@@ -471,6 +471,19 @@
     :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
               :apikey "a0ac77ecd2e6c2ea6e73f860"}}
 
+   ;; Helsinki Admin - Helsinki R paakayttaja:  helsinki / helsinki
+   {:id "50ac77ecc2e6c2ea6e73f665"
+    :email "admin@hel.fi"
+    :enabled true
+    :role "authorityAdmin"
+    :orgAuthz {:091-R #{:authorityAdmin}}
+    :firstName "Heikki"
+    :language "fi"
+    :lastName "Helsinki"
+    :username "helsinki"
+    :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
+              :apikey "50ac788ec2e6c2ea6e73f665"}}
+
    ;; Hakijat
 
    ;; Hakija: Mikko's neighbour - teppo@example.com / teppo69
@@ -1007,7 +1020,8 @@
                                                                       [:paapiirustus :pohjapiirustus]]}
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000
-                       :use-attachment-links-integration true}
+                       :use-attachment-links-integration true
+                       :operations-tos-functions {:masto-tms "10 03 00 01"}}
 
                       ;;
                       ;; Ymparisto organisaatiot

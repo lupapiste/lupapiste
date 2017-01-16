@@ -133,8 +133,10 @@
 
 (defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and
-    (not (ss/blank? address)) (not (ss/blank? propertyId))
-    (-> x util/->double pos?) (-> y util/->double pos?)))
+    (not (ss/blank? address))
+    (not (ss/blank? propertyId))
+    (-> x util/->double pos?)
+    (-> y util/->double pos?)))
 
 (defn- get-location-info [{data :data :as command} app-info]
   (when app-info
@@ -153,17 +155,17 @@
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        organization      (when (:municipality app-info) (organization/resolve-organization (:municipality app-info) permit-type))
-        validation-result (permit/validate-verdict-xml permit-type xml organization)
         location-info     (get-location-info command app-info)
-        organizations-match? (when (:municipality app-info)
-                               (= organizationId (:id organization)))
+        organization      (when (:propertyId location-info)
+                            (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
+        validation-result (permit/validate-verdict-xml permit-type xml organization)
+        organizations-match?  (= organizationId (:id organization))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
-      (not (:municipality app-info)) (fail :error.previous-permit-no-propertyid)
-      (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
+      (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       validation-result            validation-result
       :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info)]
                                      (if no-proper-applicants?

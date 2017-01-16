@@ -1,7 +1,10 @@
 <script class="ko-template"
         type="text/x-jquery-tmpl"
         id="verdict-appeal-template">
-  <h2 data-bind="ltext: 'verdict.muutoksenhaku'"></h2>
+  <!-- ko if: showTitle -->
+  <h2 data-bind="ltext: 'verdict.muutoksenhaku'"
+      data-test-id="verdict-appeal-title"></h2>
+  <!-- /ko -->
   <!-- ko if: appeals().length -->
   <div class="accordion-content-part">
     <table class="appeals-table"

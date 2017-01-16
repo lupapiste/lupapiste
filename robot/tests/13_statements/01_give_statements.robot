@@ -186,8 +186,8 @@ Statements are visible for Veikko
   Open tab  statement
   Statement count is  5
 
-Veikko can delete his own statement but no others
-  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
+Veikko cannot delete statement requests
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
 Veikko from Tampere can give statement (and attach something to it as well)
@@ -223,7 +223,7 @@ Mikko logs in and submits application
 Sonja logs in and approves application
   Sonja logs in
   Open application  ${appname}  ${appPropertyId}
-  Approve application yes
+  Approve application no dialogs
 
 Sonja cannot invite any more statement givers
   Open tab  statement

@@ -22,7 +22,7 @@
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message. Count:" (count asiat)))
 
       (let [asia (first asiat)
-            katselmukset (map cr/all-of  (select asia [:RakennusvalvontaAsia :> :katselmustieto :Katselmus]))
+            katselmukset (map cr/all-of  (select asia [:RakennusvalvontaAsia :katselmustieto :Katselmus]))
             massage (fn [katselmus]
                       (-> katselmus
                           (util/ensure-sequential :muuTunnustieto)

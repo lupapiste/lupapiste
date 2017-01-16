@@ -157,7 +157,6 @@
             (fact "no validation errors"
               (not-any? :validationErrors reviews))
             (count (filter  (partial = "aloituskokous") review-types)) => 2
-            (count (filter final-review? reviews)) => 1
             (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
 
 (facts "Automatic checking for reviews - application state and operation"

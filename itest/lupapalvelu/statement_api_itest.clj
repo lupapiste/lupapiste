@@ -331,7 +331,7 @@
         (fact* "Statement is given"
           (command pena :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
         (fact "Applicant statement giver cannot delete his already-given statement"
-          (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.statement-already-given"))
+              (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.unauthorized"))
 
         (fact "One Attachment is generated"
           (->> (query-application sonja application-id)
@@ -345,20 +345,16 @@
                (filter (comp #{"statement"} :type :target))
                (count)) => 1)))))
 
-(fact "Applicant statement giver is able to delete his not-yet-given statement"
+(fact "Applicant statement giver cannot delete his not-yet-given statement"
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         _ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
             application (query-application ronja application-id)
             non-given-statement-id (:id (some
                                           #(when (and (-> % :given not) (= pena-id (get-in % [:person :userId]))) %)
-                                          (:statements application))) => truthy
-            _ (command pena :delete-statement :id application-id :statementId non-given-statement-id) => ok?
-            application (query-application sonja application-id)]
-        (some #(= non-given-statement-id (:id %)) (:statements application)) => falsey
-        (some #(= non-given-statement-id (:statementId %)) (:auth application)) => falsey
-        ))
+                                          (:statements application))) => truthy]
+    (command pena :delete-statement :id application-id :statementId non-given-statement-id) => (partial expected-failure? "error.unauthorized")))
 
-(fact "Statement attachement"
+(fact "Statement attachment"
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         _ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
         application  (query-application ronja application-id)

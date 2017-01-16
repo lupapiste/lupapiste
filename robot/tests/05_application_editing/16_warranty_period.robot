@@ -15,6 +15,8 @@ Olli-ya prepares the application
 Olli-ya submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
+  Tab should be visible  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Confirm notification dialog
   Open tab  verdict
   Submit empty verdict  verdictGiven  1

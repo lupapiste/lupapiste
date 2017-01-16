@@ -6,11 +6,13 @@
 //   list: predefined value list. Can be either array or observable
 //   array.
 //   [testId: Text input test id (combobox-input)]
+//   Combobox editable state is calculated from enable and disable
+//   params (default editable). See EnableComponentModel for details.
 LUPAPISTE.ComboboxModel = function( params ) {
   "use strict";
   var self = this;
 
-  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+  ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( params ));
 
   var outsideValue = params.value;
   self.list  = params.list;
@@ -50,20 +52,10 @@ LUPAPISTE.ComboboxModel = function( params ) {
       : result;
   });
 
-  self.isDisabled = self.disposedPureComputed( function() {
-    var disable = ko.unwrap( params.disable );
-    var enable = ko.unwrap( params.enable );
-
-    return (_.isBoolean( disable ) && disable)
-      || (_.isBoolean( enable ) && !enable );
-  });
-
-
   self.hover = function( data ) {
     self.selectedIndex( _.indexOf( self.shortList(), data ));
     linger( true );
   };
-
 
   self.isSelected = function( index  ) {
     return index() === self.selectedIndex();
@@ -97,8 +89,6 @@ LUPAPISTE.ComboboxModel = function( params ) {
       return true;
     }
   };
-
-
 
   self.doNotLinger = _.wrap( false, linger );
 

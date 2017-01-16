@@ -2,13 +2,12 @@
 
 Approve application
   Open tab  requiredFieldSummary
-  Wait Until  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
-  Click enabled by test id  approve-application
-  # Confirm warning about designers
   Wait Until  Page should contain  Suunnittelijoiden tietoja hyväksymättä
-  Wait Until  Element Should Contain  jquery=#modal-dialog-content-component li:first  Pääsuunnittelija
-  Wait Until  Element Should Contain  jquery=#modal-dialog-content-component li:last   Suunnittelija
-  Confirm yes no dialog
+  Wait Until  Element Should Contain  jquery=div[data-test-id="non-approved-designers-list"] li:first  Pääsuunnittelija
+  Wait Until  Element Should Contain  jquery=div[data-test-id="non-approved-designers-list"] li:last   Suunnittelija
+  Wait Until  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
+  Click enabled by test id  approve-application-summaryTab
+  # Confirm warning about designers
   Wait until  Application state should be  sent
 
 Accordion approved
@@ -174,6 +173,12 @@ Reject with note and save
   Reject and fill note  ${button}  ${prefix}  ${text}
   Scroll and click test id  ${prefix}-save
   Reject note is  ${prefix}  ${text}
+
+Reject with note and lose focus
+  [Arguments]  ${button}  ${prefix}  ${text}
+  Reject and fill note  ${button}  ${prefix}  ${text}
+  Press Key test id  ${prefix}-editor  \\9
+  Reject note is  ${prefix}  ${text}  
 
 
 Reject with note but cancel

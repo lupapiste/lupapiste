@@ -81,10 +81,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return  service.attachmentApproval( self.attachment ) ;
   });
 
-  var editable = self.disposedComputed(function() {
-    return !service.processing() && !self.attachment().processing();
-  });
-
   // Type
   self.showChangeTypeDialog = function() {
     self.disablePreview(true);
@@ -175,7 +171,9 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
-  self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
+  self.metaUpdateAllowed = function() {
+    return Boolean(authModel.ok("set-attachment-meta"));
+  };
 
   self.operationSelectorDisabled = self.disposedPureComputed(function() {
     return !self.metaUpdateAllowed() || authModel.ok("set-attachment-group-enabled");
@@ -189,12 +187,11 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Not needed
   self.setNotNeededAllowed = function() { return authModel.ok("set-attachment-not-needed"); };
-  self.setNotNeededEnabled = editable;
   addUpdateListener("set-attachment-not-needed", {ok: true}, util.showSavedIndicatorIcon);
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };
-  self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility") && editable(); };
+  self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility"); };
   addUpdateListener("set-attachment-visibility", {ok: true}, util.showSavedIndicatorIcon);
 
   // Manual construction time toggle

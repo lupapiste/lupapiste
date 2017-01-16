@@ -516,6 +516,7 @@
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
+    self.error = ko.observable();
 
     self.ok = ko.computed(function() {
       return util.isValidEmailAddress(self.email());
@@ -527,7 +528,8 @@
         .neighborId(neighbor.id())
         .propertyId(neighbor.propertyId())
         .name(neighbor.owner.name())
-        .email(neighbor.owner.email());
+        .email(neighbor.owner.email())
+        .error( "");
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
@@ -538,9 +540,18 @@
       ajax
         .command("neighbor-send-invite", _.zipObject(paramNames, _.map(paramNames, paramValue)))
         .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
-        .complete(LUPAPISTE.ModalDialog.close)
-        .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
-        .onError("error.neighbor-marked-done", _.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
+        .success( function() {
+          LUPAPISTE.ModalDialog.close();
+          repository.load( self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading")));
+        })
+        .error( function( res ) {
+          if( res.text === "error.neighbor-marked-done" ) {
+            LUPAPISTE.ModalDialog.close();
+            repository.load(self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading")));
+          } else {
+            self.error( res.text );
+          }
+        })
         .call();
       return false;
     };

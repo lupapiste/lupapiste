@@ -236,7 +236,13 @@
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
                                    class="link-btn">
-                                    <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
+                                  <!-- ko if: $root.authorization.ok('approve-application') -->
+                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></span>
+                                  <!-- /ko -->
+                                  <!-- ko ifnot: $root.authorization.ok('approve-application') -->
+                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span>
+                                  <!-- /ko -->
+                                </a></li>
 
                             <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'statement'}">
                                 <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab"
@@ -1141,7 +1147,10 @@
                                 <input data-bind="textInput: email,
                                                   attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
                                        id="neighbors-sendemail-email"
-                                       class="form-input text long" />
+                                       class="form-input text long" >
+                                <div class="neighbor-error"
+                                     data-bind="visible: error,
+                                                ltext: error"></div>
                             </form>
 
                             <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok"

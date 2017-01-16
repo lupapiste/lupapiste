@@ -4,14 +4,16 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment.appeal :refer :all]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.attachment.preview :as preview]))
 
 (testable-privates lupapalvelu.attachment.appeal create-appeal-attachment-data!)
 
 (facts "appeal attachment updates"
        (against-background
          [(lupapalvelu.attachment.conversion/archivability-conversion anything anything) => {:archivable false
-                                                                                             :archivabilityError :not-validated}]
+                                                                                             :archivabilityError :not-validated}
+          (preview/preview-image! anything anything anything anything) => nil]
          (fact "appeal-attachment-data"
                (let [file-id  (mongo/create-id)
                      file-obj {:content (constantly nil),

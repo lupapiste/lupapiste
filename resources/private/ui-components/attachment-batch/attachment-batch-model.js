@@ -82,9 +82,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     self.disposedSubscribe( type, function( type ) {
       var contents = service.contentsData( type );
       contentsList( contents.list );
-      if( !_.trim( contentsValue())) {
-        contentsValue( contents.defaultValue);
-      }
+      contentsValue( contents.defaultValue);
       grouping(service.getDefaultGroupingForType(type));
     } );
     var contentsCell = new Cell( contentsValue, true );

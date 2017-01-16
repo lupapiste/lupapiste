@@ -474,7 +474,11 @@ Select From Autocomplete By Test Id
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
-  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+  Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+
+Autocomplete selection by test id is
+  [Arguments]  ${tid}  ${value}
+  Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption  ${value}
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
@@ -972,8 +976,14 @@ Submit application error should be
   ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
   Should Be Equal As Strings  ${errorText}  ${attrValue}
 
+Approve application no dialogs
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
+  Wait until  Application state should be  sent
+
 Approve application ok
-  Click enabled by test id  approve-application
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Confirm ok dialog
   Wait until  Application state should be  sent
 

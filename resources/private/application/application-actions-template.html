@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-actions-template">
     <div class="stacked" data-bind="with: application">
-        <!-- ko if: !hasInvites() -->
-            <button data-bind="click: approveApplication,
+        <!-- ko ifnot: hasInvites -->
+            <button data-bind="click: goToApplicationApproval,
                            visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                            enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                            attr: {'title': loc('tooltip.approveApplication')}"
