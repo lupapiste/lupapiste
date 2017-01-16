@@ -15,4 +15,5 @@
 <!-- /ko -->
 </div>
 <div data-bind="if: processing"><span data-bind="ltext:'application.integration-messages.loading'"></span></div>
+<div data-bind="if: !processing() && util.isEmpty(fileGroups)"><span data-bind="ltext:'application.integration-messages.no-files'"></span></div>
 </script>
