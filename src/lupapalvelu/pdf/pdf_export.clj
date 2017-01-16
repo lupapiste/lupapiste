@@ -13,7 +13,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream InputStream]
            [javax.imageio ImageIO]))
 
 ; *** Deprecated ****
@@ -533,6 +533,7 @@
                   (= child-type :tasks) (loc "task-katselmus.rakennus.tila._group_label")
                   (ss/blank? (str subtype)) (loc "application.export.title")
                   :else (loc "permitSubtype" subtype))
+          pdf-title (str (:id app) " - " title)
           app-data (collect-export-data app title false)
           child (filter #(= id (:id %)) (child-type app))
           child-data (cond
@@ -540,8 +541,7 @@
                        (= child-type :neighbors) (collect-neighbour-fields child)
                        (= child-type :tasks) (collect-task-fields child (task-attachment-count app (first child)) app)
                        (= child-type :verdicts) nil
-                       :else (collect-documents app))
-          permit-type (:permitType app)]
+                       :else (collect-documents app))]
       ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
       ; function into the body of the literal vector defined here.
       ; E.g. if (defn x [] [3 4]) then:
@@ -549,7 +549,7 @@
       ; `[1 2 ~@(x)] -> [1 2 3 4]
       ;(debug "child: " (with-out-str (clojure.pprint/pprint child)))
       ;(debug "child-data: " (with-out-str  (clojure.pprint/pprint child-data)))
-      `[~(pdf-metadata)
+      `[~(pdf-metadata pdf-title)
         ~@(common-header app-data)
         ~@(common-fields (:common-fields app-data))
         ~@(document-section-header title)
@@ -566,10 +566,10 @@
      (generate-pdf-with-child app child-type id lang out)
      (ByteArrayInputStream. (.toByteArray out)))))
 
-(defn ^java.io.InputStream generate-application-pdfa
+(defn ^InputStream generate-application-pdfa
   "Returns application data in a self-destructing input stream to a PDF/A document"
   [application lang]
   (let [file (files/temp-file "application-pdf-a-" ".tmp")] ; deleted via temp-file-input-stream
     (generate application lang file)
-    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
+    (pdf-conversion/convert-file-to-pdf-in-place file)
     (files/temp-file-input-stream file)))

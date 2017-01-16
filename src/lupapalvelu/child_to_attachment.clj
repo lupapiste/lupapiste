@@ -34,7 +34,7 @@
 
 (defn- build-attachment-options [user application type id lang file attachment-id]
   {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
-  (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
+  (let [is-pdf-a? (pdf-conversion/convert-file-to-pdf-in-place file)
         {:keys [taskname] :as child} (get-child application type id)
         type-name (case type
                     :statements (i18n/localize lang "statement.lausunto")
