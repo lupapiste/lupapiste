@@ -735,3 +735,15 @@
                               :section
                               (ss/trim operationId)
                               flag))
+
+(defcommand modify-inspection-summary-template
+  {:description ""
+   :parameters  [operation template]
+   :input-validators [(partial action/select-parameters [:operation] #{:create :update :delete})]
+   ;; :pre-checks TODO onko feature päällä
+   :user-roles #{:authorityAdmin}}
+  [{organization :organization}]
+  (condp = operation
+    :create (update-organization organization-id
+                                 {$push {:inspection-summary-templates template}})
+    (fail :not-implemented)))
