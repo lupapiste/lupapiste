@@ -739,11 +739,11 @@
 (defcommand modify-inspection-summary-template
   {:description ""
    :parameters  [operation template]
-   :input-validators [(partial action/select-parameters [:operation] #{:create :update :delete})]
+   :input-validators [(partial action/select-parameters [:operation] #{"create" "update" "delete"})]
    ;; :pre-checks TODO onko feature päällä
    :user-roles #{:authorityAdmin}}
-  [{organization :organization}]
+  [{user :user}]
   (condp = operation
-    :create (update-organization organization-id
+    "create" (org/update-organization (usr/authority-admins-organization-id user)
                                  {$push {:inspection-summary-templates template}})
     (fail :not-implemented)))

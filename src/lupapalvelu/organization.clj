@@ -62,6 +62,12 @@
    (sc/optional-key :password)  (sc/maybe sc/Str)
    (sc/optional-key :crypto-iv) sc/Str})
 
+(sc/defschema InspectionSummaryTemplate
+  {:id ssc/ObjectIdStr
+   :name sc/Str
+   :modified ssc/Timestamp
+   :items [sc/Str]})
+
 (sc/defschema Organization
   {:id sc/Str
    ;:name  (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
@@ -115,7 +121,9 @@
    (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
                                (sc/optional-key :operations) [sc/Str]}
    (sc/optional-key :3d-map) {(sc/optional-key :enabled) sc/Bool
-                              (sc/optional-key :server)  Server}})
+                              (sc/optional-key :server)  Server}
+   (sc/optional-key :inspection-summaries-enabled) sc/Bool
+   (sc/optional-key :inspection-summary-templates) [InspectionSummaryTemplate]})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
