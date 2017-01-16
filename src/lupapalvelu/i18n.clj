@@ -111,10 +111,15 @@
   [lang & terms]
   (not (nil? (get ((get-localizations) (keyword lang)) (terms->term terms)))))
 
-(defn localize [lang & terms]
+(defn try-localize
+  "Tries to find localization in language lang for terms. If fails, applies fail-fn to lang and terms."
+  [fail-fn lang terms]
   (if-let [result (get (get-terms (keyword lang)) (terms->term terms))]
     result
-    (apply unknown-term terms)))
+    (fail-fn lang terms)))
+
+(defn localize [lang & terms]
+  (try-localize #(apply unknown-term terms) lang terms))
 
 (defn localizer [lang]
   (partial localize (keyword lang)))

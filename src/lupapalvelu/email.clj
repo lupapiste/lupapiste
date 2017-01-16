@@ -8,7 +8,8 @@
             [sade.email :as email]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :refer [map-values]]))
+            [sade.util :refer [map-values deep-merge]]
+            [lupapalvelu.i18n :as i18n] ))
 
 (def send-email-message email/send-email-message)
 
@@ -99,21 +100,36 @@
 ;; Context preprocessing:
 ;; ----------------------
 
-(defn- localization-not-found-str [lang localization]
-  (str "No localization for language " (or lang "(nil)") " in " localization))
+(defn localization-keys-from-template [template]
+  (->> (re-seq #"\{\{((?:[^.}]+\.?)*)\}\}" template)
+       (map second)
+       (map #(ss/split % #"\."))))
 
-(defn- get-or-throw [lang localization]
-  (or (get localization lang)
-      (throw (Exception. (localization-not-found-str lang localization)))))
+(defn throw-localization-not-found! [lang localization]
+  (throw (Exception. (str "No localization for language "
+                          (or lang "(nil)")
+                          " in "
+                          localization))))
+
+(defn template->localization-model [template]
+  (reduce (fn [locs loc-key]
+            (assoc-in locs
+                      (map keyword loc-key)
+                      #(i18n/try-localize throw-localization-not-found!
+                                          %
+                                          loc-key)))
+          {}
+          (localization-keys-from-template template)))
 
 (defn- localization-for-language [lang localization]
   (if (fn? localization)
     (localization lang)
     localization))
 
-(defn- preprocess-context [{:keys [lang] :as context}]
+(defn- preprocess-context [template {:keys [lang] :as context}]
   (postwalk (partial localization-for-language lang)
-            context))
+            (deep-merge (template->localization-model (fetch-template template lang))
+                        context)))
 
 ;;
 ;; Apply template:
@@ -151,6 +167,6 @@
 
 (defn apply-template [template context]
   (cond
-    (ss/ends-with template ".md")    (apply-md-template template (preprocess-context context))
-    (ss/ends-with template ".html")  (apply-html-template template (preprocess-context context))
+    (ss/ends-with template ".md")    (apply-md-template template (preprocess-context template context))
+    (ss/ends-with template ".html")  (apply-html-template template (preprocess-context template context))
     :else                            (throw (Exception. (str "unsupported template: " template)))))
