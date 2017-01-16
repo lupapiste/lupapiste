@@ -447,8 +447,8 @@
    [:spacer]
    ])
 
-(defn pdf-metadata []
-  {:title  "Lupapiste.fi"
+(defn pdf-metadata [title]
+  {:title  title
    :size   "a4"
    :footer {:text  (ss/join " - " [(loc "application.export.name")
                                    (tf/unparse (tf/formatter-local "dd.MM.yyyy HH:mm") (tl/local-now))
@@ -461,13 +461,14 @@
   (let [title (if (ss/blank? subtype)
                 (loc "application.export.title")
                 (loc "permitSubtype" subtype))
+        pdf-title (str (:id app) " - " title)
         app-data (collect-export-data app title true)
         ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
         ; function into the body of the literal vector defined here.
         ; E.g. if (defn x [] [3 4]) then:
         ; [1 2 (x)] -> [1 2 [3 4]]
         ; `[1 2 ~@(x)] -> [1 2 3 4]
-        pdf-data `[~(pdf-metadata)
+        pdf-data `[~(pdf-metadata pdf-title)
                    ~@(common-header app-data)
                    ~@(common-fields (:common-fields app-data))
                    ~@(section-header (loc "application.export.subtitle"))
