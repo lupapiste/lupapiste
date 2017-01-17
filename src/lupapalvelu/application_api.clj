@@ -38,9 +38,15 @@
 
 ;; Notifications
 
+(defn state-change-email-model [{:keys [application] :as command} conf recipient]
+  (assoc
+    (notifications/new-email-app-model command conf recipient)
+    :state-text (i18n/localize (:language recipient) "email.state-description" (:state application))))
+
 (def state-change {:subject-key    "state-change"
                    :template "application-state-change.md"
-                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
+                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                   :model-fn state-change-email-model})
 
 (notifications/defemail :application-state-change state-change)
 
