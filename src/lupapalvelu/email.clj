@@ -100,10 +100,24 @@
 ;; Context preprocessing:
 ;; ----------------------
 
-(defn localization-keys-from-template [template]
-  (->> (re-seq #"\{\{((?:[^.}]+\.?)*)\}\}" template)
-       (map second)
-       (map #(ss/split % #"\."))))
+(let [open-braces         "\\{+"
+      open-section-braces "\\{\\{(?:#|\\^)"
+      open-comment-braces "\\{\\{!"
+      close-braces        "\\}+"
+      whitespace          "\\s*"
+      captured-key        "((?:[^#.}\\s]+\\.?)*)"
+      key                 "(?:(?:[^#.}\\s]+\\.?)*)"
+      anything            "(?:.|\n|\r)*"
+      variable            (str "(?:" open-braces whitespace captured-key whitespace close-braces ")")
+      open-section        (str open-section-braces whitespace captured-key whitespace close-braces)
+      close-section       (str open-braces whitespace "/" "\\1" whitespace close-braces)
+      section             (str "(?:(?:" open-section anything close-section "))")
+      comment             (str open-comment-braces anything close-braces)]
+  (defn localization-keys-from-template [template]
+    (->> (re-seq (re-pattern (str section "|" comment "|" variable)) template)
+         (map last)
+         (remove nil?)
+         (map #(ss/split % #"\.")))))
 
 (defn throw-localization-not-found! [lang localization]
   (throw (Exception. (str "No localization for language "

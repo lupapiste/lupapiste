@@ -119,7 +119,7 @@
     (fail-fn lang terms)))
 
 (defn localize [lang & terms]
-  (try-localize #(apply unknown-term terms) lang terms))
+  (try-localize (fn [_ terms] (apply unknown-term terms)) lang terms))
 
 (defn localizer [lang]
   (partial localize (keyword lang)))

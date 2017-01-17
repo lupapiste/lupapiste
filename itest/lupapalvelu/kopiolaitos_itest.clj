@@ -65,7 +65,8 @@
     (fact "Order prints"
       (let [app (query-application sonja app-id)
             attachments-with-amount (map #(assoc % :amount 2) (:attachments app))
-            order-info {:ordererOrganization "Testi"
+            order-info {:lang "fi"
+                        :ordererOrganization "Testi"
                         :ordererAddress      "Testikuja 2"
                         :ordererPhone        "12345"
                         :ordererEmail        "test@example.com"
@@ -179,4 +180,3 @@
    (get-kopiolaitos-email-addresses sonja-muni) => (throws Exception #"kopiolaitos-invalid-email")
    (provided
      (organization/with-organization sonja-muni :kopiolaitos-email) => "pena.bulkki@example.com;mikko.nodomain")))
-
