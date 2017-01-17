@@ -1,17 +1,24 @@
 <script type="text/x-jquery-tmpl" id="inspection-summary-templates-list-template" class="ko-template">
   <div class="content">
-    <p data-bind="visible: true, ltext: 'auth-admin.inspection-summary-templates.none'"></p>
-    <!-- ko if: false -->
-    <table class="admin-settings">
+    <p data-bind="visible: _.isEmpty(templates()), ltext: 'auth-admin.inspection-summary-templates.none'"></p>
+    <table data-bind="visible: !_.isEmpty(templates())">
       <thead>
-      <tr>
-        <th data-bind="ltext: 'auth-admin.inspection-summary-templates.name'"></th>
-        <th data-bind="ltext: 'auth-admin.inspection-summary-templates.modified'"></th>
-        <th data-bind="ltext: 'auth-admin.inspection-summary-templates.actions'"></th>
-      </tr>
+        <tr>
+          <th data-bind="ltext: 'auth-admin.inspection-summary-templates.name'"></th>
+          <th data-bind="ltext: 'auth-admin.inspection-summary-templates.modified'"></th>
+          <th data-bind="ltext: 'auth-admin.inspection-summary-templates.actions'"></th>
+        </tr>
       </thead>
+      <tbody>
+        <!-- ko foreach: templates -->
+        <tr>
+          <td><a data-bind="click: $component.openDetails, text: name"></a></td>
+          <td data-bind="dateString: modified"></td>
+          <td>&nbsp;</td>
+        </tr>
+        <!-- /ko -->
+      </tbody>
     </table>
-    <!-- /ko -->
     <div class="stacked--inline">
       <button class="btn btn-primary"
               data-bind="ltext: 'auth-admin.inspection-summary-templates.add',

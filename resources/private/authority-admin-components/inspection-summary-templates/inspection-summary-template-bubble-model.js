@@ -23,6 +23,8 @@ LUPAPISTE.InspectionSummaryTemplateBubbleModel = function(params) {
         util.showSavedIndicator(event);
         self.bubbleVisible(false);
         self.name("");
+        self.templateText("");
+        lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
       })
       .call();
   };

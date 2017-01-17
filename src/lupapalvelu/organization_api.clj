@@ -736,11 +736,19 @@
                               (ss/trim operationId)
                               flag))
 
+(defquery organization-inspection-summary-templates
+  {:description "Inspection summary templates for given organization."
+   ;; :pre-checks TODO onko feature päällä
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (ok :templates (get (->> (usr/authority-admins-organization-id user)
+                           (mongo/by-id :organizations)) :inspection-summary-templates [])))
+
 (defcommand modify-inspection-summary-template
   {:description ""
    :parameters  [func templateText name]
    :input-validators [(partial action/select-parameters [:func] #{"create" "update" "delete"})]
-   ;; :pre-checks TODO onko feature päällä, update ja delete operaatioissa templateText pakollinen
+   ;; :pre-checks TODO onko feature päällä, create, update operaatioissa templateText pakollinen, update ja delete templateId pakollinen
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (condp = func
@@ -748,5 +756,5 @@
                {$push {:inspection-summary-templates {:name name
                                                       :modified (now)
                                                       :id (mongo/create-id)
-                                                      :templateText (map ss/trim (s/split-lines templateText))}}})
+                                                      :items (remove ss/blank? (map ss/trim (s/split-lines templateText)))}}})
     (fail :not-implemented)))
