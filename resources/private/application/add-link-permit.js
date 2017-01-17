@@ -59,7 +59,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
   };
 
   self.addLinkPermit = function() {
-    var lupatunnus = self.selectedLinkPermit() || self.kuntalupatunnus();
+    var lupatunnus = util.getIn(self.selectedLinkPermit, ["id"]) || self.kuntalupatunnus();
     var params = {id: self.appId, linkPermitId: lupatunnus};
     ajax.command("add-link-permit", params)
       .processing(self.processing)

@@ -14,7 +14,6 @@
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
                           :save-statement-as-draft
-                          :delete-statement
                           :get-possible-statement-statuses
                           :application
                           :allowed-actions

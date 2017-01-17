@@ -51,20 +51,14 @@ var LUPAPISTE = LUPAPISTE || {};
      */
     self.open = function(arg) {
       var element$ = _.isString(arg) ? $(arg) : arg,
-          elementWidth = element$.width(),
-          elementHeight = element$.height(),
-          winHeight = $(window).height(),
-          winWidth = $(window).width(),
-          maskHeight = $(document).height(),
-          maskWidth = winWidth;
-
+          maskWidth = $(window).width(),
+          maskHeight = $(document).height();
+          
       self.getMask()
         .css({"width": maskWidth, "height": maskHeight})
         .fadeTo("fast", 0.5);
 
       element$
-        .css("top",  winHeight / 2 - elementHeight / 2)
-        .css("left", winWidth / 2 - elementWidth / 2)
         .fadeIn(600)
         .find(".close")
           .click(self.close)

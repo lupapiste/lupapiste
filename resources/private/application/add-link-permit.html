@@ -13,22 +13,17 @@
 
             <p data-bind ="lhtml: 'linkPermit.dialog.helpParagraph'"></p>
 
-            <span data-bind="ltext: 'linkPermit.dialog.choosePermit'"></span><br>
-            <select id="choose-link-permit"
-              data-bind="options: appMatches,
-                         optionsText: 'text',
-                         optionsValue: 'id',
-                         optionsCaption: loc('linkPermit.dialog.choosePermitPlaceholder'),
-                         value: selectedLinkPermit"
-              data-test-id="choose-linkPermit-select"
-              class="combobox long">
-            </select>
-            <div data-bind="ltext: 'linkPermit.dialog.or'" class="or"></div>
+            <link-permit-autocomplete params="list: appMatches,
+                                              value: selectedLinkPermit,
+                                              disable: _.trim(kuntalupatunnus())"></link-permit-autocomplete>
+
+            <div data-bind="ltext: 'linkPermit.dialog.or'" class="or top-marginM"></div>
 
             <label class="form-label" data-bind ="ltext: 'linkPermit.dialog.kuntalupatunnus'"></label>
-            <input data-bind="textInput: kuntalupatunnus"
+            <input data-bind="textInput: kuntalupatunnus,
+                              disable: selectedLinkPermit"
                    data-test-id="application-kuntalupatunnus-for-link-permit"
-                   type="text" maxlength="100" class="form-input text long" />
+                   type="text" maxlength="100" class="form-input grid-style-input" >
             <br>
 
             <div data-bind="if: errorMessage" >
