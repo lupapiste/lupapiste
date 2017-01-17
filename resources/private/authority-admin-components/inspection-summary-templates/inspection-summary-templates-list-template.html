@@ -9,15 +9,18 @@
           <th data-bind="ltext: 'auth-admin.inspection-summary-templates.actions'"></th>
         </tr>
       </thead>
-      <tbody>
-        <!-- ko foreach: templates -->
-        <tr>
-          <td><a data-bind="click: $component.openDetails, text: name"></a></td>
+      <!-- ko foreach: templates -->
+      <tbody class="inspection-summary-template">
+        <tr class="inspection-summary-template-row">
+          <td><a data-bind="click: $component.toggleOpenDetails, text: name"></a></td>
           <td data-bind="dateString: modified"></td>
           <td>&nbsp;</td>
         </tr>
-        <!-- /ko -->
+        <tr class="inspection-summary-template-row" data-bind="visible: editorVisible">
+          <td colspan="3">Editor here</td>
+        </tr>
       </tbody>
+      <!-- /ko -->
     </table>
     <div class="stacked--inline">
       <button class="btn btn-primary"
