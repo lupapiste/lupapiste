@@ -82,8 +82,7 @@
    :state-fi (i18n/localize :fi (name (:state application)))
    :state-sv (i18n/localize :sv (name (:state application)))
    :modified (to-local-date (:modified application))
-   :name (:firstName recipient)
-   :lang (:language recipient)})
+   :name (:firstName recipient)})
 
 ;;
 ;; Recipient functions
@@ -173,7 +172,8 @@
             template-file  (get conf :template (str (name template-name) ".md"))
             calendar-fn    (get conf :calendar-fn)]
         (doseq [recipient recipients]
-          (let [model   (model-fn command conf recipient)
+          (let [user-lang (:language recipient)
+                model   (assoc (model-fn command conf recipient) :lang (or user-lang "fi"))
                 subject (get-email-subject application
                                            (:language recipient)
                                            (get conf :subject-key (name template-name))
