@@ -4,9 +4,9 @@
   function UserReport() {
     var self = this;
 
-    self.options = [{value: "yes", text: "Kyll&auml;"},
+    self.options = [{value: "yes", text: "Kyll\u00e4"},
                     {value: "no", text: "Ei"},
-                    {value: "both", text: "Sek&auml; ett&auml;"}];
+                    {value: "both", text: "Sek\u00e4 ett\u00e4"}];
     self.values = [{value: ko.observable(), label: "Yritystili",
                     arg: "company"},
                    {value: ko.observable(), label: "Ammattilainen",
