@@ -7,9 +7,17 @@
   margin-bottom: $marginL;
   width: 100%;
 
-  input[type=text], input[type=password], select, textarea {
+  input[type=text], input[type=password], select {
     min-height: $grid-input-height;
     height: $grid-input-height;
+  }
+
+  textarea {
+    min-height: $grid-textarea-height * 2;
+    height: $grid-textarea-height * 2;
+  }
+
+  input[type=text], input[type=password], select, textarea {
     box-sizing: border-box;
     font-size: $grid-font-size;
     color: $input-color;

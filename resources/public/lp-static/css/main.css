@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1484646440715');
+@import url('main-blessed1.css?z=1484649198755');
 
 /* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .table-reject-note-editor:after {
@@ -10598,9 +10598,17 @@ label.batch-required {
   width: 100%;
 }
 /* line 10, ../../../private/common-html/sass/views/_inspection_summary.scss */
-.inspection-summary-template-editor input[type=text], .inspection-summary-template-editor input[type=password], .inspection-summary-template-editor select, .inspection-summary-template-editor textarea {
+.inspection-summary-template-editor input[type=text], .inspection-summary-template-editor input[type=password], .inspection-summary-template-editor select {
   min-height: 40px;
   height: 40px;
+}
+/* line 15, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor textarea {
+  min-height: 320px;
+  height: 320px;
+}
+/* line 20, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor input[type=text], .inspection-summary-template-editor input[type=password], .inspection-summary-template-editor select, .inspection-summary-template-editor textarea {
   box-sizing: border-box;
   font-size: 16px;
   color: #333333;
@@ -10611,28 +10619,28 @@ label.batch-required {
   display: block;
   width: 100%;
 }
-/* line 23, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 31, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor input[type=text].required, .inspection-summary-template-editor input[type=password].required, .inspection-summary-template-editor select.required, .inspection-summary-template-editor textarea.required {
   border-color: #f6aa59;
 }
-/* line 26, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 34, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor input[type=text]:focus, .inspection-summary-template-editor input[type=password]:focus, .inspection-summary-template-editor select:focus, .inspection-summary-template-editor textarea:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 31, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 39, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor > div {
   margin: 12px 12px;
 }
-/* line 34, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 42, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor button {
   margin: 0 12px;
 }
-/* line 37, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 45, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor label.required {
   color: #f39129;
 }
-/* line 39, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 47, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor label.required:after {
   content: "*";
   display: inline;
