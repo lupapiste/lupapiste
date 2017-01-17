@@ -19,7 +19,11 @@ LUPAPISTE.InspectionSummaryTemplateBubbleModel = function(params) {
   self.create = function() {
     ajax.command("modify-inspection-summary-template",
       {func: "create", name: self.name(), templateText: self.templateText()})
-      .success(function() {})
+      .success(function(event) {
+        util.showSavedIndicator(event);
+        self.bubbleVisible(false);
+        self.name("");
+      })
       .call();
   };
 
