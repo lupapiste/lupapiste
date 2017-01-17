@@ -59,6 +59,20 @@
          (apply-template "testbody.html" (assoc ctx :lang "sv"))
          => (mail-check "Svenska Morgon" true)))
 
+(facts "localization-keys-from-template"
+
+  (fact "finds both escaped and unescaped variables"
+    (localization-keys-from-template "{{this}} {{& and.this }} {{{and.also.this}}}")
+    => [["this"] ["and" "this"] ["and" "also" "this"]])
+
+  (fact "ignores comments"
+    (localization-keys-from-template "{{!not.mistaken.for.variable}}") => [])
+
+  (fact "ignores everything within a section"
+    (localization-keys-from-template "{{#section}}\n{{this.is.ignored}} {{/section}} {{this.is.not}}")
+    => [["this" "is" "not"]]
+    (localization-keys-from-template "{{^inverted-section}} {{ignored}}\n{{/inverted-section}}") => []))
+
 (against-background [(fetch-template "test.md"      anything)   => "Just a dummy template"
                      (fetch-template "i18n-test.md" "en")       => "{{applicationRole.authority}} {{applicationRole.foreman}}"
                      (fetch-template "i18n-test.md" "fi")       => "{{applicationRole.authority}}"

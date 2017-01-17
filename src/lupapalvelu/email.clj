@@ -100,7 +100,7 @@
 ;; Context preprocessing:
 ;; ----------------------
 
-(let [open-braces         "\\{+"
+(let [open-braces         "\\{+&?"
       open-section-braces "\\{\\{(?:#|\\^)"
       open-comment-braces "\\{\\{!"
       close-braces        "\\}+"
