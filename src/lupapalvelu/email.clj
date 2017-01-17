@@ -113,7 +113,9 @@
       close-section       (str open-braces whitespace "/" "\\1" whitespace close-braces)
       section             (str "(?:(?:" open-section anything close-section "))")
       comment             (str open-comment-braces anything close-braces)]
-  (defn localization-keys-from-template [template]
+  (defn localization-keys-from-template
+    "Find localization keys from template. Ignore Clostache sections and comments."
+    [template]
     (->> (re-seq (re-pattern (str section "|" comment "|" variable)) template)
          (map last)
          (remove nil?)
@@ -140,7 +142,12 @@
     (localization lang)
     localization))
 
-(defn- preprocess-context [template {:keys [lang] :as context}]
+(defn- preprocess-context
+  "1. Build a default context by finding all template variables and searching for respective
+      translations from i18n files.
+   2. Override with the provided context (deep-merge).
+   3. Walk through the resulting map, calling all encountered functions with lang as argument."
+  [template {:keys [lang] :as context}]
   (postwalk (partial localization-for-language lang)
             (deep-merge (template->localization-model (fetch-template template lang))
                         context)))
@@ -179,7 +186,11 @@
         plain    (html->plain html)]
     [plain html]))
 
-(defn apply-template [template context]
+(defn apply-template
+  "Build an email from the given template and context. Localizations
+   from i18n files are used for template variables that do not have a
+   localization in the provided context."
+  [template context]
   (cond
     (ss/ends-with template ".md")    (apply-md-template template (preprocess-context template context))
     (ss/ends-with template ".html")  (apply-html-template template (preprocess-context template context))

@@ -78,14 +78,15 @@
                      (fetch-template "i18n-test.md" "fi")       => "{{applicationRole.authority}}"
                      (fetch-template "nonexistent.md" anything) => "{{nonexistent.localization.key}}"]
   (facts "preprocess-context"
-    (fact "replaces functions by calling them with the language provided in the context"
-      (preprocess-context "test.md" {:lang "fi" :function #(get {"fi" "Finnish"} % "unknown")}) => {:lang "fi" :function "Finnish"})
 
-    (fact "adds localizations from i18n files for keys present in the template"
+    (fact "replaces function values in the context by calling them with the language (:lang) as argument"
+      (preprocess-context "test.md" {:lang "fi" :nationality #(get {"fi" "Finnish"} % "unknown")}) => {:lang "fi" :nationality "Finnish"})
+
+    (fact "adds localizations from i18n files for keys present in the template but missing from the context"
       (preprocess-context "i18n-test.md" {:lang "fi"}) => {:lang            "fi"
                                                            :applicationRole {:authority "viranomainen"}})
 
-    (fact "gives context precedence over localizations from i18n files"
+    (fact "gives context localizations precedence over those in i18n files"
       (preprocess-context "i18n-test.md" {:lang "en" :applicationRole {:authority "definitely not 'authority'"}})
       => {:lang "en" :applicationRole {:authority "definitely not 'authority'" :foreman "supervisor"}})
 
