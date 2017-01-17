@@ -2,7 +2,6 @@
   (:require [monger.operators :refer :all]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.email :as email]
             [sade.strings :refer [lower-case]]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
@@ -23,7 +22,7 @@
                   (let [new-key (security/random-password)]
                     (mongo/insert :activation {:user-id userid :email email :activation-key new-key :_created (now)})
                     new-key))]
-    (notifications/notify! :account-activation 
+    (notifications/notify! :account-activation
        {:user (dissoc user :id) ;; user is not yet enabled, so avoid checking it by removing the id
         :data {:key key}})))
 

@@ -282,5 +282,6 @@
         (files/with-temp-file temp-pdf-path
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
             (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
-          (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
-          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))
+          ; Note that these checks are highly dependent on the PDF structure. Check if your (raw source) PDF content has changed if these fail.
+          (re-seq #"(?ms)\(Kiinteist.{1,4}tunnus\).{1,200}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
+          (re-seq #"(?ms)\(Tila\).{1,200}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))
