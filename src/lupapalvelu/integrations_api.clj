@@ -35,6 +35,19 @@
             [sade.validators :as validators]
             [lupapalvelu.ya-extension :as yax]))
 
+(defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
+  (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
+    (fail :error.integration.asianhallinta-disabled)))
+
+(defn- asianhallinta-enabled [{:keys [organization application]}]
+  (when-not (-> (org/resolve-organization-scope (:municipality application) (:permitType application) @organization)
+                ah/asianhallinta-enabled?)
+    (fail :error.integration.asianhallinta-disabled)))
+
+(defn- asianhallinta-unavailable-for-application [command]
+  (when-not ((some-fn has-asianhallinta-operation asianhallinta-enabled) command)
+    (fail :error.integration.asianhallinta-available)))
+
 ;;
 ;; Application approval
 ;;
@@ -61,6 +74,7 @@
 
 (defcommand approve-application
   {:parameters       [id lang]
+   :pre-checks       [asianhallinta-unavailable-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true
@@ -258,10 +272,6 @@
   (when-let [link-permit-app (first (application/get-link-permit-apps application))]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
-(defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
-  (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
-    (fail :error.operations.asianhallinta-disabled)))
-
 (defn- update-kuntalupatunnus [application]
   (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
     (update-in application
@@ -276,7 +286,8 @@
    :user-roles #{:authority}
    :notified   true
    :on-success (action/notify :application-state-change)
-   :pre-checks [has-asianhallinta-operation]
+   :pre-checks [has-asianhallinta-operation
+                asianhallinta-enabled]
    :states     #{:submitted :complementNeeded}}
   [{orig-app :application created :created user :user org :organization :as command}]
   (let [application (-> (meta-fields/enrich-with-link-permit-data orig-app)
@@ -307,6 +318,7 @@
                       (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation
+                asianhallinta-enabled
                 (application-already-exported :exported-to-asianhallinta)
                 has-unsent-attachments]
    :states     (conj states/post-verdict-states :sent)
@@ -385,6 +397,7 @@
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
         ah-scope         (org/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
+    (println krysp-output-dir)
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
 
