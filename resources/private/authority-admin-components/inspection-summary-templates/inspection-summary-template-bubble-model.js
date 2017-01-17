@@ -5,12 +5,22 @@ LUPAPISTE.InspectionSummaryTemplateBubbleModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.templateId = ko.observable();
-  self.name = ko.observable("bar");
-  self.itemsText = ko.observable("bar1");
+  self.name = ko.observable("");
+  self.templateText = ko.observable("");
   self.bubbleVisible = params.bubbleVisible;
 
   self.okVisible = ko.observable(true);
   self.cancelVisible = ko.observable(true);
 
+  self.isValid = self.disposedPureComputed(function() {
+    return !_.isEmpty(self.name()) && !_.isEmpty(self.templateText());
+  });
+
+  self.create = function() {
+    ajax.command("modify-inspection-summary-template",
+      {func: "create", name: self.name(), templateText: self.templateText()})
+      .success(function() {})
+      .call();
+  };
 
 };

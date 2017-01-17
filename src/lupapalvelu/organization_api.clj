@@ -738,12 +738,15 @@
 
 (defcommand modify-inspection-summary-template
   {:description ""
-   :parameters  [operation template]
-   :input-validators [(partial action/select-parameters [:operation] #{"create" "update" "delete"})]
-   ;; :pre-checks TODO onko feature päällä
+   :parameters  [func templateText name]
+   :input-validators [(partial action/select-parameters [:func] #{"create" "update" "delete"})]
+   ;; :pre-checks TODO onko feature päällä, update ja delete operaatioissa templateText pakollinen
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (condp = operation
+  (condp = func
     "create" (org/update-organization (usr/authority-admins-organization-id user)
-                                 {$push {:inspection-summary-templates template}})
+               {$push {:inspection-summary-templates {:name name
+                                                      :modified (now)
+                                                      :id (mongo/create-id)
+                                                      :templateText (map ss/trim (s/split-lines templateText))}}})
     (fail :not-implemented)))
