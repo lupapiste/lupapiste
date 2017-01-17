@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="reports">
+      <div class="container">
+        <h2>Raportit</h2>
+        <h3>Käyttäjät</h3>
+        <div class="form-grid" id="admin-user-report">
+          <div class="row">
+            <!-- ko foreach: values -->
+            <div class="col-1">
+              <label data-bind="text: $data.label"></label>
+              <select data-bind="options: $parent.options,
+                                 optionsText: 'text',
+                                 optionsValue: 'value',
+                                 value: $data.value"
+                      class="dropdown"></select>
+            </div>
+            <!-- /ko -->
+            <div class="col-1">
+              <br>
+              <a class="btn primary"
+                 data-bind="attr: {href: link}">
+                <i class="lupicon-download"></i>
+                <span>Lataa raportti</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

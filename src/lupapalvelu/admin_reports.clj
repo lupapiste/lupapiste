@@ -105,8 +105,8 @@
 
 (defn user-report [company allow professional]
   (let [data    (user-report-data company allow professional)
-        columns (concat [:lastName :firstName :email :phone :street
-                         :zip :city :architect :allowDirectMarketing]
+        columns (concat [:lastName :firstName :email :phone :companyName
+                         :street :zip :city :architect :allowDirectMarketing]
                         (when (not= company :no)
                           [:company.name :company.y]))
         headers (map #(:header (cell-def nil %)) columns)
