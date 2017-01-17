@@ -19,7 +19,7 @@
       return "/api/raw/user-report?"
            + _(self.values)
              .map( function( v ) {
-               return sprintf( "%s=%s", v.arg, v.value())
+               return sprintf( "%s=%s", v.arg, v.value());
              })
              .join( "&");
     });
