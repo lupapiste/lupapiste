@@ -176,7 +176,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
 
   self.operationSelectorDisabled = self.disposedPureComputed(function() {
-    return !self.metaUpdateAllowed() || authModel.ok("set-attachment-group-enabled");
+    return !self.metaUpdateAllowed() || !authModel.ok("set-attachment-group-enabled");
   });
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
