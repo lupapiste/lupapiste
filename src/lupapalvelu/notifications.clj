@@ -95,7 +95,8 @@
      :modified     (to-local-date (:modified application))
      :address      (:address application)
      :municipality (i18n/localize lang "municipality" (:municipality application))
-     :operation    (i18n/localize lang "operations" (get-in application [:primaryOperation :name]))}))
+     :operation    (i18n/localize lang "operations" (get-in application [:primaryOperation :name]))
+     :user         (select-keys recipient [:firstName :lastName :email :lang])}))
 
 ;;
 ;; Recipient functions
