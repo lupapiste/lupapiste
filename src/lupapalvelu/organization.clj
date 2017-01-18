@@ -169,7 +169,6 @@
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
-  (println changes)
   (mongo/update-by-id :organizations id changes))
 
 (defn get-organization-attachments-for-operation [organization {operation-name :name}]

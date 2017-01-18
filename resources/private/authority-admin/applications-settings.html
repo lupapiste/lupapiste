@@ -39,7 +39,7 @@
         <!-- /ko -->
       </section>
 
-      <!-- ko if: organization.inspectionSummariesEnabled -->
+      <!-- ko if: authorization.ok("organization-inspection-summary-templates") -->
       <section>
         <h2 data-bind="ltext: 'auth-admin.inspection-summary-templates'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->

@@ -853,6 +853,8 @@
                                                    :name organization-name-map})))
 
 (facts inspection-summary-templates
+  (fact "Feature not enabled in Sipoo"
+    (command sipoo :modify-inspection-summary-template :func "create" :name "foo" :templateText "bar\nbar2\n\n bar3") => unauthorized?)
   (fact "Create template ok"
     (command jarvenpaa :modify-inspection-summary-template :func "create" :name "foo" :templateText "bar\nbar2\n\n bar3") => ok?)
   (fact "Created template included in the query result"
