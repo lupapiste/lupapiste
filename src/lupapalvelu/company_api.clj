@@ -126,7 +126,7 @@
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{user :user}]
   (c/add-user! {:firstName firstName :lastName lastName :email email}
-               (c/find-company-by-id (-> user :company :id))
+               (assoc (c/find-company-by-id (-> user :company :id)) :admin user)
                (if admin :admin :user)
                submit)
   (ok))

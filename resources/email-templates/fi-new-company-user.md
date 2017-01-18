@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-Lupapisteen kautta voidaan hakea rakennetun ymp&auml;rist&ouml;n lupia sek&auml; hoitaa niihin liittyv&auml; viranomaisasiointi s&auml;hk&ouml;isesti. Yrityksenne on perustanut Lupapisteeseen Yritystilin, jonka avulla voidaan hallinnoida yrityksenne hankkeita yhteisen ty&ouml;jonon kautta. **{{company.name}}** -Yritystilin yll&auml;pit&auml;j&auml; {{company.admin-name}} on lis&auml;nnyt sinut Yritystilin k&auml;ytt&auml;j&auml;ksi Lupapisteeseen.
+Lupapisteen kautta voidaan hakea rakennetun ymp&auml;rist&ouml;n lupia sek&auml; hoitaa niihin liittyv&auml; viranomaisasiointi s&auml;hk&ouml;isesti. Yrityksenne on perustanut Lupapisteeseen Yritystilin, jonka avulla voidaan hallinnoida yrityksenne hankkeita yhteisen ty&ouml;jonon kautta. **{{company.name}}** -Yritystilin yll&auml;pit&auml;j&auml; {{company-admin}} on lis&auml;nnyt sinut Yritystilin k&auml;ytt&auml;j&auml;ksi Lupapisteeseen.
 
 Voit aktivoida tilisi ja asettaa itsellesi salasanan oheisella linkill&auml;:
 
