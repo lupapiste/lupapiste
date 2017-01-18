@@ -123,7 +123,8 @@
    (sc/optional-key :3d-map) {(sc/optional-key :enabled) sc/Bool
                               (sc/optional-key :server)  Server}
    (sc/optional-key :inspection-summaries-enabled) sc/Bool
-   (sc/optional-key :inspection-summary-templates) [InspectionSummaryTemplate]})
+   (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
+                                          (sc/optional-key :selected-for-operation) sc/Any}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles

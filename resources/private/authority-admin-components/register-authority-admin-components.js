@@ -8,7 +8,8 @@ jQuery(document).ready(function() {
                     {name: "municipality-maps-layers"},
                     {name: "municipality-maps-map"},
                     {name: "inspection-summary-templates-list"},
-                    {name: "inspection-summary-template-bubble"}];
+                    {name: "inspection-summary-template-bubble"},
+                    {name: "select-inspection-summary-template-for-operation"}];
 
   ko.registerLupapisteComponents(components);
 });

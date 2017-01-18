@@ -37,6 +37,7 @@ LUPAPISTE.InspectionSummaryTemplatesListModel = function() {
   };
 
   self.removeTemplate = function() {
+    console.log("remove called");
     lupapisteApp.services.inspectionSummaryService.deleteTemplateById(this.id);
   };
 };

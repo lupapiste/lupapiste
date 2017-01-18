@@ -742,8 +742,8 @@
    :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok :templates (get (->> (usr/authority-admins-organization-id user)
-                           (mongo/by-id :organizations)) :inspection-summary-templates [])))
+  (ok :templates (get-in (->> (usr/authority-admins-organization-id user)
+                           (mongo/by-id :organizations)) [:inspection-summary :templates] [])))
 
 (defcommand modify-inspection-summary-template
   {:description "CRUD API endpoint for inspection summary templates in the given organization."
@@ -763,3 +763,6 @@
                  (ok)
                  (fail! :error.not-found))
       (fail :error.illegal-function-code))))
+
+#_(defcommand select-inspection-summary-template-for-operation
+            )
