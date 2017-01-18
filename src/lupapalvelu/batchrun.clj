@@ -42,7 +42,7 @@
 (defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data app :application} _ recipient]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))]
     (merge (notifications/new-email-app-model app nil recipient)
-           {:link (link-fn (keyword (:lang recipient)))
+           {:link (link-fn (keyword (:language recipient)))
             :inforequest-created created-date})))
 
 (def- oir-reminder-email-conf
@@ -59,27 +59,24 @@
 
 ;; Email definition for the "Request statement reminder"
 
-(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application} _ recipient]
-  {:link-fi (notifications/get-application-link application "/statement" "fi" recipient)
-   :link-sv (notifications/get-application-link application "/statement" "sv" recipient)
-   :created-date created-date})
+(defn- statement-reminders-email-model [{{:keys [created-date statement]} :data application :application} _ recipient]
+  (merge (notifications/new-email-app-model application nil recipient)
+    {:link (notifications/get-application-link application "/statement" (or (:language recipient) "fi") recipient)
+     :statement-request-created created-date
+     :due-date (util/to-local-date (:dueDate statement))
+     :message (:saateText statement)}))
 
 (notifications/defemail :reminder-request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request-reminder"
-   :model-fn       request-statement-reminder-email-model})
+   :model-fn       statement-reminders-email-model})
 
 ;; Email definition for the "Statement due date reminder"
-
-(defn- reminder-statement-due-date-model [{{:keys [due-date]} :data app :application} _ recipient]
-  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
-   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
-   :due-date due-date})
 
 (notifications/defemail :reminder-statement-due-date
   {:recipients-fn  :recipients
    :subject-key    "reminder-statement-due-date"
-   :model-fn       reminder-statement-due-date-model})
+   :model-fn       statement-reminders-email-model})
 
 ;; Email definition for the "Application state reminder"
 
@@ -127,7 +124,8 @@
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-request-statement {:application app
                                                             :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
-                                                            :data {:created-date (util/to-local-date requested)}})
+                                                            :data {:created-date (util/to-local-date requested)
+                                                                   :statement statement}})
         (update-application (application->command app)
           {:statements {$elemMatch {:id (:id statement)}}}
           {$set {:statements.$.reminder-sent timestamp-now}})))))
@@ -159,7 +157,8 @@
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-statement-due-date {:application app
                                                              :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
-                                                             :data {:due-date (util/to-local-date due-date)}})
+                                                             :data {:due-date (util/to-local-date due-date)
+                                                                    :statement statement}})
         (update-application (application->command app)
           {:statements {$elemMatch {:id (:id statement)}}}
           {$set {:statements.$.duedate-reminder-sent (now)}})))))
