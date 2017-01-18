@@ -415,20 +415,11 @@
             (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
             ))
 
-(notifications/defemail
-  :inforequest-invite
-  {:template      "inforequest-invite.html"
-   :subject-key   "applications.inforequest"
-   :show-municipality-in-subject true
-   :recipients-fn (fn [{application :application org :organization}]
+(notifications/defemail :inforequest-invite
+  {:recipients-fn (fn [{application :application org :organization}]
                     (let [organization (or (and org @org) (org/get-organization (:organization application)))
                           emails (get-in organization [:notifications :inforequest-notification-emails])]
-                      (map (fn [e] {:email e, :role "authority"}) emails)))
-   :model-fn (fn [{application :application} _ recipient]
-               {:link-fi (notifications/get-application-link application nil "fi" recipient)
-                :link-sv (notifications/get-application-link application nil "sv" recipient)
-                :info-fi (str (env/value :host) "/ohjeet")
-                :info-sv (str (env/value :host) "/ohjeet")})})
+                      (map (fn [e] {:email e, :role "authority"}) emails)))})
 
 
 (defcommand create-application

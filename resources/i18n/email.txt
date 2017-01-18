@@ -73,3 +73,6 @@
 "email.state-description.onHold" "en" "This means that the building process has been started, but because the works have not been completed, the authorities have marked the project as interrupted. Please get in touch with your local authorities."
 "email.state-description.onHold" "fi" "T&auml;m&auml; tarkoittaa, ett&auml; rakennusty&ouml;t on aloitettu, mutta koska t&ouml;it&auml; ei ole saatettu loppuun, viranomainen on merkinnyt hankkeen keskeytyneeksi. Ole tarvittaessa yhteydess&auml; kunnan viranomaiseen."
 "email.state-description.onHold" "sv" "Detta inneb&auml;r att byggnadsarbetena p&aring;b&ouml;rjats, men eftersom de inte avslutats har myndigheten markerat projektet som avbrutet. Kontakta den kommunala myndigheten vid behov."
+"email.title.inforequest-invite" "en" "Inforequest at Lupapiste"
+"email.title.inforequest-invite" "fi" "Neuvontapyyntö Lupapisteessä"
+"email.title.inforequest-invite" "sv" "Begäran om rådgivning i Lupapiste"
