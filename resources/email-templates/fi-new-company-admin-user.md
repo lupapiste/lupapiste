@@ -8,7 +8,7 @@ Aktivoi tilisi oheisella linkill&auml;:
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.             
 
-Ongelmatilanteissa ota yhteytt&auml; {{tuki-email}}.
+Ongelmatilanteissa ota yhteytt&auml; {{support-email}}.
 
 P&auml;&auml;set seuraamaan lupa-asioinnin s&auml;hk&ouml;istymist&auml;: {{facebook}} | {{twitter}} | {{instagram}}
 
