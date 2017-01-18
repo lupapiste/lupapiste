@@ -12,12 +12,20 @@
       <!-- ko foreach: templates -->
       <tbody class="inspection-summary-template">
         <tr class="inspection-summary-template-row">
-          <td><a data-bind="click: $component.toggleOpenDetails, text: name"></a></td>
+          <td><a data-bind="click: !editorVisible() && $component.toggleOpenDetails, text: name"></a></td>
           <td data-bind="dateString: modified"></td>
-          <td>&nbsp;</td>
+          <td><a data-bind="ltext: 'remove', click: $component.remove"></a></td>
         </tr>
         <tr class="inspection-summary-template-row" data-bind="visible: editorVisible">
-          <td colspan="3">Editor here</td>
+          <td colspan="3">
+            <!-- ko if: editorVisible -->
+            <div class="inspection-summary-template-new-container"
+                 data-bind="component: { name: 'inspection-summary-template-bubble',
+                                         params: { bubbleVisible: editorVisible,
+                                                   functionCode: 'update',
+                                                   template: $data } }"></div>
+            <!-- /ko -->
+          </td>
         </tr>
       </tbody>
       <!-- /ko -->
@@ -30,6 +38,7 @@
     </div>
     <div class="inspection-summary-template-new-container"
          data-bind="component: { name: 'inspection-summary-template-bubble',
-                                 params: { bubbleVisible: newTemplateBubbleVisible } }"></div>
+                                 params: { bubbleVisible: newTemplateBubbleVisible,
+                                           functionCode: 'create' } }"></div>
   </div>
 </script>

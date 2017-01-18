@@ -744,17 +744,30 @@
   (ok :templates (get (->> (usr/authority-admins-organization-id user)
                            (mongo/by-id :organizations)) :inspection-summary-templates [])))
 
+(defn- split-into-template-items [text]
+  (remove ss/blank? (map ss/trim (s/split-lines text))))
+
 (defcommand modify-inspection-summary-template
   {:description ""
-   :parameters  [func templateText name]
+   :parameters  [func]
    :input-validators [(partial action/select-parameters [:func] #{"create" "update" "delete"})]
    ;; :pre-checks TODO onko feature päällä, create, update operaatioissa templateText pakollinen, update ja delete templateId pakollinen
    :user-roles #{:authorityAdmin}}
-  [{user :user}]
+  [{user :user {:keys [templateId templateText name]} :data}]
   (condp = func
     "create" (org/update-organization (usr/authority-admins-organization-id user)
                {$push {:inspection-summary-templates {:name name
                                                       :modified (now)
                                                       :id (mongo/create-id)
-                                                      :items (remove ss/blank? (map ss/trim (s/split-lines templateText)))}}})
+                                                      :items (split-into-template-items templateText)}}})
+    "update" (do
+               (mongo/update-by-query :organizations (assoc {:inspection-summary-templates {$elemMatch {:id templateId}}} :_id (usr/authority-admins-organization-id user))
+                                    {$set {:inspection-summary-templates.$.name name
+                                           :inspection-summary-templates.$.modified (now)
+                                           :inspection-summary-templates.$.items (split-into-template-items templateText)}})
+               (ok))
+    "delete" (do
+               (org/update-organization (usr/authority-admins-organization-id user)
+                                    {$pull {:inspection-summary-templates {:id templateId}}})
+               (ok))
     (fail :not-implemented)))

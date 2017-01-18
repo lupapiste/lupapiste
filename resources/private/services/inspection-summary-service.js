@@ -11,4 +11,13 @@ LUPAPISTE.InspectionSummaryService = function() {
       })
       .call();
   };
+
+  self.deleteTemplateById = function(templateId) {
+    ajax.command("modify-inspection-summary-template", {func: "delete", templateId: templateId})
+      .success(function(event) {
+        util.showSavedIndicator(event);
+        self.getTemplatesAsAuthorityAdmin();
+      })
+      .call();
+  }
 };
