@@ -179,47 +179,52 @@
 
 (facts multioperation-attachment-updates
   (fact "multioperation attachment update with op array"
-    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}])
-    => {"$push" {:attachments.0.op {:id ..op-id.., :name ..op-name..}}, "$set" {}}
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op [] :groupType "operation"}])
+    => {"$push" {:attachments.0.op {:id ..op-id.., :name ..op-name..}}}
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"]]))
 
   (fact "multioperation attachment update with nil valued op"
-    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op nil}])
-    => {"$set" {:attachments.0.op [{:id ..op-id.., :name ..op-name..}]}, "$push" {}}
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op nil :groupType "operation"}])
+    => {"$set" {:attachments.0.op [{:id ..op-id.., :name ..op-name..}]}}
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"]]))
 
   (fact "multioperation attachment update with legacy op"
-    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op {:id ..old-op-id.. :name ..old-op-name..}}])
-    => {"$set" {:attachments.0.op [{:id ..old-op-id.. :name ..old-op-name..} {:id ..op-id.., :name ..op-name..}]}, "$push" {}}
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op {:id ..old-op-id.. :name ..old-op-name..} :groupType "operation"}])
+    => {"$set" {:attachments.0.op [{:id ..old-op-id.. :name ..old-op-name..} {:id ..op-id.., :name ..op-name..}]}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "asemapiirros"]]))
+
+  (fact "multioperation attachment update, existing group type does not match"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op [] :groupType nil}])
+    => nil
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"]]))
 
   (fact "multioperation attachment update without new op provided"
-    (multioperation-attachment-updates nil ..org.. [{:type ..att-type.. :op []}])
+    (multioperation-attachment-updates nil ..org.. [{:type ..att-type.. :op [] :groupType "operation"}])
     => nil)
 
   (fact "no existing multioperation attachment"
     (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "pohjapiirustus"} :op []}])
-    => {"$set" {}, "$push" {}}
+    => nil
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]]))
 
   (fact "no multioperation attachment required for operation"
-    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}])
-    => {"$set" {}, "$push" {}}
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op [] :groupType "operation"}])
+    => nil
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "pohjapiirustus"]]))
 
   (fact "multioperation attachment update - multiple attachments"
-    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "pohjapiirustus"} :op []}
-                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}
-                                                                                  {:type {:type-group "hakija" :type-id "valtakirja"} :op []}
-                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}])
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "pohjapiirustus"} :op [] :groupType "operation"}
+                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op [] :groupType "operation"}
+                                                                                  {:type {:type-group "hakija" :type-id "valtakirja"} :op [] :groupType "parties"}
+                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op [] :groupType "operation"}])
     => {"$push" {:attachments.1.op {:id ..op-id.., :name ..op-name..}
-                 :attachments.3.op {:id ..op-id.., :name ..op-name..}},
-        "$set" {}}
+                 :attachments.3.op {:id ..op-id.., :name ..op-name..}}}
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]])))
 

@@ -334,7 +334,9 @@
     (let [required-types (->> (org/get-organization-attachments-for-operation organization operation)
                               (map (partial apply att-type/attachment-type)))
           ops-to-update (keep-indexed (fn [ind att]
-                                        (when (and (att-type/multioperation? (:type att)) (att-type/contains? required-types (:type att)))
+                                        (when (and (att-type/multioperation? (:type att))
+                                                   (att-type/contains? required-types (:type att))
+                                                   (= (keyword (:groupType att)) :operation))
                                           [(util/kw-path "attachments" ind "op") (:op att)]))
                                       attachments)]
       (util/assoc-when-pred nil not-empty
