@@ -9,6 +9,7 @@
             [sade.property :as p]
             [sade.validators :as v]
             [lupapalvelu.action :as action]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
@@ -2705,6 +2706,24 @@
     (update-applications-array :attachments
                                set-attachment-groupType-and-op-nil
                                attachments-with-groupType-or-op-match)))
+
+(defn get-asemapiirros-multioperation-updates-for-application [application]
+  (->> (app/get-operations application)
+       (map #(select-keys % [:id :name]))
+       (hash-map :attachments.$.groupType "operation" :attachments.$.op)
+       (hash-map $set)
+       (vector {:_id (:id application) :attachments.type.type-id "asemapiirros"})))
+
+(defmigration update-asemapiirros-grouping-as-multioperation
+  (let [query      {:permitType {$in ["R" "P"]} :attachments.type.type-id "asemapiirros"}
+        projection [:primaryOperation :secondaryOperations]]
+    (->> (mongo/select :applications query projection)
+         (map get-asemapiirros-multioperation-updates-for-application)
+         (run! (partial apply mongo/update-by-query :applications)))
+    (->> (mongo/select :submitted-applications query projection)
+         (map get-asemapiirros-multioperation-updates-for-application)
+         (run! (partial apply mongo/update-by-query :submitted-applications)))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
