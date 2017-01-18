@@ -30,8 +30,7 @@
                            (cons user))
                       [user]))
    :model-fn (fn [{:keys [user data]} conf recipient]
-               {:name      (:firstName recipient)
-                :old-email (:email user)
+               {:old-email (:email user)
                 :new-email (:new-email data)})})
 
 (defn- has-person-id? [user]

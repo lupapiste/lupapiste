@@ -95,8 +95,7 @@
      :modified     (to-local-date (:modified application))
      :address      (:address application)
      :municipality (i18n/localize lang "municipality" (:municipality application))
-     :operation    (i18n/localize lang "operations" (get-in application [:primaryOperation :name]))
-     :user         (select-keys recipient [:firstName :lastName :email :lang])}))
+     :operation    (i18n/localize lang "operations" (get-in application [:primaryOperation :name]))}))
 
 ;;
 ;; Recipient functions
@@ -186,7 +185,9 @@
             calendar-fn    (get conf :calendar-fn)]
         (doseq [recipient recipients]
           (let [user-lang (:language recipient)
-                model   (assoc (model-fn command conf recipient) :lang (or user-lang "fi"))
+                model   (assoc (model-fn command conf recipient)
+                          :lang (or user-lang "fi")
+                          :user         (select-keys recipient [:firstName :lastName :email :lang]))
                 subject (get-email-subject application model (get conf :subject-key (name template-name)) (:language recipient))
                 calendar (when (some? calendar-fn)
                            (calendar-fn command recipient))
