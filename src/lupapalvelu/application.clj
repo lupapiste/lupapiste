@@ -337,10 +337,11 @@
                                         (when (and (att-type/multioperation? (:type att)) (att-type/contains? required-types (:type att)))
                                           [(util/kw-path "attachments" ind "op") (:op att)]))
                                       attachments)]
-      {$set  (->> (remove (comp vector? second) ops-to-update) ; Update legacy and nil valued op
-                  (util/map-values #(->> [% added-op] (remove nil?))))
-       $push (->> (filter (comp vector? second) ops-to-update) ; Update op array
-                  (util/map-values (constantly added-op)))})))
+      (util/assoc-when-pred nil not-empty
+                            $set  (->> (remove (comp vector? second) ops-to-update) ; Update legacy op
+                                       (util/map-values #(->> [% added-op] (remove nil?))))
+                            $push (->> (filter (comp vector? second) ops-to-update) ; Update op array
+                                       (util/map-values (constantly added-op)))))))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys

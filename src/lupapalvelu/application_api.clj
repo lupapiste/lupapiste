@@ -472,8 +472,9 @@
     (update-application command (util/deep-merge {$push {:secondaryOperations  op
                                                          :documents   {$each new-docs}
                                                          :attachments {$each new-attachments}}
-                                                  $set  {:modified created}}
-                                                 attachment-updates))))
+                                                  $set  {:modified created}}))
+    ;; Cannot update existing array and push new items into it same time with one update
+    (when (not-empty attachment-updates) (update-application command attachment-updates))))
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
