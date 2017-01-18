@@ -859,7 +859,10 @@
     (command jarvenpaa :modify-inspection-summary-template :func "create" :name "foo" :templateText "bar\nbar2\n\n bar3") => ok?)
   (fact "Created template included in the query result"
     (let [resp (query jarvenpaa :organization-inspection-summary-templates)
-          data (-> resp :templates)]
+          data (-> resp :templates)
+          id1 (-> data first :id)]
       resp => ok?
       (count data) => 1
-      (first data) => (contains {:name "foo" :items ["bar" "bar2" "bar3"]}))))
+      (first data) => (contains {:name "foo" :items ["bar" "bar2" "bar3"]})
+      (command jarvenpaa :modify-inspection-summary-template :func "update" :templateId "invalid-id" :name "foo2" :templateText "bar325146") => (partial expected-failure? :error.not-found)
+      (command jarvenpaa :modify-inspection-summary-template :func "update" :templateId id1 :name "foo2" :templateText "bar325146") => ok?)))
