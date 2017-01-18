@@ -469,10 +469,10 @@
         attachments (:attachments (domain/get-application-no-access-checking id {:attachments true}))
         new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
         attachment-updates (app/multioperation-attachment-updates op @organization attachments)]
-    (update-application command (util/deep-merge {$push {:secondaryOperations  op
-                                                         :documents   {$each new-docs}
-                                                         :attachments {$each new-attachments}}
-                                                  $set  {:modified created}}))
+    (update-application command {$push {:secondaryOperations  op
+                                        :documents   {$each new-docs}
+                                        :attachments {$each new-attachments}}
+                                 $set  {:modified created}})
     ;; Cannot update existing array and push new items into it same time with one update
     (when (not-empty attachment-updates) (update-application command attachment-updates))))
 
