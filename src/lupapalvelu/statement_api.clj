@@ -113,14 +113,12 @@
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"
-   :model-fn       request-statement-model
-   :show-municipality-in-subject true})
+   :model-fn       request-statement-model})
 
 (notifications/defemail :request-statement-new-user
   {:recipients-fn  :recipients
    :subject-key    "statement-request-new-user"
-   :model-fn       request-statement-model
-   :show-municipality-in-subject true})
+   :model-fn       request-statement-model})
 
 (defcommand request-for-statement
   {:parameters [functionCode id selectedPersons]

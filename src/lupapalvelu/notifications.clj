@@ -141,8 +141,7 @@
 
             (sc/optional-key :pred-fn)         util/Fn
             (sc/optional-key :application-fn)  util/IFn
-            (sc/optional-key :tab)             sc/Str
-            (sc/optional-key :show-municipality-in-subject) sc/Bool})
+            (sc/optional-key :tab)             sc/Str})
 
 ;;
 ;; Public API

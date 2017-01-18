@@ -84,7 +84,6 @@
   {:subject-key                  "application.calendar.appointment.new"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST nil)
-   :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient _] (usr/authority? recipient)))
    :model-fn                     suggest-appointment-model})
@@ -94,7 +93,6 @@
   {:subject-key                  "application.calendar.appointment.new"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST nil)
-   :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient reservation]
                                      (and (usr/applicant? recipient)
@@ -106,7 +104,6 @@
   {:subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST nil)
-   :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient reservation]
                                      (and (usr/applicant? recipient)
@@ -118,7 +115,6 @@
   {:subject-key                  "application.calendar.appointment.decline"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/CANCEL PartStat/DECLINED)
-   :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
    :model-fn                     model})
 
@@ -127,6 +123,5 @@
   {:subject-key                  "application.calendar.appointment.accept"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST PartStat/ACCEPTED)
-   :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
    :model-fn                     model})
