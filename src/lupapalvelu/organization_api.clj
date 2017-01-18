@@ -764,5 +764,12 @@
                  (fail! :error.not-found))
       (fail :error.illegal-function-code))))
 
-#_(defcommand select-inspection-summary-template-for-operation
-            )
+(defcommand inspection-summary-template-for-operation
+  {:description "Toggles operation either requiring section or not."
+   :parameters [operationId templateId]
+   :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
+   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [organizationId (usr/authority-admins-organization-id user)]
+    (inspection-summary/select-template-for-operation organizationId operationId templateId)))

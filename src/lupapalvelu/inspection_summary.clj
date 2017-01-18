@@ -36,3 +36,7 @@
 
 (defn delete-template [organizationId templateId]
   (mongo/update-by-query :organizations {:_id organizationId} {$pull {:inspection-summary.templates {:id templateId}}}))
+
+(defn select-template-for-operation [organizationId operationId templateId]
+  (org/update-organization organizationId
+                           {$set {(str "inspection-summary.selected-for-operation." operationId) templateId}}))
