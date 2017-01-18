@@ -6,7 +6,7 @@ Lukuoikeus koskee hanketta {{operation}} osoitteessa {{address}}, {{municipality
 
 N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link-fi}}
+{{link}}
  
 Mik&auml;li sinun on tarkoitus muokata hankkeen tietoja, olethan yhteydess&auml; kutsun l&auml;hett&auml;j&auml;&auml;n - h&auml;n saa kasvatettua oikeuksiasi l&auml;hett&auml;m&auml;ll&auml; valtuutuksen. Lukuoikeusvaltuutus on l&auml;hetetty sinulle seuraavan viestin kera:
 

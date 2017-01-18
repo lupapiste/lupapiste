@@ -4,7 +4,7 @@ muistuttelemme t&auml;ss&auml;, ett&auml; rakennuspaikan rajanaapurina teille on
 
 Hanketta koskevia tarkempia tietoja saa alla olevasta linkist&auml;. Jos linkki ei toimi, kopioikaa osoite ja liitt&auml;k&auml;&auml; se selaimen osoiteriville. Linkki vanhentuu {{expires}}.
 
-{{link-fi}}
+{{link}}
 
 Tutustuttuanne hakemukseen voitte allekirjoittaa kuulemisen s&auml;hk&ouml;isesti henkil&ouml;kohtaisten verkkopankkitunnusten tai mobiilitunnisteen avulla. Mik&auml;li hakemuksessa on jotain huomautettavaa, onnistuu huomauttaminen allekirjoittamisen yhteydess&auml;. Varatkaa verkkopankkitunnukset tarvittaessa saatavillenne.
 

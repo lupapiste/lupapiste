@@ -6,7 +6,7 @@ Mik&auml;li hakemus on aiheeton, kirjaudu sis&auml;&auml;n Lupapisteeseen ja kli
 
 N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link-fi}}
+{{link}}
 
 Terveisin,
 {{lupapiste}}

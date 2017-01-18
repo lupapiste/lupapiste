@@ -6,7 +6,7 @@ In case your application is no longer necessary, log on to Lupapiste and click "
 
 To view the project information, click the link below. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
-{{link-en}}
+{{link}}
 
 Kind regards,
 {{lupapiste}}

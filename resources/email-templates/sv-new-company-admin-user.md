@@ -4,7 +4,7 @@ trevligt att **{{company.name}}** b&ouml;rjat anv&auml;nda v&aring;r tj&auml;nst
 
 Aktivera ditt konto genom l&auml;nken nedan:
 
-{{link-sv}}
+{{link}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.             
 

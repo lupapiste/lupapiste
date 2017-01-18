@@ -6,7 +6,7 @@ Skrivr&auml;ttigheterna g&auml;ller projektet {{operation}} p&aring; adressen {{
 
 Klicka p&aring; l&auml;nken nedan och godk&auml;nn befogenheten f&ouml;r att se uppgifterna om projektet. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-{{link-sv}}
+{{link}}
  
 Du har f&aring;tt skrivr&auml;ttigheter och f&ouml;ljande meddelande:
 

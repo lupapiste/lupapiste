@@ -6,7 +6,7 @@ The read-only access is for project {{operation}} at {{address}}, {{municipality
 
 To view the project information, click the link below. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
-{{link-en}}
+{{link}}
  
 If you are supposed to edit the project information, please contact the invitation sender - he or she can increase your rights by sending an authorization. The read-only access has been sent to you with the following message:
 

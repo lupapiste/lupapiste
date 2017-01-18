@@ -4,7 +4,7 @@ At Lupapiste, you can apply for permits regarding built environments and take ca
 
 Activate your account and set yourself a password with the link below:
 
-{{link-en}}
+{{link}}
 
 If the link doesn't work, copy the address and paste it in your browser's address bar.     
 

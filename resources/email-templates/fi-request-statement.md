@@ -4,7 +4,7 @@ sinulta on pyydetty lausuntoa lupahakemukseen osoitteessa {{address}}, {{municip
 
 P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link-fi}}
+{{link}}
 
 Lausunnon m&auml;&auml;r&auml;ajaksi on asetettu {{due-date-str-fi}}. Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
 

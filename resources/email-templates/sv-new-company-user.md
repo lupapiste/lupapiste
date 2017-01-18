@@ -4,7 +4,7 @@ i Lupapiste kan du ans&ouml;ka om tillst&aring;nd som g&auml;ller den byggda mil
 
 Du kan aktivera ditt konto och skapa ett l&ouml;senord genom att klicka p&aring; den bifogade l&auml;nken.
 
-{{link-sv}}
+{{link}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

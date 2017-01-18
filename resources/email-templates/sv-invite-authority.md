@@ -4,7 +4,7 @@ du har f&aring;tt en inbjudan till tj&auml;nsten Lupapiste i egenskap av myndigh
 
 Forts&auml;tt genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-{{link-sv}}
+{{link}}
 
 En smidig elektronisk tillst&aring;ndsprocess &ouml;nskar
 {{lupapiste}}

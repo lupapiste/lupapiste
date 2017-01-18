@@ -6,7 +6,7 @@ Om ans&ouml;kan &auml;r grundl&ouml;s kan du logga in i Lupapiste och klicka "Av
 
 Klicka p&aring; l&auml;nken nedan att se uppgifterna om projektet. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-{{link-sv}}
+{{link}}
 
 H&auml;lsningar,
 {{lupapiste}}

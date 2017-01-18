@@ -4,7 +4,7 @@ muistuttelemme t&auml;ss&auml;, ett&auml; {{statement-request-created}} sinulta 
 
 P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link-fi}}
+{{link}}
 
 Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
 

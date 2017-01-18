@@ -6,7 +6,7 @@ Lupapiste &auml;r en e-tj&auml;nst d&auml;r du kan ans&ouml;ka om olika tillst&a
 
 Klicka l&auml;nken nedan f&ouml;r att f&aring; tillg&aring;ng till ditt tillst&aring;nd. Om l&auml;nken inte fungerar, kopiera den och klistra in den i webbl&auml;sarens adressf&auml;lt. 
 
-{{link-sv}}
+{{link}}
 
 Om det h&auml;r &auml;r f&ouml;rsta g&aring;ngen du anv&auml;nder Lupapiste med e-postadressen {{recipient-email}} m&aring;ste du f&ouml;rst registrera dig som anv&auml;ndare. Det g&ouml;r du med bankkoder eller mobilcertifikat.
 

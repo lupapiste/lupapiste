@@ -7,7 +7,7 @@ someone has left a comment on project  {{operation}} at {{address}}, {{municipal
 
 You can read the comment also from the application discussion chain by clicking the link below. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
-{{link-en}}
+{{link}}
 
 If you want to reply to the comment, please do so directly to the discussion chain at Lupapiste. Replies to this message doesn't reach the person who left you a comment.
 

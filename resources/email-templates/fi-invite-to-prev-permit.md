@@ -6,7 +6,7 @@ Lupapiste on s&auml;hk&ouml;inen asiointipalvelu, jossa voit hakea rakennettuun 
 
 P&auml;&auml;set luvallesi klikkaamalla seuraavasta linkist&auml;. Mik&auml;li linkki ei toimi, kopioi se ja liit&auml; selaimen osoiteriville.
 
-{{link-fi}}
+{{link}}
 
 Ellet ole aikaisemmin k&auml;ytt&auml;nyt Lupapistett&auml; s&auml;hk&ouml;postiosoitteella {{recipient-email}}, on sinun ensin rekister&ouml;idytt&auml;v&auml; Lupapisteen k&auml;ytt&auml;j&auml;ksi. Rekister&ouml;ityminen tehd&auml;&auml;n henkil&ouml;kohtaisten pankkitunnusten tai mobiilivarmenteen avulla.
 

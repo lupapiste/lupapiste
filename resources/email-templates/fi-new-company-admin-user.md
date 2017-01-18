@@ -4,7 +4,7 @@ Hienoa saada **{{company.name}}** palvelumme k&auml;ytt&auml;j&auml;ksi! **{{com
 
 Aktivoi tilisi oheisella linkill&auml;:
 
-{{link-fi}}
+{{link}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.             
 

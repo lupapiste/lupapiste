@@ -4,7 +4,7 @@ vi vill p&aring;minna dig om att {{statement-requester.name}} bett dig om ett ut
 
 Trots att tidsfristen g&aring;tt ut har du &auml;nnu en kort tid p&aring; dig att ge ditt utl&aring;tande genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-{{link-sv}}
+{{link}}
 
 Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
 

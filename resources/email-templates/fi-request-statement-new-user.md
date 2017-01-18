@@ -8,7 +8,7 @@ Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hakemuksen n&auml;kem
 
 P&auml;&auml;st&auml;ksesi antamaan lausunnon rekister&ouml;idy k&auml;ytt&auml;j&auml;ksi t&auml;st&auml;:
 
-{{link-fi}}
+{{link}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tarkista my&ouml;s, ett&auml; kutsuttu s&auml;hk&ouml;postiosoite {{recipient-email}} vastaa s&auml;hk&ouml;postiosoitetta, jolla olet palveluun rekister&ouml;itynyt.
 

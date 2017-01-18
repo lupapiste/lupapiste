@@ -4,7 +4,7 @@ Great to have **{{company.name}}** as a user of our service! **{{company.name}}*
 
 Activate your account with the link below:
 
-{{link-en}}
+{{link}}
 
 If the link doesn't work, copy the address and paste it in your browser's address bar.             
 

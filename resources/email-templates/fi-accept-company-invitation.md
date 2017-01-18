@@ -4,7 +4,7 @@
 
 Klikkaa alla olevaa linkki&auml; liitt&auml;&auml;ksesi Yritystilisi hakemuksen osapuoleksi. Samalla hyv&auml;ksyt s&auml;hk&ouml;isen valtuutuskutsun, joka vastaa perinteist&auml; valtakirjaa.
 
-{{link-fi}}
+{{link}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.          
 

@@ -6,7 +6,7 @@ Kirjoitusoikeus koskee hanketta {{operation}} osoitteessa {{address}}, {{municip
 
 N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml; ja hyv&auml;ksy valtuutus. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link-fi}}
+{{link}}
  
 Kirjoitusoikeus on lis&auml;tty sinulle seuraavan viestin kera:
 

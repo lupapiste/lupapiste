@@ -6,7 +6,7 @@ Lupapiste is an online service through which you can apply for all permits regar
 
 You can see your permit by clicking the link below. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
-{{link-en}}
+{{link}}
 
 If you haven't used Lupapiste before with your e-mail address {{recipient-email}}, you need to first register as a Lupapiste user. The registration is done either with your online banking codes or with a mobile certificate.
 

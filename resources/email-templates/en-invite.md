@@ -6,7 +6,7 @@ The writing authorization is for project {{operation}} at {{address}}, {{municip
 
 To view the project information, click the link below. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
-{{link-en}}
+{{link}}
  
 The writing authorization has been sent to you with the following message:
 

@@ -4,7 +4,7 @@ we wanted to remind you that as neighbours of a building site you have been noti
 
 You can get more information regarding the project via the link below. The link expires in three weeks, {{expires}}. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
-{{link-en}}
+{{link}}
 
 After familiarizing yourself with the application, you can sign the hearing electronically by using your online banking codes or a mobile certificate. In case you want to make remarks with regard to the application, you can do so when signing the document. Make sure your online banking codes are available.
 

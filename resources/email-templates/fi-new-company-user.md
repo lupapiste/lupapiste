@@ -4,7 +4,7 @@ Lupapisteen kautta voidaan hakea rakennetun ymp&auml;rist&ouml;n lupia sek&auml;
 
 Voit aktivoida tilisi ja asettaa itsellesi salasanan oheisella linkill&auml;:
 
-{{link-fi}}
+{{link}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
