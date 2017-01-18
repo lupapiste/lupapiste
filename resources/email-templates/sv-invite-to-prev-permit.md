@@ -1,6 +1,6 @@
 # Hej {{user.firstName}},
 
-du har f&aring;tt detta meddelande eftersom din ans&ouml;kan om bygglov f&ouml;r projektet {{operation}} p&aring; adressen {{address}}, {{city}} som l&auml;mnades in i pappersform nu har &ouml;verf&ouml;rts i elektronisk form i tj&auml;nsten Lupapiste f&ouml;r sk&ouml;tseln av &auml;renden under byggtiden, till exempel utn&auml;mnandet av arbetsledare.
+du har f&aring;tt detta meddelande eftersom din ans&ouml;kan om bygglov f&ouml;r projektet {{operation}} p&aring; adressen {{address}}, {{municipality}} som l&auml;mnades in i pappersform nu har &ouml;verf&ouml;rts i elektronisk form i tj&auml;nsten Lupapiste f&ouml;r sk&ouml;tseln av &auml;renden under byggtiden, till exempel utn&auml;mnandet av arbetsledare.
 
 Lupapiste &auml;r en e-tj&auml;nst d&auml;r du kan ans&ouml;ka om olika tillst&aring;nd som g&auml;ller den byggda milj&ouml;n och sk&ouml;ta dina tillst&aring;nds&auml;renden n&auml;r och d&auml;r det passar dig b&auml;st.
 

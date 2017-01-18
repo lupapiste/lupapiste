@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-sinulla on Lupapiste-palvelussa aktiivinen lupahakemus hankkeesta {{operation}} osoitteessa {{address}}, {{city}}. Hakemusta on p&auml;ivitetty viimeksi {{modified}}. Onko asia viel&auml; ajankohtainen? 
+sinulla on Lupapiste-palvelussa aktiivinen lupahakemus hankkeesta {{operation}} osoitteessa {{address}}, {{municipality}}. Hakemusta on p&auml;ivitetty viimeksi {{modified}}. Onko asia viel&auml; ajankohtainen? 
 
 Mik&auml;li hakemus on aiheeton, kirjaudu sis&auml;&auml;n Lupapisteeseen ja klikkaa "Peruuta hakemus" hakemuksen oikeasta yl&auml;laidasta. Hakemuksen perumisen my&ouml;t&auml; my&ouml;s hakemusta koskevat s&auml;hk&ouml;posti-ilmoitukset perutaan.
 

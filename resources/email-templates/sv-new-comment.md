@@ -1,6 +1,6 @@
 # Hej {{user.firstName}},
 
-projektet {{operation}} p&aring; adressen {{address}}, {{city}} har kommenterats i Lupapiste. 
+projektet {{operation}} p&aring; adressen {{address}}, {{municipality}} har kommenterats i Lupapiste. 
 
 {{comment-from}} ({{comment-time}}):
 {{comment-text}}

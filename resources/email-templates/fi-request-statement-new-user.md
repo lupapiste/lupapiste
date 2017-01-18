@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-s&auml;hk&ouml;postiosoite {{recipient-email}} halutaan lis&auml;t&auml; lausunnonantajaksi Lupapisteess&auml; lupahakemukselle osoitteessa {{address}}, {{city}}. Lupaa haetaan toimenpiteelle {{operation}}.
+s&auml;hk&ouml;postiosoite {{recipient-email}} halutaan lis&auml;t&auml; lausunnonantajaksi Lupapisteess&auml; lupahakemukselle osoitteessa {{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle {{operation}}.
 
 P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Lupapisteess&auml; voidaan hoitaa rakentamiseen liittyv&auml;&auml; lupa-asiointia yhdess&auml; hankkeen osapuolten kesken. Vuorokauden ymp&auml;ri.
 

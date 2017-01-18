@@ -1,6 +1,6 @@
 # Hi {{user.firstName}},
 
-someone has left a comment on project  {{operation}} at {{address}}, {{city}} at Lupapiste. 
+someone has left a comment on project  {{operation}} at {{address}}, {{municipality}} at Lupapiste. 
 
 {{comment-from}} ({{comment-time}}):
 {{comment-text}}

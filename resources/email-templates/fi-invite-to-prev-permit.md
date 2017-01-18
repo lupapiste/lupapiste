@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-sait t&auml;m&auml;n s&auml;hk&ouml;postin, koska paperilla haettu rakennuslupasi koskien hanketta {{operation}} osoitteessa {{address}}, {{city}} on nyt siirretty s&auml;hk&ouml;iseen muotoon Lupapiste-palveluun rakentamisen aikaista asiointia, kuten ty&ouml;njohtajien nime&auml;misi&auml;, varten.
+sait t&auml;m&auml;n s&auml;hk&ouml;postin, koska paperilla haettu rakennuslupasi koskien hanketta {{operation}} osoitteessa {{address}}, {{municipality}} on nyt siirretty s&auml;hk&ouml;iseen muotoon Lupapiste-palveluun rakentamisen aikaista asiointia, kuten ty&ouml;njohtajien nime&auml;misi&auml;, varten.
 
 Lupapiste on s&auml;hk&ouml;inen asiointipalvelu, jossa voit hakea rakennettuun ymp&auml;rist&ouml;&ouml;n liittyvi&auml; lupia sek&auml; edist&auml;&auml; lupa-asiointiasi silloin kun sinulle parhaiten sopii - vaikka kotisohvalta k&auml;sin.
 

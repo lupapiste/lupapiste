@@ -1,6 +1,6 @@
 # Hi {{user.firstName}},
 
-project {{operation}} at {{address}}, {{city}} has now progressed to next phase at Lupapiste. The project status is now {{state}}.
+project {{operation}} at {{address}}, {{municipality}} has now progressed to next phase at Lupapiste. The project status is now {{state}}.
 
 {{state-text}}
 

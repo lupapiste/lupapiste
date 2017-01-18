@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-sinulta on pyydetty lausuntoa lupahakemukseen osoitteessa {{address}}, {{city}}. Lupaa haetaan toimenpiteelle {{operation}}. Lausuntoa on pyyt&auml;nyt {{statement-requester.name}}.
+sinulta on pyydetty lausuntoa lupahakemukseen osoitteessa {{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle {{operation}}. Lausuntoa on pyyt&auml;nyt {{statement-requester.name}}.
 
 P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 

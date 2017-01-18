@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-sinulle on osoitettu uusi viesti Lupapisteess&auml;! Viesti koskee hanketta {{operation}} osoitteessa {{address}}, {{city}}. P&auml;&auml;set n&auml;kem&auml;&auml;n viestin sek&auml; vastaamaan siihen alla olevan linkin kautta. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+sinulle on osoitettu uusi viesti Lupapisteess&auml;! Viesti koskee hanketta {{operation}} osoitteessa {{address}}, {{municipality}}. P&auml;&auml;set n&auml;kem&auml;&auml;n viestin sek&auml; vastaamaan siihen alla olevan linkin kautta. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 {{link-fi}}
 

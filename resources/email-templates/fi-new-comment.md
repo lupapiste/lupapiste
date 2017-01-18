@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-hanketta {{operation}} osoitteessa {{address}}, {{city}} on kommentoitu Lupapisteess&auml;. 
+hanketta {{operation}} osoitteessa {{address}}, {{municipality}} on kommentoitu Lupapisteess&auml;. 
 
 {{comment-from}} ({{comment-time}}):
 {{comment-text}}

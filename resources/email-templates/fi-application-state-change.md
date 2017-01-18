@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-hanke {{operation}} osoitteessa {{address}}, {{city}} on edennyt seuraavaan vaiheeseen Lupapisteess&auml;. Hankkeen tila on nyt {{state}}.
+hanke {{operation}} osoitteessa {{address}}, {{municipality}} on edennyt seuraavaan vaiheeseen Lupapisteess&auml;. Hankkeen tila on nyt {{state}}.
 
 {{state-text}}
 

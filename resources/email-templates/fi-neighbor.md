@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-rakennuspaikan rajanaapurina teille ilmoitetaan, ett&auml; osoitteessa {{address}}, {{city}} on vireill&auml; rakentamisen lupahakemus s&auml;hk&ouml;isen Lupapiste-palvelun kautta. Lupapisteess&auml; voidaan hoitaa rakennettuun ymp&auml;rist&ouml;&ouml;n liittyv&auml;&auml; lupa-asiointia vuorovaikutuksessa viranomaisen sek&auml; muiden osapuolten kanssa. 
+rakennuspaikan rajanaapurina teille ilmoitetaan, ett&auml; osoitteessa {{address}}, {{municipality}} on vireill&auml; rakentamisen lupahakemus s&auml;hk&ouml;isen Lupapiste-palvelun kautta. Lupapisteess&auml; voidaan hoitaa rakennettuun ymp&auml;rist&ouml;&ouml;n liittyv&auml;&auml; lupa-asiointia vuorovaikutuksessa viranomaisen sek&auml; muiden osapuolten kanssa. 
 
 Hanketta koskevia tarkempia tietoja saa alla olevasta linkist&auml;. Linkki vanhentuu kolmessa viikossa, {{expires}}. Jos linkki ei toimi, kopioikaa osoite ja liitt&auml;k&auml;&auml; se selaimen osoiteriville.
 

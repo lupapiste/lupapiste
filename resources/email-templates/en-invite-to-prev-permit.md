@@ -1,6 +1,6 @@
 # Hi {{user.firstName}},
 
-you received this e-mail because the building permit regarding project {{operation}} at {{address}}, {{city}}, which you applied for in a paper format has now been changed into electronic form. This has been done so that you can easily edit your information at Lupapiste, for example by naming work supervisors, during the building process.
+you received this e-mail because the building permit regarding project {{operation}} at {{address}}, {{municipality}}, which you applied for in a paper format has now been changed into electronic form. This has been done so that you can easily edit your information at Lupapiste, for example by naming work supervisors, during the building process.
 
 Lupapiste is an online service through which you can apply for all permits regarding built environments and take care of all issues whenever it suits you the best - even from your sofa at home.
 
