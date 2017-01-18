@@ -13,38 +13,42 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Emails
 ;;
 
-(defn- application-link [lang role full-path]
-  (str (env/value :host) "/app/" lang "/" (user/applicationpage-for role) "#!" full-path))
-
 (defn- create-model [{{id :id info-request? :infoRequest} :application
-                      {target :target}                    :data}
+                      {:keys [target text]}               :data
+                      command-ts                          :created
+                      commenter                           :user :as command}
                      _
-                     {role :role
-                      name :firstName}]
-  (let [permit-type-path (if info-request? "/inforequest" "/application")
-        full-path (if (= (:type target) "verdict")
-                     (str "/verdict/" id "/" (:id target))
-                     (str permit-type-path "/" id "/conversation"))]
-    {:name    name
-     :link-fi (application-link "fi" role full-path)
-     :link-sv (application-link "sv" role full-path)}))
+                     {lang :language name :firstName :as recipient}]
+  (let [permit-type-path (if info-request? "inforequest" "application")
+        subpage   (if (= (:type target) "verdict")
+                    "verdict"
+                    permit-type-path)
+        subpage-id (if (= (:type target) "verdict")
+                     (:id target)
+                     "conversation")]
+    (merge (notifications/new-email-app-model command nil recipient)
+           {:name         name
+            :link         (notifications/get-subpage-link {:id id :subpage-id subpage-id} subpage (or lang "fi") recipient)
+            :comment-from (usr/full-name commenter)
+            :comment-time (util/to-local-datetime command-ts)
+            :comment-text text})))
 
 (notifications/defemail :new-comment
   {:pred-fn (fn [{user :user {roles :roles target :target} :data}]
               (and
                 (not= (:type target) "verdict") ; target might be comment target or attachment target
-                (user/authority? user)))
+                (usr/authority? user)))
    :recipients-fn notifications/comment-recipients-fn
    :model-fn create-model})
 
 (notifications/defemail :application-targeted-comment
-  {:recipients-fn  notifications/from-user
+  {:recipients-fn  :to-user
    :subject-key    "new-comment"
    :model-fn create-model})
 
@@ -53,7 +57,7 @@
 ;;
 
 (defn applicant-cant-set-to [{{:keys [to]} :data user :user}]
-  (when (and to (not (user/authority? user)))
+  (when (and to (not (usr/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
 (defn- validate-comment-target [{{:keys [target]} :data}]
@@ -103,12 +107,12 @@
    :on-success [(fn [{data :data :as command} _]
                   (when-not (ss/blank? (:text data))
                     (notifications/notify! :new-comment command))
-                  (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
+                  (when-let [to-user (and (:to data) (usr/get-user-by-id (:to data)))]
                     ;; LUPA-407
-                    (notifications/notify! :application-targeted-comment (assoc command :user to-user))))
+                    (notifications/notify! :application-targeted-comment (assoc command :to-user to-user))))
                 open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered openApplication] :or {mark-answered true}} :data :keys [user created application] :as command}]
-  (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))
+  (let [to-user   (and to (or (usr/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))
         ensured-visibility (if (seq roles)
                              (remove nil? (conj (set roles) (:role user) (:role to-user)))
                              #{:authority :applicant :oirAuthority})]

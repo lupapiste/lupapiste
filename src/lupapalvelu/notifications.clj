@@ -19,7 +19,7 @@
 
 (defn get-subpage-link [{:keys [id subpage-id]} subpage lang {role :role :or {role "applicant"}}]
   (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
-  (assert (#{"attachment" "statement" "neighbors"} subpage) (str "Unsupported subpage"))
+  (assert (#{"attachment" "statement" "neighbors" "verdict"} subpage) (str "Unsupported subpage"))
   (let [full-path (ss/join "/" (remove nil? [subpage id subpage-id]))]
     (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!/" full-path)))
 
