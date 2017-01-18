@@ -17,7 +17,7 @@
   (let [link-fn (fn [lang] (notifications/get-subpage-link {:id (:id app) :subpage-id attachment-id} "attachment" lang recipient))]
     {:link-fi      (link-fn "fi")
      :link-sv      (link-fn "sv")
-     :address      (:title app)
+     :address      (:address app)
      :operation-fi (app-utils/operation-description app :fi)
      :operation-sv (app-utils/operation-description app :sv)
      :created-date created-date}))

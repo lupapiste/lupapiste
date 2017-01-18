@@ -99,6 +99,7 @@
                                                   :organization "753-R",
                                                   :buildings [],
                                                   :title "Ampumaradantie 113",
+                                                  :address "Ampumaradantie 113",
                                                   :started nil,
                                                   :closed nil,
                                                   :primaryOperation {:id "532bddd0da068d67611f92f0",
@@ -121,7 +122,6 @@
                                                   :_statements-seen-by {},
                                                   :modified 1395384005343,
                                                   :comments [],
-                                                  :address "Ampumaradantie 113",
                                                   :permitType "VVVL",
                                                   :id "LP-753-2014-00001",
                                                   :municipality "753"})

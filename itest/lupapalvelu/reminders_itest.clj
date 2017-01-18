@@ -141,6 +141,7 @@
                   statement-matching-duedate-passed]
      :organization "753-R"
      :title "Naapurikuja 3"
+     :address "Naapurikuja 3"
      :primaryOperation {:id "534bf825299508fb3618455d"
                         :name "kerrostalo-rivitalo"
                         :created 1397487653097}
@@ -151,7 +152,6 @@
      :created 1397487653097
      :propertyId "75312312341234"
      :modified timestamp-the-beginning-of-time
-     :address "Naapurikuja 3"
      :permitType "R"
      :id "LP-753-2014-12345"
      :municipality "753"}))

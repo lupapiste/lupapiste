@@ -31,6 +31,7 @@
                               :role "authority"
                               :username "pekka"}
                   :address "Londb\u00f6lentie 97"
+                  :title "Londb\u00f6lentie 97"
                   :created 1391415025497
                   :documents [kuvaus
                               ctc/henkilohakija
@@ -57,8 +58,7 @@
                   :started nil
                   :state "submitted"
                   :statements ctc/statements
-                  :submitted 1391415717396
-                  :title "Londb\u00f6lentie 97"})
+                  :submitted 1391415717396})
 
 (ctc/validate-all-documents application)
 
