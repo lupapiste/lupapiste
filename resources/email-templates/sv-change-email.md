@@ -4,7 +4,7 @@ ditt byte av anv&auml;ndarnamnet {{old-email}} till ett nytt &auml;r n&auml;stan
 
 {{link}}
 
-Aktiveringsl&auml;nken &auml;r i kraft i 24 timmar (fram till{{expires}}). Vid problem &auml;r du v&auml;lkommen att kontakta {{tuki-email}}.
+Aktiveringsl&auml;nken &auml;r i kraft i 24 timmar (fram till{{expires}}). Vid problem &auml;r du v&auml;lkommen att kontakta {{support-email}}.
 
 
 H&auml;lsningar

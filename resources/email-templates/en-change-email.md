@@ -4,7 +4,7 @@ the change of your user ID {{old-email}} to a new one is almost completed. You s
 
 {{link}}
 
-The activation link is valid for 24 hours (until {{expires}}). If there are problems, please contact {{tuki-email}}.
+The activation link is valid for 24 hours (until {{expires}}). If there are problems, please contact {{support-email}}.
 
 
 Kind regards,
