@@ -3,14 +3,15 @@
             [schema.core :as sc]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clostache.parser :as clostache]
             [sade.util :refer [future* to-local-date fn->]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Helpers
@@ -48,15 +49,17 @@
 
 
 
-(defn- get-email-subject [{title :title, municipality :municipality} lang
-                          & [subject-key show-municipality-in-subject]]
-  (let [title-postfix (when subject-key
-                        (i18n/localize-fallback lang [["email.title" subject-key] subject-key]))
-        title-begin   (str (when show-municipality-in-subject
-                             (str (i18n/localize lang "municipality" municipality) ", ")) title)]
-    (str "Lupapiste: " title-begin
-         (when (and title subject-key) " - ")
-         (when subject-key title-postfix))))
+(defn- get-email-subject
+  "Renders an email subject with clostache against given model context.
+   Subject-key defines localization key to be used. Localization value can hold placeholders,
+   such as {{municipality}}"
+  [application model subject-key lang]
+  (let [subject (i18n/localize-fallback lang [["email.title" subject-key] subject-key])
+        context (merge (select-keys application [:address :title]) model)
+        subject-text (if (ss/blank? subject)
+                       (str (or (:address application) (:title application))) ; fallback
+                       (clostache/render subject context))]
+    (str "Lupapiste: " subject-text)))
 
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
@@ -184,10 +187,7 @@
         (doseq [recipient recipients]
           (let [user-lang (:language recipient)
                 model   (assoc (model-fn command conf recipient) :lang (or user-lang "fi"))
-                subject (get-email-subject application
-                                           (:language recipient)
-                                           (get conf :subject-key (name template-name))
-                                           (get conf :show-municipality-in-subject false))
+                subject (get-email-subject application model (get conf :subject-key (name template-name)) (:language recipient))
                 calendar (when (some? calendar-fn)
                            (calendar-fn command recipient))
                 msg     (email/apply-template template-file model)

@@ -2,6 +2,7 @@
   (:require [lupapalvelu.notifications :refer [notify! create-app-model]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.open-inforequest]
             [sade.dummy-email-server :as dummy]))
@@ -9,14 +10,20 @@
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
 
 (facts "email titles"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "fi" "new-comment")
-       => "Lupapiste: Haavikontie 9 - uusi kommentti"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "sv" "new-comment")
-              => "Lupapiste: Haavikontie 9 - ny kommentar"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "cn")
-       => "Lupapiste: Haavikontie 9"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837"} "fi" "statement-request" true)
-       => "Lupapiste: Tampere, Haavikontie 9 - Lausuntopyynt\u00f6")
+  (facts "{{municipality}} is rendered to subject"
+    (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tampere" } "new-comment" "fi")
+    => "Lupapiste: Haavikontie 9, Tampere - sinulle on uusi kommentti"
+    (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tammerfors" } "new-comment" "sv")
+    => "Lupapiste: Haavikontie 9, Tammerfors - du har f\u00e5tt en ny kommentar")
+
+  (fact "Without valid localization, application address is returned"
+    (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tampere" } "foo" "cn")
+    => "Lupapiste: Haavikontie 9"
+    (provided
+      (i18n/localize-fallback "cn" anything) => nil))
+
+  (get-email-subject {:address "Haavikontie 9" :municipality "837"}  {:municipality "Tampere" } "statement-request" "fi")
+    => "Lupapiste: Haavikontie 9, Tampere - lausuntopyynt\u00f6")
 
 (fact "create application link"
   (fact "..for application"
@@ -32,10 +39,10 @@
     => (str (sade.env/value :host) "/app/fi/authority#!/inforequest/1/comment")))
 
 (fact "Application model"
-      (create-app-model {:application {:id 1 :state "draft"}} {:tab ""} {:firstName "Bob"
-                                                                         :language "sv"
-                                                                         :role "applicant"})
-      => (contains {:lang "sv" :name "Bob"}))
+  (create-app-model {:application {:id 1 :state "draft"}} {:tab ""} {:firstName "Bob"
+                                                                     :language "sv"
+                                                                     :role "applicant"})
+  => (contains {:name "Bob"}))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
