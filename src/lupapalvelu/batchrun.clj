@@ -39,12 +39,11 @@
 
 ;; Email definition for the "open info request reminder"
 
-(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _ recipient]
-  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
-         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
-    {:link-fi (link-fn :fi)
-     :link-sv (link-fn :sv)
-     :created-date created-date}))
+(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data app :application} _ recipient]
+  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))]
+    (merge (notifications/new-email-app-model app nil recipient)
+           {:link (link-fn (keyword (:lang recipient)))
+            :inforequest-created created-date})))
 
 (def- oir-reminder-email-conf
   {:recipients-fn  notifications/from-data
