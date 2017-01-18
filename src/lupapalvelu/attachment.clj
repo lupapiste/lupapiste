@@ -957,6 +957,6 @@
    (validate-group [:group] command))
   ([group-path command]
    (let [group (get-in command (cons :data group-path))]
-     (when (:groupType group)
+     (when (or (:groupType group) (:operations group))
        (or ((some-fn validate-group-op validate-group-type) group)
            (validate-group-is-selectable command))))))

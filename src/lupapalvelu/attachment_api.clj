@@ -109,7 +109,7 @@
 (defn- validate-operation-in-application
   ([command] (validate-operation-in-application [:group] command))
   ([group-path {data :data application :application}]
-   (when-let [op-ids (->> (get-in data group-path) :operations not-empty (map :id))]
+   (when-let [op-ids (->> (get-in data group-path) :operations (map :id) not-empty)]
      (when (not-every? #(util/find-by-id % (app/get-operations application)) op-ids)
        (fail :error.illegal-attachment-operation)))))
 
