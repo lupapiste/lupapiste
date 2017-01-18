@@ -81,7 +81,8 @@
                           testId: 'batch-grouping-' + $index()">
             <div data-bind="component: { name: 'attachment-group-autocomplete',
                                          params: { disable: $parent.groupSelectorDisabled( $data ),
-                                                   group: $parent.cell( $data, 'grouping').value } }"></div>
+                                                   group: $parent.cell( $data, 'grouping').value } }"
+                 class="attachment-batch-grouping"></div>
             <icon-button params="click: $parent.filler( 'grouping', $data, 'number'),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-copy-down',
