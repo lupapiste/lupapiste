@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-onnittelut - p&auml;&auml;sette jatkossa antamaan lausuntoja vaikka omalta kotisohvaltanne k&auml;sin! {{municipality}} nimitt&auml;in k&auml;ytt&auml;&auml; rakennetun ymp&auml;rist&ouml;n s&auml;hk&ouml;ist&auml; lupa-asiointipalvelua Lupapistett&auml;, ja teid&auml;t on nyt lis&auml;tty lausunnonantajaksi organisaatioon {{organization}} nimikkeell&auml; {{text}}.
+onnittelut - p&auml;&auml;sette jatkossa antamaan lausuntoja vaikka omalta kotisohvaltanne k&auml;sin! {{organization}} nimitt&auml;in k&auml;ytt&auml;&auml; rakennetun ymp&auml;rist&ouml;n s&auml;hk&ouml;ist&auml; lupa-asiointipalvelua Lupapistett&auml;, ja teid&auml;t on nyt lis&auml;tty lausunnonantajaksi organisaatioon nimikkeell&auml; {{text}}.
 
 Teilt&auml; ei viel&auml; odoteta mit&auml;&auml;n toimenpiteit&auml;. Kun teilt&auml; pyydet&auml;&auml;n ensimm&auml;isen kerran lausuntoa, saatte s&auml;hk&ouml;postiinne linkin sivulle, jossa voitte asettaa itsellenne salasanan palveluun. K&auml;ytt&auml;j&auml;tunnuksena toimii s&auml;hk&ouml;postiosoitteenne.
 

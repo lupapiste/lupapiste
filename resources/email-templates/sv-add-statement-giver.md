@@ -1,6 +1,6 @@
 # Hej {{user.firstName}},
 
-grattis – i forts&auml;ttningen kan ni ge era utl&aring;tanden var som helst! {{municipality}} anv&auml;nder n&auml;mligen e-tj&auml;nsten Lupapiste f&ouml;r tillst&aring;nd som g&auml;ller den byggda milj&ouml;n, och du har lagts till som givare av utl&aring;tande f&ouml;r organisationen {{organization}} med titeln {{text}}. 
+grattis – i forts&auml;ttningen kan ni ge era utl&aring;tanden var som helst! {{organization}} anv&auml;nder n&auml;mligen e-tj&auml;nsten Lupapiste f&ouml;r tillst&aring;nd som g&auml;ller den byggda milj&ouml;n, och du har lagts till som givare av utl&aring;tande med titeln {{text}}. 
 
 Du beh&ouml;ver inte &auml;nnu vidta n&aring;gra &aring;tg&auml;rder. N&auml;r n&aring;gon ber dig om ett utl&aring;tande f&ouml;r f&ouml;rsta g&aring;ngen f&aring;r du ett e-postmeddelande med en l&auml;nk till sidan d&auml;r du kan skapa ett l&ouml;senord till tj&auml;nsten. Ditt anv&auml;ndarnamn &auml;r din e-postadress.
 

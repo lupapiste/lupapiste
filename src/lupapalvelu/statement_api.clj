@@ -31,8 +31,7 @@
 
 (defn- statement-giver-model [{{:keys [text organization]} :data} _ __]
   {:text text
-   :organization-fi (:fi (:name organization))
-   :organization-sv (:sv (:name organization))})
+   :organization #(get-in organization [:name (or (keyword %) :fi)])})
 
 (notifications/defemail :add-statement-giver
   {:recipients-fn  notifications/from-user
