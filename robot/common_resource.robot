@@ -789,7 +789,7 @@ Add attachment
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Click element     test-save-new-attachment
+  Execute Javascript  $('#test-save-new-attachment')[0].click();
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
   Run Keyword If  '${kind}' == 'application'  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
