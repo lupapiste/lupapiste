@@ -1,5 +1,5 @@
 <script type="text/x-jquery-tmpl" id="inspection-summary-templates-list-template" class="ko-template">
-  <div class="content">
+  <div class="content" data-test-id="inspection-summary-templates-list">
     <p data-bind="visible: _.isEmpty(templates()), ltext: 'auth-admin.inspection-summary-templates.none'"></p>
     <table data-bind="visible: !_.isEmpty(templates())">
       <thead>
@@ -12,18 +12,19 @@
       <!-- ko foreach: templates -->
       <tbody class="inspection-summary-template">
         <tr class="inspection-summary-template-row">
-          <td><a data-bind="click: !editorVisible() && $component.toggleOpenDetails, text: name"></a></td>
+          <td><a data-bind="click: !editorVisible() && $component.toggleOpenDetails, text: name, testId: 'edit-template-' + $index()"></a></td>
           <td data-bind="dateString: modified"></td>
-          <td><a data-bind="ltext: 'remove', click: $component.remove"></a></td>
+          <td><a data-bind="ltext: 'remove', click: $component.remove, testId: 'remove-template-' + $index()"></a></td>
         </tr>
         <tr class="inspection-summary-template-row" data-bind="visible: editorVisible">
           <td colspan="3">
             <!-- ko if: editorVisible -->
-            <div class="inspection-summary-template-new-container"
+            <div class="inspection-summary-template-editor-container"
                  data-bind="component: { name: 'inspection-summary-template-bubble',
                                          params: { bubbleVisible: editorVisible,
                                                    functionCode: 'update',
-                                                   template: $data } }"></div>
+                                                   template: $data } },
+                            testId: 'template-editor-' + $index()"></div>
             <!-- /ko -->
           </td>
         </tr>
@@ -34,11 +35,14 @@
       <button class="btn btn-primary"
               data-bind="ltext: 'auth-admin.inspection-summary-templates.add',
                          click: toggleNewTemplateBubble,
-                         disable: newTemplateBubbleVisible"></button>
+                         disable: newTemplateBubbleVisible"
+              data-test-id="show-new-template-bubble"></button>
     </div>
-    <div class="inspection-summary-template-new-container"
+    <!-- ko if: newTemplateBubbleVisible -->
+    <div class="inspection-summary-template-editor-container"
          data-bind="component: { name: 'inspection-summary-template-bubble',
                                  params: { bubbleVisible: newTemplateBubbleVisible,
                                            functionCode: 'create' } }"></div>
+    <!-- /ko -->
   </div>
 </script>
