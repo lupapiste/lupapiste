@@ -89,13 +89,12 @@
 
 
 (defn new-email-app-model [{application :application} {tab :tab} recipient]
-  (let [lang (:language recipient)]
-    {:link         (get-application-link application tab lang recipient)
-     :state        (i18n/localize lang (name (:state application)))
-     :modified     (to-local-date (:modified application))
-     :address      (:address application)
-     :municipality (i18n/localize lang "municipality" (:municipality application))
-     :operation    (i18n/localize lang "operations" (get-in application [:primaryOperation :name]))}))
+  {:link         #(get-application-link application tab % recipient)
+   :state        #(i18n/localize % (name (:state application)))
+   :modified     (to-local-date (:modified application))
+   :address      (:address application)
+   :municipality #(i18n/localize % "municipality" (:municipality application))
+   :operation    #(i18n/localize % "operations" (get-in application [:primaryOperation :name]))})
 
 ;;
 ;; Recipient functions
