@@ -280,8 +280,7 @@
     });
 
     self.tosFunctionExists = self.disposedPureComputed(function() {
-      return lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
-        _.some(params.application.tosFunction());
+      return _.some(params.application.tosFunction());
     });
 
     self.selectAll = function() {
