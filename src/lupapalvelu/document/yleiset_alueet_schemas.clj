@@ -8,8 +8,8 @@
 
 (def hankkeen-kuvaus-kayttolupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit :m2 :min-len 1 :max-len 5 :size :s}))
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}     ;; LupaAsianKuvaus
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit :m2 :min-len 1 :max-len 5 :size :s :required true}))
 
 (defschemas
   1
@@ -45,10 +45,8 @@
 
 (def tyo-aika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date :hidden true} ;; alkuPvm / loppuPvm
-    {:name "tyoaika-paattyy-pvm" :type :date :hidden true}
-    {:name "tyoaika-alkaa-ms" :type :msDate}
-    {:name "tyoaika-paattyy-ms" :type :msDate}))
+    {:name "tyoaika-alkaa-ms" :type :msDate :required true}
+    {:name "tyoaika-paattyy-ms" :type :msDate :required true}))
 
 (def tyo-aika-for-jatkoaika
   (body
@@ -160,7 +158,7 @@
 
 (def hankkeen-kuvaus-sijoituslupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}))   ;; LupaAsianKuvaus
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}))   ;; LupaAsianKuvaus
 
 (defschemas
   1
