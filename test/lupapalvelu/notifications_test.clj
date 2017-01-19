@@ -109,11 +109,11 @@
 (testable-privates lupapalvelu.open-inforequest base-email-model)
 (fact "Email for sending an open inforequest is like"
   (against-background
-    (sade.env/value :host) => "http://lupapiste.fi"
-    (sade.env/value :oir :wanna-join-url) => "http://lupapiste.fi/yhteydenotto")
+    (sade.env/value :host) => "http://lupapiste.fi")
   (let  [model (base-email-model {:data {:token-id "123"}} nil {})]
-    (:link-fi model) => "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi"
-    (:info-fi model) => "http://lupapiste.fi/yhteydenotto"))
+    (doseq [lang i18n/supported-langs]
+      (fact {:midje/description (name lang)}
+        ((:link model) lang) => (str "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=" (name lang))))))
 
 (fact "Unknown config"
   (notify! :foo {}) => (throws AssertionError))
