@@ -58,7 +58,7 @@
         context (merge (select-keys application [:address :title]) model)
         subject-text (if (ss/blank? subject)
                        (str (or (:address application) (:title application))) ; fallback
-                       (clostache/render subject context))]
+                       (clostache/render subject (email/prepare-context-for-language lang context)))]
     (str "Lupapiste: " subject-text)))
 
 (defn- get-email-recipients-for-application

@@ -142,15 +142,18 @@
     (localization lang)
     localization))
 
+(defn prepare-context-for-language [lang context]
+  (postwalk (partial localization-for-language lang) context))
+
 (defn- preprocess-context
   "1. Build a default context by finding all template variables and searching for respective
       translations from i18n files.
    2. Override with the provided context (deep-merge).
    3. Walk through the resulting map, calling all encountered functions with lang as argument."
   [template {:keys [lang] :as context}]
-  (postwalk (partial localization-for-language lang)
-            (deep-merge (template->localization-model (fetch-template template lang))
-                        context)))
+  (prepare-context-for-language lang
+                                (deep-merge (template->localization-model (fetch-template template lang))
+                                            context)))
 
 ;;
 ;; Apply template:
