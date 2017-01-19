@@ -105,28 +105,35 @@
 
 
 (notifications/defemail :invite-authority
-  (assoc pw-reset/base-email-conf :subject-key "authority-invite.title"))
+  {:model-fn (fn [{{token :token org-fn :org-fn} :data} _ _]
+               {:link #(pw-reset/reset-link (name %) token)
+                :org org-fn})
+   :recipients-fn notifications/from-user
+   :subject-key "authority-invite.title"})
 
 (notifications/defemail :notify-authority-added
-  {:model-fn (fn [{name :data} conf recipient] {:org-fi (:fi name), :org-sv (:sv name)}),
+  {:model-fn (fn [{org-fn :org-fn} _ _] {:org org-fn}),
    :subject-key "authority-notification.title",
    :recipients-fn notifications/from-user})
 
-(defn- notify-new-authority [new-user created-by]
-  (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
-    (notifications/notify! :invite-authority {:user new-user, :token token})))
+(defn- notify-new-authority [new-user created-by organization-id]
+  (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))
+        org-name-fn #(-> (organization/get-organization organization-id [:name])
+                         (get-in [:name (or (keyword %) :fi)]))]
+    (notifications/notify! :invite-authority {:user new-user, :token token :org-fn org-name-fn})))
 
 (defn- notify-authority-added [email organization-id]
   (let [user (usr/get-user-by-email email)
-        org-name (:name (organization/get-organization organization-id))]
-    (notifications/notify! :notify-authority-added {:user user, :data org-name})))
+        org-name-fn #(-> (organization/get-organization organization-id [:name])
+                         (get-in [:name (or (keyword %) :fi)]))]
+    (notifications/notify! :notify-authority-added {:user user, :org-fn org-name-fn})))
 
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {new-organization (into #{} roles)}
         user-data {:email email :orgAuthz org-authz :role :authority :enabled true :firstName firstName :lastName lastName}
         new-user (usr/create-new-user caller user-data :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
-    (notify-new-authority new-user caller)
+    (notify-new-authority new-user caller new-organization)
     (ok :operation "invited")))
 
 (defn do-create-user
@@ -140,7 +147,7 @@
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (usr/authority? user)
       (do
-        (notify-new-authority user caller)
+        (notify-new-authority user caller (:organization user-data))
         (ok :id (:id user) :user user))
       (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
         (ok :id (:id user)
@@ -449,7 +456,7 @@
   [_]
   (let [user (usr/get-user-by-email email) ]
     (if (and user (not (usr/dummy? user)))
-      (ok :link (pw-reset/reset-link "fi" (pw-reset/reset-password user)))
+      (ok :link (pw-reset/reset-link (or (:language user) "fi") (pw-reset/reset-password user)))
       (fail :error.email-not-found))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]

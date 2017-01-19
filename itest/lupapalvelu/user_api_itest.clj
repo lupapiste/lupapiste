@@ -17,6 +17,8 @@
 ;;
 (apply-remote-minimal)
 
+(def invite-authority-email-subject "Lupapiste: Tervetuloa Lupapisteen viranomaisk\u00e4ytt\u00e4j\u00e4ksi!")
+
 (fact "user query"
   (let [response (query pena :user)]
     response => ok?
@@ -76,7 +78,7 @@
   (fact "newly created authority receives mail"
     (let [email (last-email)]
       (:to email) => "foo@example.com"
-      (:subject email) => "Lupapiste: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => invite-authority-email-subject
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 ;;
@@ -170,7 +172,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => "Lupapiste: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => invite-authority-email-subject
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
 
   (fact "add existing authority to new organization"
@@ -178,7 +180,7 @@
     (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => "Lupapiste: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => invite-authority-email-subject
       (get-in email [:body :plain]) => (contains "Naantalin rakennusvalvonta"))))
 
 (facts remove-user-organization
@@ -386,5 +388,5 @@
     (-> resp decode-response :body) => ok?
     (:to email) => (contains (email-for "pena"))
     (:to email) => #"Pena Panaani <.+@.+>"
-    (:subject email) => "Lupapiste: Salasanan vaihto"
+    (:subject email) => "Lupapiste: Uusi salasana"
     (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
