@@ -8,7 +8,8 @@
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [schema.core :refer [defschema] :as sc]))
+            [schema.core :refer [defschema] :as sc]
+            [sade.strings :as str]))
 
 (defschema AttachmentType
   {:type-id                    sc/Keyword
@@ -173,40 +174,18 @@
        (-> (select-keys type [:type-group :type-id])
            (util/convert-values keyword))))
 
-;;
-;; Helpers for reporting purposes
-;;
+(def localisation-to-attachment-type-map
+  (memoize
+    (fn [permit-type]
+      (reduce
+        (fn [acc {:keys [type-group type-id] :as attachment-type}]
+          (let [loc-key (ss/join "." ["attachmentType" (name type-group) (name type-id)])]
+            (reduce
+              #(assoc %1 (str/lower-case (i18n/localize %2 loc-key)) attachment-type)
+              acc
+              [:fi :sv])))
+        {}
+        (get attachment-types-by-permit-type (keyword permit-type))))))
 
-(defn localised-attachments-by-permit-type [permit-type]
-  (let [localize-attachment-section
-        (fn [lang [title attachment-names]]
-          [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
-           (reduce
-            (fn [result attachment-name]
-              (let [lockey                    (ss/join "." ["attachmentType" (name title) (name attachment-name)])
-                    localized-attachment-name (i18n/localize lang lockey)]
-                (conj
-                 result
-                 (ss/join \tab [(name attachment-name) localized-attachment-name]))))
-             []
-             attachment-names)])]
-    (reduce
-     (fn [accu lang]
-       (assoc accu (keyword lang)
-          (->> (get attachment-types-by-permit-type (keyword permit-type))
-               (partition 2)
-               (map (partial localize-attachment-section lang))
-               vec)))
-     {}
-     ["fi" "sv"])))
-
-(defn print-attachment-types-by-permit-type []
-  (let [permit-types-with-names (into {}
-                                      (for [[k v] attachment-types-by-permit-type-unevaluated]
-                                        [k (name v)]))]
-    (doseq [[permit-type permit-type-name] permit-types-with-names]
-      (println permit-type-name)
-      (doseq [[group-name types] (:fi (localised-attachments-by-permit-type permit-type))]
-        (println "\t" group-name)
-        (doseq [type types]
-          (println "\t\t" type))))))
+(defn localisation->attachment-type [permit-type localisation]
+  (get (localisation-to-attachment-type-map permit-type) (str/lower-case localisation)))

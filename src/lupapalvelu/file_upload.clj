@@ -3,7 +3,10 @@
             [sade.util :as util]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.mime :as mime])
+            [lupapalvelu.mime :as mime]
+            [clojure.set :refer [rename-keys]]
+            [lupapalvelu.attachment.muuntaja-client :as muuntaja]
+            [lupapalvelu.attachment.type :as lat])
   (:import (java.io File InputStream)))
 
 (def FileData
@@ -32,6 +35,31 @@
      :size (or (:size filedata) (:length result))
      :contentType content-type
      :metadata metadata}))
+
+(defn- download-and-save-files [attachments session-id]
+  (pmap
+    (fn [{:keys [tiedosto tyyppi sisalto piirrosnumero liittyy] :as attachment}]
+      (when-let [attachment-type (lat/localisation->attachment-type :R tyyppi)]
+        (when-let [is (muuntaja/download-file tiedosto)]
+          (let [file-data (save-file {:filename tiedosto :content is} :sessionId session-id :linked false)]
+            (.close is)
+            (merge file-data
+                   {:contents sisalto
+                    :drawingNumber piirrosnumero
+                    :type (select-keys attachment-type [:type-group :type-id])})))))
+    attachments))
+
+(defn- is-zip-file? [filedata]
+  (-> filedata :filename mime/sanitize-filename mime/mime-type (= "application/zip")))
+
+(defn save-files [files session-id]
+  (if-let [attachments (and (empty? (rest files))
+                            (is-zip-file? (first files))
+                            (-> files first :tempfile muuntaja/unzip-attachment-collection :attachments seq))]
+    (download-and-save-files attachments session-id)
+    (pmap
+      #(save-file % :sessionId session-id :linked false)
+      (map #(rename-keys % {:tempfile :content}) files))))
 
 (defn- two-hours-ago []
   ; Matches vetuma session TTL

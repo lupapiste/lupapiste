@@ -22,13 +22,11 @@
   {:user-roles #{:anonymous}
    :parameters [files]
    :input-validators [file-mime-type-accepted file-size-legal]}
-  (let [file-info (pmap
-                    #(file-upload/save-file % :sessionId (vetuma/session-id) :linked false)
-                    (map #(rename-keys % {:tempfile :content}) files))]
-    (->> {:files file-info :ok true}
-         (resp/json)
-         (resp/content-type "text/plain")
-         (resp/status 200))))
+  (->> {:files (file-upload/save-files files (vetuma/session-id))
+        :ok true}
+       (resp/json)
+       (resp/content-type "text/plain")
+       (resp/status 200)))
 
 (defn- file-upload-in-database
   [{{attachment-id :attachmentId} :data}]
