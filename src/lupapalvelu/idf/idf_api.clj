@@ -24,9 +24,8 @@
   {:recipients-fn notifications/from-user
    :subject-key "email.title.account-activation"
    :model-fn      (fn [{{token :token} :data} _ recipient]
-                    {:link-fi (str (env/value :host) "/app/fi/welcome#!/link-account/" token)
-                     :link-sv (str (env/value :host) "/app/sv/welcome#!/link-account/" token)
-                     :name (:firstName recipient)})})
+                    {:link #(str (env/value :host) "/app/" (name %) "/welcome#!/link-account/" token)
+                     :user recipient})})
 
 (defn- bad-request [body]
   (resp/status (resp/response body) 400))

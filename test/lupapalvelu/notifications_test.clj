@@ -27,7 +27,7 @@
 
 (fact "create application link"
   (fact "..for application"
-        (get-application-link {:id 1} "" "fi" {:role "applicant"})
+    (get-application-link {:id 1} "" "fi" {:role "applicant"})
       => (str (sade.env/value :host) "/app/fi/applicant#!/application/1")
     (get-application-link {:id 1} "/tab" "fi" {:role "applicant"})
       => (str (sade.env/value :host) "/app/fi/applicant#!/application/1/tab")
