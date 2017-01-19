@@ -135,6 +135,11 @@
   [item col]
   (map #(if (= (:id item) (:id %)) item %) col))
 
+(defn filter-map-by-val
+  "Returns the mapping for which the value satisfies the predicate."
+  [pred m]
+  (into {} (filter (fn [[_ v]] (pred v)) m)))
+
 ; From clojure.contrib/seq
 
 (defn indexed
