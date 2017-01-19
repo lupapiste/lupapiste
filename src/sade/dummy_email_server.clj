@@ -81,7 +81,7 @@
   (defquery "last-email"
     {:user-roles #{:anonymous}}
     [{{reset :reset :or {reset true}} :data}]
-    (ok :message (last (messages :reset reset))))
+    (ok :message (last (messages :reset (if (util/boolean? reset) reset (Boolean/valueOf reset))))))
 
   (defn msg-header [msg]
     {:tag :dl :content [{:tag :dt :content "To"}
