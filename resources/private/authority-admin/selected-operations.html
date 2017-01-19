@@ -13,7 +13,7 @@
                 <th data-bind="ltext: permitType"
                     class="sot--full-width"></th>
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
-                <th>Tarkastusasiakirjan yhteenvetopohja</th>
+                <th data-bind="ltext: 'auth-admin.inspection-summary-templates'"></th>
                 <!-- /ko -->
                 <!-- ko if: $root.organization.verdictSectionEnabled -->
                 <th data-bind="ltext: 'section.column'"></th>

@@ -25,16 +25,18 @@ LUPAPISTE.InspectionSummaryTemplateBubbleModel = function(params) {
   });
 
   self.call = function() {
-    ajax.command("modify-inspection-summary-template",
-      {func: self.functionCode, name: self.name(), templateText: self.templateText(), templateId: self.templateId()})
-      .success(function(event) {
-        util.showSavedIndicator(event);
-        self.bubbleVisible(false);
-        self.name("");
-        self.templateText("");
-        lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
-      })
-      .call();
+    lupapisteApp.services.inspectionSummaryService.modifyTemplate(
+      {func: self.functionCode,
+       name: self.name(),
+       templateText: self.templateText(),
+       templateId: self.templateId()},
+       function(event) {
+         util.showSavedIndicator(event);
+         self.bubbleVisible(false);
+         self.name("");
+         self.templateText("");
+         lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
+       });
   };
 
 };

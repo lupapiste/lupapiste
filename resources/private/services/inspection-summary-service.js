@@ -22,6 +22,15 @@ LUPAPISTE.InspectionSummaryService = function() {
       .call();
   };
 
+  self.modifyTemplate = function(params, cb) {
+    ajax.command("modify-inspection-summary-template", params)
+      .success(function(event) {
+        cb(event);
+        getTemplatesAsAuthorityAdmin();
+      })
+      .call();
+  }
+
   self.deleteTemplateById = function(templateId) {
     ajax.command("modify-inspection-summary-template", {func: "delete", templateId: templateId})
       .success(function(event) {
