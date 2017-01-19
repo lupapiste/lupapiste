@@ -89,7 +89,7 @@
           (fact ":contents"
             (:contents att) => "Paloviranomainen")
           (fact " :attachment-type"
-            (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"})
+            (:attachment-type att) => {:type-group :ennakkoluvat_ja_lausunnot :type-id :lausunto})
           (fact ":archivable"
             (:archivable att) => false)
           (fact ":read-only"
@@ -106,7 +106,7 @@
           (fact ":contents"
             (:contents att) => "Matti Malli")
           (fact ":attachment-type"
-            (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"})
+            (:attachment-type att) => {:type-group :ennakkoluvat_ja_lausunnot :type-id :naapurin_kuuleminen})
           (fact ":archivable"
             (:archivable att) => false)
           (fact ":read-only"
@@ -126,7 +126,7 @@
           (fact ":contents"
             (:contents att) => (str (i18n/localize lang "task-katselmus.katselmuksenLaji.muu katselmus") " - katselmointi ftw"))
           (fact ":attachment-type"
-            (:attachment-type att) => {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"})
+            (:attachment-type att) => {:type-group :katselmukset_ja_tarkastukset :type-id :katselmuksen_tai_tarkastuksen_poytakirja})
           (fact ":archivable"
             (:archivable att) => false)
           (fact ":read-only"

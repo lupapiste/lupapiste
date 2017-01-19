@@ -1,0 +1,12 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="attachment-group-autocomplete-template">
+  <div data-bind="component: { name: 'base-autocomplete',
+                               params: { options: data,
+                                         query: query,
+                                         optionsText: 'title',
+                                         selectedOptions: selected,
+                                         optionsCaption: loc('attachments.group.general'),
+                                         disable: disable(),
+                                         tags: true,
+                                         lPlaceholder: 'attachments.group.search'}},
+                  testId: 'attachment-group-autocomplete'"></div>
+</script>

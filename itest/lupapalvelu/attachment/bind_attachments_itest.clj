@@ -35,7 +35,8 @@
       (command pena :bind-attachments
         :id application-id
         :filedatas [{:fileId file-id-1 :type (:type (first attachments))
-                     :group {:groupType "operation" :id (:id operation) :name (:name operation)}
+                     :group {:groupType "operation"
+                             :operations [{:id (:id operation) :name (:name operation)}]}
                      :contents "eka"}
                     {:fileId file-id-2 :type (:type (second attachments))
                      :group {:groupType nil}
@@ -47,7 +48,8 @@
                                 :bind-attachments
                                 :id application-id
                                 :filedatas [{:fileId file-id-1 :type (:type (first attachments))
-                                             :group {:groupType "operation" :id (:id operation) :name (:name operation)}
+                                             :group {:groupType "operation"
+                                                     :operations [{:id (:id operation) :name (:name operation)}]}
                                              :contents "eka"}
                                             {:fileId file-id-2 :type (:type (second attachments))
                                              :group {:groupType nil}
@@ -55,7 +57,7 @@
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
 
       (facts "attachments status"
         (let [app (query-application pena application-id)
@@ -80,10 +82,10 @@
           (when libre/enabled?
             (fact "txt converted"
               (:autoConversion (:latestVersion att1)) => true
-              (:fileId (:latestVersion att1))
+              (:fileId (:latestVersion att1)) =not=> file-id-1
               (:originalFileId (:latestVersion att1)) => file-id-1))
           (fact "groups are set"
-            (:op att1) => {:id (:id operation) :name (:name operation)}
+            (:op att1) => [{:id (:id operation) :name (:name operation)}]
             (:groupType att1) => "operation"))))))
 
 (facts "new attachment bind"
@@ -111,7 +113,7 @@
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
 
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))
@@ -139,7 +141,7 @@
                                            :contents "hakija authority"}])
           ]
       (when-not (= "done" (:status job))
-        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => ok?)
       (let [attachments        (:attachments (query-application pena application-id))
             hakija-attachments (filter #(= "hakija" (-> % :type :type-group)) attachments)
             target-attachment  (second hakija-attachments)]
@@ -180,7 +182,7 @@
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
 
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))
@@ -238,7 +240,7 @@
       (fact "with correct password resp is ok" resp => ok?)
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
 
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))

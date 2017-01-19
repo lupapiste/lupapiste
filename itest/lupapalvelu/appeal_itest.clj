@@ -316,9 +316,12 @@
         resp2  (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
         file-id-2 (get-in resp2 [:files 0 :fileId])
         pdfa-conversion? (and (string? (env/value :pdf2pdf :license-key)) (pdfa-conversion/pdf2pdf-executable))]
-    resp0 => ok?
-    resp1 => ok?
-    resp2 => ok?
+    (fact "give verdict"
+      resp0 => ok?)
+    (fact "uplaod txt attachment"
+      resp1 => ok?)
+    (fact "upload invalid pdfa attachment"
+      resp2 => ok?)
     (fact "Initially there are no attachments"
       (count attachments) => 0)
 

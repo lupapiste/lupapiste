@@ -460,19 +460,21 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       app/validate-authority-in-drafts]}
-  [{{attachments :attachments
-     app-state :state
+  [{{app-state :state
      tos-function :tosFunction :as application} :application
     organization :organization
     created :created :as command}]
   (let [op (app/make-op operation created)
         new-docs (app/make-documents nil created @organization op application)
-        existing-attachment-types (->> attachments (remove (comp #{:operation} :group)) (map :type))
-        new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types existing-attachment-types)]
+        attachments (:attachments (domain/get-application-no-access-checking id {:attachments true}))
+        new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
+        attachment-updates (app/multioperation-attachment-updates op @organization attachments)]
     (update-application command {$push {:secondaryOperations  op
                                         :documents   {$each new-docs}
                                         :attachments {$each new-attachments}}
-                                 $set  {:modified created}})))
+                                 $set  {:modified created}})
+    ;; Cannot update existing array and push new items into it same time with one update
+    (when (not-empty attachment-updates) (update-application command attachment-updates))))
 
 (defcommand update-op-description
   {:parameters [id op-id desc]

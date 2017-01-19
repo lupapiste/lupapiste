@@ -15,12 +15,13 @@
    (node :application
          att-tags/application-group-types)
    (node :operation
+         att-type/type-groups)
+   (node :multioperation
          att-type/type-groups)])
 
-(defn- attachments-operation-ids [attachments]
-  (->> (map (comp :id :op) attachments)
-       (remove nil?)
-       distinct))
+(defn- get-operation-ids [{op :op :as attachment}]
+  (->> (if (sequential? op) (mapv :id op) [(:id op)])
+       (remove nil?)))
 
 (defn- hierarchy-level-tags [hierarchy]
   (->> hierarchy
@@ -73,7 +74,7 @@
   "replace the operation hierarchy template with the actual hierarchies"
   [attachments hierarchy]
   (let [[pre operation post] (partition-by-tag :operation hierarchy)
-        op-ids               (attachments-operation-ids attachments)]
+        op-ids               (-> (mapcat get-operation-ids attachments) distinct)]
     (if operation
       (concat pre
               (map (partial operation-tag-group attachments (rest operation))

@@ -10,6 +10,7 @@
  *   selectedOptions (observableArray): observable for multi selections
  *   tags (boolean): tags mode
  *   nullable (boolean): true if selected value can be null (ie. Choose... dropdown)
+ *   disable (boolean)
  *   (lP|p)laholder: search placeholder text, either lockey (lPlaceholder) or text (placeholder)
  *   maxHeight: If given will override the calculated max height of
  *   the candidate list. CSS style.

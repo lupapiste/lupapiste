@@ -739,15 +739,17 @@
                     :throw-exceptions false
                     :cookie-store cookie-store})))))
 
+(defn- job-done? [resp]
+  (= (get-in resp [:job :status]) "done"))
+
 (defn poll-job [apikey command id version limit]
-  (if (pos? limit)
+  (loop [version version retries 0]
     (let [resp (query apikey (keyword command) :jobId id :version version)]
-      (if-not (= (get-in resp [:job :status]) "done")
-        (do
-          (Thread/sleep 200)
-          (poll-job apikey command id (get-in resp [:job :version]) (dec limit)))
-        true))
-    false))
+      (cond
+        (job-done? resp)  resp
+        (< limit retries) (merge resp {:ok false :desc "Retry limit exeeded"})
+        :else (do (Thread/sleep 200)
+                  (recur (get-in resp [:job :version]) (inc retries)))))))
 
 ;; statements
 

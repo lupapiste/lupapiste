@@ -480,6 +480,15 @@ Autocomplete selection by test id is
   [Arguments]  ${tid}  ${value}
   Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption  ${value}
 
+Autocomplete selection by test id contains
+  [Arguments]  ${tid}  ${value}
+  Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection  ${value}
+
+Autocomplete selection by test id is empty
+  [Arguments]  ${tid}
+  Element should not be visible  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption
+  Element should not be visible  jquery=div[data-test-id=${tid}] span.autocomplete-selection ul.tags .tag
+
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open
@@ -740,7 +749,7 @@ Upload batch file
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
-  Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
+  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}

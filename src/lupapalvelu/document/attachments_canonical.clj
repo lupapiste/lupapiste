@@ -22,8 +22,9 @@
   If the attachment is not explicitly linked to an operation,
   every application operation id is included in the result."
   [attachment application]
-  (let [ops (or (-> attachment :op :id) (all-operation-ids application))]
-    (-> ops list flatten set)))
+  (set (or (->> attachment :op (map :id) not-empty)
+           (some-> attachment :op :id list)
+           (all-operation-ids application))))
 
 (defn- operation-attachment-meta
   "Operation id and VTJ-PRT from either the attachment's 'own'

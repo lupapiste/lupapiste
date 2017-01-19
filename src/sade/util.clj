@@ -544,7 +544,7 @@
   "a b c -> :a.b.c"
   [& kw]
   (->> kw
-       (map name)
+       (map ss/->plain-string)
        (ss/join ".")
        keyword))
 

@@ -47,17 +47,17 @@ Mikko opens attachment details
   Title Should Be  ${appname} - Lupapiste
 
 Mikko can change related operation
-  Element should be visible  xpath=//select[@data-test-id="attachment-operation-select"]
-  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Osapuolet
+  Element should be visible  jquery=[data-test-id=attachment-group-autocomplete]
+  Click element  jquery=[data-test-id=attachment-group-autocomplete] .tag-remove
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
-  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Yleisesti hankkeeseen
+  Select from autocomplete  [data-test-id=attachment-group-autocomplete]  Osapuolet
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
-  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Rakennuspaikka
+  Select from autocomplete  [data-test-id=attachment-group-autocomplete]  Rakennuspaikka
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
-  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Muun rakennuksen rakentaminen - Talo B
+  Select from autocomplete  [data-test-id=attachment-group-autocomplete]  Muun rakennuksen rakentaminen - Talo B
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
 

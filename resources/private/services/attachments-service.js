@@ -510,6 +510,19 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
+  self.getDefaultGroupingForType = function(type) {
+    var operations = _.filter(self.groupTypes(), ["groupType", "operation"]);
+    if (util.getIn(type, ["metadata", "multioperation"]) && !_.isEmpty(operations)) {
+      return { groupType: "operation",
+               operations: operations };
+    } else if (util.getIn(type, ["metadata", "grouping"]) === "operation" && !_.isEmpty(operations)) {
+      return { groupType: "operation",
+               operations: [_.first(operations)] };
+    } else {
+      return _.find(self.groupTypes(), ["groupType", util.getIn(type, ["metadata", "grouping"])]);
+    }
+  };
+
   self.convertToPdfA = function(attachmentId) {
     ajax
       .command("convert-to-pdfa", {id: self.applicationId(), attachmentId: attachmentId})

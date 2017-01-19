@@ -19,9 +19,9 @@
 (sc/defschema NewAttachment
   {(sc/required-key :fileId)           ssc/ObjectIdStr
    (sc/required-key :type)             att/Type
-   (sc/required-key :group)            {:groupType              (sc/maybe (apply sc/enum att-tags/attachment-groups))
-                                        (sc/optional-key :id)   ssc/ObjectIdStr
-                                        (sc/optional-key :name) sc/Str}
+   (sc/required-key :group)            {:groupType  (sc/maybe (apply sc/enum att-tags/attachment-groups))
+                                        :operations [{(sc/optional-key :id)   ssc/ObjectIdStr
+                                                      (sc/optional-key :name) sc/Str}]}
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool

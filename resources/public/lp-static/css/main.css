@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1484585470907');
+@import url('main-blessed1.css?z=1484813236207');
 
 
 /* line 876, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8414,6 +8414,11 @@ td.comment-text {
 /* line 386, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-field .combobox-container {
   width: 100%;
+}
+
+/* line 390, ../../../private/common-html/sass/views/_attachment.scss */
+.attachment-batch-grouping {
+  min-width: 20em;
 }
 
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */
