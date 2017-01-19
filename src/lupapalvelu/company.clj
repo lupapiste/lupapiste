@@ -292,7 +292,7 @@
     :send-email false)
   (ok))
 
-(defn invite-user! [user-email company-id role submit firstname lastname]
+(defn invite-user! [caller user-email company-id role submit firstname lastname]
   (let [company   (find-company! {:id company-id})
         user      (usr/get-user-by-email user-email)
         user      (if (usr/dummy? user)
@@ -305,11 +305,9 @@
                                                               :role role
                                                               :submit submit} :auto-consume false)]
     (notif/notify! :invite-company-user {:user       user
-                                         :company    company
-                                         :ok-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/ok/" token-id)
-                                         :ok-sv    (str (env/value :host) "/app/sv/welcome#!/invite-company-user/ok/" token-id)
-                                         :cancel-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/cancel/" token-id)
-                                         :cancel-sv    (str (env/value :host) "/app/sv/welcome#!/invite-company-user/cancel/" token-id)})
+                                         :company    (assoc company :admin caller)
+                                         :ok         #(str (env/value :host) "/app/" % "/welcome#!/invite-company-user/ok/" token-id)
+                                         :cancel     #(str (env/value :host) "/app/" % "/welcome#!/invite-company-user/cancel/" token-id)})
     token-id))
 
 (notif/defemail :invite-company-user {:subject-key   "invite-company-user.subject"

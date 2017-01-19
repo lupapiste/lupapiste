@@ -240,7 +240,7 @@
     (fact "Foo can set pw from email token"
       (let [email (last-email)
             token (token-from-email foo-email email)]
-        (:subject email) => (contains "Salasanan vaihto")
+        (:subject email) => (contains "Uusi salasana")
         (http-token-call token {:password foo-pw}) => (contains {:status 200})))
 
     (let [store (atom {})

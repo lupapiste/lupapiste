@@ -109,7 +109,8 @@
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{caller :user}]
   (c/search-result caller email (fn [_]
-                                  (c/invite-user! email
+                                  (c/invite-user! caller
+                                                  email
                                                   (-> caller :company :id)
                                                   (if admin :admin :user)
                                                   submit

@@ -1,10 +1,10 @@
 # Hei {{user.firstName}},
 
-**{{company.name}}** on perustanut Lupapisteeseen Yritystilin, jonka avulla voitte hallinnoida yrityksenne hankkeita yhteisen ty&ouml;jonon kautta. Tilin yll&auml;pit&auml;j&auml; {{company-admin.name}} on lis&auml;nnyt sinut **{{company.name}}** -Yritystilin k&auml;ytt&auml;j&auml;ksi Lupapisteeseen.
+**{{company.name}}** on perustanut Lupapisteeseen Yritystilin, jonka avulla voitte hallinnoida yrityksenne hankkeita yhteisen ty&ouml;jonon kautta. Tilin yll&auml;pit&auml;j&auml; {{company.admin.firstName}} {{company.admin.lastName}} on lis&auml;nnyt sinut **{{company.name}}** -Yritystilin k&auml;ytt&auml;j&auml;ksi Lupapisteeseen.
 
 Hyv&auml;ksym&auml;ll&auml; kutsun hankkeesi tulevat jatkossa osaksi Yritystili&auml;. Mik&auml;li haluat liitt&auml;&auml; vanhat hankkeesi Yritystilin yhteiselle ty&ouml;jonolle,  valtuuta Yritystili mukaan kyseisille hankkeille. Hyv&auml;ksy liittymisesi oheisella linkill&auml;:
 
-{{ok-fi}}
+{{ok}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 

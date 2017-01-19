@@ -187,7 +187,7 @@
                 model   (assoc (model-fn command conf recipient)
                           :lang (or user-lang "fi")
                           :user (select-keys recipient [:firstName :lastName :email :lang]))
-                subject (get-email-subject application model (get conf :subject-key (name template-name)) (:language recipient))
+                subject (get-email-subject application model (get conf :subject-key (name template-name)) (or (:language recipient) "fi"))
                 calendar (when (some? calendar-fn)
                            (calendar-fn command recipient))
                 msg     (email/apply-template template-file model)
