@@ -14,13 +14,10 @@
 
 
 (defn- new-ram-email-model [{app :application {attachment-id :attachment-id created-date :created-date} :data} _ recipient]
-  (let [link-fn (fn [lang] (notifications/get-subpage-link {:id (:id app) :subpage-id attachment-id} "attachment" lang recipient))]
-    {:link-fi      (link-fn "fi")
-     :link-sv      (link-fn "sv")
-     :address      (:address app)
-     :operation-fi (app-utils/operation-description app :fi)
-     :operation-sv (app-utils/operation-description app :sv)
-     :created-date created-date}))
+  {:link         (fn [lang] (notifications/get-subpage-link {:id (:id app) :subpage-id attachment-id} "attachment" lang recipient))
+   :address      (:address app)
+   :operation    #(app-utils/operation-description app %)
+   :created-date created-date})
 
 (def- new-ram-email-conf
   {:recipients-fn  :recipients
