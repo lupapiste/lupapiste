@@ -94,19 +94,12 @@
   [{application :application organization :organization}]
   (statement/fetch-organization-statement-givers @organization))
 
-(defn- get-dueDate-loc [lang dueDate]
-  (if dueDate
-    (str (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-is")) " " (util/to-local-date dueDate) ".")
-    ""))
-
-(defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
-  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
-   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
-   :saateText saateText
-   :recipient-email (:email recipient)
-   :dueDate (util/to-local-date dueDate)
-   :due-date-str-fi (get-dueDate-loc "fi" dueDate)
-   :due-date-str-sv (get-dueDate-loc "sv" dueDate)})
+(defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application caller :user :as command} _ recipient]
+  (merge (notifications/new-email-app-model command nil recipient)
+         {:link          #(notifications/get-application-link app "/statement" (name %) recipient)
+          :message       saateText
+          :requester     caller
+          :due-date-str  (util/to-local-date dueDate)}))
 
 
 (notifications/defemail :request-statement

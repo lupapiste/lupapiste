@@ -19,22 +19,19 @@
 ;; Emails
 ;;
 
-(defn- create-model [{{id :id info-request? :infoRequest} :application
+(defn- create-model [{{id :id  :as app} :application
                       {:keys [target text]}               :data
                       command-ts                          :created
                       commenter                           :user :as command}
                      _
-                     {lang :language name :firstName :as recipient}]
-  (let [permit-type-path (if info-request? "inforequest" "application")
-        subpage   (if (= (:type target) "verdict")
-                    "verdict"
-                    permit-type-path)
-        subpage-id (if (= (:type target) "verdict")
-                     (:id target)
-                     "conversation")]
+                     {name :firstName :as recipient}]
+  (let [subpage   (when (= (:type target) "verdict")
+                    "verdict")]
     (merge (notifications/new-email-app-model command nil recipient)
            {:name         name
-            :link         (notifications/get-subpage-link {:id id :subpage-id subpage-id} subpage (or lang "fi") recipient)
+            :link         #(if subpage
+                             (notifications/get-subpage-link {:id id :subpage-id (:id target)} subpage % recipient)
+                             (notifications/get-application-link app "conversation" % recipient))
             :comment-from (usr/full-name commenter)
             :comment-time (util/to-local-datetime command-ts)
             :comment-text text})))

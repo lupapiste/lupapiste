@@ -154,8 +154,10 @@
           email (first emails)]
       (fact "Veikko receives email"
         (:to email) => (contains veikko-email)
-        (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
-        email => (partial contains-application-link? application-id "authority"))
+        (:subject email) => "Lupapiste: Lausuntobulevardi 1 A 1, Sipoo - lausuntopyynt\u00f6"
+        email => (partial contains-application-link? application-id "authority")
+        (get-in email [:body :plain]) => (contains "saate")
+        (get-in email [:body :plain]) => (contains "Lausuntoa on pyyt\u00e4nyt Sonja Sibbo"))
       (fact "...but no-one else"
         (count emails) => 1)
       (fact "auth array has one entry more (veikko)"
@@ -310,7 +312,7 @@
         email (first emails)]
     (fact "Pena receives email"
       (:to email) => (contains pena-email)
-      (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
+      (:subject email) => "Lupapiste: Lausuntobulevardi 1 A 1, Sipoo - lausuntopyynt\u00f6"
       email => (partial contains-application-link? application-id "applicant"))
     (fact "...but no-one else"
       (count emails) => 1)

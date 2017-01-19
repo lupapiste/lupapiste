@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-{{statement-requester.name}} vill l&auml;gga till e-postadressen {{recipient-email}} som givare av utl&aring;tanden i Lupapiste f&ouml;r en tillst&aring;ndsans&ouml;kan p&aring; adressen {{address}}, {{municipality}}. Tillst&aring;ndet s&ouml;ks f&ouml;r &aring;tg&auml;rden {{operation}}.
+{{requester.firstName}} {{requester.lastName}} vill l&auml;gga till e-postadressen {{user.email}} som givare av utl&aring;tanden i Lupapiste f&ouml;r en tillst&aring;ndsans&ouml;kan p&aring; adressen {{address}}, {{municipality}}. Tillst&aring;ndet s&ouml;ks f&ouml;r &aring;tg&auml;rden {{operation}}.
 
 Du kan ge ditt utl&aring;tande genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. I Lupapiste kan parterna i ett projekt sk&ouml;ta byggrelaterade tillst&aring;nds&auml;renden tillsammans. Dygnet runt.
 
@@ -10,9 +10,9 @@ Registrera dig som anv&auml;ndare genom l&auml;nken nedan s&aring; kan du ge dit
 
 {{link}}
 
-Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. Kontrollera ocks&aring; att den inbjudna e-postadressen {{recipient-email}} motsvarar den e-postadress du anv&auml;nt f&ouml;r att registrera dig i tj&auml;nsten. 
+Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. Kontrollera ocks&aring; att den inbjudna e-postadressen {{user.email}} motsvarar den e-postadress du anv&auml;nt f&ouml;r att registrera dig i tj&auml;nsten. 
 
-Tidsfristen f&ouml;r utl&aring;tandet g&aring;r ut {{due-date-str-fi}}. Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
+Tidsfristen f&ouml;r utl&aring;tandet g&aring;r ut {{due-date-str}}. Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
 
 {{message}}
 

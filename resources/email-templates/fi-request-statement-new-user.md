@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-s&auml;hk&ouml;postiosoite {{recipient-email}} halutaan lis&auml;t&auml; lausunnonantajaksi Lupapisteess&auml; lupahakemukselle osoitteessa {{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle {{operation}}.
+s&auml;hk&ouml;postiosoite {{user.email}} halutaan lis&auml;t&auml; lausunnonantajaksi Lupapisteess&auml; lupahakemukselle osoitteessa {{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle {{operation}}.
 
 P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Lupapisteess&auml; voidaan hoitaa rakentamiseen liittyv&auml;&auml; lupa-asiointia yhdess&auml; hankkeen osapuolten kesken. Vuorokauden ymp&auml;ri.
 
@@ -10,9 +10,9 @@ P&auml;&auml;st&auml;ksesi antamaan lausunnon rekister&ouml;idy k&auml;ytt&auml;
 
 {{link}}
 
-Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tarkista my&ouml;s, ett&auml; kutsuttu s&auml;hk&ouml;postiosoite {{recipient-email}} vastaa s&auml;hk&ouml;postiosoitetta, jolla olet palveluun rekister&ouml;itynyt.
+Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tarkista my&ouml;s, ett&auml; kutsuttu s&auml;hk&ouml;postiosoite {{user.email}} vastaa s&auml;hk&ouml;postiosoitetta, jolla olet palveluun rekister&ouml;itynyt.
 
-Lausuntoa on pyytänyt {{statement-requester.name}} ja lausunnon m&auml;&auml;r&auml;ajaksi on asetettu {{due-date-str-fi}}. Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
+Lausuntoa on pyytänyt {{requester.firstName}} {{requester.lastName}} ja lausunnon m&auml;&auml;r&auml;ajaksi on asetettu {{due-date-str}}. Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
 
 {{message}}
 
