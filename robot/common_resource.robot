@@ -472,6 +472,14 @@ Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
   Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
 
+Clear autocomplete selections by test id
+  [Arguments]  ${data-test-id}
+  Element should be visible  jquery=[data-test-id="${data-test-id}"]
+  :FOR  ${i}  IN RANGE  99999
+  \  ${selection-empty}=  Run keyword and return status  Element should not be visible  jquery=[data-test-id="${data-test-id}"] .tag-remove
+  \  Exit for loop if  ${selection-empty}
+  \  Click element  jquery=[data-test-id="${data-test-id}"] ul.tags .tag-remove
+
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
   Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
@@ -749,7 +757,9 @@ Upload batch file
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
-  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
+  ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
+  Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
+  Run keyword unless  ${group-is-selected}  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
