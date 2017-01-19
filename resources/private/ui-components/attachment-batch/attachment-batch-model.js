@@ -83,6 +83,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       var contents = service.contentsData( type );
       contentsList( contents.list );
       contentsValue( contents.defaultValue);
+      grouping({});
       grouping(service.getDefaultGroupingForType(type));
     } );
     var contentsCell = new Cell( contentsValue, true );
