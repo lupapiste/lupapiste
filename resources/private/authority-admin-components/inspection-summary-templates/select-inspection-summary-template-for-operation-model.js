@@ -10,15 +10,9 @@ LUPAPISTE.SelectInspectionSummaryTemplateForOperationModel = function(params) {
   self.selectedTemplate = ko.observable();
   self.selectedTemplateFromBackend = null;
 
-  function findSelectedTemplate() {
-    var selectionId = _.get(params.operationsMapping(), self.operationId);
-    return _.find(params.templates(), ['id', selectionId]);
-  }
-
   self.disposedComputed(function() {
-    var operationsMapping = params.operationsMapping();
-    var templates = params.templates();
-    self.selectedTemplateFromBackend = findSelectedTemplate();
+    var selectionId = _.get(params.operationsMapping(), self.operationId);
+    self.selectedTemplateFromBackend = _.find(params.templates(), ["id", selectionId]);
     self.selectedTemplate(self.selectedTemplateFromBackend);
   });
 
@@ -26,7 +20,7 @@ LUPAPISTE.SelectInspectionSummaryTemplateForOperationModel = function(params) {
     if (_.get(d, "id") !== _.get(self.selectedTemplateFromBackend, "id")) {
       lupapisteApp.services.inspectionSummaryService.selectTemplateForOperation(self.operationId, _.get(d, "id"));
     }
-  };
+  }
 
   self.disposedSubscribe(self.selectedTemplate, _.debounce(save, 500));
 

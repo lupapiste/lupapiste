@@ -1,5 +1,5 @@
 LUPAPISTE.InspectionSummaryTemplatesListModel = function() {
-  "use strict"
+  "use strict";
 
   var self = this;
 
@@ -37,7 +37,6 @@ LUPAPISTE.InspectionSummaryTemplatesListModel = function() {
   };
 
   self.removeTemplate = function() {
-    console.log("remove called");
     lupapisteApp.services.inspectionSummaryService.deleteTemplateById(this.id);
   };
 };
