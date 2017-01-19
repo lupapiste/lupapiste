@@ -296,10 +296,10 @@
   (let [company-id (get-in auth [:invite :user :id])
         token-id   (company/company-invitation-token user company-id (:id foreman-app))]
     (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
-                                               :caller     user
+                                               :inviter    user
                                                :company    (company/find-company! {:id company-id})
-                                               :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                               :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})))
+                                               :token-id   token-id
+                                               :application foreman-app})))
 
 (defn- user-invite-notifications! [foreman-app auths]
   (->> (map (fn [{{:keys [email user]} :invite}] (assoc user :email email)) auths)
