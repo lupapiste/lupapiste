@@ -12,7 +12,7 @@
               <tr>
                 <th data-bind="ltext: permitType"
                     class="sot--full-width"></th>
-                <!-- ko if: $root.authorization.ok("organization-inspection-summary-templates") -->
+                <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
                 <th>Tarkastusasiakirjan yhteenvetopohja</th>
                 <!-- /ko -->
                 <!-- ko if: $root.organization.verdictSectionEnabled -->
@@ -26,11 +26,12 @@
             <tbody data-bind="foreach: operations">
               <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
                 <td data-bind="text: text"></td>
-                <!-- ko if: $root.authorization.ok("organization-inspection-summary-templates") -->
+                <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
                 <td class="sot--center">
                   <div data-bind="component: {name: 'select-inspection-summary-template-for-operation',
                                               params: {operation: $data,
-                                                       templates: $root.organization.inspectionSummaryTemplates}}"></div>
+                                                       templates: $root.organization.inspectionSummaryTemplates,
+                                                       operationsMapping: $root.organization.operationsInspectionSummaryTemplates}}"></div>
                 </td>
                 <!-- /ko -->
                 <!-- ko if: $root.organization.verdictSectionEnabled -->

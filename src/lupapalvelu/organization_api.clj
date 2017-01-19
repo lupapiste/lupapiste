@@ -737,34 +737,39 @@
                               (ss/trim operationId)
                               flag))
 
-(defquery organization-inspection-summary-templates
+(defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
    :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok :templates (get-in (->> (usr/authority-admins-organization-id user)
-                           (mongo/by-id :organizations)) [:inspection-summary :templates] [])))
+  (ok (get (->> (usr/authority-admins-organization-id user)
+                (mongo/by-id :organizations)) :inspection-summary {})))
 
 (defcommand modify-inspection-summary-template
   {:description "CRUD API endpoint for inspection summary templates in the given organization."
    :parameters  [func]
    :input-validators [(partial action/select-parameters [:func] #{"create" "update" "delete"})]
    :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-               ;; TODO onko feature päällä, create, update operaatioissa templateText pakollinen, update ja delete templateId pakollinen
    :user-roles #{:authorityAdmin}}
   [{user :user {:keys [templateId templateText name]} :data}]
   (let [organizationId (usr/authority-admins-organization-id user)]
+    (when (and (ss/blank? templateId) (#{"update" "delete"} func))
+      (fail! :error.missing-parameters :parameters "templateId"))
+    (when (and (ss/blank? templateText) (#{"create" "update"} func))
+      (fail! :error.missing-parameters :parameters "templateText"))
+    (when (and (ss/blank? name) (#{"create" "update"} func))
+      (fail! :error.missing-parameters :parameters "name"))
     (condp = func
       "create" (inspection-summary/create-template-for-organization organizationId name templateText)
       "update" (if (= (inspection-summary/update-template organizationId templateId name templateText) 1)
                  (ok)
-                 (fail! :error.not-found))
+                 (fail :error.not-found))
       "delete" (if (= (inspection-summary/delete-template organizationId templateId) 1)
                  (ok)
-                 (fail! :error.not-found))
+                 (fail :error.not-found))
       (fail :error.illegal-function-code))))
 
-(defcommand inspection-summary-template-for-operation
+(defcommand set-inspection-summary-template-for-operation
   {:description "Toggles operation either requiring section or not."
    :parameters [operationId templateId]
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]

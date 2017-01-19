@@ -57,6 +57,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.useAttachmentLinksIntegration = ko.observable(false);
   self.inspectionSummariesEnabled = ko.observable(false);
   self.inspectionSummaryTemplates = ko.observableArray([]);
+  self.operationsInspectionSummaryTemplates = ko.observable({});
 
   self.sectionOperations = ko.observableArray();
 
@@ -186,8 +187,8 @@ LUPAPISTE.OrganizationModel = function () {
     });
 
   hub.subscribe("inspectionSummaryService::templatesLoaded", function(event) {
-    console.log(event);
     self.inspectionSummaryTemplates(event.templates);
+    self.operationsInspectionSummaryTemplates(_.get(event, "operations-templates"));
   });
 
   self.init = function(data) {

@@ -30,13 +30,13 @@
 (defn update-template [organizationId templateId name templateText]
   (let [query (assoc {:inspection-summary-templates {$elemMatch {:id templateId}}} :_id organizationId)]
     (mongo/update-by-query :organizations query
-                           {$set {:inspection-summary.templates.$.name name
+                           {$set {:inspection-summary.templates.$.name     name
                                   :inspection-summary.templates.$.modified (now)
-                                  :inspection-summary.templates.$.items (split-into-template-items templateText)}})))
+                                  :inspection-summary.templates.$.items    (split-into-template-items templateText)}})))
 
 (defn delete-template [organizationId templateId]
   (mongo/update-by-query :organizations {:_id organizationId} {$pull {:inspection-summary.templates {:id templateId}}}))
 
 (defn select-template-for-operation [organizationId operationId templateId]
   (org/update-organization organizationId
-                           {$set {(str "inspection-summary.selected-for-operation." operationId) templateId}}))
+                           {$set {(str "inspection-summary.operations-templates." operationId) templateId}}))

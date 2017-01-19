@@ -124,7 +124,7 @@
                               (sc/optional-key :server)  Server}
    (sc/optional-key :inspection-summaries-enabled) sc/Bool
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
-                                          (sc/optional-key :selected-for-operation) sc/Any}})
+                                          (sc/optional-key :operations-templates) sc/Any}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -170,6 +170,7 @@
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
+  (println changes)
   (mongo/update-by-id :organizations id changes))
 
 (defn get-organization-attachments-for-operation [organization {operation-name :name}]
