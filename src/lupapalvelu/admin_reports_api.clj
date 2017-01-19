@@ -13,3 +13,9 @@
    :user-roles #{:admin}}
   [_]
   (apply reps/user-report (map reps/string->keyword [company allow professional])))
+
+(defraw waste-report
+  {:description "Waste report. Includes both regular and extended."
+   :user-roles #{:admin}}
+  [_]
+  (reps/waste-report))

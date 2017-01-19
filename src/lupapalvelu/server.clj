@@ -68,7 +68,8 @@
             [lupapalvelu.verdict-api]
             [lupapalvelu.vetuma]
             [lupapalvelu.web :as web]
-            [lupapalvelu.ya-extension-api])
+            [lupapalvelu.ya-extension-api]
+            [lupapalvelu.admin-reports-api])
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]
            [fi.lupapiste.jmx ServerFactory]))
