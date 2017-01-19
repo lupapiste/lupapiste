@@ -1,18 +1,24 @@
 # Hei {{user.firstName}},
 
-S&auml;hk&ouml;postiosoite {{recipient-email}} halutaan valtuuttaa kirjoitusoikeudella osapuoleksi hankkeelle Lupapisteeseen. Lupapisteess&auml; voidaan hoitaa rakennetun ymp&auml;rist&ouml;n lupa-asiointia yhdess&auml; muiden hankkeen osapuolten kanssa. Vuorokauden ymp&auml;ri - vaikka kotisohvalta k&auml;sin.
+Sinut halutaan valtuuttaa kirjoitusoikeudella osapuoleksi Lupapisteessä olevaan hankkeeseen käyttäen sähköpostiosoitetta {{recipient-email}}. Lupapisteessä voidaan hoitaa lupa-asiointia yhdessä muiden hankkeen osapuolten kanssa. Vuorokauden ympäri.
 
-Kirjoitusoikeus koskee hanketta {{operation}} osoitteessa {{address}}, {{municipality}}. Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hankkeen n&auml;keminen edellytt&auml;&auml; rekister&ouml;itymist&auml; palveluun mobiilivarmenteen tai henkil&ouml;kohtaisten verkkopankkitunnuksien avulla. Muistathan rekister&ouml;ity&auml; palveluun samalla s&auml;hk&ouml;postiosoitteella, johon kutsu on l&auml;hetetty (eli {{recipient-email}}). Mik&auml;li olet jo rekister&ouml;itynyt eri osoitteella Lupapisteeseen, pyyd&auml; kutsun l&auml;hett&auml;j&auml;lt&auml; {{inviter-email}} uusi kutsu k&auml;ytt&auml;m&auml;&auml;si osoitteeseen.
+Kirjoitusoikeus koskee hanketta {{operation}} osoitteessa {{address}}, {{municipality}}.
 
-N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml; ja hyv&auml;ksy valtuutus. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+{{recognition-of-authorization}}
+
+Jos et ole vielä Lupapisteen käyttäjä, hankkeen näkeminen edellyttää rekisteröitymistä palveluun käyttäen sähköpostiosoitetta {{recipient-email}}. Rekisteröityminen tehdään tunnistautumalla mobiilivarmenteen tai henkilökohtaisten verkkopankkitunnusten avulla.
+
+Muistathan rekisteröityä palveluun samalla sähköpostiosoitteella, johon kutsu on lähetetty (eli {{recipient-email}}). Mikäli olet jo rekisteröitynyt eri osoitteella Lupapisteeseen, pyydä kutsun lähettäjältä {{inviter-email}} uusi kutsu käyttämääsi osoitteeseen.
+
+Nähdäksesi hankkeen tiedot klikkaa alla olevaa linkkiä ja hyväksy valtuutus. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 {{link}}
  
-Kirjoitusoikeus on lis&auml;tty sinulle seuraavan viestin kera:
+Kutsun lähettäjä on myös halunnut jättää sinulle seuraavan viestin:
 
 {{message}}
 
-Onko sinulla kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Suosittelemme tutustumaan {{lupapiste.help}} sek&auml; {{faq}}.
+Onko sinulla kysyttävää palvelun käytöstä? Suosittelemme tutustumaan {{lupapiste.help}} sekä {{faq}}.
 
 Terveisin,
 {{lupapiste}}
