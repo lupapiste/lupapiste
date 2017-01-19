@@ -1,6 +1,6 @@
 "lupapiste.help" "en" "[Lupapiste user guides](https://www.lupapiste.fi/ohjeet)"
 "lupapiste.help" "fi" "[Lupapisteen ohjesivustoon](https://www.lupapiste.fi/ohjeet)"
-"lupapiste.help" "fi" "[Lupapiste anvisningar](https://www.lupapiste.fi/sv/anvisningar)"
+"lupapiste.help" "sv" "[Lupapiste anvisningar](https://www.lupapiste.fi/sv/anvisningar)"
 "faq" "en" "[frequently asked questions](https://www.lupapiste.fi/ukk)"
 "faq" "fi" "[usein kysyttyihin kysymyksiin](https://www.lupapiste.fi/ukk)"
 "faq" "sv" "[anvisningar](https://www.lupapiste.fi/sv/anvisningar)"

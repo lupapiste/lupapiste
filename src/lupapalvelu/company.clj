@@ -10,17 +10,16 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application application->command]]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notif]
+            [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.notifications :as notif]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.document.schemas :as schema]
-            [lupapalvelu.authorization :as auth])
+            [lupapalvelu.user :as usr])
   (:import [java.util Date]))
 
 ;;
@@ -390,15 +389,21 @@
                        :return-count? true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
-                                                 :caller     caller
+                                                 :inviter    caller
                                                  :company    company
-                                                 :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                                 :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
+                                                 :token-id   token-id
+                                                 :application application})
       token-id)))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
                                             :recipients-fn :admins
-                                            :model-fn      (fn [model _ __] model)})
+                                            :model-fn      (fn [model _ recipient]
+                                                             (merge (notif/new-email-app-model model nil recipient)
+                                                                    model
+                                                                    {:link (str (env/value :host) "/app/"
+                                                                                (or (:language recipient) "fi")
+                                                                                "/welcome#!/accept-company-invitation/"
+                                                                                (:token-id model))}))})
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
