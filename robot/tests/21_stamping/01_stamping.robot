@@ -5,6 +5,7 @@ Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
+
 *** Test Cases ***
 
 Set stamping info variables
@@ -113,10 +114,12 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
 
 Sonja can toggle selection of attachments by group/all/none
   # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
-  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
+  # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
+  # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
+  # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
+  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
   Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
@@ -156,7 +159,8 @@ No attachments are selected
   Javascript?  $("div.stampbox-wrapper input:checked").length === 0
 
 Selection and stamping shows confirmation dialog
-  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
+  #Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
+  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
   Deny yes no dialog
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
@@ -177,5 +181,3 @@ Open stamping page
   Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
-
-
