@@ -18,8 +18,8 @@
 ;;
 
 (defn get-subpage-link [{:keys [id subpage-id]} subpage lang {role :role :or {role "applicant"}}]
-  (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
-  (assert (#{"attachment" "statement" "neighbors" "verdict"} subpage) (str "Unsupported subpage" subpage))
+  (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role: " role))
+  (assert (#{"attachment" "statement" "neighbors" "verdict"} subpage) (str "Unsupported subpage: " subpage))
   (let [full-path (ss/join "/" (remove nil? [subpage id subpage-id]))]
     (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!/" full-path)))
 
@@ -55,7 +55,7 @@
    such as {{municipality}}"
   [application model subject-key lang]
   (let [subject (i18n/localize-fallback lang [["email.title" subject-key] subject-key])
-        context (merge (select-keys application [:address :title]) model)
+        context (merge (select-keys application [:address :title :state :municipality]) model)
         subject-text (if (ss/blank? subject)
                        (str (or (:address application) (:title application))) ; fallback
                        (clostache/render subject (email/prepare-context-for-language lang context)))]
