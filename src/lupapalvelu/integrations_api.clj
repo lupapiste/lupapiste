@@ -397,7 +397,6 @@
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
         ah-scope         (org/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
-    (println krysp-output-dir)
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
 
