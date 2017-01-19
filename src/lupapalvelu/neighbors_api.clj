@@ -1,9 +1,7 @@
 (ns lupapalvelu.neighbors-api
-  (:require [clojure.string :as s]
-            [clojure.set :refer [rename-keys]]
+  (:require [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]
             [sade.util :refer [fn-> fn->> dissoc-in] :as util]
             [sade.core :refer [ok fail now]]
             [sade.validators :as v]
@@ -11,19 +9,17 @@
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.attachment.metadata :as metadata]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.vetuma :as vetuma]))
 
 (defn- valid-token? [token statuses ts-now]
   {:pre [(number? ts-now) (pos? ts-now)]}
@@ -40,7 +36,7 @@
     {:propertyId propertyId
      :owner      (merge
                    (select-keys params [:type :name :businessID :nameOfDeceased])
-                   {:email (user/canonize-email email)
+                   {:email (usr/canonize-email email)
                     :address (select-keys params [:street :city :zip])})}))
 
 (defn- params->new-neighbor [params user]
@@ -97,17 +93,19 @@
   (update-application command
                       {$pull {:neighbors {:id neighborId}}}))
 
-(defn- neighbor-invite-model [{{token :token neighbor-id :neighborId expires :expires} :data {:keys [id address municipality neighbors]} :application} _ recipient]
-  (letfn [(link-fn [lang] (str (env/value :host) "/app/" (name lang) "/neighbor/" id "/" neighbor-id "/" token))]
-    {:name (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
-     :address address
-     :expires expires
-     :city-fi (i18n/localize :fi "municipality" municipality)
-     :city-sv (i18n/localize :sv "municipality" municipality)
-     :link-fi (link-fn :fi)
-     :link-sv (link-fn :sv)}))
+(defn- neighbor-invite-model [{{token :token neighbor-id :neighborId expires :expires} :data
+                               {:keys [id neighbors]} :application :as command}
+                              _
+                              recipient]
+  (merge (notifications/new-email-app-model command nil recipient)
+         {:name    (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
+          :expires expires
+          :link    (str (env/value :host) "/app/" (or (:language recipient) "fi") "/neighbor/" id "/" neighbor-id "/" token)}))
 
-(def email-conf {:recipients-fn notifications/from-data
+(def email-conf {:recipients-fn (fn [{{:keys [to-user inviter]} :data}]
+                                  (if (map? to-user)
+                                    [to-user]
+                                    [{:email to-user :language (:language inviter)}]))
                  :model-fn neighbor-invite-model})
 (notifications/defemail :neighbor email-conf)
 
@@ -121,6 +119,8 @@
 
 (defcommand neighbor-send-invite
   {:parameters [id neighborId email]
+   :description "Send invite for neighbor. If neighbor is existing user, it's language choice is used. If unknown email,
+   language of command initator is used"
    :input-validators [(partial action/non-blank-parameters [:email :neighborId])
                       action/email-validator]
    :notified true
@@ -128,11 +128,11 @@
    :states states/all-application-states-but-draft-or-terminal
    :pre-checks [neighbor-marked-done?
                 (fn [{user :user {:keys [options]} :application}]
-                  (when (and (:municipalityHearsNeighbors options) (not (user/authority? user)))
+                  (when (and (:municipalityHearsNeighbors options) (not (usr/authority? user)))
                     (fail :error.unauthorized)))]}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
-        email (user/canonize-email email)
+        email (usr/canonize-email email)
         expires (+ ttl/neighbor-token-ttl created)]
     (update-application command
                         {:neighbors {$elemMatch {:id neighborId}}}
@@ -141,7 +141,11 @@
                                                      :token token
                                                      :user user
                                                      :created created}}})
-    (notifications/notify! :neighbor (assoc command :data {:email email, :token token, :neighborId neighborId, :expires (util/to-local-datetime expires)}))))
+    (notifications/notify! :neighbor (assoc command :data {:to-user (or (usr/get-user-by-email email) email),
+                                                           :inviter user
+                                                           :token token,
+                                                           :neighborId neighborId,
+                                                           :expires (util/to-local-datetime expires)}))))
 
 (defcommand neighbor-mark-done
   {:parameters [id neighborId]
@@ -222,7 +226,7 @@
         (fail :error.token-not-found)
         (let [new-state {:state (str "response-given-" response)
                          :message message
-                         :user (user/summary user) ; Most likely nil
+                         :user (usr/summary user) ; Most likely nil
                          :vetuma vetuma-user
                          :created created}]
           (do

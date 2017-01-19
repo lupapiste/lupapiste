@@ -1,4 +1,4 @@
-# Hei {{user.firstName}},
+# Hei {{name}},
 
 rakennuspaikan rajanaapurina teille ilmoitetaan, ett&auml; osoitteessa {{address}}, {{municipality}} on vireill&auml; rakentamisen lupahakemus s&auml;hk&ouml;isen Lupapiste-palvelun kautta. Lupapisteess&auml; voidaan hoitaa rakennettuun ymp&auml;rist&ouml;&ouml;n liittyv&auml;&auml; lupa-asiointia vuorovaikutuksessa viranomaisen sek&auml; muiden osapuolten kanssa. 
 

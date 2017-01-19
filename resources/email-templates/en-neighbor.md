@@ -1,4 +1,4 @@
-# Hi {{user.firstName}},
+# Hi {{name}},
 
 we wanted to remind you that as neighbours of a building site you have been notified that there is an online permit application submitted via Lupapiste service for {{address}}, {{municipality}}. At Lupapiste you can take care of permits regarding built environment together with the authorities and other parties of the process.
 

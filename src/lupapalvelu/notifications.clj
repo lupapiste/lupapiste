@@ -156,7 +156,7 @@
 
  ; email template ids, which are sent regardless of current user state
 (def always-sent-templates
-  #{:invite-company-user :reset-password})
+  #{:invite-company-user :reset-password :neighbor})
 
 (defn invalid-recipient?
   "Notifications are not sent to certain roles, users who do not
@@ -187,7 +187,7 @@
           (let [user-lang (:language recipient)
                 model   (assoc (model-fn command conf recipient)
                           :lang (or user-lang "fi")
-                          :user         (select-keys recipient [:firstName :lastName :email :lang]))
+                          :user (select-keys recipient [:firstName :lastName :email :lang]))
                 subject (get-email-subject application model (get conf :subject-key (name template-name)) (:language recipient))
                 calendar (when (some? calendar-fn)
                            (calendar-fn command recipient))
