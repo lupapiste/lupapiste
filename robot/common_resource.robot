@@ -480,6 +480,15 @@ Autocomplete selection by test id is
   [Arguments]  ${tid}  ${value}
   Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption  ${value}
 
+Autocomplete selection by test id contains
+  [Arguments]  ${tid}  ${value}
+  Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection  ${value}
+
+Autocomplete selection by test id is empty
+  [Arguments]  ${tid}
+  Element should not be visible  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption
+  Element should not be visible  jquery=div[data-test-id=${tid}] span.autocomplete-selection ul.tags .tag
+
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open
