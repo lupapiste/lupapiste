@@ -184,6 +184,9 @@
                            :category (if correction :tos-function-correction :tos-function-change)
                            :user (full-name user)})))))
 
+(defn- authority-changes-from-hsitory [history]
+  (->> (filter :authority history)))
+
 (defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
@@ -192,6 +195,7 @@
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         tos-fn-changes (tos-function-changes-from-history history lang)
+        _ (clojure.pprint/pprint tos-fn-changes)
         all-docs (sort-by :ts (concat tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
         state-changes (filter :state history)]
     (doall

@@ -83,6 +83,12 @@
                                     {:state "complementNeeded"
                                      :ts   1462060800000
                                      :user {:firstName "Heikki"
+                                            :lastName "Hepokatti"}}
+                                    {:authority {:id 123
+                                                 :firstName "Sonja"
+                                                 :lastName "Sibbo"}
+                                     :ts   1462060800000
+                                     :user {:firstName "Heikki"
                                             :lastName "Hepokatti"}}]}]
 
     (fact "case file report data is generated from application"
