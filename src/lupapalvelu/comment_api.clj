@@ -27,7 +27,7 @@
                      {name :firstName :as recipient}]
   (let [subpage   (when (= (:type target) "verdict")
                     "verdict")]
-    (merge (notifications/new-email-app-model command nil recipient)
+    (merge (notifications/create-app-model command nil recipient)
            {:name         name
             :link         #(if subpage
                              (notifications/get-subpage-link {:id id :subpage-id (:id target)} subpage % recipient)

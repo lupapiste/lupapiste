@@ -97,7 +97,7 @@
                                {:keys [id neighbors]} :application :as command}
                               _
                               recipient]
-  (merge (notifications/new-email-app-model command nil recipient)
+  (merge (notifications/create-app-model command nil recipient)
          {:name    (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
           :expires expires
           :link    (str (env/value :host) "/app/" (or (:language recipient) "fi") "/neighbor/" id "/" neighbor-id "/" token)}))

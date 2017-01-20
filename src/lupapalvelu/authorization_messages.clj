@@ -9,7 +9,7 @@
                     description-context))
 
 (defn- create-invite-email-model [command conf recipient]
-  (merge (notifications/new-email-app-model command conf recipient)
+  (merge (notifications/create-app-model command conf recipient)
          {:message (get-in command [:data :text])
           :recipient-email (:email recipient)
           :inviter-email (-> command :user :email)

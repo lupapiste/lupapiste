@@ -41,7 +41,7 @@
 
 (defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data app :application} _ recipient]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))]
-    (merge (notifications/new-email-app-model (application->command app) nil recipient)
+    (merge (notifications/create-app-model (application->command app) nil recipient)
            {:link (link-fn (keyword (:language recipient)))
             :inforequest-created created-date})))
 
@@ -60,7 +60,7 @@
 ;; Email definition for the "Request statement reminder"
 
 (defn- statement-reminders-email-model [{{:keys [created-date statement]} :data application :application} _ recipient]
-  (merge (notifications/new-email-app-model (application->command application) nil recipient)
+  (merge (notifications/create-app-model (application->command application) nil recipient)
     {:link (notifications/get-application-link application "/statement" (or (:language recipient) "fi") recipient)
      :statement-request-created created-date
      :due-date (util/to-local-date (:dueDate statement))
@@ -88,7 +88,7 @@
 
 (defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
   (assoc
-    (notifications/new-email-app-model (application->command application) nil recipient)
+    (notifications/create-app-model (application->command application) nil recipient)
     :work-time-expires-date work-time-expires-date))
 
 (notifications/defemail :reminder-ya-work-time-is-expiring

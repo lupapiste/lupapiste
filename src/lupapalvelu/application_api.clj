@@ -45,7 +45,7 @@
   (let [updated-command (update command :application util/assoc-when :state (:state result))
         conf-with-tab   (update conf :tab #(if (states/verdict-given-states (:state result)) "verdict" %))]
     (assoc
-      (notifications/new-email-app-model updated-command conf-with-tab recipient)
+      (notifications/create-app-model updated-command conf-with-tab recipient)
       :state-text (i18n/localize (:language recipient) "email.state-description" (get-in updated-command [:application :state])))))
 
 (def state-change {:subject-key    "state-change"

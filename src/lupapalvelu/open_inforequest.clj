@@ -11,7 +11,7 @@
 
 (defn- base-email-model [{{token :token-id} :data :as command} _ recipient]
   (assoc
-    (notifications/new-email-app-model command nil recipient)
+    (notifications/create-app-model command nil recipient)
     :link (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))))
 
 (def base-email-conf

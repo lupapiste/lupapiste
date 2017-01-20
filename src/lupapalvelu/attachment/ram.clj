@@ -14,7 +14,7 @@
 
 
 (defn- new-ram-email-model [{app :application {attachment-id :attachment-id created-date :created-date} :data :as command} _ recipient]
-  (merge (notifications/new-email-app-model command nil recipient)
+  (merge (notifications/create-app-model command nil recipient)
          {:link         (fn [lang] (notifications/get-subpage-link {:id (:id app) :subpage-id attachment-id} "attachment" lang recipient))
           :operation    #(app-utils/operation-description app %)
           :created-date created-date}))

@@ -95,7 +95,7 @@
   (statement/fetch-organization-statement-givers @organization))
 
 (defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application caller :user :as command} _ recipient]
-  (merge (notifications/new-email-app-model command nil recipient)
+  (merge (notifications/create-app-model command nil recipient)
          {:link          #(notifications/get-application-link app "/statement" (name %) recipient)
           :message       saateText
           :requester     caller

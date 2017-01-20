@@ -396,7 +396,7 @@
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
                                             :recipients-fn :admins
                                             :model-fn      (fn [model _ recipient]
-                                                             (merge (notif/new-email-app-model model nil recipient)
+                                                             (merge (notif/create-app-model model nil recipient)
                                                                     model
                                                                     {:link (str (env/value :host) "/app/"
                                                                                 (or (:language recipient) "fi")
