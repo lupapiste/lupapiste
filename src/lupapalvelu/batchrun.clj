@@ -84,9 +84,9 @@
 
 ;; Email definition for the "YA work time is expiring"
 
-(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
+(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date} :data :as command} _ recipient]
   (assoc
-    (notifications/create-app-model (application->command application) nil recipient)
+    (notifications/create-app-model command nil recipient)
     :work-time-expires-date work-time-expires-date))
 
 (notifications/defemail :reminder-ya-work-time-is-expiring

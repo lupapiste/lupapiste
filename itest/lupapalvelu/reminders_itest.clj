@@ -554,7 +554,7 @@
 
   (facts "ya-work-time-is-expiring-reminder"
 
-    (fact "the \"ya-work-time-is-expiring\" timestamp does not pre-exist -> reminder is sent"
+    (fact "timestamp does not pre-exist -> reminder is sent"
       (mongo/with-db db-name
         (let [app (mongo/by-id :applications (:id ya-reminder-application))]
 
@@ -571,12 +571,10 @@
 
             (check-sent-reminder-email
               "pena@example.com"
-              "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
-              ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"
-               (util/to-local-date tyoaika-paattyy)
-               (:address app)])))))
+              "Lupapiste: Latokuja 3, Sipoo - tarvitaanko jatkoaikaa?"
+              ["Luvan p\u00e4\u00e4ttymisajankohdaksi on merkitty" (util/to-local-date tyoaika-paattyy) (:address app)])))))
 
-    (fact "the \"ya-work-time-is-expiring\" timestamp already exists -> no reminder is sent"
+    (fact "timestamp already exists -> no reminder is sent"
       (mongo/with-db db-name
         (update-application (application->command ya-reminder-application)
           {$set {:work-time-expiring-reminder-sent timestamp-the-beginning-of-time}})
@@ -587,7 +585,7 @@
           (= (:work-time-expiring-reminder-sent app) timestamp-the-beginning-of-time) => true?
           (dummy-email-server/messages) => empty?)))
 
-    (fact "the \"ya-work-time-is-expiring\" reminder is sent also to applications in state 'construction-started'"
+    (fact "reminder is sent also to applications in state 'construction-started'"
       (mongo/with-db db-name
         (update-application (application->command ya-reminder-application)
                             (merge (application/state-transition-update :constructionStarted 0 ya-reminder-application {})
@@ -595,8 +593,8 @@
         (batchrun/ya-work-time-is-expiring-reminder)
         (check-sent-reminder-email
           "pena@example.com"
-          "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
-          ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"])))
+          "Lupapiste: Latokuja 3, Sipoo - tarvitaanko jatkoaikaa?"
+          ["Luvan p\u00e4\u00e4ttymisajankohdaksi on merkitty"])))
 
     (fact "applications without 'tyoaika' document are not reacted to"
       (mongo/with-db db-name
