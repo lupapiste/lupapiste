@@ -98,7 +98,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.addEventListener("fileuploadService", "badFile", function(event) {
     hub.send("indicator", {
       style: "negative",
-      message: event.message
+      rawMessage: event.message
     });
   });
 
