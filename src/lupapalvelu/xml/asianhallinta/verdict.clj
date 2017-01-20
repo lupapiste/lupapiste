@@ -117,7 +117,7 @@
             ;; -> build update clause
             ;; -> update-application
             (let [new-verdict   (build-verdict parsed-xml timestamp)
-                  command       (action/application->command application)
+                  command       (assoc (action/application->command application) :action :process-ah-verdict)
                   poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
                   update-clause (util/deep-merge
                                  {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
