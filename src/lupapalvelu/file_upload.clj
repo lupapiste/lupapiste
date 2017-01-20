@@ -6,7 +6,8 @@
             [lupapalvelu.mime :as mime]
             [clojure.set :refer [rename-keys]]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
-            [lupapalvelu.attachment.type :as lat])
+            [lupapalvelu.attachment.type :as lat]
+            [sade.strings :as str])
   (:import (java.io File InputStream)))
 
 (def FileData
@@ -36,17 +37,24 @@
      :contentType content-type
      :metadata metadata}))
 
+(defn- resolve-attachment-grouping [{:keys [metadata]} user-provided-operation]
+  (if-not (str/blank? user-provided-operation)
+    ; FIXME: If the user-provided-op is a string, it should be matched agains operation "tunnus" and building ids
+    {:groupType (:grouping metadata)}
+    {:groupType (:grouping metadata)}))
+
 (defn- download-and-save-files [attachments session-id]
   (pmap
-    (fn [{:keys [tiedosto tyyppi sisalto piirrosnumero liittyy] :as attachment}]
-      (when-let [attachment-type (lat/localisation->attachment-type :R tyyppi)]
-        (when-let [is (muuntaja/download-file tiedosto)]
-          (let [file-data (save-file {:filename tiedosto :content is} :sessionId session-id :linked false)]
+    (fn [{:keys [filename localizedType contents drawingNumber operation]}]
+      (when-let [attachment-type (lat/localisation->attachment-type :R localizedType)]
+        (when-let [is (muuntaja/download-file filename)]
+          (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)
             (merge file-data
-                   {:contents sisalto
-                    :drawingNumber piirrosnumero
-                    :type (select-keys attachment-type [:type-group :type-id])})))))
+                   {:contents      contents
+                    :drawingNumber drawingNumber
+                    :group         (resolve-attachment-grouping attachment-type operation)
+                    :type          (select-keys attachment-type [:type-group :type-id])})))))
     attachments))
 
 (defn- is-zip-file? [filedata]
