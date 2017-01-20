@@ -1,7 +1,6 @@
 (ns lupapalvelu.batchrun
   (:require [taoensso.timbre :refer [debug debugf error errorf info]]
             [me.raynes.fs :as fs]
-            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
@@ -12,9 +11,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.open-inforequest :as inforequest]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
@@ -208,9 +207,10 @@
                     (= "email-sent" (:state status))
                     (< (:created status) timestamp-1-week-ago))
               (notifications/notify! :reminder-neighbor {:application app
-                                                         :data {:email (:email status)
-                                                                :token (:token status)
-                                                                :neighborId (:id neighbor)}})
+                                                         :user        {:email (:email status)}
+                                                         :data        {:token      (:token status)
+                                                                       :expires    (util/to-local-datetime (+ ttl/neighbor-token-ttl (:created status)))
+                                                                       :neighborId (:id neighbor)}})
               (update-application (application->command app)
                 {:neighbors {$elemMatch {:id (:id neighbor)}}}
                 {$push {:neighbors.$.status {:state    "reminder-sent"

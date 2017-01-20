@@ -100,13 +100,11 @@
   (merge (notifications/create-app-model command nil recipient)
          {:name    (get-in (util/find-by-id neighbor-id neighbors) [:owner :name])
           :expires expires
-          :link    (str (env/value :host) "/app/" (or (:language recipient) "fi") "/neighbor/" id "/" neighbor-id "/" token)}))
+          :link    #(str (env/value :host) "/app/" % "/neighbor/" id "/" neighbor-id "/" token)}))
 
-(def email-conf {:recipients-fn (fn [{{:keys [to-user inviter]} :data}]
-                                  (if (map? to-user)
-                                    [to-user]
-                                    [{:email to-user :language (:language inviter)}]))
+(def email-conf {:recipients-fn notifications/from-user
                  :model-fn neighbor-invite-model})
+
 (notifications/defemail :neighbor email-conf)
 
 (defn neighbor-marked-done? [{{neighbor-id :neighborId} :data {:keys [neighbors]} :application}]
@@ -141,11 +139,11 @@
                                                      :token token
                                                      :user user
                                                      :created created}}})
-    (notifications/notify! :neighbor (assoc command :data {:to-user (or (usr/get-user-by-email email) email),
-                                                           :inviter user
+    (notifications/notify! :neighbor (assoc command :data {:inviter user
                                                            :token token,
                                                            :neighborId neighborId,
-                                                           :expires (util/to-local-datetime expires)}))))
+                                                           :expires (util/to-local-datetime expires)}
+                                                    :user (or (usr/get-user-by-email email) {:email email}),))))
 
 (defcommand neighbor-mark-done
   {:parameters [id neighborId]

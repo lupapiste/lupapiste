@@ -461,7 +461,6 @@
 
           (let [app (mongo/by-id :applications (:id reminder-application))
                 neighbors-with-reminder-sent-status (get-neighbors-with-reminder-sent-status app)]
-            (>pprint neighbors-with-reminder-sent-status)
 
             (count neighbors-with-reminder-sent-status) => 1
             (> (-> neighbors-with-reminder-sent-status first :timestamp-reminder-sent) now-timestamp) => true?
@@ -469,8 +468,8 @@
             ;; clears inbox
             (check-sent-reminder-email
               (->> neighbor-matching :status (filter #(= "email-sent" (:state %))) first :email)
-              "Lupapiste: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
-              ["T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan"])))))
+              "Lupapiste: Naapurikuja 3, Sipoo - muistutus naapurin kuulemisesta"
+              ["Hei n," "muistuttelemme" "rajanaapurina teille on ilmoitettu"])))))
 
     (fact "a recent \"reminder-sent\" status already exists - no reminder is sent"
       (mongo/with-db db-name
@@ -527,7 +526,7 @@
 
             (check-sent-reminder-email
              "pena@example.com"
-             "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+             "Lupapiste: Naapurikuja 3, Sipoo - muistutus aktiivisesta hakemuksesta"
              ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
 
     (fact "the 'reminder-sent' timestamp already exists but is over 1 week old -> reminder is sent"
@@ -542,7 +541,7 @@
 
           (check-sent-reminder-email
            "pena@example.com"
-           "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+           "Lupapiste: Naapurikuja 3, Sipoo - muistutus aktiivisesta hakemuksesta"
            ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
 
     (fact "the 'reminder-sent' timestamp already exists - no reminder is sent"
