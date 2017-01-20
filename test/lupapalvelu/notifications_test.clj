@@ -39,10 +39,10 @@
     => (str (sade.env/value :host) "/app/fi/authority#!/inforequest/1/comment")))
 
 (fact "Application model"
-  (create-app-model {:application {:id 1 :state "draft"}} {:tab ""} {:firstName "Bob"
-                                                                     :language "sv"
-                                                                     :role "applicant"})
-  => (contains {:name "Bob"}))
+  (create-app-model {:application {:id 1 :state "draft" :address "foodress"}} {:tab "footab"} {:firstName "Bob"
+                                                                                               :language "sv"
+                                                                                               :role "applicant"})
+  => (contains {:link fn? :state fn? :address "foodress" :municipality fn? :operation fn?}))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
