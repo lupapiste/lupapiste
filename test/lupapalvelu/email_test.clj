@@ -10,27 +10,27 @@
   (facts "invalid template"
    (apply-template "does-not-exist.md" {:receiver "foobar"}) => (throws IllegalArgumentException))
 
-  (against-background [(fetch-template "master.md" "en")      => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
-                       (fetch-template "header.md" "en")      => "# {{header}}"
+  (against-background [(fetch-template "master.md")           => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
                        (fetch-template "footer.md" "en")      => "## {{footer}}"
                        (fetch-template "test.md"   "en")      => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
                        (find-resource "html-wrap.html" "en")  => (io/input-stream (.getBytes "<html><body></body></html>"))]
     (facts "header and footer"
-      (let [[plain html] (apply-template "test.md" {:header "HEADER" :footer "FOOTER" :receiver "foobar" :lang "en"})]
-        plain => "\nHEADER\n\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
-        html => "<html><body><h1>HEADER</h1><p>This is <em>test</em> message for applicant foobar <a href=\"http://link.url\" title=\"alt text\">link text</a></p><h2>FOOTER</h2></body></html>"))))
+      (let [[plain html] (apply-template "test.md" {:footer "FOOTER" :receiver "foobar" :lang "en"})]
+        plain => "\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
+        html => "<html><body><p>This is <em>test</em> message for applicant foobar <a href=\"http://link.url\" title=\"alt text\">link text</a></p><h2>FOOTER</h2></body></html>"))))
 
 (facts "User language markdown templates: test body"
-       (fetch-template "testbody.md") => (contains "suomi")
-       (fetch-template "testbody.md" "sv") => (contains "Svenska")
-       (fetch-template "testbody.md" "fi") => (contains "suomi")
-       (fetch-template "testbody.md" "cn") => (contains "suomi"))
+  (fetch-template "testbody.md") => (contains "suomi")
+  (fetch-template "testbody.md" "sv") => (contains "Svenska")
+  (fetch-template "testbody.md" "fi") => (contains "suomi")
+  (fetch-template "testbody.md" "cn") => (contains "suomi"))
 
 (facts "User language markdown templates: footer"
-       (fetch-template "footer.md") => (contains "automaattinen")
-       (fetch-template "footer.md" "sv") => (contains "automatiskt")
-       (fetch-template "footer.md" "fi") => (contains "automaattinen")
-       (fetch-template "footer.md" "cn") => (contains "automaattinen"))
+  (fetch-template "footer.md") => (throws IllegalArgumentException)
+  (fetch-template "fi-footer.md") => (contains "automaattinen")
+  (fetch-template "footer.md" "sv") => (contains "automatiskt")
+  (fetch-template "footer.md" "fi") => (contains "automaattinen")
+  (fetch-template "footer.md" "cn") => (throws IllegalArgumentException))
 
 (facts "User language html templates: test body"
        (fetch-template "testbody.html") => (contains "<em>suomi")
@@ -45,9 +45,10 @@
 
 (facts "Apply markdown template"
        (let [ctx {:hej "Morgon" :moi "Mortonki"}]
-         (apply-template "testbody.md" ctx) => (mail-check "suomi Mortonki")
+         (apply-template "testbody.md" ctx) => (throws IllegalArgumentException)
+         (apply-template "testbody.md" (assoc ctx :lang "fi")) => (mail-check "suomi Mortonki")
          (apply-template "testbody.md" (assoc ctx :lang "cn"))
-         => (mail-check "suomi Mortonki")
+         => (throws IllegalArgumentException)
          (apply-template "testbody.md" (assoc ctx :lang "sv"))
          => (mail-check "Svenska Morgon")))
 
