@@ -46,8 +46,8 @@
    :user-roles #{:authority}
    :notified   true
    :pre-checks [application-has-verdict-given-state]
-   :on-success (notify :application-verdict)}
-  [command]
+   :on-success (notify :application-state-change)}
+  [{app :application :as command}]
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
@@ -138,7 +138,7 @@
    :states     give-verdict-states
    :pre-checks [application-has-verdict-given-state]
    :notified   true
-   :on-success (notify :application-verdict)
+   :on-success (notify :application-state-change)
    :user-roles #{:authority}}
   [{:keys [application] :as command}]
   (if-let [verdict (find-verdict application verdictId)]
