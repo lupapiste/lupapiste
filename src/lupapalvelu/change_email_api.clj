@@ -3,7 +3,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw email-validator some-pre-check] :as action]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.user :as usr]
             [lupapalvelu.company :as com]
@@ -45,12 +45,16 @@
   (when-not (has-person-id? user)
     (fail :error.unauthorized)))
 
+(defn- validate-is-basic-company-user [{user :user}]
+  (when-not (= "user" (get-in user [:company :role]))
+    (fail :error.unauthorized)))
+
 (defcommand change-email-init
   {:parameters [email]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :pre-checks [validate-has-person-id]
+   :pre-checks [(some-pre-check validate-has-person-id validate-is-basic-company-user)]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (change-email/init-email-change user email))
