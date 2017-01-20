@@ -51,7 +51,7 @@
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
-      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)) :state (get-in result [$set :state] (:state app)))
+      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)) :state (:state result))
       :else result)))
 
 ;;
