@@ -266,6 +266,9 @@ Rollup states
   Rollup approved  Muut suunnitelmat
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
 
+Sonja removes asemapiirros
+  Remove row  tr[data-test-type='paapiirustus.asemapiirros']
+
 Sonja approves RAM
   Scroll and click test id  ram-filter-label
   Checkbox wrapper selected by test id  ram-filter-checkbox
@@ -312,5 +315,3 @@ Delete allowed
 Follow ram link
   [Arguments]  ${index}
   Wait until  Click link  jquery=td[data-test-id=ram-link-type-${index}] a
-
-
