@@ -1,4 +1,4 @@
-# Hej {{user.firstName}},
+# Hej,
 
 vi vill p&aring;minna dig om att n&aring;gon v&auml;ntar p&aring; ditt r&aring;d! Beg&auml;ran om r&aring;dgivning som gjordes {{inforequest-created}} g&auml;llande projektet {{operation}} p&aring; adressen {{address}}, {{municipality}} &auml;r fortfarande aktiv. Beg&auml;ran har gjorts i tj&auml;nsten Lupapiste, d&auml;r man kan st&auml;lla fr&aring;gor om &auml;renden som g&auml;ller den byggda milj&ouml;n i din kommun. Besvara fr&aring;gan s&aring; snabbt som m&ouml;jligt i tj&auml;nsten genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

@@ -1,6 +1,6 @@
-# Hei {{user.firstName}},
+# Hei,
 
-muistuttelemme, ett&auml; joku kaipaa viel&auml;kin neuvoasi! {{inforequest-created}} avattu neuvontapyynt&ouml; koskien hanketta {{operation}} osoitteessa {{address}}, {{municipality}} on edelleen avoinna. Neuvoa on kysytty  Lupapiste-palvelussa, jonka kautta voidaan tehd&auml; rakennetun ymp&auml;rist&ouml;n asiointiin liittyvi&auml; kyselyj&auml; kuntanne alueelle. Vastaathan kysymykseen pikimmiten palvelussa alla olevaa linkki&auml; klikkaamalla. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+muistuttelemme, ett&auml; joku kaipaa viel&auml;kin neuvoasi! {{inforequest-created}} on avattu neuvontapyynt&ouml; koskien hanketta {{operation}} osoitteessa {{address}}, {{municipality}} on edelleen avoinna. Neuvoa on kysytty  Lupapiste-palvelussa, jonka kautta voidaan tehd&auml; rakennetun ymp&auml;rist&ouml;n asiointiin liittyvi&auml; kyselyj&auml; kuntanne alueelle. Vastaathan kysymykseen pikimmiten palvelussa alla olevaa linkki&auml; klikkaamalla. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 {{link}}
 
