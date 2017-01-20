@@ -106,7 +106,7 @@
                     (notifications/notify! :new-comment command))
                   (when-let [to-user (and (:to data) (usr/get-user-by-id (:to data)))]
                     ;; LUPA-407
-                    (notifications/notify! :application-targeted-comment (assoc command :to-user to-user))))
+                    (notifications/notify! :application-targeted-comment (assoc command :to-user [to-user]))))
                 open-inforequest/notify-on-comment]}
   [{{:keys [to mark-answered openApplication] :or {mark-answered true}} :data :keys [user created application] :as command}]
   (let [to-user   (and to (or (usr/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))
