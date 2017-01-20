@@ -150,7 +150,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
-      (:subject email) => "Lupapiste: Peruutustie 23 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Peruutustie 23, Sipoo - hankkeen tila on nyt Peruutettu"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant")))
 
@@ -201,7 +201,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key teppo))
-      (:subject email) => "Lupapiste: Penahouse 88 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant"))
 
