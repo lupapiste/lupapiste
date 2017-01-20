@@ -24,7 +24,7 @@ Applicant invites Solita
 Solita accepts invitation
   Open last email
   Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
-  Click Element  xpath=(//a)[2]
+  Click Element  xpath=(//a)[1]
   Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
   [Teardown]  Go to login page
 
