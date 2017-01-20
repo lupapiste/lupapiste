@@ -657,7 +657,8 @@
                                       :kopiolaitos-orderer-email nil
                                       :kopiolaitos-orderer-phone nil
                                       :calendars-enabled false
-                                      :use-attachment-links-integration false})
+                                      :use-attachment-links-integration false
+                                      :inspection-summaries-enabled false})
 
 (defn- names [names-map]
   (i18n/with-default-localization names-map (:fi names-map)))
@@ -687,6 +688,7 @@
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :assignments-enabled true
+                       :inspection-summaries-enabled true
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000}
 
@@ -1018,6 +1020,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]]}
+                       :assignments-enabled true
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :use-attachment-links-integration true

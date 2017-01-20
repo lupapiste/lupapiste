@@ -4,8 +4,8 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="tags-editor-template">
       <div class="tags-editor-component">
-        <ul class="tags">
-          <p data-bind="visible: tags().length === 0, ltext: 'tags.no-tags'"></p>
+        <p data-bind="visible: _.isEmpty(tags()), ltext: 'tags.no-tags'"></p>
+        <ul class="tags" data-bind="visible: !_.isEmpty(tags())">
           <!-- ko foreach: tags -->
           <li class="tag">
             <span class="tag-remove icon remove"

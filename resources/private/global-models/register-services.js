@@ -28,5 +28,6 @@
   lupapisteApp.services.assignmentRecipientFilterService = new LUPAPISTE.AssignmentRecipientFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.assignmentTargetFilterService = new LUPAPISTE.AssignmentTargetFilterService();
   lupapisteApp.services.eventFilterService = new LUPAPISTE.EventFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.inspectionSummaryService = new LUPAPISTE.InspectionSummaryService();
 
 })();

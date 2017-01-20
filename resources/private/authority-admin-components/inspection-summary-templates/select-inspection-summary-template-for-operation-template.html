@@ -1,0 +1,8 @@
+<script type="text/x-jquery-tmpl" id="select-inspection-summary-template-for-operation-template" class="ko-template">
+  <select data-bind="options: templates,
+                     optionsCaption: loc('notSelected'),
+                     optionsText: function(item) { return _.get(item, 'name'); },
+                     value: selectedTemplate"
+          data-test-id="select-inspection-summary-template">
+  </select>
+</script>
