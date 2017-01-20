@@ -4,7 +4,6 @@ Documentation   Authority admin administers inspection summary templates
 Suite Setup     Apply minimal fixture now
 Resource       ../../common_resource.robot
 
-
 *** Test Cases ***
 
 
