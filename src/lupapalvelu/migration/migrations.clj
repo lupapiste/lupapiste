@@ -2724,39 +2724,6 @@
          (map get-asemapiirros-multioperation-updates-for-application)
          (run! (partial apply mongo/update-by-query :submitted-applications)))))
 
-(defn- remove-start-pvm [document]
-  (if (and (= "tyoaika" (get-in document [:schema-info :name]))
-           (get-in document [:data :tyoaika-alkaa-pvm]))
-    (dissoc-in document [:data :tyoaika-alkaa-pvm])
-    document))
-
-(defn- remove-end-pvm [document]
-  (if (and (= "tyoaika" (get-in document [:schema-info :name]))
-           (get-in document [:data :tyoaika-paattyy-pvm]))
-    (dissoc-in document [:data :tyoaika-paattyy-pvm])
-    document))
-
-
-(defmigration remove-tyoaika-pvm-fields
-  {:apply-when (pos? (mongo/count :applications
-                                  {:documents
-                                   {$elemMatch {$or
-                                                [{$and [{:schema-info.name "tyoaika"},
-                                                        {:data.tyoaika-alkaa-pvm {$exists true}}]}
-                                                 {$and [{:schema-info.name "tyoaika"},
-                                                        {:data.tyoaika-paattyy-pvm {$exists true}}]}]}}}))}
-  (update-applications-array :documents
-                             remove-start-pvm
-                             {:documents
-                              {$elemMatch {$and [{:schema-info.name "tyoaika"},
-                                                 {:data.tyoaika-alkaa-pvm {$exists true}}]}}})
-
-  (update-applications-array :documents
-                             remove-end-pvm
-                             {:documents
-                              {$elemMatch {$and [{:schema-info.name "tyoaika"},
-                                                 {:data.tyoaika-paattyy-pvm {$exists true}}]}}}))
-
 
 ;;
 ;; ****** NOTE! ******
