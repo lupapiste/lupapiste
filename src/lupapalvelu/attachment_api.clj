@@ -59,7 +59,7 @@
           :desc "Attachment template is originally bound to the application by operations in application, or have been manually added by authority.")))
 
 (defn- attachment-not-requested-by-authority [{{attachmentId :attachmentId} :data user :user application :application}]
-  (when (and (not (usr/authority? user))
+  (when (and (not (auth/application-authority? application user))
              (:requestedByAuthority (att/get-attachment-info application attachmentId)))
     (fail :error.unauthorized
           :desc "Attachment is requested by authority.")))
@@ -346,7 +346,8 @@
                  att/delete-allowed-by-target
                  att/edit-allowed-by-target
                  ram/ram-status-not-ok
-                 ram/ram-not-linked]}
+                 ram/ram-not-linked
+                 attachment-not-requested-by-authority]}
   [{:keys [application user]}]
   (att/delete-attachments! application [attachmentId])
   (ok))
