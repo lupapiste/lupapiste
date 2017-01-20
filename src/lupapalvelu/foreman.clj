@@ -319,8 +319,7 @@
   (update-application command
                       {:auth {$not {$elemMatch {:invite.user.username (:email foreman-user)}}}}
                       {$push {:auth (auth/create-invite-auth user foreman-user (:id linked-app) "foreman" created)}
-                       $set  {:modified created}})
-  (notif/notify! :invite {:application linked-app :recipients [foreman-user]}))
+                       $set  {:modified created}}))
 
 (defn send-invite-notifications! [foreman-app foreman-user linked-app {user :user created :created :as command}]
   (try

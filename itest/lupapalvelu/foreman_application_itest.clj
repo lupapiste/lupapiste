@@ -412,8 +412,8 @@
         (fact "Emails are sent correctly to recipients"
           (let [emails (sent-emails)
                 recipients (map :to emails)]
-            recipients => (just ["heppu@example.com" ; foreman is invited to original application also
-                                 "heppu@example.com"
+            ; foreman does not receive separate invitation email for the original application
+            recipients => (just ["heppu@example.com"
                                  "foo@example.com"
                                  "Kaino Solita <kaino@solita.fi>"] :in-any-order)))))
 
