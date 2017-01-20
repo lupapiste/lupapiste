@@ -13,7 +13,7 @@ T&auml;ss&auml; toimintaohjeet vastuun hakemiseen tai ilmoittamiseen:
 
 T&auml;&auml;lt&auml; p&auml;&auml;set hyv&auml;ksym&auml;&auml;n valtuutuksen ja t&auml;ytt&auml;m&auml;&auml;n hakemuksesi.
 
-{{foreman-link}}
+{{link}}
 
 Rakennuslupahakemukseen p&auml;&auml;see tutustumaan ty&ouml;njohtaja-hakemuksesta l&ouml;ytyv&auml;n viiteluvan kautta, linkki l&ouml;ytyy hakemuksen yl&auml;osasta.
 

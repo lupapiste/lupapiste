@@ -13,7 +13,7 @@ Here are the instructions for applying for and notifying an authorization:
 
 You can accept the authorization and fill in your application at
 
-{{foreman-link}}
+{{link}}
 
 You can view the building permit application via the reference permit found in the supervisor application, the link is located at the upper part of the application.
 

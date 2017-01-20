@@ -13,7 +13,7 @@ H&auml;r &auml;r anvisningarna f&ouml;r att anm&auml;la eller ans&ouml;ka om ans
 
 H&auml;r kan du godk&auml;nna befogenheten och fylla i din ans&ouml;kan
 
-{{foreman-link}}
+{{link}}
 
 Du kan l&auml;sa ans&ouml;kan om bygglov via det referenslov som finns i arbetsledarans&ouml;kan. L&auml;nken finns l&auml;ngst upp p&aring; ans&ouml;kan.
 
