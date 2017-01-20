@@ -299,7 +299,7 @@
             (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
                 (if-not (s/blank? url)
-                  (let [command (assoc (application->command app) :user eraajo-user :created (now))
+                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdicts)
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.

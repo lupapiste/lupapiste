@@ -171,7 +171,7 @@
    :draft           true})
 
 (defn verdict-tab-action? [{action-name :action}]
-  (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict} (keyword action-name))))
+  (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict :fetch-verdicts} (keyword action-name))))
 
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
