@@ -13,11 +13,11 @@
             [lupapalvelu.tiedonohjaus :as tos]))
 
 
-(defn- new-ram-email-model [{app :application {attachment-id :attachment-id created-date :created-date} :data} _ recipient]
-  {:link         (fn [lang] (notifications/get-subpage-link {:id (:id app) :subpage-id attachment-id} "attachment" lang recipient))
-   :address      (:address app)
-   :operation    #(app-utils/operation-description app %)
-   :created-date created-date})
+(defn- new-ram-email-model [{app :application {attachment-id :attachment-id created-date :created-date} :data :as command} _ recipient]
+  (merge (notifications/new-email-app-model command nil recipient)
+         {:link         (fn [lang] (notifications/get-subpage-link {:id (:id app) :subpage-id attachment-id} "attachment" lang recipient))
+          :operation    #(app-utils/operation-description app %)
+          :created-date created-date}))
 
 (def- new-ram-email-conf
   {:recipients-fn  :recipients
