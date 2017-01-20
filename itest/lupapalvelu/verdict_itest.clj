@@ -20,7 +20,7 @@
         email           (last-email) => truthy]
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))
-    (:subject email) => "Lupapiste: Paatoskuja 9, Sipoo - hankkeen tila on nyt Hakemus jätetty"
+    (:subject email) => "Lupapiste: Paatoskuja 9, Sipoo - hankkeen tila on nyt Hakemus j\u00e4tetty"
     (get-in email [:body :plain]) => (contains "Hakemus j\u00e4tetty")
     email => (partial contains-application-link? application-id "applicant")
 
