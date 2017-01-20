@@ -39,6 +39,15 @@
         <!-- /ko -->
       </section>
 
+      <!-- ko if: authorization.ok("organization-inspection-summary-settings") -->
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.inspection-summary-templates'"></h2>
+        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <div data-bind="component: 'inspection-summary-templates-list'"></div>
+        <!-- /ko -->
+      </section>
+      <!-- /ko -->
+
       <section>
         <h2 data-bind="ltext: 'auth-admin.email-notifications'"></h2>
         <p data-bind="lhtml: 'auth-admin.email-notifications.info'"></p>

@@ -403,6 +403,9 @@ Jarvenpaa authority logs in
   [Arguments]  ${showAll}=True
   Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää  ${showAll}
 
+Jarvenpaa admin logs in
+  Authority-admin logs in  admin@jarvenpaa.fi  jarvenpaa  Admin Järvenpää
+
 Jussi logs in
   [Arguments]  ${showAll}=True
   Authority logs in  jussi  jussi  Jussi Viranomainen  ${showAll}

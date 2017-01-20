@@ -55,6 +55,9 @@ LUPAPISTE.OrganizationModel = function () {
   self.allowedRoles = ko.observable([]);
   self.permitTypes = ko.observable([]);
   self.useAttachmentLinksIntegration = ko.observable(false);
+  self.inspectionSummariesEnabled = ko.observable(false);
+  self.inspectionSummaryTemplates = ko.observableArray([]);
+  self.operationsInspectionSummaryTemplates = ko.observable({});
 
   self.sectionOperations = ko.observableArray();
 
@@ -183,6 +186,10 @@ LUPAPISTE.OrganizationModel = function () {
       }
     });
 
+  hub.subscribe("inspectionSummaryService::templatesLoaded", function(event) {
+    self.inspectionSummaryTemplates(event.templates);
+    self.operationsInspectionSummaryTemplates(_.get(event, "operations-templates"));
+  });
 
   self.init = function(data) {
     self.initialized = false;
@@ -207,6 +214,8 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
+
+    self.inspectionSummariesEnabled(organization["inspection-summaries-enabled"] || false);
 
     self.useAttachmentLinksIntegration(organization["use-attachment-links-integration"] === true);
 
