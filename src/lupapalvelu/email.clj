@@ -165,11 +165,10 @@
 (defn- apply-md-template [template context]
   (let [lang        (:lang context)
         master      (fetch-template "master.md" lang)
-        header      (fetch-template "header.md" lang)
         body        (fetch-template template lang)
         footer      (fetch-template "footer.md" lang)
         html-wrap   (fetch-html-template "html-wrap.html" lang)
-        rendered    (clostache/render master context {:header header :body body :footer footer})
+        rendered    (clostache/render master context {:body body :footer footer})
         ; Avoid email links to be generated, see also https://github.com/theJohnnyBrown/endophile/issues/6
         escaped     (ss/replace rendered "@" "\\@")
         content     (endophile/to-clj (endophile/mp escaped))
