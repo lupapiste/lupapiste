@@ -1,4 +1,4 @@
-# Hej {{user.firstName}},
+# Hej,
 
 n&aring;gon beh&ouml;ver din hj&auml;lp! Du har f&aring;tt en ny elektronisk beg&auml;ran om r&aring;dgivning g&auml;llande projektet {{operation}} p&aring; adressen {{address}}, {{municipality}}. 
 

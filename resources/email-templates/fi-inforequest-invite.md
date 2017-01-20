@@ -1,4 +1,4 @@
-# Hei {{user.firstName}},
+# Hei,
 
 joku kaipaa neuvoasi! Olet nimitt&auml;in saanut uuden s&auml;hk&ouml;isen neuvontapyynn&ouml;n koskien hanketta {{operation}} osoitteessa {{address}}, {{municipality}}. 
 
