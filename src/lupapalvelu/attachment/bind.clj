@@ -9,6 +9,7 @@
             [lupapalvelu.job :as job]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.authorization :as auth]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
 
@@ -37,7 +38,7 @@
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
                                                      (assoc (select-keys filedata [:group :contents])
-                                                       :requested-by-authority (usr/authority? user)
+                                                            :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
         version-options (merge
