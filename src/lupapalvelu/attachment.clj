@@ -922,9 +922,9 @@
              (ss/not-blank? (:attachmentId data)))
     (access/has-attachment-auth-role :uploader command)))
 
-(defn allowed-only-for-authority-when-application-sent [{{state :state} :application user :user}]
-  (when (and (= :sent (keyword state))
-             (not (usr/authority? user)))
+(defn allowed-only-for-authority-when-application-sent [{:keys [application user]}]
+  (when (and (util/=as-kw :sent (:state application))
+             (not (auth/application-authority? application user)))
     (fail :error.unauthorized)))
 
 (defn attachment-editable-by-application-state
