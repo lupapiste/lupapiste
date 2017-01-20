@@ -38,10 +38,15 @@
 
 ;; Notifications
 
-(defn state-change-email-model [{:keys [application] :as command} conf recipient]
-  (assoc
-    (notifications/new-email-app-model command conf recipient)
-    :state-text (i18n/localize (:language recipient) "email.state-description" (:state application))))
+(defn state-change-email-model
+  "Generic state change email. :state-text is set per application state.
+  When state changes and if notify is invoked as post-fn from command, result must contain new state in :state key."
+  [{:keys [result] :as command} conf recipient]
+  (let [updated-command (update command :application util/assoc-when :state (:state result))
+        conf-with-tab   (update conf :tab #(if (states/verdict-given-states (:state result)) "verdict" %))]
+    (assoc
+      (notifications/new-email-app-model updated-command conf-with-tab recipient)
+      :state-text (i18n/localize (:language recipient) "email.state-description" (get-in updated-command [:application :state])))))
 
 (def state-change {:subject-key    "state-change"
                    :template "application-state-change.md"

@@ -51,7 +51,7 @@
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
-      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
+      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)) :state (get-in result [$set :state] (:state app)))
       :else result)))
 
 ;;
@@ -117,19 +117,20 @@
 (defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus sopimus]}]
   (if-not (ss/blank? kuntalupatunnus)
     (when-let [next-state (sm/verdict-given-state application)]
-      (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)]
+      (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)
+            verdict-updates (util/deep-merge
+                              (application/state-transition-update next-state timestamp application user)
+                              {$set {:verdicts.$.draft false}})]
         (update-application command
                             {:verdicts {$elemMatch {:id id}}}
-                            (util/deep-merge
-                             (application/state-transition-update next-state timestamp application user)
-                             {$set {:verdicts.$.draft false}}))
+                            verdict-updates)
         (when (seq doc-updates)
           (update-application command
                               (:mongo-query doc-updates)
                               (:mongo-updates doc-updates)))
         (t/mark-app-and-attachments-final! (:id application) timestamp)
         (create-verdict-pdfa! user application id lang)
-        (ok)))
+        (ok :state (get-in verdict-updates [$set :state] (:state application)))))
     (fail :error.no-verdict-municipality-id)))
 
 (defcommand publish-verdict
