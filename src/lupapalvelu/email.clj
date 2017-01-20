@@ -164,7 +164,7 @@
 
 (defn- apply-md-template [template context]
   (let [lang        (:lang context)
-        master      (fetch-template "master.md" lang)
+        master      (fetch-template "master.md")
         body        (fetch-template template lang)
         footer      (fetch-template "footer.md" lang)
         html-wrap   (fetch-html-template "html-wrap.html" lang)
