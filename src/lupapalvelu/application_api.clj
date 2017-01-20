@@ -20,6 +20,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -32,26 +33,24 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.drawing :as draw]))
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
 
 ;; Notifications
 
 (defn state-change-email-model
   "Generic state change email. :state-text is set per application state.
   When state changes and if notify is invoked as post-fn from command, result must contain new state in :state key."
-  [{:keys [result] :as command} conf recipient]
-  (let [updated-command (update command :application util/assoc-when :state (:state result))
-        conf-with-tab   (update conf :tab #(if (states/verdict-given-states (:state result)) "verdict" %))]
-    (assoc
-      (notifications/create-app-model updated-command conf-with-tab recipient)
-      :state-text (i18n/localize (:language recipient) "email.state-description" (get-in updated-command [:application :state])))))
+  [command conf recipient]
+  (assoc
+    (notifications/create-app-model command conf recipient)
+    :state-text #(i18n/localize % "email.state-description" (get-in command [:application :state]))))
 
 (def state-change {:subject-key    "state-change"
-                   :template "application-state-change.md"
+                   :template       "application-state-change.md"
                    :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
-                   :model-fn state-change-email-model})
+                   :tab-fn         (fn [command] (cond (verdict/verdict-tab-action? command) "verdict"))
+                   :model-fn       state-change-email-model})
 
 (notifications/defemail :application-state-change state-change)
 
@@ -292,7 +291,7 @@
                     (let [organization (or (and org @org) (org/get-organization (:organization application)))
                           emails (get-in organization [:notifications :neighbor-order-emails])]
                       (map (fn [e] {:email e, :role "authority"}) emails)))
-   :tab "statement"})
+   :tab-fn (constantly "statement")})
 
 (notifications/defemail :organization-on-submit
   (assoc state-change
@@ -566,7 +565,7 @@
   [{:keys [user application] :as command}]
   (let [organization    (deref (:organization command))
         application     (:application command)
-        krysp?          (organization/krysp-integration? organization (permit/permit-type application))
+        krysp?          (org/krysp-integration? organization (permit/permit-type application))
         warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
     (if warranty?
       (update-application command (util/deep-merge

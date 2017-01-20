@@ -170,6 +170,9 @@
    :paatokset       []
    :draft           true})
 
+(defn verdict-tab-action? [{action-name :action}]
+  (boolean (#{:publish-verdict :check-for-verdict} (keyword action-name))))
+
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
   ([{permit-type :permitType :as application} type]

@@ -129,7 +129,7 @@
 
             (sc/optional-key :pred-fn)         util/Fn
             (sc/optional-key :application-fn)  util/IFn
-            (sc/optional-key :tab)             sc/Str})
+            (sc/optional-key :tab-fn)          util/IFn})
 
 ;;
 ;; Public API
@@ -171,7 +171,8 @@
             recipients     (remove (invalid-recipient? template-name) (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))
-            calendar-fn    (get conf :calendar-fn)]
+            calendar-fn    (get conf :calendar-fn)
+            conf           (assoc conf :tab ((get conf :tab-fn (constantly nil)) command))]
         (doseq [recipient recipients]
           (let [user-lang (:language recipient)
                 model   (assoc (model-fn command conf recipient)

@@ -51,7 +51,7 @@
   (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
-      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)) :state (:state result))
+      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
       :else result)))
 
 ;;
@@ -121,16 +121,14 @@
             verdict-updates (util/deep-merge
                               (application/state-transition-update next-state timestamp application user)
                               {$set {:verdicts.$.draft false}})]
-        (update-application command
-                            {:verdicts {$elemMatch {:id id}}}
-                            verdict-updates)
+        (update-application command {:verdicts {$elemMatch {:id id}}} verdict-updates)
         (when (seq doc-updates)
           (update-application command
                               (:mongo-query doc-updates)
                               (:mongo-updates doc-updates)))
         (t/mark-app-and-attachments-final! (:id application) timestamp)
         (create-verdict-pdfa! user application id lang)
-        (ok :state (get-in verdict-updates [$set :state] (:state application)))))
+        (ok)))
     (fail :error.no-verdict-municipality-id)))
 
 (defcommand publish-verdict

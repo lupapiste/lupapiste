@@ -133,7 +133,7 @@
                  (:id new-verdict)
                  poytakirja-id
                  timestamp))
-              (notifications/notify! :application-state-change command {:state verdict-given-state})
+              (notifications/notify! :application-state-change command)
               (ok)))))
       (catch Throwable e
         (if-let [error-key (some-> e ex-data :text)]

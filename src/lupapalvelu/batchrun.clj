@@ -304,7 +304,7 @@
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-state-change command {:state (:state result)}))
+                      (notifications/notify! :application-state-change command))
                     (when (fail? result)
                       (logging/log-event :error {:run-by "Automatic verdicts checking"
                                                  :event "Failed to check verdict"
