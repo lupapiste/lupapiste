@@ -13,7 +13,8 @@
                    not-needed-filters)
 
 (testable-privates lupapalvelu.attachment.tag-groups
-                   add-operation-tag-groups)
+                   add-operation-tag-groups
+                   filter-tag-groups)
 
 (facts attachment-tags
 
@@ -49,8 +50,34 @@
   (add-operation-tag-groups [] []) => []
   (add-operation-tag-groups [] [[:some] [:fancy] [:hierarchy]]) => [[:some] [:fancy] [:hierarchy]]
   (add-operation-tag-groups [{:no :operation}] [[:drop] [:operation] [:if] [:no] [:operation-attachments]]) => [[:drop] [:if] [:no] [:operation-attachments]]
-  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:operation [:tag] [:wrong-tag]]]) => [["op-id-foo" [:tag]]]
-  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:pre] [:operation [:tag] [:wrong-tag]] [:post]]) => [[:pre] ["op-id-foo" [:tag]] [:post]])
+  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:operation [:tag]]]) => [["op-id-foo" [:tag]]]
+  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:pre] [:operation [:tag] [:filtered-later-tag]] [:post]]) => [[:pre] ["op-id-foo" [:tag] [:filtered-later-tag]] [:post]])
+
+(facts filter-tag-groups
+  (fact "simple two level hierachry"
+    (filter-tag-groups [#{:tag1 :tag2}] [[:tag1 [:tag2] [:tag3]]]) => [[:tag1 [:tag2]]])
+
+  (fact "no top level tag found"
+    (filter-tag-groups [#{:tag-not-found :tag2}] [[:tag1 [:tag2] [:tag3]]]) => [])
+
+  (fact "missing tag inside hierarchy"
+    (filter-tag-groups [#{:tag1 :tag3}] [[:tag1 [:tag2 [:tag3]]]]) => [[:tag1]])
+
+  (fact "multiple attachments"
+    (filter-tag-groups [#{:tag11 :tag12} #{:tag11 :tag13}] [[:tag11 [:tag12] [:tag13] [:tag14]]]) => [[:tag11 [:tag12] [:tag13]]])
+
+  (fact "deep hierachry"
+    (filter-tag-groups [#{:tag1 :tag2 :tag3 :tag4}]
+                       [[:tag1 [:tag2 [:tag3 [:tag4 [:tag5]]]]]]) => [[:tag1 [:tag2 [:tag3 [:tag4]]]]])
+
+  (fact "wide hierachry"
+    (filter-tag-groups [#{:tag11 :tag12 :tag13} #{:tag21 :tag22 :tag23} #{:tag31 :tag32 :tag33} #{:tag41 :tag42 :tag43}]
+                       [[:tag11 [:tag12 [:tag13 [:tag14]]]]
+                        [:tag21 [:tag22 [:tag23]]]
+                        [:tag31 [:tag32]]]) =>
+    [[:tag11 [:tag12 [:tag13]]]
+     [:tag21 [:tag22 [:tag23]]]
+     [:tag31 [:tag32]]]))
 
 (facts "attachment-tag-groups"
   (fact "technical reports"
