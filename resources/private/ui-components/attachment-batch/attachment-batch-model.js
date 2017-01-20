@@ -53,6 +53,13 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     return util.getIn( rowData( file ), ["disabled"] );
   };
 
+  self.groupSelectorDisabled = function( file ) {
+    return function() {
+      return util.getIn( rowData( file ), ["disabled"] ) ||
+        !service.authModel.ok("set-attachment-group-enabled");
+    };
+  };
+
   function disableRows( flag ) {
     _.each( _.values( rows()),
             function( row ) {
@@ -72,16 +79,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var grouping = ko.observable({});
     var contentsValue = ko.observable();
     var contentsList = ko.observableArray();
-    self.disposedSubscribe( type, function( data ) {
-      var metadata = data.metadata || {};
-
-      var contents = service.contentsData( data );
+    self.disposedSubscribe( type, function( type ) {
+      var contents = service.contentsData( type );
       contentsList( contents.list );
       contentsValue( contents.defaultValue);
-      grouping({groupType: metadata.grouping === "operation"
-                ? "operation-" + _.find (service.groupTypes(),
-                                         {groupType: "operation"}).id
-                : metadata.grouping});
+      grouping({});
+      grouping(service.getDefaultGroupingForType(type));
     } );
     var contentsCell = new Cell( contentsValue, true );
     contentsCell.list = contentsList;

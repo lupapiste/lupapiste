@@ -29,8 +29,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]))
@@ -81,28 +81,9 @@
   (when (every? (comp empty? :versions) attachments)
     (fail :error.attachment.no-versions)))
 
-(defn- validate-meta [{{meta :meta} :data}]
-  (doseq [[k v] meta]
-    (when (not-any? #{k} att/attachment-meta-types)
-      (fail :error.illegal-meta-type :parameters k))))
-
-(defn- validate-group-op [group]
-  (when-let [op (not-empty (select-keys group [:id :name]))]
-    (when (sc/check att/Operation op)
-      (fail :error.illegal-attachment-operation))))
-
-(defn- validate-group-type [group]
-  (when-let [group-type (keyword (:groupType group))]
-    (when-not ((set att-tags/attachment-groups) group-type)
-      (fail :error.illegal-attachment-group-type))))
-
-(defn- validate-group [{{{group :group} :meta} :data}]
-  ((some-fn validate-group-op validate-group-type) group))
-
-(defn- validate-operation [{{meta :meta} :data}]
-  (when-let [op (:op meta)]
-    (when (sc/check att/Operation op)
-      (fail :error.illegal-attachment-operation))))
+(defn- validate-meta [{{meta :meta} :data :as command}]
+  (some->> (not-empty (remove (set att/attachment-meta-types) (keys meta)))
+           (fail :error.illegal-meta-type :parameters)))
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
@@ -125,10 +106,12 @@
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
 
-(defn- validate-operation-in-application [{data :data application :application}]
-  (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
-    (when-not (util/find-by-id op-id (app/get-operations application))
-      (fail :error.illegal-attachment-operation))))
+(defn- validate-operation-in-application
+  ([command] (validate-operation-in-application [:group] command))
+  ([group-path {data :data application :application}]
+   (when-let [op-ids (->> (get-in data group-path) :operations (map :id) not-empty)]
+     (when (not-every? #(util/find-by-id % (app/get-operations application)) op-ids)
+       (fail :error.illegal-attachment-operation)))))
 
 ;;
 ;; Attachments
@@ -311,10 +294,9 @@
                         (when (and attachment-types
                                    (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                           (fail :error.unknown-attachment-type)))
-                      app/validate-authority-in-drafts]
-   :input-validators [(partial action/vector-parameters [:attachmentTypes])
-                      (fn-> (get-in [:data :group]) validate-group-op)
-                      (fn-> (get-in [:data :group]) validate-group-type)]
+                      app/validate-authority-in-drafts
+                      att/validate-group]
+   :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles       #{:authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :answered :sent))}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
@@ -510,13 +492,12 @@
                 att/allowed-only-for-authority-when-application-sent
                 validate-attachment-type
                 app/validate-authority-in-drafts
-                validate-operation-in-application]
+                validate-operation-in-application
+                att/validate-group]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
-                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))
-                      (fn-> (get-in [:data :group]) validate-group-op)
-                      (fn-> (get-in [:data :group]) validate-group-type)]
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))]
    :states     (conj (states/all-states-but states/terminal-states) :answered)
    :notified   true
    :on-success [(notify :new-comment)
@@ -643,6 +624,14 @@
    :categories  #{:attachments}}
   [_])
 
+(defquery set-attachment-group-enabled
+  {:description "Pseudo-query for checking that attachment group can selected for application."
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :pre-checks       [att/validate-group-is-selectable]
+   :states           (states/all-application-states-but states/terminal-states)
+   :categories       #{:attachments}})
+
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
@@ -690,13 +679,14 @@
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :states     (states/all-states-but :answered :sent)
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
-                      validate-meta validate-scale validate-size validate-operation validate-group]
+                      validate-meta validate-scale validate-size]
    :pre-checks [app/validate-authority-in-drafts
                 att/foreman-must-be-uploader
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
                 att/edit-allowed-by-target
-                validate-operation-in-application]}
+                (partial validate-operation-in-application [:meta :group])
+                (partial att/validate-group [:meta :group])]}
   [{:keys [created] :as command}]
   (let [data (att/meta->attachment-data meta)]
     (att/update-attachment-data! command attachmentId data created))

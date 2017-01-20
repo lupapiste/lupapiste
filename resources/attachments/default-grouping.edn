@@ -1,4 +1,6 @@
-{:operation
+{:multioperation
+ [{:type-id :asemapiirros :type-group :paapiirustus}]
+ :operation
  [{:type-id :pohjapiirustus     :type-group :paapiirustus}
   {:type-id :leikkauspiirustus  :type-group :paapiirustus}
   {:type-id :julkisivupiirustus :type-group :paapiirustus}

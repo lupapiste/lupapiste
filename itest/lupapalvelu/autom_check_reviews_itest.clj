@@ -105,7 +105,7 @@
             (fact "reviews for verdict given application 1"
               (count-reviews sonja application-id-verdict-given-1) => 3)
             (fact "reviews for verdict given application 2"
-              (count-reviews sonja application-id-verdict-given-2) => 4)
+              (count-reviews sonja application-id-verdict-given-2) => 3)
             (fact "application 1 state not updated"
               (:state app-1) => "verdictGiven")
             (fact "application 2 state is updated"
@@ -134,7 +134,7 @@
             (fact "last review state"
               (:state last-review) => "sent")
             (fact "reviews for verdict given application"
-              (count-reviews sonja application-id-verdict-given-1) => 4)
+              (count-reviews sonja application-id-verdict-given-1) => 3)
             (fact "application state is updated"
               (:state app) => "constructionStarted")) => truthy
 
@@ -148,7 +148,7 @@
 
         (fact "existing tasks are preserved"
           ;; should be seeing 1 added "aloituskokous" here compared to default verdict.xml
-          (count-reviews sonja application-id-verdict-given-1) => 4
+          (count-reviews sonja application-id-verdict-given-1) => 3
           (let [tasks (map tools/unwrapped  (query-tasks sonja application-id-verdict-given-1))
                 reviews (filter task-is-review? tasks)
                 review-types (map #(-> % :data :katselmuksenLaji) reviews)
@@ -156,7 +156,7 @@
                                 (= (get-in review [:data :katselmus :tila]) "lopullinen"))]
             (fact "no validation errors"
               (not-any? :validationErrors reviews))
-            (count (filter  (partial = "aloituskokous") review-types)) => 2
+            (count (filter  (partial = "aloituskokous") review-types)) => 1
             (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
 
 (facts "Automatic checking for reviews - application state and operation"
@@ -282,5 +282,6 @@
         (files/with-temp-file temp-pdf-path
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
             (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
-          (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
-          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))
+          ; Note that these checks are highly dependent on the PDF structure. Check if your (raw source) PDF content has changed if these fail.
+          (re-seq #"(?ms)\(Kiinteist.{1,4}tunnus\).{1,200}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
+          (re-seq #"(?ms)\(Tila\).{1,200}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))

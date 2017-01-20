@@ -475,9 +475,30 @@ Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
   Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
 
+Clear autocomplete selections by test id
+  [Arguments]  ${data-test-id}
+  Element should be visible  jquery=[data-test-id="${data-test-id}"]
+  :FOR  ${i}  IN RANGE  99999
+  \  ${selection-empty}=  Run keyword and return status  Element should not be visible  jquery=[data-test-id="${data-test-id}"] .tag-remove
+  \  Exit for loop if  ${selection-empty}
+  \  Click element  jquery=[data-test-id="${data-test-id}"] ul.tags .tag-remove
+
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
-  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+  Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+
+Autocomplete selection by test id is
+  [Arguments]  ${tid}  ${value}
+  Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption  ${value}
+
+Autocomplete selection by test id contains
+  [Arguments]  ${tid}  ${value}
+  Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection  ${value}
+
+Autocomplete selection by test id is empty
+  [Arguments]  ${tid}
+  Element should not be visible  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption
+  Element should not be visible  jquery=div[data-test-id=${tid}] span.autocomplete-selection ul.tags .tag
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
@@ -739,7 +760,9 @@ Upload batch file
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
-  Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
+  ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
+  Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
+  Run keyword unless  ${group-is-selected}  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
@@ -769,7 +792,7 @@ Add attachment
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Click element     test-save-new-attachment
+  Execute Javascript  $('#test-save-new-attachment')[0].click();
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
   Run Keyword If  '${kind}' == 'application'  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]

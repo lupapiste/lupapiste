@@ -121,9 +121,7 @@
                             :removable false,
                             :repeating false,
                             :name "tyoaika"},
-              :data {:tyoaika-alkaa-pvm {:modified 1379404916497, :value "18.09.2013"},
-                     :tyoaika-paattyy-pvm {:modified 1379404918106, :value "22.09.2013"}
-                     :tyoaika-alkaa-ms {:modified 1379404916497, :value 1379500000000}
+              :data {:tyoaika-alkaa-ms {:modified 1379404916497, :value 1379500000000}
                      :tyoaika-paattyy-ms {:modified 1379404918106, :value 1379860000000}}})
 
 ;; Attachments

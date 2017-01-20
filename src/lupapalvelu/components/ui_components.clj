@@ -444,12 +444,14 @@
                :js ["admin.js"]}
    :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer
                          :ui-components :authority-admin-components]
-               :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
-                    "create-scope-model.js" "logs.js"]
+               :js ["admin-users.js" "organization.js" "organizations.js" "companies.js"
+                    "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
+                    "create-scope-model.js" "logs.js" "reports.js"]
                :html ["index.html" "admin.html" "organization.html"
-                      "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html" "sso-keys.html"
+                      "admin-users.html" "organizations.html" "companies.html"
+                      "features.html" "actions.html" "sso-keys.html"
                       "screenmessages-list.html" "notifications.html"
-                      "create-scope-template.html" "logs.html"]}
+                      "create-scope-template.html" "logs.html" "reports.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

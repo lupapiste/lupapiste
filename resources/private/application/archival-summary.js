@@ -175,7 +175,7 @@
   function selectIfArchivable(attachment) {
     var tila = util.getIn(attachment, ["metadata", "tila"]);
     if (attachment.archivable() && tila !== "arkistoitu") {
-      attachment.sendToArchive(true);
+      attachment.sendToArchive(!attachment.sendToArchive());
     }
   }
 
@@ -280,8 +280,7 @@
     });
 
     self.tosFunctionExists = self.disposedPureComputed(function() {
-      return lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
-        _.some(params.application.tosFunction());
+      return _.some(params.application.tosFunction());
     });
 
     self.selectAll = function() {
@@ -290,8 +289,20 @@
       _.forEach(self.archivedDocuments(), function(doc) {
         var tila = util.getIn(doc, ["metadata", "tila"]);
         if (tila !== "arkistoitu") {
-          doc.sendToArchive(true);
+          doc.sendToArchive(!doc.sendToArchive());
         }
+      });
+    };
+
+    self.unselectAll = function() {
+      _.forEach(archivedPreAttachments(), function(attachment) {
+        attachment.sendToArchive(false);
+      });
+      _.forEach(archivedPostAttachments(), function(attachment) {
+        attachment.sendToArchive(false);
+      });
+      _.forEach(self.archivedDocuments(), function(doc) {
+        doc.sendToArchive(false);
       });
     };
 

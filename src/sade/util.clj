@@ -494,7 +494,7 @@
   `(let [start# (System/currentTimeMillis)
          result# ~body
          end# (System/currentTimeMillis)]
-     (debugf (str ~msg ": %dms") (- end# start#))
+     (timbre/debug ~msg ":" (- end# start#) "ms")
      result#))
 
 
@@ -550,7 +550,7 @@
   "a b c -> :a.b.c"
   [& kw]
   (->> kw
-       (map name)
+       (map ss/->plain-string)
        (ss/join ".")
        keyword))
 

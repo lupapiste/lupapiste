@@ -412,7 +412,7 @@
         group (cond
                 (ss/blank? operationId) nil
                 ((set att-tags/attachment-groups) (keyword operationId)) {:groupType (keyword operationId)}
-                :else {:id operationId})
+                :else {:groupType :operation :operations [{:id operationId}]})
         upload-data (-> upload
                         (assoc :id applicationId
                                :attachmentId attachmentId
@@ -500,13 +500,13 @@
          uri (:uri req)
          user (:username (:user req))
          session-id (:id (:session req))]
-      (str "CSRF attempt blocked. " ip 
-           " requested '" uri 
-           "' for user '" user 
-           "' having cookie csrf '" cookie-csrf "' vs header csrf '" header-csrf 
-           "'. Ring session '" ring-session 
-              "', session id '" session-id 
-              "', user agent '" user-agent 
+      (str "CSRF attempt blocked. " ip
+           " requested '" uri
+           "' for user '" user
+           "' having cookie csrf '" cookie-csrf "' vs header csrf '" header-csrf
+           "'. Ring session '" ring-session
+              "', session id '" session-id
+              "', user agent '" user-agent
               "', requested with '" req-with "'.")))
 
 (defn- csrf-attack-hander [request]

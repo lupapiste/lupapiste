@@ -58,7 +58,7 @@
   [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit-type application)
-        scope         (organization/resolve-organization-scope (:municipality application) permit-type)
+        scope         (organization/resolve-organization-scope (:municipality application) permit-type organization)
         ah-version    (resolve-ah-version scope)
         output-dir    (resolve-output-directory scope)]
     (ah-mapping/uusi-asia-from-application application lang ah-version submitted-application begin-of-link output-dir)))

@@ -224,11 +224,3 @@
     (map? organization-or-id)    (true? (:permanent-archive-enabled organization-or-id))
     (delay? organization-or-id)  (true? (:permanent-archive-enabled @organization-or-id))
     :else (throw (IllegalArgumentException. (str "Not an organization: " organization-or-id)))))
-
-(defn ensure-pdf-a-by-organization
-  "Ensures PDF file PDF/A compatibility status if the organization uses permanent archive"
-  [src-file organization-id]
-  (if-not (pdf-a-required? organization-id)
-    (do
-      (debug "PDF/A conversion not required") false)
-    (convert-file-to-pdf-in-place src-file)))

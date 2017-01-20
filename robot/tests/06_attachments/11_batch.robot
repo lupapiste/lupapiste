@@ -96,12 +96,12 @@ Fill contents
   Contents is  3  New contents
 
 Fill grouping
-  Select grouping  2  Yleisesti hankkeeseen
+  Deselect grouping  2
   Fill down  grouping-2
   Grouping is  0  Osapuolet
   Grouping is  1  Osapuolet
-  Grouping is  2  Yleisesti hankkeeseen
-  Grouping is  3  Yleisesti hankkeeseen
+  Grouping is general  2
+  Grouping is general  3
 
 Fill drawing: integers
   Fill test id  batch-drawing-0  1
@@ -291,11 +291,19 @@ Contents is
 
 Select grouping
   [Arguments]  ${index}  ${grouping}
-  Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
+  Select from autocomplete  jquery=[data-test-id=batch-grouping-${index}]  ${grouping}
+
+Deselect grouping
+  [Arguments]  ${index}
+  Click element  jquery=[data-test-id=batch-grouping-${index}] .tag-remove
 
 Grouping is
   [Arguments]  ${index}  ${value}
-  Wait Until  List selection should be  jquery=div[data-test-id=batch-grouping-${index}] select[data-test-id=attachment-operation-select]  ${value}
+  Wait Until  Autocomplete selection by test id contains  batch-grouping-${index}  ${value}
+
+Grouping is general
+  [Arguments]  ${index}
+  Wait Until  Autocomplete selection by test id is empty  batch-grouping-${index}
 
 Fill down
   [Arguments]  ${cell}

@@ -9,8 +9,7 @@
       <div class="mask" data-bind="visible: dialogVisible, click: closeDialog"></div>
       <div class="dialog" id="modal-dialog-content" data-test-id="modal-dialog-content"
            data-bind="fader: dialogVisible, duration: 600,
-                      style: {'max-height': dialogHeightPx(),
-                              'margin-top': dialogTop() + 'px'},
+                      style: {'max-height': dialogHeightPx()},
                       css: css">
         <div class="header">
           <span class="title" data-bind="html: title"></span>

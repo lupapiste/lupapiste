@@ -334,8 +334,13 @@
   (let [check (fn [{:keys [name required body repeating] :as element}]
                 (let [kw (keyword name)
                       current-path (conj path kw)
-                      validation-error (when (and required (ss/blank? (get-in data (conj current-path :value))))
-                                         (->validation-result info nil current-path element [:tip "illegal-value:required"]))
+                      value (get-in data (conj current-path :value))
+                      validation-error (when required
+                                         (if (instance? Long value)
+                                           (when (not (some? value))
+                                             (->validation-result info nil current-path element [:tip "illegal-value:required"]))
+                                           (when (ss/blank? value)
+                                             (->validation-result info nil current-path element [:tip "illegal-value:required"]))))
                       current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
                   (concat current-validation-errors
                     (if body

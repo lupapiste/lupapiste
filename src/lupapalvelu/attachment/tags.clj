@@ -1,9 +1,10 @@
 (ns lupapalvelu.attachment.tags
   (:require [sade.util :refer [fn->>]]
             [lupapalvelu.states :as states]
-            [lupapalvelu.attachment.type :as att-type]))
+            [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.operations :as op]))
 
-(def attachment-groups [:parties :building-site :operation :reports :technical-reports])
+(def attachment-groups [:parties :building-site :reports :technical-reports :operation])
 (def general-group-tag :general)
 (def all-group-tags (cons general-group-tag attachment-groups))
 
@@ -17,7 +18,9 @@
        (map (partial merge {:groupType :operation}))))
 
 (defn attachment-groups-for-application [application]
-  (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
+  (if (false? (op/get-primary-operation-metadata application :attachment-op-selector))
+    []
+    (mapcat (partial groups-for-attachment-group-type application) attachment-groups)))
 
 (defn- tag-by-applicationState [{ram :ramLink app-state :applicationState :as attachment}]
   (cond
@@ -40,9 +43,10 @@
   (when op-id
     (str op-id-prefix op-id)))
 
-(defn tag-by-group-type [{group-type :groupType {op-id :id} :op}]
+(defn tag-by-group-type [{group-type :groupType op :op}]
   (or (some-> group-type keyword ((set (remove #{:operation} all-group-tags))))
-      (when op-id :operation)
+      (when (and (sequential? op) (> (count op) 1)) :multioperation)
+      (when (not-empty op) :operation)
       general-group-tag))
 
 (def application-group-types [:parties :general :reports :technical-reports])
@@ -55,12 +59,15 @@
   (when ((set application-group-types) (tag-by-group-type attachment))
     application-group-type-tag))
 
-(defn- tag-by-operation [{{op-id :id} :op :as attachment}]
-  (op-id->tag op-id))
+(defn- tag-by-operation [{op :op :as attachment}]
+  (->> (cond (map? op) (:id op)
+             (= (count op) 1) (get-in op [0 :id])
+             :else nil)
+       op-id->tag))
 
-(defn tag-by-type [{{op-id :id} :op :as attachment}]
+(defn tag-by-type [{op :op :as attachment}]
   (or (att-type/tag-by-type attachment)
-      (when op-id att-type/other-type-group)))
+      (when (not-empty op) att-type/other-type-group)))
 
 (defn attachment-tags
   "Returns tags for a single attachment for filtering and grouping attachments of an application"

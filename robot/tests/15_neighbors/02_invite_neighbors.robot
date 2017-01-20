@@ -3,6 +3,7 @@
 Documentation   Authority adds couple of neighbors, then we invite them and see how they respond
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Library         DebugLibrary
 
 *** Test Cases ***
 
@@ -122,6 +123,21 @@ Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//span[@data-test-id='neighbors-row-status-open']
   Wait until  Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-b@example.com']//span[@data-test-id='neighbors-row-status-open']
   Wait until  Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-c@example.com']//span[@data-test-id='neighbors-row-status-open']
+
+Sonja tries to invite user 'a' via bad email
+  Click element  jquery=div#application-statement-tab tr[data-test-id='neighbors-row-email-a@example.com'] a[data-test-id=neighbor-row-invite]
+  Wait until  Element should be visible  neighbors-sendemail-email
+  Element should not be visible  jquery=div.neighbor-error
+  Input text  neighbors-sendemail-email  älämölö@example.org
+  Click enabled by test id  neighbors-sendemail-send
+  Wait until  Element should be visible  jquery=div.neighbor-error
+  Click button  jquery=button.btn-dialog.close:visible
+
+Sonja opens dialog again and error is no longer visible
+  Click element  jquery=div#application-statement-tab tr[data-test-id='neighbors-row-email-a@example.com'] a[data-test-id=neighbor-row-invite]
+  Wait until  Element should be visible  neighbors-sendemail-email
+  Element should not be visible  jquery=div.neighbor-error
+  Click button  jquery=button.btn-dialog.close:visible
 
 Sonja meets user 'a' IRL and marks her as 'done'
   ${a_xpath} =  Set Variable  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
