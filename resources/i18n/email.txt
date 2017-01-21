@@ -26,7 +26,7 @@
 "support-email" "fi" "<tuki@lupapiste.fi>"
 "support-email" "sv" "<tuki@lupapiste.fi>"
 "register" "en" "[register](https://www.lupapiste.fi/register)"
-"register" "fi" "[rekister&uoml;idy](https://www.lupapiste.fi/register)"
+"register" "fi" "[rekister&ouml;idy](https://www.lupapiste.fi/register)"
 "register" "sv" "[registrera dig](https://www.lupapiste.fi/sv/register)"
 "company-help" "en" "[company help](https://www.lupapiste.fi/ohjeet/yrityksille/yrityksen-hakemusten-hallinta)"
 "company-help" "fi" "[Yritystilin k&auml;ytt&ouml;&ouml;n](https://www.lupapiste.fi/ohjeet/yrityksille/yrityksen-hakemusten-hallinta)"
