@@ -311,7 +311,7 @@
 
 (defn- notify-of-invite! [app command invite-type recipients]
   (->> (map (fn [{{:keys [email user]} :invite}] (assoc user :email email)) recipients)
-         (hash-map :application app :command command :recipients)
+         (assoc command :application app :recipients)
          (notif/notify! invite-type)))
 
 
