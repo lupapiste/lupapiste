@@ -191,3 +191,7 @@
 (fact "escaped-re-pattern"
   (escaped-re-pattern "^te-st[\\d]$.{2}") => #"\Q^te-st[\d]$.{2}\E"
   (escaped-re-pattern "Testitiedosto 3 {2}{2}(#(#){6}=.zip") => #"\QTestitiedosto 3 {2}{2}(#(#){6}=.zip\E")
+
+(fact "unescape-html-scandinavian-characters"
+  (unescape-html-scandinavian-characters "&auml;&Auml;&ouml;&Ouml;&aring;&Aring;")
+  => "\u00e4\u00c4\u00f6\u00d6\u00e5\u00c5")

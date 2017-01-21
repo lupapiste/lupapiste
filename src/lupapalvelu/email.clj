@@ -131,9 +131,10 @@
   (reduce (fn [locs loc-key]
             (assoc-in locs
                       (map keyword loc-key)
-                      #(i18n/try-localize throw-localization-not-found!
-                                          %
-                                          loc-key)))
+                      #(ss/unescape-html-scandinavian-characters
+                        (i18n/try-localize throw-localization-not-found!
+                                           %
+                                           loc-key))))
           {}
           (localization-keys-from-template template)))
 
