@@ -4,7 +4,8 @@
              [monger.operators :refer [$in]]
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]
-             [lupapalvelu.application-utils :refer [operation-names make-area-query]]
+             [lupapalvelu.application-utils :refer [make-area-query]]
+             [lupapalvelu.operations :refer [operation-names]]
              [lupapalvelu.geojson :as geo]
              [lupapalvelu.i18n :as i18n]))
 

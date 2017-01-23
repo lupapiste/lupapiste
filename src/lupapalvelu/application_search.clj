@@ -12,9 +12,10 @@
             [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
@@ -33,7 +34,7 @@
                      :documents.data.henkilo.henkilotiedot.sukunimi.value]
         fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
-        ops         (app-utils/operation-names filter-search)]
+        ops         (operations/operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
                                         {:secondaryOperations.name {$in ops}}])

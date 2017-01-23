@@ -8,6 +8,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
@@ -84,7 +85,7 @@
    :modified     (to-local-date (:modified application))
    :address      (:address application)
    :municipality #(i18n/localize % "municipality" (:municipality application))
-   :operation    #(i18n/localize % "operations" (get-in application [:primaryOperation :name]))})
+   :operation    #(app-utils/operation-description application %)})
 
 ;;
 ;; Recipient functions

@@ -1,10 +1,10 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [schema.core :as sc]
-            [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [monger.operators :refer :all]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
@@ -12,10 +12,10 @@
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
-            [lupapiste-commons.usage-types :as usages]
-            [monger.operators :refer :all]
-            [lupapalvelu.permit :as permit]))
+            [lupapiste-commons.usage-types :as usages]))
 
 (def default-description "operations.tree.default-description")
 
@@ -1253,6 +1253,29 @@
     (when (:hidden operation)
       (fail :error.operations.hidden))
     (fail :error.operations.not-found)))
+
+
+(defn- normalize-operation-name [i18n-text]
+  (when-let [lc (ss/lower-case i18n-text)]
+    (-> lc
+        (ss/replace #"\p{Punct}" "")
+        (ss/replace #"\s{2,}"    " "))))
+
+(def operation-index
+  (reduce
+    (fn [ops k]
+      (let [localizations (map #(i18n/localize % "operations" (name k)) i18n/supported-langs)
+            normalized (map normalize-operation-name localizations)]
+        (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
+    []
+    (keys operations)))
+
+(defn operation-names [filter-search]
+  (let [normalized (normalize-operation-name filter-search)]
+    (map :op
+         (filter
+           (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
+           operation-index))))
 
 (comment
   ; operations (keys) with asianhallinta enabled
