@@ -1,8 +1,8 @@
 # Hei,
 
-Tapaaminen peruttu.
+Tapaaminen hyväksytty.
 
-{{link-calendar-fi}}
+{{link-calendar}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 

@@ -23,8 +23,7 @@
 
 (def model
   (fn [{application :application} _ recipient]
-    {:link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
-     :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)}))
+    {:link-calendar #(notifications/get-application-link application "calendar" % recipient)}))
 
 (defn- display-names [users]
   (sade.strings/join ", " (map (fn [user] (str (:firstName user) " " (:lastName user))) users)))
@@ -42,8 +41,7 @@
                           :location        (:location reservation)}
        :address          (:address application)
        :municipality     (i18n/localize-fallback nil (str "municipality." (:municipality application)))
-       :link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
-       :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)
+       :link-calendar    #(notifications/get-application-link application "calendar" % recipient)
        :user-first-name  (:firstName recipient)})))
 
 (defn calendar-request

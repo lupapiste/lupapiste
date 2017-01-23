@@ -10,7 +10,7 @@ Lis&auml;tietoja: {{reservation.comment}}
 
 Jos allaoleva linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link-calendar-fi}}
+{{link-calendar}}
 
 Terveisin,
 [Lupapiste](https://www.lupapiste.fi/)
