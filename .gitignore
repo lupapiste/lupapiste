@@ -68,3 +68,5 @@ user.properties
 /docs/developerguide.html
 node_modules
 /.ctags
+
+resources/public/lp-static/js/*

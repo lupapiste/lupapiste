@@ -20,7 +20,7 @@
                  [bultitude "0.2.8"] ; noir requires 0.2.0
 
                  ; MongoDB driver
-                 [com.novemberain/monger "3.1.0"]
+                 [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
                  ; Logging
                  [com.taoensso/timbre "4.7.4"]
@@ -131,7 +131,11 @@
                  ; Wrapper for clj-pdf for PDF/A document generation
                  [lupapiste/pdfa-generator "1.0.2" :exclusions [org.clojure/tools.reader xalan]]
                  ; JMX-server with socket reuse
-                 [lupapiste/jmx-server "0.1.0"]]
+                 [lupapiste/jmx-server "0.1.0"]
+
+                 [org.clojure/clojurescript "1.9.293"]
+                 [rum "0.10.8"]]
+
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]

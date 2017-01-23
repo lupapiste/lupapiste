@@ -287,6 +287,11 @@
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
                               </a></li>
 
+                          <li data-bind="css: {'active': $parent.selectedTabName() === 'rum'}">
+                            <a data-bind="click: changeTab" href="#" data-target="rum" class="link-btn">
+                              <span>rum</span>
+                            </a></li>
+
                             <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
                                 <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
@@ -517,6 +522,12 @@
                       </div>
                     </div>
                     <!-- /ko -->
+
+                  <!--ko if: selectedTabName() === 'rum' -->
+                  <div id="application-rum-tab" class="tab-content">
+                    <div data-bind="rumApp: {name: 'rum-app'}"></div>
+                  </div>
+                  <!-- /ko -->
 
                     <!-- Bulletin tab -->
                     <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('publish-bulletin-enabled') -->

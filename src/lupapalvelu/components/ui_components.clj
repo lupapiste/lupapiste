@@ -23,7 +23,8 @@
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]
-            [lupapalvelu.attachment.conversion :as conversion]))
+            [lupapalvelu.attachment.conversion :as conversion]
+            [cljs.build.api]))
 
 (def themes #{"louhi", "facta"})
 
@@ -519,3 +520,12 @@
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css :scss])]
   (when-not (or (fn? r) (io/resource (c/path r)))
     (throw (Exception. (str "Resource missing: " r)))))
+
+(future
+  (cljs.build.api/watch "src"
+                        {
+                         ;:main 'lupapalvelu.ui.core
+                         :output-to "resources/public/lp-static/js/rum-app.js"
+                         :output-dir "resources/public/lp-static/js/out"
+                         :asset-path "/lp-static/js/out"
+                         :optimizations :simple}))
