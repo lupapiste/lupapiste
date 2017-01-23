@@ -5,6 +5,7 @@
             [clostache.parser :as clostache]
             [endophile.core :as endophile]
             [net.cgrand.enlive-html :as enlive]
+            [taoensso.timbre :as timbre :refer [warn]]
             [sade.email :as email]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -32,7 +33,10 @@
     resource
     (if lang
       (find-resource resource-name)
-      (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name))))))
+      (if (env/dev-mode?)
+        (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))
+        (do (warn "Can't find mail resource: " resource-name)
+            "")))))
 
 (defn- slurp-resource [resource]
   (with-open [in (io/input-stream resource)]
@@ -122,10 +126,14 @@
          (map #(ss/split % #"\.")))))
 
 (defn throw-localization-not-found! [lang localization]
-  (throw (Exception. (str "No localization for language "
-                          (or lang "(nil)")
-                          " in "
-                          localization))))
+  (let [message (str "No localization for language "
+                     (or lang "(nil)")
+                     " in "
+                     localization)]
+    (if (env/dev-mode?)
+      (throw (Exception. message))
+      (do (warn message)
+          ""))))
 
 (defn template->localization-model [template]
   (reduce (fn [locs loc-key]
