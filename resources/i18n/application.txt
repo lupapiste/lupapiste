@@ -34,7 +34,7 @@
 "application.addInvite" "en" "Add authorisation"
 "application.addInvite" "fi" "Lisää valtuutus"
 "application.addInvite" "sv" "Lägg till befogenhet"
-"application.addLinkPermit" "en" "Add authorisation reference"
+"application.addLinkPermit" "en" "Add reference permit"
 "application.addLinkPermit" "fi" "Lisää viitelupa"
 "application.addLinkPermit" "sv" "Tillsätt referenslov"
 "application.addOperation" "en" "Add action"
