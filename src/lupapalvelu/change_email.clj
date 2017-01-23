@@ -62,8 +62,10 @@
                                            :auth.$.invite.user.username new-email}})))))
 
 (defn- notify-company-admins [user old-email new-email]
-  ;; TODO
-  nil)
+  (notifications/notify! :change-company-email-notification
+                         {:user user
+                          :old-email old-email
+                          :new-email new-email}))
 
 (defn- change-email-with-token [token stamp]
   {:pre [(map? token)]}
