@@ -109,7 +109,7 @@
 "auth-admin.inspection-summary-templates.add" "en" "Add new template"
 "auth-admin.inspection-summary-templates.add" "fi" "Lisää yhteenvetopohja"
 "auth-admin.inspection-summary-templates.add" "sv" "Lägg till sammandragsmall"
-"auth-admin.inspection-summary-templates.items" "en" ""
+"auth-admin.inspection-summary-templates.items" "en" "Inspection items"
 "auth-admin.inspection-summary-templates.items" "fi" "Tarkastusasiakohdat"
 "auth-admin.inspection-summary-templates.items" "sv" "Granskningspunkter"
 "auth-admin.inspection-summary-templates.modified" "en" "Modified"

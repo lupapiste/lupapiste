@@ -154,6 +154,6 @@
 "stamp.yMargin" "en" "At the bottom"
 "stamp.yMargin" "fi" "Alareunasta"
 "stamp.yMargin" "sv" "Från nedre hörnet"
-"unstamp.all" "en" ""
+"unstamp.all" "en" "Clear selections"
 "unstamp.all" "fi" "Tyhjennä valinnat"
 "unstamp.all" "sv" "Töm valda"
