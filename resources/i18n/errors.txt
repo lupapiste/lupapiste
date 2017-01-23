@@ -390,7 +390,7 @@
 "error.invalid-task-type" "sv" "Funktionen ej i bruk för denna typ av krav"
 "error.invalid-tos-function" "en" "The chosen procedure was not found in the data control plan"
 "error.invalid-tos-function" "fi" "Valittua menettelyä ei löytynyt tiedonohjaussuunnitelmasta"
-"error.invalid-tos-function" "sv" "Det valda förfarandet hittades inte i datastyrningsplanen"
+"error.invalid-tos-function" "sv" "Det valda förfarandet hittades inte i informationsstyrningsplanen"
 "error.invalid-type" "en" "Unknown type of command"
 "error.invalid-type" "fi" "Tuntematon komennon tyyppi"
 "error.invalid-type" "sv" "Okänd kommandotyp"
