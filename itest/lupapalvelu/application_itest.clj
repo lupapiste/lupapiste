@@ -614,6 +614,11 @@
     (command pena :submit-application :id application-id)
     (return-to-draft sonja application-id)
 
+    (let [email (last-email)]
+      (:to email) => (contains "pena")
+      (:subject email) => (contains "Hakemus palautettiin Luonnos-tilaan")
+      (get-in email [:body :plain]) => (contains "comment-text"))
+
     (let [application (query-application pena application-id)]
       (fact "The return to draft can be seen in application history"
         (:state application) => "draft"

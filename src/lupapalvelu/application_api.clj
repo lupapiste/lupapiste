@@ -61,16 +61,9 @@
                                            (assoc (notifications/create-app-model command conf recipient)
                                              :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
 
-(defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
-                              _
-                              recipient]
-  {:operation-fi (app-utils/operation-description application :fi)
-   :operation-sv (app-utils/operation-description application :sv)
-   :address (:address application)
-   :city-fi (i18n/localize :fi "municipality" (:municipality application))
-   :city-sv (i18n/localize :sv "municipality" (:municipality application))
-   :name (:firstName recipient)
-   :text text})
+(defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
+  (assoc (notifications/create-app-model command conf recipient)
+    :text text))
 
 (defn return-to-draft-recipients
   "the notification is sent to applicants in auth array and application owners"
