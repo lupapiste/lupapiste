@@ -212,6 +212,12 @@
     (fact "Pena can undo his cancellation"
       (command pena :undo-cancellation :id application-id) => ok?)
 
+    (let [email (last-email)]
+      (:to email) => (contains (email-for-key teppo))
+      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hanke on palautunut tilaan Hakemus j\u00e4tetty"
+      (get-in email [:body :plain]) => (contains "hakemus on palautettu aktiiviseksi")
+      email => (partial contains-application-link? application-id "applicant"))
+
     (fact "Teppo can now cancel"
       (command teppo :cancel-application :id application-id :text "I want it canceled!" :lang "fi") => ok?
       (:state (query-application teppo application-id)) => "canceled")

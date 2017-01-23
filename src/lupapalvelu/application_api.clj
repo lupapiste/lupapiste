@@ -54,6 +54,14 @@
 
 (notifications/defemail :application-state-change state-change)
 
+(notifications/defemail :undo-cancellation
+                        {:subject-key    "undo-cancellation"
+                         :template       "application-state-change.md"
+                         :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                         :model-fn       (fn [command conf recipient]
+                                           (assoc (notifications/create-app-model command conf recipient)
+                                             :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
+
 (defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
                               _
                               recipient]
@@ -239,6 +247,7 @@
                           (let [canceled-entry (app/last-history-item application)]
                             (when-not (= (:username user) (get-in canceled-entry [:user :username]))
                               (fail :error.undo-only-for-canceler)))))]
+   :on-success       (notify :undo-cancellation)
    :states           #{:canceled}}
   [command]
   (app/undo-cancellation command))
