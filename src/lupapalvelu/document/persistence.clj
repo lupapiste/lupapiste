@@ -199,7 +199,8 @@
                    (->> all-attachments
                         (keep-indexed (fn [ind att]
                                         (some->> (att/remove-operation-updates att op-id)
-                                                 (vector ind))))
+                                                 (util/map-keys #(ss/join "." [ind (name %)])))))
+                        (apply concat)
                         (util/map-keys (partial util/kw-path :attachments)))))}))
     (when (seq removable-attachment-ids)
       (att/delete-attachments! application removable-attachment-ids))))
