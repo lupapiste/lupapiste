@@ -31,8 +31,7 @@
     :recipient-email (:email recipient)))
 
 (notifications/defemail :invite-to-prev-permit  {:recipients-fn :recipients
-                                                 :model-fn create-prev-permit-invite-email-model
-                                                 :subject-key "invite"})
+                                                 :model-fn create-prev-permit-invite-email-model})
 
 (defn create-invite-foreman-email-model [command conf recipient]
   (merge (notifications/create-app-model command conf recipient)

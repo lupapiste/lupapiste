@@ -10,7 +10,7 @@ Klicka l&auml;nken nedan f&ouml;r att f&aring; tillg&aring;ng till ditt tillst&a
 
 Om det h&auml;r &auml;r f&ouml;rsta g&aring;ngen du anv&auml;nder Lupapiste med e-postadressen {{recipient-email}} m&aring;ste du f&ouml;rst registrera dig som anv&auml;ndare. Det g&ouml;r du med bankkoder eller mobilcertifikat.
 
-Arbetsledaren m&aring;ste f&aring; en inbjudan till bygglovet och till sin egen arbetsledarans&ouml;kan/anm&auml;lan fr&aring;n den som inleder projektet eller fr&aring;n ett ombud som personen befullm&auml;ktigat. Inbjudan skickas fr&aring;n projektets flik Byggande till arbetsledarens e-postadress. L&auml;s [anvisningar om utn&auml;mnandet av arbetsledare](https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen) (på finska).
+Arbetsledaren m&aring;ste f&aring; en inbjudan till bygglovet och till sin egen arbetsledarans&ouml;kan/anm&auml;lan fr&aring;n den som inleder projektet eller fr&aring;n ett ombud som personen befullm&auml;ktigat. Inbjudan skickas fr&aring;n projektets flik Byggande till arbetsledarens e-postadress. L&auml;s {{tyonjohtajan-ohje}} (på finska).
 
 Om du anm&auml;lt arbetsledarna i anslutning till ditt tillst&aring;nd redan tidigare syns de inte i Lupapiste.  Anm&auml;lningar eller ans&ouml;kningar om arbetsledare beh&ouml;ver inte l&auml;mnas in p&aring; nytt.
 
