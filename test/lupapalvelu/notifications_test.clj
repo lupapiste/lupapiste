@@ -117,3 +117,17 @@
 
 (fact "Unknown config"
   (notify! :foo {}) => (throws AssertionError))
+
+(fact "organization-on-submit email"
+  (against-background [(lupapalvelu.organization/get-organization "Foo") => {:notifications {:submit-notification-emails ["foo-org@example.com"]}}])
+  (notify! :organization-on-submit {:application {:address "Foostreet 1",
+                                                  :municipality "753",
+                                                  :state "submitted"
+                                                  :primaryOperation {:name "kerrostalo-rivitalo"}
+                                                  :organization "Foo",
+                                                  :_applicantIndex ["Foo 1", "Foo 2"]}})
+  (let [msg (last (dummy/messages))]
+    (:subject msg) => (contains "Foostreet 1, Sipoo - uusi hakemus")
+    (get-in msg [:body :plain]) => (contains "osoitteessa Foostreet 1, Sipoo on nyt j\u00e4tetty vireille")
+    (get-in msg [:body :plain]) => (contains "Alla on linkki")
+    (get-in msg [:body :plain]) =not=> (contains "???")))

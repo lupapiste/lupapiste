@@ -93,3 +93,6 @@
 "email.state-description.undoCancellation" "en" ""
 "email.state-description.undoCancellation" "fi" "Tämä tarkoittaa, että aikaisemmin peruutettu hakemus on palautettu aktiiviseksi peruutusta edeltävään tilaan."
 "email.state-description.undoCancellation" "sv" ""
+"email.title.organization-on-submit" "en" ""
+"email.title.organization-on-submit" "fi" "{{address}}, {{municipality}} - uusi hakemus"
+"email.title.organization-on-submit" "sv" ""

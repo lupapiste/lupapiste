@@ -302,11 +302,13 @@
    :tab-fn (constantly "statement")})
 
 (notifications/defemail :organization-on-submit
-  (assoc state-change
-    :recipients-fn (fn [{application :application org :organization}]
-                      (let [organization (or (and org @org) (org/get-organization (:organization application)))
-                            emails (get-in organization [:notifications :submit-notification-emails])]
-                        (map (fn [e] {:email e, :role "authority"}) emails)))))
+  {:recipients-fn (fn [{application :application org :organization}]
+                    (let [organization (or (and org @org) (org/get-organization (:organization application)))
+                          emails (get-in organization [:notifications :submit-notification-emails])]
+                      (map (fn [e] {:email e, :role "authority"}) emails)))
+   :model-fn (fn [{app :application :as command} conf recipient]
+               (assoc (notifications/create-app-model command conf recipient)
+                 :applicants (reduce #(str %1 ", " %2) (:_applicantIndex app))))})
 
 (defn submit-validation-errors [{:keys [application] :as command}]
   (remove nil? (conj []
