@@ -22,7 +22,19 @@
   {:user-roles #{:anonymous}
    :parameters [files]
    :input-validators [file-mime-type-accepted file-size-legal]}
-  (->> {:files (file-upload/save-files files (vetuma/session-id))
+  (let [file-info (pmap
+                    #(file-upload/save-file % :sessionId (vetuma/session-id) :linked false)
+                    (map #(rename-keys % {:tempfile :content}) files))]
+    (->> {:files file-info :ok true}
+         (resp/json)
+         (resp/content-type "text/plain")
+         (resp/status 200))))
+
+(defraw upload-file-authenticated
+  {:user-roles #{:authority :applicant}
+   :parameters [files applicationId]
+   :input-validators [file-mime-type-accepted file-size-legal]}
+  (->> {:files (file-upload/save-files applicationId files (vetuma/session-id))
         :ok true}
        (resp/json)
        (resp/content-type "text/plain")

@@ -6,17 +6,18 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
-(defn- doc->building-data [{{{national-id :value} :valtakunnallinenNumero {short-id :value} :tunnus} :data
-                            {{operation-id :id} :op} :schema-info}]
-  (when (ss/not-blank? national-id)
+(defn- doc->building-data
+  [{{{national-id :value} :valtakunnallinenNumero {short-id :value} :tunnus} :data {{operation-id :id} :op} :schema-info}
+   include-bldgs-without-nid?]
+  (when (or (and short-id include-bldgs-without-nid?) (ss/not-blank? national-id))
     {:operation-id operation-id
      :national-id national-id
      :short-id    short-id}))
 
 (defn building-ids
   "Gathers building-id data from documents."
-  [{:keys [documents] :as application}]
-  (->> (map doc->building-data documents)
+  [{:keys [documents]} & [include-bldgs-without-nid?]]
+  (->> (map #(doc->building-data % include-bldgs-without-nid?) documents)
        (remove nil?)))
 
 (defn building-id-mapping
