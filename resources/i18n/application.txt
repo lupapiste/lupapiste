@@ -1057,4 +1057,4 @@
 "application.attachments.multioperation" "en" ""
 "application.attachments.multioperation" "fi" "Usean toimenpiteen liitteet"
 "application.attachments.multioperation" "sv" ""
-"link-permit.same-property" "fi" "Rajaa hakemuksen kiinteistötunnuksella"
+"link-permit.same-property" "fi" "Näytä vain hakemukset, joilla on sama kiinteistötunnus kuin tällä hakemuksella"
