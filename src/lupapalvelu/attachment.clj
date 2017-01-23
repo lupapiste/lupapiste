@@ -704,7 +704,7 @@
                                (create-attachment! application
                                                    (assoc attachment-options
                                                      :requested-by-authority
-                                                     (usr/authority? user))))
+                                                     (auth/application-authority? application user))))
         linked-version     (set-attachment-version! application user attachment options)]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
@@ -922,10 +922,14 @@
              (ss/not-blank? (:attachmentId data)))
     (access/has-attachment-auth-role :uploader command)))
 
-(defn allowed-only-for-authority-when-application-sent [{:keys [application user]}]
-  (when (and (util/=as-kw :sent (:state application))
-             (not (auth/application-authority? application user)))
-    (fail :error.unauthorized)))
+(defn allowed-only-for-authority-when-application-sent
+  "Pre-check is OK if the user is application authority or the
+  application has an environmental permit type."
+  [{:keys [application user]}]
+  (when (util/=as-kw :sent (:state application))
+    (when-not (or (auth/application-authority? application user)
+                  (contains? #{:YI :YL :YM :VVVL} (-> application :permitType keyword)))
+      (fail :error.unauthorized))))
 
 (defn attachment-editable-by-application-state
   [{{attachmentId :attachmentId} :data user :user {current-state :state organization :organization :as application} :application}]
