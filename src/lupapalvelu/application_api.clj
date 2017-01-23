@@ -56,7 +56,6 @@
 
 (notifications/defemail :undo-cancellation
                         {:subject-key    "undo-cancellation"
-                         :template       "application-state-change.md"
                          :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
                          :model-fn       (fn [command conf recipient]
                                            (assoc (notifications/create-app-model command conf recipient)
