@@ -127,6 +127,7 @@
                                                   :primaryOperation {:name "kerrostalo-rivitalo"}
                                                   :organization "Foo",
                                                   :_applicantIndex ["Foo 1", "Foo 2"]}})
+  (Thread/sleep 100)
   (let [msg (last (dummy/messages))]
     (:subject msg) => (contains "Foostreet 1, Sipoo - uusi hakemus")
     (get-in msg [:body :plain]) => (contains "osoitteessa Foostreet 1, Sipoo on nyt j\u00e4tetty vireille")
