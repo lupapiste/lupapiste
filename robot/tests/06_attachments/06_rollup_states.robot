@@ -19,11 +19,10 @@ Sonja goes to attachments tab
   Rollup rejected  Pääpiirustukset
   Rollup rejected  Muut suunnitelmat
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
-  
+
 Every accordion is open
   Rollup open  Hakemuksen liitteet
   Rollup open  Osapuolet
-  Rollup open  Yleiset hankkeen liitteet
   Rollup open  Pääpiirustukset
   Rollup open  Muut suunnitelmat
   Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
@@ -36,7 +35,6 @@ Toggle all opens all
   Scroll and click test id  toggle-all-accordions
   Rollup open  Hakemuksen liitteet
   Rollup open  Osapuolet
-  Rollup open  Yleiset hankkeen liitteet
   Rollup open  Pääpiirustukset
   Rollup open  Muut suunnitelmat
   Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
@@ -45,7 +43,6 @@ Toggle all closes all
   Scroll and click test id  toggle-all-accordions
   Rollup closed  Hakemuksen liitteet
   Rollup closed  Osapuolet
-  Rollup closed  Yleiset hankkeen liitteet
   Rollup closed  Pääpiirustukset
   Rollup closed  Muut suunnitelmat
   Rollup closed  Asuinkerrostalon tai rivitalon rakentaminen
@@ -57,7 +54,6 @@ Close Osapuolet and toggle all
   Scroll and click test id  toggle-all-accordions
   Rollup open  Hakemuksen liitteet
   Rollup open  Osapuolet
-  Rollup open  Yleiset hankkeen liitteet
   Rollup open  Pääpiirustukset
   Rollup open  Muut suunnitelmat
   Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
@@ -68,7 +64,6 @@ Close Hakemuksen liitteet and toggle all
   Scroll and click test id  toggle-all-accordions
   Rollup open  Hakemuksen liitteet
   Rollup open  Osapuolet
-  Rollup open  Yleiset hankkeen liitteet
   Rollup open  Pääpiirustukset
   Rollup open  Muut suunnitelmat
   Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
@@ -77,6 +72,7 @@ Accordion with only not needed is neutral
   Click not needed  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Rollup neutral  Muut suunnitelmat
   Click not needed  paapiirustus.pohjapiirustus
+  Click not needed  paapiirustus.asemapiirros
   Rollup neutral  Pääpiirustukset
   Rollup neutral  Asuinkerrostalon tai rivitalon rakentaminen
   Click not needed  paapiirustus.pohjapiirustus
