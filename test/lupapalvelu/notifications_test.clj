@@ -1,5 +1,5 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.notifications :refer [notify! create-app-model]]
+  (:require [lupapalvelu.notifications :refer [notify! create-app-model defemail]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.application-api]
@@ -133,3 +133,37 @@
     (get-in msg [:body :plain]) => (contains "osoitteessa Foostreet 1, Sipoo on nyt j\u00e4tetty vireille")
     (get-in msg [:body :plain]) => (contains "Alla on linkki")
     (get-in msg [:body :plain]) =not=> (contains "???")))
+
+
+(defemail :test {:recipients-fn :recipients
+                 :model-fn (constantly
+                             {:hi  ""
+                              :hej ""
+                              :moi ""})
+                 :template "testbody.md"})
+
+(defn- notify-invite! [user]
+  (notify! :test {:recipients [user]}))
+
+(defn- last-notification-contains-text [text]
+  (Thread/sleep 100)
+  (fact {:midje/description (str "Notification contains '" text "'")}
+    (let [msg (last (dummy/messages))]
+      (get-in msg [:body :plain]) => (contains text))))
+
+(facts "notification language"
+  (against-background [(#'lupapalvelu.notifications/get-email-subject anything anything anything anything) => "Subject"])
+  (notify-invite! {:email "pekka@suomi.fi" :language "fi"})
+  (last-notification-contains-text "suomi")
+
+  (notify-invite! {:email "sven@sverige.sv" :language "sv"})
+  (last-notification-contains-text "Svenska")
+
+  (notify-invite! {:email "johnny@engl.ish" :language "en"})
+  (last-notification-contains-text "English")
+
+
+  (notify-invite! {:email "nano@nano.nano" :language nil})
+  (last-notification-contains-text "suomi")
+  (last-notification-contains-text "Svenska")
+  (last-notification-contains-text "English"))

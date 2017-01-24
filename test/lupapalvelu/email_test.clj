@@ -48,7 +48,7 @@
     (fact "html" html => (contains (str (if html? "<em>" "<p>") s) :gaps-ok))))
 
 (facts "Apply markdown template"
-  (let [ctx {:hej "Morgon" :moi "Mortonki"}]
+  (let [ctx {:hej "Morgon" :moi "Mortonki" :hi "Hi y'all"}]
     (fact "If language is not provided, the templates in supported languages are catenated"
       (apply-template "testbody.md" ctx) => (every-checker (mail-check "Svenska Morgon")
                                                            (mail-check "suomi Mortonki")))
