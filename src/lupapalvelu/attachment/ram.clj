@@ -6,8 +6,6 @@
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :refer [defemail] :as notifications]
             [lupapalvelu.user :as usr]
             [lupapalvelu.tiedonohjaus :as tos]))
@@ -28,7 +26,7 @@
 
 (defn notify-new-ram-attachment! [application attachment-id created]
   (notifications/notify! :new-ram-notification {:application application
-                                                :recipients  (->> (get-in application [:authority :id]) (mongo/by-id :users) vector)
+                                                :recipients  (->> (get-in application [:authority :id]) (usr/get-user-by-id) vector)
                                                 :data        {:attachment-id attachment-id
                                                               :created-date  (util/to-local-date created)}}))
 
