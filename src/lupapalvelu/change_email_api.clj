@@ -12,6 +12,9 @@
 (defn change-email-link [lang token]
   (str (env/value :host) "/app/" lang "/welcome#!/email/" token))
 
+(defn change-email-for-company-user-link [lang token]
+  (str (env/value :host) "/app/" lang "/welcome#!/change-email/" token))
+
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
    :model-fn (fn [{data :data} conf recipient]
@@ -22,6 +25,17 @@
                     :expires (util/to-local-datetime expires)
                     :link-fi (change-email-link "fi" id)
                     :link-sv (change-email-link "sv" id)})))})
+
+(notifications/defemail :change-email-for-company-user
+  {:recipients-fn notifications/from-user
+   :model-fn (fn [{data :data} conf recipient]
+               (let [{:keys [id expires]} (:token data)]
+                 (merge
+                   (select-keys data [:old-email :new-email])
+                   {:name    (:firstName recipient)
+                    :expires (util/to-local-datetime expires)
+                    :link-fi (change-email-for-company-user-link "fi" id)
+                    :link-sv (change-email-for-company-user-link "sv" id)})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]

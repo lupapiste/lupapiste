@@ -14,7 +14,7 @@
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
         token (token/get-token token-id)]
-    (notifications/notify! :change-email
+    (notifications/notify! (if (:personId user) :change-email :change-email-for-company-user)
                            {:user (assoc user :email new-email)
                             :data {:old-email (:email user)
                                    :new-email new-email
