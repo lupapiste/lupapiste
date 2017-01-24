@@ -1,8 +1,12 @@
 (ns lupapalvelu.email-test
   (:require [lupapalvelu.email :refer :all]
+            [lupapalvelu.i18n :as i18n]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.set :as set]
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (testable-privates lupapalvelu.email preprocess-context)
 
@@ -93,3 +97,34 @@
 
     (fact "throws when it encounters a missing localization key in the template"
       (preprocess-context "nonexistent.md" {:lang "sv"}) => (throws #"No localization"))))
+
+(def ajanvaraus-templates #{"en-accept-appointment.md" "en-decline-appointment.md"
+                            "en-suggest-appointment-authority.md" "en-suggest-appointment-from-applicant.md"
+                            "en-suggest-appointment-to-applicant.md"
+                            "sv-accept-appointment.md" "sv-decline-appointment.md"
+                            "sv-suggest-appointment-authority.md" "sv-suggest-appointment-from-applicant.md"
+                            "sv-suggest-appointment-to-applicant.md"})
+
+(facts "templates exist check"
+  (let [this-path  (util/this-jar lupapalvelu.main)
+        templates  (if (ss/ends-with this-path ".jar")      ; are we inside jar
+                     (filter #(ss/ends-with % ".md") (util/list-jar this-path "email-templates/"))
+                     (util/get-files-by-regex "resources/email-templates/" #".+\.md$")) ; dev
+        template-names (->> templates
+                            (map #(if (string? %) % (.getName %)))
+                            (filter #(ss/starts-with % (str (name i18n/default-lang) "-")))) ; when writing default is "fi"
+        excluded-templates (set/union ajanvaraus-templates
+                                      #{"en-add-statement-giver.md" "en-request-statement.md"
+                                        "en-invite-authority.md" "en-neighbor-hearing-requested.md"
+                                        "en-notify-authority-added.md" "en-organization-on-submit.md"
+                                        "en-inforequest-invite.md" "en-reminder-open-inforequest.md"
+                                        "en-reminder-statement-due-date.md" "en-request-statement-new-user.md"
+                                        "en-reminder-request-statement.md" "en-undo-cancellation.md"
+                                        "sv-organization-on-submit.md" "sv-undo-cancellation.md"})]
+    (doseq [lang (disj (set i18n/supported-langs) :fi)
+            template-name template-names
+            :let [template-suffix (last (re-find  #"\w+\-(.+)" template-name))
+                  filename        (str (name lang) "-" template-suffix)]
+            :when (not (excluded-templates filename))]
+      (fact {:midje/description (str filename " exists")}
+        (find-resource filename) =not=> (throws IllegalArgumentException)))))
