@@ -2,7 +2,7 @@
   (:require [lupapalvelu.notifications :refer [notify! create-app-model]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            lupapalvelu.application-api
+            [lupapalvelu.application-api]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.open-inforequest]
