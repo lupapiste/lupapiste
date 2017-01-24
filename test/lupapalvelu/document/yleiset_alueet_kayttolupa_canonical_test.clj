@@ -258,8 +258,8 @@
     (fact "hakija-yksityinen-henkilotunnus" (:henkilotunnus hakija-yksityinen-Henkilo) => (-> henkilotiedot :hetu :value))
 
     ;; Kayton alku/loppu pvm
-    (fact "alkuPvm" alkuPvm => (util/to-xml-date-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
-    (fact "loppuPvm" loppuPvm => (util/to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
+    (fact "alkuPvm" alkuPvm => (util/to-xml-date (-> tyoaika :data :tyoaika-alkaa-ms :value)))
+    (fact "loppuPvm" loppuPvm => (util/to-xml-date (-> tyoaika :data :tyoaika-paattyy-ms :value)))
 
     ;; Hankkeen kuvaus
     (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))

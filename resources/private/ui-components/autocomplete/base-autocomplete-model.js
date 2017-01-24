@@ -10,7 +10,10 @@
  *   selectedOptions (observableArray): observable for multi selections
  *   tags (boolean): tags mode
  *   nullable (boolean): true if selected value can be null (ie. Choose... dropdown)
+ *   disable (boolean)
  *   (lP|p)laholder: search placeholder text, either lockey (lPlaceholder) or text (placeholder)
+ *   maxHeight: If given will override the calculated max height of
+ *   the candidate list. CSS style.
  */
 LUPAPISTE.AutocompleteBaseModel = function(params) {
   "use strict";
@@ -212,7 +215,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
     self.retainFocus();
   };
 
-  self.maxHeightPx = ko.pureComputed(function() {
+  self.maxHeight = params.maxHeight || ko.pureComputed(function() {
     var windowHeight = lupapisteWindow.windowHeight();
     if ( windowHeight ) {
       return windowHeight / 2 + "px"; // magic number 2, seems to work pretty well with different window sizes (zoom levels)

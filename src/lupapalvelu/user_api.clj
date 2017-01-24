@@ -735,6 +735,7 @@
         (att/upload-and-attach! command
                                 {:attachment-id attachment-id
                                  :attachment-type attachment-type
+                                 :group {:groupType (get-in (att-type/attachment-type attachment-type) [:metadata :grouping])}
                                  :created (now)
                                  :required false
                                  :locked false}

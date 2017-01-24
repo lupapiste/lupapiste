@@ -13,8 +13,9 @@
   (let [token-id (token/make-token :change-email user {:new-email new-email}
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
-        token (token/get-token token-id)]
-    (notifications/notify! :change-email
+        token (token/get-token token-id)
+        user-with-person-id (usr/find-user {:_id (:id user)})]
+    (notifications/notify! (if (:personId user-with-person-id) :change-email :change-email-for-company-user)
                            {:user (assoc user :email new-email)
                             :data {:old-email (:email user)
                                    :new-email new-email
@@ -42,15 +43,35 @@
                                 :auth.$.invite.email email
                                 :auth.$.invite.user (usr/summary user)}}))
 
+(defn- update-email-in-application-auth! [user-id old-email new-email]
+  ;; There might be duplicates due to old bugs, ensure everything is updated.
+  ;; loop exits when no applications with the old username were found
+  (loop [n 1]
+    (when (pos? n)
+      (recur (mongo/update-by-query :applications
+                                    {:auth {$elemMatch {:id user-id
+                                                        :username old-email}}}
+                                    {$set {:auth.$.username new-email}})))))
+
+(defn- update-email-in-invite-auth! [user-id old-email new-email]
+  (loop [n 1]
+    (when (pos? n)
+      (recur (mongo/update-by-query :applications
+                                    {:auth {$elemMatch {:id user-id
+                                                        :invite.email old-email}}}
+                                    {$set {:auth.$.invite.email new-email
+                                           :auth.$.invite.user.username new-email}})))))
+
 (defn- change-email-with-token [token stamp]
   {:pre [(map? token)]}
 
-  (let [vetuma-data (vetuma/get-user stamp)
+  (let [{hetu :personId old-email :email id :id :as user} (usr/get-user-by-id! (:user-id token))
         new-email (get-in token [:data :new-email])
-        {hetu :personId old-email :email id :id :as user} (usr/get-user-by-id! (:user-id token))]
+        vetuma-data (when hetu (vetuma/get-user stamp))]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
-      (not= hetu (:userid vetuma-data)) (fail! :error.personid-mismatch)
+      (and (not hetu) (not= "user" (get-in user [:company :role]))) (fail! :error.missing-person-id)
+      (and hetu (not= hetu (:userid vetuma-data))) (fail! :error.personid-mismatch)
       (usr/email-in-use? new-email) (fail! :error.duplicate-email))
 
     (when-let [{dummy-id :id :as dummy-user} (usr/get-user-by-email new-email)]
@@ -59,36 +80,21 @@
         (change-auths-dummy-id-to-user-id user dummy-id)
         (usr/remove-dummy-user dummy-id)))
 
-    ; Strictly this atomic update is enough.
-    ; Access to applications is determined by user id.
+    ;; Strictly this atomic update is enough.
+    ;; Access to applications is determined by user id.
     (usr/update-user-by-email old-email
                               {:personId hetu}
                               {$set {:username new-email :email new-email}})
 
-    ; Update application.auth arrays.
-    ; They might have duplicates due to old bugs, ensure everything is updated.
-    (loop [n 1]
-      (when (pos? n)
-        ; loop exits when no applications with the old username were found
-        (recur (mongo/update-by-query :applications
-                                      {:auth {$elemMatch {:id (:id user)
-                                                          :username old-email}}}
-                                      {$set {:auth.$.username new-email}}))))
+    (update-email-in-application-auth! id old-email new-email)
 
-    ; Also update emails in invite auths
-    (loop [n 1]
-      (when (pos? n)
-        (recur (mongo/update-by-query :applications
-                                      {:auth {$elemMatch {:id id
-                                                          :invite.email old-email}}}
-                                      {$set {:auth.$.invite.email new-email
-                                             :auth.$.invite.user.username new-email}}))))
+    (update-email-in-invite-auth! id old-email new-email)
 
-    ; Cleanup tokens
-    (vetuma/consume-user stamp)
+    ;; Cleanup tokens
+    (when hetu (vetuma/consume-user stamp))
     (token/get-token (:id token) :consume true)
 
-    ; Send notifications
+    ;; Send notifications
     (notifications/notify! :email-changed {:user user, :data {:new-email new-email}})
 
     (ok)))

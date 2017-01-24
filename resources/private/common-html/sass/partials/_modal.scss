@@ -1,3 +1,10 @@
+@mixin center-dialog() {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
 // TODO knockout dialog to share same styles with legacy dialog
 #modal-dialog {
   .small {
@@ -11,13 +18,8 @@
   }
 
   .dialog {
+    @include center-dialog;
     display: none;
-    position: fixed;
-    right: 0;
-    left: 0;
-    margin-top: 50px;
-    margin-left: auto;
-    margin-right: auto;
     z-index: 9999;
     padding: $marginM;
     background-color: #fff;
@@ -98,7 +100,7 @@
 }
 
 .window {
-  position:fixed;
+  @include center-dialog;
   display:none;
   z-index:9999;
   padding: $marginM $marginM $marginM $marginM;
@@ -299,5 +301,13 @@
     bottom: 0;
     left: $marginS;
     right: $marginS;
+  }
+}
+
+.neighbor-error {
+  color: $negative;
+  margin: {
+    top: $marginS;
+    bottom: $marginS
   }
 }

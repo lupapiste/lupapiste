@@ -19,6 +19,22 @@ table {
   width:100%;
   margin-bottom: $marginL;
   color: $gray51;
+
+  tbody.inspection-summary-template {
+    border: 1px solid $gray221;
+    &:nth-child(odd) {
+      background: white;
+    }
+    &:nth-child(even) {
+      background: $tr-color-even;
+    }
+    &:hover {
+      background-color: $gray238;
+      &:active {
+        background-color: $gray221;
+      }
+    }
+  }
 }
 
 th {
@@ -73,6 +89,10 @@ tr {
         display: block;
       }
     }
+  }
+  &.inspection-summary-template-row {
+    background: inherit;
+    border: none;
   }
 }
 

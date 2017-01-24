@@ -5,11 +5,11 @@
             [clojure.string :as s]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! def-]]
-            [sade.email :as email]
             [sade.util :as util]
             [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
+            [lupapalvelu.email :as email]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc localize]]))
 
@@ -84,8 +84,10 @@
     (try
       (let [email-attachment {:content zip :file-name zip-file-name}
             email-subject (str (localize lang :kopiolaitos-email-subject) \space (:ordererOrganization orderInfo))
-            orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)
-                                        :contentsTable (get-kopiolaitos-html-table lang attachments)})
+            orderInfo (merge {:kuntalupatunnus ""}
+                             orderInfo
+                             {:titles (get-kopiolaitos-order-email-titles lang)
+                              :contentsTable (get-kopiolaitos-html-table lang attachments)})
             email-msg (email/apply-template "kopiolaitos-order.html" orderInfo)
             results-failed-emails (reduce
                                     (fn [failed addr]

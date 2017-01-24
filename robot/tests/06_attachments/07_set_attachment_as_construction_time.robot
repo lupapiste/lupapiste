@@ -124,7 +124,6 @@ Mikko toggles all filters on
   Wait until  Toggle all filters is selected
   Checkbox wrapper selected by test id  postVerdict-filter-checkbox
   Checkbox wrapper selected by test id  preVerdict-filter-checkbox
-  Checkbox wrapper selected by test id  general-filter-checkbox
   Checkbox wrapper selected by test id  parties-filter-checkbox
   Checkbox wrapper selected by test id  paapiirustus-filter-checkbox
   Checkbox wrapper selected by test id  other-filter-checkbox
@@ -134,7 +133,6 @@ Mikko toggles all filters off
   Wait until  Toggle all filters is not selected
   Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
   Checkbox wrapper not selected by test id  preVerdict-filter-checkbox
-  Checkbox wrapper not selected by test id  general-filter-checkbox
   Checkbox wrapper not selected by test id  parties-filter-checkbox
   Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
   Checkbox wrapper not selected by test id  other-filter-checkbox

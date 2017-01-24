@@ -8,7 +8,14 @@
       <h2 data-bind="ltext: 'archivalSummary.tosFunction.missing.title'"></h2>
       <div class="info-line like-btn">
           <i class="lupicon-circle-attention"></i>
+          <!-- ko if: $root.tosFunctions().length > 0 -->
           <span data-bind="ltext: 'archivalSummary.tosFunction.missing.guide'"></span>
+          <!-- /ko -->
+          <!-- ko if: $root.tosFunctions().length <= 0 -->
+          <span data-bind="ltext: 'archivalSummary.tosFunction.not.published'"></span>
+          <a class="tos-function-error" data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
+          <span data-bind="ltext: 'archivalSummary.tosFunction.link.title'"></span></a>
+          <!-- /ko -->
       </div>
     </div>
 
@@ -41,6 +48,7 @@
           <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
           <a href="#" data-bind="click: selectAllPreAttachments, ltext: 'stamp.preAttachments'"></a>
           <a href="#" data-bind="click: selectAllPostAttachments, ltext: 'stamp.postAttachments'"></a>
+          <a href="#" data-bind="click: unselectAll, ltext: 'unstamp.all', visible: archiveButtonEnabled"></a>
         </div>
       </div>
 

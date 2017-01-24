@@ -8,8 +8,8 @@
 
 (def hankkeen-kuvaus-kayttolupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit :m2 :min-len 1 :max-len 5 :size :s}))
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}     ;; LupaAsianKuvaus
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit :m2 :min-len 1 :max-len 5 :size :s :required true}))
 
 (defschemas
   1
@@ -160,7 +160,7 @@
 
 (def hankkeen-kuvaus-sijoituslupa
   (body
-    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}))   ;; LupaAsianKuvaus
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width :required true}))   ;; LupaAsianKuvaus
 
 (defschemas
   1

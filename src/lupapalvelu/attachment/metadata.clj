@@ -4,7 +4,7 @@
 
 (def visibilities (:values tosmeta/Nakyvyys))
 
-(def public-visibility "julkinen")
+(def public-visibility :julkinen)
 
 (defn get-visibility [{metadata :metadata}]
   (get metadata :nakyvyys))
@@ -13,9 +13,13 @@
   (get metadata :julkisuusluokka))
 
 (defn public-attachment?
-  "Returns false if julkisuusluokka is not public or if julkisuusluokka is not set and nakyvyys metadata is not public.
-  Without metadata returns true."
+  "Returns true if julkisuusluokka and nakyvyys are both public, or if only one of them is defined, that one is public,
+   or if neither is defined. If either one is not public, this function must return false."
   [attachment]
-  (if-let [visibility (or (get-publicity-class attachment) (get-visibility attachment))]
-    (= public-visibility visibility)
-    true))
+  (let [publicity-class (keyword (get-publicity-class attachment))
+        visibility (keyword (get-visibility attachment))]
+    (cond
+      (and visibility publicity-class) (and (= public-visibility visibility) (= publicity-class public-visibility))
+      visibility (= public-visibility visibility)
+      publicity-class (= public-visibility publicity-class)
+      :else true)))

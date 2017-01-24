@@ -657,7 +657,8 @@
                                       :kopiolaitos-orderer-email nil
                                       :kopiolaitos-orderer-phone nil
                                       :calendars-enabled false
-                                      :use-attachment-links-integration false})
+                                      :use-attachment-links-integration false
+                                      :inspection-summaries-enabled false})
 
 (defn- names [names-map]
   (i18n/with-default-localization names-map (:fi names-map)))
@@ -687,6 +688,7 @@
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :assignments-enabled true
+                       :inspection-summaries-enabled true
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000}
 
@@ -1018,6 +1020,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]]}
+                       :assignments-enabled true
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :use-attachment-links-integration true
@@ -1029,11 +1032,11 @@
                       {:id "564-YMP"
                        :name (names {:fi "Oulun ymparisto"
                                      :sv "Oulun ymparisto"})
-                       :scope [{:municipality "564" :permitType "YM" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
-                               {:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
-                               {:municipality "564" :permitType "YL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
-                               {:municipality "564" :permitType "MAL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
-                               {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}]
+                       :scope [{:municipality "564" :permitType "YM" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled false :version "1.1"}}
+                               {:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled false :version "1.1"}}
+                               {:municipality "564" :permitType "YL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled false :version "1.1"}}
+                               {:municipality "564" :permitType "MAL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled false :version "1.1"}}
+                               {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled false :version "1.1"}}]
                        :links [(link {:fi "Oulu", :sv "Ule\u00E5borg"}
                                      "http://www.ouka.fi")]
                        :statementGivers [{:id "516560d6c2e6f603beccc144"

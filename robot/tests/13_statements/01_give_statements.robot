@@ -186,8 +186,8 @@ Statements are visible for Veikko
   Open tab  statement
   Statement count is  5
 
-Veikko can delete his own statement but no others
-  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
+Veikko cannot delete statement requests
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
 Veikko from Tampere can give statement (and attach something to it as well)

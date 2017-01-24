@@ -9,6 +9,7 @@
             [lupapalvelu.job :as job]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.authorization :as auth]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
 
@@ -19,9 +20,9 @@
 (sc/defschema NewAttachment
   {(sc/required-key :fileId)           ssc/ObjectIdStr
    (sc/required-key :type)             att/Type
-   (sc/required-key :group)            {:groupType              (sc/maybe (apply sc/enum att-tags/attachment-groups))
-                                        (sc/optional-key :id)   ssc/ObjectIdStr
-                                        (sc/optional-key :name) sc/Str}
+   (sc/required-key :group)            {:groupType  (sc/maybe (apply sc/enum att-tags/attachment-groups))
+                                        :operations [{(sc/optional-key :id)   ssc/ObjectIdStr
+                                                      (sc/optional-key :name) sc/Str}]}
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -37,7 +38,7 @@
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
                                                      (assoc (select-keys filedata [:group :contents])
-                                                       :requested-by-authority (usr/authority? user)
+                                                            :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
         version-options (merge

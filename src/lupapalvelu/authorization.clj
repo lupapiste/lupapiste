@@ -130,7 +130,7 @@
 (defn application-authority?
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
-  (has-organization-authz-roles? #{:authority :approver} application user))
+  (boolean (has-organization-authz-roles? #{:authority :approver} application user)))
 
 ;;
 ;; Enrich auth array

@@ -79,8 +79,10 @@
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'grouping'),
                           testId: 'batch-grouping-' + $index()">
-            <attachment-group-selector params="currentGroup: $parent.cell( $data, 'grouping').value,
-                                               editable: !$parent.rowDisabled( $data )"></attachment-group-selector>
+            <div data-bind="component: { name: 'attachment-group-autocomplete',
+                                         params: { disable: $parent.groupSelectorDisabled( $data ),
+                                                   group: $parent.cell( $data, 'grouping').value } }"
+                 class="attachment-batch-grouping"></div>
             <icon-button params="click: $parent.filler( 'grouping', $data, 'number'),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-copy-down',

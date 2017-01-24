@@ -70,6 +70,10 @@ fail() {
    exit 1
 }
 
+n_tests() {
+   jobs | grep run_test | grep Running | wc -l
+}
+
 usage() {
    echo \
 "roboto.sh [args] test-dir ...
@@ -101,6 +105,7 @@ start_lupapiste() {
    cd ..
    test -d src || fail "Cannot start lupapiste at $(pwd), can't see src/ here"
    echo "Starting lupapiste."
+   mkdir -p robot/target
    lein run &> robot/target/lupapiste.log &
    LUPISPID=$!
    echo -n "Waiting for lupapiste $LUPISPID: "
@@ -329,7 +334,6 @@ run_test() {
 
    mkdir -p target # make log directory if necessary
 
-   # -L TRACE
    for ROUND in $(seq 0 $RETRIES)
    do
       DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
@@ -353,19 +357,16 @@ run_test() {
    # exit value is the number of failing testcases OR 124 after timeout
    echo "NOTE: pybot exited with $BOT after round $ROUND/$LASTROUND" >> target/$TEST.out;
    # shut down X and WM if they were started
-   test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null; sleep 1
-   test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null; sleep 1
+   test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null;
+   test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null;
 }
 
 halt() {
    echo "Cleaning up..."
    test -n "$WMPID" && { echo "Closing WM $WMPID"; kill -9 $WMPID &>/dev/null; }
-   sleep 1
    test -n "$XPID" && { echo "Closing X $XPID"; kill -9 $XPID &>/dev/null; }
-   sleep 1
    test -z "$LUPISPID" || {
       echo "Shutting down lupapiste $LUPISPID"
-      # pstree -p $LUPISPID
       recursive_kill -9 $LUPISPID ""
       for foo in $(seq 10)
       do
@@ -501,20 +502,16 @@ esac
 
 for test in $TARGETS
 do
-   RUNNING=$(jobs | grep run_test | wc -l)
+   RUNNING=$(n_tests)
    while [ $RUNNING -ge $MAXTHREADS ]
    do
       show_stats "$RUNNING/$MAXTHREADS threads running"
       for foo in $(seq $UPDATE)
       do
-         # echo test $(jobs | grep run_test | wc -l) "=" "$RUNNING"
-         #jobs
-         test $(jobs | grep run_test | wc -l) "=" "$RUNNING" || break
-         #echo -n x
+         test $(n_tests) "=" "$RUNNING" || break
          sleep 1
       done
-      #jobs
-      RUNNING=$(jobs | grep run_test | wc -l)
+      RUNNING=$(n_tests)
    done
    test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
       echo "WARNING: skippin blacklisted test $test";
@@ -544,15 +541,13 @@ done
 # wait for last threads to finish
 while true
 do
-   jobs | grep -q run_test || break
+   test $(n_tests) "=" 0 && break
    show_stats
    for foo in $(seq $UPDATE)
    do
-      #echo -n o
-      jobs | grep -q run_test || break;
+      test $(n_tests) "=" 0 && break
       sleep 1
    done
-   jobs > /dev/null
 done
 
 show_stats

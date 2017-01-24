@@ -323,11 +323,10 @@
                                 :type "group"
                                 :order 60}
                   :created 1398343043267
-                  :data {}}
+                  :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}
+                         :varattava-pinta-ala {:value "333"}}}
                  {:created 1398343043267
-                  :data {:tyoaika-alkaa-pvm {:modified 1398343045608 :value "01.05.2014"}
-                         :tyoaika-paattyy-pvm {:modified 1398343045698 :value "02.05.2014"}
-                         :tyoaika-alkaa-ms {:modified 1398343045608 :value 1398902400000}
+                  :data {:tyoaika-alkaa-ms {:modified 1398343045608 :value 1398902400000}
                          :tyoaika-paattyy-ms {:modified 1398343045698 :value 1398988800000}}
                   :id "535905834206f413319be7f9"
                   :schema-info {:name "tyoaika"

@@ -142,9 +142,9 @@ jQuery(document).ready(function() {
     {name: "attachments-operation-buttons"},
     {name: "attachment-type-group-autocomplete"},
     {name: "attachment-type-autocomplete"},
+    {name: "attachment-group-autocomplete"},
     {name: "attachments-require"},
     {name: "attachments-require-bubble"},
-    {name: "attachment-group-selector"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
@@ -174,7 +174,8 @@ jQuery(document).ready(function() {
     {name: "toggle"},
     {name: "combobox"},
     {name: "drop-zone"},
-    {name: "upload-zone"}
+    {name: "upload-zone"},
+    {name: "link-permit-autocomplete"}
 ];
 
   ko.registerLupapisteComponents(components);

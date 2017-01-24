@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
+            [plumbing.core :as pc]
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
@@ -44,7 +45,6 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org])
   (:import [java.net URL]
-           [java.io File]
            [java.nio.charset StandardCharsets]))
 
 (notifications/defemail :application-verdict
@@ -478,7 +478,6 @@
        flatten))
 
 (defn- empty-review-task? [t]
-  ;; (debugf "empty-review-task? - tila is %s" (-> t :data :katselmus :tila))
   (let [katselmus-data (-> t :data :katselmus)
         top-keys [:tila :pitoPvm :pitaja]
         h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
@@ -486,42 +485,62 @@
     (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
-(defn merge-review-tasks
-  "Add review tasks with new IDs to existing tasks map"
-  [from-update existing]
+(defn- katselmuksen-laji [t]
+  (-> t tools/unwrapped :data :katselmuksenLaji))
 
-  (let [bg-id #(get-in % [:data :muuTunnus :value])
-        tasks->backend-ids (fn [tasks]
-                             (set (remove ss/blank?
-                                          (map bg-id tasks))))
-        ids-existing (tasks->backend-ids (filter tasks/task-is-review? existing))
-        ids-from-update (tasks->backend-ids from-update)
-        has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
-                                             (not (contains? ids-existing i))))
-        from-update-with-new-id (filter has-new-id? from-update)
-        same-name-and-type? (fn [wrapped-a wrapped-b]
-                              (let [a (tools/unwrapped wrapped-a)
-                                    b (tools/unwrapped wrapped-b)
-                                    na (:taskname a)
-                                    nb (:taskname b)
-                                    laji #(-> % :data :katselmuksenLaji)
-                                    la (laji a)
-                                    lb (laji b)]
-                                (and na (= na nb) la (= la lb))))
-        matches-update-by-name-and-type? #(some (partial same-name-and-type? %)
-                                                from-update-with-new-id)
-        empty-matching-update? #(and (empty-review-task? %)
-                                     (matches-update-by-name-and-type? %))
-        existing-without-empties-matching-updates (remove empty-matching-update? existing)]
-    ;; (debug "ids-existing" ids-existing)
-    ;; (debug "ids-from-update" ids-from-update)
+(defn- reviews-have-same-type-other-than-muu-katselmus? [a b]
+  (let [la (katselmuksen-laji a)
+        lb (katselmuksen-laji b)]
+    (and la (= la lb) (not= la "muu katselmus"))))
 
-    ;; (debug "from-update first type" (get-in (first from-update) [:schema-info :name]))
-    ;; (debug "from-update first has-new-id?" (has-new-id? (first from-update)))
+(defn- reviews-have-same-name-and-type? [a b]
+  (let [name-a (:taskname a)
+        name-b (:taskname b)
+        la (katselmuksen-laji a)
+        lb (katselmuksen-laji a)]
+    (and name-a (= name-a (or name-b lb)) la (= la lb))))
 
-    ;; (debug "from-update types" (doall (mapv :type from-update)))
-    (debugf "merge-review-tasks: existing %s/%s + from-update %s/%s" (count existing) (count existing-without-empties-matching-updates) (count from-update) (count from-update-with-new-id))
-    [existing-without-empties-matching-updates from-update-with-new-id]))
+(defn- bg-id [task]
+  (get-in task [:data :muuTunnus :value]))
+
+(defn- non-empty-review-task-with-bg-id? [task]
+  (and (tasks/task-is-review? task) (not (empty-review-task? task)) (not (ss/blank? (bg-id task)))))
+
+(defn- merge-review-tasks
+  "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
+  [from-update from-mongo]
+  (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s" (count from-update) (count from-mongo))
+  (loop [from-update from-update
+         from-mongo from-mongo
+         unchanged []
+         added-or-updated []]
+    (let [current (first from-mongo)
+          bg-id-current (bg-id current)
+          remaining (rest from-mongo)
+          updated-id-match (when-not (nil? bg-id-current)
+                             (util/find-first #(= bg-id-current (bg-id %)) from-update))
+          updated-match (or updated-id-match
+                            (first (filter #(or (reviews-have-same-name-and-type? current %)
+                                                (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
+      (cond
+        (= current nil)
+          ; Recursion end condition
+          (let [added-or-updated (concat added-or-updated (filter non-empty-review-task-with-bg-id? from-update))]
+            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
+            [unchanged added-or-updated])
+
+        (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
+          ;non-empty review tasks and all non-review tasks are left unchanged
+          (do
+            (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated))
+
+        (and updated-match (not (empty-review-task? updated-match)))
+          ; matching review found from backend system update => it replaces the existing one
+          (recur (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
+
+        :else
+          ; this existing review is left unchanged
+          (recur from-update remaining (conj unchanged current) added-or-updated)))))
 
 (defn get-state-updates [user created {current-state :state :as application} app-xml]
   (let [new-state (->> (krysp-reader/application-state app-xml)
@@ -538,6 +557,7 @@
   [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
+        reviews (pc/distinct-by #(select-keys % [:taskname :data]) reviews) ; remove duplicates!
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)

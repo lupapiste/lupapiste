@@ -27,7 +27,7 @@
       <!-- ko if: $data.attachments.length > 0 -->
       <div class="bulletin-comment__attachments" data-bind="foreach: $data.attachments">
         <div class="bulletin-comment__attachment">
-          <a class="link-btn bulletin-comment_attachment-link" target="_blank" data-bind="attr: {href: '/api/raw/download-bulletin-comment-attachment?attachmentId=' + $data.id}">
+          <a class="link-btn bulletin-comment_attachment-link" target="_blank" data-bind="attr: {href: '/api/raw/download-bulletin-comment-attachment?attachmentId=' + $data.fileId}">
             <span data-bind="text: $data.filename"></span>
           </a>
           <span class="bulletin-comment__attachment-type">

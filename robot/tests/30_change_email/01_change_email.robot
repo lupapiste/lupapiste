@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko changes email address
+Suite Setup  Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/email_helpers.robot

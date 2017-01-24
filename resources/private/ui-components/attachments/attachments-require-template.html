@@ -25,9 +25,9 @@
 
     <div>
       <label data-bind="ltext: 'attachment.label.operation'"></label>
-      <div data-bind="component: { name: 'attachment-group-selector',
-                                   params: { authModel: lupapisteApp.models.applicationAuthModel,
-                                             currentGroup: selectedGroup }}"></div>
+      <div data-bind="component: { name: 'attachment-group-autocomplete',
+                                   params: { disable: groupSelectorDisabled,
+                                             group: selectedGroup } }"></div>
     </div>
 
   </div>

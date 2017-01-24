@@ -101,9 +101,19 @@
     {:attachment-id id
      :error "Has versions, but marked as not needed"}))
 
-(defn validate-attachments [{attachments :attachments}]
+(defn validate-YA-attachments
+  "YA attachments should not have 'op' or 'groupType' fields"
+  [application-permitType {:keys [id op groupType]}]
+  (when (and (= application-permitType "YA")
+             (or op groupType))
+    {:attachment-id id
+     :error "Not valid YA attachment"
+     :op op
+     :groupType groupType}))
+
+(defn validate-attachments [{attachments :attachments permitType :permitType}]
   (->> attachments
-       (mapcat (juxt validate-attachment-against-schema validate-latest-version validate-not-needed))
+       (mapcat (juxt validate-attachment-against-schema validate-latest-version validate-not-needed (partial validate-YA-attachments permitType)))
        (remove nil?)
        seq))
 

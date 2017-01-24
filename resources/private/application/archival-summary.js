@@ -44,7 +44,10 @@
 
     function getGroup(groupList, attachments, group) {
       if (!groupList.initializedGroups[group]) {
-        var op  = util.getIn(attachments, [0, "op"]);
+        var op = util.getIn(attachments, [0, "op"]);
+        if (_.isArray(op)) {
+          op = op[0];
+        }
         var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, op.description, attachments, buildings[op.id]);
         groupList.initializedGroups[group] = groupModel;
       } else {
@@ -58,7 +61,11 @@
 
     return  _(attachments)
       .groupBy(function(attachment) {
-        return util.getIn(attachment, ["op", "id"]) || generalAttachmentsStr;
+        var op = util.getIn(attachment, ["op"]);
+        if (_.isArray(op)) {
+          op = op[0];
+        }
+        return util.getIn(op, ["id"]) || generalAttachmentsStr;
       })
       .map(_.partial(getGroup, groupList))
       .sortBy(function(group) { // attachments.general on top, else sort by op.created
@@ -175,7 +182,7 @@
   function selectIfArchivable(attachment) {
     var tila = util.getIn(attachment, ["metadata", "tila"]);
     if (attachment.archivable() && tila !== "arkistoitu") {
-      attachment.sendToArchive(true);
+      attachment.sendToArchive(!attachment.sendToArchive());
     }
   }
 
@@ -280,8 +287,7 @@
     });
 
     self.tosFunctionExists = self.disposedPureComputed(function() {
-      return lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
-        _.some(params.application.tosFunction());
+      return _.some(params.application.tosFunction());
     });
 
     self.selectAll = function() {
@@ -290,8 +296,20 @@
       _.forEach(self.archivedDocuments(), function(doc) {
         var tila = util.getIn(doc, ["metadata", "tila"]);
         if (tila !== "arkistoitu") {
-          doc.sendToArchive(true);
+          doc.sendToArchive(!doc.sendToArchive());
         }
+      });
+    };
+
+    self.unselectAll = function() {
+      _.forEach(archivedPreAttachments(), function(attachment) {
+        attachment.sendToArchive(false);
+      });
+      _.forEach(archivedPostAttachments(), function(attachment) {
+        attachment.sendToArchive(false);
+      });
+      _.forEach(self.archivedDocuments(), function(doc) {
+        doc.sendToArchive(false);
       });
     };
 

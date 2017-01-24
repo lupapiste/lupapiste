@@ -180,3 +180,19 @@
                         (map #(java.util.regex.Pattern/quote %))
                         (join (str ".*" whitespace ".*")))]
     (str "^.*" fuzzy ".*$")))
+
+(defprotocol ToPlainString
+  (->plain-string [value]))
+
+(extend-protocol ToPlainString
+  clojure.lang.Keyword
+  (->plain-string [value] (name value))
+
+  java.lang.String
+  (->plain-string [value] value)
+
+  java.lang.Object
+  (->plain-string [value] (.toString value))
+
+  nil
+  (->plain-string [value] ""))

@@ -148,10 +148,8 @@
   {:parameters [id statementId]
    :input-validators [(partial action/non-blank-parameters [:id :statementId])]
    :states     #{:open :submitted :complementNeeded :sent}
-   :user-roles #{:authority :applicant}
-   :user-authz-roles #{:statementGiver}
-   :pre-checks [statement/statement-not-given
-                statement/authority-or-statement-owner-applicant]}
+   :user-roles #{:authority}
+   :pre-checks [statement/statement-not-given]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 

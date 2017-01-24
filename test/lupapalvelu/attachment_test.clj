@@ -217,12 +217,12 @@
   (let [type1 (ssg/generate Type)
         type2 (ssg/generate Type)
         op-id (ssg/generate ssc/ObjectIdStr)]
-    (make-attachments 999 :draft [{:type type1} {:type type2}] {:groupType "operation" :id op-id :name "Foo"} false true true)
+    (make-attachments 999 :draft [{:type type1} {:type type2}] {:groupType "operation" :operations [{:id op-id :name "Foo"}]} false true true)
     => (just [{:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
                :groupType            :operation
-               :op                   {:id op-id :name "Foo"}
+               :op                   [{:id op-id :name "Foo"}]
                ;;:state                :requires_user_action
                :target               nil
                :type                 type1
@@ -240,7 +240,7 @@
                :locked               false
                :modified             999
                :groupType            :operation
-               :op                   {:id op-id :name "Foo"}
+               :op                   [{:id op-id :name "Foo"}]
                ;;:state                :requires_user_action
                :target               nil
                :type                 type2
@@ -257,7 +257,7 @@
     (provided
       (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
-(facts "facts about attachment metada"
+(facts "facts about attachment metadata"
   (fact "visibility"
     (let [no-metadata {}
           no-metadata2 {:metadata {}}
@@ -268,7 +268,7 @@
                                       :julkisuusluokka "test2"}}
           jluokka-public {:metadata {:nakyvyys "test"
                                      :julkisuusluokka "julkinen"}}
-          both-public {:metadata {:nakyvyys "test"
+          both-public {:metadata {:nakyvyys "julkinen"
                                   :julkisuusluokka "julkinen"}}
           only-julkisuusluokka {:metadata {:julkisuusluokka "julkinen"}}]
 
@@ -277,9 +277,30 @@
       (public-attachment? nakyvyys-not-public) => false
       (public-attachment? jluokka-nakyvyys-not-public) => false
       (fact "julkisuusluokka overrules nakyvyys" (public-attachment? nakyvyys-public) => false)
-      (public-attachment? jluokka-public) => true
+      (public-attachment? jluokka-public) => false
       (public-attachment? both-public) => true
       (public-attachment? only-julkisuusluokka) => true)))
+
+(facts remove-operations-updates
+  (fact "one operation mathces removed"
+    (remove-operation-updates {:groupType :operation :op [{:id ..op-1.. :name ..name-1..}]} ..op-1..)
+    => {:groupType nil :op nil})
+
+  (fact "two operations - one mathces removed op"
+    (remove-operation-updates {:groupType :operation :op [{:id ..op-1.. :name ..name-1..} {:id ..op-2.. :name ..name-2..}]} ..op-1..)
+    => {:groupType :operation :op [{:id ..op-2.. :name ..name-2..}]})
+
+  (fact "matching legacy op"
+    (remove-operation-updates {:groupType :operation :op {:id ..op-1.. :name ..name-1..}} ..op-1..)
+    => {:groupType nil :op nil})
+
+  (fact "two-operations - unmatching op"
+    (remove-operation-updates {:groupType :operation :op [{:id ..op-1.. :name ..name-1..} {:id ..op-2.. :name ..name-2..}]} ..op-3..)
+    => nil)
+
+  (fact "unmatching legacy op"
+    (remove-operation-updates {:groupType :operation :op {:id ..op-1.. :name ..name-1..}} ..op-2..)
+    => nil))
 
 
 (defspec make-version-new-attachment {:num-tests 20 :max-size 100}
