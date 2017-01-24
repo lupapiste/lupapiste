@@ -78,8 +78,7 @@
     (provided (usr/remove-dummy-user ..dummy-id..) => 1)
     (provided (#'lupapalvelu.change-email/update-email-in-application-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
     (provided (#'lupapalvelu.change-email/update-email-in-invite-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
-    (provided (notifications/notify! :email-changed {:user {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "user"}}, :data {:new-email ..new-email..}}) => 1)
-    (provided (notifications/notify! :change-company-email-notification {:user {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "user"}}, :new-email ..new-email.., :old-email ..old-email..}) => 1))
+    (provided (notifications/notify! :email-changed {:user {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "user"}}, :data {:new-email ..new-email..}}) => 1))
 
   (fact "normal user - vetumadata does not match"
     (try+
