@@ -92,7 +92,7 @@ Add attachment to Aloituskokous
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PDF_TESTFILE_PATH}
-  Click element    test-save-new-attachment
+  Execute Javascript  $('#test-save-new-attachment')[0].click();
   Unselect Frame
   Wait Until Page Contains  ${PDF_TESTFILE_NAME}
 
