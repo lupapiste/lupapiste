@@ -26,7 +26,7 @@ Pena add another attachment with contents
   Upload attachment  ${TXT_TESTFILE_PATH}  Julkisivupiirustus  Facade  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
   Open attachment details  paapiirustus.julkisivupiirustus  
   Wait test id visible  attachment-contents-input
-  Input text by test id  attachment-contents-input  this is julkisivu
+  Input text by test id  attachment-contents-input  Julkisivupiirustus
   Return to application
 
 Pena submits the application
@@ -67,7 +67,7 @@ Pre verdict operation attachments are in not archived group
   Group header is  archived-pre-groups  masto-tms  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen tai muun erillislaitteen sijoittaminen (esim. markiisi, aurinkokeräin)
 
 Julkisivupiirustus contents is visible
-  Attachment content is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  this is julkisivu
+  Attachment content is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Julkisivupiirustus
 
 Pre verdict general group contains one attachment
   Group row count is  archived-pre-groups  attachments.general  1
@@ -138,10 +138,6 @@ Type is changed
   Attachment type group is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Erityissuunnitelmat
   Attachment type id is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Rakennesuunnitelma
 
-
-Edit rakennesuunnitelma metadata
-  Fill in archival metadata  julkisuusluokka=julkinen  myyntipalvelu=True
-
 Rakennesuunnitelma group is changed
   Wait until  Group row count is  archived-post-groups  attachments.general  2
   Group row count is  archived-post-groups  attachments.general  2
@@ -151,9 +147,6 @@ Close additional controls, rakennesuunnitelma section is changed to archived
 
 Rakennesuunnitelma is not archivable
   Attachment archivability error icon is visible  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma
-
-Rakennesuunnitelma retention perioid is entered
-  Attachment retention perioid is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Toistaiseksi, laskentaperuste rakennuksen purkamispäivä
 
 Rakennesuunnitelma personal data is entered
   Attachment personal data is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Ei sisällä henkilötietoja
@@ -275,7 +268,7 @@ Set contents
   Input text by test id  attachment-contents-update  ${text}
 
 Fill in archival metadata
-  [Arguments]  ${julkisuusluokka}=salainen  ${salassapitoaika}=2  ${salassapitoperuste}=Koska syy  ${suojaustaso}=ei-luokiteltu  ${turvallisuusluokka}=ei-turvallisuusluokkaluokiteltu  ${kayttajaryhma}=viranomaisryhma  ${kayttajaryhmakuvaus}=muokkausoikeus  ${henkilotiedot}=ei-sisalla  ${kieli}=fi  ${arkistointi}=toistaiseksi  ${pituus}=1  ${laskentaperuste}=rakennuksen_purkamispäivä  ${perustelu}=Siksi  ${myyntipalvelu}=False  ${nakyvyys}=julkinen
+  [Arguments]  ${julkisuusluokka}=salainen  ${salassapitoaika}=2  ${salassapitoperuste}=Koska syy  ${suojaustaso}=ei-luokiteltu  ${turvallisuusluokka}=ei-turvallisuusluokkaluokiteltu  ${kayttajaryhma}=viranomaisryhma  ${kayttajaryhmakuvaus}=muokkausoikeus  ${henkilotiedot}=ei-sisalla  ${kieli}=fi  ${arkistointi}=ikuisesti  ${perustelu}=Siksi  ${myyntipalvelu}=False  ${nakyvyys}=julkinen
   Click by test id  edit-metadata
   Select from list  jquery=select[data-test-id=julkisuusluokka]:visible  ${julkisuusluokka}
   Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Input text  jquery=input[data-test-id=salassapitoaika]:visible  ${salassapitoaika}
@@ -286,10 +279,6 @@ Fill in archival metadata
   Run Keyword If  '${julkisuusluokka}' != 'julkinen'  Select from list  jquery=select[data-test-id=kayttajaryhmakuvaus]:visible  ${kayttajaryhmakuvaus}
   Select from list  jquery=select[data-test-id=henkilotiedot]:visible  ${henkilotiedot}
   Select from list  jquery=select[data-test-id=kieli]:visible  ${kieli}
-  Select from list  jquery=select[data-test-id=arkistointi]:visible  ${arkistointi}
-  Run Keyword If  '${arkistointi}' == 'määräajan'  Input text by test id  pituus  ${pituus}
-  Run Keyword If  '${arkistointi}' == 'toistaiseksi'  Input text by test id  laskentaperuste  ${laskentaperuste}
-  Input text  jquery=input[data-test-id= perustelu]:visible  ${perustelu}
   Run Keyword If  ${myyntipalvelu}  Select Checkbox  jquery=input[data-test-id=myyntipalvelu]:visible
   Select from list  jquery=select[data-test-id=nakyvyys]:visible  ${nakyvyys}
   Wait until  Click by test id  save-metadata

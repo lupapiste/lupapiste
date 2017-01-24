@@ -44,7 +44,10 @@
 
     function getGroup(groupList, attachments, group) {
       if (!groupList.initializedGroups[group]) {
-        var op  = util.getIn(attachments, [0, "op"]);
+        var op = util.getIn(attachments, [0, "op"]);
+        if (_.isArray(op)) {
+          op = op[0];
+        }
         var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, op.description, attachments, buildings[op.id]);
         groupList.initializedGroups[group] = groupModel;
       } else {
@@ -58,7 +61,11 @@
 
     return  _(attachments)
       .groupBy(function(attachment) {
-        return util.getIn(attachment, ["op", "id"]) || generalAttachmentsStr;
+        var op = util.getIn(attachment, ["op"]);
+        if (_.isArray(op)) {
+          op = op[0];
+        }
+        return util.getIn(op, ["id"]) || generalAttachmentsStr;
       })
       .map(_.partial(getGroup, groupList))
       .sortBy(function(group) { // attachments.general on top, else sort by op.created
