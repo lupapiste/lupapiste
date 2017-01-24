@@ -13,8 +13,9 @@
   (let [token-id (token/make-token :change-email user {:new-email new-email}
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
-        token (token/get-token token-id)]
-    (notifications/notify! (if (:personId user) :change-email :change-email-for-company-user)
+        token (token/get-token token-id)
+        user-with-person-id (usr/find-user {:_id (:id user)})]
+    (notifications/notify! (if (:personId user-with-person-id) :change-email :change-email-for-company-user)
                            {:user (assoc user :email new-email)
                             :data {:old-email (:email user)
                                    :new-email new-email
