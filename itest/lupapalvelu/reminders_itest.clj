@@ -526,7 +526,7 @@
 
             (check-sent-reminder-email
              "pena@example.com"
-             "Lupapiste: Naapurikuja 3, Sipoo - muistutus aktiivisesta hakemuksesta"
+             "Lupapiste: Naapurikuja 3, Sipoo - onko hanke yh\u00e4 aktiivinen?"
              ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
 
     (fact "the 'reminder-sent' timestamp already exists but is over 1 week old -> reminder is sent"
@@ -541,7 +541,7 @@
 
           (check-sent-reminder-email
            "pena@example.com"
-           "Lupapiste: Naapurikuja 3, Sipoo - muistutus aktiivisesta hakemuksesta"
+           "Lupapiste: Naapurikuja 3, Sipoo - onko hanke yh\u00e4 aktiivinen?"
            ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
 
     (fact "the 'reminder-sent' timestamp already exists - no reminder is sent"
