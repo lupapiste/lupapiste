@@ -257,7 +257,7 @@
     (provided
       (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
-(facts "facts about attachment metada"
+(facts "facts about attachment metadata"
   (fact "visibility"
     (let [no-metadata {}
           no-metadata2 {:metadata {}}
@@ -268,7 +268,7 @@
                                       :julkisuusluokka "test2"}}
           jluokka-public {:metadata {:nakyvyys "test"
                                      :julkisuusluokka "julkinen"}}
-          both-public {:metadata {:nakyvyys "test"
+          both-public {:metadata {:nakyvyys "julkinen"
                                   :julkisuusluokka "julkinen"}}
           only-julkisuusluokka {:metadata {:julkisuusluokka "julkinen"}}]
 
@@ -277,7 +277,7 @@
       (public-attachment? nakyvyys-not-public) => false
       (public-attachment? jluokka-nakyvyys-not-public) => false
       (fact "julkisuusluokka overrules nakyvyys" (public-attachment? nakyvyys-public) => false)
-      (public-attachment? jluokka-public) => true
+      (public-attachment? jluokka-public) => false
       (public-attachment? both-public) => true
       (public-attachment? only-julkisuusluokka) => true)))
 
