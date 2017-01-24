@@ -9,4 +9,5 @@ Below you can find a link to the project. If the link doesn't work, copy the add
 {{link}}
 
 Kind regards,
+
 {{lupapiste}}

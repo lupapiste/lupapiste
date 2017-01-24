@@ -5,4 +5,5 @@ Du har lagts till organisationen {{org-sv}} som myndighetsanv&auml;ndare i tj&au
 Din e-postadress fungerar som anv&auml;ndarnamn och l&ouml;senordet &auml;r detsamma som du valt tidigare.
 
 H&auml;lsningar
+
 {{lupapiste}}

@@ -14,4 +14,5 @@ Mik&auml;li haluat vastata kommentoijalle, teeth&auml;n sen Lupapisteess&auml; s
 Onko sinulla kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Suosittelemme tutustumaan {{lupapiste.help}} sek&auml; {{faq}}.
 
 Terveisin,
+
 {{lupapiste}}

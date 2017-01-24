@@ -13,4 +13,5 @@ Du har f&aring;tt skrivr&auml;ttigheter och f&ouml;ljande meddelande:
 {{message}}
 
 H&auml;lsningar,
+
 {{lupapiste}}

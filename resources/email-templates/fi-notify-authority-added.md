@@ -5,4 +5,5 @@ Sinut on liitetty organisaation {{org}} viranomaisk&auml;ytt&auml;j&auml;ksi Lup
 K&auml;ytt&auml;j&auml;tunnuksenasi toimii s&auml;hk&ouml;postiosoitteesi, ja salasananasi aiemmin asettamasi salasana.
 
 Terveisin,
+
 {{lupapiste}}

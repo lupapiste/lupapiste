@@ -11,4 +11,5 @@ Lausunnon m&auml;&auml;r&auml;ajaksi on asetettu {{due-date-str}}. Lausuntoa pyy
 {{message}}
 
 Terveisin,
+
 {{lupapiste}}

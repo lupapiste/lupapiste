@@ -11,4 +11,5 @@ Lue {{lupapiste-help-statements}} sekä {{lupapiste-for-authorities}}.
 P&auml;&auml;set seuraamaan lupa-asioinnin s&auml;hk&ouml;istymist&auml; {{facebook}} | {{twitter}} | {{instagram}}
 
 S&auml;hk&ouml;isemp&auml;&auml; meininki&auml; lausunnonantoon toivottaa,
+
 {{lupapiste}}

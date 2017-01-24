@@ -9,4 +9,5 @@ Viranomaisen viesti:
 {{text}}
 
 Terveisin,
+
 {{lupapiste}}

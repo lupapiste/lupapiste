@@ -5,4 +5,5 @@ sinulla on lupa toimenpiteeseen {{operation}} osoitteessa {{address}}, {{municip
 Onko homma edennyt ajallaan vai tarvitsetko toiminnallesi jatkoaikaa? Tarpeen niin vaatiessa, tee jatkoaikahakemus {{in_lupapiste}}.
 
 Terveisin,
+
 {{lupapiste}}

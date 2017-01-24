@@ -7,4 +7,5 @@ trevligt att du blivit en av v&aring;ra anv&auml;ndare genom webbplatsen rakenta
 Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utvecklingen p&aring; {{facebook}} | {{twitter}} | {{instagram}}
 
 Smidigt byggande med e-tj&auml;nsten &ouml;nskar
+
 {{lupapiste}}

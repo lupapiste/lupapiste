@@ -9,4 +9,5 @@ Aktivointilinkki on voimassa 24 tuntia ({{expires}} asti). Ongelmatilanteissa ot
 Onko sinulla kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Suosittelemme tutustumaan {{lupapiste.help}} sek&auml; {{faq}}.
 
 Terveisin,
+
 {{lupapiste}}

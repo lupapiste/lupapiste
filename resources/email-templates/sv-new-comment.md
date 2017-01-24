@@ -12,4 +12,5 @@ Du kan ocks&aring; l&auml;sa kommentaren i ans&ouml;kans diskussionstr&aring;d g
 Om du vill svara p&aring; kommentaren kan du g&ouml;ra det direkt i projektets diskussionstr&aring;d i Lupapiste. Om du svarar p&aring; det h&auml;r meddelandet n&aring;r du inte den som skrivit kommentaren.
 
 H&auml;lsningar,
+
 {{lupapiste}}

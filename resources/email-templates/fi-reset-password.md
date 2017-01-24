@@ -9,4 +9,5 @@ Vaihda salasana uutteen oheisen linkin kautta. Jos linkki ei toimi, kopioi osoit
 Onko sinulla kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Suosittelemme tutustumaan {{lupapiste.help}} sek&auml; {{faq}}. Mik&auml;li et l&ouml;yd&auml; ohjeista vastausta kysymykseesi, ota yhteytt&auml; osoitteeseen {{support-email}}.
 
 Terveisin,
+
 {{lupapiste}}

@@ -9,4 +9,5 @@ I forts&auml;ttningen kan du ge utl&aring;tanden med hj&auml;lp av ditt anv&auml
 Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utvecklingen p&aring; {{facebook}} | {{twitter}} | {{instagram}}
 
 Smidiga tider med elektroniska utl&aring;tanden &ouml;nskar
+
 {{lupapiste}}

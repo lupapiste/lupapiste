@@ -9,4 +9,5 @@ Viranomaisen viesti:
 {{text}}
 
 Kind regards,
+
 {{lupapiste}}

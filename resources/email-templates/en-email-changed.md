@@ -5,4 +5,5 @@ it's now done - your user ID {{old-email}} has been successfully changed at Lupa
 If you haven't requested changing your user ID, contact our technical support immediately at {{support-email}}.
 
 Kind regards,
+
 {{lupapiste}}

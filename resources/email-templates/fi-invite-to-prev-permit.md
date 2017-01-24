@@ -15,4 +15,5 @@ Ty&ouml;njohtajan pit&auml;&auml; saada kutsu rakennusluvalle sek&auml; omaan ty
 Jos olet aikaisemmin ilmoittanut ty&ouml;njohtajat lupaasi liittyen, n&auml;m&auml; eiv&auml;t n&auml;y Lupapisteess&auml;. Jo tehtyj&auml; ty&ouml;njohtajien ilmoituksia tai hakemuksia ei tarvitse tehd&auml; uudelleen.
 
 Terveisin,
+
 {{lupapiste}}

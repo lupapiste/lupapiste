@@ -9,4 +9,5 @@ Mik&auml; on Lupapiste? Solita Oy:n, kuntien ja ymp&auml;rist&ouml;ministeri&oum
 Lue lis&auml;&auml; [Lupapisteest&auml;]. P&auml;&auml;set seuraamaan lupa-asioinnin s&auml;hk&ouml;istymist&auml; my&ouml;s: {{facebook}} | {{twitter}} | {{instagram}}
 
 S&auml;hk&ouml;isi&auml; hetki&auml; asiointiisi toivottaa,
+
 {{lupapiste}}

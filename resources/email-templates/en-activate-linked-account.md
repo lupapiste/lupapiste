@@ -7,4 +7,5 @@ great to see that rakentaja.fi-website inspired you to become our user. Through 
 You can follow the electronic permit process on: {{facebook}} | [{{twitter}} | {{instagram}}
 
 With online greetings,
+
 {{lupapiste}}

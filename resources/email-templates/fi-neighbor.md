@@ -11,4 +11,5 @@ Tutustuttuanne hakemukseen voitte allekirjoittaa kuulemisen s&auml;hk&ouml;isest
 Jos hakemus her&auml;tt&auml;&auml; lis&auml;kysymyksi&auml;, olettehan yhteydess&auml; joko hankkeeseen ryhtyv&auml;n edustajaan tai rakennusvalvontaan. Onko sinulla kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Suosittelemme tutustumaan {{lupapiste.help}} sek&auml; {{faq}}.
 
 Terveisin,
+
 {{lupapiste}}

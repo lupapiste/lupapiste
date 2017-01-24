@@ -6,7 +6,9 @@ vi vill p&aring;minna dig om att n&aring;gon v&auml;ntar p&aring; ditt r&aring;d
 
 Vad &auml;r Lupapiste? En e-tj&auml;nst som utvecklats av Solita Oy, kommunerna och milj&ouml;ministeriet. I tj&auml;nsten kan man sk&ouml;ta tillst&aring;nds&auml;renden som g&auml;ller den byggda milj&ouml;n i v&auml;xelverkan med de kommunala myndigheterna och tillsammans med parterna i projektet.
 
-L&auml;s mera om {{lupapiste}}. Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utvecklingen p&aring; {{facebook}} | {{twitter}} | {{instagram}}
+L&auml;s mera om 
+{{lupapiste}}. Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utvecklingen p&aring; {{facebook}} | {{twitter}} | {{instagram}}
 
 V&auml;lkommen att sk&ouml;ta &auml;renden elektroniskt &ouml;nskar
+
 {{lupapiste}}

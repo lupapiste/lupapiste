@@ -12,4 +12,5 @@ You can read the comment also from the application discussion chain by clicking 
 If you want to reply to the comment, please do so directly to the discussion chain at Lupapiste. Replies to this message doesn't reach the person who left you a comment.
 
 Kind regards,
+
 {{lupapiste}}

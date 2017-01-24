@@ -9,4 +9,5 @@ To view the project information, click the link below. If the link doesn't work,
 {{link}}
 
 Kind regards,
+
 {{lupapiste}}

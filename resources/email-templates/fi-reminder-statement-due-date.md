@@ -13,4 +13,5 @@ Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat tervei
 {{message}}
 
 Terveisin,
+
 {{lupapiste}}

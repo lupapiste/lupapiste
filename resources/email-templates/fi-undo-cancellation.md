@@ -9,4 +9,5 @@ Alla on linkki hankkeelle. Jos linkki ei toimi, kopioi osoite ja liit&auml; se s
 {{link}}
 
 Terveisin,
+
 {{lupapiste}}

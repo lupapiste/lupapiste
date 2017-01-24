@@ -11,4 +11,5 @@ After familiarizing yourself with the application, you can sign the hearing elec
 If you have any further questions regarding the application, please be in touch with the project representative or the construction supervision services.
 
 Kind regards,
+
 {{lupapiste}}

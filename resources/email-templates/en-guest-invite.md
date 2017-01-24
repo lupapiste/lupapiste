@@ -13,4 +13,5 @@ If you are supposed to edit the project information, please contact the invitati
 {{message}}
 
 Kind regards,
+
 {{lupapiste}}

@@ -5,4 +5,5 @@ kunnan halutaan kuulevan naapurit koskien hanketta {{operation}} osoitteessa {{a
 {{link}}
 
 Terveisin,
+
 {{lupapiste}}

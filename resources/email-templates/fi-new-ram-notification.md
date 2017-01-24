@@ -7,4 +7,5 @@ sait tämän sähköpostin, sillä hankkeelle {{operation}} osoitteessa {{addres
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 Terveisin,
+
 {{lupapiste}}

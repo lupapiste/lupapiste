@@ -9,4 +9,5 @@ N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml;. Jos linkk
 {{link}}
 
 Terveisin,
+
 {{lupapiste}}

@@ -17,4 +17,5 @@ Lausuntoa on pyytänyt {{requester.firstName}} {{requester.lastName}} ja lausunn
 {{message}}
 
 Terveisin,
+
 {{lupapiste}}

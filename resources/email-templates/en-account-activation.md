@@ -9,4 +9,5 @@ At Lupapiste, you can apply for permits regarding built environments and take ca
 You can follow the electronic permit process on: {{facebook}} | {{twitter}} | {{instagram}}
 
 With online greetings,
+
 {{lupapiste}}

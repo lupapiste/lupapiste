@@ -11,4 +11,5 @@ Efter att ha l&auml;st ans&ouml;kan kan du underteckna h&ouml;randet elektronisk
 Om du har fr&aring;gor om ans&ouml;kan kan du kontakta antingen projektets representant eller byggnadstillsynen. 
 
 H&auml;lsningar,
+
 {{lupapiste}}

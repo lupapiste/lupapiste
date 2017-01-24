@@ -15,4 +15,5 @@ Arbetsledaren m&aring;ste f&aring; en inbjudan till bygglovet och till sin egen 
 Om du anm&auml;lt arbetsledarna i anslutning till ditt tillst&aring;nd redan tidigare syns de inte i Lupapiste.  Anm&auml;lningar eller ans&ouml;kningar om arbetsledare beh&ouml;ver inte l&auml;mnas in p&aring; nytt.
 
 H&auml;lsningar,
+
 {{lupapiste}}

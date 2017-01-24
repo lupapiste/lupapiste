@@ -13,4 +13,5 @@ The writing authorization has been sent to you with the following message:
 {{message}}
 
 Kind regards,
+
 {{lupapiste}}

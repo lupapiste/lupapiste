@@ -7,4 +7,5 @@ Jatka klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite 
 {{link}}
 
 S&auml;hk&ouml;ist&auml; meininki&auml; lupak&auml;sittelyyn toivottaa,
+
 {{lupapiste}}

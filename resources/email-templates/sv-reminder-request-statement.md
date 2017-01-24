@@ -11,4 +11,5 @@ Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
 {{message}}
 
 H&auml;lsningar,
+
 {{lupapiste}}

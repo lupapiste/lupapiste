@@ -20,4 +20,5 @@ Rakennuslupahakemukseen p&auml;&auml;see tutustumaan ty&ouml;njohtaja-hakemukses
 Jos vastuun hakeminen liitevaatimuksineen her&auml;tt&auml;&auml; kysymyksi&auml;, ole yhteydess&auml; rakennusvalvontaan esimerkiksi hakemuksen keskusteluketjun kautta.
 
 Terveisin,
+
 {{lupapiste}}

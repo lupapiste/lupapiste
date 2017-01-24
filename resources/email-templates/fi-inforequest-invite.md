@@ -9,4 +9,5 @@ Neuvoa on kysytty  Lupapiste-palvelussa, jonka kautta voidaan tehd&auml; rakenne
 Mik&auml; on Lupapiste? Solita Oy:n, kuntien ja ymp&auml;rist&ouml;ministeri&ouml;n yhteisty&ouml;ss&auml; kehitt&auml;m&auml; s&auml;hk&ouml;inen asiointipalvelu. Palvelussa voidaan hoitaa rakennetun ymp&auml;rist&ouml;n lupa-asiointia vuorovaikutuksessa kunnan viranomaisten sek&auml; hankkeen osapuolten kanssa.
 
 S&auml;hk&ouml;isi&auml; hetki&auml; asiointiisi toivottaa,
+
 {{lupapiste}}

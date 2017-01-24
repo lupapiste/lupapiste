@@ -20,4 +20,5 @@ Du kan l&auml;sa ans&ouml;kan om bygglov via det referenslov som finns i arbetsl
 Om du har fr&aring;gor om att ans&ouml;ka om ansvar eller om de bilagor som kr&auml;vs kan du kontakta byggnadstillsynen till exempel genom ans&ouml;kans diskussionstr&aring;d.
 
 H&auml;lsningar
+
 {{lupapiste}}

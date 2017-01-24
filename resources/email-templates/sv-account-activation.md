@@ -1,4 +1,4 @@
-# # Hej {{user.firstName}}, 
+# Hej {{user.firstName}}, 
 
 trevligt att du blivit en av v&aring;ra anv&auml;ndare! 
 
@@ -8,5 +8,6 @@ I Lupapiste kan du ans&ouml;ka om tillst&aring;nd som g&auml;ller byggande och m
 
 Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utvecklingen p&aring; {{facebook}} | {{twitter}} | {{instagram}}
 
-V&auml;lkommen att sk&ouml;ta &auml;renden elektroniskt &ouml;nskar
+V&auml;lkommen att sk&ouml;ta &auml;renden elektroniskt &ouml;nskar,
+
 {{lupapiste}}

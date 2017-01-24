@@ -20,4 +20,5 @@ You can view the building permit application via the reference permit found in t
 If you have any further questions regarding the authorization application and the required references, please get in touch with the construction supervision authorities via the application discussion chain.
 
 Kind regards,
+
 {{lupapiste}}

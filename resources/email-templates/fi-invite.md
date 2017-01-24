@@ -21,4 +21,5 @@ Kutsun lähettäjä on myös halunnut jättää sinulle seuraavan viestin:
 Onko sinulla kysyttävää palvelun käytöstä? Suosittelemme tutustumaan {{lupapiste.help}} sekä {{faq}}.
 
 Terveisin,
+
 {{lupapiste}}
