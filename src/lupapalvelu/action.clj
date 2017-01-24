@@ -43,6 +43,14 @@
 ;; some utils
 ;;
 
+(defn some-pre-check
+  "Return pre-check that fails if none of the given pre-checks succeeds.
+  Pre-check returns result of the first argument in case of failure."
+  [& pre-checks]
+  (fn [command]
+    (when ((apply every-pred pre-checks) command)
+      ((first pre-checks) command))))
+
 (defn email-validator
   "Reads email key from action parameters and checks that it is valid email address.
    Blank address passes the validation."

@@ -2,8 +2,8 @@
   (:require [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [sade.util :refer [fn->] :as util]
+            [lupapalvelu.action :refer [defquery defcommand defraw email-validator some-pre-check] :as action]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.user :as usr]
             [lupapalvelu.company :as com]
@@ -22,6 +22,15 @@
                     :expires (util/to-local-datetime expires)
                     :link-fi (change-email-link "fi" id)
                     :link-sv (change-email-link "sv" id)})))})
+
+(notifications/defemail :change-company-email-notification
+  {:recipients-fn (fn-> (get-in [:user :company :id]) com/find-company-admins)
+   :model-fn (fn [data conf recipient]
+               (let [{:keys [id expires]} (:token data)]
+                 (merge
+                   (select-keys data [:old-email :new-email])
+                   {:name    (:firstName recipient)
+                    :company-user-name (ss/join " " (get-in data [:user :firstName]) (get-in data [:user :lastName]))})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
@@ -45,12 +54,16 @@
   (when-not (has-person-id? user)
     (fail :error.unauthorized)))
 
+(defn- validate-is-basic-company-user [{user :user}]
+  (when-not (= "user" (get-in user [:company :role]))
+    (fail :error.unauthorized)))
+
 (defcommand change-email-init
   {:parameters [email]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :pre-checks [validate-has-person-id]
+   :pre-checks [(some-pre-check validate-has-person-id validate-is-basic-company-user)]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (change-email/init-email-change user email))
