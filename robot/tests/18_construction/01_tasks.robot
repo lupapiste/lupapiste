@@ -153,7 +153,7 @@ Add attachment to loppukatselmus
   Wait until       Element should be visible  test-save-new-attachment
   Select from list by value  jquery=#attachmentType  muut.tutkimus
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PDF_TESTFILE_PATH}
-  Click element    test-save-new-attachment
+  Execute Javascript  $('#test-save-new-attachment')[0].click();
   Unselect Frame
   Wait Until Page Contains  ${PDF_TESTFILE_NAME}
   Return from review
@@ -244,7 +244,7 @@ Mikko can add attachments though
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PNG_TESTFILE_PATH}
-  Click element    test-save-new-attachment
+  Execute Javascript  $('#test-save-new-attachment')[0].click();
   Unselect Frame
   Wait Until Page Contains  ${PNG_TESTFILE_NAME}
   Return from review
