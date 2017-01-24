@@ -178,7 +178,7 @@
           (let [user-lang (:language recipient)
                 model   (assoc (model-fn command conf recipient)
                                :lang user-lang
-                               :user (select-keys recipient [:firstName :lastName :email :lang]))
+                               :user (select-keys recipient [:firstName :lastName :email :language]))
                 subject (get-email-subject application model (get conf :subject-key (name template-name)) (or (:language recipient) "fi"))
                 calendar (when (some? calendar-fn)
                            (calendar-fn command recipient))
