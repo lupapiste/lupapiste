@@ -42,6 +42,7 @@
       (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
       (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
       (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (Thread/sleep 100)                                    ; Wait for emails
 
       (let [emails (dummy-email-server/messages :reset true)
             application-submitted (query-application local-query sonja application-id-submitted) => truthy
