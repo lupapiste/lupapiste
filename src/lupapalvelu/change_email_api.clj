@@ -28,6 +28,7 @@
 
 (notifications/defemail :change-email-for-company-user
   {:recipients-fn notifications/from-user
+   :subject-key "change-email"
    :model-fn (fn [{data :data} conf recipient]
                (let [{:keys [id expires]} (:token data)]
                  (merge
