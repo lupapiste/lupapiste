@@ -113,6 +113,37 @@ Tällöin selainpään karttakutsut lähetetään ko. karttapalvelimelle.
 
 Palvelun käyttämiä kiinteistö- ja osoitetietorajapintoja ei ole saatavina avoimina palveluina, lisätietoa rajapinnoista [Maanmittauslaitoksen](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut) sivuilta.
 
+## MongoDB-kannan ja tunnusten luominen
+
+Käynnistä `mongo`-shell
+
+    $ mongo
+
+Luo halutessasi admin-tunnukset. Siirry ensin admin-kantaan:
+
+    > use admin
+
+Luo uusi käyttäjätunnus:
+
+    > db.createUser(
+          {
+              user: "tähän-haluamasi-admin-tunnus",
+              pwd: "tähän-adminin-salasana",
+              roles: ["userAdminAnyDatabase"]
+          });
+
+Siirry nyt `lupapiste`-kantaan:
+
+    > use lupapiste
+
+Luo tunnukset lupapisteelle (käytä samaa kannan nimeä, käyttäjän nimeä ja käyttäjän salasanaa kuin `user.properties`-tiedostossa):
+
+    > db.createUser(
+        {
+            user: "lupapiste-user",
+            pwd: "lupapiste-password",
+            roles: [ { role: "readWrite", db: "lupapiste" } ]
+        });
 
 ## Palvelun käynnistys
 
