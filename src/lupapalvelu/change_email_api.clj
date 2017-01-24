@@ -49,6 +49,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :pre-checks [validate-has-person-id]
+   :notified   true
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (change-email/init-email-change user email))
@@ -56,6 +57,7 @@
 (defcommand change-email
   {:parameters [tokenId stamp]
    :input-validators [(partial action/non-blank-parameters [:tokenId :stamp])]
+   :notified   true
    :user-roles #{:anonymous}}
   [_]
   (change-email/change-email tokenId stamp))
