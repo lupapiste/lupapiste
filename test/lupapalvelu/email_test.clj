@@ -14,10 +14,10 @@
   (facts "invalid template"
    (apply-template "does-not-exist.md" {:receiver "foobar"}) => (throws IllegalArgumentException))
 
-  (against-background [(fetch-template "master.md")           => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
-                       (fetch-template "footer.md" "en")      => "## {{footer}}"
-                       (fetch-template "test.md"   "en")      => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
-                       (find-resource "html-wrap.html" "en")  => (io/input-stream (.getBytes "<html><body></body></html>"))]
+  (against-background [(fetch-template "master.md")              => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
+                       (fetch-template "footer.md" "en")         => "## {{footer}}"
+                       (fetch-template "test.md"   "en")         => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
+                       (find-resource "html-wrap.html" anything) => (io/input-stream (.getBytes "<html><body></body></html>"))]
     (facts "header and footer"
       (let [[plain html] (apply-template "test.md" {:footer "FOOTER" :receiver "foobar" :lang "en"})]
         plain => "\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
@@ -48,13 +48,15 @@
     (fact "html" html => (contains (str (if html? "<em>" "<p>") s) :gaps-ok))))
 
 (facts "Apply markdown template"
-       (let [ctx {:hej "Morgon" :moi "Mortonki"}]
-         (apply-template "testbody.md" ctx) => (throws IllegalArgumentException)
-         (apply-template "testbody.md" (assoc ctx :lang "fi")) => (mail-check "suomi Mortonki")
-         (apply-template "testbody.md" (assoc ctx :lang "cn"))
-         => (throws IllegalArgumentException)
-         (apply-template "testbody.md" (assoc ctx :lang "sv"))
-         => (mail-check "Svenska Morgon")))
+  (let [ctx {:hej "Morgon" :moi "Mortonki"}]
+    (fact "If language is not provided, the templates in supported languages are catenated"
+      (apply-template "testbody.md" ctx) => (every-checker (mail-check "Svenska Morgon")
+                                                           (mail-check "suomi Mortonki")))
+    (apply-template "testbody.md" (assoc ctx :lang "fi")) => (mail-check "suomi Mortonki")
+    (apply-template "testbody.md" (assoc ctx :lang "cn"))
+    => (throws IllegalArgumentException)
+    (apply-template "testbody.md" (assoc ctx :lang "sv"))
+    => (mail-check "Svenska Morgon")))
 
 (facts "Apply html template"
        (let [ctx {:hej "Morgon" :moi "Mortonki"}]
@@ -78,25 +80,24 @@
     => [["this" "is" "not"]]
     (localization-keys-from-template "{{^inverted-section}} {{ignored}}\n{{/inverted-section}}") => []))
 
-(against-background [(fetch-template "test.md"      anything)   => "Just a dummy template"
-                     (fetch-template "i18n-test.md" "en")       => "{{applicationRole.authority}} {{applicationRole.foreman}}"
-                     (fetch-template "i18n-test.md" "fi")       => "{{applicationRole.authority}}"
-                     (fetch-template "nonexistent.md" anything) => "{{nonexistent.localization.key}}"]
-  (facts "preprocess-context"
+(facts "preprocess-context"
 
-    (fact "replaces function values in the context by calling them with the language (:lang) as argument"
-      (preprocess-context "test.md" {:lang "fi" :nationality #(get {"fi" "Finnish"} % "unknown")}) => {:lang "fi" :nationality "Finnish"})
+  (fact "replaces function values in the context by calling them with the language (:lang) as argument"
+    (preprocess-context "Just a dummy template"
+                        {:lang "fi" :nationality #(get {"fi" "Finnish"} % "unknown")})
+    => {:lang "fi" :nationality "Finnish"})
 
-    (fact "adds localizations from i18n files for keys present in the template but missing from the context"
-      (preprocess-context "i18n-test.md" {:lang "fi"}) => {:lang            "fi"
-                                                           :applicationRole {:authority "viranomainen"}})
+   (fact "adds localizations from i18n files for keys present in the template but missing from the context"
+     (preprocess-context "{{applicationRole.authority}}" {:lang "fi"})
+     => {:lang "fi" :applicationRole {:authority "viranomainen"}})
 
-    (fact "gives context localizations precedence over those in i18n files"
-      (preprocess-context "i18n-test.md" {:lang "en" :applicationRole {:authority "definitely not 'authority'"}})
-      => {:lang "en" :applicationRole {:authority "definitely not 'authority'" :foreman "supervisor"}})
+   (fact "gives context localizations precedence over those in i18n files"
+     (preprocess-context "{{applicationRole.authority}}  {{applicationRole.foreman}}"
+                         {:lang "en" :applicationRole {:authority "definitely not 'authority'"}})
+     => {:lang "en" :applicationRole {:authority "definitely not 'authority'" :foreman "supervisor"}})
 
-    (fact "throws when it encounters a missing localization key in the template"
-      (preprocess-context "nonexistent.md" {:lang "sv"}) => (throws #"No localization"))))
+   (fact "throws when it encounters a missing localization key in the template"
+     (preprocess-context "{{nonexistent.localization.key}}" {:lang "sv"}) => (throws #"No localization")))
 
 (def ajanvaraus-templates #{"en-accept-appointment.md" "en-decline-appointment.md"
                             "en-suggest-appointment-authority.md" "en-suggest-appointment-from-applicant.md"
@@ -127,4 +128,8 @@
                   filename        (str (name lang) "-" template-suffix)]
             :when (not (excluded-templates filename))]
       (fact {:midje/description (str filename " exists")}
-        (find-resource filename) =not=> (throws IllegalArgumentException)))))
+            (find-resource filename) =not=> (throws IllegalArgumentException)))
+    ; These tests ensure that excluded-templates is updated when new templates are added
+    (doseq [filename excluded-templates]
+      (fact {:midje/description (str filename " does NOT exist")}
+        (find-resource filename) => (throws IllegalArgumentException)))))
