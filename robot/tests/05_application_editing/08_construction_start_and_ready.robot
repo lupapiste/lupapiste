@@ -24,6 +24,7 @@ Sonja submits the application, approves it and gives it a verdict
   Click enabled by test id  approve-application
   Tab should be visible  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
+  Wait until  Application state should be  sent
   Open tab  verdict
   Submit empty verdict  verdictGiven  1
 
@@ -72,4 +73,3 @@ Sets construction started/ready via modal datepicker dialog
   Input text by test id  modal-datepicker-date  ${date}
   Click enabled by test id  modal-datepicker-continue
   Confirm  dynamic-yes-no-confirm-dialog
-
