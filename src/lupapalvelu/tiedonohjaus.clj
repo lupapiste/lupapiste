@@ -363,7 +363,8 @@
                 :request-review (i18n/localize lang "caseFile.operation.review.request")
                 :review (i18n/localize lang "caseFile.operation.review")
                 :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
-                :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection"))
+                :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection")
+                :authority-change (i18n/localize lang "caseFile.authorityChange"))
         description (str title ": " text)
         event (ActionEvent.)]
     (when-not (s/blank? user)
