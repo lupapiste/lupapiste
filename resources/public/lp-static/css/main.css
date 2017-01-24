@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1484903306928');
+@import url('main-blessed1.css?z=1485246469109');
 
 
 /* line 876, ../../../private/common-html/sass/partials/_forms.scss */
@@ -10674,7 +10674,11 @@ label.batch-required {
   min-height: 320px;
   height: 320px;
 }
-/* line 20, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 19, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor textarea.placeholder-visible {
+  color: #999999;
+}
+/* line 24, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor input[type=text], .inspection-summary-template-editor input[type=password], .inspection-summary-template-editor select, .inspection-summary-template-editor textarea {
   box-sizing: border-box;
   font-size: 16px;
@@ -10686,28 +10690,28 @@ label.batch-required {
   display: block;
   width: 100%;
 }
-/* line 31, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 35, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor input[type=text].required, .inspection-summary-template-editor input[type=password].required, .inspection-summary-template-editor select.required, .inspection-summary-template-editor textarea.required {
   border-color: #f6aa59;
 }
-/* line 34, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 38, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor input[type=text]:focus, .inspection-summary-template-editor input[type=password]:focus, .inspection-summary-template-editor select:focus, .inspection-summary-template-editor textarea:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 39, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 43, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor > div {
   margin: 12px 12px;
 }
-/* line 42, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 46, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor button {
   margin: 0 12px;
 }
-/* line 45, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 49, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor label.required {
   color: #f39129;
 }
-/* line 47, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 51, ../../../private/common-html/sass/views/_inspection_summary.scss */
 .inspection-summary-template-editor label.required:after {
   content: "*";
   display: inline;

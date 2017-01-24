@@ -734,4 +734,25 @@
     return autoFetched;
   };
 
+  ko.bindingHandlers.multilinePlaceholder = {
+    init: function (element, valueAccessor) {
+      var text = ko.utils.unwrapObservable(valueAccessor());
+
+      setTimeout(function() {
+        $(element).val(text).addClass("placeholder-visible");
+      }, 0);
+
+      $(element).focus(
+        function () {
+          if ($(element).val() === text) {
+            $(element).val("").removeClass("placeholder-visible");
+          }
+        }).blur(function () {
+          if (_.isBlank($(element).val())) {
+            $(element).val(text).addClass("placeholder-visible");
+          }
+        });
+    }
+  };
+
 })(jQuery);

@@ -15,6 +15,10 @@
   textarea {
     min-height: $grid-textarea-height * 2;
     height: $grid-textarea-height * 2;
+
+    &.placeholder-visible {
+      color: $gray153;
+    }
   }
 
   input[type=text], input[type=password], select, textarea {
