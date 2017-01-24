@@ -159,6 +159,7 @@
   {:parameters [:email role]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
+   :notified true
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
   (do-create-user user-data caller))
@@ -354,6 +355,7 @@
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator
                       (partial allowed-roles organization/authority-roles)]
+   :notified true
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)

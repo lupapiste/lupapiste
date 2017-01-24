@@ -106,6 +106,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
+   :notified   true
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{caller :user}]
   (c/search-result caller email (fn [_]
@@ -124,6 +125,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
+   :notified   true
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{user :user}]
   (c/add-user! {:firstName firstName :lastName lastName :email email}
@@ -138,7 +140,8 @@
    :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
    :pre-checks [application/validate-authority-in-drafts
-                c/company-not-already-invited]}
+                c/company-not-already-invited]
+   :notified   true}
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))

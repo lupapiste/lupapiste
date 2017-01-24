@@ -91,15 +91,17 @@
                         {:tag :dt :content "Time"}
                         {:tag :dd :attrs {:data-test-id "time"} :content [(util/to-local-datetime (:time msg))]}]})
 
-  (defpage "/api/last-email" {reset :reset}
-    (if-let [msg (last (messages :reset reset))]
-      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8")))
+  (defn emit-as-html [msg]
+    (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8")))
                       (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
                       (enlive/transform [:body] (enlive/prepend [(msg-header msg)
                                                                  {:tag :hr}]))
-                      (enlive/transform [:body] (enlive/append [{:tag :hr} {:tag :pre :content (get-in msg [:body :calendar])}]))))
-      {:status 404 :body "No emails"}))
+                      (enlive/transform [:body] (enlive/append [{:tag :hr} {:tag :pre :content (get-in msg [:body :calendar])}])))))
 
+  (defpage "/api/last-email" {reset :reset}
+    (if-let [msg (last (messages :reset reset))]
+      (emit-as-html msg)
+      {:status 404 :body "No emails"}))
 
 
   (defpage "/api/last-emails" {reset :reset}

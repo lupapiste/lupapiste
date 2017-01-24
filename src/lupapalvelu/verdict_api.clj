@@ -148,6 +148,7 @@
   {:parameters [id verdictId]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
    :states     give-verdict-states
+   :notified true
    :user-roles #{:authority}}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
