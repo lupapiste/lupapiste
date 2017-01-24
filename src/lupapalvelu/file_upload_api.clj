@@ -6,7 +6,8 @@
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.states :as states]))
 
 (def file-upload-max-size 100000000)
 
@@ -31,10 +32,12 @@
          (resp/status 200))))
 
 (defraw upload-file-authenticated
-  {:user-roles #{:authority :applicant}
-   :parameters [files applicationId]
-   :input-validators [file-mime-type-accepted file-size-legal]}
-  (->> {:files (file-upload/save-files applicationId files (vetuma/session-id))
+  {:user-roles       #{:authority :applicant}
+   :parameters       [files id]
+   :input-validators [file-mime-type-accepted file-size-legal]
+   :states           states/all-states}
+  [{:keys [application]}]
+  (->> {:files (file-upload/save-files application files (vetuma/session-id))
         :ok true}
        (resp/json)
        (resp/content-type "text/plain")

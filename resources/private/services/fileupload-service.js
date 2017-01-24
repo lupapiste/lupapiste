@@ -4,8 +4,6 @@ LUPAPISTE.FileuploadService = function() {
 
   self.serviceName = "fileuploadService";
 
-  self.applicationId = lupapisteApp.models.application.id;
-
   function prepareDropZone( dropZone ) {
     return (function () {
       var latest = 0;
@@ -79,15 +77,18 @@ LUPAPISTE.FileuploadService = function() {
     }
 
     var $dropZone = prepareDropZone( options.dropZone );
+    var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
+    var apiUrl = applicationId ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
+    var formData = [ { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") } ];
+    if (applicationId) {
+      formData.push({ name: "id", value: applicationId });
+    }
 
     $("#" + fileInputId).fileupload({
-      url: "/api/command/upload-file-authenticated",
+      url: apiUrl,
       type: "POST",
       dataType: "json",
-      formData: [
-        { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") },
-        { name: "id", value: ko.unwrap(self.applicationId) }
-      ],
+      formData: formData,
       dropZone: $dropZone,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
