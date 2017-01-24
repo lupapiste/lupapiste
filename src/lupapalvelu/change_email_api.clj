@@ -23,15 +23,6 @@
                     :link-fi (change-email-link "fi" id)
                     :link-sv (change-email-link "sv" id)})))})
 
-(notifications/defemail :change-company-email-notification
-  {:recipients-fn (fn-> (get-in [:user :company :id]) com/find-company-admins)
-   :model-fn (fn [data conf recipient]
-               (let [{:keys [id expires]} (:token data)]
-                 (merge
-                   (select-keys data [:old-email :new-email])
-                   {:name    (:firstName recipient)
-                    :company-user-name (ss/join " " (get-in data [:user :firstName]) (get-in data [:user :lastName]))})))})
-
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
                     (if-let [company-id (get-in user [:company :id])]
