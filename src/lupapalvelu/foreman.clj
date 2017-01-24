@@ -310,7 +310,7 @@
        (foreman-app? application)))
 
 (defn- notify-of-invite! [app command invite-type recipients]
-  (->> (map (fn [{{:keys [email user]} :invite}] (assoc user :email email)) recipients)
+  (->> (map (fn [{{:keys [email user]} :invite}] (or (usr/get-user-by-email email) (assoc user :email email))) recipients)
          (assoc command :application app :recipients)
          (notif/notify! invite-type)))
 
