@@ -762,7 +762,7 @@ Upload batch file
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
   Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
-  Run keyword unless  ${group-is-selected}  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
+  Run keyword unless  ${group-is-selected} or '${grouping}' == 'Yleisesti hankkeeseen'  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
