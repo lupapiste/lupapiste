@@ -125,7 +125,7 @@
                                         "en-notify-authority-added.md" "en-organization-on-submit.md"
                                         "en-inforequest-invite.md" "en-reminder-open-inforequest.md"
                                         "en-reminder-statement-due-date.md" "en-request-statement-new-user.md"
-                                        "en-reminder-request-statement.md" "en-undo-cancellation.md"
+                                        "en-reminder-request-statement.md" "en-undo-cancellation.md" "en-change-email-for-company-user.md"
                                         "en-onnistuu-success.md" "sv-onnistuu-success.md" ; Onnistuu internal mail
                                         "sv-organization-on-submit.md" "sv-undo-cancellation.md"})]
     (doseq [lang (disj (set i18n/supported-langs) :fi)

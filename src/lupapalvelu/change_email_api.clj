@@ -23,7 +23,7 @@
                    (select-keys data [:old-email :new-email])
                    {:user    recipient
                     :expires (util/to-local-datetime expires)
-                    :link    (change-email-link (or (:language recipient) "fi") id)})))})
+                    :link    #(change-email-link % id)})))})
 
 (notifications/defemail :change-email-for-company-user
   {:recipients-fn notifications/from-user
@@ -32,10 +32,8 @@
                (let [{:keys [id expires]} (:token data)]
                  (merge
                    (select-keys data [:old-email :new-email])
-                   {:name    (:firstName recipient)
-                    :expires (util/to-local-datetime expires)
-                    :link-fi (change-email-for-company-user-link "fi" id)
-                    :link-sv (change-email-for-company-user-link "sv" id)})))})
+                   {:expires (util/to-local-datetime expires)
+                    :link    #(change-email-for-company-user-link % id)})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
