@@ -517,7 +517,7 @@
     (let [current (first from-mongo)
           bg-id-current (bg-id current)
           remaining (rest from-mongo)
-          updated-id-match (when-not (nil? bg-id-current)
+          updated-id-match (when-not (ss/empty? bg-id-current)
                              (util/find-first #(= bg-id-current (bg-id %)) from-update))
           updated-match (or updated-id-match
                             (first (filter #(or (reviews-have-same-name-and-type? current %)
