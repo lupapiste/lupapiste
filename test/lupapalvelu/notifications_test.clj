@@ -145,25 +145,29 @@
 (defn- notify-invite! [user]
   (notify! :test {:recipients [user]}))
 
-(defn- last-notification-contains-text [text]
+(defn- last-notification-text [{does-contain :contains does-not-contain :does-not-contain}]
   (Thread/sleep 100)
-  (fact {:midje/description (str "Notification contains '" text "'")}
+  (fact {:midje/description (str "Notification contains " contains " and does not contain " does-not-contain)}
     (let [msg (last (dummy/messages))]
-      (get-in msg [:body :plain]) => (contains text))))
+      (doseq [text does-contain]
+        (get-in msg [:body :plain]) => (contains text))
+      (doseq [text does-not-contain]
+        (get-in msg [:body :plain]) =not=> (contains text)))))
 
 (facts "notification language"
   (against-background [(#'lupapalvelu.notifications/get-email-subject anything anything anything anything) => "Subject"])
   (notify-invite! {:email "pekka@suomi.fi" :language "fi"})
-  (last-notification-contains-text "suomi")
+  (last-notification-text {:contains         ["suomi"]
+                           :does-not-contain ["Svenska" "English"]})
 
   (notify-invite! {:email "sven@sverige.sv" :language "sv"})
-  (last-notification-contains-text "Svenska")
+  (last-notification-text {:contains         ["Svenska"]
+                           :does-not-contain ["suomi" "English"]})
 
   (notify-invite! {:email "johnny@engl.ish" :language "en"})
-  (last-notification-contains-text "English")
+  (last-notification-text {:contains         ["English"]
+                           :does-not-contain ["suomi" "Svenska"]})
 
 
   (notify-invite! {:email "nano@nano.nano" :language nil})
-  (last-notification-contains-text "suomi")
-  (last-notification-contains-text "Svenska")
-  (last-notification-contains-text "English"))
+  (last-notification-text {:contains ["suomi" "Svenska" "English"]}))
