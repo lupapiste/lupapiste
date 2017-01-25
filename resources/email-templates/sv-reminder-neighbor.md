@@ -1,4 +1,4 @@
-# Hej {{user.firstName}},
+# Hej {{name}},
 
 vi vill p&aring;minna dig om att du i egenskap av r&aring;granne f&aring;tt ett meddelande om en ans&ouml;kan om bygglov p&aring; adressen {{address}}, {{municipality}}som &auml;r under behandling via tj&auml;nsten Lupapiste. I Lupapiste kan du sk&ouml;ta tillst&aring;nds&auml;renden som g&auml;ller den byggda milj&ouml;n i v&auml;xelverkan med myndigheten och tillsammans med de &ouml;vriga parterna.  
 
