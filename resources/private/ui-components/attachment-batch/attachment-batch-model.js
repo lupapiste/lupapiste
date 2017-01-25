@@ -76,7 +76,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   function newRow(initialType, initialContents, drawingNumber, group) {
     var type = ko.observable(initialType);
-    var grouping = ko.observable({});
+    var grouping = ko.observable(group || {});
     var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( type ) {
@@ -84,7 +84,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       contentsList( contents.list );
       contentsValue(initialContents || contents.defaultValue);
       grouping({});
-      grouping(group || service.getDefaultGroupingForType(type));
+      grouping(service.getDefaultGroupingForType(type));
     } );
     var contentsCell = new Cell( contentsValue, true );
     contentsCell.list = contentsList;

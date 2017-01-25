@@ -8,7 +8,8 @@
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
             [lupapalvelu.attachment.type :as lat]
             [sade.strings :as str]
-            [lupapalvelu.building :as building])
+            [lupapalvelu.building :as building]
+            [lupapalvelu.attachment.tags :as att-tags])
   (:import (java.io File InputStream)))
 
 (def FileData
@@ -49,27 +50,41 @@
                          (= (str/lower-case national-id) building-id))
                  operation-id)))))
 
-(defn- resolve-attachment-grouping [{:keys [metadata]} {:keys [documents] :as application} tunnus-or-bid]
-  (if-let [op-id (and
-                   (not (str/blank? tunnus-or-bid))
-                   (or (some #(op-id-from-matching-document tunnus-or-bid %) documents)
-                       (op-id-from-matching-building application tunnus-or-bid)))]
-    {:operations [{:id op-id}]}
-    {:groupType (:grouping metadata)}))
+(defn- resolve-attachment-grouping
+  [{{:keys [grouping multioperation]} :metadata} {:keys [documents] :as application} tunnus-or-bid-str]
+  (let [op-ids (->> (str/split tunnus-or-bid-str #",|;")
+                    (map str/trim)
+                    (map str/lower-case)
+                    (map (fn [tunnus-or-bid]
+                           (or (some #(op-id-from-matching-document tunnus-or-bid %) documents)
+                               (op-id-from-matching-building application tunnus-or-bid))))
+                    set)
+        groups (att-tags/attachment-groups-for-application application)
+        op-groups (filter #(= (:groupType %) :operation) groups)]
+    (cond
+      (seq op-ids) {:groupType :operation
+                    :operations (filter #(op-ids (:id %)) op-groups)}
+      ; This logic should match getDefaultGroupingForType in attachment-batch-model.js
+      multioperation {:groupType :operation
+                      :operations op-groups}
+
+      (= grouping :operation) {:groupType :operation
+                               :operations (take 1 op-groups)}
+
+      grouping (first (filter #(= grouping (:groupType %)) groups)))))
 
 (defn- download-and-save-files [application attachments session-id]
   (pmap
     (fn [{:keys [file filename localizedType contents drawingNumber operation]}]
       (when-let [attachment-type (lat/localisation->attachment-type :R localizedType)]
         (when-let [is (muuntaja/download-file file)]
-          (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)
-                tunnus-or-bid (when operation (str/lower-case (str/trim operation)))]
+          (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)
             (merge file-data
                    {:contents      contents
                     :drawingNumber drawingNumber
-                    :group         (resolve-attachment-grouping attachment-type application tunnus-or-bid)
-                    :type          (select-keys attachment-type [:type-group :type-id])})))))
+                    :group         (resolve-attachment-grouping attachment-type application operation)
+                    :type          attachment-type})))))
     attachments))
 
 (defn- is-zip-file? [filedata]
