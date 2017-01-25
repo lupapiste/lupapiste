@@ -47,9 +47,8 @@
   "Pre-check to determine if documents are editable in abnormal states"
   [data-key default-states]
   (fn [{data :data {docs :documents state :state} :application}]
-    (when-let [doc-id (get data (keyword data-key))]
-      (when-not (-> (domain/get-document-by-id docs doc-id)
-                    (model/get-document-schema)
+    (when-let [doc (->> (get data (keyword data-key)) (domain/get-document-by-id docs))]
+      (when-not (-> (model/get-document-schema doc)
                     (state-valid-by-schema? :editable-in-states default-states state))
         (fail :error.document-not-editable-in-current-state)))))
 
@@ -62,17 +61,15 @@
         (fail :error.document.post-verdict-addition)))))
 
 (defn- validate-user-authz-by-key
-  [doc-id-key {:keys [data application user]}]
+  [doc-id-key {:keys [data application user] :as command}]
   {:pre [(keyword? doc-id-key)]}
   (let [doc-id (get data doc-id-key)
-        authority? (auth/application-authority? application user)
-        schema (when doc-id (some-> application (domain/get-document-by-id doc-id) model/get-document-schema))
-        user-roles (->> user :id (auth/get-auths application) (map (comp keyword :role)) set)
-        allowed-roles (get-in schema [:info :user-authz-roles] auth/default-authz-writer-roles)]
-    (when (and doc-id (not authority?))
-      (cond
-        (nil? schema) (fail :error.document-not-found)
-        (empty? (intersection allowed-roles user-roles)) unauthorized))))
+        schema (some-> application (domain/get-document-by-id doc-id) model/get-document-schema)]
+    (when (and doc-id (not (auth/application-authority? application user)))
+      (if schema
+        (-> (get-in schema [:info :user-authz-roles] auth/default-authz-writer-roles)
+            (domain/validate-access command))
+        (fail :error.document-not-found)))))
 
 (def validate-user-authz-by-doc (partial validate-user-authz-by-key :doc))
 (def validate-user-authz-by-doc-id (partial validate-user-authz-by-key :doc-id))
