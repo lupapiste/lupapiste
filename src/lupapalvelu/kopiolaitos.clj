@@ -88,7 +88,7 @@
                              orderInfo
                              {:titles (get-kopiolaitos-order-email-titles lang)
                               :contentsTable (get-kopiolaitos-html-table lang attachments)})
-            email-msg (email/apply-template "kopiolaitos-order.html" orderInfo)
+            email-msg (email/apply-template "kopiolaitos-order.html" (dissoc orderInfo :lang))
             results-failed-emails (reduce
                                     (fn [failed addr]
                                       (let [res (do-send-email orderInfo email-subject email-msg email-attachment addr)]

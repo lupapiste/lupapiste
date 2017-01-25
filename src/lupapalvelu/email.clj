@@ -1,11 +1,11 @@
 (ns lupapalvelu.email
   (:require [clojure.java.io :as io]
-            [clojure.string :as s]
             [clojure.walk :refer [postwalk]]
             [clostache.parser :as clostache]
             [endophile.core :as endophile]
             [net.cgrand.enlive-html :as enlive]
             [taoensso.timbre :as timbre :refer [warn]]
+            [sade.core :refer :all]
             [sade.email :as email]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -21,34 +21,29 @@
 ;; where the language part is optional. Also, if the prefixed template
 ;; is not found, the fallback is a plain template.
 
-(defn- template-path [template-name lang]
-  (str "email-templates/"
-       (if lang
-         (str lang "-" template-name)
-         template-name)))
+(defn- template-path [template-name]
+  (str "email-templates/" template-name))
 
 (defn find-resource
-  [resource-name & [lang]]
-  (if-let [resource (io/resource (template-path resource-name lang))]
+  [resource-name]
+  (if-let [resource (io/resource (template-path resource-name))]
     resource
-    (if lang
-      (find-resource resource-name)
-      (if (env/dev-mode?)
-        (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))
-        (do (warn "Can't find mail resource: " resource-name)
-            "")))))
+    (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))))
 
 (defn- slurp-resource [resource]
   (with-open [in (io/input-stream resource)]
     (slurp in)))
 
 (defn fetch-template
-  [template-name & [lang]]
-  (slurp-resource (find-resource template-name lang)))
+  [template-name]
+  (slurp-resource (find-resource template-name)))
 
-(defn- fetch-html-template
+(defn fetch-html-template
   [template-name & [lang]]
-  (enlive/html-resource (find-resource template-name lang)))
+  (enlive/html-resource (find-resource (if lang (str lang "-" template-name) template-name))))
+
+(defn fetch-template-by-lang [template-name lang]
+  (fetch-template (str lang "-" template-name)))
 
 (when-not (env/feature? :no-cache)
   (alter-var-root #'fetch-template memoize)
@@ -62,10 +57,10 @@
 
 (defmulti ->str (fn [element] (if (map? element) (:tag element) :str)))
 
-(defn- ->str* [elements] (s/join (map ->str elements)))
+(defn- ->str* [elements] (ss/join (map ->str elements)))
 
 (defmethod ->str :default [element] (->str* (:content element)))
-(defmethod ->str :str     [element] (s/join element))
+(defmethod ->str :str     [element] (ss/join element))
 (defmethod ->str :h1      [element] (str \newline (->str* (:content element)) \newline))
 (defmethod ->str :h2      [element] (str \newline (->str* (:content element)) \newline))
 (defmethod ->str :p       [element] (str \newline (->str* (:content element)) \newline))
@@ -80,10 +75,10 @@
 (defmethod ->str :img     [element] "")
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] hr-as-text)
-(defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
+(defmethod ->str :blockquote [element] (-> element :content ->str* (ss/replace #"\n{2,}" "\n  ") (ss/replace #"^\n" "  ")))
 (defmethod ->str :table      [element] (str \newline (->str* (filter map? (:content element))) \newline))
 (defmethod ->str :tr         [element] (let [contents (filter #(map? %) (:content element))]
-                                         (s/join \tab (map #(s/join (:content %)) contents))))
+                                         (ss/join \tab (map #(ss/join (:content %)) contents))))
 
 ;;
 ;; HTML support:
@@ -172,23 +167,35 @@
 
 (defn- render-body-with-lang [template-name context lang]
   (let [master (fetch-template "master.md")
-        footer (fetch-template "footer.md" lang)
-        body   (fetch-template template-name lang)]
+        footer (fetch-template-by-lang "footer.md" lang)
+        body   (fetch-template-by-lang template-name lang)]
     (clostache/render master
                       (preprocess-context body
                                           (assoc context :lang lang))
                       {:body body :footer footer})))
 
+(defn try-render-with-lang
+  "Try render with language. If resource is not found and IllegalArgumentException is thrown, return empty string."
+  [template context lang]
+  (try
+    (render-body-with-lang template context lang)
+    (catch IllegalArgumentException e
+      (warn (.getMessage e))
+      "")))
+
 (defn- render-body
   "Render the template body. If no language is given in context, build
   the body by catenating the templates of all supported languages."
   [template context]
-  (->> (if (:lang context)
-         [(:lang context)]
-         i18n/supported-langs)
-       (map name)
-       (map (partial render-body-with-lang template context))
-       (ss/join hr-as-text)))
+  (let [res (->> (if (:lang context)
+                   [(:lang context)]
+                   i18n/supported-langs)
+                 (map name)
+                 (map (partial try-render-with-lang template context))
+                 (remove ss/blank?))]
+    (if (not-empty res)
+      (ss/join hr-as-text res)
+      (fail! :error.empty-email :template template))))
 
 (defn- unescape-at [s]
   (ss/replace s #"[\\]+@" "@"))
@@ -205,10 +212,10 @@
 
 (defn- apply-html-template [template-name context]
   (let [lang     (:lang context)
-        master   (fetch-html-template "master.html" lang)
+        master   (fetch-html-template "master.html")
         template (fetch-html-template template-name lang)
         html     (-> master
-                     (enlive/transform [:style] (enlive/append (->> (enlive/select template [:style]) (map :content) flatten s/join)))
+                     (enlive/transform [:style] (enlive/append (->> (enlive/select template [:style]) (map :content) flatten ss/join)))
                      (enlive/transform [:.body] (enlive/append (map :content (enlive/select template [:body]))))
                      (endophile/html-string)
                      (clostache/render context))

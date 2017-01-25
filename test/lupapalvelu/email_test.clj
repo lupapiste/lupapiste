@@ -5,6 +5,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [clojure.set :as set]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -12,12 +13,12 @@
 
 (facts "apply-template"
   (facts "invalid template"
-   (apply-template "does-not-exist.md" {:receiver "foobar"}) => (throws IllegalArgumentException))
+   (apply-template "does-not-exist.md" {:receiver "foobar"}) => (throws #"error.empty-email"))
 
   (against-background [(fetch-template "master.md")              => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
-                       (fetch-template "footer.md" "en")         => "## {{footer}}"
-                       (fetch-template "test.md"   "en")         => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
-                       (find-resource "html-wrap.html" anything) => (io/input-stream (.getBytes "<html><body></body></html>"))]
+                       (fetch-template "en-footer.md")         => "## {{footer}}"
+                       (fetch-template "en-test.md")         => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
+                       (find-resource "html-wrap.html") => (io/input-stream (.getBytes "<html><body></body></html>"))]
     (facts "header and footer"
       (let [[plain html] (apply-template "test.md" {:footer "FOOTER" :receiver "foobar" :lang "en"})]
         plain => "\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
@@ -25,22 +26,26 @@
 
 (facts "User language markdown templates: test body"
   (fetch-template "testbody.md") => (contains "suomi")
-  (fetch-template "testbody.md" "sv") => (contains "Svenska")
-  (fetch-template "testbody.md" "fi") => (contains "suomi")
-  (fetch-template "testbody.md" "cn") => (contains "suomi"))
+  (fetch-template "sv-testbody.md") => (contains "Svenska")
+  (fetch-template "fi-testbody.md") => (contains "suomi")
+  (fetch-template "cn-testbody.md") => (throws IllegalArgumentException))
 
 (facts "User language markdown templates: footer"
   (fetch-template "footer.md") => (throws IllegalArgumentException)
   (fetch-template "fi-footer.md") => (contains "automaattinen")
-  (fetch-template "footer.md" "sv") => (contains "automatiskt")
-  (fetch-template "footer.md" "fi") => (contains "automaattinen")
-  (fetch-template "footer.md" "cn") => (throws IllegalArgumentException))
+  (fetch-template "sv-footer.md") => (contains "automatiskt")
+  (fetch-template "cn-footer.md") => (throws IllegalArgumentException))
 
-(facts "User language html templates: test body"
-       (fetch-template "testbody.html") => (contains "<em>suomi")
-       (fetch-template "testbody.html" "sv") => (contains "<em>Svenska")
-       (fetch-template "testbody.html" "fi") => (contains "<em>suomi")
-       (fetch-template "testbody.html" "cn") => (contains "<em>suomi"))
+(facts "fetch by language"
+  (fetch-template-by-lang "footer.md" "fi") => (contains "automaattinen")
+  (fetch-template-by-lang "footer.md" nil) => (throws IllegalArgumentException)
+  (fetch-template-by-lang "footer.md" "cn") => (throws IllegalArgumentException))
+
+(facts "User language html templates: test body as enlive"
+  (fetch-html-template "testbody.html") => seq?
+  (fetch-html-template "testbody.html" "sv") => seq?
+  (fetch-html-template "testbody.html" "fi") => (throws IllegalArgumentException)
+  (fetch-html-template "testbody.html" "cn") => (throws IllegalArgumentException))
 
 (defn mail-check [s & [html?]]
   (fn [[txt html]]
@@ -54,7 +59,7 @@
                                                            (mail-check "suomi Mortonki")))
     (apply-template "testbody.md" (assoc ctx :lang "fi")) => (mail-check "suomi Mortonki")
     (apply-template "testbody.md" (assoc ctx :lang "cn"))
-    => (throws IllegalArgumentException)
+    => (throws #"error.empty-email")
     (apply-template "testbody.md" (assoc ctx :lang "sv"))
     => (mail-check "Svenska Morgon")))
 
@@ -62,7 +67,7 @@
        (let [ctx {:hej "Morgon" :moi "Mortonki"}]
          (apply-template "testbody.html" ctx) => (mail-check "suomi Mortonki" true)
          (apply-template "testbody.html" (assoc ctx :lang "cn"))
-         => (mail-check "suomi Mortonki" true)
+         => (throws IllegalArgumentException)
          (apply-template "testbody.html" (assoc ctx :lang "sv"))
          => (mail-check "Svenska Morgon" true)))
 
@@ -121,6 +126,7 @@
                                         "en-inforequest-invite.md" "en-reminder-open-inforequest.md"
                                         "en-reminder-statement-due-date.md" "en-request-statement-new-user.md"
                                         "en-reminder-request-statement.md" "en-undo-cancellation.md"
+                                        "en-onnistuu-success.md" "sv-onnistuu-success.md" ; Onnistuu internal mail
                                         "sv-organization-on-submit.md" "sv-undo-cancellation.md"})]
     (doseq [lang (disj (set i18n/supported-langs) :fi)
             template-name template-names
