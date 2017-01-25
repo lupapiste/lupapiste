@@ -193,13 +193,17 @@
         (fact "Statement cannot be given with invalid status"
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
+        (fact "Veikko can delete attachment"
+              (let [attachment-id (upload-attachment-for-statement veikko application-id nil true (:id statement))]
+                (command veikko :delete-attachment :id application-id
+                         :attachmentId attachment-id) => ok?))
         (fact* "Statement is given"
                (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
         (fact "Applicant got email"
-          (let [emails (sent-emails)
-                email  (first emails)]
-            (count emails) => 1
+              (let [emails (sent-emails)
+                email  (last emails)]
+            (count emails) => 2
             (:to email) => (contains mikko-email)
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
 
@@ -275,7 +279,7 @@
           (command sonja :delete-attachment :id ymp-id
                    :attachmentId (statement-attachment-id sonja ymp-id)) => ok?))
       (fact "Sonja can add attachment again"
-        (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
+            (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
       (fact "Sonja can give statement"
         (command sonja :give-statement :id ymp-id :statementId statement-id
                  :modify-id (:modify-id (designated-statement sonja ymp-id))
@@ -285,8 +289,8 @@
                  :modify-id (:modify-id (designated-statement sonja ymp-id))
                  :status "puollettu" :text "Will fail" :lang "fi")=> fail?)
       (fact "Sonja cannot delete attachment"
-        (command sonja :delete-attachment :id ymp-id
-                 :attachmentId (statement-attachment-id sonja ymp-id)))
+            (command sonja :delete-attachment :id ymp-id
+                 :attachmentId (statement-attachment-id sonja ymp-id))=> (partial expected-failure? :error.unauthorized))
       (fact "Olli requests reply from Mikko to Sonja's statement"
         (command olli :request-for-statement-reply :id ymp-id :statementId statement-id
                  :lang "fi") => ok?)

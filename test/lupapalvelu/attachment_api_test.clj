@@ -30,7 +30,7 @@
 
     (fact "attachment data cannot be modified if the attachment is read-only"
       (let [command (util/deep-merge base-command {:action "set-attachment-meta"
-                                                   :data   {:meta {"contents" "foobar"}}})]
+                                                   :data   {:meta {:contents "foobar"}}})]
         (execute command) => {:ok   false
                               :text "error.unauthorized"
                               :desc "Attachment is read only."}))
@@ -90,7 +90,7 @@
                       :data        {:id           "ABC123"
                                     :attachmentId "5234"}}
         meta-command (util/deep-merge base-command {:action "set-attachment-meta"
-                                                    :data   {:meta {"contents" "foobar"}}})
+                                                    :data   {:meta {:contents "foobar"}}})
         type-command (util/deep-merge base-command {:action "set-attachment-type"
                                                     :data   {:attachmentType "paapiirustus.asemapiirros"}})
         archivist-user {:orgAuthz      {:753-R #{:authority :archivist}}
@@ -110,3 +110,27 @@
     (provided
       (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
       (att/update-attachment-data! anything "5234" anything 1000) => {:ok true})))
+
+(facts "Allowed only for authority when application sent"
+       (let [app {:organization "753-R"
+                  :id           "ABC123"
+                  :state        "sent"
+                  :auth [{:role "owner"
+                          :id "foo"}]}
+             fail {:ok false :text "error.unauthorized"}]
+         (fact "Applicant"
+               (att/allowed-only-for-authority-when-application-sent
+                   {:application app :user {:id "foo" :role "applicant"}})
+               => fail)
+         (fact "Outside authority 1"
+               (att/allowed-only-for-authority-when-application-sent
+                   {:application app :user {:id "foo" :role "authority" :orgAuthz {:888-R #{:authority}}}})
+               => fail)
+         (fact "Outside authority 2"
+               (att/allowed-only-for-authority-when-application-sent
+                   {:application app :user {:id "foo" :role "authority"}})
+               => fail)
+         (fact "Application authority"
+               (att/allowed-only-for-authority-when-application-sent
+                   {:application app :user {:id "bar" :role "authority" :orgAuthz {:753-R #{:authority}}}})
+               => nil)))

@@ -3,7 +3,7 @@
             [clojure.string :refer [replace-first]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [sade.util :as util]
+            [sade.util :as util :refer [fn->]]
             [sade.core :refer [ok fail fail! unauthorized!]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application application->command] :as action]
@@ -196,12 +196,12 @@
          $set  (merge
                  {:modified timestamp}
                  (when op-id
-                   (mongo/generate-array-updates
-                     :attachments
-                     all-attachments
-                     #(= (:id (:op %)) op-id)
-                     :op nil
-                     :groupType nil)))}))
+                   (->> all-attachments
+                        (keep-indexed (fn [ind att]
+                                        (some->> (att/remove-operation-updates att op-id)
+                                                 (util/map-keys #(ss/join "." [ind (name %)])))))
+                        (apply concat)
+                        (util/map-keys (partial util/kw-path :attachments)))))}))
     (when (seq removable-attachment-ids)
       (att/delete-attachments! application removable-attachment-ids))))
 

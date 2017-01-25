@@ -102,10 +102,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.organization = ko.observable([]);
 
-  self.asianhallintaEnabled = ko.pureComputed(function() {
-    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
-  });
-
   self.organizationName = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().name() : "";
   });

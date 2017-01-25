@@ -5,7 +5,7 @@
 
 (apply-remote-minimal)
 
-(facts "transfers"
+(facts "transfers with case managenment"
   (let [application (create-and-submit-application
                          pena
                          :propertyId kuopio-property-id
@@ -18,10 +18,7 @@
     (generate-documents application pena)
 
     (fact "form a krysp message"
-      (command velho :approve-application :id app-id :lang "fi") => ok?)
-
-    (fact "request-for-complement before resend"
-      (command velho :request-for-complement :id app-id))
+      (command velho :approve-application :id app-id :lang "fi") => (partial expected-failure? :error.integration.asianhallinta-available))
 
     (fact "form a case management message"
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?)
@@ -32,21 +29,58 @@
     (fact {:midje/description (str "list transfers of " app-id)}
       (let [{:keys [krysp ah] :as resp} (query velho :integration-messages :id app-id)]
         resp => ok?
-        (doseq [[dirs n] [[krysp "krysp"] [ah "ah"]]
-                :let [{:keys [ok error waiting]} dirs]]
-          (fact {:midje/description n}
-            (fact "no files transferred" ok => empty?)
-            (fact "no files in errors" error => empty?)
-            (fact "at least one file waits to be transferred" (count waiting) => pos?)
-            (fact "all filenames start with application id" (map :name waiting) => (has every? #(.startsWith % app-id)))
-            (fact "file has modification time" (map :modified waiting) => (has every? pos?)))))))
+        (facts "case management"
+          (fact "no files transferred" (:ok ah) => empty?)
+          (fact "no files in errors" (:error ah) => empty?)
+          (fact "at least one file waits to be transferred" (count (:waiting ah)) => pos?)
+          (fact "all filenames start with application id" (map :name (:waiting ah)) => (has every? #(.startsWith % app-id)))
+          (fact "file has modification time" (map :modified (:waiting ah)) => (has every? pos?)))
 
+        (facts "krysp"
+          (fact "no files transferred" (:ok krysp) => empty?)
+          (fact "no files in errors" (:error krysp) => empty?)
+          #_(fact "no files waits to be transferred" (:waiting krysp) => empty?)))))) ; FIXME: clean target path before test
+
+(facts "transfers without case management"
+  (let [application (create-and-submit-application
+                         pena
+                         :propertyId kuopio-property-id
+                         :operation "kerrostalo-rivitalo"
+                         :propertyId "29703401070020"
+                         :y 6965051.2333374 :x 535179.5
+                         :address "Suusaarenkierto 45")
+        app-id (:id application)]
+
+    (generate-documents application pena)
+
+    (fact "form a case management message"
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? :error.integration.asianhallinta-disabled))
+
+    (fact "form a krysp message"
+      (command velho :approve-application :id app-id :lang "fi") => ok?)
+
+    (fact {:midje/description (str "list transfers of " app-id)}
+      (let [{:keys [krysp ah] :as resp} (query velho :integration-messages :id app-id)]
+        resp => ok?
+        (facts "krysp"
+          (fact "no files transferred" (:ok krysp) => empty?)
+          (fact "no files in errors" (:error krysp) => empty?)
+          (fact "at least one file waits to be transferred" (count (:waiting krysp)) => pos?)
+          (fact "all filenames start with application id" (map :name (:waiting krysp)) => (has every? #(.startsWith % app-id)))
+          (fact "file has modification time" (map :modified (:waiting krysp)) => (has every? pos?)))
+
+        (facts "case management"
+          (fact "no files transferred" (:ok ah) => empty?)
+          (fact "no files in errors" (:error ah) => empty?)
+          (fact "no files waits to be transferred" (:waiting ah) => empty?))))))
+
+(facts "transfers without krysp or case management"
   (let [app (create-and-submit-application
-              pena
-              :operation "kerrostalo-rivitalo"
-              :propertyId oulu-property-id
-              :y 6965051.2333374 :x 535179.5
-              :address "Torikatu 45")]
+             pena
+             :operation "kerrostalo-rivitalo"
+             :propertyId oulu-property-id
+             :y 6965051.2333374 :x 535179.5
+             :address "Torikatu 45")]
     (command olli :approve-application :id (:id app) :lang "fi") => ok?
 
     (fact "Integration messages not available, if KRYSP is not set"

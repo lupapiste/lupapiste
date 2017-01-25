@@ -266,6 +266,9 @@ check_env() {
       "chrome" )
          CG=$(google-chrome --version)
          echo "$CG" | grep -q "^Google Chrome 55\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
+         # Clean up old Chrome temp files if there
+         rm -rf /tmp/.com.google.Chrome.*
+         rm -rf /tmp/.org.chromium*
          ;;
       * )
          fail "Unsupported browser '$BROWSER'"

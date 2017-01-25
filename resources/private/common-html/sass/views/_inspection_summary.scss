@@ -1,0 +1,56 @@
+.inspection-summary-template-editor-container {
+  width: 50%;
+  display: table;
+}
+
+.inspection-summary-template-editor {
+  margin-bottom: $marginL;
+  width: 100%;
+
+  input[type=text], input[type=password], select {
+    min-height: $grid-input-height;
+    height: $grid-input-height;
+  }
+
+  textarea {
+    min-height: $grid-textarea-height * 2;
+    height: $grid-textarea-height * 2;
+
+    &.placeholder-visible {
+      color: $gray153;
+    }
+  }
+
+  input[type=text], input[type=password], select, textarea {
+    box-sizing: border-box;
+    font-size: $grid-font-size;
+    color: $input-color;
+    border: 1px solid $input-border-color;
+    -webkit-appearance: none;
+    -webkit-border-radius: 0px;
+    -moz-appearance:none;
+    display: block;
+    width: 100%;
+
+    &.required {
+      border-color: lighten($lp-orange, 10%);
+    }
+    &:focus {
+      color: $input-focus-color;
+      border-color: $input-focus-border-color;
+    }
+  }
+  &> div {
+    margin: $marginM $marginM;
+  }
+  button {
+    margin: 0 $marginM;
+  }
+  label.required {
+    color: $lp-orange;
+    &:after {
+      content: "*";
+      display: inline;
+    }
+  }
+}

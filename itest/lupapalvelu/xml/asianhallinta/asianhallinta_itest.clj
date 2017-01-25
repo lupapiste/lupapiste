@@ -270,7 +270,7 @@
                         :propertyId "29703401070010"
                         :y 6965051.2333374 :x 535179.5
                         :address "Suusaarenkierto 44")) => truthy]
-      (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.operations.asianhallinta-disabled")))
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.integration.asianhallinta-disabled")))
 
   (fact "If asianhallinta is not set error occurs"
     (let [app-id (:id (create-and-submit-application

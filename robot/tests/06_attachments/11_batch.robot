@@ -34,7 +34,7 @@ Bad batch
 
 Add good one and cancel
   Add to batch
-  Test id text is  upload-progress-title  1 tiedosto lisätty
+  Test id should contain  upload-progress-title  1 tiedosto lisätty
   Scroll and click test id  batch-cancel
   No such test id  upload-progress-title
   Wait until  Element should not be visible  jquery=table.attachment-batch-table
@@ -43,15 +43,15 @@ Add good one and cancel
 Batch of four files
   No such test id  upload-progress-title
   Add to batch
-  Test id text is  upload-progress-title  1 tiedosto lisätty
+  Test id should contain  upload-progress-title  1 tiedosto lisätty
   No such test id  sign-all
   Add to batch
-  Test id text is  upload-progress-title  2 tiedostoa lisätty
+  Test id should contain  upload-progress-title  2 tiedostoa lisätty
   Wait test id visible  sign-all
   Add to batch
-  Test id text is  upload-progress-title  3 tiedostoa lisätty
+  Test id should contain  upload-progress-title  3 tiedostoa lisätty
   Add to batch
-  Test id text is  upload-progress-title  4 tiedostoa lisätty
+  Test id should contain  upload-progress-title  4 tiedostoa lisätty
   Test id disabled  batch-ready
 
 Default contents: type
@@ -96,12 +96,12 @@ Fill contents
   Contents is  3  New contents
 
 Fill grouping
-  Select grouping  2  Yleisesti hankkeeseen
+  Deselect grouping  2
   Fill down  grouping-2
   Grouping is  0  Osapuolet
   Grouping is  1  Osapuolet
-  Grouping is  2  Yleisesti hankkeeseen
-  Grouping is  3  Yleisesti hankkeeseen
+  Grouping is general  2
+  Grouping is general  3
 
 Fill drawing: integers
   Fill test id  batch-drawing-0  1
@@ -172,7 +172,7 @@ Password checking
 Remove the second file
   Scroll and click test id  batch-remove-1
   No such test id  batch-type-3
-  Test id text is  upload-progress-title  3 tiedostoa lisätty
+  Test id should contain  upload-progress-title  3 tiedostoa lisätty
 
 Bad file
   Add bad
@@ -204,7 +204,7 @@ Upload attachments results: hakija.valtakirja
   Open attachment details  hakija.valtakirja
   Test id input is  attachment-contents-input  My contents
   Element text should be  test-attachment-file-name  ${PNG_TESTFILE_NAME}
-  Test id select is  attachment-operation-select  parties
+  Autocomplete selection by test id contains  attachment-group-autocomplete  Osapuolet
   [Teardown]  Logout
 
 # ------------------------------
@@ -246,7 +246,7 @@ Check the attachment details just in case
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Test id input is  attachment-contents-input  Ote alueen peruskartasta
   Element text should be  test-attachment-file-name  ${PNG_TESTFILE_NAME}
-  Test id select is  attachment-operation-select  Rakennuspaikka
+  Autocomplete selection by test id contains  attachment-group-autocomplete  Rakennuspaikka
   [Teardown]  Logout
 
 # ------------------------------
@@ -291,11 +291,19 @@ Contents is
 
 Select grouping
   [Arguments]  ${index}  ${grouping}
-  Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
+  Select from autocomplete  jquery=[data-test-id=batch-grouping-${index}]  ${grouping}
+
+Deselect grouping
+  [Arguments]  ${index}
+  Click element  jquery=[data-test-id=batch-grouping-${index}] .tag-remove
 
 Grouping is
   [Arguments]  ${index}  ${value}
-  Wait Until  List selection should be  jquery=div[data-test-id=batch-grouping-${index}] select[data-test-id=attachment-operation-select]  ${value}
+  Wait Until  Autocomplete selection by test id contains  batch-grouping-${index}  ${value}
+
+Grouping is general
+  [Arguments]  ${index}
+  Wait Until  Autocomplete selection by test id is empty  batch-grouping-${index}
 
 Fill down
   [Arguments]  ${cell}

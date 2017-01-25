@@ -59,14 +59,14 @@ Velho logs in again for approval
 Velho now sees asianhallinta button
   Element should be visible  xpath=//section[@id="application"]//button[@data-test-id='to-asianhallinta']
 
-Velho also sees approve-button
-  Element should be visible  xpath=//section[@id="application"]//button[@data-test-id='approve-application']
+Velho also does not see approve-button
+  Element should not be visible  xpath=//section[@id="application"]//button[@data-test-id='approve-application']
 
-Velho sees approve and asianhallinta buttons in requiredFieldSummary tab
+Velho sees asianhallinta buttons in requiredFieldSummary tab but no approve button
   Open tab  requiredFieldSummary
-  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
   Element should be visible  xpath=//button[@data-test-id="to-asianhallinta-summaryTab"]
-  Element should be visible  xpath=//button[@data-test-id="approve-application"]
+  Element should not be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
+  Element should not be visible  xpath=//button[@data-test-id="approve-application"]
 
 Velho moves application to asianhallinta, error should pop up
   Click by test id  to-asianhallinta
@@ -101,7 +101,7 @@ Velho logs in, sets Mikko as maksaja and moves application to asianhallinta
   Open tab  parties
   Open accordions  parties
   Select From List  //section[@data-doc-type="maksaja"]//select[@name="henkilo.userId"]  Intonen Mikko
-  Wait Until  Javascript?  $("section[data-doc-type=maksaja] input[data-docgen-path='henkilo.henkilotiedot.etunimi']").val() == "Mikko" 
+  Wait Until  Javascript?  $("section[data-doc-type=maksaja] input[data-docgen-path='henkilo.henkilotiedot.etunimi']").val() == "Mikko"
   Click by test id  to-asianhallinta
   Wait until  Application state should be  sent
   [Teardown]  logout

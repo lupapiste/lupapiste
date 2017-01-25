@@ -2,8 +2,8 @@
   (:require [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [sade.util :refer [fn->] :as util]
+            [lupapalvelu.action :refer [defquery defcommand defraw email-validator some-pre-check] :as action]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.user :as usr]
             [lupapalvelu.company :as com]
@@ -11,6 +11,9 @@
 
 (defn change-email-link [lang token]
   (str (env/value :host) "/app/" lang "/welcome#!/email/" token))
+
+(defn change-email-for-company-user-link [lang token]
+  (str (env/value :host) "/app/" lang "/welcome#!/change-email/" token))
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
@@ -21,6 +24,18 @@
                    {:user    recipient
                     :expires (util/to-local-datetime expires)
                     :link    (change-email-link (or (:language recipient) "fi") id)})))})
+
+(notifications/defemail :change-email-for-company-user
+  {:recipients-fn notifications/from-user
+   :subject-key "change-email"
+   :model-fn (fn [{data :data} conf recipient]
+               (let [{:keys [id expires]} (:token data)]
+                 (merge
+                   (select-keys data [:old-email :new-email])
+                   {:name    (:firstName recipient)
+                    :expires (util/to-local-datetime expires)
+                    :link-fi (change-email-for-company-user-link "fi" id)
+                    :link-sv (change-email-for-company-user-link "sv" id)})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
@@ -43,13 +58,17 @@
   (when-not (has-person-id? user)
     (fail :error.unauthorized)))
 
+(defn- validate-is-basic-company-user [{user :user}]
+  (when-not (= "user" (get-in user [:company :role]))
+    (fail :error.unauthorized)))
+
 (defcommand change-email-init
   {:parameters [email]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :pre-checks [validate-has-person-id]
    :notified   true
+   :pre-checks [(some-pre-check validate-has-person-id validate-is-basic-company-user)]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (change-email/init-email-change user email))

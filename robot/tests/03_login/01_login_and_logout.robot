@@ -97,7 +97,9 @@ Trying to open my page without logging in opens a help page
 
 My page opens after login
   [Tags]  ie8
+  Element should be visible by test id  login
   Click by test id  login
+  Wait Until  Element Should Be Visible  rememberme
   Login  mikko@example.com  ${PASSWORD}
   Wait Until  Element Should Be Visible  mypage
   User should be logged in  ${USERNAME}

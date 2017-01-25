@@ -34,6 +34,7 @@
                           :delete-attachment
                           :set-attachment-type
                           :set-attachment-meta
+                          :set-attachment-group-enabled
                           :upload-attachment
                           :bind-attachment
                           :bind-attachments

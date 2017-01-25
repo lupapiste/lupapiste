@@ -15,6 +15,7 @@
    :type-group                 sc/Keyword
    (sc/optional-key :metadata) {(sc/optional-key :permitType)     sc/Keyword
                                 (sc/optional-key :grouping)       sc/Keyword
+                                (sc/optional-key :multioperation) sc/Bool
                                 (sc/optional-key :contents)       [sc/Keyword]
                                 (sc/optional-key :for-operations) #{(apply sc/enum (keys op/operations))}}})
 
@@ -80,17 +81,27 @@
 (def type-groups (-> (vals type-grouping) distinct (concat [other-type-group])))
 
 (defn attachment-type
-  ([{type-group :type-group type-id :type-id :as attachment-type}]
-   (->> (update attachment-type :metadata util/assoc-when
-                :grouping       (some-> (util/find-first (fn-> val (contains? attachment-type)) default-grouping) key)
-                :contents       (not-empty (content-mapping (select-keys attachment-type [:type-id :type-group])))
-                :for-operations (not-empty (for-operations attachment-type)))
-        (util/strip-nils)
-        (sc/validate AttachmentType)))
+  ([{type-group :type-group type-id :type-id}]
+   (let [attachment-type {:type-group (keyword type-group) :type-id (keyword type-id)}
+         grouping (some-> (util/find-first (fn-> val (contains? attachment-type)) default-grouping) key)]
+     (->> (update attachment-type :metadata util/assoc-when
+                  :grouping       (if (= :multioperation grouping) :operation grouping)
+                  :multioperation (= :multioperation grouping)
+                  :contents       (not-empty (content-mapping (select-keys attachment-type [:type-id :type-group])))
+                  :for-operations (not-empty (for-operations attachment-type)))
+          (util/strip-nils)
+          (sc/validate AttachmentType))))
   ([type-group type-id]
    (attachment-type {:type-group (keyword type-group) :type-id (keyword type-id)}))
   ([permit-type type-group type-id]
    (attachment-type {:type-id (keyword type-id) :type-group (keyword type-group) :metadata {:permitType (keyword permit-type)}})))
+
+(defn operation-specific? [type]
+  (let [{:keys [grouping multioperation]} (or (:metadata type) (:metadata (attachment-type type)))]
+    (and (= :operation grouping) (not multioperation))))
+
+(defn multioperation? [type]
+  (:multioperation (or (:metadata type) (:metadata (attachment-type type)))))
 
 (defn- ->attachment-type-array [[permit-type attachment-types]]
   (->> (partition 2 attachment-types)

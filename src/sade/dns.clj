@@ -8,7 +8,7 @@
 
 (def- mx-query (into-array String ["MX"]))
 
-(defn- mx-lookup [email]
+(defn- has-mx? [email]
   (some->
    (InitialDirContext. dns-lookup-env)
    (.getAttributes (ss/suffix email "@") mx-query)
@@ -22,7 +22,7 @@
   (boolean
     (when-not (ss/blank? email)
       (try
-        (mx-lookup email)
+        (or (has-mx? email)
+            (errorf "Bad email %s: No MX record." email))
         (catch javax.naming.NamingException e
-          (errorf "Bad email %s: %s - %s" email (.getClass e) (.getMessage e))
-          false)))))
+          (errorf "Bad email %s: %s - %s" email (.getClass e) (.getMessage e)))))))

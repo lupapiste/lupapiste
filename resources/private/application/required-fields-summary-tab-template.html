@@ -99,8 +99,8 @@
               </button>
 
               <button data-bind="click: toAsianhallinta,
-                                 visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
-                                 enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                 visible: $root.authorization.ok('application-to-asianhallinta'),
+                                 enable: !processing() && $root.authorization.ok('application-to-asianhallinta'),
                                  attr: {'title': loc('tooltip.toAsianhallinta')}"
                       data-test-id="to-asianhallinta-summaryTab"
                       class="positive">

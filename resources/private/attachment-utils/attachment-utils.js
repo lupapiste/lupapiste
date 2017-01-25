@@ -23,8 +23,8 @@ var attachmentUtils = (function() {
     });
   }
 
-  var fGroupByOperation = function(attachment) {
-    return attachment.op ? attachment.op.id : generalAttachmentsStr;
+  var fGroupByOperation = function() {
+    return generalAttachmentsStr; // FIXME: attachmet grouping by groupType and operation
   };
 
   /* Sorting function to sort attachments into

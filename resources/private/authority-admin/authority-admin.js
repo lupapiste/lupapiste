@@ -478,6 +478,7 @@
     });
     $("#operations").applyBindings({
       organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel,
       editSelectedOperationsModel: editSelectedOperationsModel
     });
     $("#attachments").applyBindings({

@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
+            [plumbing.core :as pc]
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
@@ -44,7 +45,6 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org])
   (:import [java.net URL]
-           [java.io File]
            [java.nio.charset StandardCharsets]))
 
 (def verdict-codes ["my\u00f6nnetty"
@@ -499,7 +499,7 @@
         name-b (:taskname b)
         la (katselmuksen-laji a)
         lb (katselmuksen-laji a)]
-    (and name-a (= name-b (or name-b lb)) la (= la lb))))
+    (and name-a (= name-a (or name-b lb)) la (= la lb))))
 
 (defn- bg-id [task]
   (get-in task [:data :muuTunnus :value]))
@@ -516,8 +516,10 @@
          unchanged []
          added-or-updated []]
     (let [current (first from-mongo)
+          bg-id-current (bg-id current)
           remaining (rest from-mongo)
-          updated-id-match (util/find-first #(= (bg-id current) (bg-id %)) from-update)
+          updated-id-match (when-not (ss/empty? bg-id-current)
+                             (util/find-first #(= bg-id-current (bg-id %)) from-update))
           updated-match (or updated-id-match
                             (first (filter #(or (reviews-have-same-name-and-type? current %)
                                                 (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
@@ -530,7 +532,8 @@
 
         (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
           ;non-empty review tasks and all non-review tasks are left unchanged
-          (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated)
+          (do
+            (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated))
 
         (and updated-match (not (empty-review-task? updated-match)))
           ; matching review found from backend system update => it replaces the existing one
@@ -555,6 +558,7 @@
   [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
+        reviews (pc/distinct-by #(select-keys % [:taskname :data]) reviews) ; remove duplicates!
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)

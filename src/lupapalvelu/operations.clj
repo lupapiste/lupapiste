@@ -251,6 +251,7 @@
                                        "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                        "tyoaika")
                            :attachments []
+                           :attachment-op-selector false
                            :add-operation-allowed false
                            :min-outgoing-link-permits 0
                            :asianhallinta true})
@@ -261,6 +262,7 @@
                              :required (conj common-yleiset-alueet-schemas
                                          "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
                              :attachments []
+                             :attachment-op-selector false
                              :add-operation-allowed false
                              :min-outgoing-link-permits 0
                              :asianhallinta true})
@@ -269,13 +271,14 @@
   (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
 
 (def- ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
-                                        :permit-type permit/YA
-                                        :applicant-doc-schema applicant-doc-schema-name-YA
-                                        :required common-yleiset-alueet-schemas
-                                        :attachments []
-                                        :add-operation-allowed false
-                                        :min-outgoing-link-permits 0
-                                        :asianhallinta true})
+                               :permit-type permit/YA
+                               :applicant-doc-schema applicant-doc-schema-name-YA
+                               :required common-yleiset-alueet-schemas
+                               :attachments []
+                               :attachment-op-selector false
+                               :add-operation-allowed false
+                               :min-outgoing-link-permits 0
+                               :asianhallinta true})
 
 (def ya-operations
   {:ya-kayttolupa-tapahtumat                                          ya-kayttolupa-general
@@ -290,6 +293,7 @@
                                            :applicant-doc-schema applicant-doc-schema-name-YA
                                            :required common-yleiset-alueet-schemas
                                            :attachments []
+                                           :attachment-op-selector false
                                            :add-operation-allowed false
                                            :min-outgoing-link-permits 0
                                            :asianhallinta true}
@@ -322,6 +326,7 @@
                                            :required (conj common-yleiset-alueet-schemas
                                                        "tyo-aika-for-jatkoaika")
                                            :attachments []
+                                           :attachment-op-selector false
                                            :add-operation-allowed false
                                            :min-outgoing-link-permits 1
                                            :max-incoming-link-permits 1
