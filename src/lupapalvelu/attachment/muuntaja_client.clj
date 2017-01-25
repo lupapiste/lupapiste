@@ -55,7 +55,16 @@
 (defn download-file [file-path]
   {:pre [(not (str/blank? file-path))]}
   (try
-    (-> (http/get (str (env/value :muuntaja :url) file-path))
+    (-> (http/get (str (env/value :muuntaja :url) file-path)
+                  {:as :stream})
         :body)
     (catch Exception ex
       (timbre/error ex "File download from muuntaja failed for file" file-path))))
+
+(defn dummy-unzip [_]
+  {:attachments [{:file "/files/unzip/2017.01.25-YcnaXSOQ0Bq/LOL_APUA.pdf"
+                  :filename "LOL_APUA.pdf"
+                  :localizedType "Asemapiirros"
+                  :contents "Komea piirros"
+                  :drawingNumber "1"
+                  :operation nil}]})

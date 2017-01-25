@@ -59,9 +59,9 @@
 
 (defn- download-and-save-files [application attachments session-id]
   (pmap
-    (fn [{:keys [filename localizedType contents drawingNumber operation]}]
+    (fn [{:keys [file filename localizedType contents drawingNumber operation]}]
       (when-let [attachment-type (lat/localisation->attachment-type :R localizedType)]
-        (when-let [is (muuntaja/download-file filename)]
+        (when-let [is (muuntaja/download-file file)]
           (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)
                 tunnus-or-bid (when operation (str/lower-case (str/trim operation)))]
             (.close is)
@@ -78,7 +78,7 @@
 (defn save-files [application files session-id]
   (if-let [attachments (and (empty? (rest files))
                             (is-zip-file? (first files))
-                            (-> files first :tempfile muuntaja/unzip-attachment-collection :attachments seq))]
+                            (-> files first :tempfile muuntaja/dummy-unzip :attachments seq))]
     (download-and-save-files application attachments session-id)
     (pmap
       #(save-file % :sessionId session-id :linked false)
