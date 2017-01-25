@@ -50,10 +50,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  {:fi ssc/OptionalHttpUrl :en ssc/OptionalHttpUrl :sv ssc/OptionalHttpUrl}
-   ;:url  (i18n/localization-schema ssc/OptionalHttpUrl) TODO uncomment when feature.english is used in production
-   ;:name (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
-   :name {:fi sc/Str :en sc/Str :sv sc/Str}
+  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -68,10 +66,13 @@
    :modified ssc/Timestamp
    :items [sc/Str]})
 
+(sc/defschema HandlerRole
+  {:id ssc/ObjectIdStr
+   :name (zipmap i18n/all-languages (repeat sc/Str))})
+
 (sc/defschema Organization
   {:id sc/Str
-   ;:name  (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
-   :name {:fi sc/Str :en sc/Str :sv sc/Str}
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
@@ -109,6 +110,7 @@
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
+   (sc/optional-key :handler-roles) [HandlerRole]
    (sc/optional-key :suti) {(sc/optional-key :www) ssc/OptionalHttpUrl
                             (sc/optional-key :enabled) sc/Bool
                             (sc/optional-key :server) Server

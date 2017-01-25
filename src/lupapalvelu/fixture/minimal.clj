@@ -735,6 +735,15 @@
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
                                           :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba1111111111111111acdc"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :genaral true}
+                                       {:id "abba1111111111111112acdc"
+                                        :name {:fi "KVV-K\u00e4sittelij\u00e4"
+                                               :sv "KVV-Handl\u00e4ggare"
+                                               :en "KVV-Handler"}}]
                        :kopiolaitos-email "sipoo@example.com"
                        :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                        :kopiolaitos-orderer-email "tilaaja@example.com"
