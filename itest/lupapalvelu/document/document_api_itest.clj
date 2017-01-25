@@ -60,6 +60,41 @@
     (fact (:ok readonly-result) => false)
     (fact (:text readonly-result) => "error-trying-to-update-readonly-field")))
 
+(facts "invited user access"
+  (let [application-id   (create-app-id pena)
+        rakennus-doc-id  (:id (domain/get-document-by-name (query-application pena application-id) "rakennuspaikka")) => truthy]
+    (fact "pena is allowed to update application"
+      (command pena :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "mtunnus"]]) => ok?)
+
+    (fact "pena is cannot update unexisting doc"
+      (command pena :update-doc :id application-id :doc "invalid-doc-id" :updates [["kiinteisto.maaraalaTunnus" "mtunnus"]]) => (partial expected-failure? :error.document-not-found))
+
+    (fact "teppo is not allowed to update document"
+      (command teppo :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "mtunnus"]]) => (partial expected-failure? :error.application-not-accessible))
+
+    (fact "teppo is invited to application as foreman"
+      (command pena :invite-with-role :id application-id :email (email-for-key teppo) :role "foreman" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?)
+
+    (fact "teppo approves invite"
+      (command teppo :approve-invite :id application-id) => ok?)
+
+    (fact "teppo is allowed to update document after approving invite"
+      (command teppo :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "tilannimi"]]) => (partial expected-failure? :error.unauthorized))
+
+    (fact "mikko is invited to applition as writer"
+      (command pena :invite-with-role :id application-id :email (email-for-key mikko) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?)
+
+    (fact "mikko approves invite"
+      (command mikko :approve-invite :id application-id) => ok?)
+
+    (fact "mikko is allowed to update document after approving invite"
+      (command mikko :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "tilannimi"]]) => ok?)
+
+    (fact "solita is invited to application"
+      (invite-company-and-accept-invitation pena application-id "solita"))
+
+    (fact "kaino is allowed to update document"
+      (command kaino :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "tilannimi"]]) => ok?)))
 
 (facts "create and query document"
   (let [application-id   (create-app-id pena)
