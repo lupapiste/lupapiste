@@ -59,10 +59,10 @@
 
 (defn- statement-reminders-email-model [{{:keys [created-date statement]} :data application :application :as command} _ recipient]
   (merge (notifications/create-app-model command nil recipient)
-    {:link (notifications/get-application-link application "/statement" (or (:language recipient) "fi") recipient)
+    {:link     #(notifications/get-application-link application "/statement" % recipient)
      :statement-request-created created-date
      :due-date (util/to-local-date (:dueDate statement))
-     :message (:saateText statement)}))
+     :message  (:saateText statement)}))
 
 (notifications/defemail :reminder-request-statement
   {:recipients-fn  :recipients

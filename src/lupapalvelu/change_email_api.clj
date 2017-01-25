@@ -10,10 +10,10 @@
             [lupapalvelu.change-email :as change-email]))
 
 (defn change-email-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/email/" token))
+  (str (env/value :host) "/app/" (name lang) "/welcome#!/email/" token))
 
 (defn change-email-for-company-user-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/change-email/" token))
+  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email/" token))
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user

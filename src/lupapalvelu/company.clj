@@ -255,16 +255,14 @@
 
 (defn add-user-after-company-creation! [user company role submit]
   (let [user (update-in user [:email] usr/canonize-email)
-        lang (or (:language user) "fi")
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role, :submit submit} :auto-consume false)]
     (notif/notify! :new-company-admin-user {:user       user
                                             :company    company
-                                            :link       (str (env/value :host) "/app/" lang "/welcome#!/new-company-user/" token-id)})
+                                            :link       #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
 (defn add-user! [user company role submit]
   (let [user (update-in user [:email] usr/canonize-email)
-        lang (or (:language user) "fi")
         token-id (token/make-token :new-company-user nil {:user user
                                                           :company company
                                                           :role role
@@ -272,7 +270,7 @@
     (notif/notify! :new-company-user {:user       user
                                       :company    company
                                       :company-admin  (str (get-in company [:admin :firstName]) " " (get-in company [:admin :lastName]))
-                                      :link    (str (env/value :host) "/app/" lang "/welcome#!/new-company-user/" token-id)})
+                                      :link    #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
@@ -398,10 +396,10 @@
                                             :model-fn      (fn [model _ recipient]
                                                              (merge (notif/create-app-model model nil recipient)
                                                                     model
-                                                                    {:link (str (env/value :host) "/app/"
-                                                                                (or (:language recipient) "fi")
-                                                                                "/welcome#!/accept-company-invitation/"
-                                                                                (:token-id model))}))})
+                                                                    {:link #(str (env/value :host) "/app/"
+                                                                                 (name %)
+                                                                                 "/welcome#!/accept-company-invitation/"
+                                                                                 (:token-id model))}))})
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
