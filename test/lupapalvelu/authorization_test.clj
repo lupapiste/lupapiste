@@ -9,15 +9,34 @@
     (fact (has-auth? application :user-x) => true)
     (fact (has-auth? application :user-z) => false)))
 
-(facts
+(facts get-auths-by-role
   (let [owner   {:id 1 :role "owner"}
         writer1 {:id 2 :role "writer"}
         writer2 {:id 3 :role "writer"}
         app     {:auth [owner writer1 writer2]}]
     (fact "get owner"   (get-auths-by-role app :owner)  => (just owner))
-    (fact "get writers" (get-auths-by-role app :writer) => (just writer1 writer2))
+    (fact "get writers" (get-auths-by-role app :writer) => (just writer1 writer2))))
+
+(facts has-auths-role?
+  (let [app     {:auth [{:id 1 :role "owner"}
+                        {:id 2 :role "writer"}]}]
     (fact "'1' is owner" (has-auth-role? app 1 :owner) => true)
-    (fact "'2' is not owner" (has-auth-role? app 2 :owner) => false)))
+    (fact "'2' is not owner" (has-auth-role? app 2 :owner) => false)
+    (fact "'2' is writer" (has-auth-role? app 2 :writer) => true)
+    (fact "'6' has not role" (has-auth-role? app 6 :writer) => false)))
+
+(facts has-some-auth-role?
+  (let [app     {:auth [{:id 1 :role "owner"}
+                        {:id 2 :role "writer"}
+                        {:id 3 :role "fooer"}
+                        {:id 4 :role "buster"}
+                        {:id 5 :role "writer"}]}]
+    (fact "'1' has required role" (has-some-auth-role? app 1 [:owner :fooer])  => true)
+    (fact "'2' has not role"      (has-some-auth-role? app 2 [:owner :fooer])  => false)
+    (fact "'3' is fooer"          (has-some-auth-role? app 3 [:owner :fooer])  => true)
+    (fact "'6' has not role"      (has-some-auth-role? app 6 [:owner :fooer])  => false)
+    (fact "'2' has required role" (has-some-auth-role? app 2 [:writer])   => true)
+    (fact "'5' has required role" (has-some-auth-role? app 5 [:writer])  => true)))
 
 (facts enrich-auth-information
   (fact "handler authority"

@@ -62,6 +62,29 @@
     (fact "reader doesn't have accesss" (owner-or-write-access? app (:id reader)) => false)
     (fact "someone else doesn't have accesss" (owner-or-write-access? app 5) => false)))
 
+(facts validate-access
+  (let [app {:auth [{:id "basic-user"    :role "usering"}
+                    {:id "app-authority" :role "authoring"}
+                    {:id "some-co"       :role "usering"}
+                    {:id "another-user"  :role "stalking"}]}]
+    (fact "basic-user has 'usering' access"
+      (validate-access [:usering :authoring :hazling] {:application app :user {:id "basic-user"}}) => nil)
+    (fact "basic-user has not 'authoring' access"
+      (validate-access [:authoring] {:application app :user {:id "basic-user"}}) => {:ok false :text "error.unauthorized"})
+    (fact "basic-user has not 'hazling' access"
+      (validate-access [:hazling] {:application app :user {:id "basic-user"}}) =>  {:ok false :text "error.unauthorized"})
+    (fact "another-user has 'stalking' access"
+      (validate-access [:hazling] {:application app :user {:id "basic-user"}}) =>  {:ok false :text "error.unauthorized"})
+    (fact "another-user has 'stalking' access"
+      (validate-access [:stalking] {:application app :user {:id "another-user"}}) =>  nil)
+    (fact "another-user has not any of the 'usering', 'authoring' or 'hazling' accessses"
+      (validate-access [:usering :authoring :hazling] {:application app :user {:id "another-user"}}) =>  {:ok false :text "error.unauthorized"})
+    (fact "company-user has 'usering' access"
+      (validate-access [:usering :authoring :hazling] {:application app :user {:id "co-user" :company {:id "some-co"}}})
+      => nil)
+    (fact "company-user of anothercp  has no  access"
+      (validate-access [:usering :authoring :hazling] {:application app :user {:id "co-user" :company {:id "another-co"}}}) =>  {:ok false :text "error.unauthorized"})))
+
 (facts "only-authority-sees-drafts"
   (only-authority-sees-drafts {:role "authority"} [{:draft true}]) => [{:draft true}]
   (only-authority-sees-drafts {:role "not-authority"} [{:draft true}]) => []
@@ -136,4 +159,3 @@
                                        :id 0}}]]
       (fact "even comments for deleted attachments are returned, but not those which are empty"
         (:comments (filter-targeted-attachment-comments application)) => expected-comments))))
-

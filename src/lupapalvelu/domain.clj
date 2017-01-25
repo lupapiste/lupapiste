@@ -178,19 +178,20 @@
 (def owner-or-write-roles ["owner" "writer" "foreman"])
 
 (defn owner-or-write-access? [application user-id]
-  (boolean (some (partial auth/has-auth-role? application user-id) owner-or-write-roles)))
+  (auth/has-some-auth-role? application user-id owner-or-write-roles))
 
-(defn company-access? [application company-id]
-  (boolean (auth/has-auth-role? application company-id "writer")))
+(defn validate-access
+  "Command pre-check for validating user roles in application auth array."
+  [allowed-roles {:keys [application user] :as command}]
+  (when-not (or (auth/has-some-auth-role? application (:id user) allowed-roles)
+                (auth/has-some-auth-role? application (get-in user [:company :id]) allowed-roles))
+    unauthorized))
 
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
-  [{:keys [application] :as command}]
-  (when-not (or
-              (owner-or-write-access? application (-> command :user :id))
-              (company-access? application (-> command :user :company :id)))
-    unauthorized))
+  [command]
+  (validate-access owner-or-write-roles command))
 
 ;;
 ;; assignee
