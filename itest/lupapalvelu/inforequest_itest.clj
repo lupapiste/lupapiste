@@ -72,7 +72,7 @@
   (let [email (last-email)]
     (fact "Organization get's notification email"
       (:to email) => (contains "testi@example.com")
-      (:subject email) => (contains "Sipoo"))))
+      (:subject email) => (contains "Neuvontapyynt\u00f6 Lupapisteess\u00e4"))))
 
 (facts "Open inforequest"
   ; Reset emails
@@ -95,7 +95,7 @@
 
     (fact "Auhtority receives email about the new oir"
       (:to email) => "erajorma@example.com"
-      (:subject email) => "Lupapiste: OIR - Neuvontapyynt\u00f6"
+      (:subject email) => "Lupapiste: Neuvontapyynt\u00f6 Lupapisteess\u00e4"
       (count token) => pos?)
 
     (fact "Clicking the link redirects to oir page"
@@ -109,7 +109,7 @@
       (let [email          (last-email)
            [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
        (:to email) => "erajorma@example.com"
-       (:subject email) => "Lupapiste: OIR - Neuvontapyynt\u00f6"
+       (:subject email) => "Lupapiste: Neuvontapyynt\u00f6 Lupapisteess\u00e4"
        (count token) => pos?))
 
     (fact "Admin can not convert inforequests to normal yet"

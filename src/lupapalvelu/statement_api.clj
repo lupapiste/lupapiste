@@ -31,8 +31,7 @@
 
 (defn- statement-giver-model [{{:keys [text organization]} :data} _ __]
   {:text text
-   :organization-fi (:fi (:name organization))
-   :organization-sv (:sv (:name organization))})
+   :organization #(get-in organization [:name (or (keyword %) :fi)])})
 
 (notifications/defemail :add-statement-giver
   {:recipients-fn  notifications/from-user
@@ -95,32 +94,23 @@
   [{application :application organization :organization}]
   (statement/fetch-organization-statement-givers @organization))
 
-(defn- get-dueDate-loc [lang dueDate]
-  (if dueDate
-    (str (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-is")) " " (util/to-local-date dueDate) ".")
-    ""))
-
-(defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
-  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
-   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
-   :saateText saateText
-   :recipient-email (:email recipient)
-   :dueDate (util/to-local-date dueDate)
-   :due-date-str-fi (get-dueDate-loc "fi" dueDate)
-   :due-date-str-sv (get-dueDate-loc "sv" dueDate)})
+(defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application caller :user :as command} _ recipient]
+  (merge (notifications/create-app-model command nil recipient)
+         {:link          #(notifications/get-application-link app "/statement" (name %) recipient)
+          :message       saateText
+          :requester     caller
+          :due-date-str  (util/to-local-date dueDate)}))
 
 
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"
-   :model-fn       request-statement-model
-   :show-municipality-in-subject true})
+   :model-fn       request-statement-model})
 
 (notifications/defemail :request-statement-new-user
   {:recipients-fn  :recipients
    :subject-key    "statement-request-new-user"
-   :model-fn       request-statement-model
-   :show-municipality-in-subject true})
+   :model-fn       request-statement-model})
 
 (defcommand request-for-statement
   {:parameters [functionCode id selectedPersons]

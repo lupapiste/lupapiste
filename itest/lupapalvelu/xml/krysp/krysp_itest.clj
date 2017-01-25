@@ -284,7 +284,7 @@
         (final-xml-validation approved-application autogenarated-attachment-count expected-attachment-count expected-sent-attachment-count)
 
         (:to email) => (contains (email-for-key pena))
-        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
+        (:subject email) => "Lupapiste: Ryspitie 289, Sipoo - hankkeen tila on nyt K\u00e4sittelyss\u00e4"
         (get-in email [:body :plain]) => (contains "K\u00e4sittelyss\u00e4")
         email => (partial contains-application-link? application-id "applicant"))
 
@@ -295,7 +295,7 @@
         (:state application) => "complementNeeded"
         (-> application :history last :state) => "complementNeeded"
         (:to email) => (contains (email-for-key pena))
-        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
+        (:subject email) => "Lupapiste: Ryspitie 289, Sipoo - hankkeen tila on nyt T\u00e4ydennett\u00e4v\u00e4n\u00e4"
         (get-in email [:body :plain]) => (contains "T\u00e4ydennett\u00e4v\u00e4n\u00e4")
         email => (partial contains-application-link? application-id "applicant")))))
 

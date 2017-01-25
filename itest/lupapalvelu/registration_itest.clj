@@ -134,7 +134,7 @@
 
               (fact "New user got email"
                     (:to email) => (:email details)
-                    (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
+                    (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
 
               (fact "Email has body"
                     body => map?
@@ -172,7 +172,7 @@
 
                       (fact "New user got email"
                             (:to email) => new-user-email
-                            (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
+                            (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
 
                       (fact "Can NOT log in"
                             (login new-user-email new-user-pw) => fail?)
@@ -249,7 +249,7 @@
 
         (fact "New user got email"
           (:to email) => (:email details)
-          (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
+          (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
 
         (fact "Email has body"
           body => map?
@@ -287,7 +287,7 @@
 
             (fact "New user got email"
               (:to email) => new-user-email
-              (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
+              (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
 
             (fact "Can NOT log in"
               (login new-user-email new-user-pw) => fail?)

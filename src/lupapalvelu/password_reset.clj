@@ -11,10 +11,8 @@
   (str (env/value :host) "/app/" lang "/welcome#!/setpw/" token))
 
 (def base-email-conf
-  {:model-fn (fn [{token :token} conf recipient]
-               {:caller recipient
-                :link-fi (reset-link "fi" token)
-                :link-sv (reset-link "sv" token)})
+  {:model-fn (fn [{token :token} _ _]
+               {:link #(reset-link (name %) token)})
    :recipients-fn notifications/from-user})
 
 (notifications/defemail :reset-password

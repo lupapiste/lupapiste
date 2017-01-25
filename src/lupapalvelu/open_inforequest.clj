@@ -9,20 +9,17 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.notifications :as notifications]))
 
-(defn- base-email-model [{{token :token-id} :data} _ __]
-  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
-         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
-    {:link-fi (link-fn :fi)
-     :link-sv (link-fn :sv)
-     :info-fi (info-fn :fi)
-     :info-sv (info-fn :sv)}))
+(defn- base-email-model [{{token :token-id} :data :as command} _ recipient]
+  (assoc
+    (notifications/create-app-model command nil recipient)
+    :link (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))))
 
 (def base-email-conf
   {:recipients-fn  notifications/from-data
-   :subject-key    "applications.inforequest"
+   :subject-key    "email.title.inforequest-invite"
    :model-fn       base-email-model})
 
-(notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "inforequest-invite.html"))
+(notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "inforequest-invite.md"))
 (notifications/defemail :open-inforequest-commented (assoc base-email-conf :template "inforequest-commented.md"))
 
 (defn notify-on-comment [{application :application user :user data :data} _]

@@ -823,3 +823,6 @@
 "file_not_linked_to_the_document" "en" "Attachment not found in application"
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" "Bilagan kan inte hittas i ansökan"
+"error.empty-email" "en" ""
+"error.empty-email" "fi" "Sähköpostin lähetys epäonnistui. Ongelmasta on tehty ilmoitus Lupapisteen tukeen ja pyrimme korjaamaan asian mahdollisimman pian."
+"error.empty-email" "sv" ""

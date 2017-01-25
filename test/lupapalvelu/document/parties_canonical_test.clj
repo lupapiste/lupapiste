@@ -86,6 +86,7 @@
                   :sent 1479129349977,
                   :submitted 1479128758866,
                   :title "Latokuja 3",
+                  :address "Latokuja 3",
                   :tasks [{:schema-info {:name "task-katselmus",
                                          :type "task",
                                          :subtype "review",

@@ -1,7 +1,9 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.notifications :refer [notify! create-app-model]]
+  (:require [lupapalvelu.notifications :refer [notify! create-app-model defemail]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.application-api]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.open-inforequest]
             [sade.dummy-email-server :as dummy]))
@@ -9,18 +11,24 @@
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
 
 (facts "email titles"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "fi" "new-comment")
-       => "Lupapiste: Haavikontie 9 - uusi kommentti"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "sv" "new-comment")
-              => "Lupapiste: Haavikontie 9 - ny kommentar"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "cn")
-       => "Lupapiste: Haavikontie 9"
-       (get-email-subject {:title "Haavikontie 9" :municipality "837"} "fi" "statement-request" true)
-       => "Lupapiste: Tampere, Haavikontie 9 - Lausuntopyynt\u00f6")
+  (facts "{{municipality}} is rendered to subject"
+    (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tampere" } "new-comment" "fi")
+    => "Lupapiste: Haavikontie 9, Tampere - sinulle on uusi kommentti"
+    (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tammerfors" } "new-comment" "sv")
+    => "Lupapiste: Haavikontie 9, Tammerfors - du har f\u00e5tt en ny kommentar")
+
+  (fact "Without valid localization, application address is returned"
+    (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tampere" } "foo" "cn")
+    => "Lupapiste: Haavikontie 9"
+    (provided
+      (i18n/localize-fallback "cn" anything) => nil))
+
+  (get-email-subject {:address "Haavikontie 9" :municipality "837"}  {:municipality "Tampere" } "statement-request" "fi")
+    => "Lupapiste: Haavikontie 9, Tampere - lausuntopyynt\u00f6")
 
 (fact "create application link"
   (fact "..for application"
-        (get-application-link {:id 1} "" "fi" {:role "applicant"})
+    (get-application-link {:id 1} "" "fi" {:role "applicant"})
       => (str (sade.env/value :host) "/app/fi/applicant#!/application/1")
     (get-application-link {:id 1} "/tab" "fi" {:role "applicant"})
       => (str (sade.env/value :host) "/app/fi/applicant#!/application/1/tab")
@@ -32,10 +40,10 @@
     => (str (sade.env/value :host) "/app/fi/authority#!/inforequest/1/comment")))
 
 (fact "Application model"
-      (create-app-model {:application {:id 1 :state "draft"}} {:tab ""} {:firstName "Bob"
-                                                                         :language "sv"
-                                                                         :role "applicant"})
-      => (contains {:lang "sv" :name "Bob"}))
+  (create-app-model {:application {:id 1 :state "draft" :address "foodress"}} {:tab "footab"} {:firstName "Bob"
+                                                                                               :language "sv"
+                                                                                               :role "applicant"})
+  => (contains {:link fn? :state fn? :address "foodress" :municipality fn? :operation fn?}))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
@@ -102,11 +110,64 @@
 (testable-privates lupapalvelu.open-inforequest base-email-model)
 (fact "Email for sending an open inforequest is like"
   (against-background
-    (sade.env/value :host) => "http://lupapiste.fi"
-    (sade.env/value :oir :wanna-join-url) => "http://lupapiste.fi/yhteydenotto")
+    (sade.env/value :host) => "http://lupapiste.fi")
   (let  [model (base-email-model {:data {:token-id "123"}} nil {})]
-    (:link-fi model) => "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=fi"
-    (:info-fi model) => "http://lupapiste.fi/yhteydenotto"))
+    (doseq [lang i18n/supported-langs]
+      (fact {:midje/description (name lang)}
+        ((:link model) lang) => (str "http://lupapiste.fi/api/raw/openinforequest?token-id=123&lang=" (name lang))))))
 
 (fact "Unknown config"
   (notify! :foo {}) => (throws AssertionError))
+
+(fact "organization-on-submit email"
+  (against-background [(lupapalvelu.organization/get-organization "Foo") => {:notifications {:submit-notification-emails ["foo-org@example.com"]}}])
+  (notify! :organization-on-submit {:application {:address "Foostreet 1",
+                                                  :municipality "753",
+                                                  :state "submitted"
+                                                  :primaryOperation {:name "kerrostalo-rivitalo"}
+                                                  :organization "Foo",
+                                                  :_applicantIndex ["Foo 1", "Foo 2"]}})
+  (Thread/sleep 100)
+  (let [msg (last (dummy/messages))]
+    (:subject msg) => (contains "Foostreet 1, Sipoo - uusi hakemus")
+    (get-in msg [:body :plain]) => (contains "osoitteessa Foostreet 1, Sipoo on nyt j\u00e4tetty vireille")
+    (get-in msg [:body :plain]) => (contains "Alla on linkki")
+    (get-in msg [:body :plain]) =not=> (contains "???")))
+
+
+(defemail :test {:recipients-fn :recipients
+                 :model-fn (constantly
+                             {:hi  ""
+                              :hej ""
+                              :moi ""})
+                 :template "testbody.md"})
+
+(defn- notify-invite! [user]
+  (notify! :test {:recipients [user]}))
+
+(defn- last-notification-text [{does-contain :contains does-not-contain :does-not-contain}]
+  (Thread/sleep 100)
+  (fact {:midje/description (str "Notification contains " contains " and does not contain " does-not-contain)}
+    (let [msg (last (dummy/messages))]
+      (doseq [text does-contain]
+        (get-in msg [:body :plain]) => (contains text))
+      (doseq [text does-not-contain]
+        (get-in msg [:body :plain]) =not=> (contains text)))))
+
+(facts "notification language"
+  (against-background [(#'lupapalvelu.notifications/get-email-subject anything anything anything anything) => "Subject"])
+  (notify-invite! {:email "pekka@suomi.fi" :language "fi"})
+  (last-notification-text {:contains         ["suomi"]
+                           :does-not-contain ["Svenska" "English"]})
+
+  (notify-invite! {:email "sven@sverige.sv" :language "sv"})
+  (last-notification-text {:contains         ["Svenska"]
+                           :does-not-contain ["suomi" "English"]})
+
+  (notify-invite! {:email "johnny@engl.ish" :language "en"})
+  (last-notification-text {:contains         ["English"]
+                           :does-not-contain ["suomi" "Svenska"]})
+
+
+  (notify-invite! {:email "nano@nano.nano" :language nil})
+  (last-notification-text {:contains ["suomi" "Svenska" "English"]}))

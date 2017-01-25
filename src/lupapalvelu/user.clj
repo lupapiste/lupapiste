@@ -122,6 +122,8 @@
 ;; ==============================================================================
 ;;
 
+(defn full-name [{:keys [firstName lastName]}] (str firstName " " lastName))
+
 (defn non-private
   "Returns user without private details."
   [user]

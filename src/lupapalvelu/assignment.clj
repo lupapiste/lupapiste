@@ -11,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.operations :as operations]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -119,7 +120,7 @@
   (let [search-keys [:description :applicationDetails.address :applicationDetails._id
                      :applicationDetails.verdicts.kuntalupatunnus]
         fuzzy       (ss/fuzzy-re filter-search)
-        ops         (app-utils/operation-names filter-search)]
+        ops         (operations/operation-names filter-search)]
     {$or (concat
            (map #(hash-map % {$regex   fuzzy
                             $options "i"})

@@ -26,12 +26,11 @@
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
+(dummy-email-server/messages :reset true) ; Inbox zero
 
 (facts "Automatic checking for verdicts"
   (mongo/with-db db-name
-    (let [
-
-          application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
+    (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
           application-id-submitted      (:id application-submitted)
 
           application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
@@ -43,15 +42,17 @@
       (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?
       (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
       (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (Thread/sleep 100)                                    ; Wait for emails
 
-      (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
+      (let [emails (dummy-email-server/messages :reset true)
+            application-submitted (query-application local-query sonja application-id-submitted) => truthy
             application-sent (query-application local-query sonja application-id-sent) => truthy
             application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
+        (fact "Six emails (3x submitted, 2x approved, 1x verdict)" (count emails) => 6)
+        (get (last emails) :subject) => (contains "P\u00e4\u00e4t\u00f6s annettu")
         (:state application-submitted) => "submitted"
         (:state application-sent) => "sent"
         (:state application-verdict-given) => "verdictGiven")
-
-      (dummy-email-server/messages :reset true) ; Inbox zero
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
         (count (batchrun/fetch-verdicts)) => pos?)
@@ -82,9 +83,9 @@
           (let [email (last emails)]
             (fact "email check"
               (:to email) => (contains (email-for-key sonja))
-              (:subject email) => "Lupapiste: Paatoskuja 18 - p\u00e4\u00e4t\u00f6s"
+              (:subject email) => "Lupapiste: Paatoskuja 18, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"
               email => (partial contains-application-link-with-tab? application-id-sent "verdict" "authority")
-              (get-in email [:body :plain]) => (contains "on annettu p\u00e4\u00e4t\u00f6s.")))))
+              (get-in email [:body :plain]) => (contains "tila on nyt P\u00e4\u00e4t\u00f6s annettu")))))
 
       (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
             application-sent (query-application local-query sonja application-id-sent) => truthy

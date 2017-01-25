@@ -1,7 +1,6 @@
 (ns lupapalvelu.batchrun
   (:require [taoensso.timbre :refer [debug debugf error errorf info]]
             [me.raynes.fs :as fs]
-            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
@@ -12,9 +11,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.open-inforequest :as inforequest]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
@@ -39,12 +38,10 @@
 
 ;; Email definition for the "open info request reminder"
 
-(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _ recipient]
-  (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
-         info-fn (fn [lang] (env/value :oir :wanna-join-url))]
-    {:link-fi (link-fn :fi)
-     :link-sv (link-fn :sv)
-     :created-date created-date}))
+(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data :as command} _ recipient]
+  (merge (notifications/create-app-model command nil recipient)
+         {:link (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
+          :inforequest-created created-date}))
 
 (def- oir-reminder-email-conf
   {:recipients-fn  notifications/from-data
@@ -60,27 +57,24 @@
 
 ;; Email definition for the "Request statement reminder"
 
-(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application} _ recipient]
-  {:link-fi (notifications/get-application-link application "/statement" "fi" recipient)
-   :link-sv (notifications/get-application-link application "/statement" "sv" recipient)
-   :created-date created-date})
+(defn- statement-reminders-email-model [{{:keys [created-date statement]} :data application :application :as command} _ recipient]
+  (merge (notifications/create-app-model command nil recipient)
+    {:link     #(notifications/get-application-link application "/statement" % recipient)
+     :statement-request-created created-date
+     :due-date (util/to-local-date (:dueDate statement))
+     :message  (:saateText statement)}))
 
 (notifications/defemail :reminder-request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request-reminder"
-   :model-fn       request-statement-reminder-email-model})
+   :model-fn       statement-reminders-email-model})
 
 ;; Email definition for the "Statement due date reminder"
-
-(defn- reminder-statement-due-date-model [{{:keys [due-date]} :data app :application} _ recipient]
-  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
-   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
-   :due-date due-date})
 
 (notifications/defemail :reminder-statement-due-date
   {:recipients-fn  :recipients
    :subject-key    "reminder-statement-due-date"
-   :model-fn       reminder-statement-due-date-model})
+   :model-fn       statement-reminders-email-model})
 
 ;; Email definition for the "Application state reminder"
 
@@ -90,11 +84,10 @@
 
 ;; Email definition for the "YA work time is expiring"
 
-(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
-  {:link-fi (notifications/get-application-link application nil "fi" recipient)
-   :link-sv (notifications/get-application-link application nil "sv" recipient)
-   :address (:address application)
-   :work-time-expires-date work-time-expires-date})
+(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date} :data :as command} _ recipient]
+  (assoc
+    (notifications/create-app-model command nil recipient)
+    :work-time-expires-date work-time-expires-date))
 
 (notifications/defemail :reminder-ya-work-time-is-expiring
   {:subject-key    "ya-work-time-is-expiring-reminder"
@@ -114,7 +107,7 @@
                                                      $or [{:reminder-sent {$exists false}}
                                                           {:reminder-sent nil}
                                                           {:reminder-sent (older-than timestamp-1-week-ago)}]}}}
-                           [:statements :state :modified :infoRequest :title :address :municipality])]
+                           [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
     (doseq [app apps
             statement (:statements app)
             :let [requested (:requested statement)
@@ -128,7 +121,8 @@
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-request-statement {:application app
                                                             :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
-                                                            :data {:created-date (util/to-local-date requested)}})
+                                                            :data {:created-date (util/to-local-date requested)
+                                                                   :statement statement}})
         (update-application (application->command app)
           {:statements {$elemMatch {:id (:id statement)}}}
           {$set {:statements.$.reminder-sent timestamp-now}})))))
@@ -147,7 +141,7 @@
                                                      $or [{:duedate-reminder-sent {$exists false}}
                                                           {:duedate-reminder-sent nil}
                                                           {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}}
-                           [:statements :state :modified :infoRequest :title :address :municipality])]
+                           [:statements :state :modified :infoRequest :title :address :municipality :primaryOperation])]
     (doseq [app apps
             statement (:statements app)
             :let [due-date (:dueDate statement)
@@ -160,7 +154,8 @@
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-statement-due-date {:application app
                                                              :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
-                                                             :data {:due-date (util/to-local-date due-date)}})
+                                                             :data {:due-date (util/to-local-date due-date)
+                                                                    :statement statement}})
         (update-application (application->command app)
           {:statements {$elemMatch {:id (:id statement)}}}
           {$set {:statements.$.duedate-reminder-sent (now)}})))))
@@ -176,7 +171,7 @@
                                                          {:reminder-sent nil}
                                                          {:reminder-sent (older-than timestamp-1-week-ago)}]})]
     (doseq [oir oirs]
-      (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address :municipality])]
+      (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address :municipality :primaryOperation])]
         (logging/with-logging-context {:applicationId (:id application)}
           (when (= "info" (:state application))
             (notifications/notify! :reminder-open-inforequest {:application application
@@ -195,7 +190,7 @@
                             :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
                                                                  {:created (older-than timestamp-1-week-ago)}
                                                                  ]}}}
-                           [:neighbors :state :modified :title :address :municipality])]
+                           [:neighbors :state :modified :title :address :municipality :primaryOperation])]
     (doseq [app apps
             neighbor (:neighbors app)
             :let [statuses (:status neighbor)]]
@@ -212,9 +207,10 @@
                     (= "email-sent" (:state status))
                     (< (:created status) timestamp-1-week-ago))
               (notifications/notify! :reminder-neighbor {:application app
-                                                         :data {:email (:email status)
-                                                                :token (:token status)
-                                                                :neighborId (:id neighbor)}})
+                                                         :user        {:email (:email status)}
+                                                         :data        {:token      (:token status)
+                                                                       :expires    (util/to-local-datetime (+ ttl/neighbor-token-ttl (:created status)))
+                                                                       :neighborId (:id neighbor)}})
               (update-application (application->command app)
                 {:neighbors {$elemMatch {:id (:id neighbor)}}}
                 {$push {:neighbors.$.status {:state    "reminder-sent"
@@ -232,7 +228,7 @@
                             ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
                             :documents {$elemMatch {:schema-info.name "tyoaika"}}
                             :work-time-expiring-reminder-sent {$exists false}}
-                           [:documents :auth :state :modified :title :address :municipality :infoRequest])]
+                           [:documents :auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
     (doseq [app apps
             :let [tyoaika-doc (some
                                 (fn [doc]
@@ -261,7 +257,7 @@
                             $or [{:reminder-sent {$exists false}}
                                  {:reminder-sent nil}
                                  {:reminder-sent (older-than timestamp-1-month-ago)}]}
-                           [:auth :state :modified :title :address :municipality :infoRequest])]
+                           [:auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
     (doseq [app apps]
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-application-state {:application app
@@ -303,12 +299,12 @@
             (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
                 (if-not (s/blank? url)
-                  (let [command (assoc (application->command app) :user eraajo-user :created (now))
+                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdicts)
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-verdict command))
+                      (notifications/notify! :application-state-change command))
                     (when (fail? result)
                       (logging/log-event :error {:run-by "Automatic verdicts checking"
                                                  :event "Failed to check verdict"
@@ -437,6 +433,8 @@
                                  :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
                   (merge app/timestamp-key
                          {:state true
+                          :municipality true
+                          :address true
                           :permitType true
                           :permitSubtype true
                           :organization true

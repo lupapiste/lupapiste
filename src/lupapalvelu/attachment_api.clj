@@ -314,6 +314,7 @@
                       ram/attachment-status-ok
                       ram/attachment-type-allows-ram]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
+   :notified         true
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           (difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})}

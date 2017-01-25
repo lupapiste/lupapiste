@@ -60,7 +60,7 @@
               (command kaino :company-invite-user :email "tepp\u00f6@example.com" :admin false :submit false) => fail?)
 
         (fact "Invite is sent"
-              (command kaino :company-invite-user :email "teppo@example.com" :admin false :submit false) => ok?)
+          (command kaino :company-invite-user :email "teppo@example.com" :admin false :submit false) => ok?)
 
         (fact "Sent invitation is seen in company query"
               (let [company (query kaino :company :company "solita" :users true)]
@@ -105,16 +105,22 @@
 
 (facts* "Company is added to application"
 
-        (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
         auth (:auth (query-application mikko application-id))]
     (count auth) => 1
     (fact "Can submit"
           (query mikko :application-submittable :id application-id) => ok?)
     (fact "Applicant invites company"
-          (command mikko :company-invite :id application-id :company-id "solita") => ok?)
+      (command mikko :company-invite :id application-id :company-id "solita") => ok?
+      (fact "Email is sent"                                 ; testing new email templates - accept-company-invitation
+        (let [email (last-email false)
+              plain-body (get-in email [:body :plain])]
+          plain-body => (contains "Hei Kaino")
+          plain-body => (contains "Mikko Intonen haluaa valtuuttaa yrityksenne Solita Oy")
+          plain-body => (contains "osoitteessa Kustukatu 13"))))
 
     (fact "Company cannot be invited twice"
-          (command mikko :company-invite :id application-id :company-id "solita") => (partial expected-failure? "company.already-invited"))
+      (command mikko :company-invite :id application-id :company-id "solita") => (partial expected-failure? "company.already-invited"))
 
     (fact "Company is only invited to the application"
       (let [auth (:auth (query-application mikko application-id))
@@ -234,7 +240,7 @@
     (fact "Foo can set pw from email token"
       (let [email (last-email)
             token (token-from-email foo-email email)]
-        (:subject email) => (contains "Salasanan vaihto")
+        (:subject email) => (contains "Uusi salasana")
         (http-token-call token {:password foo-pw}) => (contains {:status 200})))
 
     (let [store (atom {})

@@ -150,7 +150,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
-      (:subject email) => "Lupapiste: Peruutustie 23 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Peruutustie 23, Sipoo - hankkeen tila on nyt Peruutettu"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant")))
 
@@ -201,7 +201,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key teppo))
-      (:subject email) => "Lupapiste: Penahouse 88 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant"))
 
@@ -211,6 +211,12 @@
       (command teppo :undo-cancellation :id application-id) => (partial expected-failure? :error.undo-only-for-canceler))
     (fact "Pena can undo his cancellation"
       (command pena :undo-cancellation :id application-id) => ok?)
+
+    (let [email (last-email)]
+      (:to email) => (contains (email-for-key teppo))
+      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hanke on palautunut tilaan Hakemus j\u00e4tetty"
+      (get-in email [:body :plain]) => (contains "hakemus on palautettu aktiiviseksi")
+      email => (partial contains-application-link? application-id "applicant"))
 
     (fact "Teppo can now cancel"
       (command teppo :cancel-application :id application-id :text "I want it canceled!" :lang "fi") => ok?
@@ -607,6 +613,11 @@
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
     (command pena :submit-application :id application-id)
     (return-to-draft sonja application-id)
+
+    (let [email (last-email)]
+      (:to email) => (contains "pena")
+      (:subject email) => (contains "Hakemus palautettiin Luonnos-tilaan")
+      (get-in email [:body :plain]) => (contains "comment-text"))
 
     (let [application (query-application pena application-id)]
       (fact "The return to draft can be seen in application history"

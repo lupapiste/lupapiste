@@ -210,7 +210,7 @@
 
                 (let [email (last (dummy-email/messages :reset true))]
                   (:to email) => (contains (email-for-key pena))
-                  (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
+                  (:subject email) => "Lupapiste: Suusaarenkierto 44, Kuopio - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"
                   email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))
 
                 (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
@@ -247,7 +247,7 @@
 
                   (let [email (last (dummy-email/messages :reset true))]
                     (:to email) => (contains (email-for-key pena))
-                    (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
+                    (:subject email) => "Lupapiste: Suusaarenkierto 44, Kuopio - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"
                     email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))))))))))
   (against-background
     (app/make-application-id anything) => "LP-297-2015-00001"))

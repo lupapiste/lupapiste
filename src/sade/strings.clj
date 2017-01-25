@@ -93,6 +93,17 @@
     (replace "&gt;"   ">")
     (replace "&quot;" "\"")))
 
+(defn unescape-html-scandinavian-characters
+  "Change HTML character entities into Scandinavian characters."
+  [^String s]
+  (.. s
+    (replace "&auml;"  "\u00e4")
+    (replace "&Auml;"  "\u00c4")
+    (replace "&ouml;"  "\u00f6")
+    (replace "&Ouml;"  "\u00d6")
+    (replace "&aring;" "\u00e5")
+    (replace "&Aring;" "\u00c5")))
+
 (defn base64-decode
   "Decode a base64 encoded string using UTF-8."
   ^String [^String s]

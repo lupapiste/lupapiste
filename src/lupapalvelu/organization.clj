@@ -164,11 +164,13 @@
   (when (nil? (sc/check [ssc/IpAddress] ips))
     {$set {:allowedAutologinIPs ips}}))
 
-(defn get-organization [id]
-  {:pre [(not (s/blank? id))]}
-  (->> (mongo/by-id :organizations id)
-       remove-sensitive-data
-       with-scope-defaults))
+(defn get-organization
+  ([id] (get-organization id {}))
+  ([id projection]
+   {:pre [(not (s/blank? id))]}
+   (->> (mongo/by-id :organizations id projection)
+        remove-sensitive-data
+        with-scope-defaults)))
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}

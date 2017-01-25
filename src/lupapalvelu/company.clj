@@ -10,17 +10,16 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application application->command]]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notif]
+            [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.notifications :as notif]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.document.schemas :as schema]
-            [lupapalvelu.authorization :as auth])
+            [lupapalvelu.user :as usr])
   (:import [java.util Date]))
 
 ;;
@@ -259,8 +258,7 @@
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role, :submit submit} :auto-consume false)]
     (notif/notify! :new-company-admin-user {:user       user
                                             :company    company
-                                            :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
-                                            :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+                                            :link       #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
 (defn add-user! [user company role submit]
@@ -271,8 +269,8 @@
                                                           :submit submit} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
-                                      :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
-                                      :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+                                      :company-admin  (str (get-in company [:admin :firstName]) " " (get-in company [:admin :lastName]))
+                                      :link    #(str (env/value :host) "/app/" (name %) "/welcome#!/new-company-user/" token-id)})
     token-id))
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
@@ -292,7 +290,7 @@
     :send-email false)
   (ok))
 
-(defn invite-user! [user-email company-id role submit firstname lastname]
+(defn invite-user! [caller user-email company-id role submit firstname lastname]
   (let [company   (find-company! {:id company-id})
         user      (usr/get-user-by-email user-email)
         user      (if (usr/dummy? user)
@@ -305,11 +303,9 @@
                                                               :role role
                                                               :submit submit} :auto-consume false)]
     (notif/notify! :invite-company-user {:user       user
-                                         :company    company
-                                         :ok-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/ok/" token-id)
-                                         :ok-sv    (str (env/value :host) "/app/sv/welcome#!/invite-company-user/ok/" token-id)
-                                         :cancel-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/cancel/" token-id)
-                                         :cancel-sv    (str (env/value :host) "/app/sv/welcome#!/invite-company-user/cancel/" token-id)})
+                                         :company    (assoc company :admin caller)
+                                         :ok         #(str (env/value :host) "/app/" % "/welcome#!/invite-company-user/ok/" token-id)
+                                         :cancel     #(str (env/value :host) "/app/" % "/welcome#!/invite-company-user/cancel/" token-id)})
     token-id))
 
 (notif/defemail :invite-company-user {:subject-key   "invite-company-user.subject"
@@ -389,15 +385,21 @@
                        :return-count? true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
-                                                 :caller     caller
+                                                 :inviter    caller
                                                  :company    company
-                                                 :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                                 :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
+                                                 :token-id   token-id
+                                                 :application application})
       token-id)))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
                                             :recipients-fn :admins
-                                            :model-fn      (fn [model _ __] model)})
+                                            :model-fn      (fn [model _ recipient]
+                                                             (merge (notif/create-app-model model nil recipient)
+                                                                    model
+                                                                    {:link #(str (env/value :host) "/app/"
+                                                                                 (name %)
+                                                                                 "/welcome#!/accept-company-invitation/"
+                                                                                 (:token-id model))}))})
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)

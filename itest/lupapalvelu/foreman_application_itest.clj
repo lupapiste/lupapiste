@@ -409,13 +409,23 @@
           (has-auth? "heppu@example.com" auth-array)
           (has-auth? "heppu@exampe.com" orig-auth))
 
-        (fact "Emails are sent correctly to recipients"
-          (let [emails (sent-emails)
-                recipients (map :to emails)]
-            recipients => (just ["heppu@example.com" ; foreman is invited to original application also
-                                 "heppu@example.com"
-                                 "foo@example.com"
-                                 "Kaino Solita <kaino@solita.fi>"] :in-any-order)))))
+        (let [emails (sent-emails)]
+          (fact "Emails are sent correctly to recipients"
+            (let [recipients (map :to emails)]
+              ; foreman does not receive separate invitation email for the original application
+              recipients => (just ["heppu@example.com"
+                                   "foo@example.com"
+                                   "Kaino Solita <kaino@solita.fi>"] :in-any-order)))
+          (fact "heppu@example.com receives the foreman invite"
+            (->> emails
+                 (filter #(= (:to %) "heppu@example.com"))
+                 first :body :plain)
+            => (contains "sinua ollaan nime\u00e4m\u00e4ss\u00e4 ty\u00f6njohtajaksi"))
+          (fact "others receive the normal invite"
+                (->> emails
+                     (remove #(= (:to %) "heppu@example.com"))
+                     (map (comp :plain :body)))
+                => (has every? (partial re-find #"(Sinut halutaan valtuuttaa)|(haluaa valtuuttaa yrityksenne)"))))))
 
     (fact "Create foreman application with the applicant as foreman"
           (let [{application-id :id} (create-and-submit-application apikey :operation "kerrostalo-rivitalo") => truthy
