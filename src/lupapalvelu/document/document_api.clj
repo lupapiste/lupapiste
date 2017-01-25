@@ -47,8 +47,9 @@
   "Pre-check to determine if documents are editable in abnormal states"
   [data-key default-states]
   (fn [{data :data {docs :documents state :state} :application}]
-    (when-let [doc (->> (get data (keyword data-key)) (domain/get-document-by-id docs))]
-      (when-not (-> (model/get-document-schema doc)
+    (when-let [doc-id (get data (keyword data-key))]
+      (when-not (-> (domain/get-document-by-id docs doc-id)
+                    (model/get-document-schema)
                     (state-valid-by-schema? :editable-in-states default-states state))
         (fail :error.document-not-editable-in-current-state)))))
 
