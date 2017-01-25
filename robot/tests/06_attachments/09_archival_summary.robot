@@ -119,7 +119,6 @@ Not archived general attachments group is hidden
   Section group count is  not-archived-pre-groups  0
   Group row count is  not-archived-pre-groups  attachments.general  0
 
-
 Muut muu type is correct
   Attachment type group is  not-archived-post-groups  attachments.general  muut.muu  Muut liitteet
   Attachment type id is  not-archived-post-groups  attachments.general  muut.muu  Muu liite
@@ -135,6 +134,7 @@ Change attachment type
   Change type  erityissuunnitelmat.rakennesuunnitelma
 
 Type is changed
+  Sleep  1.0s
   Attachment type group is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Erityissuunnitelmat
   Attachment type id is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Rakennesuunnitelma
 
