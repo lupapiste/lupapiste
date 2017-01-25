@@ -39,25 +39,33 @@
      :contentType content-type
      :metadata metadata}))
 
-(defn- op-id-from-matching-document [tunnus doc]
-  (when (= tunnus (str/lower-case (get-in doc [:data :tunnus :value])))
-    (get-in doc [:schema-info :op :id])))
+(defn- op-id-from-buildings-list [{:keys [buildings]} building-id]
+  (some
+    (fn [b]
+      (let [id-set (->> (select-keys b [:buildingId :nationalId :localShortId])
+                        vals
+                        (remove nil?)
+                        (map str/lower-case)
+                        set)]
+        (when (id-set building-id)
+          (:operationId b))))
+    buildings))
 
-(defn- op-id-from-matching-building [application building-id]
+(defn- op-id-from-document-tunnus-or-nid [application tunnus-or-national-id]
   (->> (building/building-ids application :include-bldgs-without-nid)
        (some (fn [{:keys [operation-id short-id national-id]}]
-               (when (or (= (str/lower-case short-id) building-id)
-                         (= (str/lower-case national-id) building-id))
+               (when (or (= (str/lower-case short-id) tunnus-or-national-id) ; short-id is 'tunnus'
+                         (= (str/lower-case national-id) tunnus-or-national-id))
                  operation-id)))))
 
 (defn- resolve-attachment-grouping
-  [{{:keys [grouping multioperation]} :metadata} {:keys [documents] :as application} tunnus-or-bid-str]
+  [{{:keys [grouping multioperation]} :metadata} application tunnus-or-bid-str]
   (let [op-ids (->> (str/split tunnus-or-bid-str #",|;")
                     (map str/trim)
                     (map str/lower-case)
                     (map (fn [tunnus-or-bid]
-                           (or (some #(op-id-from-matching-document tunnus-or-bid %) documents)
-                               (op-id-from-matching-building application tunnus-or-bid))))
+                           (or (op-id-from-document-tunnus-or-nid application tunnus-or-bid)
+                               (op-id-from-buildings-list application tunnus-or-bid))))
                     set)
         groups (att-tags/attachment-groups-for-application application)
         op-groups (filter #(= (:groupType %) :operation) groups)]
@@ -93,7 +101,7 @@
 (defn save-files [application files session-id]
   (if-let [attachments (and (empty? (rest files))
                             (is-zip-file? (first files))
-                            (-> files first :tempfile muuntaja/dummy-unzip :attachments seq))]
+                            (-> files first :tempfile muuntaja/unzip-attachment-collection :attachments seq))]
     (download-and-save-files application attachments session-id)
     (pmap
       #(save-file % :sessionId session-id :linked false)
