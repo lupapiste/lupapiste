@@ -33,6 +33,7 @@
                                                                    :content   (json/generate-string column-keyword-map)}]}
           {{:keys [status attachments error]} :body} (http/post (str (env/value :muuntaja :url) unzip-attachments-path)
                                                                 request-opts)]
+      (timbre/debug attachments)
       (cond
         (and (= status "ok") (seq attachments))
         (do
