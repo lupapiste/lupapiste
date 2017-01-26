@@ -1,0 +1,36 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="handler-roles-template">
+  <h2 data-bind="ltext: 'handler-roles.title'"></h2>
+  <table class="handler-roles">
+    <thead>
+      <tr>
+        <!-- ko foreach: languages -->
+        <th data-bind="text: $parent.nameHeader( $data )"></th>
+        <!-- /ko -->
+        <th></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: roles">
+      <tr>
+        <!-- ko foreach: $parent.languages -->
+        <td>
+          <input type="text"
+                 class="grid-style-input" 
+                 data-bind="value: $parent.name[$data],
+                            disable: $parent.general">
+        </td>
+        <!-- /ko -->
+        <td>
+          <i class="lupicon-remove primary"
+             data-bind="visible: !$parent.isDisabled() && !$data.general,
+                        click: $parent.removeRole">
+          </i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <icon-button params="visible: !isDisabled(),
+                       ltext: 'handler-roles.add',
+                       click: addRole,
+                       icon: 'circle-plus'"></icon-button>
+</script>

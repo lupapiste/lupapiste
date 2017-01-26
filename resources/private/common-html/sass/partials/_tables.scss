@@ -590,3 +590,10 @@ select.waste-unit-select {
     }
   }
 }
+
+table.handler-roles {
+  @include no-row-hover;
+  input {
+    width: 80%;
+  }
+}

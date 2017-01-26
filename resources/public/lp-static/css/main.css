@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1485246469109');
+@import url('main-blessed1.css?z=1485361530052');
 
 
 /* line 876, ../../../private/common-html/sass/partials/_forms.scss */
@@ -3417,6 +3417,19 @@ select.waste-unit-select {
 .attachment-batch-table .fill-pin icon-button.fill-down button {
   max-height: 100%;
   height: 100%;
+}
+
+/* line 9, ../../../private/common-html/sass/partials/_tables.scss */
+table.handler-roles tr:hover {
+  background-color: white;
+}
+/* line 12, ../../../private/common-html/sass/partials/_tables.scss */
+table.handler-roles tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+/* line 596, ../../../private/common-html/sass/partials/_tables.scss */
+table.handler-roles input {
+  width: 80%;
 }
 
 /*Tab styles*/
