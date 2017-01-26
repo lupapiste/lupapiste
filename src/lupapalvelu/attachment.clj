@@ -163,6 +163,8 @@
 (def attachment-target-coercer (ssc/json-coercer Target))
 (def group-type-coercer (ssc/json-coercer GroupType))
 
+(defn ->attachment-operation [operation]
+  (select-keys operation [:id :name]))
 
 (defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
   (when (and (not (usr/authority? user))
@@ -284,7 +286,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op (->> (:operations group) (map #(select-keys % [:id :name])) not-empty)
+           :op (->> (:operations group) (map ->attachment-operation) not-empty)
            :signatures []
            :versions []
            ;:approvals {}
@@ -532,7 +534,7 @@
 (defn meta->attachment-data [meta]
   (merge (dissoc meta :group)
          (when (contains? meta :group)
-           {:op (not-empty (get-in meta [:group :operations]))
+           {:op (not-empty (->> (get-in meta [:group :operations]) (map ->attachment-operation)))
             :groupType (get-in meta [:group :groupType])})))
 
 (defn update-attachment-data! [command attachmentId data now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
@@ -948,7 +950,7 @@
 
 (defn- validate-group-op [group]
   (when-let [operations (:operations group)]
-    (when (sc/check [Operation] (map #(select-keys % [:id :name]) operations))
+    (when (sc/check [Operation] (map ->attachment-operation operations))
       (fail :error.illegal-attachment-operation))))
 
 (defn- validate-group-type [group]
