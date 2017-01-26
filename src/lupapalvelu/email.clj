@@ -34,21 +34,24 @@
   (with-open [in (io/input-stream resource)]
     (slurp in)))
 
-(defn fetch-template
+(defn- fetch-template-uncached
   [template-name]
   (slurp-resource (find-resource template-name)))
 
-(defn fetch-html-template
+(defn- fetch-html-template-uncached
   [template-name & [lang]]
   (enlive/html-resource (find-resource (if lang (str lang "-" template-name) template-name))))
 
+(if (env/feature? :no-cache)
+  (do
+    (def fetch-template fetch-template-uncached)
+    (def fetch-html-template fetch-html-template-uncached))
+  (do
+    (def fetch-template (memoize fetch-template-uncached))
+    (def fetch-html-template (memoize fetch-html-template-uncached))))
+
 (defn fetch-template-by-lang [template-name lang]
   (fetch-template (str lang "-" template-name)))
-
-(when-not (env/feature? :no-cache)
-  (alter-var-root #'fetch-template memoize)
-  (alter-var-root #'fetch-html-template memoize))
-
 ;;
 ;; Plain text support:
 ;; -------------------

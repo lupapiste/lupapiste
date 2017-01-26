@@ -7,18 +7,19 @@
             [clojure.set :as set]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [net.cgrand.enlive-html :as enlive]))
 
 (testable-privates lupapalvelu.email preprocess-context)
 
 (facts "apply-template"
   (facts "invalid template"
-   (apply-template "does-not-exist.md" {:receiver "foobar"}) => (throws #"error.empty-email"))
+    (apply-template "does-not-exist.md" {:receiver "foobar"}) => (throws #"error.empty-email"))
 
-  (against-background [(fetch-template "master.md")              => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
-                       (fetch-template "en-footer.md")         => "## {{footer}}"
-                       (fetch-template "en-test.md")         => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
-                       (find-resource "html-wrap.html") => (io/input-stream (.getBytes "<html><body></body></html>"))]
+  (against-background [(fetch-template "master.md")           => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
+                       (fetch-template "en-footer.md")        => "## {{footer}}"
+                       (fetch-template "en-test.md")          => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
+                       (fetch-html-template "html-wrap.html") => (enlive/html-resource (io/input-stream (.getBytes "<html><body></body></html>")))]
     (facts "header and footer"
       (let [[plain html] (apply-template "test.md" {:footer "FOOTER" :receiver "foobar" :lang "en"})]
         plain => "\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
