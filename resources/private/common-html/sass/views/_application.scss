@@ -456,6 +456,20 @@ $app-gray-darkest: $gray187;
   border-bottom: none;
 }
 
+.application_summary_text {
+  ul.handler-list {
+    padding: 0;
+    display: table-cell;
+    width: 100%;
+  }
+  a.handler-list-edit {
+    display: table-cell;
+    &:after {
+      content: "\2026";
+    }
+  }
+}
+
 @mixin icon-colorizer( $id ) {
   ##{$id} {
   i.lupicon-circle-check,

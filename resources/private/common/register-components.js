@@ -175,7 +175,8 @@ jQuery(document).ready(function() {
     {name: "combobox"},
     {name: "drop-zone"},
     {name: "upload-zone"},
-    {name: "link-permit-autocomplete"}
+    {name: "link-permit-autocomplete"},
+    {name: "handler-list"}
 ];
 
   ko.registerLupapisteComponents(components);
