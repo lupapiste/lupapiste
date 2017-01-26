@@ -3,10 +3,15 @@ LUPAPISTE.CljsComponentModel = function(params) {
   var self = this;
 
   self.componentName = params.name;
+  var component = lupapalvelu.ui[_.snakeCase(self.componentName)];
 
-  $.getScript('/lp-static/js/'+self.componentName+'.js', function() {
+  if (component) { // If React component is already loaded, defer mounting it so #id for template is bound after KO compnent init
+    _.defer(component.start, self.componentName);
+  } else {
+    $.getScript('/lp-static/js/'+self.componentName+'.js', function() {
       lupapalvelu.ui[_.snakeCase(self.componentName)].start(self.componentName);
-  });
+    });
+  }
 
   self.dispose = function(param) {
     ReactDOM.unmountComponentAtNode(document.getElementById(self.componentName));
