@@ -525,16 +525,17 @@
 
 (def cljs-base-url "/lp-static/js/out/cljs_base.js")
 
-(future
-  (cljs.build.api/watch "src/lupapalvelu/ui"
-                        {
-                         ;:main 'lupapalvelu.ui.core
-                         :output-dir "resources/public/lp-static/js/out"
-                         :asset-path "/lp-static/js/out"
-                         :modules {:common {
-                                            :output-to "resources/public/lp-static/js/rum-app.js"
-                                            :entries #{"lupapalvelu.ui.core"}
-                                            }
-                                   :checklist {:output-to "resources/public/lp-static/js/checklist-summary.js"
-                                               :entries #{"lupapalvelu.ui.checklist-summary"}}}
-                         :optimizations :simple}))
+(defonce cljs-build (future
+                      (cljs.build.api/watch "src/lupapalvelu/ui"
+                                            {
+                                             ;:main 'lupapalvelu.ui.core
+                                             :output-dir "resources/public/lp-static/js/out"
+                                             :source-map "resources/public/lp-static/js/out/source.map"
+                                             :asset-path "/lp-static/js/out"
+                                             :modules {:common {
+                                                                :output-to "resources/public/lp-static/js/rum-app.js"
+                                                                :entries #{"lupapalvelu.ui.core"}
+                                                                }
+                                                       :checklist {:output-to "resources/public/lp-static/js/checklist-summary.js"
+                                                                   :entries #{"lupapalvelu.ui.checklist-summary"}}}
+                                             :optimizations :simple})))
