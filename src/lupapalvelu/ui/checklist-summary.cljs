@@ -11,7 +11,7 @@
    [:tbody
     (doall
       (for [n (take 5 (range))]
-        [:tr [:td "Cell"] [:td n] [:td "Faa"]]))]])
+        [:tr [:td "Cell"] [:td (js/util.randomElementId (str "id-" n "-"))] [:td "Faa"]]))]])
 
 (defn ^:export start [domId]
   (rum/mount (checklist-summary) (.getElementById js/document (name domId))))
