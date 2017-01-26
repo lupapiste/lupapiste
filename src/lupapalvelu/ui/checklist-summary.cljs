@@ -3,14 +3,15 @@
 
 (enable-console-print!)
 
-(rum/defc root []
+(rum/defc checklist-summary < {:will-unmount (fn [state] (println "Will-unmount" state) state)
+                               :will-mount   (fn [state] (println "Will-mount" state) state)}
+  []
   [:h1 "Tarkastusasiakirjan yhteenveto"]
   [:table
    [:tbody
     (doall
       (for [n (take 5 (range))]
-        [:tr [:td "Cell"] [:td n]]))]])
+        [:tr [:td "Cell"] [:td n] [:td "Faa"]]))]])
 
 (defn ^:export start [domId]
-  (js/console.log "checklist-summary" domId)
-  (rum/mount (root) (.getElementById js/document (name domId))))
+  (rum/mount (checklist-summary) (.getElementById js/document (name domId))))
