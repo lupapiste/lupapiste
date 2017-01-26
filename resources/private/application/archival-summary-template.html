@@ -99,7 +99,7 @@
       </div>
     <!-- /ko -->
 
-    <!-- ko if: showMarkArchivedSection && !$root.authorization.ok("common-area-application") && tosFunctionExists -->
+    <!-- ko if: $data.showMarkArchivedSection() && !$root.authorization.ok("common-area-application") && $data.tosFunctionExists() -->
     <div class="mark-as-archived">
       <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
       <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
