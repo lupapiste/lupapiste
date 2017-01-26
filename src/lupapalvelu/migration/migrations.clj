@@ -2701,7 +2701,7 @@
       {$and [{:permitType "YA"}
              {$or [{:attachments {$elemMatch {:groupType {$ne nil}}}}
                    {:attachments {$elemMatch {:op {$ne nil}}}}]}]}]
-  (defmigration remove-groupType-and-op-from-YA-applications
+  (defmigration remove-groupType-and-op-from-YA-applications-v2
     {:apply-when (pos? (mongo/count :applications attachments-with-groupType-or-op-match))}
     (update-applications-array :attachments
                                set-attachment-groupType-and-op-nil
