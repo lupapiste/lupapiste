@@ -175,7 +175,9 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
-   :common-html  {:depends [:selectm-html]
+   :cljs-component {:js ["cljs-component.js"] :html ["cljs-component.html"]}
+
+   :common-html  {:depends [:selectm-html :cljs-component]
                   :css ["jquery-ui.css"]
                   :html ["404.html"]}
 
@@ -532,5 +534,7 @@
                          :modules {:common {
                                             :output-to "resources/public/lp-static/js/rum-app.js"
                                             :entries #{"lupapalvelu.ui.core"}
-                                            }}
+                                            }
+                                   :checklist {:output-to "resources/public/lp-static/js/checklist-summary.js"
+                                               :entries #{"lupapalvelu.ui.checklist-summary"}}}
                          :optimizations :simple}))
