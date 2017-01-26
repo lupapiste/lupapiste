@@ -60,12 +60,12 @@
 
 (defn- resolve-attachment-grouping
   [{{:keys [grouping multioperation]} :metadata} application tunnus-or-bid-str]
-  (let [op-ids (->> (str/split tunnus-or-bid-str #",|;")
-                    (map str/trim)
-                    (map str/lower-case)
-                    (map (fn [tunnus-or-bid]
-                           (or (op-id-from-document-tunnus-or-nid application tunnus-or-bid)
-                               (op-id-from-buildings-list application tunnus-or-bid))))
+  (let [tunnus->op-id (comp #(or (op-id-from-document-tunnus-or-nid application %)
+                                 (op-id-from-buildings-list application %))
+                            str/lower-case
+                            str/trim)
+        op-ids (->> (str/split tunnus-or-bid-str #",|;")
+                    (map tunnus->op-id)
                     set)
         groups (att-tags/attachment-groups-for-application application)
         op-groups (filter #(= (:groupType %) :operation) groups)]
