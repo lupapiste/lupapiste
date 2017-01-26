@@ -521,11 +521,16 @@
   (when-not (or (fn? r) (io/resource (c/path r)))
     (throw (Exception. (str "Resource missing: " r)))))
 
+(def cljs-base-url "/lp-static/js/out/cljs_base.js")
+
 (future
-  (cljs.build.api/watch "src"
+  (cljs.build.api/watch "src/lupapalvelu/ui"
                         {
                          ;:main 'lupapalvelu.ui.core
-                         :output-to "resources/public/lp-static/js/rum-app.js"
                          :output-dir "resources/public/lp-static/js/out"
                          :asset-path "/lp-static/js/out"
+                         :modules {:common {
+                                            :output-to "resources/public/lp-static/js/rum-app.js"
+                                            :entries #{"lupapalvelu.ui.core"}
+                                            }}
                          :optimizations :simple}))
