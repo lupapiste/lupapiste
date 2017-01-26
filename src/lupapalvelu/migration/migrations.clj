@@ -2724,6 +2724,14 @@
          (map get-asemapiirros-multioperation-updates-for-application)
          (run! (partial apply mongo/update-by-query :submitted-applications)))))
 
+(defn- clean-up-attachment-op [attachment]
+  (if (sequential? (:op attachment))
+    (update attachment :op #(map attachment/->attachment-operation %))
+    attachment))
+
+(defmigration cleanup-attachment-operations
+  {:apply-when (pos? (mongo/count :applications {:attachments.op.groupType {$exists true}}))}
+  (update-applications-array :attachments clean-up-attachment-op {:attachments.op.groupType {$exists true}}))
 
 ;;
 ;; ****** NOTE! ******
