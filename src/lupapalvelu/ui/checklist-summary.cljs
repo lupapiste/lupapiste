@@ -10,9 +10,12 @@
   [:tr [:td "Cell"] [:td (:text row-data)] [:td "Faa"]])
 
 (rum/defc checklist-summary < rum/reactive
-  []
+  [ko-app]
+  (js/console.log "from cljs" (aget ko-app "texti"))
   [:div
    [:h1 "Tarkastusasiakirjan yhteenveto"]
+   [:pre ((aget ko-app "texti"))]
+   [:input ]
    [:table
     [:tbody
      (doall
@@ -21,5 +24,5 @@
    [:button {:on-click (fn [_] (swap! rows conj {:id (str "row" (rand-int 50)) :text "Faa"}))}
     "Click"]])
 
-(defn ^:export start [domId]
-  (rum/mount (checklist-summary) (.getElementById js/document (name domId))))
+(defn ^:export start [domId ko-app]
+  (rum/mount (checklist-summary ko-app) (.getElementById js/document (name domId))))
