@@ -322,6 +322,10 @@
                               (util/assoc-when op :name)))))
          not-empty)))
 
+(defn- attachment-grouping-for-application [group application]
+  (when-not (false? (op/get-primary-operation-metadata application :attachment-op-selector))
+    (update group :operations resolve-operation-names application)))
+
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority contents read-only source]
@@ -334,7 +338,7 @@
                      requested-by-authority
                      locked
                      (-> application :state keyword)
-                     (update group :operations resolve-operation-names application)
+                     (attachment-grouping-for-application group application)
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
@@ -501,7 +505,7 @@
     {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
      (let [options       (if (contains? options :group)
-                           (update-in options [:group :operations] resolve-operation-names application)
+                           (update options :group attachment-grouping-for-application application)
                            options)
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
