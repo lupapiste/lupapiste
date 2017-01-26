@@ -4,7 +4,7 @@
 
 (apply-remote-minimal)
 
-(facts "Create application"
+(facts "Create R application"
   (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
         {:keys [attachments]} (query-application pena application-id)
         cv-type {:type-group "osapuolet"
@@ -28,8 +28,12 @@
 
     (let [{:keys [attachments]} (query-application pena application-id)
           user-att (last attachments)]
-      (count attachments) => 5
-      (:type user-att) => cv-type)
+      (fact "attachment is added"
+        (count attachments) => 5)
+      (fact "attachmnet type"
+        (:type user-att) => cv-type)
+      (fact "attachment grouping"
+        (:groupType user-att) => "parties"))
 
     (command pena :submit-application :id application-id) => ok?
 
@@ -93,3 +97,31 @@
               (count cv-attachments) => 1)
             (fact "CV is needed now"
               (:notNeeded (first cv-attachments)) => false)))))))
+
+(facts "YA application"
+  (let [{application-id :id :as response} (create-app mikko :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
+        {:keys [attachments]} (query-application mikko application-id)
+        cv-type {:type-group "osapuolet"
+                 :type-id "cv"}
+        tutkintotodistus-type {:type-group "osapuolet"
+                               :type-id "tutkintotodistus"}]
+    response => ok?
+    (count attachments) => 1
+
+    (fact "No user attachments"
+      (command mikko :copy-user-attachments-to-application :id application-id) => (partial expected-failure? :error.no-user-attachments))
+
+    (fact "Upload user attachment"
+      (upload-user-attachment mikko "osapuolet.cv" true))
+
+    (fact "Copy user attachments to application"
+      (command mikko :copy-user-attachments-to-application :id application-id) => ok?)
+
+    (let [{:keys [attachments]} (query-application mikko application-id)
+          user-att (last attachments)]
+      (fact "one attachment is added"
+        (count attachments) => 2)
+      (fact "attachment type"
+        (:type user-att) => cv-type)
+      (fact "attachment grouping not set for YA applications"
+        (:groupType user-att) => nil))))

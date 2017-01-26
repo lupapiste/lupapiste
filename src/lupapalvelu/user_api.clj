@@ -25,6 +25,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
@@ -728,14 +729,16 @@
 
           attachment-id (or old-user-attachment-id
                             (-> (remove :latestVersion same-attachments) first :id) ; upload user attachment to empty placeholder
-                            maybe-attachment-id)]
+                            maybe-attachment-id)
+          attachment-group (when-not (false? (op/get-primary-operation-metadata application :attachment-op-selector))
+                             {:groupType (get-in (att-type/attachment-type attachment-type) [:metadata :grouping])})]
       (when (zero? (mongo/count :applications {:_id application-id
                                                :attachments {$elemMatch {:id attachment-id ; skip upload when user attachment as already been uploaded
                                                                          :latestVersion.type attachment-type}}}))
         (att/upload-and-attach! command
                                 {:attachment-id attachment-id
                                  :attachment-type attachment-type
-                                 :group {:groupType (get-in (att-type/attachment-type attachment-type) [:metadata :grouping])}
+                                 :group attachment-group
                                  :created (now)
                                  :required false
                                  :locked false}
