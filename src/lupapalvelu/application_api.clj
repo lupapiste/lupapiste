@@ -174,12 +174,14 @@
                           (fail "error.user.not.found")))]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created app :application :as command}]
+  [{created :created app :application user :user :as command}]
   (let [assignee (util/find-by-id assigneeId (app/application-org-authz-users app "authority"))]
     (if (or assignee (ss/blank? assigneeId))
-      (update-application command
-                          {$set {:modified  created
-                                 :authority (if assignee (usr/summary assignee) (:authority domain/application-skeleton))}})
+      (let [authority (if assignee (usr/summary assignee) (:authority domain/application-skeleton))]
+        (update-application command
+                            {$set {:modified  created
+                                   :authority authority}
+                             $push {:history (app/authority-history-entry authority created user)}}))
       (fail "error.user.not.found"))))
 
 ;;
