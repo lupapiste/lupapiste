@@ -55,7 +55,6 @@ Pena submits extension
 Sonja cannot approve application but extension
   Sonja logs in
   Open application  ${ext1}  ${propertyid}
-  No such test id  approve-application
   No such test id  application-open-verdict-tab
   Scroll and click test id  approve-extension
   Deny  dynamic-yes-no-confirm-dialog
@@ -106,7 +105,6 @@ Pena fills out the first extension
 Sonja approves the first extension
   Sonja logs in
   Open application  ${ext1}  ${propertyid}
-  No such test id  approve-application
   Scroll and click test id  approve-extension
   Confirm  dynamic-yes-no-confirm-dialog
 

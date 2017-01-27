@@ -26,8 +26,7 @@ Mikko fills some of the suunnittelija docs
 Sonja logs in and sends app to backing system
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Click enabled by test id  approve-application
-  Tab should be visible  requiredFieldSummary
+  Open tab  requiredFieldSummary
   Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
 

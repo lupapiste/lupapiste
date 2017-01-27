@@ -31,7 +31,7 @@ Mikko sets himself the applicant
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
 
 Mikko can't approve application
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+  User should not be able to approve application
 
 Mikko adds an attachment
   Open tab  attachments
@@ -124,9 +124,6 @@ Authority opens integration message monitor
 At least one message is displayed in the monitor
   Wait Until  Page Should Contain Element  //div[@data-test-id="integration-message-monitor"]/ul/li
   Close message monitor
-
-Sonja cant re-approve application
-  Wait Until  Element should not be visible by test id  approve-application
 
 Party tab indicators have been reset
   Wait Until  Element should not be visible  applicationPartyDocumentIndicator

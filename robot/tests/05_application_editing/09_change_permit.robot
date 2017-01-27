@@ -20,7 +20,6 @@ Sonja prepares the application
 Sonja submits the application and gives it a verdict
   Submit application
   Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
-  Element should be visible  xpath=//button[@data-test-id="approve-application"]
   Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Open tab  verdict
   Fetch verdict
