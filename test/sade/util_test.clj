@@ -225,6 +225,39 @@
   (assoc-when-pred {:a nil :b :b} not-empty-or-nil? :a :a, :b nil, :c :c, :d false)
   => {:a :a, :b :b, :c :c, :d false})
 
+(facts upsert
+  (fact "one item with match"
+    (upsert {:id ..id-1.. :val ..new-value..} [{:id ..id-1.. :val ..bar..}])
+    => [{:id ..id-1.. :val ..new-value..}])
+
+  (fact "empty collection"
+    (upsert {:id ..id-1.. :val ..new-value..} [])
+    => [{:id ..id-1.. :val ..new-value..}])
+
+  (fact "empty item"
+    (upsert {} [{:id ..id-1.. :val ..bar..}])
+    => [{:id ..id-1.. :val ..bar..}])
+
+  (fact "item without id"
+    (upsert {:val ..new-value..} [{:id ..id-1.. :val ..bar..}])
+    => [{:id ..id-1.. :val ..bar..}])
+
+  (fact "without match"
+    (upsert {:id ..id-2.. :val ..new-value..} [{:id ..id-1.. :val ..bar..}])
+    => [{:id ..id-1.. :val ..bar..} {:id ..id-2.. :val ..new-value..}])
+
+  (fact "first item matches"
+    (upsert {:id ..id-1.. :val ..new-value..} [{:id ..id-1.. :val ..bar..} {:id ..id-2.. :val ..quu..} {:id ..id-3.. :val ..quz..}])
+    => [{:id ..id-1.. :val ..new-value..} {:id ..id-2.. :val ..quu..} {:id ..id-3.. :val ..quz..}])
+
+  (fact "last item matches"
+    (upsert {:id ..id-3.. :val ..new-value..} [{:id ..id-1.. :val ..bar..} {:id ..id-2.. :val ..quu..} {:id ..id-3.. :val ..quz..}])
+    => [{:id ..id-1.. :val ..bar..} {:id ..id-2.. :val ..quu..} {:id ..id-3.. :val ..new-value..}])
+
+  (fact "match in the middle"
+    (upsert {:id ..id-2.. :val ..new-value..} [{:id ..id-1.. :val ..bar..} {:id ..id-2.. :val ..quu..} {:id ..id-3.. :val ..quz..}])
+    => [{:id ..id-1.. :val ..bar..} {:id ..id-2.. :val ..new-value..} {:id ..id-3.. :val ..quz..}]))
+
 (facts "comparing history item difficulties"
   (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
     (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)

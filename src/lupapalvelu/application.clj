@@ -58,6 +58,11 @@
    :ts timestamp
    :user (usr/summary user)})
 
+(defn handler-history-entry [handler timestamp user]
+  {:handler handler
+   :ts timestamp
+   :user (usr/summary user)})
+
 ;;
 ;; Validators
 ;;

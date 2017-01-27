@@ -394,6 +394,13 @@
   [m pred & kvs]
   (apply merge m (filter (comp pred val) (apply hash-map kvs))))
 
+(defn upsert
+  [{id :id :as item} coll]
+  (if id
+    (->> (split-with (fn-> :id (not= id)) coll)
+         (#(concat (first %) [item] (rest (second %)))))
+    coll))
+
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
 
