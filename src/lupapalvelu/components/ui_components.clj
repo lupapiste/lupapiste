@@ -25,7 +25,7 @@
             [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.attachment.conversion :as conversion]
             [cljs.build.api]
-            [figwheel-sidecar.repl-api :as ra]))
+            #_[figwheel-sidecar.repl-api :as ra]))
 
 (def themes #{"louhi", "facta"})
 
