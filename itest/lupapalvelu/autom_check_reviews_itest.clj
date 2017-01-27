@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
+            [slingshot.support]
             [sade.core :refer [now fail]]
             [sade.files :as files]
             [sade.http :as http]
@@ -31,6 +32,10 @@
   (:import [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
+
+(defn- slingshot-exception [ex-map]
+  (-> (slingshot.support/make-context ex-map (str "throw+: " ex-map) nil (slingshot.support/stack-trace))
+      (slingshot.support/wrap)))
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -158,6 +163,55 @@
               (not-any? :validationErrors reviews))
             (count (filter  (partial = "aloituskokous") review-types)) => 1
             (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
+
+(fact "Automatic checking for reviews - 404 in fetching multiple applications causes fallback into fetching consecutively"
+  (mongo/with-db db-name
+    (mongo/remove-many :applications {})
+    (against-background [(coordinate/convert anything anything anything anything) => nil]
+      (let [application-verdict-given-1    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
+            application-id-verdict-given-1 (:id application-verdict-given-1)
+            application-verdict-given-2    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 19")
+            application-id-verdict-given-2 (:id application-verdict-given-2)]
+
+        (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
+        (local-command sonja :approve-application :id application-id-verdict-given-2 :lang "fi") => ok?
+        (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) => 0
+        (count (batchrun/fetch-verdicts)) => pos?
+        (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) =not=> 0
+
+        (give-local-verdict sonja application-id-verdict-given-1 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+        (give-local-verdict sonja application-id-verdict-given-2 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+
+        ;; Trying to fetch with multiple ids throws xml parser exception -> causes fallback into consecutive fetching
+        (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
+              poll-result   (batchrun/poll-verdicts-for-reviews)
+              last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
+              last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
+              app-1         (query-application local-query sonja application-id-verdict-given-1)
+              app-2         (query-application local-query sonja application-id-verdict-given-2)]
+
+          (fact "last review state for application 1"
+            (:state last-review-1) => "requires_user_action")
+          (fact "last review state for application 2"
+            (:state last-review-2) => "sent")
+          (fact "reviews for verdict given application 1"
+            (count-reviews sonja application-id-verdict-given-1) => 3)
+          (fact "reviews for verdict given application 2"
+            (count-reviews sonja application-id-verdict-given-2) => 3)
+          (fact "application 1 state not updated"
+            (:state app-1) => "verdictGiven")
+          (fact "application 2 state is updated"
+            (:state app-2) => "constructionStarted")) => truthy
+
+            (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything) =throws=> (slingshot-exception {:sade.core/type :sade.core/fail, :status 404}))
+            ;; Fallback - no xml found for application 1 by application id or backend-id
+            (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] :application-id anything) => nil)
+            (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil)
+            ;; Xml found for application 2
+            (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-2] :application-id anything)
+                      => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                             (ss/replace #"LP-186-2014-90009" application-id-verdict-given-2)
+                             (sxml/parse-string "utf-8")))))))
 
 (facts "Automatic checking for reviews - application state and operation"
   (mongo/with-db db-name

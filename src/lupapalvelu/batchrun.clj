@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
+            [slingshot.slingshot :refer [try+]]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
@@ -403,27 +404,38 @@
     (catch Throwable t
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
+(defn- fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
+  (->> (map (fn [app]
+              (try
+                (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s"
+                        (:id organization) permit-type (:id app))
+                (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
+                (catch Throwable t
+                  (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s"
+                          (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                  nil)))
+            applications)
+       (apply concat)
+       (remove nil?)))
+
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
-    (try
+    (try+
       (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]"
               (:id organization) permit-type (ss/join ", " (map :id applications)))
       (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+
       (catch SAXParseException e
         (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
-        ;; Fallcback into fetching xmls consecutively
-        (->> (map (fn [app]
-                    (try
-                      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s"
-                              (:id organization) permit-type (:id app))
-                      (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
-                      (catch Throwable t
-                        (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s"
-                                (:id app) (:id organization) (.getName (class t)) (.getMessage t))
-                        nil)))
-                  applications)
-             (apply concat)
-             (remove nil?)))
+        ;; Fallback into fetching xmls consecutively
+        (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+
+      (catch [:sade.core/type :sade.core/fail
+              :status         404] _
+        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: Got HTTP status 404" permit-type (:id organization))
+        ;; Fallback into fetching xmls consecutively
+        (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+
       (catch Throwable t
         (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
                 permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
