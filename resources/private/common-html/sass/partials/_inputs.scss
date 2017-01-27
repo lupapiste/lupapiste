@@ -390,3 +390,37 @@ drop-zone {
     color: $orange-active;
   }
 }
+
+@mixin autocomplete( $cls, $width: 20em ) {
+    display: inherit;
+    #{$cls} {
+      min-width: $width;
+      max-width: $width;
+      display: inline-block;
+      vertical-align: middle;
+      .autocomplete-selection-wrapper {
+        display: table;
+        .autocomplete-selection {
+          padding-left: 6px;
+          display: table-cell;
+          vertical-align: middle;
+          min-height: $btn-height;
+          height: $btn-height;
+        }
+      }
+      span.caption {
+        white-space: normal;
+        line-height: normal;
+        padding-left: 0;
+      }
+    }
+    #{$cls}.no-events {
+      .autocomplete-selection-wrapper {
+        background-color: $gray246;
+        i.tag-chevron, span.selection-text {
+          color: $gray187;
+        }
+      }
+    }
+}
+

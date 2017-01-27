@@ -527,37 +527,7 @@ select.waste-unit-select {
     color: $gray153;
   }
   .batch-autocomplete {
-    display: inherit;
-    attachment-type-autocomplete {
-      $width: 20em;
-      min-width: $width;
-      max-width: $width;
-      display: inline-block;
-      vertical-align: middle;
-      .autocomplete-selection-wrapper {
-        display: table;
-        .autocomplete-selection {
-          padding-left: 6px;
-          display: table-cell;
-          vertical-align: middle;
-          min-height: $btn-height;
-          height: $btn-height;
-        }
-      }
-      span.caption {
-        white-space: normal;
-        line-height: normal;
-        padding-left: 0;
-      }
-    }
-    attachment-type-autocomplete.no-events {
-      .autocomplete-selection-wrapper {
-        background-color: $gray246;
-        i.tag-chevron, span.selection-text {
-          color: $gray187;
-        }
-      }
-    }
+    @include autocomplete( attachment-type-autocomplete );
   }
   .batch-drawing {
     max-width: 4em;
@@ -595,5 +565,38 @@ table.handler-roles {
   @include no-row-hover;
   input {
     width: 80%;
+  }
+}
+
+.tabby {
+  display: table;
+  width: 100%;
+  margin: {
+    top: $marginS;
+    bottom: $marginS;
+  }
+  .tabby__row {
+    display: table-row;
+    width: 100%;
+    .tabby__cell {
+      display: table-cell;
+      padding: {
+        top: $marginS;
+        bottom: $marginS;
+        left: 2 * $marginS;
+        right: 0;
+      }
+      vertical-align: middle;
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+  }
+
+}
+
+@each $i in 10, 20, 25, 33, 40, 50, 75, 80, 90, 100 {
+  .tabby--#{$i} {
+    width: $i * 1%;
   }
 }

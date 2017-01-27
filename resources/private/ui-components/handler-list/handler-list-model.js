@@ -5,11 +5,11 @@ LUPAPISTE.HandlerListModel = function() {
 
   var service = lupapisteApp.services.handlerService;
 
-  self.handlers = service.getApplicationHandlers;
+  self.handlers = service.applicationHandlers;
 
   self.editHandlers = _.partial( hub.send,
-                                 "cardStack::select",
-                                 {card: "edit-handler",
-                                  stack: "summary"});
+                                 "cardService::select",
+                                 {card: "edit-handlers",
+                                  deck: "summary"});
 
 };

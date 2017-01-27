@@ -30,5 +30,6 @@
   lupapisteApp.services.eventFilterService = new LUPAPISTE.EventFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.inspectionSummaryService = new LUPAPISTE.InspectionSummaryService();
   lupapisteApp.services.handlerService = new LUPAPISTE.HandlerService();
+  lupapisteApp.services.cardService = new LUPAPISTE.CardService();
 
 })();

@@ -1,0 +1,54 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="edit-handlers-template">
+  <div class="edit-handlers-container">
+    <icon-button params="icon: 'chevron-start',
+                         buttonClass: 'secondary',
+                         ltext: 'back',
+                         click: back"></icon-button>
+    <hr>
+    <div class="tabby">
+      <div class="tabby__row">
+        <div class="tabby__cell tabby--40">
+          <label data-bind="ltext: 'person-selector'"></label>        
+        </div>
+        <div class="tabby__cell tabby--40">
+          <label data-bind="ltext: 'application.handlers.select'"></label>        
+        </div>
+        <div class="tabby__cell"></div>
+      </div>
+      <!-- ko foreach: handlers -->
+      <div class="tabby__row">
+        <div class="tabby__cell">
+          <div data-bind="component: {name: 'base-autocomplete',
+                          params: {options: $parent.complete()[$data.id].persons,
+                          optionsText: 'name',
+                          query: $parent.complete()[$data.id].queryPerson,
+                          selectedOption: $parent.complete()[$data.id].selectedPerson,
+                          lPlaceholder: 'search',                                                 
+                          nullable: false,
+                          disable: false,
+                          maxHeight: '16em'}}"
+               class="handler-autocomplete"></div>
+        </div>
+        <div class="tabby__cell">
+          <div data-bind="component: {name: 'base-autocomplete',
+                          params: {options: $parent.complete()[$data.id].roles,
+                          optionsText: 'name',
+                          query: $parent.complete()[$data.id].queryRole,
+                          selectedOption: $parent.complete()[$data.id].selectedRole,
+                          lPlaceholder: 'search',                                                 
+                          nullable: false,
+                          disable: false,
+                          maxHeight: '16em'}}"
+               class="handler-autocomplete"></div>
+        </div>
+        <div class="tabby__cell">
+              <icon-button params="icon: 'remove',
+                                   buttonClass: 'secondary',
+                                   ltext: 'remove'"></icon-button>
+        </div>
+      </div>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>

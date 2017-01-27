@@ -1063,3 +1063,4 @@
 "application.handlers" "en" "Handler(s):"
 "application.handlers" "fi" "Käsittelijä(t):"
 "application.handlers" "sv" "Handläggare(r):"
+"application.handlers.select" "fi" "Valitse käsittelijärooli"

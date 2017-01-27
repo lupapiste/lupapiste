@@ -11,17 +11,16 @@ LUPAPISTE.HandlerService = function() {
                                     name: {fi: "KVV-käsittelijä",
                                            sv: "KVV-handläggare",
                                            en: "KVV Handler"}}]);
-  var handlers = ko.observableArray( [{id: "foobar",
+  var handlers = ko.observableArray( [{id: "foo",
                                        roleId: "first",
                                        firstName: "First",
                                        lastName: "Last",
                                        userId: "1233"},
-                                      {id: "foobar",
+                                      {id: "bar",
                                        roleId: "second",
                                        firstName: "First lakdfjaldkfa",
                                        lastName: "Last aldskfjalsdfj",
                                        userId: "1233"}]);
-  console.log( "Handlers:", handlers );
   self.authorities = ko.observableArray();
 
   function appId() {
@@ -48,25 +47,46 @@ LUPAPISTE.HandlerService = function() {
     console.log( "Set name", orgId, roleId, name );    
   };
 
-  self.getApplicationHandlerRoles = ko.computed( function() {
+  self.applicationHandlerRoles = ko.computed( function() {
     return _.map( roles(), function( role ) {
-      return {id: role.id, name: {fi: role.name.fi}, general: role.general};
+      return {id: role.id,
+              name: _.get( role, ["name", loc.getCurrentLanguage()], ""),
+              general: role.general};
     });
   });
 
-  self.getApplicationHandlers = ko.pureComputed( function() {
-    var m = _.reduce( self.getApplicationHandlerRoles(),
+  self.findHandlerRole = function( roleId ) {
+    return _.find( self.applicationHandlerRoles(),
+                 {id: ko.unwrap( roleId )});
+  };
+
+  function updateApplicationHandler( handlerId, data ) {
+    console.log( "Upsert handler:", handlerId, data );
+  }
+
+  self.applicationHandlers = ko.pureComputed( function() {
+    var m = _.reduce( self.applicationHandlerRoles(),
                     function( acc, role ) {
                       return _.set( acc, role.id, role );
                     }, {});
 
     return _.map( handlers(), function( h ) {
-      return _.set( h,
-                    "text",
-                    sprintf( "%s %s (%s)",
-                           _.get( h, "lastName", ""),
-                           _.get( h, "firstName", ""),
-                             _.get( m, [h.roleId, "name", loc.getCurrentLanguage()], "")));
+      var roleId = ko.observable( h.roleId);
+      var userId = ko.observable( h.userId);
+      ko.computed( function() {
+        if( h.roleId !== roleId() || h.userId !== userId()) {
+          updateApplicationHandler( h.id, {userId: userId(),
+                                           roleId: roleId()} );
+        }
+      });
+      return _.merge( {},
+                      h,
+                      {text: sprintf( "%s %s (%s)",
+                                      _.get( h, "lastName", ""),
+                                      _.get( h, "firstName", ""),
+                                      _.get( m, [h.roleId, "name"], "")),
+                      roleId: roleId,
+                      userId: userId});
     });
   });
 

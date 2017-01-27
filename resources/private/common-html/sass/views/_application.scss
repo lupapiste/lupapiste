@@ -11,10 +11,11 @@ $app-gray-bg:    $gray238;
 $app-gray-light: $gray246;
 $app-gray-dark:  $gray221;
 $app-gray-darkest: $gray187;
+$preamble-min-height: 280px; // at least the size of the map container
 
 @mixin preamble-common {
     position: relative;
-    min-height: 280px; // at least the size of the map container
+    min-height: $preamble-min-height;
     padding: {
       left: $map-width;
       right: 24%;
@@ -468,6 +469,12 @@ $app-gray-darkest: $gray187;
       content: "\2026";
     }
   }
+}
+
+.edit-handlers-container {
+  min-height: $preamble-min-height;
+  width: 80px;
+  min-width: $minimum-breakpoint;
 }
 
 @mixin icon-colorizer( $id ) {
