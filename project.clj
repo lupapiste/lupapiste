@@ -134,7 +134,9 @@
                  [lupapiste/jmx-server "0.1.0"]
 
                  [org.clojure/clojurescript "1.9.293"]
-                 [rum "0.10.8"]]
+                 [rum "0.10.8"]
+                 ;[figwheel-sidecar "0.5.4-7"]
+                 ]
 
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
