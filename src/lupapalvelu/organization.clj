@@ -67,8 +67,10 @@
    :items [sc/Str]})
 
 (sc/defschema HandlerRole
-  {:id ssc/ObjectIdStr
-   :name (zipmap i18n/all-languages (repeat sc/Str))})
+  {:id                              ssc/ObjectIdStr
+   :name                            (zipmap i18n/all-languages (repeat sc/Str))
+   (sc/optional-key :general)       sc/Bool
+   (sc/optional-key :disabled)      sc/Bool})
 
 (sc/defschema Organization
   {:id sc/Str

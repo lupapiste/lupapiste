@@ -739,7 +739,7 @@
                                         :name {:fi "K\u00e4sittelij\u00e4"
                                                :sv "Handl\u00e4ggare"
                                                :en "Handler"}
-                                        :genaral true}
+                                        :general true}
                                        {:id "abba1111111111111112acdc"
                                         :name {:fi "KVV-K\u00e4sittelij\u00e4"
                                                :sv "KVV-Handl\u00e4ggare"
