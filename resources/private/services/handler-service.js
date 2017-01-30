@@ -25,7 +25,9 @@ LUPAPISTE.HandlerService = function() {
                        firstName: "First lakdfjaldkfa",
                        lastName: "Last aldskfjalsdfj",
                        userId: "1233"}];
-  
+
+  var TMP = "temporary-";
+
   self.authorities = ko.observableArray();
 
   function appId() {
@@ -33,10 +35,12 @@ LUPAPISTE.HandlerService = function() {
   }
 
   self.nameAndRoleString = function( handler ) {
-    return sprintf( "%s %s (%s)",
-                    util.getIn( handler, ["lastName"], ""),
-                    util.getIn( handler, ["firstName"], ""),
-                    _.get(self.findHandlerRole( handler.roleId), "name", ""));
+    var lastName  = util.getIn( handler, ["lastName"], "");
+    var firstName = util.getIn( handler, ["firstName"], "");
+    var role = _.get(self.findHandlerRole( handler.roleId), "name", "");
+    return lastName && firstName && role
+         ? sprintf( "%s %s (%s)", lastName, firstName, role )
+         : "";
   };
 
   self.organizationHandlerRoles = function( orgId ) {
@@ -72,27 +76,62 @@ LUPAPISTE.HandlerService = function() {
                  {id: ko.unwrap( roleId )});
   };
 
-  function updateApplicationHandler( handlerId, data ) {
-    console.log( "Upsert handler:", handlerId, data );
+  function updateHandler( handlerId, data, raw ) {
+    raw = raw || {};
     var h = _.find( self.applicationHandlers(), {id: handlerId});
-    var auth = _.find( self.authorities(), {id: data.userId });
-    h.firstName( auth.firstName );
-    h.lastName( auth.lastName);    
-  };
+    if( h ) {
+      console.log( "Update handler:", handlerId, data );
+      var auth = _.find( self.authorities(), {id: data.userId });
+      if( auth ) {
+        h.firstName(_.get(auth, "firstName", "" ));
+        h.lastName( _.get(auth, "lastName", "" ));
+      }
+      if( data.userId
+       && data.roleId
+       && (data.userId !== raw.userId || data.roleId !== raw.roleId)) {
+        console.log( "AJAX: Upsert handler:", handlerId, data );
+      }
+    }
+  }
 
-  self.applicationHandlers = ko.observableArray( _.map( raw_handlers, function( h ) {
-    var m =  _.defaults( ko.mapping.fromJS( _.pick( h,
+  function removeHandler( handlerId ) {
+    console.log( "AJAX: Remove handler:", handlerId);
+  }
+
+  function processRawHandler( raw ) {
+    var m =  _.defaults( ko.mapping.fromJS( _.pick( raw,
                                                     ["roleId", "userId",
-                                                    "firstName", "lastName"])),
-                         h);
+                                                     "firstName", "lastName"])),
+                         raw);
     ko.computed( function() {
-      if( m.roleId() && m.userId() && !ko.computedContext.isInitial()) {
-        updateApplicationHandler( h.id, {userId: m.userId(),
-                                         roleId: m.roleId()} );
+      var data = {userId: m.userId(),
+                  roleId: m.roleId()};
+      if( !ko.computedContext.isInitial()) {
+        updateHandler( raw.id, data, raw );
       }
     });
     return m;
-  }));
+  }
+
+  self.applicationHandlers = ko.observableArray( _.map( raw_handlers,
+                                                        processRawHandler ));
+  
+  self.newApplicationHandler = function() {
+    self.applicationHandlers.push(processRawHandler( {id: _.uniqueId( TMP ),
+                                                      roleId: ko.observable(),
+                                                      userId: ko.observable(),
+                                                      lastName: ko.observable(""),
+                                                      firstName: ko.observable("")}));
+  };
+
+  self.removeApplicationHandler = function( handlerId ) {
+    self.applicationHandlers.remove( function( h ) {
+      return h.id === handlerId;
+    });
+    if( !_.startsWith( handlerId, TMP )) {
+      removeHandler( handlerId );
+    }
+  };
 
   hub.subscribe( "contextService::enter",
                  function( data ) {

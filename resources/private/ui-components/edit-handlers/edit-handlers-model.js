@@ -65,7 +65,7 @@ LUPAPISTE.EditHandlersModel = function() {
     });
   }
   
-  self.complete = self.disposedComputed( function() {
+  var complete = self.disposedComputed( function() {
     return _.reduce( self.handlers(),
                    function( acc, h ) {
                      var queryRole = ko.observable( "" );
@@ -94,7 +94,29 @@ LUPAPISTE.EditHandlersModel = function() {
                    }, {});
   });
 
+  self.getComplete = function( id ) {
+    return _.get( complete(), [id],{});
+  };
+
+
+  self.canAdd = function() {
+    return _.some( handlerRoles( {}));
+  };
+
+  self.add = function() {
+    service.newApplicationHandler();
+  };
   
+  self.remove = function( data ) {
+    service.removeApplicationHandler( data.id );
+  };
+
+  self.isDisabled = function( data ) {
+    if( data.userId() && data.roleId() ) {
+      return !_.find( authorities(), {id: data.userId()})
+          || !_.find( roles(), {id: data.roleId()});
+    }
+  };
 
   self.back = _.partial( hub.send,
                          "cardService::select", {deck: "summary",

@@ -6,7 +6,8 @@
                          ltext: 'back',
                          click: back"></icon-button>
     <hr>
-    <div class="tabby">
+    <div class="tabby"
+         data-bind="visible: _.size( handlers() )">
       <div class="tabby__row">
         <div class="tabby__cell tabby--40">
           <label data-bind="ltext: 'person-selector'"></label>        
@@ -20,35 +21,42 @@
       <div class="tabby__row">
         <div class="tabby__cell">
           <div data-bind="component: {name: 'base-autocomplete',
-                          params: {options: $parent.complete()[$data.id].persons,
+                          params: {options: $parent.getComplete( $data.id).persons,
                           optionsText: 'name',
-                          query: $parent.complete()[$data.id].queryPerson,
-                          selectedOption: $parent.complete()[$data.id].selectedPerson,
-                          lPlaceholder: 'search',                                                 
+                          query: $parent.getComplete( $data.id).queryPerson,
+                          selectedOption: $parent.getComplete( $data.id).selectedPerson,
+                          lPlaceholder: 'search', 
                           nullable: false,
-                          disable: false,
+                          disable: $parent.isDisabled( $data),
                           maxHeight: '16em'}}"
                class="handler-autocomplete"></div>
         </div>
         <div class="tabby__cell">
           <div data-bind="component: {name: 'base-autocomplete',
-                          params: {options: $parent.complete()[$data.id].roles,
+                          params: {options: $parent.getComplete( $data.id).roles,
                           optionsText: 'name',
-                          query: $parent.complete()[$data.id].queryRole,
-                          selectedOption: $parent.complete()[$data.id].selectedRole,
-                          lPlaceholder: 'search',                                                 
+                          query: $parent.getComplete( $data.id).queryRole,
+                          selectedOption: $parent.getComplete( $data.id).selectedRole,
+                          lPlaceholder: 'search',           
                           nullable: false,
-                          disable: false,
+                          disable: $parent.isDisabled( $data ),
                           maxHeight: '16em'}}"
                class="handler-autocomplete"></div>
         </div>
         <div class="tabby__cell">
               <icon-button params="icon: 'remove',
                                    buttonClass: 'secondary',
-                                   ltext: 'remove'"></icon-button>
+                                   ltext: 'remove',
+                                   click: _.partial( $parent.remove, $data)">
+              </icon-button>
         </div>
       </div>
       <!-- /ko -->
     </div>
+    <icon-button params="icon: 'circle-plus',
+                         buttonClass: 'positive',
+                         enable: canAdd(),
+                         click: add,
+                         ltext: 'handler-roles.add'"></icon-button>
   </div>
 </script>
