@@ -2729,7 +2729,7 @@
     (update attachment :op #(map attachment/->attachment-operation %))
     attachment))
 
-(defmigration cleanup-attachment-operations
+(defmigration cleanup-attachment-operations-v2
   {:apply-when (pos? (mongo/count :applications {:attachments.op.groupType {$exists true}}))}
   (update-applications-array :attachments clean-up-attachment-op {:attachments.op.groupType {$exists true}}))
 

@@ -1,8 +1,10 @@
 (ns lupapalvelu.attachment.bind-attachments-itest
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.schemas :as ssc]))
 
 (apply-remote-minimal)
 
@@ -16,7 +18,7 @@
     file-id => string?
     (raw pena :view-file :fileId file-id :cookie-store cookie-store) => http200?))
 
-(facts "placholder bind"
+(facts "placeholder bind"
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
         operation      (:primaryOperation application)
         application-id (:id application)
@@ -36,10 +38,10 @@
         :id application-id
         :filedatas [{:fileId file-id-1 :type (:type (first attachments))
                      :group {:groupType "operation"
-                             :operations [{:id (:id operation) :name (:name operation)}]}
+                             :operations [operation]}
                      :contents "eka"}
                     {:fileId file-id-2 :type (:type (second attachments))
-                     :group {:groupType nil}
+                     :group nil
                      :contents "toka"
                      :attachmentId "foo"}]) => (partial expected-failure? :error.attachment.id))
 
@@ -49,10 +51,10 @@
                                 :id application-id
                                 :filedatas [{:fileId file-id-1 :type (:type (first attachments))
                                              :group {:groupType "operation"
-                                                     :operations [{:id (:id operation) :name (:name operation)}]}
+                                                     :operations [operation]}
                                              :contents "eka"}
                                             {:fileId file-id-2 :type (:type (second attachments))
-                                             :group {:groupType nil}
+                                             :group nil
                                              :contents "toka"}])]
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
@@ -66,8 +68,9 @@
               att2 (second attachments)]
           (fact "now new attachments created, as placeholders were empty"
             (count attachments) => 4)
-          (fact "versions exists"
-            (count (:versions att1)) => 1
+          (fact "versions exists - att1"
+            (count (:versions att1)) => 1)
+          (fact "versions exists - att2"
             (count (:versions att2)) => 1)
           (fact "contents are set"
             (:contents att1) => "eka"
@@ -108,7 +111,7 @@
                                              :group {:groupType "parties"}
                                              :contents "hakija"}
                                             {:fileId file-id-2 :type {:type-group "osapuolet" :type-id "tutkintotodistus"}
-                                             :group {:groupType nil}
+                                             :group nil
                                              :contents "todistus"}])]
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
@@ -176,7 +179,7 @@
                                              :contents "hakija"
                                              :constructionTime true}
                                             {:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                                             :group {:groupType nil}
+                                             :group nil
                                              :contents "esuunnitelma"
                                              :constructionTime true}])]
       resp => ok?
@@ -213,13 +216,13 @@
     (fact "signing with invalid password fails"
       (command pena :bind-attachments :id application-id
                :filedatas [{:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                            :group {:groupType nil}
+                            :group nil
                             :contents "esuunnitelma"
                             :constructionTime true
                             :sign true}]) => (partial expected-failure? :error.password)
       (command pena :bind-attachments :id application-id :password "wrongPass"
                :filedatas [{:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                            :group {:groupType nil}
+                            :group nil
                             :contents "esuunnitelma"
                             :constructionTime true
                             :sign true}]) => (partial expected-failure? :error.password))
@@ -233,7 +236,7 @@
                                              :group {:groupType "parties"}
                                              :contents "hakija"}
                                             {:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                                             :group {:groupType nil}
+                                             :group nil
                                              :contents "esuunnitelma"
                                              :constructionTime true
                                              :sign true}])]

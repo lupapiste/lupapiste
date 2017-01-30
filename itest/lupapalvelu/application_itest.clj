@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
@@ -11,6 +12,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application-api :as app]
             [lupapalvelu.application :as a]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.operations :as op]
             [lupapalvelu.document.tools :as tools]))
 
@@ -243,8 +245,13 @@
         (fact "Only one non-repeating location exists"
           (count (filter #(= "location" (get-in % [:schema-info :type])) docs)) => 1)))
 
+
     (fact "Authority is able to add operation"
-      (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+      (success (command veikko :add-operation :id application-id :operation "kerrostalo-rivitalo")) => true)
+
+    (fact "All added attachments are valid"
+      (let [{attachments :attachments} (query-application mikko application-id)]
+        ((ssc/json-coercer [att/Attachment]) attachments)))))
 
 (facts "Users need approver role to approve applications"
   (let [application    (create-and-submit-application mikko :municipality sonja-muni)
