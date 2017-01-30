@@ -96,6 +96,7 @@
       (enlive/transform [:footer] (enlive/content (map :content footer)))
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (str (resource-url :common :js) "?lang=" (name lang))) e)))
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
+      (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-cljs") (assoc-in e [:attrs :src] uic/cljs-base-url) e)))
       (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
       (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
       (enlive/transform [:link#main-css] (fn [e] (update-in e [:attrs :href] #(str % "?b=" (:build-number env/buildinfo)))))

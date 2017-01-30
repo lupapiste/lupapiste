@@ -23,7 +23,9 @@
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]
-            [lupapalvelu.attachment.conversion :as conversion]))
+            [lupapalvelu.attachment.conversion :as conversion]
+            [cljs.build.api]
+            #_[figwheel-sidecar.repl-api :as ra]))
 
 (def themes #{"louhi", "facta"})
 
@@ -174,7 +176,9 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
-   :common-html  {:depends [:selectm-html]
+   :cljs-component {:js ["cljs-component.js"] :html ["cljs-component.html"]}
+
+   :common-html  {:depends [:selectm-html :cljs-component]
                   :css ["jquery-ui.css"]
                   :html ["404.html"]}
 
@@ -519,3 +523,42 @@
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css :scss])]
   (when-not (or (fn? r) (io/resource (c/path r)))
     (throw (Exception. (str "Resource missing: " r)))))
+
+(def cljs-base-url "/lp-static/js/out/cljs_base.js")
+
+(defonce cljs-build (future
+                      (cljs.build.api/watch "src/lupapalvelu/ui"
+                                            {
+                                             ;:main 'lupapalvelu.ui.core
+                                             :output-dir "resources/public/lp-static/js/out"
+                                             :source-map "resources/public/lp-static/js/out/source.map"
+                                             :asset-path "/lp-static/js/out"
+                                             :modules {:common {
+                                                                :output-to "resources/public/lp-static/js/rum-app.js"
+                                                                :entries #{"lupapalvelu.ui.core"}
+                                                                }
+                                                       :checklist {:output-to "resources/public/lp-static/js/checklist-summary.js"
+                                                                   :entries #{"lupapalvelu.ui.checklist-summary"}}}
+                                             :optimizations :simple})))
+
+#_(defn figwheel-build! []
+  (ra/start-figwheel! {:figwheel-options {:http-server-root "resources/public"
+                                          :server-port      3449}
+                       :build-ids ["dev"]
+                       :all-builds [{:id "dev"
+                                     :source-paths ["src/lupapalvelu/ui"]
+                                     :figwheel true
+                                     :compiler {:main 'lupapalvelu.ui.core
+                                                :output-to "resources/public/lp-static/js/figwheel.js"
+                                                :output-dir "resources/public/lp-static/js/out"
+                                                :source-map "resources/public/lp-static/js/source.map"
+                                                :asset-path "/lp-static/js/out"
+                                                #_:modules #_{:common {:output-to "resources/public/lp-static/js/rum-app.js"
+                                                                   :entries #{"lupapalvelu.ui.core"}}
+                                                          :checklist {:output-to "resources/public/lp-static/js/checklist-summary.js"
+                                                                      :entries #{"lupapalvelu.ui.checklist-summary"}}}
+                                                :optimizations :simple}}]}))
+
+#_(defonce figwheel-build
+  (future
+    (figwheel-build!)))

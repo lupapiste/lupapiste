@@ -755,4 +755,16 @@
     }
   };
 
+  ko.bindingHandlers.rumApp = {
+    init: function () {
+      return { controlsDescendantBindings: true };
+    },
+
+    update: function (el, valueAccessor, allBindings) {
+      $.getScript('/lp-static/js/rum-app.js', function() {
+        lupapalvelu.ui.core.start(el);
+      });
+    }
+  };
+
 })(jQuery);
