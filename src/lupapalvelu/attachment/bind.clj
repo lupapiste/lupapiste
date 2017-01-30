@@ -21,8 +21,8 @@
   {(sc/required-key :fileId)           ssc/ObjectIdStr
    (sc/required-key :type)             att/Type
    (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
-                                                  :operations [{(sc/optional-key :id)   ssc/ObjectIdStr
-                                                                (sc/optional-key :name) sc/Str}]})
+                                                  (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
+                                                                                  (sc/optional-key :name) sc/Str}]})
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
