@@ -59,6 +59,7 @@
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.reports.reports-api]
             [lupapalvelu.rest.rest-api]
+            [lupapalvelu.inspection-summary-api]
             [clj-time.core :as time]
             [clj-time.local :as local])
   (:import (java.io OutputStreamWriter BufferedWriter)

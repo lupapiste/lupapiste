@@ -21,6 +21,11 @@
     (when (or (empty? org-set) (not (some organization-has-inspection-summary-feature? org-set)))
       unauthorized)))
 
+(defn inspection-summary-api-authority-pre-check
+  [{{:keys [organization]} :application}]
+  (when (or (empty? organization) (not (organization-has-inspection-summary-feature? organization)))
+    unauthorized))
+
 (defn settings-for-organization [organizationId]
   (get (mongo/by-id :organizations organizationId) :inspection-summary {}))
 
