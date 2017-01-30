@@ -739,7 +739,9 @@
       var text = ko.utils.unwrapObservable(valueAccessor());
 
       setTimeout(function() {
-        $(element).val(text).addClass("placeholder-visible");
+        if (_.isEmpty($(element).val())) {
+          $(element).val(text).addClass("placeholder-visible");
+        }
       }, 0);
 
       $(element).focus(

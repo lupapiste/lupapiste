@@ -21,6 +21,7 @@ LUPAPISTE.InspectionSummaryTemplatesListModel = function() {
     self.templates(_.map(templates, function(n) {
       n.editorVisible = ko.observable(false);
       n.templateText = _.join(n.items, "\n");
+      console.log(n);
       return n;
     }));
   });
