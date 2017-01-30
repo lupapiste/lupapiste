@@ -20,9 +20,9 @@
 (sc/defschema NewAttachment
   {(sc/required-key :fileId)           ssc/ObjectIdStr
    (sc/required-key :type)             att/Type
-   (sc/required-key :group)            {:groupType  (sc/maybe (apply sc/enum att-tags/attachment-groups))
-                                        :operations [{(sc/optional-key :id)   ssc/ObjectIdStr
-                                                      (sc/optional-key :name) sc/Str}]}
+   (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
+                                                  :operations [{(sc/optional-key :id)   ssc/ObjectIdStr
+                                                                (sc/optional-key :name) sc/Str}]})
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -79,18 +79,20 @@
 (defn- bind-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
-(defn- bindable-file-check
-  "Coerces target and type and then checks against schema"
+(defn- coerce-bindable-file
+  "Coerces bindable file data"
   [file]
-  (sc/check BindableFile (-> file
-                             (update :target att/attachment-target-coercer)
-                             (update :type att/attachment-type-coercer)
-                             (update-in [:group :groupType] att/group-type-coercer))))
+  (-> file
+      (update :type att/attachment-type-coercer)
+      (update :group (fn [{group-type :groupType operations :operations :as group}]
+                       (util/assoc-when group
+                                        :groupType  (and group-type (att/group-type-coercer group-type))
+                                        :operations (and operations (map att/->attachment-operation operations)))))))
 
 (defn make-bind-job
   [command file-infos]
-  {:pre [(every? bindable-file-check file-infos)]}
-  (let [job (-> (zipmap (map :fileId file-infos) (map #(assoc % :status :pending) file-infos))
+  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
+        job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
                 (job/start bind-job-status))]
-    (util/future* (bind-attachments! command file-infos (:id job)))
+    (util/future* (bind-attachments! command coerced-file-infos (:id job)))
     job))
