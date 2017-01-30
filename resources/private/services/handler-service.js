@@ -10,22 +10,34 @@ LUPAPISTE.HandlerService = function() {
                                    {id: "second",
                                     name: {fi: "KVV-käsittelijä",
                                            sv: "KVV-handläggare",
-                                           en: "KVV Handler"}}]);
-  var handlers = ko.observableArray( [{id: "foo",
-                                       roleId: "first",
-                                       firstName: "First",
-                                       lastName: "Last",
-                                       userId: "1233"},
-                                      {id: "bar",
-                                       roleId: "second",
-                                       firstName: "First lakdfjaldkfa",
-                                       lastName: "Last aldskfjalsdfj",
-                                       userId: "1233"}]);
+                                           en: "KVV Handler"}},
+                                   {id: "third",
+                                    name: {fi: "IV-käsittelijä",
+                                           sv: "IV-handläggare",
+                                           en: "IV Handler"}}]);
+  var raw_handlers = [{id: "foo",
+                       roleId: "first",
+                       firstName: "First",
+                       lastName: "Last",
+                       userId: "1233"},
+                      {id: "bar",
+                       roleId: "second",
+                       firstName: "First lakdfjaldkfa",
+                       lastName: "Last aldskfjalsdfj",
+                       userId: "1233"}];
+  
   self.authorities = ko.observableArray();
 
   function appId() {
     return lupapisteApp.services.contextService.applicationId();
   }
+
+  self.nameAndRoleString = function( handler ) {
+    return sprintf( "%s %s (%s)",
+                    util.getIn( handler, ["lastName"], ""),
+                    util.getIn( handler, ["firstName"], ""),
+                    _.get(self.findHandlerRole( handler.roleId), "name", ""));
+  };
 
   self.organizationHandlerRoles = function( orgId ) {
     return ko.computed( function() {
@@ -62,33 +74,25 @@ LUPAPISTE.HandlerService = function() {
 
   function updateApplicationHandler( handlerId, data ) {
     console.log( "Upsert handler:", handlerId, data );
-  }
+    var h = _.find( self.applicationHandlers(), {id: handlerId});
+    var auth = _.find( self.authorities(), {id: data.userId });
+    h.firstName( auth.firstName );
+    h.lastName( auth.lastName);    
+  };
 
-  self.applicationHandlers = ko.pureComputed( function() {
-    var m = _.reduce( self.applicationHandlerRoles(),
-                    function( acc, role ) {
-                      return _.set( acc, role.id, role );
-                    }, {});
-
-    return _.map( handlers(), function( h ) {
-      var roleId = ko.observable( h.roleId);
-      var userId = ko.observable( h.userId);
-      ko.computed( function() {
-        if( h.roleId !== roleId() || h.userId !== userId()) {
-          updateApplicationHandler( h.id, {userId: userId(),
-                                           roleId: roleId()} );
-        }
-      });
-      return _.merge( {},
-                      h,
-                      {text: sprintf( "%s %s (%s)",
-                                      _.get( h, "lastName", ""),
-                                      _.get( h, "firstName", ""),
-                                      _.get( m, [h.roleId, "name"], "")),
-                      roleId: roleId,
-                      userId: userId});
+  self.applicationHandlers = ko.observableArray( _.map( raw_handlers, function( h ) {
+    var m =  _.defaults( ko.mapping.fromJS( _.pick( h,
+                                                    ["roleId", "userId",
+                                                    "firstName", "lastName"])),
+                         h);
+    ko.computed( function() {
+      if( m.roleId() && m.userId() && !ko.computedContext.isInitial()) {
+        updateApplicationHandler( h.id, {userId: m.userId(),
+                                         roleId: m.roleId()} );
+      }
     });
-  });
+    return m;
+  }));
 
   hub.subscribe( "contextService::enter",
                  function( data ) {

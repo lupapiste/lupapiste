@@ -5,7 +5,7 @@
   <span class="application_summary_text">
     <ul class="handler-list"
         data-bind="foreach: handlers">
-      <li data-bind="text: text"></li>
+      <li data-bind="text: $parent.itemText( $data )"></li>
     </ul>
     <a class="handler-list-edit"
          data-bind="ltext: 'edit',

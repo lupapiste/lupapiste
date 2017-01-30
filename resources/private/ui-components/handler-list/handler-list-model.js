@@ -7,6 +7,8 @@ LUPAPISTE.HandlerListModel = function() {
 
   self.handlers = service.applicationHandlers;
 
+  self.itemText = service.nameAndRoleString;
+
   self.editHandlers = _.partial( hub.send,
                                  "cardService::select",
                                  {card: "edit-handlers",
