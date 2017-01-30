@@ -19,8 +19,7 @@
           m (first (filter #(= (:id %) "997") all-active-m))]
       (:applications m) => empty?
       (:infoRequests m) => ["R"]
-      (:opening m) => empty?
-      ))
+      (:opening m) => empty?))
   (fact "only applications enabled"
     (let [m (query pena :municipality-active :municipality "998")]
       (:applications m) => ["R"]
@@ -40,10 +39,36 @@
       :applicationEnabled false
       :openInforequestEnabled false
       :openInforequestEmail "someone@localhost"
-      :opening 123)
+      :opening 123) => ok?
     (let [m (query pena :municipality-active :municipality "999")]
       (:applications m) => empty?
       (:infoRequests m) => empty?
       (:opening m) => [{:permitType "R", :opening 123}])
     (let [all-active-m (:municipalities (query pena :active-municipalities))]
-      (:opening  (first (filter #(= (:id %) "999") all-active-m))) => [{:opening 123, :permitType "R"}])))
+      (:opening  (first (filter #(= (:id %) "999") all-active-m))) => [{:opening 123, :permitType "R"}]))
+  (fact "opening is not included, if applications enabled"
+    (command admin :update-organization
+             :permitType "R"
+             :municipality "999"
+             :inforequestEnabled false
+             :applicationEnabled true
+             :openInforequestEnabled false
+             :openInforequestEmail "someone@localhost"
+             :opening 123) => ok?
+    (let [resp (query pena :municipality-active :municipality "999")]
+      (:applications resp) => (just "R")
+      (:opening resp) => empty?))
+
+  (fact "open-inforequest is taken into account"
+    (command admin :update-organization
+             :permitType "R"
+             :municipality "999"
+             :inforequestEnabled false
+             :applicationEnabled false
+             :openInforequestEnabled true
+             :openInforequestEmail "someone@localhost"
+             :opening 123) => ok?
+    (let [resp (query pena :municipality-active :municipality "999")]
+      (:applications resp) => empty?
+      (:infoRequests resp) => (just "R")
+      (:opening resp) => (just #{(just {:opening 123 :permitType "R"})}))))
