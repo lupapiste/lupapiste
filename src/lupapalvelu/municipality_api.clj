@@ -14,18 +14,18 @@
   (lupapalvelu.i18n/localize lang :municipality id))
 
 (defn active-municipalities-from-organizations [organizations]
-  (->> (for [[muni-id scopes] (group-by :municipality (flatten (map :scope organizations)))
-             :let [applications (->> scopes (filter :new-application-enabled) (map :permitType))]]
-         {:id muni-id
-          :nameFi (municipality-name "fi" muni-id) :nameSv (municipality-name "sv" muni-id)
-          :applications applications
-          :infoRequests (->> scopes
-                             (filter #(or (:inforequest-enabled %) (:open-inforequest %)))
-                             (map :permitType))
-          :opening (->> scopes
-                        (filter :opening)
-                        (map #(select-keys % [:permitType :opening]))
-                        (remove #(contains? (set applications) (:permitType %))))})))
+  (for [[muni-id scopes] (group-by :municipality (flatten (map :scope organizations)))
+        :let [applications (->> scopes (filter :new-application-enabled) (map :permitType))]]
+    {:id muni-id
+     :nameFi (municipality-name "fi" muni-id) :nameSv (municipality-name "sv" muni-id)
+     :applications applications
+     :infoRequests (->> scopes
+                        (filter #(or (:inforequest-enabled %) (:open-inforequest %)))
+                        (map :permitType))
+     :opening (->> scopes
+                   (filter :opening)
+                   (map #(select-keys % [:permitType :opening]))
+                   (remove #(contains? (set applications) (:permitType %))))}))
 
 (defquery active-municipalities
   {:user-roles #{:anonymous}
