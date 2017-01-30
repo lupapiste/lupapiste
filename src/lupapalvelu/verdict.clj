@@ -43,7 +43,8 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.organization :as org])
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.inspection-summary :as inspection-summary])
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
@@ -286,6 +287,7 @@
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
   (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml))]
+    (inspection-summary/process-verdict-given application)
     (util/deep-merge
      {$set {:verdicts verdicts-with-attachments, :modified created}}
      (get-task-updates application created verdicts-with-attachments app-xml)

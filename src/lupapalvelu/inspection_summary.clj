@@ -58,3 +58,7 @@
                  {$unset {field 1}}
                  {$set   {field templateId}})]
     (org/update-organization organizationId update)))
+
+(defn process-verdict-given [{:keys [organization primaryOperation] :as application}]
+  (when (organization-has-inspection-summary-feature? organization)
+    (debugf "CREATING NEW INSPECTION SUMMARY" (:name primaryOperation))))
