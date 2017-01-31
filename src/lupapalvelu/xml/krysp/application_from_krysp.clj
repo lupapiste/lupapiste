@@ -19,7 +19,8 @@
        first))
 
 (defn- group-content-by [content-fn permit-type xml-without-ns]
-  (let [toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])
+  (let [xml-without-ns (update xml-without-ns :content (partial remove (comp #{:boundedBy} :tag)))
+        toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])
         content (if (= (:tag xml-without-ns) :FeatureCollection)
                   (-> xml-without-ns :content first :content)
                   (:content xml-without-ns))]
@@ -78,7 +79,8 @@
   (when-not (empty? applications)
     (->> (partition chunk-size chunk-size nil applications)
          (mapcat (partial get-application-xmls-for-chunk organization permit-type search-type))
-         (remove (comp nil? first)))))
+         (remove (comp nil? first)) ; poistetaan ne app-xml:t joista ei tunnistettu lupatunnusta/hakemus-id:ta, ne on jotenkin rikki!!!
+         )))
 
 (defn- get-application-xmls-by-backend-id [organization permit-type applications chunk-size]
   (let [apps-with-kuntalupatunnus (->> applications
