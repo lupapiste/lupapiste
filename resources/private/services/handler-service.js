@@ -2,19 +2,19 @@
 LUPAPISTE.HandlerService = function() {
   "use strict";
   var self = this;
-  var roles =  ko.observableArray([{ id: "first",
-                                     name: {fi: "Käsittelijä",
-                                            sv: "Handläggare",
-                                            en: "Handler"},
-                                     general: true},
-                                   {id: "second",
-                                    name: {fi: "KVV-käsittelijä",
-                                           sv: "KVV-handläggare",
-                                           en: "KVV Handler"}},
-                                   {id: "third",
-                                    name: {fi: "IV-käsittelijä",
-                                           sv: "IV-handläggare",
-                                           en: "IV Handler"}}]);
+  var raw_roles =  [{ id: "first",
+                      name: {fi: "Käsittelijä",
+                             sv: "Handläggare",
+                             en: "Handler"},
+                      general: true},
+                    {id: "second",
+                     name: {fi: "KVV-käsittelijä",
+                            sv: "KVV-handläggare",
+                            en: "KVV Handler"}},
+                    {id: "third",
+                     name: {fi: "IV-käsittelijä",
+                            sv: "IV-handläggare",
+                            en: "IV Handler"}}];
   var raw_handlers = [{id: "foo",
                        roleId: "first",
                        firstName: "First",
@@ -34,6 +34,10 @@ LUPAPISTE.HandlerService = function() {
     return lupapisteApp.services.contextService.applicationId();
   }
 
+  function indicateSaved() {
+    hub.send( "indicator", {message: "saved", style: "positive"} );
+  }
+
   self.nameAndRoleString = function( handler ) {
     var lastName  = util.getIn( handler, ["lastName"], "");
     var firstName = util.getIn( handler, ["firstName"], "");
@@ -43,25 +47,55 @@ LUPAPISTE.HandlerService = function() {
          : "";
   };
 
+  // Name is object (e.g., {fi: "Uusi nimi", sv: "Nytt namn", en: "New name"}).
+  function upsertOrganizationRole( orgId, roleId, name ) {
+    console.log( "Set name", orgId, roleId, name);
+    indicateSaved();    
+  }
+
+
+  function processRawRole( orgId, role ) {
+    var nameObs = ko.mapping.fromJS( role.name );
+    ko.computed( function() {
+      if( _.every( _.values( nameObs), _.flow( ko.unwrap, _.trim))
+       && !ko.computedContext.isInitial()) {
+        upsertOrganizationRole( orgId, role.id, ko.mapping.toJS( nameObs ));
+      }
+    });
+    return _.defaults( {name: nameObs}, role);
+  }
+
+  var latestOrgId = null;
+  var roles = ko.observableArray();
+  
   self.organizationHandlerRoles = function( orgId ) {
-    return ko.computed( function() {
-      return roles();
-    });    
+    if( orgId && orgId !== latestOrgId ) {
+      roles(_.map( raw_roles,
+                   _.partial( processRawRole, orgId )));
+      latestOrgId = orgId;
+    }
+    return roles;
+  };
+
+  self.organizationLanguages = function( orgId ) {
+    return _.intersection( loc.getSupportedLanguages(),
+                           _.keys( _.get( self.organizationHandlerRoles( orgId )(),
+                                          "0.name")));
   };
 
   self.removeOrganizationHandlerRole = function( orgId, roleId ) {
-    roles( _.reject ( roles(), {id: roleId} ) );
+    roles.remove( function( r ) {return r.id === roleId;});
   };
 
   self.addOrganizationHandlerRole = function( orgId ) {
-    roles.push( {id: _.uniqueId( "role" ),
-                 name: {fi: "", sv: "", en: ""}});    
+    roles.push( processRawRole(orgId,
+                               {id: _.uniqueId( TMP ),
+                                name: _( self.organizationLanguages( orgId ))
+                                      .map( function( lang ) {return [lang, ""];})
+                                      .fromPairs()
+                                      .value()}));    
   };
 
-  // Name is object (e.g., {fi: "Uusi nimi"}).
-  self.setOrganizationHandlerRole = function( orgId, roleId, name ) {
-    console.log( "Set name", orgId, roleId, name );    
-  };
 
   self.applicationHandlerRoles = ko.computed( function() {
     return _.map( roles(), function( role ) {
@@ -90,12 +124,15 @@ LUPAPISTE.HandlerService = function() {
        && data.roleId
        && (data.userId !== raw.userId || data.roleId !== raw.roleId)) {
         console.log( "AJAX: Upsert handler:", handlerId, data );
+        indicateSaved();
       }
     }
   }
 
   function removeHandler( handlerId ) {
     console.log( "AJAX: Remove handler:", handlerId);
+    indicateSaved();
+    
   }
 
   function processRawHandler( raw ) {
