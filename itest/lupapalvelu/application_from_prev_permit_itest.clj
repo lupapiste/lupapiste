@@ -38,7 +38,8 @@
                           :y 0
                           :x 0
                           :address ""
-                          :propertyId nil})
+                          :propertyId nil
+                          :authoriseApplicants true})
                   (mapcat seq))]
     (apply local-command apikey :create-application-from-previous-permit args)))
 
@@ -208,3 +209,25 @@
                                 response => http200?
                                 resp-body => ok?
                                 (keyword (:text resp-body)) => :created-new-application)))))))
+
+    (facts "Applicants invitation should be selectable"
+      (fact "When not authorise applicants"
+        (mongo/with-db local-db-name
+        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
+                                     :kuntalupatunnus "14-0241-R 10"
+                                     :authoriseApplicants false))
+             (query-application local-query raktark-jarvenpaa)
+             (:auth)
+             (count)) => 1 ;; owner of the application
+        (provided
+          (krysp-reader/get-app-info-from-message anything anything) => example-app-info)))
+      (fact "When authorise applicants"
+        (mongo/with-db local-db-name
+        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
+                                               :kuntalupatunnus "14-0241-R 11"
+                                               :authoriseApplicants true))
+             (query-application local-query raktark-jarvenpaa)
+             (:auth)
+             (count)) => 4
+        (provided
+          (krysp-reader/get-app-info-from-message anything anything) => example-app-info))))
