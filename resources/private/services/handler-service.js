@@ -20,50 +20,53 @@ LUPAPISTE.HandlerService = function() {
                            sv: "Gone-handläggare",
                            en: "Gone Handler"},
                     disabled: true}];
-  var raw_handlers = [{id: "foo",
-                       roleId: "first",
-                       firstName: "Ronja",
-                       lastName: "Sibbo",
-                       userId: "777777777777777777000024"},
-                      {id: "bar",
-                       roleId: "second",
-                       firstName: "First",
-                       lastName: "Last",
-                       userId: "1234"},
-                      {id: "baz",
-                       roleId: "disabled",
-                       firstName: "Ronja",
-                       lastName: "Sibbo",
-                       userId: "777777777777777777000024"}];
+
+  // var raw_handlers = [{id: "foo",
+  //                      roleId: "first",
+  //                      firstName: "Ronja",
+  //                      lastName: "Sibbo",
+  //                      userId: "777777777777777777000024",
+  //                      roleName: "Käsittelijä"},
+  //                     {id: "bar",
+  //                      roleId: "second",
+  //                      firstName: "First",
+  //                      lastName: "Last",
+  //                      userId: "1234",
+  //                      roleName: "KVV-käsittelijä"},
+  //                     {id: "baz",
+  //                      roleId: "disabled",
+  //                      firstName: "Ronja",
+  //                      lastName: "Sibbo",
+  //                      userId: "777777777777777777000024",
+  //                      roleName: "Gone-käsittelijä"}];
 
   var TMP = "temporary-";
 
+  
   self.authorities = ko.observableArray();
+  self.applicationHandlers = ko.observableArray();
 
   function appId() {
     return lupapisteApp.services.contextService.applicationId();
   }
 
+  function allowed( action ) {
+    return lupapisteApp.models.applicationAuthModel.ok( action );
+  }
+
+  self.canEdit = function() {
+    return allowed( "application-authorities");
+  };
+
   function indicateSaved() {
     hub.send( "indicator", {message: "saved", style: "positive"} );
   }
-
-  self.nameAndRoleString = function( handler ) {
-    console.log( "handler:", handler );
-    var lastName  = util.getIn( handler, ["lastName"], "");
-    var firstName = util.getIn( handler, ["firstName"], "");
-    var role = _.get(self.findHandlerRole( handler.roleId), "name", "");
-    return lastName && firstName && role
-         ? sprintf( "%s %s (%s)", lastName, firstName, role )
-         : "";
-  };
 
   // Name is object (e.g., {fi: "Uusi nimi", sv: "Nytt namn", en: "New name"}).
   function upsertOrganizationRole( orgId, roleId, name ) {
     console.log( "Set name", orgId, roleId, name);
     indicateSaved();    
   }
-
 
   function processRawRole( orgId, role ) {
     var nameObs = ko.mapping.fromJS( role.name );
@@ -127,11 +130,17 @@ LUPAPISTE.HandlerService = function() {
     // processRawHandler (see below).
     var h = _.find( self.applicationHandlers.peek(), {id: handlerId});
     if( h ) {
-            var auth = _.find( self.authorities.peek(), {id: data.userId });
+      var auth = _.find( self.authorities.peek(), {id: data.userId });
       if( auth ) {
         h.firstName(_.get(auth, "firstName", "" ));
         h.lastName( _.get(auth, "lastName", "" ));
       }
+      var roleName = _.get(_.find( self.applicationHandlerRoles.peek(), {id: data.roleId}),
+                       "name");
+      if( roleName ) {
+        h.roleName( roleName );
+      }
+      
       if( data.userId && data.roleId) {
         console.log( "AJAX: Upsert handler:", handlerId, data );
         indicateSaved();
@@ -147,7 +156,8 @@ LUPAPISTE.HandlerService = function() {
   function processRawHandler( raw ) {
     var m =  _.defaults( ko.mapping.fromJS( _.pick( raw,
                                                     ["roleId", "userId",
-                                                     "firstName", "lastName"])),
+                                                     "firstName", "lastName",
+                                                     "roleName"])),
                          raw);
     ko.computed( function() {
       var data = {userId: m.userId(),
@@ -159,12 +169,11 @@ LUPAPISTE.HandlerService = function() {
     return m;
   }
 
-  self.applicationHandlers = ko.observableArray( _.map( raw_handlers,
-                                                        processRawHandler ));
   
   self.newApplicationHandler = function() {
     self.applicationHandlers.push(processRawHandler( {id: _.uniqueId( TMP ),
                                                       roleId: ko.observable(),
+                                                      roleName: ko.observable(),
                                                       userId: ko.observable(),
                                                       lastName: ko.observable(""),
                                                       firstName: ko.observable("")}));
@@ -179,16 +188,33 @@ LUPAPISTE.HandlerService = function() {
     }
   };
 
+  function fetchApplicationHandlers() {
+    ajax.query( "application-handlers", {id: appId()})
+    .success( function( res ) {
+      self.applicationHandlers( _.map( res.handlers,
+                                       processRawHandler ));
+    })
+    .call();
+  }
+
+  function fetchAuthorities() {
+    if( allowed( "application-authorities")) {
+      ajax.query( "application-authorities", {id: appId()})
+      .success( function( res ) {
+        self.authorities( res.authorities );
+      })
+      .call();
+    }
+  }
+
   hub.subscribe( "contextService::enter",
-                 function( data ) {
-                   ajax.query( "application-authorities", {id: data.applicationId})
-                   .success( function( res ) {
-                     self.authorities( res.authorities );
-                   })
-                   .call();
+                 function() {
+                   fetchApplicationHandlers();
+                   fetchAuthorities();
                  });
 
   hub.subscribe( "contextService::leave", function() {
+    self.applicationHandlers.removeAll();
     self.authorities.removeAll();
   });
 };

@@ -911,3 +911,17 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+
+(defquery application-handlers
+  {:parameters       [id]
+   :user-authz-roles #{:statementGiver}
+   :user-roles       #{:authority :applicant}
+   :states           states/all-application-states}
+  [{:keys [application lang organization]}]
+  (ok :handlers (map (fn [{role-id :roleId :as handler}]
+                       (assoc handler :roleName (->> @organization
+                                                     :handler-roles
+                                                     (util/find-by-id role-id)
+                                                     :name
+                                                     lang)))
+                     (:handlers application))))
