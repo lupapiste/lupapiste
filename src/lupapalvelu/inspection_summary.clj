@@ -22,7 +22,7 @@
       unauthorized)))
 
 (defn inspection-summary-api-authority-pre-check
-  [{{:keys [organization]} :application}]
+  [{{:keys [organization id]} :application}]
   (when (or (empty? organization) (not (organization-has-inspection-summary-feature? organization)))
     unauthorized))
 

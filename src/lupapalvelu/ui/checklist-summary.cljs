@@ -3,8 +3,10 @@
 
 (enable-console-print!)
 
-(def state (atom {:rows []
-                  :input ""}))
+(def state (atom {:applicationId ""
+                  :rows []
+                  :input ""
+                  :operations []}))
 (def rows  (rum/cursor-in state [:rows]))
 (def texti  (rum/cursor-in state [:input]))
 
@@ -14,13 +16,25 @@
 (defn ko-subscription [value]
   (swap! state assoc :input value))
 
+(defn init
+  [init-state props]
+  (swap! state assoc :applicationId ((-> (aget props ":rum/initial-state")
+                                         :rum/args
+                                         first
+                                         (aget "id"))))
+  (swap! state assoc :input ((-> (aget props ":rum/initial-state")
+                                 :rum/args
+                                 first
+                                 (aget "texti"))))
+  #_(js/hub.send "XYZ" (js-obj :id (-> @state :applicationId)))
+  (-> (js/ajax.query "inspection-summary-templates-for-application"
+                     (js-obj "id" (-> @state :applicationId)))
+      (.success js/console.log)
+      .call)
+  init-state)
+
 (rum/defc checklist-summary < rum/reactive
-                              {:init (fn [init-state props]
-                                       (swap! state assoc :input ((-> (aget props ":rum/initial-state")
-                                                                      :rum/args
-                                                                      first
-                                                                      (aget "texti"))))
-                                       init-state)}
+                              {:init init}
   [ko-app]
   (.subscribe (aget ko-app "texti") ko-subscription)
   [:div
@@ -28,6 +42,12 @@
    ; [:pre ((aget ko-app "texti")) " -> oneshot, is not updated when ko subscription changes, only when component is re-rendered"]
    [:pre (rum/react texti) "-> rum/react"]
    [:input ]
+   [:div
+    [:label "Valitse tarkastusasiakirjan yhteenveto"]
+    [:br]
+    [:select
+     (for [op (rum/react (rum/cursor-in state [:operations]))]
+       [:option op])]]
    [:table
     [:tbody
      (doall
