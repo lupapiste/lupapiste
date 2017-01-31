@@ -373,10 +373,10 @@
   (fetch-asianhallinta-verdicts))
 
 (defn orgs-for-review-fetch [& organization-ids]
-  (organization/get-organizations (merge {:krysp.R.url {$exists true},
+  (mongo/select :organizations (merge {:krysp.R.url {$exists true},
                                           :krysp.R.version {$gte "2.1.5"}}
                                          (when (seq organization-ids) {:_id {$in organization-ids}}))
-                                  {:krysp 1}))
+                               {:krysp 1}))
 
 (defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings] :as result}]
   (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
