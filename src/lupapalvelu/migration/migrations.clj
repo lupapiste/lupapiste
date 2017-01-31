@@ -2701,7 +2701,7 @@
       {$and [{:permitType "YA"}
              {$or [{:attachments {$elemMatch {:groupType {$ne nil}}}}
                    {:attachments {$elemMatch {:op {$ne nil}}}}]}]}]
-  (defmigration remove-groupType-and-op-from-YA-applications-v3
+  (defmigration remove-groupType-and-op-from-YA-applications-v4
     {:apply-when (pos? (mongo/count :applications attachments-with-groupType-or-op-match))}
     (update-applications-array :attachments
                                set-attachment-groupType-and-op-nil
@@ -2729,7 +2729,7 @@
     (update attachment :op #(map attachment/->attachment-operation %))
     attachment))
 
-(defmigration cleanup-attachment-operations-v2
+(defmigration cleanup-attachment-operations-v3
   {:apply-when (pos? (mongo/count :applications {:attachments.op.groupType {$exists true}}))}
   (update-applications-array :attachments clean-up-attachment-op {:attachments.op.groupType {$exists true}}))
 
