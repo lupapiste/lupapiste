@@ -43,7 +43,7 @@
                              :operations [operation]}
                      :contents "eka"}
                     {:fileId file-id-2 :type (:type (second attachments))
-                     :group nil
+                     :group {:groupType nil}
                      :contents "toka"
                      :attachmentId "foo"}]) => (partial expected-failure? :error.attachment.id))
 
@@ -56,7 +56,7 @@
                                                      :operations [operation]}
                                              :contents "eka"}
                                             {:fileId file-id-2 :type (:type (second attachments))
-                                             :group nil
+                                             :group {:groupType nil}
                                              :contents "toka"}])]
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
@@ -127,7 +127,7 @@
                                              :group {:groupType "parties"}
                                              :contents "hakija"}
                                             {:fileId file-id-2 :type {:type-group "osapuolet" :type-id "tutkintotodistus"}
-                                             :group nil
+                                             :group {:groupType nil}
                                              :contents "todistus"}])]
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
@@ -195,7 +195,7 @@
                                              :contents "hakija"
                                              :constructionTime true}
                                             {:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                                             :group nil
+                                             :group {:groupType nil}
                                              :contents "esuunnitelma"
                                              :constructionTime true}])]
       resp => ok?
@@ -232,13 +232,13 @@
     (fact "signing with invalid password fails"
       (command pena :bind-attachments :id application-id
                :filedatas [{:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                            :group nil
+                            :group {:groupType nil}
                             :contents "esuunnitelma"
                             :constructionTime true
                             :sign true}]) => (partial expected-failure? :error.password)
       (command pena :bind-attachments :id application-id :password "wrongPass"
                :filedatas [{:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                            :group nil
+                            :group {:groupType nil}
                             :contents "esuunnitelma"
                             :constructionTime true
                             :sign true}]) => (partial expected-failure? :error.password))
@@ -252,7 +252,7 @@
                                              :group {:groupType "parties"}
                                              :contents "hakija"}
                                             {:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                                             :group nil
+                                             :group {:groupType nil}
                                              :contents "esuunnitelma"
                                              :constructionTime true
                                              :sign true}])]
