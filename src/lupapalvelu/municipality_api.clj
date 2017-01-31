@@ -1,5 +1,5 @@
 (ns lupapalvelu.municipality-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info warn error errorf fatal]]
             [sade.core :refer :all]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :refer [defquery non-blank-parameters]]))
@@ -14,13 +14,18 @@
   (lupapalvelu.i18n/localize lang :municipality id))
 
 (defn active-municipalities-from-organizations [organizations]
-  (for [[muni-id scopes] (group-by :municipality (flatten (map :scope organizations)))]
+  (for [[muni-id scopes] (group-by :municipality (flatten (map :scope organizations)))
+        :let [applications (->> scopes (filter :new-application-enabled) (map :permitType))]]
     {:id muni-id
      :nameFi (municipality-name "fi" muni-id) :nameSv (municipality-name "sv" muni-id)
-     :applications (->> scopes (filter :new-application-enabled) (map :permitType))
-     :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
-     :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening])))}
-    ))
+     :applications applications
+     :infoRequests (->> scopes
+                        (filter #(or (:inforequest-enabled %) (:open-inforequest %)))
+                        (map :permitType))
+     :opening (->> scopes
+                   (filter :opening)
+                   (map #(select-keys % [:permitType :opening]))
+                   (remove #(contains? (set applications) (:permitType %))))}))
 
 (defquery active-municipalities
   {:user-roles #{:anonymous}

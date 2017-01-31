@@ -178,6 +178,7 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
+  Wait for jQuery
   Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
