@@ -83,9 +83,9 @@
 
 (defn- download-and-save-files [application attachments session-id]
   (pmap
-    (fn [{:keys [file filename localizedType contents drawingNumber operation]}]
+    (fn [{:keys [file filename uri localizedType contents drawingNumber operation]}]
       (when-let [attachment-type (lat/localisation->attachment-type :R localizedType)]
-        (when-let [is (muuntaja/download-file file)]
+        (when-let [is (muuntaja/download-file uri)]
           (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)
             (merge file-data
