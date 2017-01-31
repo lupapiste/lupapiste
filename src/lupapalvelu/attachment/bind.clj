@@ -87,7 +87,7 @@
     (-> file
         (update :type att/attachment-type-coercer)
         (update :group (fn [{group-type :groupType operations :operations :as group}]
-                         (util/assoc-when group
+                         (util/assoc-when nil
                                           :groupType  (and group-type (att/group-type-coercer group-type))
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
