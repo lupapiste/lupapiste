@@ -14,17 +14,27 @@ LUPAPISTE.HandlerService = function() {
                     {id: "third",
                      name: {fi: "IV-käsittelijä",
                             sv: "IV-handläggare",
-                            en: "IV Handler"}}];
+                            en: "IV Handler"}},
+                   {id: "disabled",
+                    name: {fi: "Gone-käsittelijä",
+                           sv: "Gone-handläggare",
+                           en: "Gone Handler"},
+                    disabled: true}];
   var raw_handlers = [{id: "foo",
                        roleId: "first",
-                       firstName: "First",
-                       lastName: "Last",
-                       userId: "1233"},
+                       firstName: "Ronja",
+                       lastName: "Sibbo",
+                       userId: "777777777777777777000024"},
                       {id: "bar",
                        roleId: "second",
-                       firstName: "First lakdfjaldkfa",
-                       lastName: "Last aldskfjalsdfj",
-                       userId: "1233"}];
+                       firstName: "First",
+                       lastName: "Last",
+                       userId: "1234"},
+                      {id: "baz",
+                       roleId: "disabled",
+                       firstName: "Ronja",
+                       lastName: "Sibbo",
+                       userId: "777777777777777777000024"}];
 
   var TMP = "temporary-";
 
@@ -39,6 +49,7 @@ LUPAPISTE.HandlerService = function() {
   }
 
   self.nameAndRoleString = function( handler ) {
+    console.log( "handler:", handler );
     var lastName  = util.getIn( handler, ["lastName"], "");
     var firstName = util.getIn( handler, ["firstName"], "");
     var role = _.get(self.findHandlerRole( handler.roleId), "name", "");
@@ -98,11 +109,11 @@ LUPAPISTE.HandlerService = function() {
 
 
   self.applicationHandlerRoles = ko.computed( function() {
-    return _.map( roles(), function( role ) {
-      return {id: role.id,
-              name: _.get( role, ["name", loc.getCurrentLanguage()], ""),
-              general: role.general};
-    });
+    return _.map( self.organizationHandlerRoles( lupapisteApp.models.application.organization())(),
+                  function( role ) {
+                    return _.defaults( {name: _.get( role, ["name", loc.getCurrentLanguage()], "")},
+                                       role );
+                  });
   });
 
   self.findHandlerRole = function( roleId ) {
@@ -110,19 +121,18 @@ LUPAPISTE.HandlerService = function() {
                  {id: ko.unwrap( roleId )});
   };
 
-  function updateHandler( handlerId, data, raw ) {
-    raw = raw || {};
-    var h = _.find( self.applicationHandlers(), {id: handlerId});
+  function updateHandler( handlerId, data) {
+    // Peeks are needed so the changes (e.g., handler removal) will
+    // not trigger unnecessary ajax call via computed in
+    // processRawHandler (see below).
+    var h = _.find( self.applicationHandlers.peek(), {id: handlerId});
     if( h ) {
-      console.log( "Update handler:", handlerId, data );
-      var auth = _.find( self.authorities(), {id: data.userId });
+            var auth = _.find( self.authorities.peek(), {id: data.userId });
       if( auth ) {
         h.firstName(_.get(auth, "firstName", "" ));
         h.lastName( _.get(auth, "lastName", "" ));
       }
-      if( data.userId
-       && data.roleId
-       && (data.userId !== raw.userId || data.roleId !== raw.roleId)) {
+      if( data.userId && data.roleId) {
         console.log( "AJAX: Upsert handler:", handlerId, data );
         indicateSaved();
       }
@@ -131,8 +141,7 @@ LUPAPISTE.HandlerService = function() {
 
   function removeHandler( handlerId ) {
     console.log( "AJAX: Remove handler:", handlerId);
-    indicateSaved();
-    
+    indicateSaved();    
   }
 
   function processRawHandler( raw ) {
@@ -144,7 +153,7 @@ LUPAPISTE.HandlerService = function() {
       var data = {userId: m.userId(),
                   roleId: m.roleId()};
       if( !ko.computedContext.isInitial()) {
-        updateHandler( raw.id, data, raw );
+        updateHandler( raw.id, data);
       }
     });
     return m;

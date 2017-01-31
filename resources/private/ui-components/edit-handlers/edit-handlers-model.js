@@ -19,7 +19,7 @@ LUPAPISTE.EditHandlersModel = function() {
                   return _.merge( {},
                                   auth,
                                   {id: auth.id,
-                                   name: nameString( auth )})
+                                   name: nameString( auth )});
                 });
   });
 
@@ -33,7 +33,8 @@ LUPAPISTE.EditHandlersModel = function() {
                   })
                   .value();
     return _.reject( roles(), function( role ) {
-      return _.includes( usedIds, role.id );
+      return _.includes( usedIds, role.id )
+          || role.disabled;
     });
   }
 
@@ -58,13 +59,13 @@ LUPAPISTE.EditHandlersModel = function() {
         return {userId: handler.userId(),
                 name: text()};
       },
-      write: function( authority ) {
+      write: function( authority ) {        
         handler.userId( authority.id );
         text( nameString( authority ));
       }
     });
   }
-  
+
   var complete = self.disposedComputed( function() {
     return _.reduce( self.handlers(),
                    function( acc, h ) {
@@ -113,8 +114,10 @@ LUPAPISTE.EditHandlersModel = function() {
 
   self.isDisabled = function( data ) {
     if( data.userId() && data.roleId() ) {
+      var role = _.find( roles(), {id: data.roleId()});
       return !_.find( authorities(), {id: data.userId()})
-          || !_.find( roles(), {id: data.roleId()});
+          || !role
+          || _.get( role, "disabled" );
     }
   };
 

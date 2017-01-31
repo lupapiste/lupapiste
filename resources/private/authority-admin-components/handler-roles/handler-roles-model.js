@@ -10,7 +10,8 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
                                                     params,
                                                     ["organization", "organizationId"]));
   self.roles = self.disposedComputed( function() {
-      return service.organizationHandlerRoles( orgId())();
+    return _.reject( service.organizationHandlerRoles( orgId())(),
+                     {disabled: true});
   });
 
   self.languages = self.disposedPureComputed( _.partial( service.organizationLanguages, orgId()));
