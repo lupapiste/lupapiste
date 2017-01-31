@@ -573,3 +573,12 @@
   (update-organization organization
                        {$pull {:links (mongofy {:name name
                                                 :url  url})}}))
+
+(defn create-handler-role [role-id name]
+  {:id (or role-id (mongo/create-id))
+   :name name})
+
+(defn set-handler-role! [{handler-roles :handler-roles org-id :id} handler-role]
+  (let [ind (or (util/position-by-id handler-role handler-roles)
+                (count handler-role))]
+    (update-organization org-id {$set {(util/kw-path :handler-roles ind) handler-role}})))

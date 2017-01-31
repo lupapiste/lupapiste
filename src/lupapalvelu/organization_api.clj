@@ -777,3 +777,23 @@
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
     (inspection-summary/select-template-for-operation organizationId operationId templateId)))
+
+(defn- validate-handler-role-in-organization [{{role-id :roleId} :data user :user user-orgs :user-organizations}]
+  (when-let [org (-> (usr/authority-admins-organization-id user)
+                     (util/find-by-id user-orgs))]
+    (when (and role-id (not (util/find-by-id role-id (:handler-roles org))))
+      (fail :error.unknown-handler))))
+
+(defcommand upsert-handler-role
+  {:description "Create and modify organization handler roles"
+   :parameters [name]
+   :optional-parameters [roleId]
+   :pre-checks [validate-handler-role-in-organization]
+   :input-validators [(partial non-blank-parameters [:name])
+                      (partial action/map-parameters-with-required-keys :name i18n/all-languages)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user user-orgs :user-organizations}]
+  (let [org (-> (usr/authority-admins-organization-id user)
+                (util/find-by-id user-orgs))]
+    (->> (org/create-handler-role roleId name)
+         (org/set-handler-role! org))))

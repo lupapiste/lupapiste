@@ -1,6 +1,7 @@
 (ns lupapalvelu.organization-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.organization :refer :all]))
+            [lupapalvelu.organization :refer :all]
+            [monger.operators :refer :all]))
 
 (facts
  (let [organization {:operations-attachments {:kikka [["type-group-1" "type-id-123"]]}
@@ -17,3 +18,16 @@
          (krysp-integration? organization :bad1) => falsey
          (krysp-integration? organization :bad2) => falsey
          (krysp-integration? organization :bad3) => falsey)))
+
+(facts set-handler-role!
+  (fact "update existing"
+    (set-handler-role! {:id ..org-id.. :handler-roles [{:id ..role-id..}]} {:id ..role-id.. :name ..name..}) => "done"
+    (provided (update-organization ..org-id.. {$set {:handler-roles.0 {:id ..role-id.. :name ..name..}}}) => "done"))
+
+  (fact "add new"
+    (set-handler-role! {:id ..org-id.. :handler-roles [{:id ..role-id..}]} {:id ..new-role-id.. :name ..name..}) => "done"
+    (provided (update-organization ..org-id.. {$set {:handler-roles.1 {:id ..new-role-id.. :name ..name..}}}) => "done"))
+
+  (fact "update existing when there is multiple handlers in org"
+    (set-handler-role! {:id ..org-id.. :handler-roles [{:id ..role-id-0..} {:id ..role-id-1..} {:id ..role-id-2..} {:id ..role-id-3..}]} {:id ..role-id-2.. :name ..name..}) => "done"
+    (provided (update-organization ..org-id.. {$set {:handler-roles.2 {:id ..role-id-2.. :name ..name..}}}) => "done")))

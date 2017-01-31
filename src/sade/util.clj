@@ -157,6 +157,11 @@
   [pred coll]
   (for [[idx elt] (indexed coll) :when (pred elt)] idx))
 
+(defn position-by-id
+  "Returns item index by id"
+  [item coll]
+  (first (positions (comp #{(:id item)} :id) coll)))
+
 ; From clojure.contrib/map-utils)
 (defn deep-merge-with
   "Like merge-with, but merges maps recursively, applying the given fn

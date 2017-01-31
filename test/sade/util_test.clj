@@ -58,6 +58,34 @@
 
 (fact (positions #{2} [1 2 3 4 1 2 3 4]) => [1 5])
 
+(facts position-by-id
+  (fact "found in one item collection"
+    (position-by-id {:id ..id..} [{:id ..id..}]) => 0)
+
+  (fact "not found in one item collection"
+    (position-by-id {:id ..id..} [{:id ..another-id..}]) => nil)
+
+  (fact "found first in three item collection"
+    (position-by-id {:id ..id..} [{:id ..id..} {:id ..another-id..} {:id ..yet-another-id..}]) => 0)
+
+  (fact "found last in three item collection"
+    (position-by-id {:id ..id..} [{:id ..another-id..} {:id ..yet-another-id..} {:id ..id..}]) => 2)
+
+  (fact "found middle in three item collection"
+    (position-by-id {:id ..id..} [{:id ..another-id..} {:id ..id..} {:id ..yet-another-id..}]) => 1)
+
+  (fact "no id"
+    (position-by-id {:no-id ..some-value..} [{:id ..id..} {:id ..another-id..} {:id ..yet-another-id..}]) => nil)
+
+  (fact "item is nil"
+    (position-by-id nil [{:id ..id..} {:id ..another-id..} {:id ..yet-another-id..}]) => nil)
+
+  (fact "collection is nil"
+    (position-by-id {:id ..id..} nil) => nil)
+
+  (fact "collection contains nil"
+    (position-by-id {:id ..id..} [nil {:id ..id..}]) => 1))
+
 (facts "deep-merge-with"
   (fact
     (deep-merge-with + {:a {:b {:c 1 :d {:x 1 :y 2}} :e 3} :f 4}
