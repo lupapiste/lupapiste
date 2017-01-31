@@ -521,7 +521,7 @@ LUPAPISTE.AttachmentsService = function() {
       return { groupType: "operation",
                operations: [_.first(operations)] };
     } else {
-      return _.find(self.groupTypes(), ["groupType", util.getIn(type, ["metadata", "grouping"])]);
+      return _.pick(_.find(self.groupTypes(), ["groupType", util.getIn(type, ["metadata", "grouping"])]), "groupType");
     }
   };
 
