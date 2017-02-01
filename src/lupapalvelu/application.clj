@@ -4,7 +4,7 @@
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
-            [monger.operators :refer [$set $push $in $unset]]
+            [monger.operators :refer :all]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -532,12 +532,12 @@
   (let [history-entries (remove nil?
                                 [(when-not (:opened application) (history-entry :open created user))
                                  (history-entry :submitted created user)])]
-    (update-application command
-                        {$set {:state     :submitted
-                               :modified  created
-                               :opened    (or (:opened application) created)
-                               :submitted (or (:submitted application) created)}
-                         $push {:history {$each history-entries}}}))
+    (action/update-application command
+                               {$set {:state     :submitted
+                                      :modified  created
+                                      :opened    (or (:opened application) created)
+                                      :submitted (or (:submitted application) created)}
+                                $push {:history {$each history-entries}}}))
   (try
     (mongo/insert :submitted-applications (-> application
                                               meta-fields/enrich-with-link-permit-data
