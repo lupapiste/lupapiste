@@ -799,3 +799,13 @@
       (-> (usr/authority-admins-organization-id user)
           (util/find-by-id user-orgs)
           (org/upsert-handler-role! handler-role)))))
+
+(defcommand disable-handler-role
+  {:description "Set organization handler role disabled"
+   :parameters [roleId]
+   :pre-checks [validate-handler-role-in-organization]
+   :input-validators [(partial non-blank-parameters [:id])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (-> (usr/authority-admins-organization-id user)
+      (org/disable-handler-role! roleId)))

@@ -582,3 +582,6 @@
   (let [ind (or (util/position-by-id (:id handler-role) handler-roles)
                 (count handler-roles))]
     (update-organization org-id {$set {(util/kw-path :handler-roles ind) handler-role}})))
+
+(defn disable-handler-role! [org-id role-id]
+  (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))
