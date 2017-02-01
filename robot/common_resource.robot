@@ -1349,6 +1349,17 @@ Fill in new password
   Wait Until  Page should contain  Salasana asetettu.
   Confirm notification dialog
 
+Fill in new company password
+  [Arguments]  ${section}  ${password}
+  Wait Until  Element should be visible  xpath=//section[@id='${section}']//h2[@data-test-id='company-setpw-header']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password1']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password2']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Click Element  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Confirm notification dialog
+
+
 Open company user listing
   Click Element  user-name
   Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
