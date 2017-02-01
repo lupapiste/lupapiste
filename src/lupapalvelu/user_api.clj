@@ -105,7 +105,7 @@
 
 
 (notifications/defemail :invite-authority
-  {:model-fn (fn [{{token :token org-fn :org-fn} :data} _ _]
+  {:model-fn (fn [{token :token org-fn :org-fn} _ _]
                {:link #(pw-reset/reset-link (name %) token)
                 :org org-fn})
    :recipients-fn notifications/from-user
@@ -117,7 +117,7 @@
    :recipients-fn notifications/from-user})
 
 (defn- notify-new-authority [new-user created-by organization-id]
-  (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))
+  (let [token       (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))
         org-name-fn #(-> (organization/get-organization organization-id [:name])
                          (get-in [:name (or (keyword %) :fi)]))]
     (notifications/notify! :invite-authority {:user new-user, :token token :org-fn org-name-fn})))
