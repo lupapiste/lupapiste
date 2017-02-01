@@ -192,11 +192,11 @@
 (facts validate-handler-in-organization
   (fact "handler not in organization"
     (:ok (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}})) => false
-    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority"}) => nil))
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => nil))
 
   (fact "handler found in organization"
     (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}}) => nil
-    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority"}) => {:id ..user-id.. :orgAuthz {:org-id ["authority"]}}))
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => {:id ..user-id.. :orgAuthz {:org-id ["authority"]}}))
 
   (fact "no user id given"
     (validate-handler-in-organization {:data {:userId nil} :application {:organization "org-id"}}) => nil))
