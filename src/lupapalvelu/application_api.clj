@@ -183,7 +183,7 @@
     (fail :error.unknown-handler)))
 
 (defn- validate-handler-in-organization [{{user-id :userId} :data {application-org :organization} :application}]
-  (when (and user-id (not (usr/find-user {:id user-id (util/kw-path :orgAuthz application-org) "authority"})))
+  (when (and user-id (not (usr/find-user {:id user-id (util/kw-path :orgAuthz application-org) "authority" :enabled true})))
     (fail :error.unknown-handler)))
 
 (defcommand upsert-application-handler
