@@ -205,6 +205,18 @@
                          $push {:history   (app/handler-history-entry (util/assoc-when handler :new-entry (nil? handlerId)) created user)}})
     (ok :id (:id handler))))
 
+(defcommand remove-application-handler
+  {:parameters [id handlerId]
+   :pre-checks [validate-handler-id-in-application]
+   :input-validators [(partial action/non-blank-parameters [:id :handlerId])]
+   :user-roles #{:authority}
+   :states     (states/all-states-but :draft :canceled)}
+  [{created :created {handlers :handlers} :application user :user :as command}]
+  (update-application command
+                      {$set  {:modified created}
+                       $pull {:handlers {:id handlerId}}
+                       $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}}))
+
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :input-validators [(fn [{{assignee :assigneeId} :data}]
