@@ -109,6 +109,132 @@
          (:id authority-before-assignation) => nil
          (:id authority-in-the-end) => nil))
 
+(facts upsert-application-handler
+  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+        resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
+
+    (fact "Initially there is no handlers"
+      (:handlers application) => empty?)
+
+    (facts "Insert new handler"
+      (let [handlers (:handlers (query-application sonja app-id))]
+
+        resp => ok?
+        (:id resp) => string?
+
+        (fact "one handler exists" (count handlers) => 1)
+        (fact "handler has all data" (-> handlers first) => {:id (:id resp)
+                                                             :roleId "abba1111111111111111acdc"
+                                                             :userId ronja-id
+                                                             :firstName "Ronja"
+                                                             :lastName "Sibbo"})))
+
+    (facts "Applicant is not allowed to edit handlers"
+      (command pena :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id)
+      => (partial expected-failure? :error.unauthorized))
+
+    (facts "Cannot insert handler that is not organization authority"
+      (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId veikko-id)
+      => (partial expected-failure? :error.unknown-handler))
+
+    (facts "Cannot insert handler with role that is not in organization roles"
+      (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111fooo" :userId ronja-id)
+      => (partial expected-failure? :error.unknown-handler))
+
+    (facts "Cannot insert handler with same role twice"
+      (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)
+      => (partial expected-failure? :error.duplicate-handler-role))
+
+    (facts "Set existing handler role"
+      (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId ronja-id :handlerId (:id resp))
+            handlers    (:handlers (query-application sonja app-id))]
+
+        update-resp => ok?
+        (:id update-resp) => (:id resp)
+
+        (fact "one handler still exists" (count handlers) => 1)
+        (fact "handler has all data" (-> handlers first) => {:id (:id resp)
+                                                             :roleId "abba1111111111111112acdc"
+                                                             :userId ronja-id
+                                                             :firstName "Ronja"
+                                                             :lastName "Sibbo"})))
+
+    (facts "Set existing handler user"
+      (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id :handlerId (:id resp))
+            handlers    (:handlers (query-application sonja app-id))]
+
+        update-resp => ok?
+        (:id update-resp) => (:id resp)
+
+        (fact "one handler still exists" (count handlers) => 1)
+        (fact "handler has all data" (-> handlers first) => {:id (:id resp)
+                                                             :roleId "abba1111111111111112acdc"
+                                                             :userId sonja-id
+                                                             :firstName "Sonja"
+                                                             :lastName "Sibbo"})))
+
+    (facts "Insert second handler"
+      (let [insert-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId sonja-id)
+            handlers    (:handlers (query-application sonja app-id))]
+
+        resp => ok?
+        (:id insert-resp) => string?
+
+        (fact "two handlers exists" (count handlers) => 2)
+        (fact "second handler has all data" handlers => [{:id (:id resp)
+                                                           :roleId "abba1111111111111112acdc"
+                                                           :userId sonja-id
+                                                           :firstName "Sonja"
+                                                           :lastName "Sibbo"}
+                                                         {:id (:id insert-resp)
+                                                          :roleId "abba1111111111111111acdc"
+                                                          :userId sonja-id
+                                                          :firstName "Sonja"
+                                                          :lastName "Sibbo"}])))
+
+    (facts "Handler changes are stored in application history"
+      (let [history (:history (query-application sonja app-id))
+            handler-history (filter :handler history)]
+
+        (fact "total handler entries"
+          (count handler-history) => 4)
+
+        (fact "new entries"
+          (count (filter (comp :new-entry :handler) handler-history)) => 2)))))
+
+(facts remove-application-handler
+  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+        resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
+
+    (fact "Handler is added"
+      resp => ok?)
+
+    (fact "Handler is in application"
+      (:handlers (query-application sonja app-id)) => not-empty)
+
+    (fact "Handler role cannot be removed if not in application handlers"
+      (command sonja :remove-application-handler :id app-id :handlerId sonja-id) => (partial expected-failure? :error.unknown-handler))
+
+    (facts "Applicant is not allowed to remove handlers"
+      (command pena :remove-application-handler :id app-id :handlerId (:id resp))
+      => (partial expected-failure? :error.unauthorized))
+
+    (fact "Authority removes handler"
+      (command sonja :remove-application-handler :id app-id :handlerId (:id resp)) => ok?)
+
+    (fact "Handler is removed"
+      (:handlers (query-application sonja app-id)) => empty?)
+
+    (facts "Handler changes are stored in application history"
+      (let [history (:history (query-application sonja app-id))
+            handler-history (filter :handler history)]
+
+        (fact "total handler entries"
+          (count handler-history) => 2)
+
+        (fact "remove entries"
+          (count (filter (comp :removed :handler) handler-history)) => 1)))))
+
 (fact "Authority is able to create an application to a municipality in own organization"
   (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
     (fact "Application is open"
@@ -129,8 +255,14 @@
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
+        _ (comment-application pena id)
+        authority-submit (command sonja :submit-application :id id)
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
+
+    (fact "Authority is not allowed to submit application for applicant"
+      authority-submit => (partial expected-failure? :error.unauthorized))
+
     (:opened app1) => nil
     (:opened app2) => number?))
 
