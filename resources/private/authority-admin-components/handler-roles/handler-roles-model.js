@@ -5,7 +5,8 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
   "use strict";
   var self = this;
  
-  ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( params ));
+  ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( _.defaults( params,
+                                                                         {enable: Boolean(lupapisteApp.models.globalAuthModel.ok("upsert-handler-role"))}) ));
 
   var service = lupapisteApp.services.handlerService;
 
@@ -30,6 +31,6 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
   self.isRequired = function( name, lang ) {
     return !_.trim( util.getIn( name, [lang]))
         && _.some( _.values( ko.mapping.toJS( name )), _.trim);
-  };
+  }; 
 };
 

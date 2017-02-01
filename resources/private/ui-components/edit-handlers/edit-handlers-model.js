@@ -42,7 +42,7 @@ LUPAPISTE.EditHandlersModel = function() {
     return self.disposedComputed( {
       read: function() {
         return {roleId: handler.roleId(),
-                name: _.get( service.findHandlerRole ( handler.roleId),
+                name: _.get( service.findHandlerRole( handler.roleId),
                              "name",
                              "" )};
       },
@@ -74,7 +74,7 @@ LUPAPISTE.EditHandlersModel = function() {
                      var queryPerson = ko.observable( "" );
                      var selectedPerson = personValue( h );
                      return _.set( acc,
-                                   h.id,
+                                   h.id(),
                                    {roles: self.disposedComputed( function() {
                                      return util.filterDataByQuery( {data: handlerRoles( h ),
                                                                      query: queryRole(),
@@ -96,7 +96,7 @@ LUPAPISTE.EditHandlersModel = function() {
   });
 
   self.getComplete = function( id ) {
-    return _.get( complete(), [id],{});
+    return _.get( complete(), [id()],{});
   };
 
 

@@ -5,11 +5,13 @@
   <span class="application_summary_text">
     <ul class="handler-list"
         data-bind="foreach: handlers">
-      <li data-bind="text: $parent.itemText( $data )"></li>
+      <li data-bind="text: $parent.itemText( $data ),
+                     testId: 'handler-' + $index()"></li>
     </ul>
     <a class="handler-list-edit"
-         data-bind="ltext: 'edit',
-                    click: editHandlers,
-                    visible: canEdit()"></a>
+       data-bind="ltext: 'edit',
+                  click: editHandlers,
+                  visible: canEdit()"
+       data-test-id="edit-handlers"></a>
   </span>
 </script>
