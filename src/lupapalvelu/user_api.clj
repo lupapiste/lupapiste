@@ -147,7 +147,7 @@
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (usr/authority? user)
       (do
-        (notify-new-authority user caller (:organization user-data))
+        (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
         (ok :id (:id user) :user user))
       (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
         (ok :id (:id user)
