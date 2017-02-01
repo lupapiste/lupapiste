@@ -2742,9 +2742,9 @@
                                                                                            :en "Handler"}
                                                                                  :general true}]}}))))
 
-(defn- set-handler-for-application [role-id {id :id {user-id :id} :authority :as application}]
+(defn- set-handler-for-application [role-id {id :id authority :authority :as application}]
   (when user-id
-    (let [handler (user/create-handler nil role-id user-id)]
+    (let [handler (user/create-handler nil role-id authority)]
       (mongo/update-by-id :applications           id {$set {:handlers [handler]}})
       (mongo/update-by-id :submitted-applications id {$set {:handlers [handler]}}))))
 
