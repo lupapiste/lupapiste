@@ -17,7 +17,8 @@
           <input type="text"
                  class="grid-style-input" 
                  data-bind="value: $parent.name[$data],
-                            disable: $parent.general">
+                            disable: $parent.general,
+                            css: {required: $parents[1].isRequired( $parent.name, $data )}">
         </td>
         <!-- /ko -->
         <td>

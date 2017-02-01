@@ -1,20 +1,17 @@
+// Organization handler roles management.
+// Parameters:
+//   organization: OrganizationModel instance.
 LUPAPISTE.HandlerRolesModel = function( params ) {
   "use strict";
   var self = this;
-
+ 
   ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( params ));
 
   var service = lupapisteApp.services.handlerService;
 
-  var orgId = self.disposedPureComputed( _.partial( util.getIn,
-                                                    params,
-                                                    ["organization", "organizationId"]));
-  self.roles = self.disposedComputed( function() {
-    return _.reject( service.organizationHandlerRoles( orgId())(),
-                     {disabled: true});
-  });
+  self.roles = service.organizationHandlerRoles( params.organization );
 
-  self.languages = self.disposedPureComputed( _.partial( service.organizationLanguages, orgId()));
+  self.languages = self.disposedPureComputed(  service.organizationLanguages );
 
   self.nameHeader = function( lang ) {
     return sprintf( "%s (%s)",
@@ -23,11 +20,16 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
   };
 
   self.removeRole = function( role ) {
-    service.removeOrganizationHandlerRole( orgId(), role.id );    
+    service.removeOrganizationHandlerRole( role.id );    
   };
 
   self.addRole = function() {
-    service.addOrganizationHandlerRole( orgId());
+    service.addOrganizationHandlerRole();
+  };
+
+  self.isRequired = function( name, lang ) {
+    return !_.trim( util.getIn( name, [lang]))
+        && _.some( _.values( ko.mapping.toJS( name )), _.trim);
   };
 };
 

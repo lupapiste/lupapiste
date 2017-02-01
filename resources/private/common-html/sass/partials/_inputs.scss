@@ -21,6 +21,12 @@
     border-color: $input-disabled-border-color;
     background-color: $input-disabled-background-color;
   }
+  &.warning {
+    border-color: $negative;
+  }
+  &.required {
+    border-color: $primary;
+  }
 }
 
 @mixin hide-radio-check-input ($display: inherit) {

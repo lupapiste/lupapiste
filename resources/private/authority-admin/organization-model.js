@@ -58,6 +58,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.inspectionSummariesEnabled = ko.observable(false);
   self.inspectionSummaryTemplates = ko.observableArray([]);
   self.operationsInspectionSummaryTemplates = ko.observable({});
+  self.handlerRoles = ko.observableArray();
 
   self.sectionOperations = ko.observableArray();
 
@@ -312,6 +313,8 @@ LUPAPISTE.OrganizationModel = function () {
     sectionEnabled( _.get( organization, "section.enabled"));
 
     self.sectionOperations(_.get( organization, "section.operations", []));
+
+    self.handlerRoles( _.get( organization, "handler-roles", []));
 
     self.initialized = true;
   };

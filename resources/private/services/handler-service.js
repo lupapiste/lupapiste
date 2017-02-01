@@ -2,49 +2,61 @@
 LUPAPISTE.HandlerService = function() {
   "use strict";
   var self = this;
-  var raw_roles =  [{ id: "first",
-                      name: {fi: "Käsittelijä",
-                             sv: "Handläggare",
-                             en: "Handler"},
-                      general: true},
-                    {id: "second",
-                     name: {fi: "KVV-käsittelijä",
-                            sv: "KVV-handläggare",
-                            en: "KVV Handler"}},
-                    {id: "third",
-                     name: {fi: "IV-käsittelijä",
-                            sv: "IV-handläggare",
-                            en: "IV Handler"}},
-                   {id: "disabled",
-                    name: {fi: "Gone-käsittelijä",
-                           sv: "Gone-handläggare",
-                           en: "Gone Handler"},
-                    disabled: true}];
-
-  // var raw_handlers = [{id: "foo",
-  //                      roleId: "first",
-  //                      firstName: "Ronja",
-  //                      lastName: "Sibbo",
-  //                      userId: "777777777777777777000024",
-  //                      roleName: "Käsittelijä"},
-  //                     {id: "bar",
-  //                      roleId: "second",
-  //                      firstName: "First",
-  //                      lastName: "Last",
-  //                      userId: "1234",
-  //                      roleName: "KVV-käsittelijä"},
-  //                     {id: "baz",
-  //                      roleId: "disabled",
-  //                      firstName: "Ronja",
-  //                      lastName: "Sibbo",
-  //                      userId: "777777777777777777000024",
-  //                      roleName: "Gone-käsittelijä"}];
 
   var TMP = "temporary-";
-
   
-  self.authorities = ko.observableArray();
+  var authorities = ko.observableArray();
   self.applicationHandlers = ko.observableArray();
+  var roles = ko.observableArray();
+  
+  // Ajax API
+
+  function fetchApplicationHandlers() {
+    ajax.query( "application-handlers", {id: appId()})
+    .success( function( res ) {
+      self.applicationHandlers( _.map( res.handlers,
+                                       processRawHandler ));
+    })
+    .call();
+  }
+
+  function fetchAuthorities() {
+    if( allowed( "application-authorities")) {
+      ajax.query( "application-authorities", {id: appId()})
+      .success( function( res ) {
+        authorities( res.authorities );
+      })
+      .call();
+    }
+  }
+
+function fetchHandlerRoles() {
+  if( allowed( "application-organization-handler-roles")) {
+      ajax.query( "application-organization-handler-roles", {id: appId()})
+      .success( function( res ) {
+        roles( _.map( res.handlerRoles,
+                  function( role ) {
+                    return _.defaults( {name: _.get( role, ["name", loc.getCurrentLanguage()], "")},
+                                       role );
+                  }));
+      })
+      .call();
+    }
+  }
+
+  self.applicationAuthorities = function() {
+    if( _.isEmpty( authorities() )) {
+      fetchAuthorities();
+    }
+    return authorities;
+  };
+
+  self.applicationHandlerRoles = function() {
+    if( _.isEmpty( roles() )) {
+      fetchHandlerRoles();
+    }
+    return roles;
+  };
 
   function appId() {
     return lupapisteApp.services.contextService.applicationId();
@@ -80,47 +92,47 @@ LUPAPISTE.HandlerService = function() {
   }
 
   var latestOrgId = null;
-  var roles = ko.observableArray();
   
-  self.organizationHandlerRoles = function( orgId ) {
-    if( orgId && orgId !== latestOrgId ) {
-      roles(_.map( raw_roles,
-                   _.partial( processRawRole, orgId )));
-      latestOrgId = orgId;
-    }
+  self.organizationHandlerRoles = function( organization ) {
+    ko.computed( function() {
+      var orgId = util.getIn( organization, ["organizationId"]);
+      var rawRoles = util.getIn( organization, ["handlerRoles"]);
+      // There is always at least one role (general).
+      if( orgId && orgId !== latestOrgId && _.size( rawRoles) ) {
+        roles.removeAll();
+        latestOrgId = orgId;
+        roles(_.map( rawRoles,
+                     _.partial( processRawRole, orgId)));
+      }                        
+    });    
+    
     return roles;
   };
 
-  self.organizationLanguages = function( orgId ) {
+  self.organizationLanguages = function() {
     return _.intersection( loc.getSupportedLanguages(),
-                           _.keys( _.get( self.organizationHandlerRoles( orgId )(),
+                           _.keys( _.get( roles(),
                                           "0.name")));
   };
 
-  self.removeOrganizationHandlerRole = function( orgId, roleId ) {
+  self.removeOrganizationHandlerRole = function( roleId ) {
     roles.remove( function( r ) {return r.id === roleId;});
   };
 
-  self.addOrganizationHandlerRole = function( orgId ) {
-    roles.push( processRawRole(orgId,
+  self.addOrganizationHandlerRole = function() {
+    roles.push( processRawRole(latestOrgId,
                                {id: _.uniqueId( TMP ),
-                                name: _( self.organizationLanguages( orgId ))
+                                name: _( self.organizationLanguages())
                                       .map( function( lang ) {return [lang, ""];})
                                       .fromPairs()
                                       .value()}));    
   };
 
 
-  self.applicationHandlerRoles = ko.computed( function() {
-    return _.map( self.organizationHandlerRoles( lupapisteApp.models.application.organization())(),
-                  function( role ) {
-                    return _.defaults( {name: _.get( role, ["name", loc.getCurrentLanguage()], "")},
-                                       role );
-                  });
-  });
+  
 
   self.findHandlerRole = function( roleId ) {
-    return _.find( self.applicationHandlerRoles(),
+    return _.find( roles(),
                  {id: ko.unwrap( roleId )});
   };
 
@@ -130,12 +142,12 @@ LUPAPISTE.HandlerService = function() {
     // processRawHandler (see below).
     var h = _.find( self.applicationHandlers.peek(), {id: handlerId});
     if( h ) {
-      var auth = _.find( self.authorities.peek(), {id: data.userId });
+      var auth = _.find( authorities.peek(), {id: data.userId });
       if( auth ) {
         h.firstName(_.get(auth, "firstName", "" ));
         h.lastName( _.get(auth, "lastName", "" ));
       }
-      var roleName = _.get(_.find( self.applicationHandlerRoles.peek(), {id: data.roleId}),
+      var roleName = _.get(_.find( roles.peek(), {id: data.roleId}),
                        "name");
       if( roleName ) {
         h.roleName( roleName );
@@ -188,33 +200,12 @@ LUPAPISTE.HandlerService = function() {
     }
   };
 
-  function fetchApplicationHandlers() {
-    ajax.query( "application-handlers", {id: appId()})
-    .success( function( res ) {
-      self.applicationHandlers( _.map( res.handlers,
-                                       processRawHandler ));
-    })
-    .call();
-  }
 
-  function fetchAuthorities() {
-    if( allowed( "application-authorities")) {
-      ajax.query( "application-authorities", {id: appId()})
-      .success( function( res ) {
-        self.authorities( res.authorities );
-      })
-      .call();
-    }
-  }
-
-  hub.subscribe( "contextService::enter",
-                 function() {
-                   fetchApplicationHandlers();
-                   fetchAuthorities();
-                 });
+  hub.subscribe( "contextService::enter", fetchApplicationHandlers );
 
   hub.subscribe( "contextService::leave", function() {
     self.applicationHandlers.removeAll();
-    self.authorities.removeAll();
+    authorities.removeAll();
+    roles.removeAll();
   });
 };

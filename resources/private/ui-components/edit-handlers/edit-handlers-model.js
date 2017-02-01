@@ -12,9 +12,9 @@ LUPAPISTE.EditHandlersModel = function() {
                     obj.firstName || "" );
   }
 
-  var roles = service.applicationHandlerRoles;
+  var roles = service.applicationHandlerRoles();
   var authorities = self.disposedComputed( function() {
-    return _.map( service.authorities(),
+    return _.map( service.applicationAuthorities()(),
                 function( auth ) {
                   return _.merge( {},
                                   auth,

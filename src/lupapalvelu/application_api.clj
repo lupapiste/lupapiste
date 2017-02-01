@@ -925,3 +925,12 @@
                                                      :name
                                                      lang)))
                      (:handlers application))))
+
+(defquery application-organization-handler-roles
+  {:description "Every handler defined in the organization, including
+  the disabled ones."
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/all-application-states}
+  [{:keys [organization]}]
+  (ok :handlerRoles (:handler-roles @organization)))
