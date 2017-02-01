@@ -2743,7 +2743,7 @@
                                                                                  :general true}]}}))))
 
 (defn- set-handler-for-application [role-id {id :id authority :authority :as application}]
-  (when user-id
+  (when (:id authority)
     (let [handler (user/create-handler nil role-id authority)]
       (mongo/update-by-id :applications           id {$set {:handlers [handler]}})
       (mongo/update-by-id :submitted-applications id {$set {:handlers [handler]}}))))
@@ -2754,7 +2754,7 @@
          (run! (partial set-handler-for-application role-id)))))
 
 (defmigration copy-application-authority-as-general-handler-in-applications
-  {:apply-when (pos? (mongo/count :applications {:handlers {$exists false}}))}
+  {:apply-when (pos? (mongo/count :applications {:authority.id {$type 2} :handlers {$exists false}}))}
   (->> (mongo/select :organizations {:handler-roles.general {$exists true}} [:handler-roles])
        (run! set-handler-for-organizations-applications)))
 
