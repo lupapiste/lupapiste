@@ -4,7 +4,10 @@
             [lupapalvelu.action :as action :refer [defquery defcommand]]
             [sade.core :refer [ok fail fail! now unauthorized]]
             [sade.strings :as ss]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.schemas :as schemas]))
 
 (defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
@@ -47,9 +50,19 @@
   (let [organizationId (usr/authority-admins-organization-id user)]
     (inspection-summary/select-template-for-operation organizationId operationId templateId)))
 
-(defquery inspection-summary-templates-for-application
+(defn- map-operation-to-frontend [app op]
+  (let [document (domain/get-document-by-operation app op)
+        {identifier-field :name} (schemas/find-identifier-field-from (get-in document [:schema-info :name]))]
+    (assoc (select-keys op [:id :name :description])
+      :op-identifier (or (get-in document [:data (keyword identifier-field) :value])
+                         (get-in document [:data :valtakunnallinenNumero :value])))))
+
+(defquery inspection-summaries-for-application
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id]
    :user-roles #{:authority}}
   [{app :application}]
-  (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)))
+  (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)
+      :operations (->> (app/get-operations app)
+                       (map (partial map-operation-to-frontend app))
+                       (remove nil?))))

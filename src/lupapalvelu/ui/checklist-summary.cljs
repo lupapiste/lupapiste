@@ -16,6 +16,19 @@
 (defn ko-subscription [value]
   (swap! state assoc :input value))
 
+(defn update-operations [value]
+  (swap! state assoc :operations value))
+
+(defn id-subscription [value]
+  (swap! state assoc :applicationId value)
+  (when-not (empty? value)
+    (-> (js/ajax.query "inspection-summaries-for-application"
+                       (js-obj "id" value))
+        (.success (fn [data]
+                    (update-operations (js->clj (aget data "operations")
+                                                :keywordize-keys true))))
+        .call)))
+
 (defn init
   [init-state props]
   (swap! state assoc :applicationId ((-> (aget props ":rum/initial-state")
@@ -27,27 +40,24 @@
                                  first
                                  (aget "texti"))))
   #_(js/hub.send "XYZ" (js-obj :id (-> @state :applicationId)))
-  (-> (js/ajax.query "inspection-summary-templates-for-application"
-                     (js-obj "id" (-> @state :applicationId)))
-      (.success js/console.log)
-      .call)
   init-state)
 
 (rum/defc checklist-summary < rum/reactive
-                              {:init init}
+                              {:init init
+                               :render init}
   [ko-app]
   (.subscribe (aget ko-app "texti") ko-subscription)
+  (.subscribe (aget ko-app "id") id-subscription)
   [:div
    [:h1 "Tarkastusasiakirjan yhteenveto"]
-   ; [:pre ((aget ko-app "texti")) " -> oneshot, is not updated when ko subscription changes, only when component is re-rendered"]
-   [:pre (rum/react texti) "-> rum/react"]
-   [:input ]
    [:div
     [:label "Valitse tarkastusasiakirjan yhteenveto"]
     [:br]
     [:select
      (for [op (rum/react (rum/cursor-in state [:operations]))]
-       [:option op])]]
+       [:option
+        {:value (:id op)}
+        (str (:description op) " - " (:op-identifier op))])]]
    [:table
     [:tbody
      (doall
