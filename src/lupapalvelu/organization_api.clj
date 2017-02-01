@@ -814,7 +814,7 @@
    :parameters [roleId]
    :pre-checks [validate-handler-role-in-organization
                 validate-handler-role-not-general]
-   :input-validators [(partial non-blank-parameters [:id])]
+   :input-validators [(partial non-blank-parameters [:roleId])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (-> (usr/authority-admins-organization-id user)
