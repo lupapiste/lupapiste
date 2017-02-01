@@ -135,10 +135,12 @@
   [user]
   (dissoc user :private))
 
-(defn create-handler [handler-id role-id user-id]
+(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName :as user}]
   {:id        (or handler-id (mongo/create-id))
    :roleId    role-id
-   :userId    user-id})
+   :userId    user-id
+   :firstName first-name
+   :lastName  last-name})
 
 (def summary-keys [:id :username :firstName :lastName :role])
 

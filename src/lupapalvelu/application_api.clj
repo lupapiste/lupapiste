@@ -196,8 +196,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :userId :roleId])]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created {handlers :handlers} :application user :user :as command}]
-  (let [handler (usr/create-handler handlerId roleId userId)]
+  [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
+  (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
+                     (usr/create-handler handlerId roleId))]
     (update-application command
                         {$set  {:modified  created
                                 :handlers  (util/upsert handler handlers)}
