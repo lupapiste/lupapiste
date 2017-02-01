@@ -2733,6 +2733,31 @@
   {:apply-when (pos? (mongo/count :applications {:attachments.op.groupType {$exists true}}))}
   (update-applications-array :attachments clean-up-attachment-op {:attachments.op.groupType {$exists true}}))
 
+(defmigration create-general-handler-for-organizations
+  {:apply-when (pos? (mongo/count :organizations {:handler-roles {$exists false}}))}
+  (->> (mongo/select :organizations {:handler-roles.id {$exists false}} [:_id])
+       (run! #(mongo/update-by-id :organizations (:id %) {$set {:handler-roles [{:id      (mongo/create-id)
+                                                                                 :name    {:fi "K\u00e4sittelij\u00e4"
+                                                                                           :sv "Handl\u00e4ggare"
+                                                                                           :en "Handler"}
+                                                                                 :general true}]}}))))
+
+(defn- set-handler-for-application [role-id {id :id {user-id :id} :authority :as application}]
+  (when user-id
+    (let [handler (user/create-handler nil role-id user-id)]
+      (mongo/update-by-id :applications           id {$set {:handlers [handler]}})
+      (mongo/update-by-id :submitted-applications id {$set {:handlers [handler]}}))))
+
+(defn- set-handler-for-organizations-applications [{org-id :id roles :handler-roles}]
+  (when-let [role-id (:id (util/find-by-key :general true roles))]
+    (->> (mongo/select :applications {:organization org-id} [:authority])
+         (run! (partial set-handler-for-application role-id)))))
+
+(defmigration copy-application-authority-as-general-handler-in-applications
+  {:apply-when (pos? (mongo/count :applications {:handlers {$exists false}}))}
+  (->> (mongo/select :organizations {:handler-roles.general {$exists true}} [:handler-roles])
+       (run! set-handler-for-organizations-applications)))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

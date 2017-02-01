@@ -157,6 +157,11 @@
   [pred coll]
   (for [[idx elt] (indexed coll) :when (pred elt)] idx))
 
+(defn position-by-id
+  "Returns item index by id"
+  [id coll]
+  (first (positions (comp #{id} :id) coll)))
+
 ; From clojure.contrib/map-utils)
 (defn deep-merge-with
   "Like merge-with, but merges maps recursively, applying the given fn
@@ -393,6 +398,13 @@
   "Assocs entries into m when pred returns truthy for value."
   [m pred & kvs]
   (apply merge m (filter (comp pred val) (apply hash-map kvs))))
+
+(defn upsert
+  [{id :id :as item} coll]
+  (if id
+    (->> (split-with (fn-> :id (not= id)) coll)
+         (#(concat (first %) [item] (rest (second %)))))
+    coll))
 
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))

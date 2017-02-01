@@ -167,6 +167,56 @@
 ;; Assign
 ;;
 
+(defn- validate-handler-role [{{role-id :roleId} :data org :organization}]
+  (when (and role-id (not (util/find-by-id role-id (:handler-roles @org))))
+    (fail :error.unknown-handler)))
+
+(defn- validate-handler-role-not-in-use
+  "Pre-check for setting application handler. Validates that handler role is not already set on application."
+  [{{role-id :roleId handler-id :handlerId} :data {application-handlers :handlers} :application}]
+  (when (and role-id (->> (remove (comp #{handler-id} :id) application-handlers)
+                          (util/find-by-key :roleId role-id)))
+    (fail :error.duplicate-handler-role)))
+
+(defn- validate-handler-id-in-application [{{handler-id :handlerId} :data {application-handlers :handlers} :application}]
+  (when (and handler-id (not (util/find-by-id handler-id application-handlers)))
+    (fail :error.unknown-handler)))
+
+(defn- validate-handler-in-organization [{{user-id :userId} :data {application-org :organization} :application}]
+  (when (and user-id (not (usr/find-user {:id user-id (util/kw-path :orgAuthz application-org) "authority" :enabled true})))
+    (fail :error.unknown-handler)))
+
+(defcommand upsert-application-handler
+  {:parameters [id userId roleId]
+   :optional-parameters [handlerId]
+   :pre-checks [validate-handler-role
+                validate-handler-role-not-in-use
+                validate-handler-id-in-application
+                validate-handler-in-organization]
+   :input-validators [(partial action/non-blank-parameters [:id :userId :roleId])]
+   :user-roles #{:authority}
+   :states     (states/all-states-but :draft :canceled)}
+  [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
+  (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
+                     (usr/create-handler handlerId roleId))]
+    (update-application command
+                        {$set  {:modified  created
+                                :handlers  (util/upsert handler handlers)}
+                         $push {:history   (app/handler-history-entry (util/assoc-when handler :new-entry (nil? handlerId)) created user)}})
+    (ok :id (:id handler))))
+
+(defcommand remove-application-handler
+  {:parameters [id handlerId]
+   :pre-checks [validate-handler-id-in-application]
+   :input-validators [(partial action/non-blank-parameters [:id :handlerId])]
+   :user-roles #{:authority}
+   :states     (states/all-states-but :draft :canceled)}
+  [{created :created {handlers :handlers} :application user :user :as command}]
+  (update-application command
+                      {$set  {:modified created}
+                       $pull {:handlers {:id handlerId}}
+                       $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}}))
+
 (defcommand assign-application
   {:parameters [:id assigneeId]
    :input-validators [(fn [{{assignee :assigneeId} :data}]

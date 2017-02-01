@@ -116,6 +116,12 @@
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
                    :password                         (ssc/max-length-string 255)
                    (sc/optional-key :language)       i18n/supported-language-schema})
+
+(defschema Handler
+  {:id     ssc/ObjectIdStr
+   :userId (:id User)
+   :roleId ssc/ObjectIdStr})
+
 ;;
 ;; ==============================================================================
 ;; Utils:
@@ -128,6 +134,13 @@
   "Returns user without private details."
   [user]
   (dissoc user :private))
+
+(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName :as user}]
+  {:id        (or handler-id (mongo/create-id))
+   :roleId    role-id
+   :userId    user-id
+   :firstName first-name
+   :lastName  last-name})
 
 (def summary-keys [:id :username :firstName :lastName :role])
 

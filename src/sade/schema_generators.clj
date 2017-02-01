@@ -81,7 +81,9 @@
 
 (register-generator ssc/BlankStr blank-string)
 
-(def not-blank-string (gen/such-that (comp not s/blank?) gen/string))
+(def not-blank-string (gen/fmap (partial apply str) (gen/tuple gen/char-alphanumeric gen/string-ascii)))
+
+(register-generator ssc/NonBlankStr not-blank-string)q
 
 (def digit (gen/fmap str single-number-int))
 
