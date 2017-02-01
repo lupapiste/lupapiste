@@ -41,6 +41,6 @@
                         (-> (query jarvenpaa :organization-inspection-summary-settings) :templates)
           app-jarvenpaa (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Järvikatu 29")]
       (fact "Feature not enabled in Sipoo"
-        (query sipoo :inspection-summary-templates-for-application :id (:id app-sipoo)) => unauthorized?)
+        (query sipoo :inspection-summaries-for-application :id (:id app-sipoo)) => unauthorized?)
       (fact "Feature enabled in Järvenpää"
-        (query raktark-jarvenpaa :inspection-summary-templates-for-application :id (:id app-jarvenpaa)) => (contains {:templates jarvenpaa-templates-from-admin})))))
+        (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa)) => (contains {:templates jarvenpaa-templates-from-admin})))))
