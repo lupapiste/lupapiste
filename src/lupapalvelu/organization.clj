@@ -68,7 +68,7 @@
 
 (sc/defschema HandlerRole
   {:id                              ssc/ObjectIdStr
-   :name                            (zipmap i18n/all-languages (repeat sc/Str))
+   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
