@@ -805,9 +805,10 @@
   (let [handler-role (org/create-handler-role roleId name)]
     (if (sc/check org/HandlerRole handler-role)
       (fail :error.missing-parameters)
-      (-> (usr/authority-admins-organization-id user)
-          (util/find-by-id user-orgs)
-          (org/upsert-handler-role! handler-role)))))
+      (do (-> (usr/authority-admins-organization-id user)
+              (util/find-by-id user-orgs)
+              (org/upsert-handler-role! handler-role))
+          (ok :id (:id handler-role))))))
 
 (defcommand disable-handler-role
   {:description "Set organization handler role disabled"
