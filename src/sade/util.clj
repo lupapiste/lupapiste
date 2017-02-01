@@ -159,8 +159,8 @@
 
 (defn position-by-id
   "Returns item index by id"
-  [item coll]
-  (first (positions (comp #{(:id item)} :id) coll)))
+  [id coll]
+  (first (positions (comp #{id} :id) coll)))
 
 ; From clojure.contrib/map-utils)
 (defn deep-merge-with
