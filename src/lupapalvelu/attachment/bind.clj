@@ -82,12 +82,14 @@
 (defn- coerce-bindable-file
   "Coerces bindable file data"
   [file]
-  (-> file
-      (update :type att/attachment-type-coercer)
-      (update :group (fn [{group-type :groupType operations :operations :as group}]
-                       (util/assoc-when group
-                                        :groupType  (and group-type (att/group-type-coercer group-type))
-                                        :operations (and operations (map att/->attachment-operation operations)))))))
+  (if (:attachmentId file)
+    file
+    (-> file
+        (update :type att/attachment-type-coercer)
+        (update :group (fn [{group-type :groupType operations :operations :as group}]
+                         (util/assoc-when nil
+                                          :groupType  (and group-type (att/group-type-coercer group-type))
+                                          :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
   [command file-infos]

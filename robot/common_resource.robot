@@ -4,6 +4,7 @@ Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
+Library        DebugLibrary
 
 *** Variables ***
 
@@ -178,6 +179,7 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
+  Wait for jQuery
   Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
