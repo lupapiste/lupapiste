@@ -785,7 +785,7 @@
       (fail :error.unknown-handler))))
 
 (defcommand upsert-handler-role
-  {:description "Create and modify organization handler roles"
+  {:description "Create and modify organization handler role"
    :parameters [name]
    :optional-parameters [roleId]
    :pre-checks [validate-handler-role-in-organization]
@@ -793,7 +793,9 @@
                       (partial action/map-parameters-with-required-keys :name i18n/all-languages)]
    :user-roles #{:authorityAdmin}}
   [{user :user user-orgs :user-organizations}]
-  (let [org (-> (usr/authority-admins-organization-id user)
-                (util/find-by-id user-orgs))]
-    (->> (org/create-handler-role roleId name)
-         (org/set-handler-role! org))))
+  (let [handler-role (org/create-handler-role roleId name)]
+    (if (sc/check org/HandlerRole handler-role)
+      (fail :error.missing-parameters)
+      (-> (usr/authority-admins-organization-id user)
+          (util/find-by-id user-orgs)
+          (org/set-handler-role! handler-role)))))
