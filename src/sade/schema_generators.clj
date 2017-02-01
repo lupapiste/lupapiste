@@ -83,7 +83,7 @@
 
 (def not-blank-string (gen/fmap (partial apply str) (gen/tuple gen/char-alphanumeric gen/string-ascii)))
 
-(register-generator ssc/NonBlankStr not-blank-string)q
+(register-generator ssc/NonBlankStr not-blank-string)
 
 (def digit (gen/fmap str single-number-int))
 
