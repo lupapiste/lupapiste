@@ -4,6 +4,7 @@ Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
+Library        DebugLibrary
 
 *** Variables ***
 

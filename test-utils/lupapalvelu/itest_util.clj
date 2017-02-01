@@ -29,6 +29,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.server]
             [ring.util.codec :as codec])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))

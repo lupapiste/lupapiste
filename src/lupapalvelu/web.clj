@@ -29,36 +29,24 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
-            [lupapalvelu.application-search-api]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.organization-api]
-            [lupapalvelu.application-api :as application]
-            [lupapalvelu.foreman-api :as foreman-api]
-            [lupapalvelu.open-inforequest-api]
-            [lupapalvelu.pdf.pdf-export-api]
-            [lupapalvelu.logging-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.calendars-api :as calendars]
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
-            [lupapalvelu.reports.reports-api]
-            [lupapalvelu.rest.rest-api]
             [clj-time.core :as time]
             [clj-time.local :as local])
   (:import (java.io OutputStreamWriter BufferedWriter)
@@ -668,7 +656,7 @@
                           (assoc :user user, :created (now)))]
           (cond
             (= state "submitted")
-            (application/do-submit command)
+            (app/submit command)
 
             (and (ss/not-blank? state) (not= state (get-in command [:application :state])))
             (action/update-application command {$set {:state state}, $push {:history (app/history-entry state (:created command) user)}}))

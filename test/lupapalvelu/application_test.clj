@@ -23,7 +23,7 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application-api add-operation-allowed?)
+(testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
 (testable-privates lupapalvelu.application required-link-permits)
 
 (facts "mark-indicators-seen-updates"
@@ -176,6 +176,61 @@
                ((reject-primary-operations #{:hii}) app) => nil?
                ((reject-primary-operations #{}) app) => nil?)))
 
+(facts validate-handler-id-in-application
+  (fact "no handlers"
+    (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers []}})) => false)
+
+  (fact "no matching handlers"
+    (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers [{:id ..another-handler-id..}]}})) => false)
+
+  (fact "matching handlers"
+    (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers [{:id ..handler-id..}]}}) => nil)
+
+  (fact "no handler id given"
+    (validate-handler-id-in-application {:data {:handlerId nil} :application {:handlers [{:id ..handler-id..}]}}) => nil))
+
+(facts validate-handler-in-organization
+  (fact "handler not in organization"
+    (:ok (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}})) => false
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => nil))
+
+  (fact "handler found in organization"
+    (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}}) => nil
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => {:id ..user-id.. :orgAuthz {:org-id ["authority"]}}))
+
+  (fact "no user id given"
+    (validate-handler-in-organization {:data {:userId nil} :application {:organization "org-id"}}) => nil))
+
+
+(facts validate-handler-role
+  (fact "no handler roles in org"
+    (:ok (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles []})})) => false)
+
+  (fact "no mathing handler roles in org"
+    (:ok (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles [{:id ..another-role-id..}]})})) => false)
+
+  (fact "mathing handler role"
+    (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles [{:id ..role-id..}]})}) => nil)
+
+  (fact "no role id given"
+    (validate-handler-role {:data {:roleId nil} :organization (delay {:handler-roles [{:id ..role-id..}]})}) => nil))
+
+(facts validate-handler-role-not-in-use
+  (fact "update existing handler"
+    (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId ..handler-id..} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}})
+    => nil)
+
+  (fact "trying create duplicate handler role"
+    (:ok (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}}))
+    => false)
+
+  (fact "create new handler role"
+    (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..another-role-id..}]}})
+    => nil)
+
+  (fact "no role id given"
+    (validate-handler-role-not-in-use {:data {:roleId nil :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}})
+    => nil))
 
 (facts multioperation-attachment-updates
   (fact "multioperation attachment update with op array"

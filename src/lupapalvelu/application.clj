@@ -4,7 +4,7 @@
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
-            [monger.operators :refer [$set $push $in $unset]]
+            [monger.operators :refer :all]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -55,6 +55,11 @@
 
 (defn authority-history-entry [authority timestamp user]
   {:authority authority
+   :ts timestamp
+   :user (usr/summary user)})
+
+(defn handler-history-entry [handler timestamp user]
+  {:handler handler
    :ts timestamp
    :user (usr/summary user)})
 
@@ -525,6 +530,27 @@
                                                            "kuntalupatunnus")
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
+
+;; Submit
+
+(defn submit [{:keys [application created user] :as command} ]
+  (let [history-entries (remove nil?
+                                [(when-not (:opened application) (history-entry :open created user))
+                                 (history-entry :submitted created user)])]
+    (action/update-application command
+                               {$set {:state     :submitted
+                                      :modified  created
+                                      :opened    (or (:opened application) created)
+                                      :submitted (or (:submitted application) created)}
+                                $push {:history {$each history-entries}}}))
+  (try
+    (mongo/insert :submitted-applications (-> application
+                                              meta-fields/enrich-with-link-permit-data
+                                              (dissoc :id)
+                                              (assoc :_id (:id application))))
+    (catch com.mongodb.DuplicateKeyException e
+      ; This is ok. Only the first submit is saved.
+      )))
 
 ;;
 ;; Updates

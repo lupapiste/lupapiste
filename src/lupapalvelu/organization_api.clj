@@ -777,3 +777,46 @@
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
     (inspection-summary/select-template-for-operation organizationId operationId templateId)))
+
+(defn- validate-handler-role-in-organization
+  "Pre-check that fails if roleId is defined but not found in handler-roles of authority admin's organization."
+  [{{role-id :roleId} :data user :user user-orgs :user-organizations}]
+  (when-let [org (-> (usr/authority-admins-organization-id user)
+                     (util/find-by-id user-orgs))]
+    (when (and role-id (not (util/find-by-id role-id (:handler-roles org))))
+      (fail :error.unknown-handler))))
+
+(defn- validate-handler-role-not-general
+  "Pre-check that fails if roleId is defined and found in handler-roles of authority admin's organization and is set as general."
+  [{{role-id :roleId} :data user :user user-orgs :user-organizations}]
+  (when-let [org (-> (usr/authority-admins-organization-id user)
+                     (util/find-by-id user-orgs))]
+    (when (and role-id (:general (util/find-by-id role-id (:handler-roles org))))
+      (fail :error.illegal-handler-role))))
+
+(defcommand upsert-handler-role
+  {:description "Create and modify organization handler role"
+   :parameters [name]
+   :optional-parameters [roleId]
+   :pre-checks [validate-handler-role-in-organization]
+   :input-validators [(partial action/map-parameters-with-required-keys [:name] i18n/all-languages)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user user-orgs :user-organizations}]
+  (let [handler-role (org/create-handler-role roleId name)]
+    (if (sc/check org/HandlerRole handler-role)
+      (fail :error.missing-parameters)
+      (do (-> (usr/authority-admins-organization-id user)
+              (util/find-by-id user-orgs)
+              (org/upsert-handler-role! handler-role))
+          (ok :id (:id handler-role))))))
+
+(defcommand disable-handler-role
+  {:description "Set organization handler role disabled"
+   :parameters [roleId]
+   :pre-checks [validate-handler-role-in-organization
+                validate-handler-role-not-general]
+   :input-validators [(partial non-blank-parameters [:roleId])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (-> (usr/authority-admins-organization-id user)
+      (org/disable-handler-role! roleId)))
