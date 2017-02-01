@@ -798,4 +798,4 @@
       (fail :error.missing-parameters)
       (-> (usr/authority-admins-organization-id user)
           (util/find-by-id user-orgs)
-          (org/set-handler-role! handler-role)))))
+          (org/upsert-handler-role! handler-role)))))

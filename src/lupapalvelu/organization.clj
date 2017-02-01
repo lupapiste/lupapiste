@@ -578,7 +578,7 @@
   {:id (or role-id (mongo/create-id))
    :name name})
 
-(defn set-handler-role! [{handler-roles :handler-roles org-id :id} handler-role]
+(defn upsert-handler-role! [{handler-roles :handler-roles org-id :id} handler-role]
   (let [ind (or (util/position-by-id (:id handler-role) handler-roles)
                 (count handler-roles))]
     (update-organization org-id {$set {(util/kw-path :handler-roles ind) handler-role}})))
