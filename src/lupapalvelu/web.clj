@@ -668,7 +668,7 @@
                           (assoc :user user, :created (now)))]
           (cond
             (= state "submitted")
-            (application/do-submit command)
+            (app/submit command)
 
             (and (ss/not-blank? state) (not= state (get-in command [:application :state])))
             (action/update-application command {$set {:state state}, $push {:history (app/history-entry state (:created command) user)}}))

@@ -526,6 +526,27 @@
                                          :apptype (get-in link-application [:primaryOperation :name])}}
                         :upsert true)))
 
+;; Submit
+
+(defn submit [{:keys [application created user] :as command} ]
+  (let [history-entries (remove nil?
+                                [(when-not (:opened application) (history-entry :open created user))
+                                 (history-entry :submitted created user)])]
+    (update-application command
+                        {$set {:state     :submitted
+                               :modified  created
+                               :opened    (or (:opened application) created)
+                               :submitted (or (:submitted application) created)}
+                         $push {:history {$each history-entries}}}))
+  (try
+    (mongo/insert :submitted-applications (-> application
+                                              meta-fields/enrich-with-link-permit-data
+                                              (dissoc :id)
+                                              (assoc :_id (:id application))))
+    (catch com.mongodb.DuplicateKeyException e
+      ; This is ok. Only the first submit is saved.
+      )))
+
 ;;
 ;; Updates
 ;;

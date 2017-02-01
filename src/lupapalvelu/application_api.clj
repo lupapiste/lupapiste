@@ -267,27 +267,6 @@
   [{:keys [application]}]
   (krysp-output/cleanup-output-dir application))
 
-;; Submit
-
-(defn do-submit [{:keys [application created user] :as command} ]
-  (let [history-entries (remove nil?
-                          [(when-not (:opened application) (app/history-entry :open created user))
-                           (app/history-entry :submitted created user)])]
-    (update-application command
-      {$set {:state     :submitted
-             :modified  created
-             :opened    (or (:opened application) created)
-             :submitted (or (:submitted application) created)}
-       $push {:history {$each history-entries}}}))
-  (try
-    (mongo/insert :submitted-applications (-> application
-                                            meta-fields/enrich-with-link-permit-data
-                                            (dissoc :id)
-                                            (assoc :_id (:id application))))
-    (catch com.mongodb.DuplicateKeyException e
-      ; This is ok. Only the first submit is saved.
-      )))
-
 (notifications/defemail :neighbor-hearing-requested
   {:pred-fn       (fn [command] (get-in command [:application :options :municipalityHearsNeighbors]))
    :recipients-fn (fn [{application :application org :organization}]
@@ -344,7 +323,7 @@
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do-submit command))))
+      (app/submit command))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
