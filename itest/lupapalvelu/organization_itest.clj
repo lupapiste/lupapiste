@@ -947,3 +947,35 @@
                                      :name {:fi "Updated Finnish kasittelija"
                                             :sv "Updated Swedish handlaggare"
                                             :en "Updated English handler"}}]))))
+
+(def sipoo-handler-roles (->> (query sipoo :organization-by-user) :organization :handler-roles))
+
+(facts disable-handler-role
+  (fact "cannot disable with unexisting id"
+    (command sipoo :disable-handler-role
+             :roleId "abba1111111111111666acdc") => (partial expected-failure? :error.unknown-handler))
+
+  (fact "cannot disable with blank id"
+    (command sipoo :upsert-handler-role
+             :roleId "") => (partial expected-failure? :error.missing-parameters))
+
+  (fact "cannot disable general handler role"
+    (command sipoo :disable-handler-role
+             :roleId (-> sipoo-handler-roles first :id)) => (partial expected-failure? :error.illegal-handler-role))
+
+  (fact "disable handler role"
+    (command sipoo :disable-handler-role
+             :roleId (-> sipoo-handler-roles second :id)) => ok?
+
+    (let [handler-roles (get-in (query sipoo :organization-by-user) [:organization :handler-roles])]
+      (fact "no handler roles added or deleted"
+        (count handler-roles) => (count sipoo-handler-roles))
+
+      (fact "second handler is disabled"
+        (-> handler-roles second :disabled) => true)
+
+      (fact "second handler is not name and id is not edited"
+        (-> handler-roles second (select-keys [:id :name])) => (-> sipoo-handler-roles second (select-keys [:id :name])))
+
+      (fact "other handler-roles not updated"
+        (first handler-roles) => (first sipoo-handler-roles)))))
