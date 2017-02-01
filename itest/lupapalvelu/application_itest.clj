@@ -568,7 +568,7 @@
       (fact "application is unassigned, Sonja does not see the full person IDs"
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (-> app :authority :id) => nil
+          (:handlers app) => empty?
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "application is unassigned, Ronja does not see the full person IDs"
