@@ -63,6 +63,7 @@
    :user-roles #{:authority}}
   [{app :application}]
   (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)
+      :summaries (:inspection-summaries app)
       :operations (->> (app/get-operations app)
                        (map (partial map-operation-to-frontend app))
                        (remove nil?))))

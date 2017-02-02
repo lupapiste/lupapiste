@@ -7,7 +7,21 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.schemas :as ssc]
+            [schema.core :as sc :refer [defschema]]))
+
+(defschema InspectionSummaryItem
+           {:label sc/Str
+            :content [sc/Any]})
+
+(defschema InspectionSummary
+  {:id ssc/ObjectIdStr
+   :name sc/Str
+   :op {:id ssc/ObjectIdStr
+        (sc/optional-key :name) sc/Str
+        (sc/optional-key :description) sc/Str}
+   :items [InspectionSummaryItem]})
 
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
@@ -59,6 +73,20 @@
                  {$set   {field templateId}})]
     (org/update-organization organizationId update)))
 
-(defn process-verdict-given [{:keys [organization primaryOperation] :as application}]
-  (when (organization-has-inspection-summary-feature? organization)
-    (debugf "CREATING NEW INSPECTION SUMMARY" (:name primaryOperation))))
+(defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
+  (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
+        summary (assoc (select-keys template [:id :name])
+                  :op    (select-keys operation [:id :name :description])
+                  :items (zipmap (:items template) (repeat {})))]
+    (mongo/update :applications {:_id appId} {$push {:inspection-summaries summary}})))
+
+(defn default-template-id-for-operation [organization {opName :name}]
+  (get-in organization [:inspection-summary :operations-templates (keyword opName)]))
+
+(defn process-verdict-given [{:keys [organization primaryOperation inspection-summaries] :as application}]
+  (println primaryOperation)
+  (let [organization (org/get-organization organization)]
+    (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
+      (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
+        (debugf "CREATING NEW INSPECTION SUMMARY %s %s" (:name primaryOperation) templateId)
+        (new-summary-for-operation application primaryOperation templateId)))))
