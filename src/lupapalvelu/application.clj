@@ -317,16 +317,20 @@
 ;; Application creation
 ;;
 
+(defn- new-attachment-types-for-operation [organization operation existing-types]
+  (->> (org/get-organization-attachments-for-operation organization operation)
+       (map (partial apply att-type/attachment-type))
+       (filter #(or (att-type/operation-specific? %) (not (att-type/contains? existing-types %))))))
+
+(defn- attachment-grouping-for-type [operation {{group-type :grouping} :metadata}]
+  (when-not (false? (op/get-operation-metadata (:name operation) :attachment-op-selector))
+    (util/assoc-when nil :groupType group-type :operations (when (and operation (= group-type :operation)) [operation]))))
+
 (defn make-attachments
   [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
-  (let [existing-types (->> (map att/attachment-type-coercer existing-attachments-types) set)
-        types          (->> (org/get-organization-attachments-for-operation organization operation)
-                            (map (partial apply att-type/attachment-type))
-                            (filter #(or (att-type/operation-specific? %) (not (att-type/contains? existing-types %)))))
-        groups         (map #(let [group-type (get-in % [:metadata :grouping])]
-                               (util/assoc-when nil :groupType group-type :operations (when (and operation (= group-type :operation)) [operation])))
-                            types)
-        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
+  (let [types     (new-attachment-types-for-operation organization operation existing-attachments-types)
+        groups    (map (partial attachment-grouping-for-type operation) types)
+        metadatas (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false (keyword applicationState)) groups types metadatas)))
 
 (defn multioperation-attachment-updates [operation organization attachments]
