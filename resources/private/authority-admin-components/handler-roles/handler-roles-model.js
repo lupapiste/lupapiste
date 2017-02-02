@@ -29,6 +29,7 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
     service.addOrganizationHandlerRole();
   };
 
+  // Empty names on partly filled row are required.
   self.isRequired = function( name, lang ) {
     return !_.trim( util.getIn( name, [lang]))
         && _.some( _.values( ko.mapping.toJS( name )), _.trim);

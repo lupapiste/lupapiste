@@ -943,9 +943,9 @@
 
 (defquery application-handlers
   {:parameters       [id]
-   :user-authz-roles #{:statementGiver}
-   :user-roles       #{:authority :applicant}
-   :states           states/all-application-states}
+   :user-authz-roles auth/all-authz-roles
+   :user-roles       #{:authority :applicant :oirAuthority}
+   :states           states/all-states}
   [{:keys [application lang organization]}]
   (ok :handlers (map (fn [{role-id :roleId :as handler}]
                        (assoc handler :roleName (->> @organization
@@ -960,6 +960,6 @@
   the disabled ones."
    :parameters  [id]
    :user-roles  #{:authority}
-   :states      states/all-application-states}
+   :states      states/all-states}
   [{:keys [organization]}]
   (ok :handlerRoles (:handler-roles @organization)))
