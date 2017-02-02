@@ -120,6 +120,9 @@
   "A schema for empty or nil valued string"
   (sc/if string? (sc/pred empty? "Empty string") (sc/pred nil? "Nil")))
 
+(defschema NonBlankStr
+  (sc/constrained sc/Str ss/not-blank? "Non-blank string"))
+
 (defschema Email
   "A simple schema for email"
   (sc/constrained sc/Str (every-pred validators/valid-email? ss/in-lower-case? (max-length-constraint 255)) "Email"))

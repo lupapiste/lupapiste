@@ -67,8 +67,10 @@
    :items [sc/Str]})
 
 (sc/defschema HandlerRole
-  {:id ssc/ObjectIdStr
-   :name (zipmap i18n/all-languages (repeat sc/Str))})
+  {:id                              ssc/ObjectIdStr
+   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
+   (sc/optional-key :general)       sc/Bool
+   (sc/optional-key :disabled)      sc/Bool})
 
 (sc/defschema Organization
   {:id sc/Str
@@ -571,3 +573,16 @@
   (update-organization organization
                        {$pull {:links (mongofy {:name name
                                                 :url  url})}}))
+
+(defn create-handler-role [role-id name]
+  {:id (or role-id (mongo/create-id))
+   :name name})
+
+(defn upsert-handler-role! [{handler-roles :handler-roles org-id :id} handler-role]
+  (let [ind (or (util/position-by-id (:id handler-role) handler-roles)
+                (count handler-roles))]
+    (update-organization org-id {$set {(util/kw-path :handler-roles ind :id)   (:id handler-role)
+                                       (util/kw-path :handler-roles ind :name) (:name handler-role)}})))
+
+(defn disable-handler-role! [org-id role-id]
+  (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))

@@ -22,7 +22,7 @@
   (let [xml-without-ns (update xml-without-ns :content (partial remove (comp #{:boundedBy} :tag)))
         toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])
         content (if (= (:tag xml-without-ns) :FeatureCollection)
-                  (-> xml-without-ns :content first :content)
+                  (mapcat :content (-> xml-without-ns :content))
                   (:content xml-without-ns))]
     (->> content
          (remove (comp #{:toimituksenTiedot} :tag))
@@ -59,8 +59,9 @@
 
 (defmethod get-application-xmls :application-id
   [organization permit-type search-type application-ids]
-  (->> (fetch-application-xmls organization permit-type application-ids :application-id false)
-       (group-content-by get-lp-tunnus permit-type)))
+  (let [res (->> (fetch-application-xmls organization permit-type application-ids :application-id false)
+                 (group-content-by get-lp-tunnus permit-type))]
+    res))
 
 (defmethod get-application-xmls :kuntalupatunnus
   [organization permit-type search-type backend-ids]

@@ -83,14 +83,14 @@ Registrations succeeds, user gets email
   Open all latest emails
   Wait Until  Page Should Contain  puuha.pete@pete-rakennus.fi
   Page Should Contain  new-company-user
-  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste: Inbjudan till huvudanvändare för Lupapiste-tjänstens företagskonto
+  Wait until  Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste: Inbjudan att administrera Företagskonto i Lupapiste
 
 Second link in email should lead to password reset
-  Click Element  xpath=(//a)[2]
+  Click Element  xpath=(//a[contains(., 'new-company-user')])
   Wait Until  Element should be visible  new-company-user
   Wait Until  Page should contain  2341528-4
   Page should contain  puuha.pete@pete-rakennus.fi
-  Fill in new password  new-company-user  company123
+  Fill in new company password  new-company-user  company123
 
 Login with the new password
   Login  puuha.pete@pete-rakennus.fi  company123

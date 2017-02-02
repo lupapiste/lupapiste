@@ -347,7 +347,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {:firstName "", :lastName "", :id nil}
+   :authority                {:firstName "", :lastName "", :id nil} ; TODO: Remove from application, use handlers instead
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp
@@ -360,6 +360,7 @@
    :drawings                 []
    :foreman                  ""
    :foremanRole              ""
+   :handlers                 []
    :history                  [] ; state transition audit log
    :infoRequest              false
    :location                 {}

@@ -29,6 +29,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.server]
             [ring.util.codec :as codec])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
@@ -96,6 +97,9 @@
 (def oir-property-id "43300000000000")
 (def oulu-property-id "56400000000000")
 (def no-backend-property-id oulu-property-id)
+
+(def sipoo-general-handler-id "abba1111111111111111acdc")
+(def sipoo-kvv-handler-id     "abba1111111111111112acdc")
 
 (defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
 

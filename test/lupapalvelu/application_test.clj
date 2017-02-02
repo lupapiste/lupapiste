@@ -8,7 +8,7 @@
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.operations :as operations]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-api]
@@ -23,8 +23,8 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application-api add-operation-allowed?)
-(testable-privates lupapalvelu.application required-link-permits)
+(testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -82,7 +82,7 @@
                                :koeluontoinen-toiminta :maa-ainesten-kotitarveotto :ilmoitus-poikkeuksellisesta-tilanteesta}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
-    (doseq [operation lupapalvelu.operations/operations]
+    (doseq [operation op/operations]
       (let [[op {permit-type :permit-type}] operation
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
             operation-allowed (add-operation-allowed? {:application application})]
@@ -176,6 +176,61 @@
                ((reject-primary-operations #{:hii}) app) => nil?
                ((reject-primary-operations #{}) app) => nil?)))
 
+(facts validate-handler-id-in-application
+  (fact "no handlers"
+    (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers []}})) => false)
+
+  (fact "no matching handlers"
+    (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers [{:id ..another-handler-id..}]}})) => false)
+
+  (fact "matching handlers"
+    (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers [{:id ..handler-id..}]}}) => nil)
+
+  (fact "no handler id given"
+    (validate-handler-id-in-application {:data {:handlerId nil} :application {:handlers [{:id ..handler-id..}]}}) => nil))
+
+(facts validate-handler-in-organization
+  (fact "handler not in organization"
+    (:ok (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}})) => false
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => nil))
+
+  (fact "handler found in organization"
+    (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}}) => nil
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => {:id ..user-id.. :orgAuthz {:org-id ["authority"]}}))
+
+  (fact "no user id given"
+    (validate-handler-in-organization {:data {:userId nil} :application {:organization "org-id"}}) => nil))
+
+
+(facts validate-handler-role
+  (fact "no handler roles in org"
+    (:ok (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles []})})) => false)
+
+  (fact "no mathing handler roles in org"
+    (:ok (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles [{:id ..another-role-id..}]})})) => false)
+
+  (fact "mathing handler role"
+    (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles [{:id ..role-id..}]})}) => nil)
+
+  (fact "no role id given"
+    (validate-handler-role {:data {:roleId nil} :organization (delay {:handler-roles [{:id ..role-id..}]})}) => nil))
+
+(facts validate-handler-role-not-in-use
+  (fact "update existing handler"
+    (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId ..handler-id..} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}})
+    => nil)
+
+  (fact "trying create duplicate handler role"
+    (:ok (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}}))
+    => false)
+
+  (fact "create new handler role"
+    (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..another-role-id..}]}})
+    => nil)
+
+  (fact "no role id given"
+    (validate-handler-role-not-in-use {:data {:roleId nil :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}})
+    => nil))
 
 (facts multioperation-attachment-updates
   (fact "multioperation attachment update with op array"
@@ -228,6 +283,54 @@
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]])))
 
+(facts new-attachment-types-for-operation
+  (fact "three attachments"
+    (new-attachment-types-for-operation ..org.. ..op.. [])
+    => [{:type-group :paapiirustus, :type-id :asemapiirros,   :metadata {:grouping :operation, :multioperation true}}
+        {:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}
+        {:type-group :muut,         :type-id :luonnos}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["muut" "luonnos"]]))
+
+  (fact "two attachments - one existing operation specific"
+    (new-attachment-types-for-operation ..org.. ..op.. [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+    => [{:type-group :paapiirustus, :type-id :asemapiirros,   :metadata {:grouping :operation, :multioperation true}}
+        {:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]]))
+
+  (fact "two attachments - one existing multioperation"
+    (new-attachment-types-for-operation ..org.. ..op.. [{:type-group "paapiirustus" :type-id "asemapiirros"}])
+    => [{:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]]))
+
+  (fact "three attachments - all exists"
+    (new-attachment-types-for-operation ..org.. ..op.. [{:type-group "paapiirustus" :type-id "asemapiirros"} {:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "muut" :type-id "luonnos"}])
+    => [{:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["muut" "luonnos"]])))
+
+(facts attachment-grouping-for-type
+  (fact "operation grouping - attachment-op-selector->nil"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :operation}}) => {:groupType :operation :operations [{:name ..op-name..}]}
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => nil))
+
+  (fact "operation grouping - attachment-op-selector->true"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :operation}}) => {:groupType :operation :operations [{:name ..op-name..}]}
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => true))
+
+  (fact "operation grouping - attachment-op-selector->false"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :operation}}) => nil
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => false))
+
+  (fact "parties grouping - attachment-op-selector->nil"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :parties}}) => {:groupType :parties}
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => nil))
+
+  (fact "parties grouping - attachment-op-selector->false"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :parties}}) => nil
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => false))
+
+  (fact "no metadata"
+    (attachment-grouping-for-type {:name ..op-name..} nil) => nil
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => false)))
 
 (facts make-attachments
   (fact "no overlapping attachments"

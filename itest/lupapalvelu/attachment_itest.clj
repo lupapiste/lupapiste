@@ -799,8 +799,8 @@
     (fact "Upload file to attachment"
           (upload-attachment pena application-id base-attachment true) => truthy)
 
-    (fact "Assign application to Ronja"
-      (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?)
+    (fact "Ronja is set as general handler"
+      (command sonja :upsert-application-handler :id application-id :userId ronja-id :roleId sipoo-general-handler-id) => ok?)
 
     (fact "Cannot create ram attachment before verdict is given"
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))

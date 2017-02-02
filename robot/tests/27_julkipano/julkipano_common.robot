@@ -46,6 +46,7 @@ Publish bulletin
   ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
   ${MONTH_FROM_NOW} =    Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text with jQuery  input[name="proclamationStartsAt"]  ${TODAY_DD_MM_YYYY}
   Input text with jQuery  input[name="proclamationEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="proclamationText"]  foobar
@@ -59,6 +60,7 @@ Create application and publish bulletin
   ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
   ${MONTH_FROM_NOW} =    Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text with jQuery  input[name="proclamationStartsAt"]  ${TODAY_DD_MM_YYYY}
   Input text with jQuery  input[name="proclamationEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="proclamationText"]  foobar
