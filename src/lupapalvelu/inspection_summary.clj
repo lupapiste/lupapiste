@@ -12,8 +12,8 @@
             [schema.core :as sc :refer [defschema]]))
 
 (defschema InspectionSummaryItem
-           {:label sc/Str
-            :content [sc/Any]})
+           {:target-name sc/Str   ;Tarkastuskohde
+            sc/Keyword   sc/Any})
 
 (defschema InspectionSummary
   {:id ssc/ObjectIdStr
@@ -21,7 +21,7 @@
    :op {:id ssc/ObjectIdStr
         (sc/optional-key :name) sc/Str
         (sc/optional-key :description) sc/Str}
-   :items [InspectionSummaryItem]})
+   :targets [InspectionSummaryItem]})
 
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
@@ -76,8 +76,8 @@
 (defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
   (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
         summary (assoc (select-keys template [:id :name])
-                  :op    (select-keys operation [:id :name :description])
-                  :items (zipmap (:items template) (repeat {})))]
+                  :op      (select-keys operation [:id :name :description])
+                  :targets (map #(hash-map :target-name %) (:items template)))]
     (mongo/update :applications {:_id appId} {$push {:inspection-summaries summary}})))
 
 (defn default-template-id-for-operation [organization {opName :name}]
