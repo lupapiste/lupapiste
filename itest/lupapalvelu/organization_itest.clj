@@ -906,22 +906,23 @@
 
   (facts "update existing handler role"
     (command sipoo :upsert-handler-role
-             :roleId (get-in sipoo-handler-roles [1 :id])
+             :roleId (get-in sipoo-handler-roles [0 :id])
              :name {:fi "Updated Finnish kasittelija"
                     :sv "Updated Swedish handlaggare"
                     :en "Updated English handler"}) => ok?
 
     (let [handler-roles (get-in (query sipoo :organization-by-user) [:organization :handler-roles])]
       (fact "handler role is updated"
-        (second handler-roles) => {:id "abba1111111111111112acdc"
-                                   :name {:fi "Updated Finnish kasittelija"
-                                          :sv "Updated Swedish handlaggare"
-                                          :en "Updated English handler"}})
+        (first handler-roles) => {:id   (get-in sipoo-handler-roles [0 :id])
+                                  :name {:fi "Updated Finnish kasittelija"
+                                         :sv "Updated Swedish handlaggare"
+                                         :en "Updated English handler"}
+                                  :general true})
       (fact "no new handlers added"
         (count handler-roles) => (count sipoo-handler-roles))
 
       (fact "other handler roles not changed"
-        (first handler-roles) => (first sipoo-handler-roles))))
+        (second handler-roles) => (second sipoo-handler-roles))))
 
   (facts "insert new handler role"
     (command sipoo :upsert-handler-role
@@ -942,11 +943,12 @@
         (:id (last handler-roles)) => ss/not-blank?)
 
       (fact "other handler-roles not updated"
-        (take 2 handler-roles) => [(first sipoo-handler-roles)
-                                   {:id "abba1111111111111112acdc"
-                                     :name {:fi "Updated Finnish kasittelija"
-                                            :sv "Updated Swedish handlaggare"
-                                            :en "Updated English handler"}}]))))
+        (take 2 handler-roles) => [{:id   (get-in sipoo-handler-roles [0 :id])
+                                    :name {:fi "Updated Finnish kasittelija"
+                                           :sv "Updated Swedish handlaggare"
+                                           :en "Updated English handler"}
+                                    :general true}
+                                   (second sipoo-handler-roles)]))))
 
 (def sipoo-handler-roles (->> (query sipoo :organization-by-user) :organization :handler-roles))
 
