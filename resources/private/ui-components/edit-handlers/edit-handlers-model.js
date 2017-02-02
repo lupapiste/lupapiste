@@ -13,15 +13,17 @@ LUPAPISTE.EditHandlersModel = function() {
   }
 
   var roles = service.applicationHandlerRoles();
-  var authorities = self.disposedComputed( function() {
-    return _.map( service.applicationAuthorities()(),
-                function( auth ) {
-                  return _.merge( {},
-                                  auth,
-                                  {id: auth.id,
-                                   name: nameString( auth )});
-                });
-  });
+  var authorities = ko.observableArray();
+  self.disposedSubscribe(service.applicationAuthorities(), function( auths ) {
+    authorities(_.map( auths,
+                       function( auth ) {
+                         return _.merge( {},
+                                         auth,
+                                         {id: auth.id,
+                                          name: nameString( auth )});
+                       }));
+    
+  } );
 
   self.handlers = service.applicationHandlers;
 

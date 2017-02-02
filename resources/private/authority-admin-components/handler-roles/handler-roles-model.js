@@ -5,10 +5,17 @@
 LUPAPISTE.HandlerRolesModel = function( params ) {
   "use strict";
   var self = this;
- 
-  ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( _.defaults( params,
-                                                                         {enable: Boolean(lupapisteApp.models.globalAuthModel.ok("upsert-handler-role"))}) ));
 
+  var enable = ko.observable( true );
+ 
+  ko.utils.extend( self,
+                   new LUPAPISTE.EnableComponentModel( _.defaults( params,
+                                                                   {enable: enable}) ));
+
+  self.disposedComputed( function() {
+    enable( Boolean(lupapisteApp.models.globalAuthModel.ok("upsert-handler-role")));
+  });
+  
   var service = lupapisteApp.services.handlerService;
 
   self.roles = service.organizationHandlerRoles( params.organization );

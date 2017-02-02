@@ -19,7 +19,7 @@
                  data-bind="value: $parent.name[$data],
                             disable: $parents[1].isDisabled,
                             css: {required: $parents[1].isRequired( $parent.name, $data )},
-                            testId: sprintf( 'edit-role-%s-%s', $index(), $data )">
+                            testId: sprintf( 'edit-role-%s-%s', $parentContext.$index, $data )">
         </td>
         <!-- /ko -->
         <td>
