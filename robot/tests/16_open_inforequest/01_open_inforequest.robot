@@ -19,8 +19,8 @@ Mikko creates an info request to Loppi
 
 Email is sent to Loppi rakennusvalvonta
   Open last email
-  Wait until  Element Should Contains  xpath=//dd[@data-test-id='subject']  Lupapiste
-  Wait until  Element Should Contains  xpath=//dd[@data-test-id='subject']  Neuvontapyyntö
+  Wait until  Element Should Contain  xpath=//dd[@data-test-id='subject']  Lupapiste
+  Wait until  Element Should Contain  xpath=//dd[@data-test-id='subject']  Neuvontapyyntö
 
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()
