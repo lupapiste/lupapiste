@@ -256,7 +256,7 @@
       (facts "Application"
         (let [application (query-application sonja application-id)]
           (fact "is not assigned"
-            (get-in application  [:authority :id]) => nil)
+            (:handlers application) => empty?)
           (fact "has correct number of attachments with files"
             (->> (:attachments application)
                  (filter (comp :fileId :latestVersion))

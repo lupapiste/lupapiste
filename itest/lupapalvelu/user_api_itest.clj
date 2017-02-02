@@ -79,7 +79,7 @@
     (let [email (last-email)]
       (:to email) => "foo@example.com"
       (:subject email) => invite-authority-email-subject
-      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
+      (get-in email [:body :plain]) => (contains #"/app/fi/welcome#!/setpw/[A-Za-z0-9-]+"))))
 
 ;;
 ;; ==============================================================================
@@ -173,7 +173,7 @@
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => invite-authority-email-subject
-      (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
+      (get-in email [:body :plain]) => (contains #"/app/fi/welcome#!/setpw/[A-Za-z0-9-]+")))
 
   (fact "add existing authority to new organization"
 

@@ -98,6 +98,9 @@
 (def oulu-property-id "56400000000000")
 (def no-backend-property-id oulu-property-id)
 
+(def sipoo-general-handler-id "abba1111111111111111acdc")
+(def sipoo-kvv-handler-id     "abba1111111111111112acdc")
+
 (defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
 
 ;; use in place of server-address to use loopback interface over configured hostname in testing, eg autologin
