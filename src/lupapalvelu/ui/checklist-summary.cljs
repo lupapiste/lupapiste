@@ -1,14 +1,16 @@
 (ns lupapalvelu.ui.checklist-summary
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [clojure.string :as string]))
 
 (enable-console-print!)
 
-(def state (atom {:applicationId ""
+(def empty-state {:applicationId ""
                   :rows []
                   :input ""
-                  :operations []}))
+                  :operations []})
+
+(def state (atom empty-state))
 (def rows  (rum/cursor-in state [:rows]))
-(def texti  (rum/cursor-in state [:input]))
 
 (rum/defc summary-row [row-data]
   [:tr [:td "Cell"] [:td (:text row-data)] [:td "Faa"]])
@@ -31,33 +33,36 @@
 
 (defn init
   [init-state props]
-  (swap! state assoc :applicationId ((-> (aget props ":rum/initial-state")
-                                         :rum/args
-                                         first
-                                         (aget "id"))))
-  (swap! state assoc :input ((-> (aget props ":rum/initial-state")
-                                 :rum/args
-                                 first
-                                 (aget "texti"))))
+  (id-subscription ((-> (aget props ":rum/initial-state")
+                                    :rum/args
+                                    first
+                                    (aget "id"))))
   #_(js/hub.send "XYZ" (js-obj :id (-> @state :applicationId)))
   init-state)
 
 (rum/defc checklist-summary < rum/reactive
                               {:init init
-                               :render init}
+                               :will-unmount (fn [& _] (reset! state empty-state))}
   [ko-app]
-  (.subscribe (aget ko-app "texti") ko-subscription)
   (.subscribe (aget ko-app "id") id-subscription)
   [:div
    [:h1 "Tarkastusasiakirjan yhteenveto"]
    [:div
     [:label "Valitse tarkastusasiakirjan yhteenveto"]
-    [:br]
-    [:select
-     (for [op (rum/react (rum/cursor-in state [:operations]))]
-       [:option
-        {:value (:id op)}
-        (str (:description op) " - " (:op-identifier op))])]]
+    [:div
+     {:class "left-buttons"}
+     [:select.form-entry.is-middle
+      {:style {:width "50%"}}
+      (for [op (rum/react (rum/cursor-in state [:operations]))
+            :let [op-name        (js/loc (str "operations." (:name op)))
+                  op-description (string/join " - " (remove empty? [(:description op) (:op-identifier op)]))]]
+        [:option
+         {:value (:id op)}
+         (str op-description " (" op-name ") ")])]
+     [:button.positive
+      {:on-click (fn [_] (swap! rows conj {:id (str "row" (rand-int 50)) :text "Faa"}))}
+      [:i.lupicon-circle-plus]
+      [:span "Luo uusi"]]]]
    [:table
     [:tbody
      (doall
