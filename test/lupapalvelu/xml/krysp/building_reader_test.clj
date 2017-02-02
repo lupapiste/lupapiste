@@ -186,4 +186,7 @@
                     :nationalId   "1234567892",
                     :area         "2000",
                     :propertyId   "02012345",
-                    :operationId  nil}])))
+                    :operationId  nil}]))
+       (fact "FeatureCollection+boundedBy+multiple featureMembers review"
+             (let [fc-group (group-xml "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml")]
+               (keys fc-group) => (contains ["LP-999-2016-99999" "LP-999-2016-99349"] :in-any-order))))
