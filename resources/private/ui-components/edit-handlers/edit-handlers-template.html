@@ -4,8 +4,8 @@
     <icon-button params="icon: 'chevron-start',
                          buttonClass: 'secondary',
                          ltext: 'back',
-                         click: back"
-                 data-test-id="edit-handlers-back"></icon-button>
+                         click: back,
+                         testId: 'edit-handlers-back'"></icon-button>
     <hr>
     <div class="tabby"
          data-bind="visible: _.size( handlers() )">
@@ -61,7 +61,7 @@
                          buttonClass: 'positive',
                          enable: canAdd(),
                          click: add,
-                         ltext: 'handler-roles.add'"
-                 data-test-id="add-handler"></icon-button>
+                         ltext: 'handler-roles.add',
+                         testId: 'add-handler'"></icon-button>
   </div>
 </script>

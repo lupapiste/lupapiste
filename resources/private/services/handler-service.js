@@ -1,4 +1,6 @@
-// Application handlers and organization handler roles.
+// Application handlers and organization handler roles.  The service
+// is used both by authorityAdmin (organisation handler roles) and
+// applicant/authority (listing and editing application handlers).
 LUPAPISTE.HandlerService = function() {
   "use strict";
   var self = this;
@@ -17,10 +19,13 @@ LUPAPISTE.HandlerService = function() {
     return lupapisteApp.services.contextService.applicationId();
   }
 
-  function indicateSaved() {
-    hub.send( "indicator", {message: "saved", style: "positive"} );
+  function indicate( message ) {
+    hub.send( "indicator", {message: message,
+                            style: "positive"} );
   }
 
+  var indicateSaved   = _.wrap( "saved", indicate );
+  var indicateRemoved = _.wrap( "calendar.deleted", indicate );
  
   // ---------------------------
   // Ajax API
@@ -74,7 +79,7 @@ LUPAPISTE.HandlerService = function() {
 
   function disableOrganizationRole( roleId ) {
     ajax.command( "disable-handler-role", {roleId: roleId })
-    .success( indicateSaved )
+    .success( indicateRemoved )
     .call();
   }
 
@@ -96,7 +101,7 @@ LUPAPISTE.HandlerService = function() {
     ajax.command( "remove-application-handler",
                   {id: appId(),
                    handlerId: ko.unwrap( handlerId )})
-    .success( indicateSaved)
+    .success( indicateRemoved)
     .call();
   }
 
@@ -146,12 +151,12 @@ LUPAPISTE.HandlerService = function() {
     });        
     return roles;
   };
-
-  self.organizationLanguages = function() {
+  
+  self.organizationLanguages = ko.pureComputed( function() {
     return _.intersection( loc.getSupportedLanguages(),
                            _.keys( _.get( roles(),
                                           "0.name")));
-  };
+  });
 
   self.removeOrganizationHandlerRole = function( roleId ) {
     roles.remove( function( r ) {return r.id() === roleId();});
@@ -204,7 +209,6 @@ LUPAPISTE.HandlerService = function() {
     });
     return m;
   }
-
   
   self.newApplicationHandler = function() {
     self.applicationHandlers.push(processRawHandler( {id: _.uniqueId( TMP ),
@@ -223,7 +227,6 @@ LUPAPISTE.HandlerService = function() {
       removeHandler( handlerId );
     }
   };
-
 
   hub.subscribe( "contextService::enter", fetchApplicationHandlers );
 

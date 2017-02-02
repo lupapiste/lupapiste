@@ -1,4 +1,5 @@
 // Organization handler roles management.
+// Note: There is always at least one handler role (general).
 // Parameters:
 //   organization: OrganizationModel instance.
 LUPAPISTE.HandlerRolesModel = function( params ) {
@@ -12,7 +13,7 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
 
   self.roles = service.organizationHandlerRoles( params.organization );
 
-  self.languages = self.disposedPureComputed(  service.organizationLanguages );
+  self.languages = service.organizationLanguages;
 
   self.nameHeader = function( lang ) {
     return sprintf( "%s (%s)",
