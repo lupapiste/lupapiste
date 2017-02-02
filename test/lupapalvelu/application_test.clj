@@ -8,7 +8,7 @@
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.operations :as operations]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-api]
@@ -24,7 +24,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -82,7 +82,7 @@
                                :koeluontoinen-toiminta :maa-ainesten-kotitarveotto :ilmoitus-poikkeuksellisesta-tilanteesta}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
-    (doseq [operation lupapalvelu.operations/operations]
+    (doseq [operation op/operations]
       (let [[op {permit-type :permit-type}] operation
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
             operation-allowed (add-operation-allowed? {:application application})]
@@ -283,6 +283,54 @@
     (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]])))
 
+(facts new-attachment-types-for-operation
+  (fact "three attachments"
+    (new-attachment-types-for-operation ..org.. ..op.. [])
+    => [{:type-group :paapiirustus, :type-id :asemapiirros,   :metadata {:grouping :operation, :multioperation true}}
+        {:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}
+        {:type-group :muut,         :type-id :luonnos}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["muut" "luonnos"]]))
+
+  (fact "two attachments - one existing operation specific"
+    (new-attachment-types-for-operation ..org.. ..op.. [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+    => [{:type-group :paapiirustus, :type-id :asemapiirros,   :metadata {:grouping :operation, :multioperation true}}
+        {:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]]))
+
+  (fact "two attachments - one existing multioperation"
+    (new-attachment-types-for-operation ..org.. ..op.. [{:type-group "paapiirustus" :type-id "asemapiirros"}])
+    => [{:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]]))
+
+  (fact "three attachments - all exists"
+    (new-attachment-types-for-operation ..org.. ..op.. [{:type-group "paapiirustus" :type-id "asemapiirros"} {:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "muut" :type-id "luonnos"}])
+    => [{:type-group :paapiirustus, :type-id :pohjapiirustus, :metadata {:grouping :operation}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. ..op..) => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["muut" "luonnos"]])))
+
+(facts attachment-grouping-for-type
+  (fact "operation grouping - attachment-op-selector->nil"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :operation}}) => {:groupType :operation :operations [{:name ..op-name..}]}
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => nil))
+
+  (fact "operation grouping - attachment-op-selector->true"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :operation}}) => {:groupType :operation :operations [{:name ..op-name..}]}
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => true))
+
+  (fact "operation grouping - attachment-op-selector->false"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :operation}}) => nil
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => false))
+
+  (fact "parties grouping - attachment-op-selector->nil"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :parties}}) => {:groupType :parties}
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => nil))
+
+  (fact "parties grouping - attachment-op-selector->false"
+    (attachment-grouping-for-type {:name ..op-name..} {:metadata {:grouping :parties}}) => nil
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => false))
+
+  (fact "no metadata"
+    (attachment-grouping-for-type {:name ..op-name..} nil) => nil
+    (provided (op/get-operation-metadata ..op-name.. :attachment-op-selector) => false)))
 
 (facts make-attachments
   (fact "no overlapping attachments"
