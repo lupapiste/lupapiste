@@ -1139,6 +1139,10 @@ $max-columns: 12;
   padding-left: $grid-margin;
   padding-right: $grid-margin;
 
+  &.no-top-border {
+    border-top: none;
+  }
+
   &:last-child {
     border-bottom: none;
   }

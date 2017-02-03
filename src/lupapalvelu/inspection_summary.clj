@@ -75,7 +75,8 @@
 
 (defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
   (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
-        summary (assoc (select-keys template [:id :name])
+        summary (assoc (select-keys template [:name])
+                  :id      (mongo/create-id)
                   :op      (select-keys operation [:id :name :description])
                   :targets (map #(hash-map :target-name %) (:items template)))]
     (mongo/update :applications {:_id appId} {$push {:inspection-summaries summary}})))
