@@ -39,7 +39,7 @@ LUPAPISTE.HandlerService = function() {
     var fetchObs = fetched[key];
     if( !fetchObs() && appId()) {
       fetchObs( true );
-      return true
+      return true;
     }
   }
 
