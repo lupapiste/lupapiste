@@ -7,7 +7,10 @@
 (def empty-state {:applicationId ""
                   :operations []
                   :summaries []
+                  :templates []
                   :view {:bubble-visible false
+                         :new {:operation nil
+                               :template nil}
                          :summary {:id nil
                                    :targets []}}})
 
@@ -60,26 +63,36 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
-(rum/defc operations-select [operations]
+(rum/defc select [change-fn value options]
   [:select.form-entry.is-middle
-   (for [op   operations
-         :let [op-name        (js/loc (str "operations." (:name op)))
-               op-description (operation-description-for-select op)]]
-     [:option
-      {:value (:id op)}
-      (str op-description " (" op-name ") ")])])
+   {:on-change #(change-fn (.. % -target -value))
+    :value     value}
+   (map (fn [[k v]] [:option {:value k} v]) options)])
+
+(rum/defc operations-select [operations selection]
+  (select (partial (swap! state assoc-in [:view :new :operation]))
+          selection
+          (cons
+            [nil (js/loc "choose")]
+            (map (fn [op] (let [op-name        (js/loc (str "operations." (:name op)))
+                                op-description (operation-description-for-select op)]
+                            [(:id op) (str op-description " (" op-name ") ")])) operations))))
 
 (rum/defc summaries-select [summaries operations selection]
-  [:select.form-entry.is-middle
-   {:on-change  #(update-summary-view (.. % -target -value))
-    :value      selection}
-   [:option {:value nil} "-- Valitse --"]
-   (for [s    summaries
-         :let [op             (find-by-key :id (-> s :op :id) operations)
-               op-description (operation-description-for-select op)]]
-     [:option
-      {:value (:id s)}
-      (str (:name s) " - " op-description)])])
+  (select update-summary-view
+          selection
+          (cons
+            [nil (js/loc "choose")]
+            (map (fn [s] (let [operation      (find-by-key :id (-> s :op :id) operations)
+                               op-description (operation-description-for-select operation)]
+                           [(:id s) (str (:name s) " - " op-description)])) summaries))))
+
+(rum/defc templates-select [templates selection]
+  (select (partial (swap! state assoc-in [:view :new :template]))
+          selection
+          (cons
+            [nil (js/loc "choose")]
+            (map (fn [tmpl] [(:id tmpl) (:name tmpl)]) templates))))
 
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
@@ -95,7 +108,7 @@
       [:span (js/loc "inspection-summary.tab.intro.1")]
       [:span (js/loc "inspection-summary.tab.intro.2")]
       [:span (js/loc "inspection-summary.tab.intro.3")]]
-     [:div.form-grid.no-top-border
+     [:div.form-grid.no-top-border.no-padding
       [:div.row
        [:div.col-1
         [:div.col--vertical
@@ -120,12 +133,27 @@
          [:span (js/loc "inspection-summary.new-summary.intro.2")]]
         [:div.row
          [:label (js/loc "inspection-summary.new-summary.operation")]
-         (operations-select (rum/react (rum/cursor-in state [:operations])))]
+         [:div.col-4.no-padding
+          [:span.select-arrow.lupicon-chevron-small-down
+           {:style {:z-index 10}}]
+           (operations-select (rum/react (rum/cursor-in state [:operations]))
+                              (rum/react (rum/cursor-in state [:view :new :operation])))]]
         [:div.row
+         [:label (js/loc "inspection-summary.new-summary.template")]
+         [:div.col-4.no-padding
+          [:span.select-arrow.lupicon-chevron-small-down
+           {:style {:z-index 10}}]
+          (templates-select (rum/react (rum/cursor-in state [:templates]))
+                            (rum/react (rum/cursor-in state [:view :new :template])))]]
+        [:div.row.left-buttons
          [:button.positive
           {:on-click (fn [_] (reset! bubble-visible false))}
           [:i.lupicon-check]
-          [:span (js/loc "inspection-summary.new-summary.button")]]]]]
+          [:span (js/loc "button.ok")]]
+         [:button.secondary
+          {:on-click (fn [_] (reset! bubble-visible false))}
+          [:i.lupicon-remove]
+          [:span (js/loc "button.cancel")]]]]]
       [:div.row
        [:table
         [:thead
