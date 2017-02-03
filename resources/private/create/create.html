@@ -126,6 +126,11 @@
                type="text" class="form-input text" autofocus="autofocus" />
       </div>
 
+      <div>
+        <input id="authoriseApplicants" data-test-id="test-authorise-applicants" type="checkbox" data-bind="checked: authoriseApplicants" class="form-input checkbox"/>
+        <label for="authoriseApplicants" data-bind="ltext: 'newRequest.authoriseApplicants'" class="form-label-checkbox"/>
+      </div>
+
       <div data-bind="visible: !needMorePrevPermitInfo()">
         <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label>
         <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
