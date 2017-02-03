@@ -31,36 +31,60 @@ LUPAPISTE.HandlerService = function() {
   // Ajax API
   // ---------------------------
 
+  var fetched = {handlers: ko.observable(),
+                 authorities: ko.observable(),
+                roles: ko.observable()};
+
+  function canFetch( key ) {
+    var fetchObs = fetched[key];
+    if( !fetchObs() && appId()) {
+      fetchObs( true );
+      return true
+    }
+  }
+
+  function resetFetched() {
+    _.each( _.values( fetched), function( obs ) {
+      obs( false );
+    });
+  }
+
   function fetchApplicationHandlers() {
-    ajax.query( "application-handlers", {id: appId()})
-    .success( function( res ) {
-      self.applicationHandlers( _.map( res.handlers,
-                                       processRawHandler ));
-    })
-    .call();
+    if( canFetch( "handlers" )) {
+      ajax.query( "application-handlers", {id: appId()})
+      .success( function( res ) {
+        self.applicationHandlers( _.map( res.handlers,
+                                         processRawHandler ));
+      })
+      .call();
+    }
   }
 
   function fetchAuthorities() {
-    ajax.query( "application-authorities", {id: appId()})
-    .success( function( res ) {
-      authorities( res.authorities );
-    })
-    .call();    
+    if( canFetch( "authorities") ) {
+      ajax.query( "application-authorities", {id: appId()})
+      .success( function( res ) {
+        authorities( res.authorities );
+      })
+      .call();
+    }    
   }
 
   function fetchHandlerRoles() {
-    ajax.query( "application-organization-handler-roles", {id: appId()})
-    .success( function( res ) {
-      roles( _.map( res.handlerRoles,
-                    function( role ) {
-                      return _.defaults( {
-                        name: _.get( role, ["name",
-                                            loc.getCurrentLanguage()], "")
-                      },
-                                         role );
-                    }));
-    })
-    .call();  
+    if( canFetch( "roles" )) {
+      ajax.query( "application-organization-handler-roles", {id: appId()})
+      .success( function( res ) {
+        roles( _.map( res.handlerRoles,
+                      function( role ) {
+                        return _.defaults( {
+                          name: _.get( role, ["name",
+                                              loc.getCurrentLanguage()], "")
+                        },
+                                           role );
+                      }));
+      })
+      .call();
+    }  
   }
   
   // Name is object (e.g., {fi: "Uusi nimi", sv: "Nytt namn", en: "New name"}).
@@ -234,5 +258,6 @@ LUPAPISTE.HandlerService = function() {
     self.applicationHandlers.removeAll();
     authorities.removeAll();
     roles.removeAll();
+    resetFetched();
   });
 };

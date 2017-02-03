@@ -121,26 +121,7 @@
       .processing(applicationModel.processing)
       .call();
     }
-  });
-
-  function refreshAuthoritiesSelectList(appId) {
-    if (authorizationModel.ok("assign-application")) {
-      ajax.query("application-authorities", {id: appId})
-        .success(function(res) {
-          var auths = res.authorities || [];
-          authorities(auths);
-        })
-        .pending(applicationModel.pending)
-        .call();
-    } else {
-      authorities([]);
-    }
-
-  }
-
-  hub.subscribe("application-model-updated", function(event) {
-    refreshAuthoritiesSelectList(event.applicationId);
-  });
+  });    
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);

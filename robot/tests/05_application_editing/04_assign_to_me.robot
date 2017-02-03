@@ -1,9 +1,9 @@
 *** Settings ***
 
 Documentation  Sonja can assign application to herself
-Suite Teardown  Apply minimal fixture now
+Suite Setup    Apply minimal fixture now
 Resource       ../../common_resource.robot
-Resource       assignment_resource.robot
+Resource       ../37_handlers/handlers_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -36,7 +36,7 @@ Sonja sees comment indicator on applications list
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
-  Wait Until  Application assignee select empty
+  No such test id  handler-0  
 
 Sonja sees Mikko's person ID masked
   Open tab  parties
@@ -51,16 +51,16 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  Assign application to  Sibbo Sonja
+  General handler to  Sibbo Sonja  
 
 Assignee has changed
-  Wait Until  Application assignee select is  Sibbo Sonja
+  General handler is  Sibbo Sonja
 
 Viewing attachment should not reset the assignee select
   Open tab  attachments
   Add attachment file  tr[data-test-type='hakija.valtakirja']  ${PDF_TESTFILE_PATH}
   Return to application
-  Wait Until  Application assignee select is  Sibbo Sonja
+  General handler is  Sibbo Sonja
   Open tab  parties
 
 Sonja checks property owners
@@ -101,22 +101,22 @@ Application is shown after login
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Mikko sees that application is assigned to Sonja
-  Application assignee span is  Sibbo Sonja
+  General handler is  Sibbo Sonja  
 
 ... even after a page reload
   Reload page and kill dev-box
-  Application assignee span is  Sibbo Sonja
+  General handler is  Sibbo Sonja  
   [Teardown]  Logout
 
 Sonja logs in and clears authority
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Assign application to nobody
+  Remove first handler
   Reload page and kill dev-box
-  Application assignee select empty
+  No such test id  handler-0
 
 Sonja assigns application to Ronja
-  Assign application to  Sibbo Ronja
+  General handler to  Sibbo Ronja
   [Teardown]  Logout
 
 Sipoo admin logs in and removes Ronja
@@ -130,14 +130,14 @@ Sipoo admin logs in and removes Ronja
 Sonja logs in and sees Ronja still assigned
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Application assignee select is  Sibbo Ronja
-  Element Should Be Disabled  jquery=option[value=777777777777777777000024]
-
-Sonja assigns application to herself
-  Assign application to  Sibbo Sonja
+  General handler is  Sibbo Ronja  
+  
+Sonja removes Ronja handler and assigns application to herself
+  Remove first handler
+  General handler to  Sibbo Sonja
   Reload page and kill dev-box
-  Application assignee select is  Sibbo Sonja
-  Page Should Not Contain  jquery=option[value=777777777777777777000024]
+  General handler is  Sibbo Sonja  
+  
 
 # LUPA-791
 Sonja cancels the application with reason

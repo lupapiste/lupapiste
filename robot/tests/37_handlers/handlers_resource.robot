@@ -60,3 +60,23 @@ Handler disabled
 List handler is
   [Arguments]  ${index}  ${person}  ${role}
   Test id text is  handler-${index}  ${person} (${role})
+
+# Shortcuts for old tests
+  
+General handler to
+  [Arguments]  ${person}
+  Click by test id  edit-handlers
+  Click by test id  add-handler
+  Edit handler  0  ${person}  Käsittelijä
+  Click by test id  edit-handlers-back
+
+General handler is
+  [Arguments]  ${person}
+  Wait until  List handler is  0  ${person}  Käsittelijä
+
+Remove first handler
+  Click by test id  edit-handlers
+  Click by test id  remove-handler-0
+  Remove indicated  
+  Click by test id  edit-handlers-back
+  No such test id  handler-0

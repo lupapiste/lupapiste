@@ -14,7 +14,8 @@ LUPAPISTE.EditHandlersModel = function() {
 
   var roles = service.applicationHandlerRoles();
   var authorities = ko.observableArray();
-  self.disposedSubscribe(service.applicationAuthorities(), function( auths ) {
+
+  function updateAuthorities( auths ) {
     authorities(_.map( auths,
                        function( auth ) {
                          return _.merge( {},
@@ -22,8 +23,13 @@ LUPAPISTE.EditHandlersModel = function() {
                                          {id: auth.id,
                                           name: nameString( auth )});
                        }));
-    
-  } );
+  }
+
+  self.disposedSubscribe(service.applicationAuthorities(), updateAuthorities);
+
+  // Initial call just in case. Otherwise coming back to component
+  // would not not update authorities
+  updateAuthorities( service.applicationAuthorities()() );
 
   self.handlers = service.applicationHandlers;
 
