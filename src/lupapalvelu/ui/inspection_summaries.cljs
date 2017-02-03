@@ -7,7 +7,8 @@
 (def empty-state {:applicationId ""
                   :operations []
                   :summaries []
-                  :view {:summary {:id nil
+                  :view {:bubble-visible false
+                         :summary {:id nil
                                    :targets []}}})
 
 (def state      (atom empty-state))
@@ -69,7 +70,6 @@
       (str op-description " (" op-name ") ")])])
 
 (rum/defc summaries-select [summaries operations selection]
-          (println selection)
   [:select.form-entry.is-middle
    {:on-change  #(update-summary-view (.. % -target -value))
     :value      selection}
@@ -86,7 +86,9 @@
                                   :will-unmount (fn [& _] (reset! state empty-state))}
   [ko-app]
   (.subscribe (aget ko-app "id") id-subscription)
-  (let [summary-in-view (rum/react (rum/cursor-in state [:view :summary]))]
+  (let [summary-in-view (rum/react (rum/cursor-in state [:view :summary]))
+        bubble-visible (rum/cursor-in state [:view :bubble-visible])
+        visibility (rum/react bubble-visible)]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
@@ -106,10 +108,24 @@
        [:div.col-1
         {:style {:padding-top "24px"}}
         [:button.positive
-         {:on-click (fn [_] ())}
+         {:on-click (fn [_] (reset! bubble-visible true))}
          [:i.lupicon-circle-plus]
          [:span (js/loc "inspection-summary.new-summary.button")]]]]
-      #_(operations-select (rum/react (rum/cursor-in state [:operations])))
+      [:div.row
+       [:div.container-bubble.half-width.arrow-2nd-col
+        {:style {:display (if visibility "block" "none")}}
+        [:div.row
+         [:span (js/loc "inspection-summary.new-summary.intro.1")]]
+        [:div.row
+         [:span (js/loc "inspection-summary.new-summary.intro.2")]]
+        [:div.row
+         [:label (js/loc "inspection-summary.new-summary.operation")]
+         (operations-select (rum/react (rum/cursor-in state [:operations])))]
+        [:div.row
+         [:button.positive
+          {:on-click (fn [_] (reset! bubble-visible false))}
+          [:i.lupicon-check]
+          [:span (js/loc "inspection-summary.new-summary.button")]]]]]
       [:div.row
        [:table
         [:thead
