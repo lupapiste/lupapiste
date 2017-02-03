@@ -43,7 +43,7 @@
             <div class="clear spacerM"></div>
           </div>
 
-          <div data-bind="visible: !_.isEmpty(lupapisteApp.services.assignmentService.assignments())">
+          <div data-bind="visible: !_.isEmpty(lupapisteApp.services.assignmentService.incompleteAssignments())">
             <h2 data-bind="ltext: 'application.incomplete-assignments'" class="missing-info-title"></h2>
             <table class="assignments-search-result__table">
               <thead>
@@ -55,8 +55,8 @@
                   <th>&nbsp;</th>
                 </tr>
               </thead>
-              <tbody data-bind="foreach: lupapisteApp.services.assignmentService.assignments()">
-              <tr>
+              <tbody data-bind="foreach: lupapisteApp.services.assignmentService.incompleteAssignments()">
+              <tr data-test-id="incomplete-assignment">
                 <td data-bind="ltext: 'application.assignment.type.' + $data.target['group'], testId: 'target-group'"></td>
                 <td data-bind="ltext: $data.target['type-key'], testId: 'target-type'"></td>
                 <td data-bind="text: util.partyFullName($data.recipient), testId: 'recipient'"></td>
