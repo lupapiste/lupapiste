@@ -237,9 +237,9 @@
    :kuntakoodi municipality
    :kielitieto lang})
 
-(defn- get-handler [{handler :authority :as application}]
-  (if (domain/assigned? application)
-    {:henkilo {:nimi {:etunimi (:firstName handler) :sukunimi (:lastName handler)}}}
+(defn- get-handler [{handlers :handlers :as application}]
+  (if-let [general-handler (util/find-first :general handlers)]
+    {:henkilo {:nimi {:etunimi (:firstName general-handler) :sukunimi (:lastName general-handler)}}}
     empty-tag))
 
 (defn get-state [application]
@@ -254,7 +254,6 @@
           :pvm (util/to-xml-date ts)
           :kasittelija (get-handler application)}})
       state-timestamps)))
-
 
 (defn lupatunnus [{:keys [id submitted] :as application}]
   {:pre [id]}
@@ -683,11 +682,7 @@
            :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
            :paivaysPvm (util/to-xml-date (state-timestamp application))
-           :kasittelija (if (domain/assigned? application)
-                          {:henkilo
-                           {:nimi {:etunimi  (get-in application [:authority :firstName])
-                                   :sukunimi (get-in application [:authority :lastName])}}}
-                          empty-tag)}})
+           :kasittelija (get-handler application)}})
 
 (defn get-henkilo [henkilo]
   (let [nimi   (util/assoc-when-pred {} util/not-empty-or-nil?

@@ -574,6 +574,9 @@
                        {$pull {:links (mongofy {:name name
                                                 :url  url})}}))
 
+(defn general-handler-id-for-organization [{roles :handler-roles :as organization}]
+  (:id (util/find-first :general roles)))
+
 (defn create-handler-role [role-id name]
   {:id (or role-id (mongo/create-id))
    :name name})

@@ -1,9 +1,8 @@
 (ns lupapalvelu.construction-api
   (:require [monger.operators :refer [$set $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify defquery] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
@@ -20,10 +19,7 @@
 (defn- save-as-krysp-if-possible
   [application organization lang app-updates]
   (if (organization/krysp-integration? organization (permit/permit-type application))
-    (let [krysp-app (-> application
-                        meta-fields/enrich-with-link-permit-data
-                        link-permit/update-backend-ids-in-link-permit-data
-                        (merge app-updates))]
+    (let [krysp-app (app/post-process-app-for-krysp (merge application app-updates) organization)]
       (mapping-to-krysp/save-application-as-krysp krysp-app lang krysp-app organization)
       true)
     false))
@@ -42,7 +38,7 @@
                      :started   timestamp}
         krysp?      (save-as-krysp-if-possible application @organization lang app-updates)]
     (update-application command (util/deep-merge
-                                 (application/state-transition-update :constructionStarted created application user)
+                                 (app/state-transition-update :constructionStarted created application user)
                                  {$set app-updates}))
     (ok :integrationAvailable krysp?)))
 
@@ -63,10 +59,10 @@
         krysp?      (save-as-krysp-if-possible orig-app @org lang app-updates)]
 
     (update-application command (util/deep-merge
-                                  (application/state-transition-update :closed created orig-app user)
+                                  (app/state-transition-update :closed created orig-app user)
                                    (if krysp?
                                      {$set app-updates}
-                                     {$set (merge app-updates (application/warranty-period timestamp))})))
+                                     {$set (merge app-updates (app/warranty-period timestamp))})))
     (ok :integrationAvailable krysp?)))
 
 (defquery info-construction-status

@@ -176,6 +176,24 @@
                ((reject-primary-operations #{:hii}) app) => nil?
                ((reject-primary-operations #{}) app) => nil?)))
 
+(facts enrich-application-handlers
+  (fact "one handler in org - one in app"
+    (enrich-application-handlers {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]} {:handler-roles [{:id ..role-id.. :name ..name..}]}) =>
+    {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id.. :name ..name..}]})
+
+  (fact "no handlers in org - one in app - handler not enriched"
+    (enrich-application-handlers {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]} {:handler-roles []}) =>
+    {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]})
+
+  (fact "one handler in org - none in app"
+    (enrich-application-handlers {:data ..data.. :handlers []} {:handler-roles [{:id ..role-id.. :name ..name..}]}) =>
+    {:data ..data.. :handlers []})
+
+  (fact "multiple handlers in org - two in app"
+    (enrich-application-handlers {:data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2..} {:id ..handler-id-0.. :roleId ..role-id-0..}]}
+                                 {:handler-roles [{:id ..role-id-0.. :name ..name-0..} {:id ..role-id-1.. :name ..name-1..} {:id ..role-id-2.. :name ..name-2..}  {:id ..role-id-3.. :name ..name-3..}]}) =>
+    {:data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2.. :name ..name-2..} {:id ..handler-id-0.. :roleId ..role-id-0.. :name ..name-0..}]} ))
+
 (facts validate-handler-id-in-application
   (fact "no handlers"
     (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers []}})) => false)

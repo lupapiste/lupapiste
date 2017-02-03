@@ -75,11 +75,9 @@
 (def vapautus-vesijohdosta-ja-viemarista-hakemus {:sent nil,
                                                   :neighbors [],
                                                   :schema-version 1,
-                                                  :authority {:role "authority",
-                                                              :lastName "Borga",
-                                                              :firstName "Pekka",
-                                                              :username "pekka",
-                                                              :id "777777777777777777000033"},
+                                                  :handlers [{:lastName "Borga",
+                                                               :firstName "Pekka",
+                                                               :general true}],
                                                   :auth [{:lastName "Borga",
                                                           :firstName "Pekka",
                                                           :username "pekka",
@@ -214,5 +212,3 @@
 
         jatevedet (:jatevedet kohde) => "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."
         ]))
-
-

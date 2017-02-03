@@ -1,7 +1,6 @@
 (ns lupapalvelu.link-permit
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf warn]]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.operations :as op]
             [lupapalvelu.states :as states]
             [sade.core :refer :all]
@@ -35,7 +34,7 @@
 (defn update-backend-ids-in-link-permit-data [application]
   (check-link-permit-count application)
   (let [link-permit-data (link-permits-with-app-data application)]
-    (when (and (foreman/foreman-app? application)
+    (when (and (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword))
                (not (link-permit-approved? (first link-permit-data))))
       (fail! :error.link-permit-app-not-in-post-sent-state))
     (assoc application :linkPermitData (->> (map update-backend-id-in-link-permit link-permit-data)

@@ -18,6 +18,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
@@ -177,6 +178,9 @@
        :state
        keyword))
 
+(defn enrich-application-handlers [application {roles :handler-roles :as organization}]
+  (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %))))
+
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts" "authority-notices" "info-links"})
 
@@ -322,6 +326,12 @@
        action/without-system-keys
        (process-documents-and-tasks user)
        location->object))
+
+(defn post-process-app-for-krysp [application organization]
+  (-> application
+      (enrich-application-handlers organization)
+      meta-fields/enrich-with-link-permit-data
+      link-permit/update-backend-ids-in-link-permit-data))
 
 ;;
 ;; Application creation
