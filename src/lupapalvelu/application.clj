@@ -11,6 +11,7 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.model :as model]
@@ -195,10 +196,10 @@
     (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
 
 ; Masking
-(defn- person-id-masker-for-user [user {authority :authority :as application}]
+(defn- person-id-masker-for-user [user {handlers :handlers :as application}]
   (cond
-    (usr/same-user? user authority) identity
-    (usr/authority? user) model/mask-person-id-ending
+    (util/find-by-key :userId (:id user) handlers) identity
+    (auth/application-authority? application user) model/mask-person-id-ending
     :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
 
 (defn with-masked-person-ids [application user]
@@ -261,14 +262,11 @@
         doc))
     doc))
 
-(defn process-document-or-task [user {authority :authority :as application} doc]
-  (let [mask-person-ids (person-id-masker-for-user user application)
-        operations      (get-operations application)]
-    (->> doc
-         (validate application)
-         (populate-operation-info operations)
-         mask-person-ids
-         (enrich-single-doc-disabled-flag user))))
+(defn process-document-or-task [user application doc]
+  (->> (validate application doc)
+       (populate-operation-info (get-operations application))
+       ((person-id-masker-for-user user application))
+       (enrich-single-doc-disabled-flag user)))
 
 (defn- process-documents-and-tasks [user application]
   (let [mapper (partial process-document-or-task user application)]

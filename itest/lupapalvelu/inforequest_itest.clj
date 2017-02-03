@@ -24,10 +24,10 @@
         (-> (:comments application) first :text) => "hello"))
 
     (fact "Veikko can not assign inforequest to himself"
-      (command veikko :assign-application :id id :assigneeId veikko-id) => not-accessible?)
+      (command veikko :upsert-application-handler :id id :userId veikko-id :roleId sipoo-general-handler-id) => not-accessible?)
 
     (fact "Sonja can assign inforequest to herself"
-      (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
+      (command sonja :upsert-application-handler :id id :userId sonja-id :roleId sipoo-general-handler-id) => ok?)
 
     (fact "Sonja can mark inforequest answered"
       (command sonja :can-mark-answered :id id) => ok?
