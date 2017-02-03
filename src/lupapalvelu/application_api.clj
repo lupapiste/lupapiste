@@ -940,3 +940,26 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+
+(defquery application-handlers
+  {:parameters       [id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles       #{:authority :applicant :oirAuthority}
+   :states           states/all-states}
+  [{:keys [application lang organization]}]
+  (ok :handlers (map (fn [{role-id :roleId :as handler}]
+                       (assoc handler :roleName (->> @organization
+                                                     :handler-roles
+                                                     (util/find-by-id role-id)
+                                                     :name
+                                                     lang)))
+                     (:handlers application))))
+
+(defquery application-organization-handler-roles
+  {:description "Every handler defined in the organization, including
+  the disabled ones."
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/all-states}
+  [{:keys [organization]}]
+  (ok :handlerRoles (:handler-roles @organization)))

@@ -475,7 +475,7 @@ Select From Autocomplete
 
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
-  Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
+  Select From Autocomplete  [data-test-id="${data-test-id}"]:visible  ${value}
 
 Clear autocomplete selections by test id
   [Arguments]  ${data-test-id}
@@ -1502,7 +1502,7 @@ Test id input is
 
 Test id text is
   [Arguments]  ${id}  ${text}
-  Wait until  Element text should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Element text should be  jquery=[data-test-id=${id}]:visible  ${text}
 
 Javascript? helper
   [Arguments]  ${expression}
@@ -1559,6 +1559,15 @@ Test id select is
 jQuery should match X times
   [Arguments]  ${selector}  ${count}
   Wait until  Javascript?  $("${selector}").length === ${count}
+
+Test id autocomplete options check
+  [Arguments]  ${tid}  ${included}  @{options}  
+  :FOR  ${text}  IN  @{options}
+  \  Javascript?  _.includes($("div[data-test-id='${tid}'] div.autocomplete-dropdown .autocomplete-result-item span").map( function() {return this.innerText;}).get(), "${text}") === ${included}
+
+Test id autocomplete disabled
+  [Arguments]  ${tid}
+  jQuery should match X times  div[data-test-id='${tid}'] .autocomplete-selection-wrapper.disabled:visible  1
 
 
 # Frontend error log

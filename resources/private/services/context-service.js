@@ -42,6 +42,7 @@ LUPAPISTE.ContextService = function() {
   $(window).on("hashchange", checkContext);
   hub.subscribe( "application-model-updated", checkContext );
 
+
   self.applicationId = function() {
     return latestAppId;
   };

@@ -1060,3 +1060,7 @@
 "link-permit.same-property" "en" "Display only applications with the same property code that is used in this application"
 "link-permit.same-property" "fi" "Näytä vain hakemukset, joilla on sama kiinteistötunnus kuin tällä hakemuksella"
 "link-permit.same-property" "sv" "Visa endast ansökningar, med samma fastighetsbeteckning som denna ansökan"
+"application.handlers" "en" "Handler(s):"
+"application.handlers" "fi" "Käsittelijä(t):"
+"application.handlers" "sv" "Handläggare(r):"
+"application.handlers.select" "fi" "Valitse käsittelijärooli"

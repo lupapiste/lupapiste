@@ -3,8 +3,9 @@
     <body>
         <section class="page" id="application">
             <div class="application_summary">
-                <div class="container">
-                    <div class="preamble">
+              <div class="container">
+                <div class="preamble"
+                     data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">                  
                         <div class="application_summary_info" data-bind="with: application">
                           <h1 data-bind="component: {name: 'address',
                                          params: { application: $parent,
@@ -71,10 +72,8 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorities -->
-                              <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
-                              <!-- /ko -->
-
+                              <div data-bind="component: 'handler-list'"></div>
+                              
                               <!-- Operations: -->
                               <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
                               <div>
@@ -204,8 +203,11 @@
                         <div class="application_actions" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'application'">
                             <div data-bind="template: 'application-actions-template'"></div>
                         </div>
-                    </div>
-
+                </div>
+                <card params="deck: 'summary',
+                              card: 'edit-handlers'">
+                          <edit-handlers></edit-handlers>
+                </card>
                     <!-- Tabs: -->
                     <div class="tabs-container" data-bind="with: application">
                         <ul class="tabs" id="applicationTabs">

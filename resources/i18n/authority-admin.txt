@@ -340,3 +340,5 @@
 "auth-admin.version" "en" "Version"
 "auth-admin.version" "fi" "Versio"
 "auth-admin.version" "sv" "Version"
+"handler-roles.title" "fi" "Käsittelijäroolit"
+"handler-roles.add" "fi" "Lisää uusi käsittelijä"
