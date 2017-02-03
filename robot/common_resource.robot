@@ -1502,7 +1502,7 @@ Test id input is
 
 Test id text is
   [Arguments]  ${id}  ${text}
-  Wait until  Element text should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Element text should be  jquery=[data-test-id=${id}]:visible  ${text}
 
 Javascript? helper
   [Arguments]  ${expression}

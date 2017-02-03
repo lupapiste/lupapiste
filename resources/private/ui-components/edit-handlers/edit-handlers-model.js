@@ -33,6 +33,14 @@ LUPAPISTE.EditHandlersModel = function() {
 
   self.handlers = service.applicationHandlers;
 
+  function currentUserIsHandler() {
+    return _.some( self.handlers(), function( h ) {
+      return h.userId() === lupapisteApp.models.currentUser.id();
+    });
+  }
+  
+  var currentUserWasHandler = currentUserIsHandler();
+
   function handlerRoles( handler ) {
     var usedIds = _(self.handlers())
                   .reject( {id: handler.id })
@@ -129,7 +137,11 @@ LUPAPISTE.EditHandlersModel = function() {
     }
   };
 
-  self.back = _.partial( hub.send,
-                         "cardService::select", {deck: "summary",
-                                                 card: "info"});
+  self.back = function() {
+    if( currentUserWasHandler !== currentUserIsHandler()) {
+      repository.load( lupapisteApp.models.application.id());
+    }
+    hub.send(  "cardService::select", {deck: "summary",
+                                       card: "info"});
+  };  
 };
