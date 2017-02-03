@@ -4,6 +4,7 @@ Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
+Library        DebugLibrary
 
 *** Variables ***
 
@@ -178,6 +179,7 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
+  Wait for jQuery
   Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
@@ -1346,6 +1348,17 @@ Fill in new password
   Click Element  xpath=//section[@id='${section}']//button
   Wait Until  Page should contain  Salasana asetettu.
   Confirm notification dialog
+
+Fill in new company password
+  [Arguments]  ${section}  ${password}
+  Wait Until  Element should be visible  xpath=//section[@id='${section}']//h2[@data-test-id='company-setpw-header']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password1']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password2']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Click Element  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Confirm notification dialog
+
 
 Open company user listing
   Click Element  user-name

@@ -105,7 +105,7 @@
 
 
 (notifications/defemail :invite-authority
-  {:model-fn (fn [{{token :token org-fn :org-fn} :data} _ _]
+  {:model-fn (fn [{token :token org-fn :org-fn} _ _]
                {:link #(pw-reset/reset-link (name %) token)
                 :org org-fn})
    :recipients-fn notifications/from-user
@@ -117,7 +117,7 @@
    :recipients-fn notifications/from-user})
 
 (defn- notify-new-authority [new-user created-by organization-id]
-  (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))
+  (let [token       (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))
         org-name-fn #(-> (organization/get-organization organization-id [:name])
                          (get-in [:name (or (keyword %) :fi)]))]
     (notifications/notify! :invite-authority {:user new-user, :token token :org-fn org-name-fn})))
@@ -147,7 +147,7 @@
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (usr/authority? user)
       (do
-        (notify-new-authority user caller (:organization user-data))
+        (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
         (ok :id (:id user) :user user))
       (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
         (ok :id (:id user)

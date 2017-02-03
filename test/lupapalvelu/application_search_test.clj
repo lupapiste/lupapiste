@@ -38,7 +38,7 @@
   (-> (make-query {} {:kind  "both"
                       :applicationType "all"
                       :handlers  ["123"]}
-                  {:role "authority"}) (get "$and") second) => {"$or" [{:auth.id {"$in" ["123"]}} {:authority.id  {"$in" ["123"]}}]})
+                  {:role "authority"}) (get "$and") second) => {"$or" [{:auth.id {"$in" ["123"]}} {:handlers.userId  {"$in" ["123"]}}]})
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
@@ -58,7 +58,7 @@
                                 {"$and" [{:state {"$ne" "canceled"}}
                                          {"$or" [{:state {"$ne" "draft"}}
                                                  {:organization {"$nin" []}}]}]}
-                                {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
+                                {"$or" [{:auth.id {"$in" ["321"]}} {:handlers.userId  {"$in" ["321"]}}]}
                                 {:tags {"$in" ["test1" "test2"]}}
                                 {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2"]}}]})
 

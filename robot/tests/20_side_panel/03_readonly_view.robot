@@ -26,7 +26,6 @@ Form is disabled
 Actions are disabled
   Open tab  requiredFieldSummary
   Element should not be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
-  Element should not be visible  xpath=//button[@data-test-id="approve-application"]
 
 Commenting and notices are disabled
   Element should not be visible  conversation-panel

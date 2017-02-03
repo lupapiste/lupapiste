@@ -159,4 +159,34 @@
                                    :nationalId   "1234567892",
                                    :area         "2000",
                                    :propertyId   "02012345",
-                                   :operationId  nil}])))
+                                   :operationId  nil}]))
+       (fact "FeatureCollection+boundedBy review"
+             (let [fc-group (group-xml "resources/krysp/dev/feature-collection-having-boundedby.xml")]
+               (keys fc-group) => (contains ["LP-020-2016-22222" "LP-020-2016-99999"] :in-any-order)
+               (->buildings-summary (get fc-group "LP-020-2016-22222"))
+               => [{:description  nil,
+                    :localShortId "002",
+                    :buildingId   "1987654324",
+                    :index        "001",
+                    :created      "2016",
+                    :localId      nil,
+                    :usage        "941 talousrakennukset",
+                    :nationalId   "1987654324",
+                    :area         "60",
+                    :propertyId   "02054321",
+                    :operationId  nil}]
+               (->buildings-summary (get fc-group "LP-020-2016-99999"))
+               => [{:description  nil,
+                    :localShortId nil,
+                    :buildingId   "1234567892",
+                    :index        "001",
+                    :created      "2016",
+                    :localId      nil,
+                    :usage        "811 navetat, sikalat, kanalat yms",
+                    :nationalId   "1234567892",
+                    :area         "2000",
+                    :propertyId   "02012345",
+                    :operationId  nil}]))
+       (fact "FeatureCollection+boundedBy+multiple featureMembers review"
+             (let [fc-group (group-xml "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml")]
+               (keys fc-group) => (contains ["LP-999-2016-99999" "LP-999-2016-99349"] :in-any-order))))

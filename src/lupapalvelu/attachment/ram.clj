@@ -26,7 +26,7 @@
 
 (defn notify-new-ram-attachment! [application attachment-id created]
   (notifications/notify! :new-ram-notification {:application application
-                                                :recipients  (->> (get-in application [:authority :id]) (usr/get-user-by-id) vector)
+                                                :recipients  (some->> application :handlers (map :userId) not-empty (#(usr/get-users {:id {$in %}})))
                                                 :data        {:attachment-id attachment-id
                                                               :created-date  (util/to-local-date created)}}))
 

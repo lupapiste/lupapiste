@@ -153,25 +153,31 @@
         (-> resp :applications count) => 1))
 
     (count (get-in (datatables sonja :applications-search :handlers [sonja-id]) [:data :applications])) => 2
-    (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?
 
-    (fact "Handler ID filter"
-      (let [resp (datatables sonja :applications-search :handlers [ronja-id])]
-        (count (get-in resp [:data :applications])) => 1
-        (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id))
+    (let [{handler-id :id :as resp} (command sonja :upsert-application-handler :id application-id :roleId sipoo-general-handler-id :userId ronja-id)]
 
-    (fact "Handler email filter"
-      (let [resp (datatables sonja :applications-search :handlers [(email-for "ronja")])]
-        (count (get-in resp [:data :applications])) => 1
-        (get-in resp [:data :applications 0 :id]) => application-id))
+      (fact "Set handler"
+        resp => ok?)
 
-    (command sonja :add-application-tags :id application-id :tags ["222222222222222222222222"]) => ok?
-    (fact "$and query returns 1"
-      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 1)
+      (fact "Handler ID filter"
+        (let [resp (datatables sonja :applications-search :handlers [ronja-id])]
+          (count (get-in resp [:data :applications])) => 1
+          (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id))
 
-    (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
-    (fact "$and query returns 0 when handler is returning 0 matches"
-      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 0)
+      (fact "Handler email filter"
+        (let [resp (datatables sonja :applications-search :handlers [(email-for "ronja")])]
+          (count (get-in resp [:data :applications])) => 1
+          (get-in resp [:data :applications 0 :id]) => application-id))
+
+      (command sonja :add-application-tags :id application-id :tags ["222222222222222222222222"]) => ok?
+      (fact "$and query returns 1"
+        (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 1)
+
+      (fact "Remove handler"
+        (command sonja :remove-application-handler :id application-id :handlerId handler-id) => ok?)
+
+      (fact "$and query returns 0 when handler is returning 0 matches"
+        (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 0))
 
     (fact "Tags filter"
       (get-in (datatables sonja :applications-search :tags ["222222222222222222222222"]) [:data :applications 0 :id]) => application-id)

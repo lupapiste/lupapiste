@@ -6,7 +6,7 @@
 "faq" "sv" "[anvisningar](https://www.lupapiste.fi/sv/anvisningar)"
 "lupapiste.team" "en" "[Lupapiste Team](https://www.lupapiste.fi)"
 "lupapiste.team" "fi" "[Lupapisteen tiimi](https://www.lupapiste.fi)"
-"lupapiste.team" "sv" "[Lupapiste Team](https://www.lupapiste.fi)/sv/"
+"lupapiste.team" "sv" "[Lupapiste Team](https://www.lupapiste.fi/sv/)"
 "facebook" "en" "[Facebook](https://www.facebook.com/Lupapiste)"
 "facebook" "fi" "[Facebookissa](https://www.facebook.com/Lupapiste)"
 "facebook" "sv" "[Facebook](https://www.facebook.com/Lupapiste)"

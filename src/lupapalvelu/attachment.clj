@@ -548,14 +548,11 @@
                                    (when set-app-modified? {:modified now})
                                    (when set-attachment-modified? {:attachments.$.modified now}))}))
 
-(defn type-match? [type {att-type :type}]
-  (= type att-type))
-
 (defn get-empty-attachment-placeholder-id [attachments type exclude-ids-set]
   (->> (filter (comp empty? :versions) attachments)
        (remove (comp exclude-ids-set :id))
        (remove :notNeeded)
-       (util/find-first (partial type-match? type))
+       (util/find-first (comp (partial att-type/equals? type) :type))
        :id))
 
 (defn- attachment-file-ids

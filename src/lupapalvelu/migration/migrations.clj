@@ -2701,7 +2701,7 @@
       {$and [{:permitType "YA"}
              {$or [{:attachments {$elemMatch {:groupType {$ne nil}}}}
                    {:attachments {$elemMatch {:op {$ne nil}}}}]}]}]
-  (defmigration remove-groupType-and-op-from-YA-applications-v2
+  (defmigration remove-groupType-and-op-from-YA-applications-v5
     {:apply-when (pos? (mongo/count :applications attachments-with-groupType-or-op-match))}
     (update-applications-array :attachments
                                set-attachment-groupType-and-op-nil
@@ -2729,9 +2729,34 @@
     (update attachment :op #(map attachment/->attachment-operation %))
     attachment))
 
-(defmigration cleanup-attachment-operations
+(defmigration cleanup-attachment-operations-v3
   {:apply-when (pos? (mongo/count :applications {:attachments.op.groupType {$exists true}}))}
   (update-applications-array :attachments clean-up-attachment-op {:attachments.op.groupType {$exists true}}))
+
+(defmigration create-general-handler-for-organizations
+  {:apply-when (pos? (mongo/count :organizations {:handler-roles {$exists false}}))}
+  (->> (mongo/select :organizations {:handler-roles.id {$exists false}} [:_id])
+       (run! #(mongo/update-by-id :organizations (:id %) {$set {:handler-roles [{:id      (mongo/create-id)
+                                                                                 :name    {:fi "K\u00e4sittelij\u00e4"
+                                                                                           :sv "Handl\u00e4ggare"
+                                                                                           :en "Handler"}
+                                                                                 :general true}]}}))))
+
+(defn- set-handler-for-application [role-id {id :id authority :authority :as application}]
+  (when (:id authority)
+    (let [handler (user/create-handler nil role-id authority)]
+      (mongo/update-by-id :applications           id {$set {:handlers [handler]}})
+      (mongo/update-by-id :submitted-applications id {$set {:handlers [handler]}}))))
+
+(defn- set-handler-for-organizations-applications [{org-id :id roles :handler-roles}]
+  (when-let [role-id (:id (util/find-by-key :general true roles))]
+    (->> (mongo/select :applications {:organization org-id} [:authority])
+         (run! (partial set-handler-for-application role-id)))))
+
+(defmigration copy-application-authority-as-general-handler-in-applications
+  {:apply-when (pos? (mongo/count :applications {:authority.id {$type 2} :handlers {$exists false}}))}
+  (->> (mongo/select :organizations {:handler-roles.general {$exists true}} [:handler-roles])
+       (run! set-handler-for-organizations-applications)))
 
 ;;
 ;; ****** NOTE! ******
