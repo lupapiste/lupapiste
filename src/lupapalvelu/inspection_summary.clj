@@ -89,5 +89,4 @@
   (let [organization (org/get-organization organization)]
     (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
-        (debugf "CREATING NEW INSPECTION SUMMARY %s %s" (:name primaryOperation) templateId)
         (new-summary-for-operation application primaryOperation templateId)))))

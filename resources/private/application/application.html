@@ -287,9 +287,10 @@
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
                               </a></li>
 
-                          <li data-bind="css: {'active': $parent.selectedTabName() === 'rum'}">
-                            <a data-bind="click: changeTab" href="#" data-target="rum" class="link-btn">
-                              <span>rum</span>
+                          <li data-bind="if: $root.authorization.ok('inspection-summaries-for-application'),
+                                         css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
+                            <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" class="link-btn">
+                              <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
                             </a>
                           </li>
 
@@ -524,11 +525,11 @@
                     </div>
                     <!-- /ko -->
 
-                  <!-- ko if: selectedTabName() === 'rum' -->
-                  <div id="application-rum-tab" class="tab-content">
+                  <!-- ko if: selectedTabName() === 'inspectionSummaries' && $root.authorization.ok('inspection-summaries-for-application') -->
+                  <div id="application-inspectionSummaries-tab" class="tab-content">
                     <!-- <input data-bind="textInput: $data.application.texti">
                     <div data-bind="rumApp: {name: 'rum-app'}"></div> -->
-                    <cljs-component params="{name: 'checklist-summary', app: $data.application}"></cljs-component>
+                    <cljs-component params="{name: 'inspection-summaries', app: $data.application}"></cljs-component>
                   </div>
                   <!-- /ko -->
 

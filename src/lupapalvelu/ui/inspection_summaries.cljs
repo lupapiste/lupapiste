@@ -1,4 +1,4 @@
-(ns lupapalvelu.ui.checklist-summary
+(ns lupapalvelu.ui.inspection-summaries
   (:require [rum.core :as rum]
             [clojure.string :as string]))
 
@@ -81,9 +81,9 @@
       {:value (:id s)}
       (str (:name s) " - " op-description)])])
 
-(rum/defc checklist-summary < rum/reactive
-                              {:init init
-                               :will-unmount (fn [& _] (reset! state empty-state))}
+(rum/defc inspection-summaries < rum/reactive
+                                 {:init init
+                                  :will-unmount (fn [& _] (reset! state empty-state))}
   [ko-app]
   (.subscribe (aget ko-app "id") id-subscription)
   (let [summary-in-view (rum/react (rum/cursor-in state [:view :summary]))]
@@ -131,4 +131,5 @@
         [:span (js/loc "inspection-summary.targets.new.button")]]]]]))
 
 (defn ^:export start [domId ko-app]
-  (rum/mount (checklist-summary ko-app) (.getElementById js/document (name domId))))
+  (rum/mount (inspection-summaries ko-app)
+             (.getElementById js/document (name domId))))
