@@ -465,6 +465,7 @@ $preamble-min-height: 280px; // at least the size of the map container
   }
   a.handler-list-edit {
     display: table-cell;
+    padding-left: $marginS;
     &:after {
       content: "\2026";
     }

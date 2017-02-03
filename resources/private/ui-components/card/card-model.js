@@ -1,3 +1,9 @@
+// Card concept. See CardService for definitions.
+// Parameters [optional]:
+//  deck: Deck name
+//  card: Card name
+//  [selected]: if truthy, then the card is initially selected (default
+//  false).
 LUPAPISTE.CardModel = function( params ) {
   "use strict";
   var self = this;

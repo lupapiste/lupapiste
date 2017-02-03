@@ -189,7 +189,7 @@ Sonja assigns handler
   [Teardown]  Logout
 
 # -------------------------
-# Application
+# Applicant
 # -------------------------
 Pena sees the handler on the inforequest
   Pena logs in
