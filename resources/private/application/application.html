@@ -72,11 +72,8 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorities -->
-                              <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
                               <div data-bind="component: 'handler-list'"></div>
-                              <!-- /ko -->
-
+                              
                               <!-- Operations: -->
                               <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
                               <div>
