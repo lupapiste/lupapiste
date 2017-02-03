@@ -55,7 +55,7 @@
              :type "owner",
              :role "owner",
              :id "777777777777777777000020"}]
-   :authority sonja,
+   :handlers [(assoc sonja :general true)],
    :permitType "YA",
    :organization "753-YA",
    :infoRequest false,
@@ -298,6 +298,3 @@
     (fact "tapahtuman-nimi" tapahtuman-nimi => (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtuman-nimi :value))
     (fact "tapahtumapaikka" tapahtumapaikka => (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtumapaikka :value))
     (fact "haetaan-kausilupaa" haetaan-kausilupaa => (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :haetaan-kausilupaa :value))))
-
-
-

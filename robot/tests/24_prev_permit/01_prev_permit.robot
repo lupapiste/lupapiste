@@ -31,6 +31,7 @@ Järvenpää authority logs in and sees the Nouda lupa button
 
 Open 'prev permit' create page and check the fields
   Go to prev permit page and fill the kuntalupatunnus
+  Select Checkbox  xpath=//input[@data-test-id='test-authorise-applicants']
 
 Click create button
   Click button  prev-permit-create-button

@@ -100,6 +100,8 @@
 
 (def sipoo-general-handler-id "abba1111111111111111acdc")
 (def sipoo-kvv-handler-id     "abba1111111111111112acdc")
+(def jarvenpaa-general-handler-id "abba11111111111111111186")
+
 
 (defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
 

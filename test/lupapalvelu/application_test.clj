@@ -16,7 +16,6 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.attachment.type :as att-type]))
 
-
 (fact "update-document"
   (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
   (provided
@@ -24,7 +23,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -175,6 +174,24 @@
                ((reject-primary-operations #{:foobar}) app) => err
                ((reject-primary-operations #{:hii}) app) => nil?
                ((reject-primary-operations #{}) app) => nil?)))
+
+(facts enrich-application-handlers
+  (fact "one handler in org - one in app"
+    (enrich-application-handlers {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]} {:handler-roles [{:id ..role-id.. :name ..name..}]}) =>
+    {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id.. :name ..name..}]})
+
+  (fact "no handlers in org - one in app - handler not enriched"
+    (enrich-application-handlers {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]} {:handler-roles []}) =>
+    {:data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]})
+
+  (fact "one handler in org - none in app"
+    (enrich-application-handlers {:data ..data.. :handlers []} {:handler-roles [{:id ..role-id.. :name ..name..}]}) =>
+    {:data ..data.. :handlers []})
+
+  (fact "multiple handlers in org - two in app"
+    (enrich-application-handlers {:data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2..} {:id ..handler-id-0.. :roleId ..role-id-0..}]}
+                                 {:handler-roles [{:id ..role-id-0.. :name ..name-0..} {:id ..role-id-1.. :name ..name-1..} {:id ..role-id-2.. :name ..name-2..}  {:id ..role-id-3.. :name ..name-3..}]}) =>
+    {:data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2.. :name ..name-2..} {:id ..handler-id-0.. :roleId ..role-id-0.. :name ..name-0..}]} ))
 
 (facts validate-handler-id-in-application
   (fact "no handlers"
@@ -360,3 +377,31 @@
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["hakija" "valtakirja"]]))
 
 )
+
+
+(facts person-id-masker-for-user
+  (fact "handler authority - no masking"
+    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..id..}]}) {:schema-info {:name "maksaja"}
+                                                                                               :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+
+  (fact "non handler authority"
+    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
+     {:schema-info {:name "maksaja"}
+      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-****"}}}}})
+
+  (fact "authority in different organization"
+    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:another-org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
+     {:schema-info {:name "maksaja"}
+      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}})
+
+  (fact "non authority user"
+    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..other-id..}]}) {:schema-info {:name "maksaja"}
+                                                                                                     :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}}))

@@ -7,15 +7,17 @@
             [sade.core :refer :all]
             [clojure.walk :as walk]))
 
+(defn- get-handler [{handlers :handlers :as application}]
+  (if-let [general-handler (util/find-first :general handlers)]
+    {:henkilotieto {:Henkilo {:nimi {:etunimi (:firstName general-handler) :sukunimi (:lastName general-handler)}}}}
+    empty-tag))
+
 (defn get-kasittelytieto [application]
   {:Kasittelytieto {:muutosHetki (util/to-xml-datetime (:modified application))
                     :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
                     :paivaysPvm (util/to-xml-date (state-timestamp application))
-                    :kasittelija (if (domain/assigned? application)
-                                   {:henkilotieto {:Henkilo {:nimi {:etunimi  (get-in application [:authority :firstName])
-                                                                    :sukunimi (get-in application [:authority :lastName])}}}}
-                                   empty-tag)}})
+                    :kasittelija (get-handler application)}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (util/assoc-when-pred {} util/not-empty-or-nil? :teksti (-> yritys :osoite :katu))]

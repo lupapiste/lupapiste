@@ -29,7 +29,7 @@
           (select-keys result [:ok :text]))))))
 
 (defcommand create-application-from-previous-permit
-  {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]
+  {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus authoriseApplicants]
    :user-roles       #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang :organizationId]) ;; no :address included
                       ;; the propertyId parameter can be nil

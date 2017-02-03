@@ -375,7 +375,6 @@
   (let [operation "kerrostalo-rivitalo"
         application-id  (create-app-id mikko :propertyId tampere-property-id :operation operation)]
     (comment-application mikko application-id true) => ok?
-    (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
       (success (command mikko :add-operation :id application-id :operation "puun-kaataminen")) => true
@@ -577,16 +576,14 @@
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "Sonja assigns the application to herself and sees the full person ID"
-        (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+        (command sonja :upsert-application-handler :id application-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-9988"))
 
       (fact "Ronja still does not see the full person ID"
         (let [app (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (facts "Set company to document"
@@ -666,8 +663,8 @@
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
                          :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
-                         :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
-                         :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
+                         :unsubscribe-notifications :subscribe-notifications :upsert-application-handler :remove-application-handler
+                         :neighbor-add :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application
