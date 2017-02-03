@@ -8,6 +8,7 @@
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
             [lupapalvelu.attachment.type :as lat]
             [sade.strings :as str]
+            [sade.env :as env]
             [lupapalvelu.building :as building]
             [lupapalvelu.attachment.tags :as att-tags])
   (:import (java.io File InputStream)))
@@ -100,6 +101,7 @@
 
 (defn save-files [application files session-id]
   (if-let [attachments (and (empty? (rest files))
+                            (env/feature? :unzip-attachments)
                             (is-zip-file? (first files))
                             (-> files first :tempfile muuntaja/unzip-attachment-collection :attachments seq))]
     (download-and-save-files application attachments session-id)
