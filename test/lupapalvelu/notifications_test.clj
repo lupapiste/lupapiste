@@ -6,7 +6,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.open-inforequest]
-            [sade.dummy-email-server :as dummy]))
+            [sade.dummy-email-server :as dummy]
+            [sade.env :as env]))
 
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
 
@@ -119,6 +120,8 @@
 (fact "Unknown config"
   (notify! :foo {}) => (throws AssertionError))
 
+(when (env/value :email :dummy-server)
+
 (fact "organization-on-submit email"
   (against-background [(lupapalvelu.organization/get-organization "Foo") => {:notifications {:submit-notification-emails ["foo-org@example.com"]}}])
   (notify! :organization-on-submit {:application {:address "Foostreet 1",
@@ -170,4 +173,4 @@
 
 
   (notify-invite! {:email "nano@nano.nano" :language nil})
-  (last-notification-text {:contains ["suomi" "Svenska" "English"]}))
+  (last-notification-text {:contains ["suomi" "Svenska" "English"]})))
