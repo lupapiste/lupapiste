@@ -1,14 +1,19 @@
 # Hei {{user.firstName}},
 
-muistuttelemme t&auml;ss&auml;, ett&auml; {{statement-request-created}} sinulta on pyydetty lausuntoa lupahakemukseen osoitteessa {{address}}, {{municipality}}. 
+muistuttelemme tässä, että {{statement-request-created}} sinulta on
+pyydetty lausuntoa lupahakemukseen osoitteessa {{address}},
+{{municipality}}.
 
-Lupaa haetaan toimenpiteelle {{operation}}. Lausunnolle asetettu m&auml;&auml;r&auml;aika {{due-date}} on umpeutunut.
+Lupaa haetaan toimenpiteelle {{operation}}. Lausunnolle asetettu
+määräaika {{due-date}} on umpeutunut.
 
-M&auml;&auml;r&auml;ajan umpeutumisesta huolimatta p&auml;&auml;set viel&auml; hetken ajan antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+Määräajan umpeutumisesta huolimatta pääset vielä hetken ajan antamaan
+lausunnon klikkaamalla alla olevaa linkkiä. Jos linkki ei toimi,
+kopioi osoite ja liitä se selaimen osoiteriville.
 
 {{link}}
 
-Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
+Lausuntoa pyytänyt taho lähettää vielä seuraavat terveiset:
 
 {{message}}
 

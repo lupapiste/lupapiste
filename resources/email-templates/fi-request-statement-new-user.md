@@ -1,18 +1,32 @@
 # Hei {{user.firstName}},
 
-s&auml;hk&ouml;postiosoite {{user.email}} halutaan lis&auml;t&auml; lausunnonantajaksi Lupapisteess&auml; lupahakemukselle osoitteessa {{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle {{operation}}.
+sähköpostiosoite {{user.email}} halutaan lisätä
+lausunnonantajaksi Lupapisteessä lupahakemukselle osoitteessa
+{{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle
+{{operation}}.
 
-P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Lupapisteess&auml; voidaan hoitaa rakentamiseen liittyv&auml;&auml; lupa-asiointia yhdess&auml; hankkeen osapuolten kesken. Vuorokauden ymp&auml;ri.
+Pääset antamaan lausunnon klikkaamalla alla olevaa linkkiä. Jos linkki
+ei toimi, kopioi osoite ja liitä se selaimen
+osoiteriville. Lupapisteessä voidaan hoitaa rakentamiseen liittyvää
+lupa-asiointia yhdessä hankkeen osapuolten kesken. Vuorokauden ympäri.
 
-Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hakemuksen n&auml;keminen edellytt&auml;&auml; rekister&ouml;itymist&auml; palveluun mobiilivarmenteen tai verkkopankkitunnuksien avulla. Muistathan rekister&ouml;ity&auml; palveluun samalla s&auml;hk&ouml;postiosoitteella, johon kutsu on l&auml;hetetty.
+Jos et ole vielä Lupapisteen käyttäjä, hakemuksen näkeminen edellyttää
+rekisteröitymistä palveluun mobiilivarmenteen tai
+verkkopankkitunnuksien avulla. Muistathan rekisteröityä palveluun
+samalla sähköpostiosoitteella, johon kutsu on lähetetty.
 
-P&auml;&auml;st&auml;ksesi antamaan lausunnon rekister&ouml;idy k&auml;ytt&auml;j&auml;ksi t&auml;st&auml;:
+Päästäksesi antamaan lausunnon rekisteröidy käyttäjäksi tästä:
 
 {{link}}
 
-Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tarkista my&ouml;s, ett&auml; kutsuttu s&auml;hk&ouml;postiosoite {{user.email}} vastaa s&auml;hk&ouml;postiosoitetta, jolla olet palveluun rekister&ouml;itynyt.
+Jos linkki ei toimi, kopioi osoite ja liitä se selaimen
+osoiteriville. Tarkista myös, että kutsuttu sähköpostiosoite
+{{user.email}} vastaa sähköpostiosoitetta, jolla olet palveluun
+rekisteröitynyt.
 
-Lausuntoa on pyytänyt {{requester.firstName}} {{requester.lastName}} ja lausunnon m&auml;&auml;r&auml;ajaksi on asetettu {{due-date-str}}. Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
+Lausuntoa on pyytänyt {{requester.firstName}} {{requester.lastName}}
+ja lausunnon määräajaksi on asetettu {{due-date}}. Lausuntoa
+pyytänyt taho lähettää vielä seuraavat terveiset:
 
 {{message}}
 
