@@ -31,26 +31,43 @@ LUPAPISTE.HandlerService = function() {
   // Ajax API
   // ---------------------------
 
-  var fetched = {handlers: ko.observable(),
-                 authorities: ko.observable(),
-                roles: ko.observable()};
+  var fetched = {handlers: {flag: ko.observable(),
+                            guard: "application-handlers"},
+                 authorities: {flag: ko.observable(),
+                               guard: "application-authorities"},
+                 roles: {flag: ko.observable(),
+                         guard: "application-organization-handler-roles"}};
+  var pendingFetch = {};
 
-  function canFetch( key ) {
-    var fetchObs = fetched[key];
-    if( !fetchObs() && appId()) {
-      fetchObs( true );
-      return true;
+  function canFetch( key, fun ) {
+    var fetch = fetched[key];
+    if( lupapisteApp.models.applicationAuthModel.ok( fetch.guard )) {
+      if( !fetch.flag() && appId()) {
+        fetch.flag( true );
+        return true;
+      }
+      else {
+        pendingFetch[key] = fun;
+      }
     }
   }
 
+  function fetchPending() {
+    var funs = _.values(pendingFetch);
+    pendingFetch = {};
+    _.each( funs, function( fun ) {
+      fun();
+    });
+  }
+
   function resetFetched() {
-    _.each( _.values( fetched), function( obs ) {
-      obs( false );
+    _.each( _.values( fetched), function( fetch ) {
+      fetch.flag( false );
     });
   }
 
   function fetchApplicationHandlers() {
-    if( canFetch( "handlers" )) {
+    if( canFetch( "handlers", fetchApplicationHandlers )) {
       ajax.query( "application-handlers", {id: appId()})
       .success( function( res ) {
         self.applicationHandlers( _.map( res.handlers,
@@ -61,7 +78,7 @@ LUPAPISTE.HandlerService = function() {
   }
 
   function fetchAuthorities() {
-    if( canFetch( "authorities") ) {
+    if( canFetch( "authorities", fetchAuthorities) ) {
       ajax.query( "application-authorities", {id: appId()})
       .success( function( res ) {
         authorities( res.authorities );
@@ -71,7 +88,7 @@ LUPAPISTE.HandlerService = function() {
   }
 
   function fetchHandlerRoles() {
-    if( canFetch( "roles" )) {
+    if( canFetch( "roles", fetchHandlerRoles )) {
       ajax.query( "application-organization-handler-roles", {id: appId()})
       .success( function( res ) {
         roles( _.map( res.handlerRoles,
@@ -252,7 +269,10 @@ LUPAPISTE.HandlerService = function() {
     }
   };
 
-  hub.subscribe( "contextService::enter", fetchApplicationHandlers );
+  hub.subscribe( "contextService::enter", function() {
+    fetchApplicationHandlers();
+    fetchPending();
+  });
 
   hub.subscribe( "contextService::leave", function() {
     self.applicationHandlers.removeAll();
