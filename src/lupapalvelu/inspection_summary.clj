@@ -85,7 +85,6 @@
   (get-in organization [:inspection-summary :operations-templates (keyword opName)]))
 
 (defn process-verdict-given [{:keys [organization primaryOperation inspection-summaries] :as application}]
-  (println primaryOperation)
   (let [organization (org/get-organization organization)]
     (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]

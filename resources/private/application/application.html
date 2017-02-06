@@ -289,7 +289,7 @@
 
                           <li data-bind="if: $root.authorization.ok('inspection-summaries-for-application'),
                                          css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
-                            <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" class="link-btn">
+                            <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" data-test-id="application-open-inspectionSummaries-tab" class="link-btn">
                               <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
                             </a>
                           </li>

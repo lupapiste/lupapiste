@@ -72,14 +72,16 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
-(rum/defc select [change-fn value options]
+(rum/defc select [change-fn data-test-id value options]
   [:select.form-entry.is-middle
    {:on-change #(change-fn (.. % -target -value))
+    :data-test-id "SELECT"
     :value     value}
    (map (fn [[k v]] [:option {:value k} v]) options)])
 
 (rum/defc operations-select [operations selection]
   (select #(swap! state assoc-in [:view :new :operation] %)
+          "operations-select"
           selection
           (cons
             [nil (js/loc "choose")]
@@ -89,6 +91,7 @@
 
 (rum/defc summaries-select [summaries operations selection]
   (select update-summary-view
+          "summaries-select"
           selection
           (cons
             [nil (js/loc "choose")]
@@ -98,6 +101,7 @@
 
 (rum/defc templates-select [templates selection]
   (select #(swap! state assoc-in [:view :new :template] %)
+          "templates-select"
           selection
           (cons
             [nil (js/loc "choose")]
@@ -176,6 +180,7 @@
           [:span (js/loc "button.cancel")]]]]]
       [:div.row
        [:table
+        {:id "targets-table"}
         [:thead
          [:tr
           [:th (js/loc "inspection-summary.targets.table.state")]
