@@ -115,7 +115,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   };
 
   self.init = function() {
-    if( !self.readOnly ) {
+    if( !ko.unwrap(self.readOnly) ) {
       // Trick to ensure that rendering is done before binding.
       _.defer(bindToService );
     }
