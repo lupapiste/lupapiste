@@ -106,14 +106,14 @@
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app "authority")))
+  (ok :authorities (app/application-org-authz-users app #{"authority"})))
 
 (defquery application-commenters
   {:user-roles #{:authority}
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app "authority" "commenter")))
+  (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
@@ -225,7 +225,7 @@
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
   [{created :created app :application user :user :as command}]
-  (let [assignee (util/find-by-id assigneeId (app/application-org-authz-users app "authority"))]
+  (let [assignee (util/find-by-id assigneeId (app/application-org-authz-users app #{"authority"}))]
     (if (or assignee (ss/blank? assigneeId))
       (let [authority (if assignee (usr/summary assignee) (:authority domain/application-skeleton))]
         (update-application command

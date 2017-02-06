@@ -631,8 +631,8 @@
     (fail :error.illegal-state)))
 
 (defn application-org-authz-users
-  [{org-id :organization :as application} & org-authz]
-  (->> (apply usr/find-authorized-users-in-org org-id org-authz)
+  [{org-id :organization :as application} org-authz]
+  (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
 ;; Cancellation
