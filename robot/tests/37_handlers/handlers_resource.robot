@@ -31,7 +31,16 @@ No required
 
 Yes required
   [Arguments]  ${index}  ${lang}
+  Scroll to test id  add-handler-role
   Wait until  Element should be visible  jquery=input.required[data-test-id=edit-role-${index}-${lang}]
+  
+Warning visible
+  Scroll to test id  add-handler-role
+  Wait test id visible  handler-roles-warning
+
+Warning not visible
+  Scroll to test id  add-handler-role
+  No such test id  handler-roles-warning
 
 Handler is
   [Arguments]  ${index}  ${person}  ${role}
