@@ -4,6 +4,21 @@
 
 (enable-console-print!)
 
+(defn find-by-key
+  "Return item from sequence col of maps where element k (keyword) matches value v."
+  [k v col]
+  (some (fn [m] (when (= v (get m k)) m)) col))
+
+(defn query [name success-fn & kvs]
+  (-> (js/ajax.query name (apply js-obj kvs))
+      (.success success-fn)
+      .call))
+
+(defn command [name success-fn & kvs]
+  (-> (js/ajax.command name (apply js-obj kvs))
+      (.success success-fn)
+      .call))
+
 (def empty-state {:applicationId ""
                   :operations []
                   :summaries []
@@ -17,11 +32,6 @@
 (def state      (atom empty-state))
 (def table-rows (rum/cursor-in state [:view :summary :targets]))
 
-(defn find-by-key
-  "Return item from sequence col of maps where element k (keyword) matches value v."
-  [k v col]
-  (some (fn [m] (when (= v (get m k)) m)) col))
-
 (rum/defc summary-row [row-data]
   [:tr
    [:td ""]
@@ -31,20 +41,19 @@
    [:td ""]
    [:td ""]])
 
-(defn update-operations [value]
-  (swap! state assoc :operations value))
+(defn- refresh []
+  (query "inspection-summaries-for-application"
+         (fn [data]
+           (swap! state assoc
+                  :operations (js->clj (aget data "operations") :keywordize-keys true)
+                  :templates  (js->clj (aget data "templates") :keywordize-keys true)
+                  :summaries  (js->clj (aget data "summaries") :keywordize-keys true)))
+         "id" (-> @state :applicationId)))
 
 (defn id-subscription [value]
   (swap! state assoc :applicationId value)
   (when-not (empty? value)
-    (-> (js/ajax.query "inspection-summaries-for-application"
-                       (js-obj "id" value))
-        (.success (fn [data]
-                    (update-operations (js->clj (aget data "operations")
-                                                :keywordize-keys true))
-                    (swap! state assoc :summaries (js->clj (aget data "summaries")
-                                                           :keywordize-keys true))))
-        .call)))
+    (refresh)))
 
 (defn init
   [init-state props]
@@ -70,7 +79,7 @@
    (map (fn [[k v]] [:option {:value k} v]) options)])
 
 (rum/defc operations-select [operations selection]
-  (select (partial (swap! state assoc-in [:view :new :operation]))
+  (select #(swap! state assoc-in [:view :new :operation] %)
           selection
           (cons
             [nil (js/loc "choose")]
@@ -88,7 +97,7 @@
                            [(:id s) (str (:name s) " - " op-description)])) summaries))))
 
 (rum/defc templates-select [templates selection]
-  (select (partial (swap! state assoc-in [:view :new :template]))
+  (select #(swap! state assoc-in [:view :new :template] %)
           selection
           (cons
             [nil (js/loc "choose")]
@@ -106,7 +115,9 @@
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
       [:span (js/loc "inspection-summary.tab.intro.1")]
+      [:br]
       [:span (js/loc "inspection-summary.tab.intro.2")]
+      [:br]
       [:span (js/loc "inspection-summary.tab.intro.3")]]
      [:div.form-grid.no-top-border.no-padding
       [:div.row
@@ -126,11 +137,12 @@
          [:span (js/loc "inspection-summary.new-summary.button")]]]]
       [:div.row
        [:div.container-bubble.half-width.arrow-2nd-col
-        {:style {:display (if visibility "block" "none")}}
+        {:style {:display (if visibility "block" "none")
+                 :margin  "0px"
+                 :padding "0px 24px"}}
         [:div.row
-         [:span (js/loc "inspection-summary.new-summary.intro.1")]]
-        [:div.row
-         [:span (js/loc "inspection-summary.new-summary.intro.2")]]
+         [:label (js/loc "inspection-summary.new-summary.intro.1")]
+         [:label (js/loc "inspection-summary.new-summary.intro.2")]]
         [:div.row
          [:label (js/loc "inspection-summary.new-summary.operation")]
          [:div.col-4.no-padding
@@ -146,8 +158,16 @@
           (templates-select (rum/react (rum/cursor-in state [:templates]))
                             (rum/react (rum/cursor-in state [:view :new :template])))]]
         [:div.row.left-buttons
+         {:style {:padding-top "12px"}}
          [:button.positive
-          {:on-click (fn [_] (reset! bubble-visible false))}
+          {:on-click (fn [_] (command "create-inspection-summary"
+                                      (fn [result]
+                                        (js/util.showSavedIndicator result)
+                                        (refresh)
+                                        (reset! bubble-visible false))
+                                      "id"          (-> @state :applicationId)
+                                      "operationId" (-> @state :view :new :operation)
+                                      "templateId"  (-> @state :view :new :template)))}
           [:i.lupicon-check]
           [:span (js/loc "button.ok")]]
          [:button.secondary
