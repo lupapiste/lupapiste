@@ -28,7 +28,7 @@
   (make-sort {:sort {:field "submitted" :asc true }})  => {:submitted 1}
   (make-sort {:sort {:field "modified" :asc true }})  => {:modified 1}
   (make-sort {:sort {:field "state" :asc true }})  => {:state 1}
-  (make-sort {:sort {:field "handler" :asc true }}) => {"authority.lastName" 1, "authority.firstName" 1}
+  (make-sort {:sort {:field "handler" :asc true }}) => {:handlers.0.lastName 1, :handlers.0.firstName 1}
   (make-sort {:sort {:field {:injection "attempt"}
               :asc "; drop database;"}})   => {}
   (make-sort {})                                 => {}
