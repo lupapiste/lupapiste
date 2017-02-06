@@ -954,6 +954,9 @@ $preamble-min-height: 280px; // at least the size of the map container
 #application-requiredFieldSummary-tab {
   .auth-actions button {
     display: block;
+    span {
+      width: 100%
+    }
   }
 }
 

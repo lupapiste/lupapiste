@@ -106,6 +106,13 @@ ul.tabs {
   pointer-events: none;
 }
 
+.tabs li.active >  a.link-btn-inverse {
+  cursor: default;
+  color: $gray51;
+  pointer-events: none;
+  background-color: $orange;
+}
+
 .tabs-content-container {
   border: 1px solid #ccc;
   border-top: none;
