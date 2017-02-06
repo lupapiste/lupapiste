@@ -48,8 +48,8 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("eight",   "applications.status",     {sortField: "state",
                                                                      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("ninth",   "applications.authority",  {sortField: "handler",
-                                                                     currentSort: self.dataProvider.sort})
+    util.createSortableColumn("ninth",   "application.handlers",  {sortField: "handler",
+                                                                   currentSort: self.dataProvider.sort})
   ];
 
   // Scroll support.

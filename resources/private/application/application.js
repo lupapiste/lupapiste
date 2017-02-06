@@ -55,7 +55,8 @@
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
-  var authorities = ko.observableArray([]);
+  var authorities = lupapisteApp.services.handlerService.applicationAuthorities();
+
   var tosFunctions = ko.observableArray([]);
   var hasEditableDocs = ko.observable();
 
