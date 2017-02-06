@@ -342,3 +342,4 @@
 "auth-admin.version" "sv" "Version"
 "handler-roles.title" "fi" "Käsittelijäroolit"
 "handler-roles.add" "fi" "Lisää uusi käsittelijä"
+"handler-roles.info" "fi" "<b>Huom!</b> Käsittelijärooleihin tehdyt muutokset vaikuttavat kaikilla hakemuksilla näkyviin käsittelijätietohin välittömästi.<br>Ensimmäinen rooli (Käsittelijä) on kiinteästi asetettu rooli, jonka nimen voi muuttaa, mutta jota ei voi poistaa. "
