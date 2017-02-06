@@ -217,23 +217,6 @@
                        $pull {:handlers {:id handlerId}}
                        $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}}))
 
-(defcommand assign-application
-  {:parameters [:id assigneeId]
-   :input-validators [(fn [{{assignee :assigneeId} :data}]
-                        (when-not (or (ss/blank? assignee) (mongo/valid-key? assignee))
-                          (fail "error.user.not.found")))]
-   :user-roles #{:authority}
-   :states     (states/all-states-but :draft :canceled)}
-  [{created :created app :application user :user :as command}]
-  (let [assignee (util/find-by-id assigneeId (app/application-org-authz-users app #{"authority"}))]
-    (if (or assignee (ss/blank? assigneeId))
-      (let [authority (if assignee (usr/summary assignee) (:authority domain/application-skeleton))]
-        (update-application command
-                            {$set {:modified  created
-                                   :authority authority}
-                             $push {:history (app/authority-history-entry authority created user)}}))
-      (fail "error.user.not.found"))))
-
 ;;
 ;; Cancel
 ;;

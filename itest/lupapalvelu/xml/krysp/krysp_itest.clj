@@ -555,7 +555,7 @@
 #_(fact* "Aloitusilmoitus is transferred to the backing system"
          (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Aloituspolku 1")
                application-id (:id application)
-               _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+               _ (command sonja :upsert-application-handler :id application-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?
                _ (command sonja :check-for-verdict :id application-id) => ok?
                application (query-application sonja application-id)
                building-1 (-> application :buildings first) => truthy

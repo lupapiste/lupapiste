@@ -81,36 +81,6 @@
         application     (query-application pena application-id)]
     (:organization application) => "069-R"))
 
-(fact* "Assign application to an authority"
-       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
-             ;; add a comment to change state to open
-             _ (comment-application pena application-id true) => ok?
-             application (query-application sonja application-id)
-             authority-before-assignation (:authority application)
-             resp (command sonja :assign-application :id application-id :assigneeId ronja-id)
-             assigned-app (query-application sonja application-id)
-             authority-after-assignation (:authority assigned-app)]
-         application-id => truthy
-         application => truthy
-         (success resp) => true
-         (:id authority-before-assignation) => nil
-         authority-after-assignation => (contains {:id ronja-id})
-         (fact "Authority is not able to submit"
-           sonja =not=> (allowed? :submit-application :id application-id))))
-
-(fact* "Assign application to an authority and then to no-one"
-       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
-             ;; add a comment change set state to open
-             _ (comment-application pena application-id true) => ok?
-             application (query-application sonja application-id)
-             authority-before-assignation (:authority application)
-             resp (command sonja :assign-application :id application-id :assigneeId sonja-id)
-             resp (command sonja :assign-application :id application-id :assigneeId nil)
-             assigned-app (query-application sonja application-id)
-             authority-in-the-end (:authority assigned-app)]
-         (:id authority-before-assignation) => nil
-         (:id authority-in-the-end) => nil))
-
 (facts upsert-application-handler
   (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
         resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
