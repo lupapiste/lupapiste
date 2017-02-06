@@ -2,37 +2,44 @@
         id="handler-roles-template">
   <h2 data-bind="ltext: 'handler-roles.title'"></h2>
   <p data-bind="lhtml: 'handler-roles.info'"></p>
-  <table class="handler-roles">
-    <thead>
-      <tr>
-        <!-- ko foreach: languages -->
-        <th data-bind="text: $parent.nameHeader( $data )"></th>
-        <!-- /ko -->
-        <th></th>
-      </tr>
-    </thead>
-    <tbody data-bind="foreach: roles">
-      <tr>
-        <!-- ko foreach: $parent.languages -->
-        <td>
-          <input type="text"
-                 class="grid-style-input" 
-                 data-bind="value: $parent.name[$data],
-                            disable: $parents[1].isDisabled,
-                            css: {required: $parents[1].isRequired( $parent.name, $data )},
-                            testId: sprintf( 'edit-role-%s-%s', $parentContext.$index, $data )">
-        </td>
-        <!-- /ko -->
-        <td>
-          <i class="lupicon-remove primary"
-             data-bind="visible: !$parent.isDisabled() && !$data.general,
-                        click: $parent.removeRole,
-                        testId: sprintf( 'remove-role-%s', $index() )">
-          </i>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="handler-roles-container">
+    <table class="handler-roles">
+      <thead>
+        <tr>
+          <!-- ko foreach: languages -->
+          <th data-bind="text: $parent.nameHeader( $data )"></th>
+          <!-- /ko -->
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: roles">
+        <tr>
+          <!-- ko foreach: $parent.languages -->
+          <td>
+            <input type="text"
+                   class="grid-style-input" 
+                   data-bind="value: $parent.name[$data],
+                              disable: $parents[1].isDisabled,
+                              css: {required: $parents[1].isRequired( $parent.name, $data )},
+                              testId: sprintf( 'edit-role-%s-%s', $parentContext.$index, $data )">
+          </td>
+          <!-- /ko -->
+          <td>
+            <i class="lupicon-remove primary"
+               data-bind="visible: !$parent.isDisabled() && !$data.general,
+                          click: $parent.removeRole,
+                          testId: sprintf( 'remove-role-%s', $index() )">
+            </i>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-bind="visible: showWarning,
+                    ltext: 'invite.error.missing-parameters'"
+         class="handler-role-warning"
+         data-test-id="handler-roles-warning">
+    </div>
+  </div>
   <icon-button params="ltext: 'handler-roles.add',
                        click: addRole,
                        icon: 'circle-plus',

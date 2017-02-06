@@ -33,19 +33,23 @@ Partly filled roles show required highlights
   No required  2  fi
   No required  2  sv
   No required  2  en
+  Warning not visible
   Edit handler role  2  fi  Uusi
   No required  2  fi     
   Yes required  2  sv    
-  Yes required  2  en    
+  Yes required  2  en
+  Warning visible    
   Edit handler role  2  en  New
   No required  2  fi     
   Yes required  2  sv    
-  No required  2  en     
+  No required  2  en 
+  Warning visible        
   Edit handler role  2  sv  Nytt  True
   No required  2  fi
   No required  2  sv
   No required  2  en
   Handler role is  2  Uusi  Nytt  New
+  Warning not visible
 
 Partly filled roles are not saved
   Click enabled by test id  add-handler-role

@@ -561,10 +561,24 @@ select.waste-unit-select {
   }
 }
 
-table.handler-roles {
-  @include no-row-hover;
-  input {
-    width: 80%;
+div.handler-roles-container {
+  margin-bottom: $marginL;
+  table.handler-roles {
+    @include no-row-hover;
+    input {
+      width: 80%;
+    }
+    margin-bottom: $marginS;
+  }
+
+  div.handler-role-warning {
+    text-align: center;
+    border: 1px solid $negative;
+    color: $negative;
+    width: 100%;
+    min-height: $btn-height;
+    line-height: $btn-height;
+    font-size: 16px;
   }
 }
 

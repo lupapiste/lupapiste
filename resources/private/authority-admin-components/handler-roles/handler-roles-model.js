@@ -40,6 +40,13 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
   self.isRequired = function( name, lang ) {
     return !_.trim( util.getIn( name, [lang]))
         && _.some( _.values( ko.mapping.toJS( name )), _.trim);
-  }; 
+  };
+
+  self.showWarning = self.disposedComputed( function() {
+    return _.some( self.roles(), function( role ) {
+      return _.some( self.languages(),
+                     _.partial( self.isRequired, role.name ));
+    });        
+  });
 };
 
