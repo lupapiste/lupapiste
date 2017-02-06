@@ -17,6 +17,51 @@
           </div>
           <!-- /ko -->
 
+          <!-- ko ifnot: missingSomeInfo -->
+          <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
+          <div class="clear spacerM"></div>
+          <!-- /ko -->
+
+          <div class="auth-actions stacked inner-margins">
+              <button data-bind="click: approveApplication,
+                                 visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                                 attr: {'title': loc('tooltip.approveApplication')}"
+                      data-test-id="approve-application-summaryTab"
+                      class="positive">
+                  <span data-bind="ltext: 'application.approveApplication'"></span>
+                  <i class="lupicon-circle-arrow-right"></i>
+              </button>
+              <button data-bind="click: approveExtension,
+                                 visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                                 attr: {'title': loc('tooltip.approveApplication')}"
+                      data-test-id="approve-extension-summaryTab"
+                      class="positive">
+                  <i class="lupicon-circle-check"></i>
+                  <span data-bind="ltext: 'application.extension.approve'"></span>
+              </button>
+
+              <button data-bind="click: toAsianhallinta,
+                                 visible: $root.authorization.ok('application-to-asianhallinta'),
+                                 enable: !processing() && $root.authorization.ok('application-to-asianhallinta'),
+                                 attr: {'title': loc('tooltip.toAsianhallinta')}"
+                      data-test-id="to-asianhallinta-summaryTab"
+                      class="positive">
+                  <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+                  <i class="lupicon-circle-arrow-right"></i>
+              </button>
+
+              <button data-test-id="application-return-to-draft-btn"
+                      data-bind="click: returnToDraft,
+                                 visible: $root.authorization.ok( 'return-to-draft' ),
+                                 enable: !processing() && $root.authorization.ok( 'return-to-draft' )"
+                      class="secondary">
+                <i class="lupicon-circle-arrow-left"></i>
+                <span data-bind="ltext: 'application.returnToDraft'"></span>
+              </button>
+          </div>
+
           <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('submit-application')" data-test-id="submit-errors-container">
             <h2 data-bind="ltext: 'application.not-submittable'"></h2>
             <div data-bind="foreach: submitErrors">
@@ -27,15 +72,14 @@
             </div>
           </div>
 
-          <!-- ko ifnot: missingSomeInfo -->
-          <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
-          <!-- /ko -->
-
           <!-- ko if: $root.authorization.ok('approve-application') -->
           <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear" data-test-id="non-approved-designers-list">
             <h2 data-bind="ltext: 'application.designers-not-approved'" class="missing-info-title"></h2>
             <div class="info-line">
-              <div data-bind="ltext: 'application.designers-not-approved-help'" class="non-approved-designers"></div>
+              <div class="like-btn">
+                <i class="lupicon-circle-attention"></i>
+                <span data-bind="ltext: 'application.designers-not-approved-help'" class="non-approved-designers"></span>
+              </div>
               <ul data-bind="foreach: nonApprovedDesigners" class="non-approved-designers">
                 <li data-bind="text: $data"></li>
               </ul>
@@ -78,45 +122,6 @@
               <span data-bind="ltext: 'application.submitApplication'"></span>
           </button>
 
-          <div class="auth-actions stacked inner-margins">
-              <button data-bind="click: approveApplication,
-                                 visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
-                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
-                                 attr: {'title': loc('tooltip.approveApplication')}"
-                      data-test-id="approve-application-summaryTab"
-                      class="positive">
-                  <i class="lupicon-circle-arrow-right"></i>
-                  <span data-bind="ltext: 'application.approveApplication'"></span>
-              </button>
-              <button data-bind="click: approveExtension,
-                                 visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
-                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
-                                 attr: {'title': loc('tooltip.approveApplication')}"
-                      data-test-id="approve-extension-summaryTab"
-                      class="positive">
-                  <i class="lupicon-circle-check"></i>
-                  <span data-bind="ltext: 'application.extension.approve'"></span>
-              </button>
-
-              <button data-bind="click: toAsianhallinta,
-                                 visible: $root.authorization.ok('application-to-asianhallinta'),
-                                 enable: !processing() && $root.authorization.ok('application-to-asianhallinta'),
-                                 attr: {'title': loc('tooltip.toAsianhallinta')}"
-                      data-test-id="to-asianhallinta-summaryTab"
-                      class="positive">
-                  <i class="lupicon-circle-arrow-right"></i>
-                  <span data-bind="ltext: 'application.toAsianhallinta'"></span>
-              </button>
-
-              <button data-test-id="application-return-to-draft-btn"
-                      data-bind="click: returnToDraft,
-                                 visible: $root.authorization.ok( 'return-to-draft' ),
-                                 enable: !processing() && $root.authorization.ok( 'return-to-draft' )"
-                      class="positive">
-                <i class="lupicon-circle-arrow-left"></i>
-                <span data-bind="ltext: 'application.returnToDraft'"></span>
-              </button>
-          </div>
 
           <!-- missing information -->
 
