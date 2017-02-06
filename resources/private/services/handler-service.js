@@ -31,18 +31,24 @@ LUPAPISTE.HandlerService = function() {
   // Ajax API
   // ---------------------------
 
-  var fetched = {handlers: ko.observable(),
-                 authorities: ko.observable(),
-                roles: ko.observable()};
+  var fetched = {handlers: {flag: ko.observable(),
+                            guard: "application-handlers"},
+                 authorities: {flag: ko.observable(),
+                               guard: "application-authorities"},
+                 roles: {flag: ko.observable(),
+                         guard: "application-organization-handler-roles"}};
   var pendingFetch = {};
 
   function canFetch( key, fun ) {
-    var fetchObs = fetched[key];
-    if( !fetchObs() && appId()) {
-      fetchObs( true );
-      return true;
-    } else {
-      pendingFetch[key] = fun;
+    var fetch = fetched[key];
+    if( lupapisteApp.models.applicationAuthModel.ok( fetch.guard )) {
+      if( !fetch.flag() && appId()) {
+        fetch.flag( true );
+        return true;
+      }
+      else {
+        pendingFetch[key] = fun;
+      }
     }
   }
 
@@ -55,8 +61,8 @@ LUPAPISTE.HandlerService = function() {
   }
 
   function resetFetched() {
-    _.each( _.values( fetched), function( obs ) {
-      obs( false );
+    _.each( _.values( fetched), function( fetch ) {
+      fetch.flag( false );
     });
   }
 
