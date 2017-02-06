@@ -41,12 +41,14 @@ LUPAPISTE.HandlerService = function() {
 
   function canFetch( key, fun ) {
     var fetch = fetched[key];
-    if( lupapisteApp.models.applicationAuthModel.ok( fetch.guard )) {
-      if( !fetch.flag() && appId()) {
-        fetch.flag( true );
-        return true;
-      }
-      else {
+    var authOk = lupapisteApp.models.applicationAuthModel.ok( fetch.guard );
+    if( !fetch.flag() && appId() && authOk ) {
+      fetch.flag( true );
+      return true;
+    } else {
+      // Auth can be undefined if the auth model has not been
+      // initialized yet.
+      if( authOk !== false  ) {
         pendingFetch[key] = fun;
       }
     }
