@@ -1,17 +1,39 @@
-# Hi {{user.firstName}},
+# Hello, {{user.firstName}}. 
 
-This e-mail address {{recipient-email}} has been requested to be added as a party with a writing authorization to an application at Lupapiste. At Lupapiste you can take care of permits regarding built environment together with the authorities and other parties of the process. Around the clock - even from your sofa at home.
+A request has been made to authorize you as a party with writer access
+to a project in Lupapiste using the email address
+{{recipient-email}}. In Lupapiste, permit transactions can be handled
+together with the other parties of a project, 24 hours a day.
 
-The writing authorization is for project {{operation}} at {{address}}, {{municipality}}. If you are not yet a user at Lupapiste, viewing the application requires registering to the service by using your online banking codes or a mobile certificate. Remember to register to the service with the same e-mail address in which you received this invitation (i.e. {{recipient-email}}). If the invitation came to a different e-mail address than the one which you have used for registering at Lupapiste, ask the invitation sender {{inviter-email}} for a new invitation to the e-mail address you use.
+The writer access is for the project {{operation}} at {{address}},
+{{municipality}}.
 
-To view the project information, click the link below. If the link doesn't work, copy the address and paste it in your browser's address bar.
+{{recognition-of-authorization}}
+
+If you are not yet a Lupapiste user, viewing the project requires you
+to register with the service using the email address
+{{recipient-email}}. Registration is done with mobile phone or
+personal online banking authentication.
+
+Please remember to register with the service using the same email
+address to which the invitation was sent ({{recipient-email}}). If you
+have already registered with Lupapiste using a different address, ask
+the inviter {{inviter-email}} to send a new invitation to the address
+used.
+
+To see the project information, click on the link below and accept the
+authorization. If the link does not work, copy the URL and paste it in
+the browser's address bar.
 
 {{link}}
- 
-The writing authorization has been sent to you with the following message:
+
+The inviter has also left you the following message: 
 
 {{message}}
 
-Kind regards,
+Do you have any questions about using the service? We recommend you
+read {{lupapiste.help}} and {{faq}}.
 
-{{lupapiste}}
+Regards,
+
+{{lupapiste}} 
