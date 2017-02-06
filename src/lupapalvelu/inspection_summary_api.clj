@@ -7,7 +7,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.util :as util]))
 
 (defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
@@ -48,7 +49,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
-    (inspection-summary/select-template-for-operation organizationId operationId templateId)))
+    (inspection-summary/set-default-template-for-operation organizationId operationId templateId)))
 
 (defn- map-operation-to-frontend [app op]
   (let [document (domain/get-document-by-operation app op)
@@ -60,6 +61,7 @@
 (defquery inspection-summaries-for-application
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id]
+   ; TODO STATES
    :user-roles #{:authority}}
   [{app :application}]
   (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)
@@ -67,3 +69,14 @@
       :operations (->> (app/get-operations app)
                        (map (partial map-operation-to-frontend app))
                        (remove nil?))))
+
+(defcommand create-inspection-summary
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+   :parameters [:id templateId operationId]
+   :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
+   :user-roles #{:authority}}
+  [{app :application}]
+  (ok :id (inspection-summary/new-summary-for-operation
+            app
+            (util/find-by-key :id operationId (app/get-operations app))
+            templateId)))

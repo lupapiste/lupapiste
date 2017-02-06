@@ -43,9 +43,6 @@
   &> div {
     margin: $marginM $marginM;
   }
-  button {
-    margin: 0 $marginM;
-  }
   label.required {
     color: $lp-orange;
     &:after {

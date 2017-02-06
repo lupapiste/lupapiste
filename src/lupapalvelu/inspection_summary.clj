@@ -66,8 +66,8 @@
       (mongo/update-by-query :organizations {:_id organizationId} {$unset operations-to-unset}))
     (mongo/update-by-query :organizations {:_id organizationId} {$pull {:inspection-summary.templates {:id templateId}}})))
 
-(defn select-template-for-operation [organizationId operationId templateId]
-  (let [field  (str "inspection-summary.operations-templates." operationId)
+(defn set-default-template-for-operation [organizationId operationName templateId]
+  (let [field  (str "inspection-summary.operations-templates." operationName)
         update (if (= templateId "_unset")
                  {$unset {field 1}}
                  {$set   {field templateId}})]
