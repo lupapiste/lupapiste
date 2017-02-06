@@ -35,7 +35,9 @@
 (rum/defc summary-row [row-data]
   [:tr
    [:td ""]
-   [:td (:target-name row-data)]
+   [:td
+    {:data-test-id (str "target-name-" (:target-name row-data))}
+    (:target-name row-data)]
    [:td ""]
    [:td ""]
    [:td ""]
@@ -75,7 +77,7 @@
 (rum/defc select [change-fn data-test-id value options]
   [:select.form-entry.is-middle
    {:on-change #(change-fn (.. % -target -value))
-    :data-test-id "SELECT"
+    :data-test-id data-test-id
     :value     value}
    (map (fn [[k v]] [:option {:value k} v]) options)])
 

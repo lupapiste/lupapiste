@@ -19,7 +19,9 @@ Create template setup in auth admin
   Wait Until   Positive indicator should be visible
   Select From List by test id and index  select-inspection-summary-template-kerrostalo-rivitalo  1
   Wait Until   Positive indicator should be visible
-  [Teardown]  Logout
+  Go to page  users
+  Authority-admin front page should be open
+  Logout
 
 Pena wants to build a block of flats
   Pena logs in
@@ -37,5 +39,5 @@ Authority gives a verdict
 
 Inspection summary should be created automatically
   Open tab  inspectionSummaries
-  Select From List by test id and index  templates-select  0
-  Wait until  Element should be visible  xpath=//table[@id=targets-table]//td[text() = 'AA']
+  Select From List by test id and index  summaries-select  1
+  Wait until  Element should be visible by test id  target-name-AA
