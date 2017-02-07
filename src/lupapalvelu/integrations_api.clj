@@ -294,8 +294,8 @@
                         update-kuntalupatunnus)
         submitted-application (mongo/by-id :submitted-applications id)
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
-
-        app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
+        app-updates {:modified created,
+                     :handlers (ensure-general-handler-is-set (:handlers application) user @org)}
         indicator-updates (app/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application @org) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
