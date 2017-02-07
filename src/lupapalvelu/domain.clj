@@ -201,14 +201,6 @@
   (validate-access owner-or-write-roles command))
 
 ;;
-;; assignee
-;;
-
-(defn assigned? [{authority :authority}]
-  {:pre [(map? authority)]}
-  (-> authority :id nil? not))
-
-;;
 ;; documents
 ;;
 

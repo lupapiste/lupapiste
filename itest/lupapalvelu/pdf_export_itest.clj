@@ -92,7 +92,7 @@
         test-address             "Testikuja 1234"
         test-property-id         "44400100100100"
         test-submitted           (clj-time.coerce/to-long "2014-01-01")
-        test-authority           {:id "foo" :firstName "Erkki" :lastName "Testihenkilo"}
+        test-handlers            [{:id "foo" :firstName "Erkki" :lastName "Testihenkilo" :general true}]
         test-primaryOperation    {:name "kerrostalo-rivitalo"}
         test-secondaryoperations [{:name "aita"}]
 
@@ -106,7 +106,7 @@
                             :address             test-address
                             :submitted           test-submitted
                             :propertyId          test-property-id
-                            :authority           test-authority
+                            :handlers            test-handlers
                             :primaryOperation    test-primaryOperation
                             :secondaryOperations test-secondaryoperations})
 
