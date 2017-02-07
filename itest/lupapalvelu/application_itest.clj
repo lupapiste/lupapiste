@@ -101,7 +101,7 @@
                                                              :firstName "Ronja"
                                                              :lastName "Sibbo"
                                                              :general true
-                                                             :name {:en "Handler", :fi "Käsittelijä", :sv "Handläggare"}})))
+                                                             :name {:en "Handler", :fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare"}})))
 
     (facts "Applicant is not allowed to edit handlers"
       (command pena :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id)
@@ -132,7 +132,7 @@
                                                              :userId ronja-id
                                                              :firstName "Ronja"
                                                              :lastName "Sibbo"
-                                                             :name {:en "KVV-Handler", :fi "KVV-Käsittelijä", :sv "KVV-Handläggare"}})))
+                                                             :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}})))
 
     (facts "Set existing handler user"
       (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id :handlerId (:id resp))
@@ -147,7 +147,7 @@
                                                              :userId sonja-id
                                                              :firstName "Sonja"
                                                              :lastName "Sibbo"
-                                                             :name {:en "KVV-Handler", :fi "KVV-Käsittelijä", :sv "KVV-Handläggare"}})))
+                                                             :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}})))
 
     (facts "Insert second handler"
       (let [insert-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId sonja-id)
@@ -158,18 +158,18 @@
 
         (fact "two handlers exists" (count handlers) => 2)
         (fact "second handler has all data" handlers => [{:id (:id resp)
-                                                           :roleId "abba1111111111111112acdc"
-                                                           :userId sonja-id
-                                                           :firstName "Sonja"
-                                                           :lastName "Sibbo"
-                                                          :name {:en "KVV-Handler", :fi "KVV-Käsittelijä", :sv "KVV-Handläggare"}}
+                                                          :roleId "abba1111111111111112acdc"
+                                                          :userId sonja-id
+                                                          :firstName "Sonja"
+                                                          :lastName "Sibbo"
+                                                          :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}}
                                                          {:id (:id insert-resp)
                                                           :roleId "abba1111111111111111acdc"
                                                           :userId sonja-id
                                                           :firstName "Sonja"
                                                           :lastName "Sibbo"
                                                           :general true
-                                                          :name {:en "Handler", :fi "Käsittelijä", :sv "Handläggare"}}])))
+                                                          :name {:en "Handler", :fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare"}}])))
 
     (facts "Handler changes are stored in application history"
       (let [history (:history (query-application sonja app-id))
