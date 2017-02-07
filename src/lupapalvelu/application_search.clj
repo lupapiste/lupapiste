@@ -171,7 +171,7 @@
 
 (defn- enrich-row [app]
   (-> app
-      (assoc :handlers (vec (set (:handlers app)))) ;; Each handler only once.
+      (assoc :handlers (distinct (:handlers app))) ;; Each handler only once.
       app-utils/with-application-kind
       app-utils/location->object))
 
