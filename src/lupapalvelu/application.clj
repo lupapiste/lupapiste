@@ -327,7 +327,7 @@
 
 (defn post-process-app-for-krysp [application organization]
   (-> application
-      (enrich-application-handlers organization)
+      (domain/enrich-application-handlers organization)
       meta-fields/enrich-with-link-permit-data
       link-permit/update-backend-ids-in-link-permit-data))
 
@@ -670,3 +670,9 @@
                                {$unset {:canceled 1}}))
   (assignment/activate-assignments (:id application))
   (ok))
+
+(defn handler-upsert-updates [handler handlers created user]
+  (let [ind (util/position-by-id (:id handler) handlers)]
+    {$set  {:modified created
+            (util/kw-path :handlers (or ind (count handlers))) handler}
+     $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))

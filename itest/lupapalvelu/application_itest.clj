@@ -99,7 +99,9 @@
                                                              :roleId "abba1111111111111111acdc"
                                                              :userId ronja-id
                                                              :firstName "Ronja"
-                                                             :lastName "Sibbo"})))
+                                                             :lastName "Sibbo"
+                                                             :general true
+                                                             :name {:en "Handler", :fi "Käsittelijä", :sv "Handläggare"}})))
 
     (facts "Applicant is not allowed to edit handlers"
       (command pena :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id)
@@ -129,7 +131,8 @@
                                                              :roleId "abba1111111111111112acdc"
                                                              :userId ronja-id
                                                              :firstName "Ronja"
-                                                             :lastName "Sibbo"})))
+                                                             :lastName "Sibbo"
+                                                             :name {:en "KVV-Handler", :fi "KVV-Käsittelijä", :sv "KVV-Handläggare"}})))
 
     (facts "Set existing handler user"
       (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id :handlerId (:id resp))
@@ -143,7 +146,8 @@
                                                              :roleId "abba1111111111111112acdc"
                                                              :userId sonja-id
                                                              :firstName "Sonja"
-                                                             :lastName "Sibbo"})))
+                                                             :lastName "Sibbo"
+                                                             :name {:en "KVV-Handler", :fi "KVV-Käsittelijä", :sv "KVV-Handläggare"}})))
 
     (facts "Insert second handler"
       (let [insert-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId sonja-id)
@@ -157,12 +161,15 @@
                                                            :roleId "abba1111111111111112acdc"
                                                            :userId sonja-id
                                                            :firstName "Sonja"
-                                                           :lastName "Sibbo"}
+                                                           :lastName "Sibbo"
+                                                          :name {:en "KVV-Handler", :fi "KVV-Käsittelijä", :sv "KVV-Handläggare"}}
                                                          {:id (:id insert-resp)
                                                           :roleId "abba1111111111111111acdc"
                                                           :userId sonja-id
                                                           :firstName "Sonja"
-                                                          :lastName "Sibbo"}])))
+                                                          :lastName "Sibbo"
+                                                          :general true
+                                                          :name {:en "Handler", :fi "Käsittelijä", :sv "Handläggare"}}])))
 
     (facts "Handler changes are stored in application history"
       (let [history (:history (query-application sonja app-id))

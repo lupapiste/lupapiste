@@ -199,10 +199,7 @@
   [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
   (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
                      (usr/create-handler handlerId roleId))]
-    (update-application command
-                        {$set  {:modified  created
-                                :handlers  (util/upsert handler handlers)}
-                         $push {:history   (app/handler-history-entry (util/assoc-when handler :new-entry (nil? handlerId)) created user)}})
+    (update-application command (app/handler-upsert-updates handler handlers created user))
     (ok :id (:id handler))))
 
 (defcommand remove-application-handler
@@ -930,12 +927,10 @@
    :user-roles       #{:authority :applicant :oirAuthority}
    :states           states/all-states}
   [{:keys [application lang organization]}]
-  (ok :handlers (map (fn [{role-id :roleId :as handler}]
-                       (assoc handler :roleName (->> @organization
-                                                     :handler-roles
-                                                     (util/find-by-id role-id)
-                                                     :name
-                                                     lang)))
+  (ok :handlers (map (fn [{role-name :name :as handler}]
+                       (-> handler
+                           (assoc :roleName ((keyword lang) role-name))
+                           (dissoc :name)))
                      (:handlers application))))
 
 (defquery application-organization-handler-roles
