@@ -5,6 +5,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
+            [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -190,7 +191,8 @@
         tila (get-in task [:data :katselmus :tila :value])
 
         task-pdf-version (tasks/generate-task-pdfa application task user lang)
-        application (domain/get-application-no-access-checking id)
+        application (-> (domain/get-application-no-access-checking id)
+                        (app/post-process-app-for-krysp @organization))
         all-attachments (:attachments application)
         command (assoc command :application application)
 

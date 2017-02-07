@@ -54,7 +54,7 @@
               email (last-email)]
 
           (:to email) => (contains (email-for-key pena))
-          (:subject email) => (contains "hakemuksen tila muuttunut")
+          (:subject email) => (contains "Kuopio - hankkeen tila on nyt K\u00e4sittelyss\u00e4")
           (get-in email [:body :plain]) => (contains "K\u00e4sittelyss\u00e4")
 
 

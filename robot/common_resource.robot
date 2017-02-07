@@ -4,6 +4,7 @@ Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
+Library        DebugLibrary
 
 *** Variables ***
 
@@ -178,6 +179,7 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
+  Wait for jQuery
   Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
@@ -473,7 +475,7 @@ Select From Autocomplete
 
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
-  Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
+  Select From Autocomplete  [data-test-id="${data-test-id}"]:visible  ${value}
 
 Clear autocomplete selections by test id
   [Arguments]  ${data-test-id}
@@ -1347,6 +1349,17 @@ Fill in new password
   Wait Until  Page should contain  Salasana asetettu.
   Confirm notification dialog
 
+Fill in new company password
+  [Arguments]  ${section}  ${password}
+  Wait Until  Element should be visible  xpath=//section[@id='${section}']//h2[@data-test-id='company-setpw-header']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password1']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password2']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Click Element  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Confirm notification dialog
+
+
 Open company user listing
   Click Element  user-name
   Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
@@ -1489,7 +1502,7 @@ Test id input is
 
 Test id text is
   [Arguments]  ${id}  ${text}
-  Wait until  Element text should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Element text should be  jquery=[data-test-id=${id}]:visible  ${text}
 
 Javascript? helper
   [Arguments]  ${expression}
@@ -1546,6 +1559,15 @@ Test id select is
 jQuery should match X times
   [Arguments]  ${selector}  ${count}
   Wait until  Javascript?  $("${selector}").length === ${count}
+
+Test id autocomplete options check
+  [Arguments]  ${tid}  ${included}  @{options}  
+  :FOR  ${text}  IN  @{options}
+  \  Javascript?  _.includes($("div[data-test-id='${tid}'] div.autocomplete-dropdown .autocomplete-result-item span").map( function() {return this.innerText;}).get(), "${text}") === ${included}
+
+Test id autocomplete disabled
+  [Arguments]  ${tid}
+  jQuery should match X times  div[data-test-id='${tid}'] .autocomplete-selection-wrapper.disabled:visible  1
 
 
 # Frontend error log

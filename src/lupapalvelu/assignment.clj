@@ -11,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.operations :as operations]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -119,7 +120,7 @@
   (let [search-keys [:description :applicationDetails.address :applicationDetails._id
                      :applicationDetails.verdicts.kuntalupatunnus]
         fuzzy       (ss/fuzzy-re filter-search)
-        ops         (app-utils/operation-names filter-search)]
+        ops         (operations/operation-names filter-search)]
     {$or (concat
            (map #(hash-map % {$regex   fuzzy
                             $options "i"})
@@ -149,37 +150,44 @@
           :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient operation area createdDate targetType]} user]
-  {$and
-   (filter seq
-           [query
-            (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-            (when-not (empty? operation)
-              {:applicationDetails.primaryOperation.name {$in operation}})
-            (when-not (empty? recipient)
-              {:recipient.id {$in recipient}})
-            (when-not (empty? area)
-              (app-utils/make-area-query area user :applicationDetails))
-            (when-not (empty? createdDate)
-              {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
-                                    "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
-            (when-not (empty? targetType)
-              {:target.group {$in targetType}})
-            {:status {$ne "canceled"}}])})
-
+(defn- make-query [{:keys [searchText recipient operation area createdDate targetType]} user]
+  "Returns query parameters in two parts:
+   - pre-lookup: query conditions that can be executed directly against the assignments collection itself
+   - post-lookup: conditions that need data fetched via the assignments->applications lookup stage in aggregation query
+                  (basically the ones that are targeted to the :applicationDetails subdocument"
+  {:pre-lookup (filter seq
+                       [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}}
+                        (when-not (empty? recipient)
+                         {:recipient.id {$in recipient}})
+                        (when-not (empty? createdDate)
+                          {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
+                                                "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
+                        (when-not (empty? targetType)
+                          {:target.group {$in targetType}})
+                        {:status {$ne "canceled"}}])
+  :post-lookup (filter seq
+                       [(when-not (ss/blank? searchText)
+                          (make-text-query (ss/trim searchText)))
+                        (when-not (empty? operation)
+                          {:applicationDetails.primaryOperation.name {$in operation}})
+                        (when-not (empty? area)
+                          (app-utils/make-area-query area user :applicationDetails))])})
 
 (defn sort-query [sort]
    (let [dir (if (:asc sort) 1 -1)]
       {(:field sort) dir}))
 
-(defn search [{state :state} mongo-query skip limit sort]
+(defn search [{state :state} {:keys [pre-lookup post-lookup] :as mongo-query} skip limit sort]
   (try
-    (let [aggregate (->> [{"$lookup" {:from :applications
+    (let [aggregate (->> [(when-not (empty? pre-lookup)
+                            {"$match" {$and pre-lookup}})
+                          {"$lookup" {:from :applications
                                       :localField "application.id"
                                       :foreignField "_id"
                                       :as "applicationDetails"}}
                           {"$unwind" "$applicationDetails"}
-                          {"$match"  mongo-query}
+                          (when-not (empty? post-lookup)
+                            {"$match" {$and post-lookup}})
                           {"$project"
                            ;; pull the creation state to root of document for sorting purposes
                            ;; it might also be possible to use :document "$$ROOT" in aggregation
@@ -247,8 +255,7 @@
 (sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
-  (let [user-query  (organization-query-for-user user {})
-        mongo-query (make-query user-query query user)
+  (let [mongo-query (make-query query user)
         assignments (search query
                             mongo-query
                             (util/->long (:skip query))

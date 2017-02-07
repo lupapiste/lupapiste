@@ -5,7 +5,7 @@
             [noir.response :as resp]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.authorization :as auth]
@@ -15,7 +15,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -63,7 +62,7 @@
 (defn- do-approve [application organization created id current-state lang do-rest-fn]
   (if (org/krysp-integration? organization (permit/permit-type application))
     (or
-      (application/validate-link-permits application)
+      (app/validate-link-permits application)
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
             sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
                               (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization :current-state current-state))
@@ -71,6 +70,12 @@
         (do-rest-fn attachments-updates)))
     ;; Integration details not defined for the organization -> let the approve command pass
     (do-rest-fn nil)))
+
+(defn- ensure-general-handler-is-set [handlers user organization]
+  (let [general-id (org/general-handler-id-for-organization organization)]
+    (if (or (nil? general-id) (util/find-by-key :roleId general-id handlers))
+      handlers
+      (conj handlers (user/create-handler nil general-id user)))))
 
 (defcommand approve-application
   {:parameters       [id lang]
@@ -91,18 +96,14 @@
         timestamps  (zipmap [:modified next-state] (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
 
-        history-entry (application/history-entry next-state created user)
+        history-entry (app/history-entry next-state created user)
 
-        app-updates (merge
-                      {:state next-state
-                       :authority (if (domain/assigned? application) (:authority application) (user/summary user))} ; LUPA-1450
-                      timestamps)
-        application (-> application
-                      meta-fields/enrich-with-link-permit-data
-                      link-permit/update-backend-ids-in-link-permit-data
-                      (merge app-updates))
+        app-updates (util/assoc-when timestamps
+                                     :state next-state
+                                     :handlers (ensure-general-handler-is-set (:handlers application) user @organization)) ; LUPA-1450
+        application (app/post-process-app-for-krysp (merge application app-updates) @organization)
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
-        indicator-updates (application/mark-indicators-seen-updates application user created)
+        indicator-updates (app/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application command
@@ -132,7 +133,6 @@
                          (or (not sent) (> (-> versions last :created) sent))))
                   attachments)
     (fail :error.no-unsent-attachments)))
-
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
@@ -204,7 +204,7 @@
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
    :states     krysp-enrichment-states
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [app/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (let [{url :url credentials :credentials} (org/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
@@ -256,7 +256,7 @@
    :org-authz-roles auth/all-org-authz-roles
    :user-authz-roles auth/all-authz-roles
    :states     states/all-application-states
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [app/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (org/get-krysp-wfs application)]
     (ok :data (building-reader/building-info-list url credentials propertyId))
@@ -269,7 +269,7 @@
 (defn- fetch-linked-kuntalupatunnus
   "Fetch kuntalupatunnus from application's link permit's verdicts"
   [application]
-  (when-let [link-permit-app (first (application/get-link-permit-apps application))]
+  (when-let [link-permit-app (first (app/get-link-permit-apps application))]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
 (defn- update-kuntalupatunnus [application]
@@ -294,15 +294,15 @@
                         update-kuntalupatunnus)
         submitted-application (mongo/by-id :submitted-applications id)
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
-
-        app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
-        indicator-updates (application/mark-indicators-seen-updates application user created)
+        app-updates {:modified created,
+                     :handlers (ensure-general-handler-is-set (:handlers application) user @org)}
+        indicator-updates (app/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application @org) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         (util/deep-merge
-                          (application/state-transition-update (sm/next-state application) created orig-app user)
+                          (app/state-transition-update (sm/next-state application) created orig-app user)
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))

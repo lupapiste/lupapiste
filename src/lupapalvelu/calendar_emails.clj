@@ -23,8 +23,7 @@
 
 (def model
   (fn [{application :application} _ recipient]
-    {:link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
-     :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)}))
+    {:link-calendar #(notifications/get-application-link application "calendar" % recipient)}))
 
 (defn- display-names [users]
   (sade.strings/join ", " (map (fn [user] (str (:firstName user) " " (:lastName user))) users)))
@@ -42,8 +41,7 @@
                           :location        (:location reservation)}
        :address          (:address application)
        :municipality     (i18n/localize-fallback nil (str "municipality." (:municipality application)))
-       :link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
-       :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)
+       :link-calendar    #(notifications/get-application-link application "calendar" % recipient)
        :user-first-name  (:firstName recipient)})))
 
 (defn calendar-request
@@ -84,7 +82,6 @@
   {:subject-key                  "application.calendar.appointment.new"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST nil)
-   :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient _] (usr/authority? recipient)))
    :model-fn                     suggest-appointment-model})
@@ -94,7 +91,6 @@
   {:subject-key                  "application.calendar.appointment.new"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST nil)
-   :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient reservation]
                                      (and (usr/applicant? recipient)
@@ -106,7 +102,6 @@
   {:subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST nil)
-   :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient reservation]
                                      (and (usr/applicant? recipient)
@@ -118,7 +113,6 @@
   {:subject-key                  "application.calendar.appointment.decline"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/CANCEL PartStat/DECLINED)
-   :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
    :model-fn                     model})
 
@@ -127,6 +121,5 @@
   {:subject-key                  "application.calendar.appointment.accept"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (calendar-request Method/REQUEST PartStat/ACCEPTED)
-   :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
    :model-fn                     model})

@@ -14,6 +14,7 @@
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
+(def all-languages [:fi :sv :en])
 (def supported-langs (if (env/feature? :english)
                        [:fi :sv :en]
                        [:fi :sv]))

@@ -29,6 +29,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.server]
             [ring.util.codec :as codec])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
@@ -96,6 +97,11 @@
 (def oir-property-id "43300000000000")
 (def oulu-property-id "56400000000000")
 (def no-backend-property-id oulu-property-id)
+
+(def sipoo-general-handler-id "abba1111111111111111acdc")
+(def sipoo-kvv-handler-id     "abba1111111111111112acdc")
+(def jarvenpaa-general-handler-id "abba11111111111111111186")
+
 
 (defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
 
@@ -496,14 +502,15 @@
 
 (defn last-email
   "Returns the last email (or nil) and clears the inbox"
-  []
+  ([] (last-email true))
+  ([reset]
   {:post [(or (nil? %)
             (and (:to %) (:subject %) (not (.contains (:subject %) "???")) (-> % :body :html) (-> % :body :plain))
             (println %))]}
   (Thread/sleep 20) ; A little wait to allow mails to be delivered
-  (let [{:keys [ok message]} (query pena :last-email :reset true)] ; query with any user will do
+  (let [{:keys [ok message]} (query pena :last-email :reset reset)] ; query with any user will do
     (assert ok)
-    message))
+    message)))
 
 (defn sent-emails
   "Returns a list of emails and clears the inbox"

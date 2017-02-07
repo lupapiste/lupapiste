@@ -46,10 +46,10 @@
 (facts "Localize with fallback"
        (fact "Finnish"
              (localize-fallback :fi [["email.title" "change-foo"] "sldfkjasdf" ["email.title" "change-email"]])
-             => "Uuden s\u00e4hk\u00f6postiosoitteen vahvistus")
+             => "Aktivoi uusi tunnuksesi")
        (fact "Swedish"
              (localize-fallback :sv [["email.title" "change-foo"] "sldfkjasdf" ["email.title" "change-email"]])
-             => "Verifiering av ny e-postadress")
+             => "Aktivera ditt nya anv\u00e4ndarnamn")
        (fact "Chinese (default fallback is Finnish)"
              (localize-fallback :cn [["email.title" "change-foo"] "no" ["email.title" "change-email"]])
              => "Ei")

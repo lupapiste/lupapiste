@@ -180,6 +180,7 @@
      :statements ctc/statements
      :organization "753-P"
      :title "S\u00f6derkullantie 146"
+     :address "S\u00f6derkullantie 146"
      :primaryOperation {:id "523844e1da063788effc1c56"
                         :name "poikkeamis"
                         :created 1379419361123}
@@ -191,7 +192,6 @@
      :documents documents
      :_statements-seen-by {:777777777777777777000023 1379423134104}
      :modified 1379423133065
-     :address "S\u00f6derkullantie 146"
      :permitType "P"
      :permitSubtype "poikkeamislupa"
      :id "LP-753-2013-00001"

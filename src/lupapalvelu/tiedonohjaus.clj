@@ -184,6 +184,13 @@
                            :category (if correction :tos-function-correction :tos-function-change)
                            :user (full-name user)})))))
 
+(defn- authority-changes-from-history [history]
+  (->> (filter :authority history)
+       (map (fn [{:keys [authority user] :as item}]
+              (merge item {:text (str (:lastName authority) " " (:firstName authority))
+                           :category :authority-change
+                           :user (full-name user)})))))
+
 (defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
@@ -192,7 +199,8 @@
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         tos-fn-changes (tos-function-changes-from-history history lang)
-        all-docs (sort-by :ts (concat tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
+        authority-changes (authority-changes-from-history history)
+        all-docs (sort-by :ts (concat authority-changes tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
         state-changes (filter :state history)]
     (doall
       (map (fn [[{:keys [state ts user]} next]]
@@ -355,7 +363,8 @@
                 :request-review (i18n/localize lang "caseFile.operation.review.request")
                 :review (i18n/localize lang "caseFile.operation.review")
                 :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
-                :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection"))
+                :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection")
+                :authority-change (i18n/localize lang "caseFile.authorityChange"))
         description (str title ": " text)
         event (ActionEvent.)]
     (when-not (s/blank? user)

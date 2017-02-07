@@ -4,7 +4,8 @@
   <section class="page" id="inforequest">
     <div class="application_summary">
         <div class="container">
-          <div class="preamble">
+          <div class="preamble"
+               data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">
             <div data-bind="with: application" class="application_summary_info">
                 <h1 data-bind="component: {name: 'address',
                                params: { prefix: 'infoRequest',
@@ -52,9 +53,7 @@
             </div>
 
             <!-- Authority -->
-            <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
-            <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
-            <!-- /ko -->
+            <div data-bind="component: 'handler-list'"></div>
 
           </div>
           <div class="application-map-container">
@@ -94,6 +93,10 @@
               </div>
             </div>
           </div>
+          <card params="deck: 'summary',
+                        card: 'edit-handlers'">
+            <edit-handlers></edit-handlers>
+          </card>
           <div class="clear"></div>
         </div>
     </div>

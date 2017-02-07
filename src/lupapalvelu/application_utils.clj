@@ -1,20 +1,12 @@
 (ns lupapalvelu.application-utils
   (:require [sade.strings :as ss]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.i18n :as i18n]
             [sade.strings :as s]
             [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]))
 
-;; Operations
-
-(defn- normalize-operation-name [i18n-text]
-  (when-let [lc (ss/lower-case i18n-text)]
-    (-> lc
-        (s/replace #"\p{Punct}" "")
-        (s/replace #"\s{2,}"    " "))))
 
 (defn operation-description
   "obtain the name of application's primary operation, taking into
@@ -25,22 +17,6 @@
     (if primary-operation
       (i18n/localize lang "operations" primary-operation)
       "")))
-
-(def operation-index
-  (reduce
-    (fn [ops k]
-      (let [localizations (map #(i18n/localize % "operations" (name k)) i18n/supported-langs)
-            normalized (map normalize-operation-name localizations)]
-        (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
-    []
-    (keys operations/operations)))
-
-(defn operation-names [filter-search]
-  (let [normalized (normalize-operation-name filter-search)]
-    (map :op
-         (filter
-           (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
-           operation-index))))
 
 (defn with-application-kind [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond

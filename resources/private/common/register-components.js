@@ -26,7 +26,6 @@ jQuery(document).ready(function() {
     {name: "attachments-multiselect"},
     {name: "attachment-details"},
     {name: "attachments-change-type"},
-    {name: "authority-select"},
     {name: "base-autocomplete", model: "autocomplete-base-model"},
     {name: "autocomplete"},
     {name: "export-attachments"},
@@ -175,7 +174,10 @@ jQuery(document).ready(function() {
     {name: "combobox"},
     {name: "drop-zone"},
     {name: "upload-zone"},
-    {name: "link-permit-autocomplete"}
+    {name: "link-permit-autocomplete"},
+    {name: "handler-list"},
+    {name: "card"},
+    {name: "edit-handlers"}
 ];
 
   ko.registerLupapisteComponents(components);

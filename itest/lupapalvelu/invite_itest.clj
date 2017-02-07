@@ -56,7 +56,7 @@
         (fact "invite email contents"
           email => (partial contains-application-link? application-id "applicant")
           (:to email) => (contains (email-for-key teppo))
-          (:subject email) => "Lupapiste: Kutsukatu 13 - kutsu"
+          (:subject email) => "Lupapiste: Kutsukatu 13, Sipoo - valtuutus Lupapisteess\u00e4"
           (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")
           (get-in email [:body :plain]) => (contains (email-for-key teppo))
           (get-in email [:body :plain]) => (contains (email-for-key mikko)))))

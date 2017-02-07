@@ -50,10 +50,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  {:fi ssc/OptionalHttpUrl :en ssc/OptionalHttpUrl :sv ssc/OptionalHttpUrl}
-   ;:url  (i18n/localization-schema ssc/OptionalHttpUrl) TODO uncomment when feature.english is used in production
-   ;:name (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
-   :name {:fi sc/Str :en sc/Str :sv sc/Str}
+  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -68,10 +66,15 @@
    :modified ssc/Timestamp
    :items [sc/Str]})
 
+(sc/defschema HandlerRole
+  {:id                              ssc/ObjectIdStr
+   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
+   (sc/optional-key :general)       sc/Bool
+   (sc/optional-key :disabled)      sc/Bool})
+
 (sc/defschema Organization
   {:id sc/Str
-   ;:name  (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
-   :name {:fi sc/Str :en sc/Str :sv sc/Str}
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
@@ -109,6 +112,7 @@
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
+   (sc/optional-key :handler-roles) [HandlerRole]
    (sc/optional-key :suti) {(sc/optional-key :www) ssc/OptionalHttpUrl
                             (sc/optional-key :enabled) sc/Bool
                             (sc/optional-key :server) Server
@@ -162,11 +166,13 @@
   (when (nil? (sc/check [ssc/IpAddress] ips))
     {$set {:allowedAutologinIPs ips}}))
 
-(defn get-organization [id]
-  {:pre [(not (s/blank? id))]}
-  (->> (mongo/by-id :organizations id)
-       remove-sensitive-data
-       with-scope-defaults))
+(defn get-organization
+  ([id] (get-organization id {}))
+  ([id projection]
+   {:pre [(not (s/blank? id))]}
+   (->> (mongo/by-id :organizations id projection)
+        remove-sensitive-data
+        with-scope-defaults)))
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
@@ -567,3 +573,19 @@
   (update-organization organization
                        {$pull {:links (mongofy {:name name
                                                 :url  url})}}))
+
+(defn general-handler-id-for-organization [{roles :handler-roles :as organization}]
+  (:id (util/find-first :general roles)))
+
+(defn create-handler-role [role-id name]
+  {:id (or role-id (mongo/create-id))
+   :name name})
+
+(defn upsert-handler-role! [{handler-roles :handler-roles org-id :id} handler-role]
+  (let [ind (or (util/position-by-id (:id handler-role) handler-roles)
+                (count handler-roles))]
+    (update-organization org-id {$set {(util/kw-path :handler-roles ind :id)   (:id handler-role)
+                                       (util/kw-path :handler-roles ind :name) (:name handler-role)}})))
+
+(defn disable-handler-role! [org-id role-id]
+  (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))

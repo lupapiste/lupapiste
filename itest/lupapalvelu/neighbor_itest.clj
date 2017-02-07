@@ -30,7 +30,7 @@
 
 (defn- create-app-with-neighbor [& args]
   (let [application-id (apply create-app-id pena args)
-        resp (comment-application pena application-id true)
+        _ (comment-application pena application-id true)
         resp (command sonja "neighbor-add" :id application-id :propertyId "12312312341234" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
         application (query-application pena application-id)
@@ -90,8 +90,8 @@
         expiration-date           (util/to-local-date (+ ttl/neighbor-token-ttl (now)))]
 
     (fact "correct to" (:to email) => neighbor-email-addr)
-    (fact "correct subject" (:subject email) => "Lupapiste: Naapurikuja 3 - naapurin kuuleminen")
-    (fact "neighbor name field" (get-in email [:body :plain]) => (contains #"Hei( \w+)+,"))
+    (fact "correct subject" (:subject email) => "Lupapiste: Naapurikuja 3, Sipoo - ilmoitus naapureiden kuulemisesta")
+    (fact "neighbor name field" (get-in email [:body :plain]) => (contains #"Hei n,"))
     (fact "correnct link"
       a-id => application-id
       n-id => neighbor-id

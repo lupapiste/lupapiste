@@ -16,15 +16,14 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.attachment.type :as att-type]))
 
-
 (fact "update-document"
   (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
   (provided
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application-api add-operation-allowed?)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type)
+(testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -176,6 +175,77 @@
                ((reject-primary-operations #{:hii}) app) => nil?
                ((reject-primary-operations #{}) app) => nil?)))
 
+(facts validate-handler-id-in-application
+  (fact "no handlers"
+    (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers []}})) => false)
+
+  (fact "no matching handlers"
+    (:ok (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers [{:id ..another-handler-id..}]}})) => false)
+
+  (fact "matching handlers"
+    (validate-handler-id-in-application {:data {:handlerId ..handler-id..} :application {:handlers [{:id ..handler-id..}]}}) => nil)
+
+  (fact "no handler id given"
+    (validate-handler-id-in-application {:data {:handlerId nil} :application {:handlers [{:id ..handler-id..}]}}) => nil))
+
+(facts validate-handler-in-organization
+  (fact "handler not in organization"
+    (:ok (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}})) => false
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => nil))
+
+  (fact "handler found in organization"
+    (validate-handler-in-organization {:data {:userId ..user-id..} :application {:organization "org-id"}}) => nil
+    (provided (lupapalvelu.mongo/select-one :users {:_id ..user-id.. :orgAuthz.org-id "authority" :enabled true}) => {:id ..user-id.. :orgAuthz {:org-id ["authority"]}}))
+
+  (fact "no user id given"
+    (validate-handler-in-organization {:data {:userId nil} :application {:organization "org-id"}}) => nil))
+
+
+(facts validate-handler-role
+  (fact "no handler roles in org"
+    (:ok (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles []})})) => false)
+
+  (fact "no mathing handler roles in org"
+    (:ok (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles [{:id ..another-role-id..}]})})) => false)
+
+  (fact "mathing handler role"
+    (validate-handler-role {:data {:roleId ..role-id..} :organization (delay {:handler-roles [{:id ..role-id..}]})}) => nil)
+
+  (fact "no role id given"
+    (validate-handler-role {:data {:roleId nil} :organization (delay {:handler-roles [{:id ..role-id..}]})}) => nil))
+
+(facts validate-handler-role-not-in-use
+  (fact "update existing handler"
+    (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId ..handler-id..} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}})
+    => nil)
+
+  (fact "trying create duplicate handler role"
+    (:ok (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}}))
+    => false)
+
+  (fact "create new handler role"
+    (validate-handler-role-not-in-use {:data {:roleId ..role-id.. :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..another-role-id..}]}})
+    => nil)
+
+  (fact "no role id given"
+    (validate-handler-role-not-in-use {:data {:roleId nil :handlerId nil} :application {:handlers [{:id ..handler-id.. :roleId ..role-id..}]}})
+    => nil))
+
+(facts handler-upsert-updates
+  (fact "new entry, no existing handlers"
+    (handler-upsert-updates {:id ..new-id.. :info ..info..} [] ..created.. ..user..) =>
+    {$push {:history {:handler {:id ..new-id.. :info ..info.., :new-entry true}, :ts ..created.., :user {}}},
+     $set {:handlers.0 {:id ..new-id.. :info ..info..}, :modified ..created..}})
+
+  (fact "new entry, one existing handler"
+    (handler-upsert-updates {:id ..new-id..} [{:id ..id..}] ..created.. ..user..) =>
+    {$push {:history {:handler {:id ..new-id.., :new-entry true}, :ts ..created.., :user {}}},
+     $set {:handlers.1 {:id ..new-id..}, :modified ..created..}})
+
+  (fact "update existing handler"
+    (handler-upsert-updates {:id ..id-1..} [{:id ..id-0..} {:id ..id-1..} {:id ..id-2..}] ..created.. ..user..) =>
+    {$push {:history {:handler {:id ..id-1..}, :ts ..created.., :user {}}},
+     $set {:handlers.1 {:id ..id-1..}, :modified ..created..}}))
 
 (facts multioperation-attachment-updates
   (fact "multioperation attachment update with op array"
@@ -305,3 +375,31 @@
               => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["hakija" "valtakirja"]]))
 
 )
+
+
+(facts person-id-masker-for-user
+  (fact "handler authority - no masking"
+    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..id..}]}) {:schema-info {:name "maksaja"}
+                                                                                               :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+
+  (fact "non handler authority"
+    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
+     {:schema-info {:name "maksaja"}
+      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "010101-****"}}}}})
+
+  (fact "authority in different organization"
+    ((person-id-masker-for-user {:id ..id.. :role :authority :orgAuthz {:another-org-id #{:authority}}} {:organization "org-id" :handlers [{:userId ..other-id..}]})
+     {:schema-info {:name "maksaja"}
+      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}})
+
+  (fact "non authority user"
+    ((person-id-masker-for-user {:id ..id.. :role :authority} {:handlers [{:userId ..other-id..}]}) {:schema-info {:name "maksaja"}
+                                                                                                     :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
+    => {:schema-info {:name "maksaja"}
+        :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}}))

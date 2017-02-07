@@ -686,6 +686,11 @@
                                                                       [:hakija :valtakirja]
                                                                       [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]]}
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
+                       :handler-roles [{:id "abba11111111111111111186"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :assignments-enabled true
                        :inspection-summaries-enabled true
@@ -735,6 +740,15 @@
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
                                           :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba1111111111111111acdc"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}
+                                       {:id "abba1111111111111112acdc"
+                                        :name {:fi "KVV-K\u00e4sittelij\u00e4"
+                                               :sv "KVV-Handl\u00e4ggare"
+                                               :en "KVV-Handler"}}]
                        :kopiolaitos-email "sipoo@example.com"
                        :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                        :kopiolaitos-orderer-email "tilaaja@example.com"
@@ -800,6 +814,11 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba1111111111111111b753"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations [:ya-katulupa-vesi-ja-viemarityot
                                              :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
                                              :ya-kayttolupa-mainostus-ja-viitoitus
@@ -824,6 +843,11 @@
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
                                           :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba1111111111111111b753"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
@@ -852,6 +876,11 @@
                                                                            [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
                                                                            [:suunnitelmat :valaistussuunnitelma]]}
                        :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
+                       :handler-roles [{:id "abba1111111111111111a837"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -868,6 +897,11 @@
                                           :email "jussi.viranomainen@tampere.fi"
                                           :name "Jussi Viranomainen"}]
                        :krysp {:YA {:url local-krysp :ftpUser "dev_ya_tampere" :version "2.1.2"}}
+                       :handler-roles [{:id "abba1111111111111111b837"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
@@ -886,7 +920,12 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
                        :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "172.17.144.220" "109.204.231.126"]
                        :permanent-archive-enabled false
-                       :krysp {:R {:url local-krysp, :ftpUser "dev_porvoo", :version "2.1.6"}}}
+                       :krysp {:R {:url local-krysp, :ftpUser "dev_porvoo", :version "2.1.6"}}
+                       :handler-roles [{:id "abba11111111111111111638"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]}
 
                       ;; Oulu R
                       {:id "564-R"
@@ -897,6 +936,11 @@
                                      "http://www.ouka.fi")
                                (link {:fi "Rakennusvalvonta", :sv "Fastigheter"}
                                      "http://oulu.ouka.fi/rakennusvalvonta/")]
+                       :handler-roles [{:id "abba1111111111111111a564"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -909,6 +953,11 @@
                                           :text "Paloviranomainen"
                                           :email "oulu.viranomainen@oulu.fi"
                                           :name "Oulu Viranomainen"}]
+                       :handler-roles [{:id "abba1111111111111111b564"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :links [(link {:fi "Oulu", :sv "Ule\u00E5borg"}
                                      "http://www.ouka.fi")]
                        :operations-attachments ya-default-attachments-for-operations
@@ -920,6 +969,11 @@
                        :name (names {:fi "Naantalin rakennusvalvonta"
                                      :sv "Naantalin rakennusvalvonta"})
                        :scope [{:municipality "529" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
+                       :handler-roles [{:id "abba11111111111111111529"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -931,6 +985,11 @@
                                {:municipality "317" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "626" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
+                       :handler-roles [{:id "abba11111111111111111069"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -948,6 +1007,11 @@
                                 :open-inforequest true
                                 :open-inforequest-email "erajorma@example.com"}]
                        :links []
+                       :handler-roles [{:id "abba11111111111111111433"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -963,6 +1027,11 @@
                                 :open-inforequest-email "turku@example.com"}]
                        :links []
                        :krysp {:osoitteet {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"}}
+                       :handler-roles [{:id "abba11111111111111111853"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -1000,6 +1069,11 @@
                                {:ftpUser "dev_kuopio"
                                 :url "http://localhost:8000/dev/krysp"
                                 :version "2.1.5"}}
+                       :handler-roles [{:id "abba1111111111111111b297"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
@@ -1017,6 +1091,11 @@
                                (link {:fi "Rakennusvalvontavirasto", :sv "Byggnadstillsynsverket"}
                                      "http://www.hel.fi/www/rakvv/fi")]
                        :krysp {:R {:url local-krysp :version "2.2.0" :ftpUser "dev_helsinki"}}
+                       :handler-roles [{:id "abba1111111111111111a091"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]]}
@@ -1043,6 +1122,11 @@
                                           :text "Paloviranomainen",
                                           :email "olli.uleaborg@ouka.fi",
                                           :name "Olli Ule\u00E5borg"}]
+                       :handler-roles [{:id "abba1111111111111111c564"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -1065,6 +1149,11 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba11111111111111111997"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -1082,6 +1171,11 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba11111111111111111998"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
@@ -1099,6 +1193,11 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
+                       :handler-roles [{:id "abba11111111111111111999"
+                                        :name {:fi "K\u00e4sittelij\u00e4"
+                                               :sv "Handl\u00e4ggare"
+                                               :en "Handler"}
+                                        :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}]))
 

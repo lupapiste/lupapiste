@@ -11,7 +11,7 @@ LUPAPISTE.BaseUploadModel = function(params) {
 
   // Setting for attribute to "" effectively disables file selection.
   self.labelFor = self.disposedComputed( function() {
-    return self.waiting() || self.upload.readOnly ? "" : self.upload.fileInputId;
+    return self.waiting() || ko.unwrap(self.upload.readOnly) ? "" : self.upload.fileInputId;
   });
 
 };

@@ -77,7 +77,7 @@
     (fact "User receives activation link"
       (let [email (last-email)]
         (:to email) => (contains (:email documented-params))
-        (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi"
+        (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!"
         (get-in email [:body :plain]) => (partial re-matches #"(?sm).+/app/fi/welcome#!/link-account/\w{48}\s.+")))))
 
 (fact "Old user is linked"

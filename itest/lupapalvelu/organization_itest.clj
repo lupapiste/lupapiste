@@ -14,6 +14,7 @@
             [lupapalvelu.i18n :as i18n]
             [monger.operators :refer :all]
             [sade.core :as sade]
+            [sade.strings :as ss]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
 
@@ -878,3 +879,105 @@
       (fact "Deleting the template"
         (command jarvenpaa :modify-inspection-summary-template :func "delete" :templateId id1) => ok?
         (-> (query jarvenpaa :organization-inspection-summary-settings) :operations-templates) => empty?))))
+
+(def sipoo-handler-roles (->> (query sipoo :organization-by-user) :organization :handler-roles))
+
+(facts upsert-handler-role
+  (fact "cannot update with unexisting id"
+    (command sipoo :upsert-handler-role
+             :roleId "abba1111111111111666acdc"
+             :name {:fi "Not found id kasittelija"
+                    :sv "Not found id handlaggare"
+                    :en "Not found id handler"}) => (partial expected-failure? :error.unknown-handler))
+
+  (fact "cannot update with non-string name"
+    (command sipoo :upsert-handler-role
+             :roleId (get-in sipoo-handler-roles [1 :id])
+             :name {:fi {:handler "non-string kasittelija"}
+                    :sv "Updated Swedish handlaggare"
+                    :en "Updated English handler"}) => (partial expected-failure? :error.missing-parameters))
+
+  (fact "cannot update with missing handler name localization"
+    (command sipoo :upsert-handler-role
+             :roleId (get-in sipoo-handler-roles [1 :id])
+             :name {:fi "Updated Finnish kasittelija"
+                    :sv "Updated Swedish handlaggare"
+                    :en ""}) => (partial expected-failure? :error.missing-parameters))
+
+  (facts "update existing handler role"
+    (command sipoo :upsert-handler-role
+             :roleId (get-in sipoo-handler-roles [0 :id])
+             :name {:fi "Updated Finnish kasittelija"
+                    :sv "Updated Swedish handlaggare"
+                    :en "Updated English handler"}) => ok?
+
+    (let [handler-roles (get-in (query sipoo :organization-by-user) [:organization :handler-roles])]
+      (fact "handler role is updated"
+        (first handler-roles) => {:id   (get-in sipoo-handler-roles [0 :id])
+                                  :name {:fi "Updated Finnish kasittelija"
+                                         :sv "Updated Swedish handlaggare"
+                                         :en "Updated English handler"}
+                                  :general true})
+      (fact "no new handlers added"
+        (count handler-roles) => (count sipoo-handler-roles))
+
+      (fact "other handler roles not changed"
+        (second handler-roles) => (second sipoo-handler-roles))))
+
+  (facts "insert new handler role"
+    (command sipoo :upsert-handler-role
+             :name {:fi "New Finnish kasittelija"
+                    :sv "New Swedish handlaggare"
+                    :en "New English handler"}) => ok?
+
+    (let [handler-roles (get-in (query sipoo :organization-by-user) [:organization :handler-roles])]
+      (fact "one handler is added"
+        (count handler-roles) => (inc (count sipoo-handler-roles)))
+
+      (fact "handler name is set"
+        (:name (last handler-roles)) => {:fi "New Finnish kasittelija"
+                                         :sv "New Swedish handlaggare"
+                                         :en "New English handler"})
+
+      (fact "id is set"
+        (:id (last handler-roles)) => ss/not-blank?)
+
+      (fact "other handler-roles not updated"
+        (take 2 handler-roles) => [{:id   (get-in sipoo-handler-roles [0 :id])
+                                    :name {:fi "Updated Finnish kasittelija"
+                                           :sv "Updated Swedish handlaggare"
+                                           :en "Updated English handler"}
+                                    :general true}
+                                   (second sipoo-handler-roles)]))))
+
+(def sipoo-handler-roles (->> (query sipoo :organization-by-user) :organization :handler-roles))
+
+(facts disable-handler-role
+  (fact "cannot disable with unexisting id"
+    (command sipoo :disable-handler-role
+             :roleId "abba1111111111111666acdc") => (partial expected-failure? :error.unknown-handler))
+
+  (fact "cannot disable with blank id"
+    (command sipoo :upsert-handler-role
+             :roleId "") => (partial expected-failure? :error.missing-parameters))
+
+  (fact "cannot disable general handler role"
+    (command sipoo :disable-handler-role
+             :roleId (-> sipoo-handler-roles first :id)) => (partial expected-failure? :error.illegal-handler-role))
+
+  (fact "disable handler role"
+    (command sipoo :disable-handler-role
+             :roleId (-> sipoo-handler-roles second :id)) => ok?
+
+    (let [handler-roles (get-in (query sipoo :organization-by-user) [:organization :handler-roles])]
+      (fact "no handler roles added or deleted"
+        (count handler-roles) => (count sipoo-handler-roles))
+
+      (fact "second handler is disabled"
+        (-> handler-roles second :disabled) => true)
+
+      (fact "second handler is not name and id is not edited"
+        (-> handler-roles second (select-keys [:id :name])) => (-> sipoo-handler-roles second (select-keys [:id :name])))
+
+      (fact "other handler-roles not updated"
+        (first handler-roles) => (first sipoo-handler-roles)))))

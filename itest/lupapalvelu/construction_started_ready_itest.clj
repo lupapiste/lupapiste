@@ -41,7 +41,7 @@
         (:state application) => "constructionStarted"
         (-> application :history last :state) => "constructionStarted")
       (:to email) => (contains (email-for-key sonja))
-      (:subject email) => "Lupapiste: Paatoskuja 11 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Paatoskuja 11, Sipoo - hankkeen tila on nyt Rakennusty\u00f6t aloitettu"
       (get-in email [:body :plain]) => (contains "Rakennusty\u00f6t aloitettu")
       email => (partial contains-application-link? application-id "authority")
 
@@ -63,7 +63,7 @@
         sonja =not=> (allowed? :create-continuation-period-permit :id application-id)
 
         (:to email) => (contains (email-for-key sonja))
-        (:subject email) => "Lupapiste: Paatoskuja 11 - hakemuksen tila muuttunut"
+        (:subject email) => "Lupapiste: Paatoskuja 11, Sipoo - hankkeen tila on nyt Valmistunut"
         (get-in email [:body :plain]) => (contains "Valmistunut")
         email => (partial contains-application-link? application-id "authority")))))
 

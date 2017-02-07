@@ -141,6 +141,7 @@
                   statement-matching-duedate-passed]
      :organization "753-R"
      :title "Naapurikuja 3"
+     :address "Naapurikuja 3"
      :primaryOperation {:id "534bf825299508fb3618455d"
                         :name "kerrostalo-rivitalo"
                         :created 1397487653097}
@@ -151,7 +152,6 @@
      :created 1397487653097
      :propertyId "75312312341234"
      :modified timestamp-the-beginning-of-time
-     :address "Naapurikuja 3"
      :permitType "R"
      :id "LP-753-2014-12345"
      :municipality "753"}))
@@ -320,8 +320,8 @@
 
           (check-sent-reminder-email
             (-> statement-matching :person :email)
-            "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-            ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
+            "Lupapiste: Naapurikuja 3, Sipoo - muistutus lausuntopyynn\u00f6st\u00e4"
+            ["muistuttelemme" "sinulta on pyydetty lausuntoa"]
             (:id reminder-application) "authority"))))
 
     (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -342,8 +342,8 @@
         ;; clears inbox
         (check-sent-reminder-email
           (-> statement-matching :person :email)
-          "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-          ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
+          "Lupapiste: Naapurikuja 3, Sipoo - muistutus lausuntopyynn\u00f6st\u00e4"
+          ["muistuttelemme" "sinulta on pyydetty lausuntoa"]
           (:id reminder-application) "authority")))
 
     (fact "a fresh \"reminder-sent\" timestamp already exists -> no reminder is sent"
@@ -376,8 +376,8 @@
 
           (check-sent-reminder-email
             (-> statement-matching-duedate-passed :person :email)
-            "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
-            ["Sinulta on pyydetty lausuntoa lupahakemukseen" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+            "Lupapiste: Naapurikuja 3, Sipoo - muistutus er\u00e4\u00e4ntyv\u00e4st\u00e4 lausuntopyynn\u00f6st\u00e4"
+            ["muistuttelemme" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
             (:id reminder-application) "authority"))))
 
     (fact "the \"duedate-reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -398,8 +398,8 @@
         ;; clears inbox
         (check-sent-reminder-email
           (-> statement-matching-duedate-passed :person :email)
-          "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
-          ["Sinulta on pyydetty lausuntoa lupahakemukseen" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+          "Lupapiste: Naapurikuja 3, Sipoo - muistutus er\u00e4\u00e4ntyv\u00e4st\u00e4 lausuntopyynn\u00f6st\u00e4"
+          ["muistuttelemme" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
           (:id reminder-application) "authority")))
 
     (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
@@ -425,8 +425,8 @@
 
           (check-sent-reminder-email
            (:email open-inforequest-entry-matching)
-           "Lupapiste: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
-           ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"]))))
+           "Lupapiste: Naapurikuja 3 - muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           ["on avattu neuvontapyynt\u00f6" "Vastaathan"]))))
 
     (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
       (mongo/with-db db-name
@@ -442,8 +442,8 @@
           ;; clears inbox
           (check-sent-reminder-email
            (:email open-inforequest-entry-matching)
-           "Lupapiste: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
-           ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"]))))
+           "Lupapiste: Naapurikuja 3 - muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           ["on avattu neuvontapyynt\u00f6" "Vastaathan"]))))
 
     (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
       (mongo/with-db db-name
@@ -452,9 +452,7 @@
         (dummy-email-server/messages :reset true) => empty?)))
 
 
-
   (facts "neighbor-reminder"
-
     (fact "the \"reminder-sent\" status does not pre-exist and one matching neighbor exists -> reminder is sent"
       (mongo/with-db db-name
         (let [now-timestamp (now)]
@@ -470,8 +468,8 @@
             ;; clears inbox
             (check-sent-reminder-email
               (->> neighbor-matching :status (filter #(= "email-sent" (:state %))) first :email)
-              "Lupapiste: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
-              ["T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan"])))))
+              "Lupapiste: Naapurikuja 3, Sipoo - muistutus naapurin kuulemisesta"
+              ["Hei n," "muistuttelemme" "rajanaapurina teille on ilmoitettu"])))))
 
     (fact "a recent \"reminder-sent\" status already exists - no reminder is sent"
       (mongo/with-db db-name
@@ -528,7 +526,7 @@
 
             (check-sent-reminder-email
              "pena@example.com"
-             "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+             "Lupapiste: Naapurikuja 3, Sipoo - onko hanke yh\u00e4 aktiivinen?"
              ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
 
     (fact "the 'reminder-sent' timestamp already exists but is over 1 week old -> reminder is sent"
@@ -543,7 +541,7 @@
 
           (check-sent-reminder-email
            "pena@example.com"
-           "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+           "Lupapiste: Naapurikuja 3, Sipoo - onko hanke yh\u00e4 aktiivinen?"
            ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
 
     (fact "the 'reminder-sent' timestamp already exists - no reminder is sent"
@@ -556,7 +554,7 @@
 
   (facts "ya-work-time-is-expiring-reminder"
 
-    (fact "the \"ya-work-time-is-expiring\" timestamp does not pre-exist -> reminder is sent"
+    (fact "timestamp does not pre-exist -> reminder is sent"
       (mongo/with-db db-name
         (let [app (mongo/by-id :applications (:id ya-reminder-application))]
 
@@ -573,12 +571,10 @@
 
             (check-sent-reminder-email
               "pena@example.com"
-              "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
-              ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"
-               (util/to-local-date tyoaika-paattyy)
-               (:address app)])))))
+              "Lupapiste: Latokuja 3, Sipoo - tarvitaanko jatkoaikaa?"
+              ["Luvan p\u00e4\u00e4ttymisajankohdaksi on merkitty" (util/to-local-date tyoaika-paattyy) (:address app)])))))
 
-    (fact "the \"ya-work-time-is-expiring\" timestamp already exists -> no reminder is sent"
+    (fact "timestamp already exists -> no reminder is sent"
       (mongo/with-db db-name
         (update-application (application->command ya-reminder-application)
           {$set {:work-time-expiring-reminder-sent timestamp-the-beginning-of-time}})
@@ -589,7 +585,7 @@
           (= (:work-time-expiring-reminder-sent app) timestamp-the-beginning-of-time) => true?
           (dummy-email-server/messages) => empty?)))
 
-    (fact "the \"ya-work-time-is-expiring\" reminder is sent also to applications in state 'construction-started'"
+    (fact "reminder is sent also to applications in state 'construction-started'"
       (mongo/with-db db-name
         (update-application (application->command ya-reminder-application)
                             (merge (application/state-transition-update :constructionStarted 0 ya-reminder-application {})
@@ -597,8 +593,8 @@
         (batchrun/ya-work-time-is-expiring-reminder)
         (check-sent-reminder-email
           "pena@example.com"
-          "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
-          ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"])))
+          "Lupapiste: Latokuja 3, Sipoo - tarvitaanko jatkoaikaa?"
+          ["Luvan p\u00e4\u00e4ttymisajankohdaksi on merkitty"])))
 
     (fact "applications without 'tyoaika' document are not reacted to"
       (mongo/with-db db-name

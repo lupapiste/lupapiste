@@ -17,7 +17,9 @@ var externalApiTools = (function() {
   function toPermitFilter(application) {
     var result = _.pick(application, ["id", "location", "address", "municipality", "applicant", "permitType"]);
     result.type = application.infoRequest ? "inforequest" : "application";
-    result.authority = application.authority.id ? application.authority.lastName + " " + application.authority.firstName : "";
+    var handler = _.defaults( _.first( application.handlers ),
+                              {lastName: "", firstName: ""});
+    result.authority = _.trim(sprintf( "%s %s", handler.lastName, handler.firstName ));
     var op = util.getIn(application, ["primaryOperation", "name"]);
     result.operation = op ? loc(["operations", op]) : "";
     return _.defaults(result, permitSkeleton);

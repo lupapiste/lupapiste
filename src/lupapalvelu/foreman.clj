@@ -144,9 +144,6 @@
 
 (defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
 
-(defn foreman-in-foreman-app [application user]
-  (and (auth/has-auth-role? application (:id user) :foreman) (foreman-app? application)))
-
 (defn allow-foreman-only-in-foreman-app
   "If user has :forman role in current application, check that the application is a forman application."
   [{:keys [application user]}]
@@ -296,21 +293,40 @@
   (let [company-id (get-in auth [:invite :user :id])
         token-id   (company/company-invitation-token user company-id (:id foreman-app))]
     (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
-                                               :caller     user
+                                               :inviter    user
                                                :company    (company/find-company! {:id company-id})
-                                               :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                               :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})))
+                                               :token-id   token-id
+                                               :application foreman-app})))
 
-(defn- user-invite-notifications! [foreman-app auths]
-  (->> (map (fn [{{:keys [email user]} :invite}] (assoc user :email email)) auths)
-       (hash-map :application foreman-app :recipients)
-       (notif/notify! :invite)))
+(defn- invited-as-foreman? [application user]
+  (->> application
+       :auth
+       (filter #(= (-> % :invite :role) "foreman"))
+       (map :id)
+       (some #(= (:id user) %))))
+
+(defn foreman-in-foreman-app? [application user]
+  (and (invited-as-foreman? application user)
+       (foreman-app? application)))
+
+(defn- notify-of-invite! [app command invite-type recipients]
+  (->> (map (fn [{{:keys [email user]} :invite}] (or (usr/get-user-by-email email) (assoc user :email email))) recipients)
+         (assoc command :application app :recipients)
+         (notif/notify! invite-type)))
+
+
+(defn- user-invite-notifications! [foreman-app command auths]
+  (let [[foremen others] ((juxt filter remove) (partial foreman-in-foreman-app?
+                                                        foreman-app)
+                                               auths)]
+    (notify-of-invite! foreman-app command :invite-foreman foremen)
+    (notify-of-invite! foreman-app command :invite others)))
 
 (defn- invite-notifications! [{auths :auth :as foreman-app} command]
   (let [invite-auths (remove (comp #{:owner} :role) auths)]
     ;; Non-company invites
     (->> (remove (comp #{"company"} :type) invite-auths)
-         (user-invite-notifications! foreman-app))
+         (user-invite-notifications! foreman-app command))
     ;; Company invites
     (->> (filter (comp #{"company"} :type) invite-auths)
          (run! (partial invite-company! foreman-app command)))))
@@ -319,8 +335,7 @@
   (update-application command
                       {:auth {$not {$elemMatch {:invite.user.username (:email foreman-user)}}}}
                       {$push {:auth (auth/create-invite-auth user foreman-user (:id linked-app) "foreman" created)}
-                       $set  {:modified created}})
-  (notif/notify! :invite {:application linked-app :recipients [foreman-user]}))
+                       $set  {:modified created}}))
 
 (defn send-invite-notifications! [foreman-app foreman-user linked-app {user :user created :created :as command}]
   (try

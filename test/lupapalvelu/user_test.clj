@@ -89,10 +89,10 @@
 
 (facts "validate-create-new-user!"
   (against-background
-    [(mongo/by-id :organizations "o") => {:id "o"}
-     (mongo/by-id :organizations "other") => nil
-     (mongo/by-id :organizations "q") => {:id "q"}
-     (mongo/by-id :organizations "x") => {:id "x"}]
+    [(mongo/by-id :organizations "o" anything) => {:id "o"}
+     (mongo/by-id :organizations "other" anything) => nil
+     (mongo/by-id :organizations "q" anything) => {:id "q"}
+     (mongo/by-id :organizations "x" anything) => {:id "x"}]
 
   (fact (validate-create-new-user! nil nil) => (partial expected-failure? :error.missing-parameters))
   (fact (validate-create-new-user! nil {})  => (partial expected-failure? :error.missing-parameters))
@@ -209,7 +209,7 @@
     (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => ..result..
     (provided
       (get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
-      (mongo/by-id :organizations "x") => {:id "x"}
+      (mongo/by-id :organizations "x" anything) => {:id "x"}
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil))
 
@@ -217,7 +217,7 @@
     (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => (partial expected-failure? :error.duplicate-email)
     (provided
       (get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
-      (mongo/by-id :organizations "x") => {:id "x"}
+      (mongo/by-id :organizations "x" anything) => {:id "x"}
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => anything :times 0)))
 

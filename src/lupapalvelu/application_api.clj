@@ -20,6 +20,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -32,28 +33,37 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.drawing :as draw]))
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
 
 ;; Notifications
 
+(defn state-change-email-model
+  "Generic state change email. :state-text is set per application state.
+  When state changes and if notify is invoked as post-fn from command, result must contain new state in :state key."
+  [command conf recipient]
+  (assoc
+    (notifications/create-app-model command conf recipient)
+    :state-text #(i18n/localize % "email.state-description" (get-in command [:application :state]))))
+
 (def state-change {:subject-key    "state-change"
-                   :template "application-state-change.md"
-                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
+                   :template       "application-state-change.md"
+                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                   :tab-fn         (fn [command] (cond (verdict/verdict-tab-action? command) "verdict"))
+                   :model-fn       state-change-email-model})
 
 (notifications/defemail :application-state-change state-change)
 
-(defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
-                              _
-                              recipient]
-  {:operation-fi (app-utils/operation-description application :fi)
-   :operation-sv (app-utils/operation-description application :sv)
-   :address (:address application)
-   :city-fi (i18n/localize :fi "municipality" (:municipality application))
-   :city-sv (i18n/localize :sv "municipality" (:municipality application))
-   :name (:firstName recipient)
-   :text text})
+(notifications/defemail :undo-cancellation
+                        {:subject-key    "undo-cancellation"
+                         :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                         :model-fn       (fn [command conf recipient]
+                                           (assoc (notifications/create-app-model command conf recipient)
+                                             :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
+
+(defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
+  (assoc (notifications/create-app-model command conf recipient)
+    :text text))
 
 (defn return-to-draft-recipients
   "the notification is sent to applicants in auth array and application owners"
@@ -96,14 +106,14 @@
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app "authority")))
+  (ok :authorities (app/application-org-authz-users app #{"authority"})))
 
 (defquery application-commenters
   {:user-roles #{:authority}
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app "authority" "commenter")))
+  (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
@@ -157,20 +167,52 @@
 ;; Assign
 ;;
 
-(defcommand assign-application
-  {:parameters [:id assigneeId]
-   :input-validators [(fn [{{assignee :assigneeId} :data}]
-                        (when-not (or (ss/blank? assignee) (mongo/valid-key? assignee))
-                          (fail "error.user.not.found")))]
+(defn- validate-handler-role [{{role-id :roleId} :data org :organization}]
+  (when (and role-id (not (util/find-by-id role-id (:handler-roles @org))))
+    (fail :error.unknown-handler)))
+
+(defn- validate-handler-role-not-in-use
+  "Pre-check for setting application handler. Validates that handler role is not already set on application."
+  [{{role-id :roleId handler-id :handlerId} :data {application-handlers :handlers} :application}]
+  (when (and role-id (->> (remove (comp #{handler-id} :id) application-handlers)
+                          (util/find-by-key :roleId role-id)))
+    (fail :error.duplicate-handler-role)))
+
+(defn- validate-handler-id-in-application [{{handler-id :handlerId} :data {application-handlers :handlers} :application}]
+  (when (and handler-id (not (util/find-by-id handler-id application-handlers)))
+    (fail :error.unknown-handler)))
+
+(defn- validate-handler-in-organization [{{user-id :userId} :data {application-org :organization} :application}]
+  (when (and user-id (not (usr/find-user {:id user-id (util/kw-path :orgAuthz application-org) "authority" :enabled true})))
+    (fail :error.unknown-handler)))
+
+(defcommand upsert-application-handler
+  {:parameters [id userId roleId]
+   :optional-parameters [handlerId]
+   :pre-checks [validate-handler-role
+                validate-handler-role-not-in-use
+                validate-handler-id-in-application
+                validate-handler-in-organization]
+   :input-validators [(partial action/non-blank-parameters [:id :userId :roleId])]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created app :application :as command}]
-  (let [assignee (util/find-by-id assigneeId (app/application-org-authz-users app "authority"))]
-    (if (or assignee (ss/blank? assigneeId))
-      (update-application command
-                          {$set {:modified  created
-                                 :authority (if assignee (usr/summary assignee) (:authority domain/application-skeleton))}})
-      (fail "error.user.not.found"))))
+  [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
+  (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
+                     (usr/create-handler handlerId roleId))]
+    (update-application command (app/handler-upsert-updates handler handlers created user))
+    (ok :id (:id handler))))
+
+(defcommand remove-application-handler
+  {:parameters [id handlerId]
+   :pre-checks [validate-handler-id-in-application]
+   :input-validators [(partial action/non-blank-parameters [:id :handlerId])]
+   :user-roles #{:authority}
+   :states     (states/all-states-but :draft :canceled)}
+  [{created :created {handlers :handlers} :application user :user :as command}]
+  (update-application command
+                      {$set  {:modified created}
+                       $pull {:handlers {:id handlerId}}
+                       $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}}))
 
 ;;
 ;; Cancel
@@ -229,6 +271,7 @@
                           (let [canceled-entry (app/last-history-item application)]
                             (when-not (= (:username user) (get-in canceled-entry [:user :username]))
                               (fail :error.undo-only-for-canceler)))))]
+   :on-success       (notify :undo-cancellation)
    :states           #{:canceled}}
   [command]
   (app/undo-cancellation command))
@@ -254,41 +297,22 @@
   [{:keys [application]}]
   (krysp-output/cleanup-output-dir application))
 
-;; Submit
-
-(defn do-submit [{:keys [application created user] :as command} ]
-  (let [history-entries (remove nil?
-                          [(when-not (:opened application) (app/history-entry :open created user))
-                           (app/history-entry :submitted created user)])]
-    (update-application command
-      {$set {:state     :submitted
-             :modified  created
-             :opened    (or (:opened application) created)
-             :submitted (or (:submitted application) created)}
-       $push {:history {$each history-entries}}}))
-  (try
-    (mongo/insert :submitted-applications (-> application
-                                            meta-fields/enrich-with-link-permit-data
-                                            (dissoc :id)
-                                            (assoc :_id (:id application))))
-    (catch com.mongodb.DuplicateKeyException e
-      ; This is ok. Only the first submit is saved.
-      )))
-
 (notifications/defemail :neighbor-hearing-requested
   {:pred-fn       (fn [command] (get-in command [:application :options :municipalityHearsNeighbors]))
    :recipients-fn (fn [{application :application org :organization}]
                     (let [organization (or (and org @org) (org/get-organization (:organization application)))
                           emails (get-in organization [:notifications :neighbor-order-emails])]
                       (map (fn [e] {:email e, :role "authority"}) emails)))
-   :tab "statement"})
+   :tab-fn (constantly "statement")})
 
 (notifications/defemail :organization-on-submit
-  (assoc state-change
-    :recipients-fn (fn [{application :application org :organization}]
-                      (let [organization (or (and org @org) (org/get-organization (:organization application)))
-                            emails (get-in organization [:notifications :submit-notification-emails])]
-                        (map (fn [e] {:email e, :role "authority"}) emails)))))
+  {:recipients-fn (fn [{application :application org :organization}]
+                    (let [organization (or (and org @org) (org/get-organization (:organization application)))
+                          emails (get-in organization [:notifications :submit-notification-emails])]
+                      (map (fn [e] {:email e, :role "authority"}) emails)))
+   :model-fn (fn [{app :application :as command} conf recipient]
+               (assoc (notifications/create-app-model command conf recipient)
+                 :applicants (reduce #(str %1 ", " %2) (:_applicantIndex app))))})
 
 (defn submit-validation-errors [{:keys [application] :as command}]
   (remove nil? (conj []
@@ -329,7 +353,7 @@
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do-submit command))))
+      (app/submit command))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -409,20 +433,11 @@
             (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
             ))
 
-(notifications/defemail
-  :inforequest-invite
-  {:template      "inforequest-invite.html"
-   :subject-key   "applications.inforequest"
-   :show-municipality-in-subject true
-   :recipients-fn (fn [{application :application org :organization}]
+(notifications/defemail :inforequest-invite
+  {:recipients-fn (fn [{application :application org :organization}]
                     (let [organization (or (and org @org) (org/get-organization (:organization application)))
                           emails (get-in organization [:notifications :inforequest-notification-emails])]
-                      (map (fn [e] {:email e, :role "authority"}) emails)))
-   :model-fn (fn [{application :application} _ recipient]
-               {:link-fi (notifications/get-application-link application nil "fi" recipient)
-                :link-sv (notifications/get-application-link application nil "sv" recipient)
-                :info-fi (str (env/value :host) "/ohjeet")
-                :info-sv (str (env/value :host) "/ohjeet")})})
+                      (map (fn [e] {:email e, :role "authority"}) emails)))})
 
 
 (defcommand create-application
@@ -566,7 +581,7 @@
   [{:keys [user application] :as command}]
   (let [organization    (deref (:organization command))
         application     (:application command)
-        krysp?          (organization/krysp-integration? organization (permit/permit-type application))
+        krysp?          (org/krysp-integration? organization (permit/permit-type application))
         warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
     (if warranty?
       (update-application command (util/deep-merge
@@ -905,3 +920,24 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+
+(defquery application-handlers
+  {:parameters       [id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles       #{:authority :applicant :oirAuthority}
+   :states           states/all-states}
+  [{:keys [application lang organization]}]
+  (ok :handlers (map (fn [{role-name :name :as handler}]
+                       (-> handler
+                           (assoc :roleName ((keyword lang) role-name))
+                           (dissoc :name)))
+                     (:handlers application))))
+
+(defquery application-organization-handler-roles
+  {:description "Every handler defined in the organization, including
+  the disabled ones."
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/all-states}
+  [{:keys [organization]}]
+  (ok :handlerRoles (:handler-roles @organization)))

@@ -116,16 +116,31 @@
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
                    :password                         (ssc/max-length-string 255)
                    (sc/optional-key :language)       i18n/supported-language-schema})
+
+(defschema Handler
+  {:id     ssc/ObjectIdStr
+   :userId (:id User)
+   :roleId ssc/ObjectIdStr})
+
 ;;
 ;; ==============================================================================
 ;; Utils:
 ;; ==============================================================================
 ;;
 
+(defn full-name [{:keys [firstName lastName]}] (str firstName " " lastName))
+
 (defn non-private
   "Returns user without private details."
   [user]
   (dissoc user :private))
+
+(defn create-handler [handler-id role-id {user-id :id first-name :firstName last-name :lastName :as user}]
+  {:id        (or handler-id (mongo/create-id))
+   :roleId    role-id
+   :userId    user-id
+   :firstName first-name
+   :lastName  last-name})
 
 (def summary-keys [:id :username :firstName :lastName :role])
 
@@ -295,18 +310,18 @@
   ([query order-by]
    (mongo/select-ordered :users (user-query query) order-by)))
 
-(defn find-authorized-users-in-org [org-id & org-authz]
+(defn find-authorized-users-in-org [org-id org-authz]
   (mongo/select :users
-                {(str "orgAuthz." org-id) {$in org-authz}, :enabled true}
+                {(str "orgAuthz." org-id) {$in org-authz} :role "authority" :enabled true}
                 summary-keys
                 (array-map :lastName 1, :firstName 1)))
 
 (defn authority-users-in-organizations [org-ids]
-  (let [query (org-authz-match org-ids "authority")]
-    (mongo/select :users
-                  query
-                  [:id :username :firstName :lastName :email]
-                  (array-map :lastName 1, :firstName 1))))
+  (mongo/select :users
+                {$and [{:role "authority" :enabled true} (org-authz-match org-ids "authority")]}
+                [:id :username :firstName :lastName :email]
+                (array-map :lastName 1, :firstName 1)))
+
 ;;
 ;; jQuery data-tables support:
 ;;

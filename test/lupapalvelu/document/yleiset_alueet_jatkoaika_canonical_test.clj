@@ -52,7 +52,7 @@
                             :linkPermitData [link-permit-data],
                             :infoRequest false
                             :openInfoRequest false
-                            :authority sonja
+                            :handlers [(assoc sonja :general true)]
                             :state "submitted"
                             :title "Latokuja 1"
                             :address "Latokuja 1"
@@ -219,4 +219,3 @@
     (fact "Lisaaika-alkuPvm" alkuPvm => (util/to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-alkaa-pvm :value)))
     (fact "Lisaaika-loppuPvm" loppuPvm => (util/to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-paattyy-pvm :value)))
     ))
-

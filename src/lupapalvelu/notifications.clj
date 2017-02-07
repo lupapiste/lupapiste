@@ -3,22 +3,24 @@
             [schema.core :as sc]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clostache.parser :as clostache]
             [sade.util :refer [future* to-local-date fn->]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Helpers
 ;;
 
 (defn get-subpage-link [{:keys [id subpage-id]} subpage lang {role :role :or {role "applicant"}}]
-  (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
-  (assert (#{"attachment" "statement" "neighbors"} subpage) (str "Unsupported subpage"))
+  (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role: " role))
+  (assert (#{"attachment" "statement" "neighbors" "verdict"} subpage) (str "Unsupported subpage: " subpage))
   (let [full-path (ss/join "/" (remove nil? [subpage id subpage-id]))]
     (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!/" full-path)))
 
@@ -48,15 +50,17 @@
 
 
 
-(defn- get-email-subject [{title :title, municipality :municipality} lang
-                          & [subject-key show-municipality-in-subject]]
-  (let [title-postfix (when subject-key
-                        (i18n/localize-fallback lang [["email.title" subject-key] subject-key]))
-        title-begin   (str (when show-municipality-in-subject
-                             (str (i18n/localize lang "municipality" municipality) ", ")) title)]
-    (str "Lupapiste: " title-begin
-         (when (and title subject-key) " - ")
-         (when subject-key title-postfix))))
+(defn- get-email-subject
+  "Renders an email subject with clostache against given model context.
+   Subject-key defines localization key to be used. Localization value can hold placeholders,
+   such as {{municipality}}"
+  [application model subject-key lang]
+  (let [subject (i18n/localize-fallback lang [["email.title" subject-key] subject-key])
+        context (merge (select-keys application [:address :title :state :municipality]) model)
+        subject-text (if (ss/blank? subject)
+                       (str (or (:address application) (:title application))) ; fallback
+                       (clostache/render subject (email/prepare-context-for-language lang context)))]
+    (str "Lupapiste: " subject-text)))
 
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
@@ -75,15 +79,13 @@
 ;; Model creation functions
 ;;
 
-;; Application (the default)
 (defn create-app-model [{application :application} {tab :tab} recipient]
-  {:link-fi (get-application-link application tab "fi" recipient)
-   :link-sv (get-application-link application tab "sv" recipient)
-   :state-fi (i18n/localize :fi (name (:state application)))
-   :state-sv (i18n/localize :sv (name (:state application)))
-   :modified (to-local-date (:modified application))
-   :name (:firstName recipient)
-   :lang (:language recipient)})
+  {:link         #(get-application-link application tab % recipient)
+   :state        #(i18n/localize % (name (:state application)))
+   :modified     (to-local-date (:modified application))
+   :address      (:address application)
+   :municipality #(i18n/localize % "municipality" (:municipality application))
+   :operation    #(app-utils/operation-description application %)})
 
 ;;
 ;; Recipient functions
@@ -128,8 +130,7 @@
 
             (sc/optional-key :pred-fn)         util/Fn
             (sc/optional-key :application-fn)  util/IFn
-            (sc/optional-key :tab)             sc/Str
-            (sc/optional-key :show-municipality-in-subject) sc/Bool})
+            (sc/optional-key :tab-fn)          util/IFn})
 
 ;;
 ;; Public API
@@ -145,7 +146,7 @@
 
  ; email template ids, which are sent regardless of current user state
 (def always-sent-templates
-  #{:invite-company-user :reset-password})
+  #{:invite-company-user :reset-password :neighbor})
 
 (defn invalid-recipient?
   "Notifications are not sent to certain roles, users who do not
@@ -171,13 +172,14 @@
             recipients     (remove (invalid-recipient? template-name) (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))
-            calendar-fn    (get conf :calendar-fn)]
+            calendar-fn    (get conf :calendar-fn)
+            conf           (assoc conf :tab ((get conf :tab-fn (constantly nil)) command))]
         (doseq [recipient recipients]
-          (let [model   (model-fn command conf recipient)
-                subject (get-email-subject application
-                                           (:language recipient)
-                                           (get conf :subject-key (name template-name))
-                                           (get conf :show-municipality-in-subject false))
+          (let [user-lang (:language recipient)
+                model   (assoc (model-fn command conf recipient)
+                               :lang user-lang
+                               :user (select-keys recipient [:firstName :lastName :email :language]))
+                subject (get-email-subject application model (get conf :subject-key (name template-name)) (or (:language recipient) "fi"))
                 calendar (when (some? calendar-fn)
                            (calendar-fn command recipient))
                 msg     (email/apply-template template-file model)

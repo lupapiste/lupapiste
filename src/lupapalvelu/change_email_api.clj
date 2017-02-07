@@ -10,10 +10,10 @@
             [lupapalvelu.change-email :as change-email]))
 
 (defn change-email-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/email/" token))
+  (str (env/value :host) "/app/" (name lang) "/welcome#!/email/" token))
 
 (defn change-email-for-company-user-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/change-email/" token))
+  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email/" token))
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
@@ -21,10 +21,9 @@
                (let [{:keys [id expires]} (:token data)]
                  (merge
                    (select-keys data [:old-email :new-email])
-                   {:name    (:firstName recipient)
+                   {:user    recipient
                     :expires (util/to-local-datetime expires)
-                    :link-fi (change-email-link "fi" id)
-                    :link-sv (change-email-link "sv" id)})))})
+                    :link    #(change-email-link % id)})))})
 
 (notifications/defemail :change-email-for-company-user
   {:recipients-fn notifications/from-user
@@ -33,10 +32,8 @@
                (let [{:keys [id expires]} (:token data)]
                  (merge
                    (select-keys data [:old-email :new-email])
-                   {:name    (:firstName recipient)
-                    :expires (util/to-local-datetime expires)
-                    :link-fi (change-email-for-company-user-link "fi" id)
-                    :link-sv (change-email-for-company-user-link "sv" id)})))})
+                   {:expires (util/to-local-datetime expires)
+                    :link    #(change-email-for-company-user-link % id)})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
@@ -46,8 +43,7 @@
                            (cons user))
                       [user]))
    :model-fn (fn [{:keys [user data]} conf recipient]
-               {:name      (:firstName recipient)
-                :old-email (:email user)
+               {:old-email (:email user)
                 :new-email (:new-email data)})})
 
 (defn- has-person-id? [user]
@@ -69,6 +65,7 @@
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
+   :notified   true
    :pre-checks [(some-pre-check validate-has-person-id validate-is-basic-company-user)]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
@@ -77,6 +74,7 @@
 (defcommand change-email
   {:parameters [tokenId stamp]
    :input-validators [(partial action/non-blank-parameters [:tokenId :stamp])]
+   :notified   true
    :user-roles #{:anonymous}}
   [_]
   (change-email/change-email tokenId stamp))

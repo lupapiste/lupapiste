@@ -4,7 +4,8 @@
              [monger.operators :refer [$in]]
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]
-             [lupapalvelu.application-utils :refer [operation-names make-area-query]]
+             [lupapalvelu.application-utils :refer [make-area-query]]
+             [lupapalvelu.operations :refer [operation-names]]
              [lupapalvelu.geojson :as geo]
              [lupapalvelu.i18n :as i18n]))
 
@@ -27,7 +28,7 @@
   (make-sort {:sort {:field "submitted" :asc true }})  => {:submitted 1}
   (make-sort {:sort {:field "modified" :asc true }})  => {:modified 1}
   (make-sort {:sort {:field "state" :asc true }})  => {:state 1}
-  (make-sort {:sort {:field "handler" :asc true }}) => {"authority.lastName" 1, "authority.firstName" 1}
+  (make-sort {:sort {:field "handler" :asc true }}) => {:handlers.0.lastName 1, :handlers.0.firstName 1}
   (make-sort {:sort {:field {:injection "attempt"}
               :asc "; drop database;"}})   => {}
   (make-sort {})                                 => {}
@@ -37,7 +38,7 @@
   (-> (make-query {} {:kind  "both"
                       :applicationType "all"
                       :handlers  ["123"]}
-                  {:role "authority"}) (get "$and") second) => {"$or" [{:auth.id {"$in" ["123"]}} {:authority.id  {"$in" ["123"]}}]})
+                  {:role "authority"}) (get "$and") second) => {"$or" [{:auth.id {"$in" ["123"]}} {:handlers.userId  {"$in" ["123"]}}]})
 
 (fact "query contais user query"
   (-> (make-query {:auth.id "123"} {} {}) (get "$and") first) => {:auth.id "123"})
@@ -57,7 +58,7 @@
                                 {"$and" [{:state {"$ne" "canceled"}}
                                          {"$or" [{:state {"$ne" "draft"}}
                                                  {:organization {"$nin" []}}]}]}
-                                {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
+                                {"$or" [{:auth.id {"$in" ["321"]}} {:handlers.userId  {"$in" ["321"]}}]}
                                 {:tags {"$in" ["test1" "test2"]}}
                                 {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2"]}}]})
 

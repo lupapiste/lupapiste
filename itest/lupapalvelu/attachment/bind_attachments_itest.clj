@@ -53,7 +53,8 @@
                                 :id application-id
                                 :filedatas [{:fileId file-id-1 :type (:type (first attachments))
                                              :group {:groupType "operation"
-                                                     :operations [operation]}
+                                                     :operations [operation]
+                                                     :title "Osapuolet"} ; :title is illegal, but this tests that bind-attachments can ignore it
                                              :contents "eka"}
                                             {:fileId file-id-2 :type (:type (second attachments))
                                              :group {:groupType nil}

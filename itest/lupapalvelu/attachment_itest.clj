@@ -799,8 +799,8 @@
     (fact "Upload file to attachment"
           (upload-attachment pena application-id base-attachment true) => truthy)
 
-    (fact "Assign application to Ronja"
-      (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?)
+    (fact "Ronja is set as general handler"
+      (command sonja :upsert-application-handler :id application-id :userId ronja-id :roleId sipoo-general-handler-id) => ok?)
 
     (fact "Cannot create ram attachment before verdict is given"
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
@@ -827,7 +827,7 @@
     (fact "Email notification about new RAM is sent"
       (let [email (last-email)]
         (:to email) => (contains (email-for-key ronja))
-        (:subject email) => "Lupapiste: foo 42, bar - Ilmoitus uudesta RAM:sta"))
+        (:subject email) => "Lupapiste: foo 42, bar, Sipoo - Ilmoitus uudesta RAM:sta"))
 
     (fact "RAM link cannot be created twice on same attachment"
           (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))

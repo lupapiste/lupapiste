@@ -81,35 +81,138 @@
         application     (query-application pena application-id)]
     (:organization application) => "069-R"))
 
-(fact* "Assign application to an authority"
-       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
-             ;; add a comment to change state to open
-             _ (comment-application pena application-id true) => ok?
-             application (query-application sonja application-id)
-             authority-before-assignation (:authority application)
-             resp (command sonja :assign-application :id application-id :assigneeId ronja-id)
-             assigned-app (query-application sonja application-id)
-             authority-after-assignation (:authority assigned-app)]
-         application-id => truthy
-         application => truthy
-         (success resp) => true
-         (:id authority-before-assignation) => nil
-         authority-after-assignation => (contains {:id ronja-id})
-         (fact "Authority is not able to submit"
-           sonja =not=> (allowed? :submit-application :id application-id))))
+(facts upsert-application-handler
+  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+        resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
 
-(fact* "Assign application to an authority and then to no-one"
-       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
-             ;; add a comment change set state to open
-             _ (comment-application pena application-id true) => ok?
-             application (query-application sonja application-id)
-             authority-before-assignation (:authority application)
-             resp (command sonja :assign-application :id application-id :assigneeId sonja-id)
-             resp (command sonja :assign-application :id application-id :assigneeId nil)
-             assigned-app (query-application sonja application-id)
-             authority-in-the-end (:authority assigned-app)]
-         (:id authority-before-assignation) => nil
-         (:id authority-in-the-end) => nil))
+    (fact "Initially there is no handlers"
+      (:handlers application) => empty?)
+
+    (facts "Insert new handler"
+      (let [handlers (:handlers (query-application sonja app-id))]
+
+        resp => ok?
+        (:id resp) => string?
+
+        (fact "one handler exists" (count handlers) => 1)
+        (fact "handler has all data" (-> handlers first) => {:id (:id resp)
+                                                             :roleId "abba1111111111111111acdc"
+                                                             :userId ronja-id
+                                                             :firstName "Ronja"
+                                                             :lastName "Sibbo"
+                                                             :general true
+                                                             :name {:en "Handler", :fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare"}})))
+
+    (facts "Applicant is not allowed to edit handlers"
+      (command pena :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id)
+      => (partial expected-failure? :error.unauthorized))
+
+    (facts "Cannot insert handler that is not organization authority"
+      (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId veikko-id)
+      => (partial expected-failure? :error.unknown-handler))
+
+    (facts "Cannot insert handler with role that is not in organization roles"
+      (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111fooo" :userId ronja-id)
+      => (partial expected-failure? :error.unknown-handler))
+
+    (facts "Cannot insert handler with same role twice"
+      (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)
+      => (partial expected-failure? :error.duplicate-handler-role))
+
+    (facts "Set existing handler role"
+      (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId ronja-id :handlerId (:id resp))
+            handlers    (:handlers (query-application sonja app-id))]
+
+        update-resp => ok?
+        (:id update-resp) => (:id resp)
+
+        (fact "one handler still exists" (count handlers) => 1)
+        (fact "handler has all data" (-> handlers first) => {:id (:id resp)
+                                                             :roleId "abba1111111111111112acdc"
+                                                             :userId ronja-id
+                                                             :firstName "Ronja"
+                                                             :lastName "Sibbo"
+                                                             :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}})))
+
+    (facts "Set existing handler user"
+      (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id :handlerId (:id resp))
+            handlers    (:handlers (query-application sonja app-id))]
+
+        update-resp => ok?
+        (:id update-resp) => (:id resp)
+
+        (fact "one handler still exists" (count handlers) => 1)
+        (fact "handler has all data" (-> handlers first) => {:id (:id resp)
+                                                             :roleId "abba1111111111111112acdc"
+                                                             :userId sonja-id
+                                                             :firstName "Sonja"
+                                                             :lastName "Sibbo"
+                                                             :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}})))
+
+    (facts "Insert second handler"
+      (let [insert-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId sonja-id)
+            handlers    (:handlers (query-application sonja app-id))]
+
+        resp => ok?
+        (:id insert-resp) => string?
+
+        (fact "two handlers exists" (count handlers) => 2)
+        (fact "second handler has all data" handlers => [{:id (:id resp)
+                                                          :roleId "abba1111111111111112acdc"
+                                                          :userId sonja-id
+                                                          :firstName "Sonja"
+                                                          :lastName "Sibbo"
+                                                          :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}}
+                                                         {:id (:id insert-resp)
+                                                          :roleId "abba1111111111111111acdc"
+                                                          :userId sonja-id
+                                                          :firstName "Sonja"
+                                                          :lastName "Sibbo"
+                                                          :general true
+                                                          :name {:en "Handler", :fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare"}}])))
+
+    (facts "Handler changes are stored in application history"
+      (let [history (:history (query-application sonja app-id))
+            handler-history (filter :handler history)]
+
+        (fact "total handler entries"
+          (count handler-history) => 4)
+
+        (fact "new entries"
+          (count (filter (comp :new-entry :handler) handler-history)) => 2)))))
+
+(facts remove-application-handler
+  (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
+        resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
+
+    (fact "Handler is added"
+      resp => ok?)
+
+    (fact "Handler is in application"
+      (:handlers (query-application sonja app-id)) => not-empty)
+
+    (fact "Handler role cannot be removed if not in application handlers"
+      (command sonja :remove-application-handler :id app-id :handlerId sonja-id) => (partial expected-failure? :error.unknown-handler))
+
+    (facts "Applicant is not allowed to remove handlers"
+      (command pena :remove-application-handler :id app-id :handlerId (:id resp))
+      => (partial expected-failure? :error.unauthorized))
+
+    (fact "Authority removes handler"
+      (command sonja :remove-application-handler :id app-id :handlerId (:id resp)) => ok?)
+
+    (fact "Handler is removed"
+      (:handlers (query-application sonja app-id)) => empty?)
+
+    (facts "Handler changes are stored in application history"
+      (let [history (:history (query-application sonja app-id))
+            handler-history (filter :handler history)]
+
+        (fact "total handler entries"
+          (count handler-history) => 2)
+
+        (fact "remove entries"
+          (count (filter (comp :removed :handler) handler-history)) => 1)))))
 
 (fact "Authority is able to create an application to a municipality in own organization"
   (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
@@ -131,8 +234,14 @@
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
+        _ (comment-application pena id)
+        authority-submit (command sonja :submit-application :id id)
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
+
+    (fact "Authority is not allowed to submit application for applicant"
+      authority-submit => (partial expected-failure? :error.unauthorized))
+
     (:opened app1) => nil
     (:opened app2) => number?))
 
@@ -152,7 +261,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
-      (:subject email) => "Lupapiste: Peruutustie 23 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Peruutustie 23, Sipoo - hankkeen tila on nyt Peruutettu"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant")))
 
@@ -203,7 +312,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key teppo))
-      (:subject email) => "Lupapiste: Penahouse 88 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant"))
 
@@ -213,6 +322,12 @@
       (command teppo :undo-cancellation :id application-id) => (partial expected-failure? :error.undo-only-for-canceler))
     (fact "Pena can undo his cancellation"
       (command pena :undo-cancellation :id application-id) => ok?)
+
+    (let [email (last-email)]
+      (:to email) => (contains (email-for-key teppo))
+      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hanke on palautunut tilaan Hakemus j\u00e4tetty"
+      (get-in email [:body :plain]) => (contains "hakemus on palautettu aktiiviseksi")
+      email => (partial contains-application-link? application-id "applicant"))
 
     (fact "Teppo can now cancel"
       (command teppo :cancel-application :id application-id :text "I want it canceled!" :lang "fi") => ok?
@@ -237,7 +352,6 @@
   (let [operation "kerrostalo-rivitalo"
         application-id  (create-app-id mikko :propertyId tampere-property-id :operation operation)]
     (comment-application mikko application-id true) => ok?
-    (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
       (success (command mikko :add-operation :id application-id :operation "puun-kaataminen")) => true
@@ -430,7 +544,7 @@
       (fact "application is unassigned, Sonja does not see the full person IDs"
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (-> app :authority :id) => nil
+          (:handlers app) => empty?
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "application is unassigned, Ronja does not see the full person IDs"
@@ -439,16 +553,14 @@
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "Sonja assigns the application to herself and sees the full person ID"
-        (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+        (command sonja :upsert-application-handler :id application-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-9988"))
 
       (fact "Ronja still does not see the full person ID"
         (let [app (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (facts "Set company to document"
@@ -528,8 +640,8 @@
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
                          :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
-                         :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
-                         :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
+                         :unsubscribe-notifications :subscribe-notifications :upsert-application-handler :remove-application-handler
+                         :neighbor-add :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application
@@ -614,6 +726,11 @@
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
     (command pena :submit-application :id application-id)
     (return-to-draft sonja application-id)
+
+    (let [email (last-email)]
+      (:to email) => (contains "pena")
+      (:subject email) => (contains "Hakemus palautettiin Luonnos-tilaan")
+      (get-in email [:body :plain]) => (contains "comment-text"))
 
     (let [application (query-application pena application-id)]
       (fact "The return to draft can be seen in application history"

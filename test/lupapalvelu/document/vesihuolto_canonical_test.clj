@@ -75,11 +75,9 @@
 (def vapautus-vesijohdosta-ja-viemarista-hakemus {:sent nil,
                                                   :neighbors [],
                                                   :schema-version 1,
-                                                  :authority {:role "authority",
-                                                              :lastName "Borga",
-                                                              :firstName "Pekka",
-                                                              :username "pekka",
-                                                              :id "777777777777777777000033"},
+                                                  :handlers [{:lastName "Borga",
+                                                               :firstName "Pekka",
+                                                               :general true}],
                                                   :auth [{:lastName "Borga",
                                                           :firstName "Pekka",
                                                           :username "pekka",
@@ -99,6 +97,7 @@
                                                   :organization "753-R",
                                                   :buildings [],
                                                   :title "Ampumaradantie 113",
+                                                  :address "Ampumaradantie 113",
                                                   :started nil,
                                                   :closed nil,
                                                   :primaryOperation {:id "532bddd0da068d67611f92f0",
@@ -121,7 +120,6 @@
                                                   :_statements-seen-by {},
                                                   :modified 1395384005343,
                                                   :comments [],
-                                                  :address "Ampumaradantie 113",
                                                   :permitType "VVVL",
                                                   :id "LP-753-2014-00001",
                                                   :municipality "753"})
@@ -214,5 +212,3 @@
 
         jatevedet (:jatevedet kohde) => "Labkon biokem 6 panospudistamo, josta k\u00e4siteltu j\u00e4tevesi johdetaan pois pohjaveden valuma-alueelta."
         ]))
-
-

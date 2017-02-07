@@ -23,5 +23,5 @@ Sonja sends comment to Kosti
 
 Kosti receives an email notification of the comment
   Open last email
-  Wait until  Page should contain  Moi Kosti
+  Wait until  Page should contain  Hei Kosti
   Go to login page

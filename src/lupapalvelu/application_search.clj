@@ -12,9 +12,10 @@
             [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
@@ -33,7 +34,7 @@
                      :documents.data.henkilo.henkilotiedot.sukunimi.value]
         fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
-        ops         (app-utils/operation-names filter-search)]
+        ops         (operations/operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
                                         {:secondaryOperations.name {$in ops}}])
@@ -108,10 +109,10 @@
                        {:organization {$nin (->> user :orgAuthz keys (map name))}}]}]}))
       (when-not (empty? handlers)
         (if ((set handlers) no-handler)
-          {$or [{:authority.id  {$exists false}}, {:authority.id {$in [nil ""]}}]}
+          {:handlers {$size 0}}
           (when-let [handler-ids (seq (remove nil? (map handler-email-to-id handlers)))]
             {$or [{:auth.id {$in handler-ids}}
-                  {:authority.id {$in handler-ids}}]})))
+                  {:handlers.userId {$in handler-ids}}]})))
       (when-not (empty? tags)
         {:tags {$in tags}})
       (when-not (empty? organizations)
@@ -147,7 +148,7 @@
 (def- db-fields ; projection
   [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
    :_attachment_indicator_reset :address :applicant :attachments
-   :auth :authority :authorityNotice :comments :created :documents
+   :auth :handlers.firstName :handlers.lastName :authorityNotice :comments :created :documents
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitType :permitSubtype :primaryOperation :state :statements
    :organization ; required for authorization checks
@@ -157,7 +158,7 @@
   (map :field meta-fields/indicator-meta-fields))
 
 (def- frontend-fields
-  [:id :address :applicant :authority :authorityNotice
+  [:id :address :applicant :handlers :authorityNotice
    :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
    :foreman :foremanRole :permitType])
@@ -170,11 +171,12 @@
 
 (defn- enrich-row [app]
   (-> app
+      (assoc :handlers (distinct (:handlers app))) ;; Each handler only once.
       app-utils/with-application-kind
       app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
-                          "handler" ["authority.lastName" "authority.firstName"]
+                          "handler" [:handlers.0.lastName :handlers.0.firstName]
                           "location" :address
                           "modified" :modified
                           "submitted" :submitted

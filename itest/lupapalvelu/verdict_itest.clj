@@ -20,7 +20,7 @@
         email           (last-email) => truthy]
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))
-    (:subject email) => "Lupapiste: Paatoskuja 9 - hakemuksen tila muuttunut"
+    (:subject email) => "Lupapiste: Paatoskuja 9, Sipoo - hankkeen tila on nyt Hakemus j\u00e4tetty"
     (get-in email [:body :plain]) => (contains "Hakemus j\u00e4tetty")
     email => (partial contains-application-link? application-id "applicant")
 
@@ -86,9 +86,9 @@
           (let [email (last-email)
                 body (get-in email [:body :plain])]
             (:to email) => (contains (email-for-key pena))
-            (:subject email) => "Lupapiste: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
+            (:subject email) => "Lupapiste: Paatoskuja 9, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"
             email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")
-            body => (contains "Moi Pena,")))
+            body => (contains "Hei Pena,")))
 
         (fact "Authority is still able to add an attachment"
           (upload-attachment sonja (:id application) first-attachment true)
@@ -155,7 +155,7 @@
     (fact "Applicant receives email about verdict (not about comment)"
       (let [email (last-email)]
        (:to email) => (contains (email-for-key mikko))
-       (:subject email) => "Lupapiste: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
+       (:subject email) => "Lupapiste: Paatoskuja 17, Sipoo - hankkeen tila on nyt P\u00e4\u00e4t\u00f6s annettu"
        email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")))
 
     (fact "There are two new attachments, see krysp/dev/verdict.xml"

@@ -49,7 +49,7 @@
                                     :type "owner",
                                     :role "owner",
                                     :id "777777777777777777000020"}]
-                            :authority sonja
+                            :handlers [(assoc sonja :general true)]
                             :state "submitted"
                             :title "Latokuja 1"
                             :address "Latokuja 1"

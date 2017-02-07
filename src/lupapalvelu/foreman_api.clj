@@ -29,7 +29,8 @@
    :input-validators [(partial action/email-validator :foremanEmail)]
    :states (states/all-application-states-but states/terminal-states)
    :pre-checks [application/validate-authority-in-drafts
-                application/validate-only-authority-before-verdict-given]}
+                application/validate-only-authority-before-verdict-given]
+   :notified   true}
   [{:keys [created user application] :as command}]
   (let [foreman-user   (when (v/valid-email? foremanEmail)
                          (user/get-or-create-user-by-email foremanEmail user))

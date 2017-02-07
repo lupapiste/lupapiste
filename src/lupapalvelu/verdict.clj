@@ -47,10 +47,6 @@
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
-(notifications/defemail :application-verdict
-                        {:subject-key    "verdict"
-                         :tab            "verdict"})
-
 (def verdict-codes ["my\u00f6nnetty"
                     "hyv\u00e4ksytty"
                     "ev\u00e4tty"
@@ -173,6 +169,9 @@
    :timestamp       nil
    :paatokset       []
    :draft           true})
+
+(defn verdict-tab-action? [{action-name :action}]
+  (boolean (#{:publish-verdict :check-for-verdict :process-ah-verdict :fetch-verdicts} (keyword action-name))))
 
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
@@ -403,7 +402,9 @@
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
         (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
-    (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+    (ok :verdicts (get-in updates [$set :verdicts])
+        :tasks (get-in updates [$set :tasks])
+        :state (get-in updates [$set :state] (:state application)))))
 
 (defn- backend-id-mongo-updates
   [{verdicts :verdicts} backend-ids]

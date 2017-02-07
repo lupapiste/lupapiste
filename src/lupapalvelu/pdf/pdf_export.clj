@@ -182,10 +182,9 @@
         decorated-docs (map (comp (partial decorate-doc-with-op app) schemas/with-current-schema-info) docs)]
     (map collect-single-document (sort-docs decorated-docs))))
 
-(defn- get-authority [{authority :authority :as application}]
-  (if (and (:authority application)
-           (domain/assigned? application))
-    (str (:lastName authority) " " (:firstName authority))
+(defn- get-general-handler [application]
+  (if-let [general-handler (util/find-first :general (:handlers application))]
+    (str (:lastName general-handler) " " (:firstName general-handler))
     (loc "application.export.empty")))
 
 (defn- get-operations [{:keys [primaryOperation secondaryOperations]}]
@@ -201,7 +200,7 @@
     (loc "kiinteisto.kiinteisto.kiinteistotunnus") (p/to-human-readable-property-id (:propertyId app))
     (loc "submitted") (str (or (util/to-local-date (:submitted app)) "-"))
     (loc "application.id") (:id app)
-    (loc "applications.authority") (get-authority app)
+    (loc "applications.authority") (get-general-handler app)
     (loc "application.address") (:address app)
     (loc "applicant") (clojure.string/join ", " (:_applicantIndex app))
     (loc "operations") (get-operations app)))
