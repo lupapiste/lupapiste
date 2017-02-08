@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1486391182380');
+@import url('main-blessed1.css?z=1486556567030');
 
 
 /* line 830, ../../../private/common-html/sass/partials/_forms.scss */
@@ -3631,18 +3631,18 @@ select.waste-unit-select {
 .attachment-batch-table .batch-autocomplete {
   display: inherit;
 }
-/* line 402, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 407, ../../../private/common-html/sass/partials/_inputs.scss */
 .attachment-batch-table .batch-autocomplete attachment-type-autocomplete {
   min-width: 20em;
   max-width: 20em;
   display: inline-block;
   vertical-align: middle;
 }
-/* line 407, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 412, ../../../private/common-html/sass/partials/_inputs.scss */
 .attachment-batch-table .batch-autocomplete attachment-type-autocomplete .autocomplete-selection-wrapper {
   display: table;
 }
-/* line 409, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 414, ../../../private/common-html/sass/partials/_inputs.scss */
 .attachment-batch-table .batch-autocomplete attachment-type-autocomplete .autocomplete-selection-wrapper .autocomplete-selection {
   padding-left: 6px;
   display: table-cell;
@@ -3650,17 +3650,17 @@ select.waste-unit-select {
   min-height: 40px;
   height: 40px;
 }
-/* line 417, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 422, ../../../private/common-html/sass/partials/_inputs.scss */
 .attachment-batch-table .batch-autocomplete attachment-type-autocomplete span.caption {
   white-space: normal;
   line-height: normal;
   padding-left: 0;
 }
-/* line 424, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 429, ../../../private/common-html/sass/partials/_inputs.scss */
 .attachment-batch-table .batch-autocomplete attachment-type-autocomplete.no-events .autocomplete-selection-wrapper {
   background-color: #f6f6f6;
 }
-/* line 426, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 431, ../../../private/common-html/sass/partials/_inputs.scss */
 .attachment-batch-table .batch-autocomplete attachment-type-autocomplete.no-events .autocomplete-selection-wrapper i.tag-chevron, .attachment-batch-table .batch-autocomplete attachment-type-autocomplete.no-events .autocomplete-selection-wrapper span.selection-text {
   color: #bbbbbb;
 }

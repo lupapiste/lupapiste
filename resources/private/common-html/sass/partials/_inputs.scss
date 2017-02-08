@@ -41,6 +41,11 @@
   }
 }
 
+// http://stackoverflow.com/questions/30421570/sass-unicode-escape-is-not-preserved-in-css-file
+@function unicode($str) {
+  @return unquote("\"") + unquote(str-insert($str, "\\", 1)) + unquote("\"")
+}
+
 
 // Defines the following classes:
 // .cls-label
@@ -72,7 +77,7 @@
 }
   .#{$cls}-label:before {
     @include lupicon-font( $size );
-    content: $off;
+    content: unicode($off);
     display: inline-block;
     margin-right: 10px;
     vertical-align: top;
@@ -87,7 +92,7 @@
 
   input:checked + .#{$cls}-label:before {
     @include lupicon-font($size);
-    content: $on;
+    content: unicode($on);
     color: $selected;
   }
 
@@ -113,35 +118,35 @@
 }
 }
 
-@include toggle-helper ( arrow, "\e614", "\e611" ) {}
+@include toggle-helper ( arrow, "e614", "e611" ) {}
 
 // Checkboxes
-@include toggle-helper ( checkbox, "\e604", "\e603" ) {}
-@include toggle-helper ( blockbox, "\e604", "\e603", $wrapper-display: block ) {}
-@include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
+@include toggle-helper ( checkbox, "e604", "e603" ) {}
+@include toggle-helper ( blockbox, "e604", "e603", $wrapper-display: block ) {}
+@include toggle-helper ( docgen-checkbox, "e604", "e603", $wrapper-display: block ) {}
 .docgen-checkbox-wrapper.form-input {
   height: auto;
   width: auto;
 }
-@include toggle-helper ( sectionbox, "\e61d", "\e620" ) {}
+@include toggle-helper ( sectionbox, "e61d", "e620" ) {}
 
-@include toggle-helper ( stampbox, "\e61e", "\e620", $selected: white ) {}
+@include toggle-helper ( stampbox, "e61e", "e620", $selected: white ) {}
 .stampbox-wrapper {
   border: none;
 }
 
-@include toggle-helper ( signbox, "\e619", "\e620" ) {}
+@include toggle-helper ( signbox, "e619", "e620" ) {}
 .signbox-wrapper {
   border: none;
 }
 
 
 // Radio buttons
-@include toggle-helper (radio, "\e635", "\e634", $wrapper-display: inline-block, $input-display: block) {}
+@include toggle-helper (radio, "e635", "e634", $wrapper-display: inline-block, $input-display: block) {}
 
 // Radio field component. In order to make sure that the components are adjacent without
 // gaps, some adjustments are needed.
-@include toggle-helper (radio-field, "\e635", "\e634", $wrapper-display: inline,
+@include toggle-helper (radio-field, "e635", "e634", $wrapper-display: inline,
                         $input-display: inline-block, $label-display: inline) {}
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
@@ -162,7 +167,7 @@
 
 
 // Attachment filters related
-@include toggle-helper ( filter, "\e604", "\e603", $wrapper-display: inline-block, $input-display: block ) {}
+@include toggle-helper ( filter, "e604", "e603", $wrapper-display: inline-block, $input-display: block ) {}
 
 .filter-group {
   border: 1px solid $gray187;
