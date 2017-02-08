@@ -110,7 +110,11 @@
       (command sonja :undo-cancellation :id id) => ok?
       (->> (query sonja :assignments-for-application :id id)
            :assignments
-           (map :status)) => ["active", "active"])))
+           (map :status)) => ["active", "active"])
+    (fact "recipient is not necessary"
+      (let [assignment-id (:id (create-assignment sonja nil id {:group "group" :id doc-id} "Kuvaus")) => ok?
+            assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
+        (-> assignment :recipient) => nil?))))
 
 (facts "Editing assignments"
   (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))

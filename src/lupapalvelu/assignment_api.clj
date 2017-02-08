@@ -102,7 +102,7 @@
   {:description      "Create an assignment"
    :user-roles       #{:authority}
    :parameters       [id recipientId target description]
-   :input-validators [(partial action/non-blank-parameters [:recipientId :description])
+   :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/map-parameters [:target])]
    :pre-checks       [validate-receiver
                       assignments-enabled-for-application]
@@ -113,7 +113,7 @@
   (ok :id (assignment/insert-assignment {:application    (select-keys application
                                                                       [:id :organization :address :municipality])
                                          :state          (assignment/new-state "created" (usr/summary user) created)
-                                         :recipient      (userid->summary recipientId)
+                                         :recipient      (when recipientId (userid->summary recipientId))
                                          :target         target
                                          :description    description})))
 
