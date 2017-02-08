@@ -10,4 +10,4 @@ Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utveck
 
 V&auml;lkommen att sk&ouml;ta &auml;renden elektroniskt &ouml;nskar,
 
-{{lupapiste}}
+{{lupapiste.link}}

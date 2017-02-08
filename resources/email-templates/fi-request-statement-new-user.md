@@ -32,4 +32,4 @@ pyytänyt taho lähettää vielä seuraavat terveiset:
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

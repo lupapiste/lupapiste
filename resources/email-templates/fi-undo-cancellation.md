@@ -12,4 +12,4 @@ se selaimen osoiteriville.
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

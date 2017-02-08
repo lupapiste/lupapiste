@@ -11,4 +11,4 @@ Myndighetens meddelande:
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

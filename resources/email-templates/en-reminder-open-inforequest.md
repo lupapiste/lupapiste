@@ -22,4 +22,4 @@ permit transactions: {{facebook}} | {{twitter}} | {{instagram}}
 
 Wishing electrified time with your transactions,
 
-{{lupapiste}}
+{{lupapiste.link}}

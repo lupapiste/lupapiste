@@ -19,4 +19,4 @@ viranomaisten sekä hankkeen osapuolten kanssa.
 
 Sähköisiä hetkiä asiointiisi toivottaa,
 
-{{lupapiste}}
+{{lupapiste.link}}

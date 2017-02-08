@@ -12,4 +12,4 @@ adressen och lägg in den i adressfältet på din webbläsare.
 
 Hälsningar, 
 
-{{lupapiste}}
+{{lupapiste.link}}

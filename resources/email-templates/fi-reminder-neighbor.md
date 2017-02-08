@@ -12,4 +12,4 @@ Jos hakemus her&auml;tt&auml;&auml; lis&auml;kysymyksi&auml;, olettehan yhteydes
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

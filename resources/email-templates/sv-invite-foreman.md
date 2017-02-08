@@ -21,4 +21,4 @@ Om du har fr&aring;gor om att ans&ouml;ka om ansvar eller om de bilagor som kr&a
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}

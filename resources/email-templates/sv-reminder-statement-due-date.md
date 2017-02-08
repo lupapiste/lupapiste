@@ -12,4 +12,4 @@ Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

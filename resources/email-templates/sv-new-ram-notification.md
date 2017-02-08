@@ -12,4 +12,4 @@ adressfältet på din webbläsare.
 
 Hälsningar, 
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -20,4 +20,4 @@ project.
 
 Wishing electrified time with your transactions,
 
-{{lupapiste}}
+{{lupapiste.link}}

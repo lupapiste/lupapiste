@@ -11,4 +11,4 @@ Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

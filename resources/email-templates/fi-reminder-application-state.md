@@ -10,4 +10,4 @@ N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml;. Jos linkk
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

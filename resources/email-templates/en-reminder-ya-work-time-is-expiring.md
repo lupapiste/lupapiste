@@ -6,4 +6,4 @@ Has the work been progressing according to schedule or do you need an extension 
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

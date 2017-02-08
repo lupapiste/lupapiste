@@ -13,4 +13,4 @@ Viranomaisen viesti:
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

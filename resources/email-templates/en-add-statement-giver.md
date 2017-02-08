@@ -20,4 +20,4 @@ You can follow the digitalization of permit transactions: {{facebook}}
 
 Wishing a more electrified time in statement giving,
 
-{{lupapiste}}
+{{lupapiste.link}}

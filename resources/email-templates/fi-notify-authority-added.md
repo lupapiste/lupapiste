@@ -8,4 +8,4 @@ aiemmin asettamasi salasana.
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

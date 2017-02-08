@@ -35,4 +35,4 @@ med {{lupapiste.help}} och {{faq}}.
 
 Hälsningar, 
 
-{{lupapiste}}
+{{lupapiste.link}}

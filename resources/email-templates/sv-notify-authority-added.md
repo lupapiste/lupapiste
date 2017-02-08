@@ -6,4 +6,4 @@ Din e-postadress fungerar som anv&auml;ndarnamn och l&ouml;senordet &auml;r dets
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}

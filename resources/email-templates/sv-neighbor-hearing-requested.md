@@ -6,4 +6,4 @@ kommunen ombeds h&ouml;ra grannarna g&auml;llande projektet {{operation}} p&arin
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}

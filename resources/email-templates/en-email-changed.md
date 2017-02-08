@@ -6,4 +6,4 @@ If you haven't requested changing your user ID, contact our technical support im
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -17,4 +17,4 @@ Den som bett om utlåtandet skickar följande hälsningar:
 
 Hälsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

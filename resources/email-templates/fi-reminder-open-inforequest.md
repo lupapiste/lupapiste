@@ -22,4 +22,4 @@ lupa-asioinnin sähköistymistä myös: {{facebook}} |
 
 Sähköisiä hetkiä asiointiisi toivottaa,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -21,4 +21,4 @@ Jos vastuun hakeminen liitevaatimuksineen her&auml;tt&auml;&auml; kysymyksi&auml
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

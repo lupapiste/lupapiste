@@ -12,4 +12,4 @@ asti). Ongelmatilanteissa ota yhteyttä tuki@lupapiste.fi.
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -12,4 +12,4 @@ If you have any further questions regarding the application, please get in touch
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

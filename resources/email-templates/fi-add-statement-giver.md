@@ -20,4 +20,4 @@ Pääset seuraamaan lupa-asioinnin sähköistymistä {{facebook}} |
 
 Sähköisempää meininkiä lausunnonantoon toivottaa,
 
-{{lupapiste}}
+{{lupapiste.link}}

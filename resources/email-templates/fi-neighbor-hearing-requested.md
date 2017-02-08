@@ -9,4 +9,4 @@ selaimen osoiteriville.
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -12,4 +12,4 @@ tuki@lupapiste.fi.
 
 Regards,
 
-{{lupapiste}} 
+{{lupapiste.link}} 

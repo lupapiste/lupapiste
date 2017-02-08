@@ -6,4 +6,4 @@ du har f&aring;tt ett nytt meddelande i Lupapiste! Meddelandet g&auml;ller proje
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}
