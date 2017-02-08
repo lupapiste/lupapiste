@@ -27,8 +27,7 @@
       </tr>
     </tbody>
   </table>
-  <a data-bind="visible: !params.showAllProjects, click: showAllProjects">
-    <span data-bind="ltext: 'tyonjohtaja.history.showAllProjects'"></span>
-  </a>
-  <div data-bind="visible: params.showAllProjects, component: 'ok-button-group'"></div>
+  <toggle params="value: showAll,
+                  ltext: 'tyonjohtaja.history.showAllProjects'"
+          data-bind="visible: !allVisible()"></toggle>
 </script>
