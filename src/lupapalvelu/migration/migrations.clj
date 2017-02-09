@@ -2758,6 +2758,13 @@
   (->> (mongo/select :organizations {:handler-roles.general {$exists true}} [:handler-roles])
        (run! set-handler-for-organizations-applications)))
 
+(defn handler-map-to-array [{:keys [handlers id]}]
+  (when (map? handlers)
+    (mongo/update-by-id :applications id {$set {:handlers (vals handlers)}})))
+
+(defmigration application-handler-fix                       ; fix handlers after deploy of 8.2.2017
+  (->> (mongo/select :applications {:modified {$gt 1486588980000} :handlers {$exists true}} [:handlers])
+       (run! handler-map-to-array)))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
