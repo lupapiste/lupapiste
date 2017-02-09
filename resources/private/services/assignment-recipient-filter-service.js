@@ -7,7 +7,7 @@ LUPAPISTE.AssignmentRecipientFilterService = function() {
   self.all = {id: "all", fullName: loc("all"), behaviour: "clearSelected"};
   self.noone = {id: null, fullName: loc("applications.search.recipient.no-one"), behaviour: "singleSelection"};
 
-  Self.selected = ko.observableArray([self.myown]);
+  self.selected = ko.observableArray([self.myown]);
 
   /*var savedFilter = ko.pureComputed(function() {
     return util.getIn(applicationFiltersService.selected(), ["filter", "recipient"]);
