@@ -196,9 +196,9 @@ LUPAPISTE.HandlerService = function() {
   };
   
   self.organizationLanguages = ko.pureComputed( function() {
-    return _.intersection( loc.getSupportedLanguages(),
-                           _.keys( _.get( roles(),
-                                          "0.name")));
+    return _.keys( ko.mapping.toJS( _.get( roles(),
+                                           "0.name",
+                                           {})));
   });
 
   self.removeOrganizationHandlerRole = function( roleId ) {
