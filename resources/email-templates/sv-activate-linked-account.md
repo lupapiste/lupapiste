@@ -8,4 +8,4 @@ Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utveck
 
 Smidigt byggande med e-tj&auml;nsten &ouml;nskar
 
-{{lupapiste}}
+{{lupapiste.link}}

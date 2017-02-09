@@ -10,4 +10,4 @@ Nedan finns en l&auml;nk till projektet. Om l&auml;nken inte fungerar, kopiera a
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

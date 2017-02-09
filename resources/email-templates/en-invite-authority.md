@@ -12,4 +12,4 @@ copy the URL and paste it in the browser's address bar.
 
 Wishing you electrified time in application processing, 
 
-{{lupapiste}}
+{{lupapiste.link}}

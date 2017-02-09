@@ -16,4 +16,4 @@ URL and paste it in the browser's address bar.
 
 Regards, 
 
-{{lupapiste}}
+{{lupapiste.link}}

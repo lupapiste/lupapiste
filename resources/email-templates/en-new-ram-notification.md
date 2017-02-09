@@ -12,4 +12,4 @@ address bar.
 
 Regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

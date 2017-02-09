@@ -19,4 +19,4 @@ message:
 
 Regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -8,4 +8,4 @@ you set earlier.
 
 Regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

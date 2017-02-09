@@ -11,4 +11,4 @@ osoite ja liitä se selaimen osoiteriville.
 
 Sähköistä meininkiä lupakäsittelyyn toivottaa,
 
-{{lupapiste}}
+{{lupapiste.link}}

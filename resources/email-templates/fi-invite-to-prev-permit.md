@@ -16,4 +16,4 @@ Jos olet aikaisemmin ilmoittanut ty&ouml;njohtajat lupaasi liittyen, n&auml;m&au
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

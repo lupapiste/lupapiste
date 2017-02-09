@@ -14,4 +14,4 @@ Message from the authority:
 
 Regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

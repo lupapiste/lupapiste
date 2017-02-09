@@ -36,4 +36,4 @@ read {{lupapiste.help}} and {{faq}}.
 
 Regards,
 
-{{lupapiste}} 
+{{lupapiste.link}} 

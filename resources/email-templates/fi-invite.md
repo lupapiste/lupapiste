@@ -35,4 +35,4 @@ Onko sinulla kysyttävää palvelun käytöstä? Suosittelemme tutustumaan
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

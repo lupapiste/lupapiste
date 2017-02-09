@@ -32,4 +32,4 @@ utlåtandet skickar följande hälsningar:
 
 Hälsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

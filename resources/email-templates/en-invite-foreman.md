@@ -21,4 +21,4 @@ If you have any further questions regarding the authorization application and th
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

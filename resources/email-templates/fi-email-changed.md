@@ -6,4 +6,4 @@ Jos ep&auml;ilet v&auml;&auml;rink&auml;ytt&ouml;&auml;, ota viipym&auml;tt&auml
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}
