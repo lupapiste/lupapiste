@@ -112,7 +112,7 @@
            :assignments
            (map :status)) => ["active", "active"])
     (fact "recipient is not necessary"
-      (let [assignment-id (:id (create-assignment sonja nil id {:group "group" :id doc-id} "Kuvaus")) => ok?
+      (let [assignment-id (:id (create-assignment sonja nil id {:group "group" :id doc-id} "No recipient")) => ok?
             assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
         (-> assignment :recipient) => nil?))))
 
