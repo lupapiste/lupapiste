@@ -82,8 +82,7 @@
       (fail :error.task-not-found))))
 
 (defquery foreman-history
-  {
-   :description      "Foreman application target history in Lupapiste. If
+  {:description      "Foreman application target history in Lupapiste. If
    all parameter is true, then the whole history is returned otherwise
    just non-redundant highlights."
    :user-roles       #{:authority}

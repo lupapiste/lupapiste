@@ -5,7 +5,7 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   self.showAll = ko.observable();
-  self.allVisible = ko.observable();
+  self.showCheck = ko.observable( true );
 
   self.params = params;
   self.projects = ko.observableArray([]);
@@ -16,7 +16,9 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
                                  all: Boolean(self.showAll())})
       .success(function (res) {
         self.projects(res.projects);
-        self.allVisible( res.all );
+        if( !self.showAll()) {
+          self.showCheck( !res.all );
+        }        
       })
       .call();
   });

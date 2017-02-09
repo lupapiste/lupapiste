@@ -85,6 +85,6 @@ Authority sees foreman history
   Open foreman application  4
   Open tab  parties
   Open accordions  parties
-
+  debug  
   Wait until  Foreman history should have text X times  Sipoo  3
   Foreman history should have text X times  Tavanomainen  2
