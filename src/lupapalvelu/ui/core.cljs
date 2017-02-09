@@ -10,7 +10,7 @@
 (rum/defc hello-world []
           [:h1 (:text @app-state)])
 
-(rum/mount (hello-world)
+#_(rum/mount (hello-world)
            (. js/document (getElementById "app")))
 
 (defn on-js-reload []
