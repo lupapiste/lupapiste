@@ -6,19 +6,20 @@
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.schemas :as ssc]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.strings :as ss]))
 
 ;; Helpers and validators
 
 (defn- userid->summary [id]
-  (usr/summary (usr/get-user-by-id id)))
+  (when (not (ss/empty? id)) (usr/summary (usr/get-user-by-id id))))
 
 (defn- userid->session-summary [id]
   (usr/session-summary (usr/get-user-by-id id)))
 
 (defn- validate-receiver [{{:keys [organization]} :application
                            {:keys [recipientId]}    :data}]
-  (when (and recipientId
+  (when (and (not (ss/empty? recipientId))
              (not (usr/user-is-authority-in-organization? (userid->session-summary recipientId)
                                                           organization)))
     (fail :error.invalid-assignment-receiver)))
@@ -113,7 +114,7 @@
   (ok :id (assignment/insert-assignment {:application    (select-keys application
                                                                       [:id :organization :address :municipality])
                                          :state          (assignment/new-state "created" (usr/summary user) created)
-                                         :recipient      (when recipientId (userid->summary recipientId))
+                                         :recipient      (userid->summary recipientId)
                                          :target         target
                                          :description    description})))
 
@@ -121,7 +122,7 @@
   {:description      "Updates an assignment"
    :user-roles       #{:authority}
    :parameters       [id assignmentId recipientId description]
-   :input-validators [(partial action/non-blank-parameters [:recipientId :description])
+   :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :pre-checks       [validate-receiver
                       validate-assignment-id]
