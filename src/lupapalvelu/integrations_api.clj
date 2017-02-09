@@ -47,6 +47,13 @@
   (when-not ((some-fn has-asianhallinta-operation asianhallinta-enabled) command)
     (fail :error.integration.asianhallinta-available)))
 
+(defn- temporary-approve-prechecks
+    "Temporary fix: case management and regular approve mechanism can
+  coexist for environmental applications."
+  [command]
+  (when-let [cm-fail (asianhallinta-unavailable-for-application command)]
+    (when-not (-> command :application :permitType keyword #{:YI :YL :YM :VVVL :MAL})
+      cm-fail)))
 ;;
 ;; Application approval
 ;;
@@ -79,7 +86,7 @@
 
 (defcommand approve-application
   {:parameters       [id lang]
-   :pre-checks       [asianhallinta-unavailable-for-application]
+   :pre-checks       [temporary-approve-prechecks]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true
