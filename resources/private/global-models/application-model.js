@@ -877,6 +877,4 @@ LUPAPISTE.ApplicationModel = function() {
                              componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                yesFn: doDelete}});
   };
-
-  self.texti = ko.observable("foo");
 };
