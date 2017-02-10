@@ -51,6 +51,8 @@
         (recur tail (if (>= new-length break-at) (.length map-entry) new-length)))
       (.append sb "}"))))
 
+(declare rum-app-url)
+
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
@@ -64,6 +66,7 @@
                  :build                 (:build-number env/buildinfo)
                  :cookie                (env/value :cookie)
                  :wannaJoinUrl          (env/value :oir :wanna-join-url)
+                 :rumURL                rum-app-url
                  :userAttachmentTypes   (map #(str "osapuolet." (name %)) att-type/osapuolet)
                  :attachmentScales      attachment-scales
                  :attachmentSizes       attachment-sizes
@@ -526,7 +529,6 @@
   (when-not (or (fn? r) (io/resource (c/path r)))
     (throw (Exception. (str "Resource missing: " r)))))
 
-(def cljs-base-url "/lp-static/js/out/cljs_base.js")
 (def rum-app-url "/lp-static/js/rum-app.js")
 
 (defonce cljs-build (future

@@ -14,10 +14,9 @@ var cljsLoader = {
   loadComponent: function(name, componentConfig, callback) {
     "use strict";
     if (_.has(componentConfig, "cljsComponentName")) {
-
+      var lupapalvelu;
       var cljsComponentName = _.get(componentConfig, "cljsComponentName");
       var elemId = _.uniqueId(cljsComponentName);
-      var component = lupapalvelu.ui[cljsComponentName]; // if Rum app not yet loaded, will be undefined
       var elems = ko.utils.parseHtmlFragment("<div id='" + elemId + "'></div>");
       var doCallback = function() {
         callback({template: elems,
@@ -26,10 +25,10 @@ var cljsLoader = {
                     return new LUPAPISTE.CljsComponentModel(newParams);
                   }});
       };
-      if (component) { // If Rum already loaded, initialize component
+      if (lupapalvelu) { // If Rum already loaded, initialize component
         doCallback();
       } else { // If not loaded, fetch rum-app.js and initialize after
-        $.getScript("/lp-static/js/rum-app.js", function() {
+        $.getScript(LUPAPISTE.config.rumURL, function() {
           doCallback();
         });
       }
