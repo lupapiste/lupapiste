@@ -546,7 +546,8 @@
 
                   <!-- ko if: selectedTabName() === 'inspectionSummaries' && $root.authorization.ok('inspection-summaries-for-application') -->
                   <div id="application-inspectionSummaries-tab" class="tab-content">
-                    <cljs-component params="{name: 'inspection-summaries', app: $data.application}"></cljs-component>
+                    <!-- <cljs-component params="{name: 'inspection-summaries', app: $data.application}"></cljs-component>-->
+                    <cljs-inspection-summaries params="{app: $data.application}"></cljs-inspection-summaries>
                   </div>
                   <!-- /ko -->
 

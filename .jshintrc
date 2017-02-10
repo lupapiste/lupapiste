@@ -55,6 +55,7 @@
     "loc": true,
     "locationSearch": true,
     "LUPAPISTE": true,
+    "lupapiste": true,
     "lupapisteApp" :true,
     "moment": false,
     "municipalities": true,

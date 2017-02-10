@@ -177,8 +177,7 @@ jQuery(document).ready(function() {
     {name: "link-permit-autocomplete"},
     {name: "handler-list"},
     {name: "card"},
-    {name: "edit-handlers"},
-    {name: "cljs-component"}
+    {name: "edit-handlers"}
 ];
 
   ko.registerLupapisteComponents(components);

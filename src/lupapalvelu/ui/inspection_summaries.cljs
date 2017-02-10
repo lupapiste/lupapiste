@@ -60,9 +60,9 @@
 (defn init
   [init-state props]
   (id-subscription ((-> (aget props ":rum/initial-state")
-                                    :rum/args
-                                    first
-                                    (aget "id"))))
+                        :rum/args
+                        first
+                        (aget "id"))))
   #_(js/hub.send "XYZ" (js-obj :id (-> @state :applicationId)))
   init-state)
 
@@ -201,6 +201,6 @@
         [:i.lupicon-circle-plus]
         [:span (js/loc "inspection-summary.targets.new.button")]]]]]))
 
-(defn ^:export start [domId ko-app]
-  (rum/mount (inspection-summaries ko-app)
+(defn ^:export start [domId componentParams]
+  (rum/mount (inspection-summaries (aget componentParams "app"))
              (.getElementById js/document (name domId))))

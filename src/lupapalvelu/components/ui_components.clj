@@ -176,7 +176,7 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
-   :cljs-component {:js ["cljs-component.js"] :html ["cljs-component.html"]}
+   :cljs-component {:js ["cljs-component.js" "cljs-loader.js"]}
 
    :common-html  {:depends [:selectm-html :cljs-component]
                   :css ["jquery-ui.css"]
