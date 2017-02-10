@@ -50,6 +50,7 @@ LUPAPISTE.HandlerService = function() {
       // initialized yet.
       if( authOk !== false  ) {
         pendingFetch[key] = fun;
+        _.delay( fetchPending, 1000 );
       }
     }
   }
@@ -273,6 +274,7 @@ LUPAPISTE.HandlerService = function() {
 
   hub.subscribe( "contextService::enter", function() {
     fetchApplicationHandlers();
+    fetchAuthorities();
     fetchPending();
   });
 
