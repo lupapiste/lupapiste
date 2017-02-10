@@ -94,7 +94,7 @@ Sonja logs in again
   Open application  ${appname}  ${propertyid}
   Open tab  parties
 
-Sonja creates assignment without receiver
+Sonja can create assignment without receiver
   Create assignment  Ei vastaanottajaa  parties  paasuunnittelija  Ei vastaanottajaa  2
 
 
