@@ -1,6 +1,7 @@
 (ns lupapalvelu.municipality-api
   (:require [taoensso.timbre :refer [trace debug debugf info warn error errorf fatal]]
             [sade.core :refer :all]
+            [sade.util :as util]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :refer [defquery non-blank-parameters]]))
 
@@ -39,5 +40,5 @@ municipality"}
    :user-roles #{:anonymous}}
   [_]
   (let [organizations (org/get-organizations {:scope.municipality municipality})
-        active-map (first (active-municipalities-from-organizations organizations))]
+        active-map (util/find-by-id municipality (active-municipalities-from-organizations organizations))]
       (ok (select-keys active-map [:applications :infoRequests :opening]))))
