@@ -120,11 +120,11 @@
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
-      [:span (js/loc "inspection-summary.tab.intro.1")]
+      [:label (js/loc "inspection-summary.tab.intro.1")]
       [:br]
-      [:span (js/loc "inspection-summary.tab.intro.2")]
+      [:label (js/loc "inspection-summary.tab.intro.2")]
       [:br]
-      [:span (js/loc "inspection-summary.tab.intro.3")]]
+      [:label (js/loc "inspection-summary.tab.intro.3")]]
      [:div.form-grid.no-top-border.no-padding
       [:div.row
        [:div.col-1
@@ -148,6 +148,7 @@
                  :padding "0px 24px"}}
         [:div.row
          [:label (js/loc "inspection-summary.new-summary.intro.1")]
+         [:br]
          [:label (js/loc "inspection-summary.new-summary.intro.2")]]
         [:div.row
          [:label (js/loc "inspection-summary.new-summary.operation")]
