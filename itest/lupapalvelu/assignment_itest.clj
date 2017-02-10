@@ -138,13 +138,22 @@
     (fact "inputs are validated"
       (update-assignment ronja id "foo" sonja-id "Ota koppi") => fail?
       (update-assignment ronja id (mongo/create-id) sonja-id "Ota koppi") => invalid-assignment?
-      (update-assignment ronja id assignment-id "foo" "Ota koppi") => invalid-receiver?)))
+      (update-assignment ronja id assignment-id "foo" "Ota koppi") => invalid-receiver?)
+    (fact "recipient can be removed and added again"
+      (update-assignment ronja id assignment-id nil "Ei vastaanottajaa") => ok?
+      (-> (query ronja :assignment :assignmentId assignment-id)
+          :assignment :recipient) => nil
+      (update-assignment ronja id assignment-id sonja-id "Ei vastaanottajaa") => ok?
+      (-> (query ronja :assignment :assignmentId assignment-id)
+          :assignment
+          :recipient :username) => "sonja")))
 
 (facts "Completing assignments"
   (let [id (create-app-id sonja :propertyId sipoo-property-id)
         doc-id (-> (query-application sonja id) :documents first :id)
         {assignment-id1 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")
-        {assignment-id2 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")]
+        {assignment-id2 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")
+        {assignment-id3 :id} (create-assignment sonja nil id {:group "group" :id doc-id} "Valmistuva")]
     (fact "Only authorities within the same organization can complete assignment"
       (complete-assignment pena assignment-id1)   => unauthorized?
       (complete-assignment veikko assignment-id1) => assignments-not-enabled?
@@ -155,7 +164,9 @@
       (complete-assignment sonja assignment-id2) => ok?)
 
     (fact "After calling complete-assignment, the assignment is completed"
-      (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :states last :type) => "completed")))
+      (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :states last :type) => "completed")
+    (fact "Assignments with no recipient can be completed"
+      (complete-assignment ronja assignment-id3)  => ok?)))
 
 (facts "Assignment targets"
   (let [app-id (create-app-id sonja :propertyId sipoo-property-id)

@@ -87,6 +87,9 @@ Ronja changes assignment back to Sonja
   Positive indicator should be visible
   Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
   Wait until  Element text should be  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']/span[@class='receiver']  Sonja Sibbo
+
+Only one assignment has been created
+  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1
   Logout
 
 Sonja logs in again
@@ -97,10 +100,8 @@ Sonja logs in again
 Sonja can create assignment without receiver
   Create assignment  Ei vastaanottajaa  parties  paasuunnittelija  Ei vastaanottajaa  2
 
-
-
-Only one assignment has been created
-  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1
+Two assignments have been created
+  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  2
 
 No frontend errors
   [Tags]  non-roboto-proof
