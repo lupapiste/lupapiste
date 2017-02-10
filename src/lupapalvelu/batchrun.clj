@@ -432,9 +432,14 @@
         ;; Fallback into fetching xmls consecutively
         (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
 
-      (catch Throwable t
+
+      (catch [:sade.core/type :sade.core/fail] t
+        (errorf "error.integration - Unable to get reviews for %s backend: %s"
+                (:id organization) (select-keys t [:status :text])))
+
+      (catch Object o
         (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
-                permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
+                permit-type (:id organization) (.getName (class o)) (get &throw-context :message ""))))))
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type]
@@ -457,16 +462,12 @@
 
 (defn- fetch-review-updates-for-organization
   [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
-  (try+
-    (let [grouped-apps (if (seq applications)
+  (let [grouped-apps (if (seq applications)
                          (group-by :permitType applications)
                          (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
                               (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
-      (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
-           (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)]))))
-    (catch [:sade.core/type :sade.core/fail] t
-        (errorf "error.integration - Unable to get reviews for %s backend: %s - %s"
-                (:id organization) (.getName (class t)) (.getMessage t)))))
+    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
+         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
 
 (defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
   (let [applications (when (seq application-ids)
