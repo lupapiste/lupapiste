@@ -9,10 +9,12 @@
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
             [sade.schemas :as ssc]
-            [schema.core :as sc :refer [defschema]]))
+            [schema.core :as sc :refer [defschema]]
+            [lupapalvelu.domain :as domain]))
 
 (defschema InspectionSummaryItem
            {:target-name sc/Str   ;Tarkastuskohde
+            :finished    sc/Bool
             sc/Keyword   sc/Any})
 
 (defschema InspectionSummary
@@ -36,8 +38,15 @@
       unauthorized)))
 
 (defn inspection-summary-api-authority-pre-check
-  [{{:keys [organization id]} :application}]
+  [{{:keys [organization]} :application}]
   (when (or (empty? organization) (not (organization-has-inspection-summary-feature? organization)))
+    unauthorized))
+
+(defn inspection-summary-api-applicant-pre-check
+  [{{:keys [organization] :as application} :application {user-id :id} :user}]
+  (when (or (empty? organization)
+            (not (organization-has-inspection-summary-feature? organization))
+            (not (domain/owner-or-write-access? application user-id)))
     unauthorized))
 
 (defn settings-for-organization [organizationId]
@@ -73,12 +82,15 @@
                  {$set   {field templateId}})]
     (org/update-organization organizationId update)))
 
+(defn- targets-from-template [template]
+  (map #(hash-map :target-name % :finished false) (:items template)))
+
 (defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
   (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
         summary (assoc (select-keys template [:name])
                   :id      (mongo/create-id)
                   :op      (select-keys operation [:id :name :description])
-                  :targets (map #(hash-map :target-name %) (:items template)))]
+                  :targets (targets-from-template template))]
     (mongo/update :applications {:_id appId} {$push {:inspection-summaries summary}})))
 
 (defn default-template-id-for-operation [organization {opName :name}]

@@ -59,10 +59,12 @@
                          (get-in document [:data :valtakunnallinenNumero :value])))))
 
 (defquery inspection-summaries-for-application
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [(action/some-pre-check
+                  inspection-summary/inspection-summary-api-authority-pre-check
+                  inspection-summary/inspection-summary-api-applicant-pre-check)]
    :parameters [:id]
    ; TODO STATES
-   :user-roles #{:authority}}
+   :user-roles #{:authority :applicant}}
   [{app :application}]
   (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)
       :summaries (:inspection-summaries app)

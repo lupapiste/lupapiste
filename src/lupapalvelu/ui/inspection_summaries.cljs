@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.inspection-summaries
   (:require [rum.core :as rum]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [cljs.pprint]))
 
 (enable-console-print!)
 
@@ -29,8 +30,8 @@
                          :summary {:id nil
                                    :targets []}}})
 
-(def state      (atom empty-state))
-(def table-rows (rum/cursor-in state [:view :summary :targets]))
+(def state         (atom empty-state))
+(def table-rows    (rum/cursor-in state [:view :summary :targets]))
 
 (rum/defc summary-row [row-data]
   [:tr
@@ -63,7 +64,6 @@
                         :rum/args
                         first
                         (aget "id"))))
-  #_(js/hub.send "XYZ" (js-obj :id (-> @state :applicationId)))
   init-state)
 
 (defn- operation-description-for-select [op]
@@ -109,14 +109,56 @@
             [nil (js/loc "choose")]
             (map (fn [tmpl] [(:id tmpl) (:name tmpl)]) templates))))
 
+(rum/defc create-summary-bubble < rum/reactive
+  [visible?]
+  (let [visibility (rum/react visible?)]
+    [:div.container-bubble.half-width.arrow-2nd-col
+     {:style {:display (if visibility "block" "none")
+              :margin  "0px"
+              :padding "0px 24px"}}
+     [:div.row
+      [:label (js/loc "inspection-summary.new-summary.intro.1")]
+      [:br]
+      [:label (js/loc "inspection-summary.new-summary.intro.2")]]
+     [:div.row
+      [:label (js/loc "inspection-summary.new-summary.operation")]
+      [:div.col-4.no-padding
+       [:span.select-arrow.lupicon-chevron-small-down
+        {:style {:z-index 10}}]
+       (operations-select (rum/react (rum/cursor-in state [:operations]))
+                          (rum/react (rum/cursor-in state [:view :new :operation])))]]
+     [:div.row
+      [:label (js/loc "inspection-summary.new-summary.template")]
+      [:div.col-4.no-padding
+       [:span.select-arrow.lupicon-chevron-small-down
+        {:style {:z-index 10}}]
+       (templates-select (rum/react (rum/cursor-in state [:templates]))
+                         (rum/react (rum/cursor-in state [:view :new :template])))]]
+     [:div.row.left-buttons
+      {:style {:padding-top "12px"}}
+      [:button.positive
+       {:on-click (fn [_] (command "create-inspection-summary"
+                                   (fn [result]
+                                     (js/util.showSavedIndicator result)
+                                     (refresh)
+                                     (reset! visible? false))
+                                   "id"          (-> @state :applicationId)
+                                   "operationId" (-> @state :view :new :operation)
+                                   "templateId"  (-> @state :view :new :template)))}
+       [:i.lupicon-check]
+       [:span (js/loc "button.ok")]]
+      [:button.secondary
+       {:on-click (fn [_] (reset! visible? false))}
+       [:i.lupicon-remove]
+       [:span (js/loc "button.cancel")]]]]))
+
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
                                   :will-unmount (fn [& _] (reset! state empty-state))}
-  [ko-app]
+  [ko-app authModel]
   (.subscribe (aget ko-app "id") id-subscription)
   (let [summary-in-view (rum/react (rum/cursor-in state [:view :summary]))
-        bubble-visible (rum/cursor-in state [:view :bubble-visible])
-        visibility (rum/react bubble-visible)]
+        bubble-visible (rum/cursor-in state [:view :bubble-visible])]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
@@ -135,52 +177,15 @@
          (summaries-select (rum/react (rum/cursor-in state [:summaries]))
                            (rum/react (rum/cursor-in state [:operations]))
                            (:id summary-in-view))]]
-       [:div.col-1
-        {:style {:padding-top "24px"}}
-        [:button.positive
-         {:on-click (fn [_] (reset! bubble-visible true))}
-         [:i.lupicon-circle-plus]
-         [:span (js/loc "inspection-summary.new-summary.button")]]]]
-      [:div.row
-       [:div.container-bubble.half-width.arrow-2nd-col
-        {:style {:display (if visibility "block" "none")
-                 :margin  "0px"
-                 :padding "0px 24px"}}
-        [:div.row
-         [:label (js/loc "inspection-summary.new-summary.intro.1")]
-         [:br]
-         [:label (js/loc "inspection-summary.new-summary.intro.2")]]
-        [:div.row
-         [:label (js/loc "inspection-summary.new-summary.operation")]
-         [:div.col-4.no-padding
-          [:span.select-arrow.lupicon-chevron-small-down
-           {:style {:z-index 10}}]
-           (operations-select (rum/react (rum/cursor-in state [:operations]))
-                              (rum/react (rum/cursor-in state [:view :new :operation])))]]
-        [:div.row
-         [:label (js/loc "inspection-summary.new-summary.template")]
-         [:div.col-4.no-padding
-          [:span.select-arrow.lupicon-chevron-small-down
-           {:style {:z-index 10}}]
-          (templates-select (rum/react (rum/cursor-in state [:templates]))
-                            (rum/react (rum/cursor-in state [:view :new :template])))]]
-        [:div.row.left-buttons
-         {:style {:padding-top "12px"}}
-         [:button.positive
-          {:on-click (fn [_] (command "create-inspection-summary"
-                                      (fn [result]
-                                        (js/util.showSavedIndicator result)
-                                        (refresh)
-                                        (reset! bubble-visible false))
-                                      "id"          (-> @state :applicationId)
-                                      "operationId" (-> @state :view :new :operation)
-                                      "templateId"  (-> @state :view :new :template)))}
-          [:i.lupicon-check]
-          [:span (js/loc "button.ok")]]
-         [:button.secondary
-          {:on-click (fn [_] (reset! bubble-visible false))}
-          [:i.lupicon-remove]
-          [:span (js/loc "button.cancel")]]]]]
+       (if (.ok authModel "create-inspection-summary")
+         [:div.col-1
+          {:style {:padding-top "24px"}}
+          [:button.positive
+           {:on-click (fn [_] (reset! bubble-visible true))}
+           [:i.lupicon-circle-plus]
+           [:span (js/loc "inspection-summary.new-summary.button")]]])]
+      (if (.ok authModel "create-inspection-summary")
+        [:div.row (create-summary-bubble bubble-visible)])
       [:div.row
        [:table
         {:id "targets-table"}
@@ -203,5 +208,5 @@
         [:span (js/loc "inspection-summary.targets.new.button")]]]]]))
 
 (defn ^:export start [domId componentParams]
-  (rum/mount (inspection-summaries (aget componentParams "app"))
+  (rum/mount (inspection-summaries (aget componentParams "app") (aget componentParams "authModel"))
              (.getElementById js/document (name domId))))
