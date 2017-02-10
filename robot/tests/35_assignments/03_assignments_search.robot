@@ -114,6 +114,28 @@ Completed assignments are not visible in application
   Open tab  parties
   Wait until  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  0
 
+Sonja logs in again
+  As Sonja
+  Open application  ${appname}  ${propertyid}
+  Tab should be visible  info
+
+Sonja creates two assignments with no recipient
+  Create assignment  Ei vastaanottajaa  documents  uusiRakennus  Tarkasta varusteet
+  Create assignment  Ei vastaanottajaa  documents  rakennuspaikka  Tarkasta kiinteistö
+
+Sonja opens assignments search and sees no assignments
+  Open assignments search
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
+
+Sonja sets recipient filter to Kaikki and sees two assignments
+  Click by test id  toggle-advanced-filters
+  Select from autocomplete by test id  recipient-filter-component  Kaikki
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+
+Sonja sets recipient filter to Ei vastaanottajaa and sees two assignments
+  Select from autocomplete by test id  recipient-filter-component  Ei vastaanottajaa
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+
 No frontend errors
   [Tags]  non-roboto-proof
   Logout
