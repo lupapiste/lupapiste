@@ -15,8 +15,6 @@ LUPAPISTE.InspectionSummaryTemplateBubbleModel = function(params) {
   self.templateText = ko.observable(_.get( params, "template.templateText", "" ));
   self.templateId = ko.observable(_.get( params, "template.id", "" ));
 
-  console.log(self.templateText());
-
   self.okVisible = ko.observable(true);
   self.cancelVisible = ko.observable(true);
 
