@@ -10,4 +10,4 @@ Klicka p&aring; l&auml;nken nedan att se uppgifterna om projektet. Om l&auml;nke
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

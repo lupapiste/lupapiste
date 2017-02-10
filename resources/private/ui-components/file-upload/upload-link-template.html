@@ -4,7 +4,7 @@
                     multiple: upload.allowMultiple},
                     testId: options.testId + '-input'">
   <a class="link-btn link-btn--link"
-     data-bind="visible: !upload.readOnly">
+     data-bind="visible: !ko.unwrap(upload.readOnly)">
     <label data-bind="attr: {'for': labelFor},
                       css: {waiting: waiting},
                       testId: options.testId + '-label'">

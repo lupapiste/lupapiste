@@ -1,6 +1,9 @@
 (ns lupapalvelu.document.canonical-common-test
   (:require [lupapalvelu.document.canonical-common :refer :all]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]))
+
+(testable-privates lupapalvelu.document.canonical-common get-handler)
 
 (facts "timestamps"
   (let [day (* 24 60 60 1000)
@@ -83,3 +86,23 @@
     (schema-info-filter [doc] :foo)       => (contains doc)
     (schema-info-filter [doc] :foo "bar") => (contains doc)
     (schema-info-filter [doc] :foo "not") => empty?))
+
+(facts get-handler
+  (fact "empty handlers"
+    (get-handler {:handlers []}) => "")
+
+  (fact "nil handlers"
+    (get-handler {:handlers nil}) => "")
+
+  (fact "no general handler"
+    (get-handler {:handlers [{:firstName "first-name" :lastName "last-name"}]}) => "")
+
+  (fact "with general handler"
+    (get-handler {:handlers [{:firstName "first-name" :lastName "last-name" :general true}]})
+    => {:henkilo {:nimi {:etunimi "first-name", :sukunimi "last-name"}}})
+
+  (fact "multiple handlers with general"
+    (get-handler {:handlers [{:firstName "other-first-name" :lastName "other-last-name"}
+                             {:firstName "first-name" :lastName "last-name" :general true}
+                             {:firstName "other-first-name-2" :lastName "other-last-name-2"}]})
+    => {:henkilo {:nimi {:etunimi "first-name", :sukunimi "last-name"}}}))

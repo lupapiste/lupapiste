@@ -148,7 +148,7 @@
 (def- db-fields ; projection
   [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
    :_attachment_indicator_reset :address :applicant :attachments
-   :auth :authority :authorityNotice :comments :created :documents
+   :auth :handlers.firstName :handlers.lastName :authorityNotice :comments :created :documents
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitType :permitSubtype :primaryOperation :state :statements
    :organization ; required for authorization checks
@@ -158,7 +158,7 @@
   (map :field meta-fields/indicator-meta-fields))
 
 (def- frontend-fields
-  [:id :address :applicant :authority :authorityNotice
+  [:id :address :applicant :handlers :authorityNotice
    :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
    :foreman :foremanRole :permitType])
@@ -171,11 +171,12 @@
 
 (defn- enrich-row [app]
   (-> app
+      (assoc :handlers (distinct (:handlers app))) ;; Each handler only once.
       app-utils/with-application-kind
       app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
-                          "handler" ["authority.lastName" "authority.firstName"]
+                          "handler" [:handlers.0.lastName :handlers.0.firstName]
                           "location" :address
                           "modified" :modified
                           "submitted" :submitted

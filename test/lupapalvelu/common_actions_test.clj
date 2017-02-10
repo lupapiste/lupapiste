@@ -76,7 +76,8 @@
                           :tasks-tab-visible
                           :application-info-tab-visible
                           :application-summary-tab-visible
-                          :application-verdict-tab-visible}
+                          :application-verdict-tab-visible
+                          :application-handlers}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})

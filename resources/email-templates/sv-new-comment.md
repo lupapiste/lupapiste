@@ -13,4 +13,4 @@ Om du vill svara p&aring; kommentaren kan du g&ouml;ra det direkt i projektets d
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -10,4 +10,4 @@ You can follow the electronic permit process on: {{facebook}} | {{twitter}} | {{
 
 With online greetings,
 
-{{lupapiste}}
+{{lupapiste.link}}

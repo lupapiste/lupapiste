@@ -1,9 +1,11 @@
 # Hei {{user.firstName}}!
 
-Sinut on liitetty organisaation {{org}} viranomaisk&auml;ytt&auml;j&auml;ksi Lupapiste-palvelussa. Hieno juttu! 
+Sinut on liitetty organisaation {{org}} viranomaiskäyttäjäksi
+Lupapiste-palvelussa. Hieno juttu!
 
-K&auml;ytt&auml;j&auml;tunnuksenasi toimii s&auml;hk&ouml;postiosoitteesi, ja salasananasi aiemmin asettamasi salasana.
+Käyttäjätunnuksenasi toimii sähköpostiosoitteesi, ja salasananasi
+aiemmin asettamasi salasana.
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

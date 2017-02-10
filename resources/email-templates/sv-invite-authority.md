@@ -8,4 +8,4 @@ Forts&auml;tt genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte f
 
 En smidig elektronisk tillst&aring;ndsprocess &ouml;nskar
 
-{{lupapiste}}
+{{lupapiste.link}}

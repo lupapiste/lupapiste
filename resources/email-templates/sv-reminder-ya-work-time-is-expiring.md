@@ -6,4 +6,4 @@ Har arbetet framskridit som planerat eller beh&ouml;ver du till&auml;ggstid? Vid
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

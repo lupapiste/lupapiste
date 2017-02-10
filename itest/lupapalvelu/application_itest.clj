@@ -81,36 +81,6 @@
         application     (query-application pena application-id)]
     (:organization application) => "069-R"))
 
-(fact* "Assign application to an authority"
-       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
-             ;; add a comment to change state to open
-             _ (comment-application pena application-id true) => ok?
-             application (query-application sonja application-id)
-             authority-before-assignation (:authority application)
-             resp (command sonja :assign-application :id application-id :assigneeId ronja-id)
-             assigned-app (query-application sonja application-id)
-             authority-after-assignation (:authority assigned-app)]
-         application-id => truthy
-         application => truthy
-         (success resp) => true
-         (:id authority-before-assignation) => nil
-         authority-after-assignation => (contains {:id ronja-id})
-         (fact "Authority is not able to submit"
-           sonja =not=> (allowed? :submit-application :id application-id))))
-
-(fact* "Assign application to an authority and then to no-one"
-       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
-             ;; add a comment change set state to open
-             _ (comment-application pena application-id true) => ok?
-             application (query-application sonja application-id)
-             authority-before-assignation (:authority application)
-             resp (command sonja :assign-application :id application-id :assigneeId sonja-id)
-             resp (command sonja :assign-application :id application-id :assigneeId nil)
-             assigned-app (query-application sonja application-id)
-             authority-in-the-end (:authority assigned-app)]
-         (:id authority-before-assignation) => nil
-         (:id authority-in-the-end) => nil))
-
 (facts upsert-application-handler
   (let [{app-id :id :as application} (create-and-submit-application pena :propertyId sipoo-property-id)
         resp     (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId ronja-id)]
@@ -129,7 +99,9 @@
                                                              :roleId "abba1111111111111111acdc"
                                                              :userId ronja-id
                                                              :firstName "Ronja"
-                                                             :lastName "Sibbo"})))
+                                                             :lastName "Sibbo"
+                                                             :general true
+                                                             :name {:en "Handler", :fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare"}})))
 
     (facts "Applicant is not allowed to edit handlers"
       (command pena :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id)
@@ -159,7 +131,8 @@
                                                              :roleId "abba1111111111111112acdc"
                                                              :userId ronja-id
                                                              :firstName "Ronja"
-                                                             :lastName "Sibbo"})))
+                                                             :lastName "Sibbo"
+                                                             :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}})))
 
     (facts "Set existing handler user"
       (let [update-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111112acdc" :userId sonja-id :handlerId (:id resp))
@@ -173,7 +146,8 @@
                                                              :roleId "abba1111111111111112acdc"
                                                              :userId sonja-id
                                                              :firstName "Sonja"
-                                                             :lastName "Sibbo"})))
+                                                             :lastName "Sibbo"
+                                                             :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}})))
 
     (facts "Insert second handler"
       (let [insert-resp (command sonja :upsert-application-handler :id app-id :roleId "abba1111111111111111acdc" :userId sonja-id)
@@ -184,15 +158,18 @@
 
         (fact "two handlers exists" (count handlers) => 2)
         (fact "second handler has all data" handlers => [{:id (:id resp)
-                                                           :roleId "abba1111111111111112acdc"
-                                                           :userId sonja-id
-                                                           :firstName "Sonja"
-                                                           :lastName "Sibbo"}
+                                                          :roleId "abba1111111111111112acdc"
+                                                          :userId sonja-id
+                                                          :firstName "Sonja"
+                                                          :lastName "Sibbo"
+                                                          :name {:en "KVV-Handler", :fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare"}}
                                                          {:id (:id insert-resp)
                                                           :roleId "abba1111111111111111acdc"
                                                           :userId sonja-id
                                                           :firstName "Sonja"
-                                                          :lastName "Sibbo"}])))
+                                                          :lastName "Sibbo"
+                                                          :general true
+                                                          :name {:en "Handler", :fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare"}}])))
 
     (facts "Handler changes are stored in application history"
       (let [history (:history (query-application sonja app-id))
@@ -375,7 +352,6 @@
   (let [operation "kerrostalo-rivitalo"
         application-id  (create-app-id mikko :propertyId tampere-property-id :operation operation)]
     (comment-application mikko application-id true) => ok?
-    (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
       (success (command mikko :add-operation :id application-id :operation "puun-kaataminen")) => true
@@ -577,16 +553,14 @@
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "Sonja assigns the application to herself and sees the full person ID"
-        (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+        (command sonja :upsert-application-handler :id application-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-9988"))
 
       (fact "Ronja still does not see the full person ID"
         (let [app (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (facts "Set company to document"
@@ -666,8 +640,8 @@
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
                          :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
-                         :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
-                         :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
+                         :unsubscribe-notifications :subscribe-notifications :upsert-application-handler :remove-application-handler
+                         :neighbor-add :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application

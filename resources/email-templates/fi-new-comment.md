@@ -15,4 +15,4 @@ Onko sinulla kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Suositt
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

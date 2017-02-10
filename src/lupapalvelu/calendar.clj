@@ -123,8 +123,8 @@
   [{:keys [organization] :as application}]
   (let [calendars     (find-calendars-for-organizations organization)
         authority-ids (keys calendars)]
-    (filter #(util/contains-value? authority-ids (:id %))
-             (app/application-org-authz-users application "authority"))))
+    (->> (app/application-org-authz-users application #{"authority"})
+         (filter #(util/contains-value? authority-ids (:id %))))))
 
 (defn find-calendars-for-user
   [userId]

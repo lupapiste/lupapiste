@@ -9,4 +9,4 @@ Aktiveringsl&auml;nken &auml;r i kraft i 24 timmar (fram till{{expires}}). Vid p
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}

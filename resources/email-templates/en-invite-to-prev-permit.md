@@ -17,4 +17,4 @@ If you have previously named your supervisors regarding the permit in question, 
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

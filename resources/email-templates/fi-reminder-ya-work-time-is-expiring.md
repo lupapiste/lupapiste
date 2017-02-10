@@ -6,4 +6,4 @@ Onko homma edennyt ajallaan vai tarvitsetko toiminnallesi jatkoaikaa? Tarpeen ni
 
 Terveisin,
 
-{{lupapiste}}
+{{lupapiste.link}}

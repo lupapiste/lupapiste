@@ -106,14 +106,14 @@
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app "authority")))
+  (ok :authorities (app/application-org-authz-users app #{"authority"})))
 
 (defquery application-commenters
   {:user-roles #{:authority}
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app "authority" "commenter")))
+  (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
@@ -199,10 +199,7 @@
   [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
   (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
                      (usr/create-handler handlerId roleId))]
-    (update-application command
-                        {$set  {:modified  created
-                                :handlers  (util/upsert handler handlers)}
-                         $push {:history   (app/handler-history-entry (util/assoc-when handler :new-entry (nil? handlerId)) created user)}})
+    (update-application command (app/handler-upsert-updates handler handlers created user))
     (ok :id (:id handler))))
 
 (defcommand remove-application-handler
@@ -216,23 +213,6 @@
                       {$set  {:modified created}
                        $pull {:handlers {:id handlerId}}
                        $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}}))
-
-(defcommand assign-application
-  {:parameters [:id assigneeId]
-   :input-validators [(fn [{{assignee :assigneeId} :data}]
-                        (when-not (or (ss/blank? assignee) (mongo/valid-key? assignee))
-                          (fail "error.user.not.found")))]
-   :user-roles #{:authority}
-   :states     (states/all-states-but :draft :canceled)}
-  [{created :created app :application user :user :as command}]
-  (let [assignee (util/find-by-id assigneeId (app/application-org-authz-users app "authority"))]
-    (if (or assignee (ss/blank? assigneeId))
-      (let [authority (if assignee (usr/summary assignee) (:authority domain/application-skeleton))]
-        (update-application command
-                            {$set {:modified  created
-                                   :authority authority}
-                             $push {:history (app/authority-history-entry authority created user)}}))
-      (fail "error.user.not.found"))))
 
 ;;
 ;; Cancel
@@ -940,3 +920,24 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
+
+(defquery application-handlers
+  {:parameters       [id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles       #{:authority :applicant :oirAuthority}
+   :states           states/all-states}
+  [{:keys [application lang organization]}]
+  (ok :handlers (map (fn [{role-name :name :as handler}]
+                       (-> handler
+                           (assoc :roleName ((keyword lang) role-name))
+                           (dissoc :name)))
+                     (:handlers application))))
+
+(defquery application-organization-handler-roles
+  {:description "Every handler defined in the organization, including
+  the disabled ones."
+   :parameters  [id]
+   :user-roles  #{:authority}
+   :states      states/all-states}
+  [{:keys [organization]}]
+  (ok :handlerRoles (:handler-roles @organization)))

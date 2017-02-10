@@ -46,7 +46,7 @@
                                      :type "owner",
                                      :role "owner",
                                      :id "777777777777777777000020"}]
-                             :authority sonja,
+                             :handlers [(assoc sonja :general true)],
                              :permitType "YA",
                              :organization "753-YA",
                              :infoRequest false,

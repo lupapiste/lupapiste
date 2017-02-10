@@ -47,10 +47,9 @@
 (defn- localized-text [lang value]
   (if (nil? value) "" (xml-escape (i18n/localize lang value))))
 
-(defn- get-authority [lang {authority :authority :as application}]
-  (if (and (:authority application)
-           (domain/assigned? application))
-    (str (:lastName authority) " " (:firstName authority))
+(defn- get-general-handler [lang application]
+  (if-let [general-handler (util/find-first :general (:handlers application))]
+    (str (:lastName general-handler) " " (:firstName general-handler))
     (i18n/localize lang "application.export.empty")))
 
 (defn- get-operations [{:keys [primaryOperation secondaryOperations]}]
@@ -77,7 +76,7 @@
    "LPAVALUE_SUBMITTED"    (or (util/to-local-date (:submitted application)) "-")
 
    "LPATITLE_AUTHORITY"    (localized-text lang "applications.authority")
-   "LPAVALUE_AUTHORITY"    (get-authority lang application)
+   "LPAVALUE_AUTHORITY"    (get-general-handler lang application)
 
    "LPATITLE_APPLICANT"    (localized-text lang "applicant")
    "LPAVALUE_APPLICANT"    (s/join ", " (:_applicantIndex application))

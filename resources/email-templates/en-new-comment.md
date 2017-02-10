@@ -13,4 +13,4 @@ If you want to reply to the comment, please do so directly to the discussion cha
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

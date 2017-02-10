@@ -10,4 +10,4 @@ Vad &auml;r Lupapiste? En e-tj&auml;nst som utvecklats av Solita Oy, kommunerna 
 
 V&auml;lkommen att sk&ouml;ta &auml;renden elektroniskt &ouml;nskar
 
-{{lupapiste}}
+{{lupapiste.link}}

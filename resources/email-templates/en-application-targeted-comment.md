@@ -6,4 +6,4 @@ you have a new message at Lupapiste! The message concerns project {{operation}} 
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -134,11 +134,18 @@
   (let [ids (flatten (vals (select-keys reservation [:from :to])))]
     (assoc reservation :participants (map user/get-user-by-id (remove nil? ids)))))
 
+(defn enrich-application-handlers
+  ([{org-id :organization :as application}]
+   (enrich-application-handlers application {:handler-roles (lazy-seq (:handler-roles (mongo/select-one :organizations {:_id org-id} [:handler-roles])))}))
+  ([application {roles :handler-roles :as organization}]
+   (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %)))))
+
 (defn- enrich-application [application]
   (some-> application
           (update :documents (partial map schemas/with-current-schema-info))
           (update :tasks (partial map schemas/with-current-schema-info))
-          (update :reservations (partial map with-participants-info))))
+          (update :reservations (partial map with-participants-info))
+          (enrich-application-handlers)))
 
 (defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}
@@ -192,14 +199,6 @@
    To be used in commands' :pre-checks vector."
   [command]
   (validate-access owner-or-write-roles command))
-
-;;
-;; assignee
-;;
-
-(defn assigned? [{authority :authority}]
-  {:pre [(map? authority)]}
-  (-> authority :id nil? not))
 
 ;;
 ;; documents

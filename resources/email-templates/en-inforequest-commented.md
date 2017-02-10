@@ -8,4 +8,4 @@ If the provided link does not work, try to copy and paste the link into your bro
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -12,4 +12,4 @@ Om du har fr&aring;gor om ans&ouml;kan kan du kontakta antingen projektets repre
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

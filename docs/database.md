@@ -43,6 +43,7 @@ Indeksit on määriteltu lupapalvelu.mongo nimiavaruudessa.
 - Jos hakuehdossa vertaa avainta arvoon `null`, palautuu myös ne joilta koko avain puuttuu!
   - Käytettävä lisäksi $exists-ehtoa, esim.
     `db.myCollection.find({$and: [{key: null}, {key: {$exists: true}}]})`
+- [MongoChef](http://3t.io/mongochef/)-pommi: jos projektiossa käytetään $elemMatchia, niin kentän päivitys ei välttämättä kohdistu näkyvään kenttään. Esim. rajataan auth-arraysta näkyviin vain yksi valtuutettu ja muutetaan käyttäjätunnus. Todellisuudessa muuttuukin auth-arrayn ensimmäisen alkion käyttäjätunnus!
 
 Lue myös [Top 5 syntactic weirdnesses to be aware of in MongoDB](http://devblog.me/wtf-mongo)
 1. Keys order in a hash object
