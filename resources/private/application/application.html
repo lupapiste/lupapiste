@@ -5,7 +5,7 @@
             <div class="application_summary">
               <div class="container">
                 <div class="preamble"
-                     data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">                  
+                     data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">
                         <div class="application_summary_info" data-bind="with: application">
                           <h1 data-bind="component: {name: 'address',
                                          params: { application: $parent,
@@ -73,7 +73,7 @@
 
                               <!-- Authorities: -->
                               <div data-bind="component: 'handler-list'"></div>
-                              
+
                               <!-- Operations: -->
                               <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
                               <div>
@@ -546,7 +546,6 @@
 
                   <!-- ko if: selectedTabName() === 'inspectionSummaries' && $root.authorization.ok('inspection-summaries-for-application') -->
                   <div id="application-inspectionSummaries-tab" class="tab-content">
-                    <!-- <cljs-component params="{name: 'inspection-summaries', app: $data.application}"></cljs-component>-->
                     <cljs-inspection-summaries params="{app: $data.application}"></cljs-inspection-summaries>
                   </div>
                   <!-- /ko -->

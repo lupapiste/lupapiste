@@ -1,19 +1,19 @@
+/**
+ * Used for custom elements starting with <cljs*...
+ * Inits the CLJS component by calling start-method with the elementId, where React component content will be injected.
+ * Params given for cljs-* Knockout components will be passed as second parameter for CLJS component.
+ * Thus CLJS component must implement start function, which is given two parameters: DOM element id and parameters passed to Knockout component.
+ */
 LUPAPISTE.CljsComponentModel = function(params) {
   "use strict";
   var self = this;
   self.componentName = params.componentName;
-/*
-  if (component) { // If React component is already loaded, defer mounting it so #id for template is bound after KO compnent init
-    //_.defer(component.start, self.componentName, params.app);
-    // _.defer(component.start, "cljs-component-template", params.app);
-  } else {
-      //lupapalvelu.ui[_.snakeCase(self.componentName)].start(self.componentName, params.app);
-  }
-*/
+
   self.dispose = function() {
     ReactDOM.unmountComponentAtNode(document.getElementById(params.elemId));
   };
 
+  // bind React component only after template has been injected
   _.defer(lupapalvelu.ui[self.componentName].start, params.elemId, params);
 };
 
