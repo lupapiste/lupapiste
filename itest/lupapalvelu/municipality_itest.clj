@@ -71,4 +71,21 @@
     (let [resp (query pena :municipality-active :municipality "999")]
       (:applications resp) => empty?
       (:infoRequests resp) => (just "R")
-      (:opening resp) => (just #{(just {:opening 123 :permitType "R"})}))))
+      (:opening resp) => (just #{(just {:opening 123 :permitType "R"})})))
+
+  (fact "municipality in two organizations"
+    (let [oulu (query pena :municipality-active :municipality "564")
+          porvoo (query pena :municipality-active :municipality "638")]
+      (fact "Oulu initial" (:applications oulu) => (just #{"YM" "YI" "YL" "MAL" "VVVL" "R" "YA"}))
+      (fact "Porvoo initial" (:applications porvoo) => (just ["R" "YI" "YL"])))
+    (command admin :add-scope
+             :organization "564-YMP"                        ; Oulu YMP
+             :permitType "YM"
+             :municipality "638" ; Naantali in minimal
+             :inforequestEnabled true
+             :applicationEnabled true
+             :openInforequestEnabled false
+             :openInforequestEmail ""
+             :opening nil) => ok?
+    (fact "Porvoo now has also YMP"
+      (:applications (query pena :municipality-active :municipality "638")) => (just ["YM" "R" "YI" "YL"] :in-any-order))))
