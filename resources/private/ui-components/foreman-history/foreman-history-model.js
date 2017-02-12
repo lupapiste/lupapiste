@@ -11,9 +11,9 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   self.projects = ko.observableArray([]);
 
   self.disposedComputed( function() {
-      ajax
-      .query("foreman-history", {id: params.applicationId,
-                                 all: Boolean(self.showAll())})
+      ajax.query("foreman-history",
+                 {id: params.applicationId,
+                  all: Boolean(self.showAll())})
       .success(function (res) {
         self.projects(res.projects);
         if( !self.showAll()) {
@@ -21,5 +21,12 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
         }        
       })
       .call();
+  });
+  self.title = self.disposedPureComputed( function () {
+    return  "tyonjohtaja.historia.otsikko"
+         + (self.showAll() || !self.showCheck() ? "-kaikki" : "");
+  });
+  self.titleTestId = self.disposedPureComputed( function() {
+    return _.replaceAll( self.title(), "\\.", "-");
   });
 };

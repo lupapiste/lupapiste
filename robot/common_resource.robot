@@ -1548,6 +1548,19 @@ Checkbox wrapper disabled
   [Arguments]  ${id}
   Javascript?  $("input#${id}:disabled").length === 1
 
+Toggle selected
+  [Arguments]  ${tid}
+  Checkbox wrapper selected by test id  ${tid}-input
+
+Toggle not selected
+  [Arguments]  ${tid}
+  Checkbox wrapper not selected by test id  ${tid}-input
+
+Toggle toggle
+  [Arguments]  ${tid}
+  Click label by test id  ${tid}-label  
+  
+
 Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
