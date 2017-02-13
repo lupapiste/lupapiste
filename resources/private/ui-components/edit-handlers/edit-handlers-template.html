@@ -51,7 +51,8 @@
                                    buttonClass: 'secondary',
                                    ltext: 'remove',
                                    click: _.partial( $parent.remove, $data),
-                                   testId: 'remove-handler-' + $index()">
+                                   testId: 'remove-handler-' + $index(),
+                                   disable: lupapisteApp.services.handlerService.pending">
               </icon-button>
         </div>
       </div>
