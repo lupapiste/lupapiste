@@ -49,7 +49,7 @@ LUPAPISTE.HandlerService = function() {
       // Auth can be undefined if the auth model has not been
       // initialized yet.
       if( authOk !== false  ) {
-        pendingFetch[key] = fun;
+        pendingFetch[key] = fun;        
       }
     }
   }
@@ -61,6 +61,12 @@ LUPAPISTE.HandlerService = function() {
       fun();
     });
   }
+
+  ko.computed( function() {
+    if( lupapisteApp.models.applicationAuthModel.getData()) {
+      ko.ignoreDependencies( fetchPending );
+    }
+  });
 
   function resetFetched() {
     _.each( _.values( fetched), function( fetch ) {
@@ -273,6 +279,7 @@ LUPAPISTE.HandlerService = function() {
 
   hub.subscribe( "contextService::enter", function() {
     fetchApplicationHandlers();
+    fetchAuthorities();
     fetchPending();
   });
 
