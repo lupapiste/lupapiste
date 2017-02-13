@@ -1,7 +1,7 @@
 (ns lupapalvelu.ui.inspection-summaries
   (:require [rum.core :as rum]
             [clojure.string :as string]
-            [cljs.pprint]))
+            [lupapalvelu.ui.common :refer [query command]]))
 
 (enable-console-print!)
 
@@ -10,15 +10,10 @@
   [k v col]
   (some (fn [m] (when (= v (get m k)) m)) col))
 
-(defn query [name success-fn & kvs]
-  (-> (js/ajax.query name (apply js-obj kvs))
-      (.success success-fn)
-      .call))
-
-(defn command [name success-fn & kvs]
-  (-> (js/ajax.command name (apply js-obj kvs))
-      (.success success-fn)
-      .call))
+(defn save-indicator [visible-atom]
+  [:span.form-indicator.form-input-saved
+   {:style {:display (if (rum/react visible-atom) "block" "none")}}
+   [:span.icon]])
 
 (def empty-state {:applicationId ""
                   :operations []
@@ -48,9 +43,9 @@
   (query "inspection-summaries-for-application"
          (fn [data]
            (swap! state assoc
-                  :operations (js->clj (aget data "operations") :keywordize-keys true)
-                  :templates  (js->clj (aget data "templates") :keywordize-keys true)
-                  :summaries  (js->clj (aget data "summaries") :keywordize-keys true)))
+                  :operations (:operations data)
+                  :templates  (:templates data)
+                  :summaries  (:summaries data))
          "id" (-> @state :applicationId)))
 
 (defn init
