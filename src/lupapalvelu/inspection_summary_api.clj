@@ -63,7 +63,7 @@
                   inspection-summary/inspection-summary-api-authority-pre-check
                   inspection-summary/inspection-summary-api-applicant-pre-check)]
    :parameters [:id]
-   ; TODO STATES
+   :states states/post-verdict-states
    :user-roles #{:authority :applicant}}
   [{app :application}]
   (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)

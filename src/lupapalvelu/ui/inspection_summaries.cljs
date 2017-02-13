@@ -53,18 +53,15 @@
                   :summaries  (js->clj (aget data "summaries") :keywordize-keys true)))
          "id" (-> @state :applicationId)))
 
-(defn id-subscription [value]
-  (swap! state assoc :applicationId value)
-  (when-not (empty? value)
-    (refresh)))
-
 (defn init
   [init-state props]
-  (id-subscription ((-> (aget props ":rum/initial-state")
-                        :rum/args
-                        first
-                        (aget "id"))))
-  init-state)
+  (let [[ko-app auth-model] (-> (aget props ":rum/initial-state") :rum/args)
+        id-computed (aget ko-app "id")
+        id          (id-computed)]
+    (swap! state assoc :applicationId id)
+    (when (and (not (empty? id)) (.ok auth-model "inspection-summaries-for-application"))
+      (refresh))
+    init-state))
 
 (defn- operation-description-for-select [op]
   (string/join " - " (remove empty? [(:description op) (:op-identifier op)])))
@@ -155,8 +152,7 @@
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
                                   :will-unmount (fn [& _] (reset! state empty-state))}
-  [ko-app authModel]
-  (.subscribe (aget ko-app "id") id-subscription)
+  [ko-app auth-model]
   (let [summary-in-view (rum/react (rum/cursor-in state [:view :summary]))
         bubble-visible (rum/cursor-in state [:view :bubble-visible])]
     [:div
@@ -177,14 +173,14 @@
          (summaries-select (rum/react (rum/cursor-in state [:summaries]))
                            (rum/react (rum/cursor-in state [:operations]))
                            (:id summary-in-view))]]
-       (if (.ok authModel "create-inspection-summary")
+       (if (.ok auth-model "create-inspection-summary")
          [:div.col-1
           {:style {:padding-top "24px"}}
           [:button.positive
            {:on-click (fn [_] (reset! bubble-visible true))}
            [:i.lupicon-circle-plus]
            [:span (js/loc "inspection-summary.new-summary.button")]]])]
-      (if (.ok authModel "create-inspection-summary")
+      (if (.ok auth-model "create-inspection-summary")
         [:div.row (create-summary-bubble bubble-visible)])
       [:div.row
        [:table
