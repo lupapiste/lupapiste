@@ -32,8 +32,7 @@ Foreman sets his information to several applications
 
 Foreman history is not visible to applicant
   Page Should Not Contain Element  xpath=//foreman-history
-  Page Should Not Contain  Kooste työnjohtajan historiasta Lupapisteessä
-  Page Should Not Contain  KOOSTE TYÖNJOHTAJAN HISTORIASTA LUPAPISTEESSÄ
+  Page Should Not Contain Element  jquery=foreman-history div.foreman-history-container
   [Teardown]  logout
 
 Switch to authority
@@ -81,10 +80,29 @@ Sonja gives verdicts to foreman applications
   Verdict for foreman application  2
   Verdict for foreman application  3
 
-Authority sees foreman history
+Authority sees reduced foreman history
   Open foreman application  4
   Open tab  parties
   Open accordions  parties
-
   Wait until  Foreman history should have text X times  Sipoo  3
   Foreman history should have text X times  Tavanomainen  2
+  Wait test id visible  tyonjohtaja-historia-otsikko
+
+Sonja toggles show all of the history
+  Toggle not selected  foreman-history-show-all-input
+  Toggle toggle  foreman-history-show-all
+  Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
+  Wait until  Foreman history should have text X times  Sipoo  4
+
+Sonja opens foreman application 1
+  Open foreman application  1
+  Open tab  parties
+  Open accordions  parties
+
+There is no reduced history for this application
+  Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
+  Wait until  Foreman history should have text X times  Sipoo  3
+  No such test id  foreman-history-show-all-label
+  [Teardown]  Logout
+  
+  

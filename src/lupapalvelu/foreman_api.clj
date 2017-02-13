@@ -82,28 +82,26 @@
       (fail :error.task-not-found))))
 
 (defquery foreman-history
-  {:user-roles #{:authority}
+  {:description      "Foreman application target history in Lupapiste. If
+   all parameter is true, then the whole history is returned otherwise
+   just non-redundant highlights."
+   :user-roles       #{:authority}
    :states           states/all-states
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles
-   :parameters       [:id]
+   :parameters       [:id all]
+   :input-validators [(partial action/non-blank-parameters [:all])]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
   (if application
-    (ok :projects (foreman/get-foreman-history-data application))
+    (let [history-data (foreman/get-foreman-history-data application)]
+      (if (= all "true")
+        (ok :projects history-data :all true)
+        (let [reduced-data (foreman/reduce-foreman-history-data history-data)]
+          (ok :projects reduced-data
+              :all (= (count history-data) (count reduced-data))))))
     (fail :error.application-not-found)))
 
-(defquery reduced-foreman-history
-  {:user-roles #{:authority}
-   :states           states/all-states
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
-   :parameters       [:id]
-   :pre-checks       [foreman-app-check]}
-  [{application :application user :user :as command}]
-  (if application
-    (ok :projects (foreman/get-foreman-reduced-history-data application))
-    (fail :error.application-not-found)))
 
 (defquery foreman-applications
   {:user-roles #{:applicant :authority :oirAuthority}
