@@ -306,9 +306,12 @@
 
     (facts"reduced"
           (fact "History is empty since all foreman applications are in the pre-verdict state"
-                (let [reduced (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?]
+                (let [reduced (query sonja :foreman-history :all false :id base-foreman-app-id) => ok?]
                   (-> reduced :projects empty?) => true))
           (finalize-foreman-app mikko sonja foreman-app-id1 true)
+          (fact "History is now the same both for reduced and unreduced"
+                (query sonja :foreman-history :all false :id foreman-app-id2) => (contains {:ok true :all true})
+                (query sonja :foreman-history :all true :id foreman-app-id2) => (contains {:ok true :all true}))
           (finalize-foreman-app mikko sonja foreman-app-id2 false)
           (finalize-foreman-app mikko sonja foreman-app-id3 true)
           (finalize-foreman-app mikko sonja foreman-app-id4 true)
@@ -317,35 +320,37 @@
           (fact "Appeal one foreman-app"
                 (command sonja :change-application-state :id foreman-app-id5 :state :appealed) => ok?)
           (fact "reduced history should contain reduced history (excluding canceled application)"
-                (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
+                (let [reduced-history (query sonja :foreman-history :all false :id base-foreman-app-id)
+                      => (contains {:ok true :all false})
                       history-ids (map :foremanAppId (:projects reduced-history))]
                   history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
                   (some #{foreman-app-id4} history-ids) => nil?))
 
       (fact "reduced history should depend on the base application"
-        (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
+        (let [reduced-history (query sonja :foreman-history :all false :id foreman-app-id1) => ok?
               history-ids (map :foremanAppId (:projects reduced-history))]
           history-ids =>     (just [foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
           history-ids =not=> (has some #{foreman-app-id4 base-foreman-app-id})))
 
       (fact "Unknown foreman app id"
-        (query sonja :reduced-foreman-history :id "foobar") => fail?))
+        (query sonja :foreman-history :all false :id "foobar") => fail?))
 
     (fact "Should be queriable only with a foreman application"
-      (let [resp (query sonja :foreman-history :id history-base-app-id) => fail?]
+      (let [resp (query sonja :foreman-history :all true :id history-base-app-id) => fail?]
         (:text resp) => "error.not-foreman-app"))
 
     (facts "unreduced"
       (fact "unreduced history should not reduce history"
-        (let [unreduced-history (query sonja :foreman-history :id base-foreman-app-id) => ok?
+            (let [unreduced-history (query sonja :foreman-history :all true :id base-foreman-app-id)
+                  => (contains {:ok true :all true})
               history-ids       (map :foremanAppId (:projects unreduced-history))]
           history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id4 foreman-app-id5] :in-any-order)))
 
       (fact "Unknown foreman app id"
-        (query sonja :foreman-history :id "foobar") => fail?)
+        (query sonja :foreman-history :all true :id "foobar") => fail?)
 
       (fact "Should be queriable only with a foreman application"
-        (let [resp (query sonja :reduced-foreman-history :id history-base-app-id) => fail?]
+        (let [resp (query sonja :foreman-history :all false :id history-base-app-id) => fail?]
           (:text resp) => "error.not-foreman-app")))
 
     (fact "can not link foreman application with a second application"
