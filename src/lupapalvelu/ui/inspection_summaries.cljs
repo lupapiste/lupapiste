@@ -39,13 +39,15 @@
    [:td ""]
    [:td ""]])
 
-(defn- refresh []
+(defn- refresh [cb]
   (query "inspection-summaries-for-application"
          (fn [data]
            (swap! state assoc
                   :operations (:operations data)
                   :templates  (:templates data)
                   :summaries  (:summaries data))
+           (when cb
+             (cb)))
          "id" (-> @state :applicationId)))
 
 (defn init
@@ -55,7 +57,7 @@
         id          (id-computed)]
     (swap! state assoc :applicationId id)
     (when (and (not (empty? id)) (.ok auth-model "inspection-summaries-for-application"))
-      (refresh))
+      (refresh nil))
     init-state))
 
 (defn- operation-description-for-select [op]
@@ -131,8 +133,8 @@
       [:button.positive
        {:on-click (fn [_] (command "create-inspection-summary"
                                    (fn [result]
-                                     (js/util.showSavedIndicator result)
-                                     (refresh)
+                                     (println "command result" result)
+                                     (refresh #(update-summary-view (:id result)))
                                      (reset! visible? false))
                                    "id"          (-> @state :applicationId)
                                    "operationId" (-> @state :view :new :operation)
@@ -194,7 +196,7 @@
              (summary-row row)))]]]
       [:div.row
        [:button.positive
-        {:on-click (fn [_] (swap! table-rows conj {:target-name "Faa"}))}
+        {:on-click (fn [_] (swap! table-rows conj {:target-name "Faas"}))}
         [:i.lupicon-circle-plus]
         [:span (js/loc "inspection-summary.targets.new.button")]]]]]))
 
