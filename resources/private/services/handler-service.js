@@ -39,6 +39,8 @@ LUPAPISTE.HandlerService = function() {
                          guard: "application-organization-handler-roles"}};
   var pendingFetch = {};
 
+  self.pending = ko.observable();
+
   function canFetch( key, fun ) {
     var fetch = fetched[key];
     var authOk = lupapisteApp.models.applicationAuthModel.ok( fetch.guard );
@@ -132,13 +134,14 @@ LUPAPISTE.HandlerService = function() {
     .call();
   }
 
-  function upsertHandler( handlerId, data ) {
+  function upsertHandler( handlerId, data ) {        
     ajax.command( "upsert-application-handler",
                   _.defaults( data,
                               isTemporary( handlerId.peek() )
                                    ? {}
                                    : {handlerId: handlerId.peek()},
                             {id: appId()}))
+    .pending( self.pending )
     .success( function( res ) {
       handlerId( res.id );
       indicateSaved();      
@@ -150,6 +153,7 @@ LUPAPISTE.HandlerService = function() {
     ajax.command( "remove-application-handler",
                   {id: appId(),
                    handlerId: ko.unwrap( handlerId )})
+    .pending( self.pending )
     .success( indicateRemoved)
     .call();
   }
@@ -228,21 +232,18 @@ LUPAPISTE.HandlerService = function() {
   };
 
   function updateHandler( handler, data) {
-    // Peeks are needed so the changes (e.g., handler removal) will
-    // not trigger unnecessary ajax call via computed in
-    // processRawHandler (see below).
-    var auth = _.find( authorities.peek(), {id: data.userId });
+    var auth = _.find( authorities(), {id: data.userId });
     if( auth ) {
       handler.firstName(_.get(auth, "firstName", "" ));
       handler.lastName( _.get(auth, "lastName", "" ));
     }
-    var roleName = _.get(_.find( roles.peek(), {id: data.roleId}),
+    var roleName = _.get(_.find( roles(), {id: data.roleId}),
                          "name");
     if( roleName ) {
       handler.roleName( roleName );
     }
     
-    if( data.userId && data.roleId) {
+    if( data.userId && data.roleId ) {
         upsertHandler(handler.id, data);        
       }
   }
@@ -253,7 +254,7 @@ LUPAPISTE.HandlerService = function() {
       var data = {userId: m.userId(),
                   roleId: m.roleId()};
       if( !ko.computedContext.isInitial()) {
-        updateHandler( m, data);
+        ko.ignoreDependencies( _.partial( updateHandler, m, data )); 
       }
     });
     return m;
