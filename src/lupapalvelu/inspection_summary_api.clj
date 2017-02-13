@@ -92,3 +92,11 @@
             app
             (util/find-by-key :id operationId (app/get-operations app))
             templateId)))
+
+(defcommand remove-target-from-inspection-summary
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+   :parameters [:id templateId operationId]
+   :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
+   :user-roles #{:authority}}
+  [{app :application}]
+  (ok))

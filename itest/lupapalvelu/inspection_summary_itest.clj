@@ -47,6 +47,7 @@
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
          (-> (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa)) :summaries first :name) => "foo")
-      (fact "Applicant can see summaries but not create new ones"
+      (fact "Applicant can see summaries but not create new ones or modify them"
         (query pena :inspection-summaries-for-application :id (:id app-jarvenpaa)) => ok?
-        (command pena :create-inspection-summary :id (:id app-jarvenpaa)) => unauthorized?))))
+        (command pena :create-inspection-summary :id (:id app-jarvenpaa)) => unauthorized?
+        (command pena :remove-target-from-inspection-summary :id (:id app-jarvenpaa)) => unauthorized?))))

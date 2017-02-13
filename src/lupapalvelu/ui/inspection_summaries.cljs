@@ -185,11 +185,12 @@
          (doall
            (for [row (rum/react table-rows)]
              (summary-row row)))]]]
-      [:div.row
-       [:button.positive
-        {:on-click (fn [_] (swap! table-rows conj {:target-name "Faas"}))}
-        [:i.lupicon-circle-plus]
-        [:span (js/loc "inspection-summary.targets.new.button")]]]]]))
+      (if (.ok auth-model "remove-target-from-inspection-summary")
+        [:div.row
+         [:button.positive
+          {:on-click (fn [_] (swap! table-rows conj {:target-name "Faas"}))}
+          [:i.lupicon-circle-plus]
+          [:span (js/loc "inspection-summary.targets.new.button")]]])]]))
 
 (defn ^:export start [domId componentParams]
   (rum/mount (inspection-summaries (aget componentParams "app") (aget componentParams "authModel"))
