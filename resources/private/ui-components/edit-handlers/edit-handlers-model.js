@@ -128,13 +128,17 @@ LUPAPISTE.EditHandlersModel = function() {
     service.removeApplicationHandler( data.id );
   };
 
-  self.isDisabled = function( data ) {
-    if( data.userId() && data.roleId() ) {
+  function isDataDisabled( data ) {
+    if( data && data.userId() && data.roleId() ) {
       var role = _.find( roles(), {id: data.roleId()});
       return !_.find( authorities(), {id: data.userId()})
           || !role
           || _.get( role, "disabled" );
     }
+}
+
+  self.isDisabled = function( data ) {
+    return service.pending() || isDataDisabled( data );
   };
 
   self.back = function() {

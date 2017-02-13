@@ -21,7 +21,7 @@ LUPAPISTE.HandlerListModel = function() {
                                  {card: "edit-handlers",
                                   deck: "summary"});
 
-  self.canEdit = _.wrap( "application-authorities",
+  self.canEdit = _.wrap( "upsert-application-handler",
                          lupapisteApp.models.applicationAuthModel.ok );
 
 };
