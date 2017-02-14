@@ -212,7 +212,8 @@
              (map
                  #(dissoc % :description-ci :created :currentState)
                  (map #(rename-keys % {:_id :id}) res))]
-      converted)
+      {:count       (count converted)
+       :assignments (->> converted (drop skip) (take limit))})
     (catch com.mongodb.MongoException e
       (errorf "Assignment search query=%s failed: %s" mongo-query e)
       (fail! :error.unknown))))
@@ -252,19 +253,19 @@
   (get-assignments user {:application.id application-id
                          :status {$ne "canceled"}}))
 
-(sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
+(sc/defn assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [mongo-query (make-query query user)
-        assignments (search query
-                            mongo-query
-                            (util/->long (:skip query))
-                            (util/->long (:limit query))
-                            (:sort query))]
+        assignments-result (search query
+                                   mongo-query
+                                   (util/->long (:skip query))
+                                   (util/->long (:limit query))
+                                   (:sort query))]
     {:userTotalCount (mongo/count :assignments)
      ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
-     :totalCount     (count assignments)
-     :assignments    (->> assignments
+     :totalCount     (:count assignments-result)
+     :assignments    (->> (:assignments assignments-result)
                           (enrich-targets))}))
 
 (sc/defn ^:always-validate count-active-assignments-for-user :- sc/Int
