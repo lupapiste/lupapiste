@@ -558,7 +558,6 @@
   [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
-        reviews (pc/distinct-by #(select-keys % [:taskname :data]) reviews) ; remove duplicates!
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
@@ -566,6 +565,7 @@
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                             (< pvm (now))))
         review-tasks (map review-to-task (filter historical-timestamp-present? reviews))
+        review-tasks (pc/distinct-by #(select-keys % [:taskname :data]) review-tasks) ; remove duplicates!
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
@@ -591,7 +591,7 @@
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
     (if (some seq validation-errors)
       (fail :error.invalid-task-type :validation-errors validation-errors)
-      (ok :review-count (count reviews)
+      (ok :review-count (count review-tasks)
           :updated-tasks (map :id updated-tasks)
           :updates (util/deep-merge task-updates building-updates state-updates)
           :added-tasks-with-updated-buildings added-tasks-with-updated-buildings))))
