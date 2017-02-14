@@ -23,7 +23,9 @@
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]
-            [lupapalvelu.attachment.conversion :as conversion]))
+            [lupapalvelu.attachment.conversion :as conversion]
+            [cljs.build.api]
+            #_[figwheel-sidecar.repl-api :as ra]))
 
 (def themes #{"louhi", "facta"})
 
@@ -49,6 +51,8 @@
         (recur tail (if (>= new-length break-at) (.length map-entry) new-length)))
       (.append sb "}"))))
 
+(declare rum-app-url)
+
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
@@ -62,6 +66,7 @@
                  :build                 (:build-number env/buildinfo)
                  :cookie                (env/value :cookie)
                  :wannaJoinUrl          (env/value :oir :wanna-join-url)
+                 :rumURL                rum-app-url
                  :userAttachmentTypes   (map #(str "osapuolet." (name %)) att-type/osapuolet)
                  :attachmentScales      attachment-scales
                  :attachmentSizes       attachment-sizes
@@ -174,7 +179,9 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
-   :common-html  {:depends [:selectm-html]
+   :cljs-component {:js ["cljs-component.js" "cljs-loader.js"]}
+
+   :common-html  {:depends [:selectm-html :cljs-component]
                   :css ["jquery-ui.css"]
                   :html ["404.html"]}
 
@@ -521,3 +528,5 @@
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css :scss])]
   (when-not (or (fn? r) (io/resource (c/path r)))
     (throw (Exception. (str "Resource missing: " r)))))
+
+(def rum-app-url "/lp-static/js/rum-app.js")

@@ -2,7 +2,7 @@
   <select data-bind="options: templates,
                      optionsCaption: loc('notSelected'),
                      optionsText: function(item) { return _.get(item, 'name'); },
-                     value: selectedTemplate"
-          data-test-id="select-inspection-summary-template">
+                     value: selectedTemplate,
+                     testId: 'select-inspection-summary-template-' + operationId">
   </select>
 </script>

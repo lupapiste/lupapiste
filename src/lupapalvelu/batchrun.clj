@@ -460,7 +460,7 @@
                           :verdicts true
                           :history true}))))
 
-(defn- fetch-review-updates-for-organization
+(defn fetch-review-updates-for-organization
   [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
   (let [grouped-apps (if (seq applications)
                          (group-by :permitType applications)

@@ -98,6 +98,9 @@
 (defn get-in-schemas [schema-name path]
   (reduce #(util/find-by-key :name (name %2) (:body %1)) (get-schema {:name schema-name}) path))
 
+(defn find-identifier-field-from [schema-name]
+  (util/find-by-key :identifier true (:body (get-schema {:name schema-name}))))
+
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 

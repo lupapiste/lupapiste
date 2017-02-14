@@ -59,7 +59,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
       copy.unshift(item);
       return copy;
     } else {
-      return self.options();
+      return self.options && self.options();
     }
     // reset index
     initIndex();

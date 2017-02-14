@@ -46,6 +46,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.info-links-api]
             [lupapalvelu.integrations-api]
+            [lupapalvelu.inspection-summary-api]
             [lupapalvelu.kopiolaitos-api]
             [lupapalvelu.logging]
             [lupapalvelu.logging-api]

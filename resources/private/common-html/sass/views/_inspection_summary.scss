@@ -43,9 +43,6 @@
   &> div {
     margin: $marginM $marginM;
   }
-  button {
-    margin: 0 $marginM;
-  }
   label.required {
     color: $lp-orange;
     &:after {
@@ -53,4 +50,20 @@
       display: inline;
     }
   }
+}
+
+.create-summary-bubble {
+  .container-bubble {
+    margin: 0px;
+    padding: 0px 24px;
+  }
+
+  div.row.left-buttons {
+    padding-top: 12px;
+  }
+
+}
+
+div.create-new-summary-button {
+  padding-top: 24px;
 }
