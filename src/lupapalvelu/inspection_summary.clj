@@ -28,9 +28,6 @@
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
 
-(defn organization-has-inspection-summary-feature? [organizationId]
-  (pos? (mongo/count :organizations {:_id organizationId :inspection-summaries-enabled true})))
-
 (defn inspection-summary-api-auth-admin-pre-check
   [{user :user}]
   (let [org-set (usr/organization-ids-by-roles user #{:authorityAdmin})]
@@ -38,15 +35,15 @@
       unauthorized)))
 
 (defn inspection-summary-api-authority-pre-check
-  [{{:keys [organization]} :application}]
-  (when (or (empty? organization) (not (organization-has-inspection-summary-feature? organization)))
+  [{organization :organization}]
+  (when-not (and organization (-> @organization :inspection-summaries-enabled))
     unauthorized))
 
 (defn inspection-summary-api-applicant-pre-check
-  [{{:keys [organization] :as application} :application {user-id :id} :user}]
-  (when (or (empty? organization)
-            (not (organization-has-inspection-summary-feature? organization))
-            (not (domain/owner-or-write-access? application user-id)))
+  [{application :application organization :organization {user-id :id} :user}]
+  (when-not (and organization
+                 (-> @organization :inspection-summaries-enabled)
+                 (domain/owner-or-write-access? application user-id))
     unauthorized))
 
 (defn settings-for-organization [organizationId]

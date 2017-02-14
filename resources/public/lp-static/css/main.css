@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1486713228936');
+@import url('main-blessed1.css?z=1487053638741');
 
 
 /* line 830, ../../../private/common-html/sass/partials/_forms.scss */
@@ -11137,6 +11137,21 @@ label.batch-required {
 .inspection-summary-template-editor label.required:after {
   content: "*";
   display: inline;
+}
+
+/* line 56, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.create-summary-bubble .container-bubble {
+  margin: 0px;
+  padding: 0px 24px;
+}
+/* line 61, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.create-summary-bubble div.row.left-buttons {
+  padding-top: 12px;
+}
+
+/* line 67, ../../../private/common-html/sass/views/_inspection_summary.scss */
+div.create-new-summary-button {
+  padding-top: 24px;
 }
 
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */

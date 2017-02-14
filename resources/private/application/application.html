@@ -306,7 +306,7 @@
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
                               </a></li>
 
-                          <li data-bind="if: $root.authorization.ok('inspection-summaries-for-application'),
+                          <li data-bind="if: !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application'),
                                          css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
                             <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" data-test-id="application-open-inspectionSummaries-tab" class="link-btn">
                               <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
@@ -544,7 +544,7 @@
                     </div>
                     <!-- /ko -->
 
-                  <!-- ko if: selectedTabName() === 'inspectionSummaries' && $root.authorization.ok('inspection-summaries-for-application') -->
+                  <!-- ko if: selectedTabName() === 'inspectionSummaries' && !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application') -->
                   <div id="application-inspectionSummaries-tab" class="tab-content">
                     <cljs-inspection-summaries params="{app: $data.application, authModel: $root.authorization}"></cljs-inspection-summaries>
                   </div>

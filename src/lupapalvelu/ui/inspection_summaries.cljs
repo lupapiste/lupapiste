@@ -12,7 +12,7 @@
 
 (defn save-indicator [visible-atom]
   [:span.form-indicator.form-input-saved
-   {:style {:display (if (rum/react visible-atom) "block" "none")}}
+   {:style {:display (when-not (rum/react visible-atom) "none")}}
    [:span.icon]])
 
 (def empty-state {:applicationId ""
@@ -107,9 +107,7 @@
   [visible?]
   (let [visibility (rum/react visible?)]
     [:div.container-bubble.half-width.arrow-2nd-col
-     {:style {:display (if visibility "block" "none")
-              :margin  "0px"
-              :padding "0px 24px"}}
+     {:style {:display (when-not visibility "none")}}
      [:div.row
       [:label (js/loc "inspection-summary.new-summary.intro.1")]
       [:br]
@@ -129,7 +127,6 @@
        (templates-select (rum/react (rum/cursor-in state [:templates]))
                          (rum/react (rum/cursor-in state [:view :new :template])))]]
      [:div.row.left-buttons
-      {:style {:padding-top "12px"}}
       [:button.positive
        {:on-click (fn [_] (command "create-inspection-summary"
                                    (fn [result]
@@ -171,14 +168,13 @@
                            (rum/react (rum/cursor-in state [:operations]))
                            (:id summary-in-view))]]
        (if (.ok auth-model "create-inspection-summary")
-         [:div.col-1
-          {:style {:padding-top "24px"}}
+         [:div.col-1.create-new-summary-button
           [:button.positive
            {:on-click (fn [_] (reset! bubble-visible true))}
            [:i.lupicon-circle-plus]
            [:span (js/loc "inspection-summary.new-summary.button")]]])]
       (if (.ok auth-model "create-inspection-summary")
-        [:div.row (create-summary-bubble bubble-visible)])
+        [:div.row.create-summary-bubble (create-summary-bubble bubble-visible)])
       [:div.row
        [:table
         {:id "targets-table"}
