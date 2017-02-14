@@ -48,14 +48,17 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
+(defn- do-remove [row-data]
+  (println "###" row-data)
+  (command "remove-target-from-inspection-summary"
+    (fn [_] (refresh #(update-summary-view (:summaryId row-data))))
+    "id"        (-> @state :applicationId)
+    "summaryId" (:summaryId row-data)
+    "targetId"  (:id row-data)))
+
 (rum/defc remove-link [row-data]
   [:i.lupicon-remove.primary
-   {:on-click (fn [_] (command "remove-target-from-inspection-summary"
-                               (fn [_]
-                                 (refresh #(update-summary-view (:summaryId row-data))))
-                               "id"        (-> @state :applicationId)
-                               "summaryId" (:summaryId row-data)
-                               "targetId"  (:id row-data)))}])
+   {:on-click #(uc/confirm-dialog "" "" (fn [] (do-remove row-data)))}])
 
 (rum/defc summary-row [row-data remove-enabled?]
   [:tr

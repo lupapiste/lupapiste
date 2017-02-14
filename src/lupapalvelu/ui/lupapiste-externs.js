@@ -53,3 +53,8 @@ ajax.header = function() {};
 
 var util = {};
 util.showSavedIndicator = function() {};
+
+var loc = {};
+
+var hub = {};
+hub.send = function() {};
