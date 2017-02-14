@@ -39,16 +39,17 @@
    [:td ""]
    [:td ""]])
 
-(defn- refresh [cb]
-  (query "inspection-summaries-for-application"
-         (fn [data]
-           (swap! state assoc
-                  :operations (:operations data)
-                  :templates  (:templates data)
-                  :summaries  (:summaries data))
-           (when cb
-             (cb)))
-         "id" (-> @state :applicationId)))
+(defn- refresh
+  ([] (refresh nil))
+  ([cb]
+    (query "inspection-summaries-for-application"
+      (fn [data]
+        (swap! state assoc
+                :operations (:operations data)
+                :templates  (:templates data)
+                :summaries  (:summaries data))
+        (when cb (cb)))
+      "id" (-> @state :applicationId))))
 
 (defn init
   [init-state props]
@@ -56,7 +57,7 @@
         id-computed (aget ko-app "id")
         id          (id-computed)]
     (swap! state assoc :applicationId id)
-    (when (and (not (empty? id)) (.ok auth-model "inspection-summaries-for-application"))
+    (when (.ok auth-model "inspection-summaries-for-application")
       (refresh nil))
     init-state))
 

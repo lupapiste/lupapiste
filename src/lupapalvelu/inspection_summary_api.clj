@@ -17,29 +17,39 @@
   [{user :user}]
   (ok (inspection-summary/settings-for-organization (usr/authority-admins-organization-id user))))
 
-(defcommand modify-inspection-summary-template
-  {:description "CRUD API endpoint for inspection summary templates in the given organization."
-   :parameters  [func]
-   :input-validators [(partial action/select-parameters [:func] #{"create" "update" "delete"})]
+(defcommand create-inspection-summary-template
+  {:description "Create a new inspection summary template in the given organization."
+   :parameters  [templateText name]
+   :input-validators [(partial action/non-blank-parameters [:templateText :name])]
    :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
    :user-roles #{:authorityAdmin}}
-  [{user :user {:keys [templateId templateText name]} :data}]
+  [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
-    (when (and (ss/blank? templateId) (#{"update" "delete"} func))
-      (fail! :error.missing-parameters :parameters "templateId"))
-    (when (and (ss/blank? templateText) (#{"create" "update"} func))
-      (fail! :error.missing-parameters :parameters "templateText"))
-    (when (and (ss/blank? name) (#{"create" "update"} func))
-      (fail! :error.missing-parameters :parameters "name"))
-    (condp = func
-      "create" (inspection-summary/create-template-for-organization organizationId name templateText)
-      "update" (if (= (inspection-summary/update-template organizationId templateId name templateText) 1)
-                 (ok)
-                 (fail :error.not-found))
-      "delete" (if (= (inspection-summary/delete-template organizationId templateId) 1)
-                 (ok)
-                 (fail :error.not-found))
-      (fail :error.illegal-function-code))))
+    (inspection-summary/create-template-for-organization organizationId name templateText)))
+
+(defcommand delete-inspection-summary-template
+  {:description "Modify inspection summary templates in the given organization."
+   :parameters  [templateId]
+   :input-validators [(partial action/non-blank-parameters [:templateId])]
+   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [organizationId (usr/authority-admins-organization-id user)]
+    (if (= (inspection-summary/delete-template organizationId templateId) 1)
+      (ok)
+      (fail :error.not-found))))
+
+(defcommand modify-inspection-summary-template
+  {:description "Deletes an inspection summary template in the given organization."
+   :parameters  [name templateId templateText]
+   :input-validators [(partial action/non-blank-parameters [:name :templateId :templateText])]
+   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [organizationId (usr/authority-admins-organization-id user)]
+    (if (= (inspection-summary/update-template organizationId templateId name templateText) 1)
+      (ok)
+      (fail :error.not-found))))
 
 (defcommand set-inspection-summary-template-for-operation
   {:description "Toggles operation either requiring section or not."
