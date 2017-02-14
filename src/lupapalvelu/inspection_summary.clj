@@ -28,6 +28,9 @@
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
 
+(defn organization-has-inspection-summary-feature? [organizationId]
+  (pos? (mongo/count :organizations {:_id organizationId :inspection-summaries-enabled true})))
+
 (defn inspection-summary-api-auth-admin-pre-check
   [{user :user}]
   (let [org-set (usr/organization-ids-by-roles user #{:authorityAdmin})]
