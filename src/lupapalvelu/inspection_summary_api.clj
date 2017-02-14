@@ -95,8 +95,9 @@
 
 (defcommand remove-target-from-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
-   :parameters [:id templateId operationId]
-   :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
+   :parameters [:id summaryId targetId]
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-roles #{:authority}}
-  [{app :application}]
+  [{{appId :id} :application}]
+  (inspection-summary/remove-target appId summaryId targetId)
   (ok))

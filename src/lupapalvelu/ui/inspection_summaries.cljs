@@ -27,7 +27,6 @@
                                    :targets []}}})
 
 (def state         (atom empty-state))
-(def table-rows    (rum/cursor-in state [:view :summary :targets]))
 
 (defn- refresh
   ([] (refresh nil))
@@ -49,8 +48,16 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
+(rum/defc remove-link [row-data]
+  [:i.lupicon-remove.primary
+   {:on-click (fn [_] (command "remove-target-from-inspection-summary"
+                               (fn [_]
+                                 (refresh #(update-summary-view (:summaryId row-data))))
+                               "id"        (-> @state :applicationId)
+                               "summaryId" (:summaryId row-data)
+                               "targetId"  (:id row-data)))}])
 
-(rum/defc summary-row [row-data]
+(rum/defc summary-row [row-data remove-enabled?]
   [:tr
    [:td ""]
    [:td
@@ -59,7 +66,9 @@
    [:td ""]
    [:td ""]
    [:td ""]
-   [:td ""]])
+   [:td
+    (if remove-enabled?
+      (remove-link row-data))]])
 
 (defn init
   [init-state props]
@@ -142,8 +151,10 @@
                                  {:init init
                                   :will-unmount (fn [& _] (reset! state empty-state))}
   [ko-app auth-model]
-  (let [summary-in-view (rum/react (rum/cursor-in state [:view :summary]))
-        bubble-visible (rum/cursor-in state [:view :bubble-visible])]
+  (let [{sid :id :as summary-in-view}  (rum/react (rum/cursor-in state [:view :summary]))
+        bubble-visible                 (rum/cursor-in state [:view :bubble-visible])
+        target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
+        table-rows                     (rum/cursor-in state [:view :summary :targets])]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
@@ -161,7 +172,7 @@
           {:style {:z-index 10}}]
          (summaries-select (rum/react (rum/cursor-in state [:summaries]))
                            (rum/react (rum/cursor-in state [:operations]))
-                           (:id summary-in-view))]]
+                           sid)]]
        (if (.ok auth-model "create-inspection-summary")
          [:div.col-1.create-new-summary-button
           [:button.positive
@@ -184,8 +195,8 @@
         [:tbody
          (doall
            (for [row (rum/react table-rows)]
-             (summary-row row)))]]]
-      (if (.ok auth-model "remove-target-from-inspection-summary")
+             (summary-row (assoc row :summaryId sid) target-remove-enabled?)))]]]
+      (if target-remove-enabled?
         [:div.row
          [:button.positive
           {:on-click (fn [_] (swap! table-rows conj {:target-name "Faas"}))}

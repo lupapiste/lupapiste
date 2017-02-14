@@ -103,3 +103,8 @@
     (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
         (new-summary-for-operation application primaryOperation templateId)))))
+
+(defn remove-target [appId summaryId targetId]
+  (mongo/update-by-query :applications
+                         {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}}
+                         {$pull {:inspection-summaries.$.targets {:id targetId}}}))

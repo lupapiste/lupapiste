@@ -37,7 +37,8 @@
 (facts "Inspection summaries in applications"
   (fact "Create test data"
     (let [app-sipoo     (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
-          app-jarvenpaa (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Järvikatu 29")
+          {id1 :id :as app-jarvenpaa}
+                        (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Järvikatu 29")
           _ (command jarvenpaa :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\n\n bar3")
           templates (-> (query jarvenpaa :organization-inspection-summary-settings) :templates)]
       (command jarvenpaa :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?
@@ -46,8 +47,13 @@
         (query sipoo :inspection-summaries-for-application :id (:id app-sipoo)) => unauthorized?)
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
-         (-> (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa)) :summaries first :name) => "foo")
-      (fact "Applicant can see summaries but not create new ones or modify them"
-        (query pena :inspection-summaries-for-application :id (:id app-jarvenpaa)) => ok?
-        (command pena :create-inspection-summary :id (:id app-jarvenpaa)) => unauthorized?
-        (command pena :remove-target-from-inspection-summary :id (:id app-jarvenpaa)) => unauthorized?))))
+        (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))]
+         (-> summaries first :name) => "foo"
+         (fact "Applicant can see the default summary but not create new ones or modify them"
+           (query pena :inspection-summaries-for-application :id id1) => ok?
+           (command pena :create-inspection-summary :id id1) => unauthorized?
+           (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?)
+         (fact "Authority can remove a single target from a created summary"
+           (command raktark-jarvenpaa :remove-target-from-inspection-summary
+                                      :id id1 :summaryId (-> summaries first :name)
+                                      :targetId (-> summaries first :targets second :id)) => ok?))))))
