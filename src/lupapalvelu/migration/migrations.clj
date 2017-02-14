@@ -2765,6 +2765,17 @@
 (defmigration application-handler-fix                       ; fix handlers after deploy of 8.2.2017
   (->> (mongo/select :applications {:modified {$gt 1486588980000} :handlers {$exists true}} [:handlers])
        (run! handler-map-to-array)))
+
+(defn- add-empty-handler-array [collection {handlers :handlers id :id :as application}]
+  (when-not handlers
+    (mongo/update-by-id collection id {$set {:handlers []}})))
+
+(defmigration handlers-to-all-applications
+  (->> (mongo/select :applications {:handlers {$exists false}} [:handlers])
+       (run! (partial add-empty-handler-array :applications)))
+  (->> (mongo/select :submitted-applications {:handlers {$exists false}} [:handlers])
+       (run! (partial add-empty-handler-array :submitted-applications))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
