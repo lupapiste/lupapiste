@@ -8,14 +8,14 @@
             :value     value}
            (map (fn [[k v]] [:option {:value k} v]) options)])
 
-(defn confirm-dialog [title message callback]
+(defn confirm-dialog [titleKey messageKey callback]
           (.send js/hub
                  "show-dialog"
                  #js
-                   {:ltitle title
+                   {:ltitle titleKey
                     :size   "medium"
                     :component "yes-no-dialog"
-                    :componentParams #js {:text      message
+                    :componentParams #js {:ltext     messageKey
                                           :yesFn     callback
                                           :lyesTitle "ok"
                                           :lnoTitle  "cancel"}}))

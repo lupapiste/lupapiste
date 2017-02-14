@@ -58,7 +58,10 @@
 
 (rum/defc remove-link [row-data]
   [:i.lupicon-remove.primary
-   {:on-click #(uc/confirm-dialog "" "" (fn [] (do-remove row-data)))}])
+   {:on-click #(uc/confirm-dialog
+                "inspection-summary.targets.remove-confirm.title"
+                "inspection-summary.targets.remove-confirm.message"
+                (fn [] (do-remove row-data)))}])
 
 (rum/defc summary-row [row-data remove-enabled?]
   [:tr
