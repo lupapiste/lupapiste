@@ -12,8 +12,9 @@
             [schema.core :as sc :refer [defschema]]
             [lupapalvelu.domain :as domain]))
 
-(defschema InspectionSummaryItem
+(defschema InspectionSummaryTargets
            {:target-name sc/Str   ;Tarkastuskohde
+            :id          ssc/ObjectIdStr
             :finished    sc/Bool
             sc/Keyword   sc/Any})
 
@@ -23,7 +24,7 @@
    :op {:id ssc/ObjectIdStr
         (sc/optional-key :name) sc/Str
         (sc/optional-key :description) sc/Str}
-   :targets [InspectionSummaryItem]})
+   :targets [InspectionSummaryTargets]})
 
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
@@ -83,7 +84,7 @@
     (org/update-organization organizationId update)))
 
 (defn- targets-from-template [template]
-  (map #(hash-map :target-name % :finished false) (:items template)))
+  (map #(hash-map :target-name % :finished false :id (mongo/create-id)) (:items template)))
 
 (defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
   (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
