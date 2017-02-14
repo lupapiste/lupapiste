@@ -21,7 +21,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.domain :as domain])
+            [lupapalvelu.domain :as domain]
+            [lupapiste-commons.schema-utils :as su])
   (:import [java.util.concurrent ThreadFactory Executors]
            [java.io InputStream]))
 
@@ -232,16 +233,6 @@
       (get-in document [:data :yritys :yritysnimi :value])
       (person-name (get-in document [:data :henkilo])))))
 
-(defn- remove-blank-keys [metadata]
-  (reduce
-    (fn [acc [k v]]
-      (let [value (if (map? v) (remove-blank-keys v) v)]
-        (if (and (or (nil? value) (map? value) (string? value)) (empty? value))
-          acc
-          (assoc acc k value))))
-    {}
-    metadata))
-
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality location
            location-wgs84 tosFunction verdicts authority closed drawings] :as application}
@@ -281,7 +272,7 @@
                        :closed                (ts->iso-8601-date closed)
                        :drawing-wgs84         (seq (map :geometry-wgs84 drawings))}]
     (-> base-metadata
-        remove-blank-keys
+        su/remove-blank-keys
         (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
