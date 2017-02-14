@@ -1,7 +1,8 @@
 (ns lupapalvelu.ui.inspection-summaries
   (:require [rum.core :as rum]
             [clojure.string :as string]
-            [lupapalvelu.ui.common :refer [query command]]))
+            [lupapalvelu.ui.common :refer [query command]]
+            [lupapalvelu.ui.components :as uc]))
 
 (enable-console-print!)
 
@@ -28,6 +29,27 @@
 (def state         (atom empty-state))
 (def table-rows    (rum/cursor-in state [:view :summary :targets]))
 
+(defn- refresh
+  ([] (refresh nil))
+  ([cb]
+   (query "inspection-summaries-for-application"
+          (fn [data]
+            (swap! state assoc
+                   :operations (:operations data)
+                   :templates  (:templates data)
+                   :summaries  (:summaries data))
+            (when cb (cb)))
+          "id" (-> @state :applicationId))))
+
+(defn- operation-description-for-select [op]
+  (string/join " - " (remove empty? [(:description op) (:op-identifier op)])))
+
+(defn- update-summary-view [id]
+  (->> (:summaries @state)
+       (find-by-key :id id)
+       (swap! state assoc-in [:view :summary])))
+
+
 (rum/defc summary-row [row-data]
   [:tr
    [:td ""]
@@ -39,18 +61,6 @@
    [:td ""]
    [:td ""]])
 
-(defn- refresh
-  ([] (refresh nil))
-  ([cb]
-    (query "inspection-summaries-for-application"
-      (fn [data]
-        (swap! state assoc
-                :operations (:operations data)
-                :templates  (:templates data)
-                :summaries  (:summaries data))
-        (when cb (cb)))
-      "id" (-> @state :applicationId))))
-
 (defn init
   [init-state props]
   (let [[ko-app auth-model] (-> (aget props ":rum/initial-state") :rum/args)
@@ -61,48 +71,33 @@
       (refresh nil))
     init-state))
 
-(defn- operation-description-for-select [op]
-  (string/join " - " (remove empty? [(:description op) (:op-identifier op)])))
-
-(defn- update-summary-view [id]
-  (->> (:summaries @state)
-       (find-by-key :id id)
-       (swap! state assoc-in [:view :summary])))
-
-(rum/defc select [change-fn data-test-id value options]
-  [:select.form-entry.is-middle
-   {:on-change #(change-fn (.. % -target -value))
-    :data-test-id data-test-id
-    :value     value}
-   (map (fn [[k v]] [:option {:value k} v]) options)])
-
 (rum/defc operations-select [operations selection]
-  (select #(swap! state assoc-in [:view :new :operation] %)
-          "operations-select"
-          selection
-          (cons
-            [nil (js/loc "choose")]
-            (map (fn [op] (let [op-name        (js/loc (str "operations." (:name op)))
-                                op-description (operation-description-for-select op)]
-                            [(:id op) (str op-description " (" op-name ") ")])) operations))))
+  (uc/select #(swap! state assoc-in [:view :new :operation] %)
+             "operations-select"
+             selection
+             (cons
+               [nil (js/loc "choose")]
+               (map (fn [op] (let [op-name        (js/loc (str "operations." (:name op)))
+                                   op-description (operation-description-for-select op)]
+                               [(:id op) (str op-description " (" op-name ") ")])) operations))))
 
 (rum/defc summaries-select [summaries operations selection]
-  (select update-summary-view
-          "summaries-select"
-          selection
-          (cons
-            [nil (js/loc "choose")]
-            (map (fn [s] (let [operation      (find-by-key :id (-> s :op :id) operations)
-                               op-description (operation-description-for-select operation)]
-                           [(:id s) (str (:name s) " - " op-description)])) summaries))))
+  (uc/select update-summary-view
+             "summaries-select"
+             selection
+             (cons
+               [nil (js/loc "choose")]
+               (map (fn [s] (let [operation      (find-by-key :id (-> s :op :id) operations)
+                                  op-description (operation-description-for-select operation)]
+                              [(:id s) (str (:name s) " - " op-description)])) summaries))))
 
 (rum/defc templates-select [templates selection]
-  (select #(swap! state assoc-in [:view :new :template] %)
-          "templates-select"
-          selection
-          (cons
-            [nil (js/loc "choose")]
-            (map (fn [tmpl] [(:id tmpl) (:name tmpl)]) templates))))
+  (uc/select #(swap! state assoc-in [:view :new :template] %)
+             "templates-select"
+             selection
+             (cons
+               [nil (js/loc "choose")]
+               (map (fn [tmpl] [(:id tmpl) (:name tmpl)]) templates))))
 
 (rum/defc create-summary-bubble < rum/reactive
   [visible?]
@@ -131,7 +126,6 @@
       [:button.positive
        {:on-click (fn [_] (command "create-inspection-summary"
                                    (fn [result]
-                                     (println "command result" result)
                                      (refresh #(update-summary-view (:id result)))
                                      (reset! visible? false))
                                    "id"          (-> @state :applicationId)
