@@ -137,7 +137,12 @@
                  [rum "0.10.8"]
                  ;[figwheel-sidecar "0.5.4-7"]
                  ]
-
+  :plugins [[lein-cljsbuild "1.1.5"]]
+  :cljsbuild {:builds {:rum {:source-paths ^:replace ["src/lupapalvelu/ui"]}}}
+  :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
+                                    "resources/public/lp-static/js/rum-app.js.map"
+                                    "resources/public/lp-static/js/out"
+                                    :target-path]
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
@@ -152,8 +157,24 @@
                    :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
-                              :test-paths []}}
-             :uberjar  {:main lupapalvelu.main}
+                              :test-paths []}
+                   :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
+                                                                   :output-to "resources/public/lp-static/js/rum-app.js"
+                                                                   :source-map "resources/public/lp-static/js/rum-app.js.map"
+                                                                   :asset-path "/lp-static/js/out"
+                                                                   :pretty-print true
+                                                                   :optimizations :simple}}}}}
+             :uberjar  {:main lupapalvelu.main
+                        :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
+                                                                        :output-to "resources/public/lp-static/js/rum-app.js"
+                                                                        :asset-path "/lp-static/js/out"
+                                                                        :externs ["src/lupapalvelu/ui/lupapiste-externs.js"]
+                                                                        :parallel-build true
+                                                                        :pretty-print false
+                                                                        :optimizations :advanced}}}}
+                        :prep-tasks [["cljsbuild" "once" "rum"]
+                                     "javac"
+                                     "compile"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]

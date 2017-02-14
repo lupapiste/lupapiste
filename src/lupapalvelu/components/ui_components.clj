@@ -530,13 +530,3 @@
     (throw (Exception. (str "Resource missing: " r)))))
 
 (def rum-app-url "/lp-static/js/rum-app.js")
-
-(defonce cljs-build (future
-                      (cljs.build.api/watch "src/lupapalvelu/ui"
-                                            {
-                                             ;:main 'lupapalvelu.ui.core
-                                             :output-dir "resources/public/lp-static/js/out"
-                                             :output-to "resources/public/lp-static/js/rum-app.js"
-                                             :source-map "resources/public/lp-static/js/rum-app.js.map"
-                                             :asset-path "/lp-static/js/out"
-                                             :optimizations :simple})))
