@@ -218,11 +218,12 @@
   (ss/trim (str (get-in person-data [:henkilotiedot :sukunimi :value]) \space (get-in person-data [:henkilotiedot :etunimi :value]))))
 
 (defn- foremen [application]
-  (if (empty? (:foreman application))
-    (let [foreman-applications (foreman/get-linked-foreman-applications (:id application))
-          foreman-documents (mapv foreman/get-foreman-documents foreman-applications)
-          foremen (mapv (fn [document] (person-name (:data document))) foreman-documents)]
-      (apply str (interpose ", " foremen)))
+  (if (ss/blank? (:foreman application))
+    (when-let [foremen (->> (foreman/get-linked-foreman-applications (:id application))
+                            (map foreman/get-foreman-documents)
+                            (map #(person-name (:data %)))
+                            seq)]
+      (string/join ", " foremen))
     (:foreman application)))
 
 (defn- tyomaasta-vastaava [application]
@@ -231,8 +232,19 @@
       (get-in document [:data :yritys :yritysnimi :value])
       (person-name (get-in document [:data :henkilo])))))
 
+(defn- remove-blank-keys [metadata]
+  (reduce
+    (fn [acc [k v]]
+      (let [value (if (map? v) (remove-blank-keys v) v)]
+        (if (and (or (nil? value) (map? value) (string? value)) (empty? value))
+          acc
+          (assoc acc k value))))
+    {}
+    metadata))
+
 (defn- generate-archive-metadata
-  [{:keys [id propertyId _applicantIndex address organization municipality location location-wgs84] :as application}
+  [{:keys [id propertyId _applicantIndex address organization municipality location
+           location-wgs84 tosFunction verdicts authority closed drawings] :as application}
    user
    & [attachment]]
   (let [s2-metadata (or (:metadata attachment) (:metadata application))
@@ -243,33 +255,34 @@
                        :propertyId            propertyId
                        :applicants            _applicantIndex
                        :operations            (find-op application (get-in attachment [:op :id]))
-                       :tosFunction           (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
+                       :tosFunction           (first (filter #(= tosFunction (:code %)) (tiedonohjaus/available-tos-functions organization)))
                        :address               address
                        :organization          organization
                        :municipality          municipality
                        :location-etrs-tm35fin location
                        :location-wgs84        location-wgs84
-                       :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus (:verdicts application)))
+                       :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus verdicts))
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
                        :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
-                       :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])
+                       :kasittelija           (select-keys authority [:username :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
                        :kayttotarkoitukset    (get-usages application (get-in attachment [:op :id]))
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))
-                       :foremen               (foremen application)}]
-    (cond-> base-metadata
-            (:contents attachment) (conj {:contents (:contents attachment)})
-            (:size attachment) (conj {:size (:size attachment)})
-            (:scale attachment) (conj {:scale (:scale attachment)})
-            (tyomaasta-vastaava application) (conj {:tyomaasta-vastaava (tyomaasta-vastaava application)})
-            (:closed application) (conj {:closed (ts->iso-8601-date (:closed application))})
-            (seq (map :geometry-wgs84 (:drawings application))) (conj {:drawing-wgs84 (mapv :geometry-wgs84 (:drawings application))})
-            true (merge s2-metadata))))
+                       :foremen               (foremen application)
+                       :contents              (:contents attachment)
+                       :size                  (:size attachment)
+                       :scale                 (:scale attachment)
+                       :tyomaasta-vastaava    (tyomaasta-vastaava application)
+                       :closed                (ts->iso-8601-date closed)
+                       :drawing-wgs84         (seq (map :geometry-wgs84 drawings))}]
+    (-> base-metadata
+        remove-blank-keys
+        (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
   (if (or (get-paatospvm application) (foreman/foreman-app? application))
