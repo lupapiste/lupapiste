@@ -123,7 +123,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.84"]
+                 [lupapiste/commons "0.7.87"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -133,7 +133,7 @@
                  ; JMX-server with socket reuse
                  [lupapiste/jmx-server "0.1.0"]
 
-                 [org.clojure/clojurescript "1.9.293"]
+                 [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
                  ;[figwheel-sidecar "0.5.4-7"]
                  ]
@@ -162,6 +162,7 @@
                                                                    :output-to "resources/public/lp-static/js/rum-app.js"
                                                                    :source-map "resources/public/lp-static/js/rum-app.js.map"
                                                                    :asset-path "/lp-static/js/out"
+                                                                   :parallel-build true
                                                                    :pretty-print true
                                                                    :optimizations :simple}}}}}
              :uberjar  {:main lupapalvelu.main
