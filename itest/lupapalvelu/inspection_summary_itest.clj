@@ -44,8 +44,6 @@
 
       (fact "Feature not enabled in Sipoo"
         (query sipoo :inspection-summaries-for-application :id (:id app-sipoo)) => unauthorized?)
-      (fact "Feature enabled in Järvenpää"
-        (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa)) => ok?)
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
          (-> (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa)) :summaries first :name) => "foo")
