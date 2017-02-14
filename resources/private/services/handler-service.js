@@ -80,6 +80,7 @@ LUPAPISTE.HandlerService = function() {
       }      
     } else {
       ko.ignoreDependencies( resetAll );
+      latestAppId = null;
     }    
   });
   
