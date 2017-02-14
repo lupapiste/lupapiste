@@ -265,8 +265,7 @@
     {:userTotalCount (mongo/count :assignments)
      ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
      :totalCount     (:count assignments-result)
-     :assignments    (->> (:assignments assignments-result)
-                          (enrich-targets))}))
+     :assignments    (->> (:assignments assignments-result))}))
 
 (sc/defn ^:always-validate count-active-assignments-for-user :- sc/Int
   [{user-id :id}]
