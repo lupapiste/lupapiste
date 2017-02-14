@@ -162,6 +162,7 @@
                                                                    :output-to "resources/public/lp-static/js/rum-app.js"
                                                                    :source-map "resources/public/lp-static/js/rum-app.js.map"
                                                                    :asset-path "/lp-static/js/out"
+                                                                   :parallel-build true
                                                                    :pretty-print true
                                                                    :optimizations :simple}}}}}
              :uberjar  {:main lupapalvelu.main
