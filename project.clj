@@ -133,7 +133,7 @@
                  ; JMX-server with socket reuse
                  [lupapiste/jmx-server "0.1.0"]
 
-                 [org.clojure/clojurescript "1.9.293"]
+                 [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
                  ;[figwheel-sidecar "0.5.4-7"]
                  ]
