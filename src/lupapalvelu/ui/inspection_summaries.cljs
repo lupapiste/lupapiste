@@ -55,7 +55,8 @@
     [:tr
      [:td ""]
      [:td
-      {:data-test-id (str "target-name-" (:target-name data))}
+      {:class "target-name"
+       :data-test-id (str "target-name-" idx)}
       (if (and editing? add-enabled?)
         (uc/autofocus-input-field (:target-name data)
           (fn [val]
