@@ -209,7 +209,9 @@
                           <edit-handlers></edit-handlers>
                 </card>
                     <!-- Tabs: -->
-                    <div class="tabs-container" data-bind="with: application">
+                    <div class="tabs-container"
+                         data-bind="with: application,
+                                    visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
                         <ul class="tabs" id="applicationTabs">
                             <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
@@ -323,7 +325,8 @@
                 </div>
             </div>
 
-            <div class="container">
+            <div class="container"
+                 data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
                 <div class="tab-content-container content">
 
                     <!-- Application info tab -->
