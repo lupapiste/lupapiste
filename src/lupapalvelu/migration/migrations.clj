@@ -2765,6 +2765,16 @@
 (defmigration application-handler-fix                       ; fix handlers after deploy of 8.2.2017
   (->> (mongo/select :applications {:modified {$gt 1486588980000} :handlers {$exists true}} [:handlers])
        (run! handler-map-to-array)))
+
+
+(defmigration assignment-target-to-targets
+  {:apply-when (pos? (mongo/count :assignments {$or [{:target {$exists true}}
+                                                     {:targets {$exists false}}]}))}
+  (reduce + 0
+          (for [assignment (mongo/select :assignments {} {:target 1})]
+            (let [target (:target assignment)]
+              (mongo/update-n :assignments {:_id (:id assignment)} {$set {:targets [target]}
+                                                                    $unset {:target ""}})))))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

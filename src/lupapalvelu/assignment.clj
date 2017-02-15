@@ -59,18 +59,18 @@
                     :organization sc/Str
                     :address      sc/Str
                     :municipality sc/Str}
-   :target         {:group                         sc/Str
-                    :id                            sc/Str
-                    (sc/optional-key :type-key)    sc/Str
-                    (sc/optional-key :info-key)    sc/Str
-                    (sc/optional-key :description) sc/Str}
+   :targets        [{:group                         sc/Str
+                     :id                            sc/Str
+                     (sc/optional-key :type-key)    sc/Str
+                     (sc/optional-key :info-key)    sc/Str
+                     (sc/optional-key :description) sc/Str}]
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]
    :description    sc/Str})
 
 (sc/defschema NewAssignment
-  (-> (select-keys Assignment [:application :description :recipient :target])
+  (-> (select-keys Assignment [:application :description :recipient :targets])
       (assoc :state AssignmentState)))
 
 (sc/defschema UpdateAssignment
@@ -163,7 +163,7 @@
                           {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
                                                 "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
                         (when-not (empty? targetType)
-                          {:target.group {$in targetType}})
+                          {:targets.group {$in targetType}})
                         {:status {$ne "canceled"}}])
   :post-lookup (filter seq
                        [(when-not (ss/blank? searchText)
@@ -198,7 +198,7 @@
                                              :organization "$applicationDetails.organization"
                                              :address "$applicationDetails.address"
                                              :municipality "$applicationDetails.municipality"}
-                            :target         "$target"
+                            :targets        "$targets"
                             :recipient      "$recipient"
                             :status         "$status"
                             :states         "$states"
@@ -225,7 +225,13 @@
 
 (defn- enrich-assignment-target [application-targets assignment]
   (let [group-targets (-> assignment :target :group keyword application-targets)]
-    (update assignment :target #(merge % (util/find-by-id (:id %) group-targets)))))
+    (update assignment :targets
+            (partial map
+                     #(merge % (util/find-by-id (:id %)
+                                                (-> %
+                                                    :group
+                                                    keyword
+                                                    application-targets)))))))
 
 (defn- enrich-targets [assignments]
   (let [app-id->targets (->> (map (comp :id :application) assignments)

@@ -9,7 +9,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   var _data = ko.observableArray([]);
 
   function targetTab(assignment) {
-    switch (assignment.target.group) {
+    switch (assignment.targets[0].group) {
       case "parties":
         return "parties";
       case "attachments":

@@ -101,9 +101,9 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
-   :parameters       [id recipientId target description]
+   :parameters       [id recipientId targets description]
    :input-validators [(partial action/non-blank-parameters [:recipientId :description])
-                      (partial action/map-parameters [:target])]
+                      (partial action/vector-parameters [:targets])]
    :pre-checks       [validate-receiver
                       assignments-enabled-for-application]
    :states           states/all-application-states-but-draft-or-terminal}
@@ -114,7 +114,7 @@
                                                                       [:id :organization :address :municipality])
                                          :state          (assignment/new-state "created" (usr/summary user) created)
                                          :recipient      (userid->summary recipientId)
-                                         :target         target
+                                         :targets        targets
                                          :description    description})))
 
 (defcommand update-assignment
