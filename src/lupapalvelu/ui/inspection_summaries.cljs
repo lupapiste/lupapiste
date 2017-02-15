@@ -23,8 +23,7 @@
                   :view {:bubble-visible false
                          :new {:operation nil
                                :template nil}
-                         :summary {:id nil
-                                   :targets []}}})
+                         :summary nil}})
 
 (def state         (atom empty-state))
 
@@ -166,6 +165,7 @@
   (let [{sid :id :as summary}          (rum/react (rum/cursor-in state [:view :summary]))
         bubble-visible                 (rum/cursor-in state [:view :bubble-visible])
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
+        target-add-enabled?            (and summary (.ok auth-model "add-target-to-inspection-summary"))
         table-rows                     (rum/cursor-in state [:view :summary :targets])]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
@@ -193,22 +193,23 @@
            [:span (js/loc "inspection-summary.new-summary.button")]]])]
       (if (.ok auth-model "create-inspection-summary")
         [:div.row.create-summary-bubble (create-summary-bubble bubble-visible)])
-      [:div.row
-       [:table
-        {:id "targets-table"}
-        [:thead
-         [:tr
-          [:th (js/loc "inspection-summary.targets.table.state")]
-          [:th (js/loc "inspection-summary.targets.table.target-name")]
-          [:th (js/loc "inspection-summary.targets.table.attachment")]
-          [:th (js/loc "inspection-summary.targets.table.date")]
-          [:th (js/loc "inspection-summary.targets.table.marked-by")]
-          [:th ""]]]
-        [:tbody
-         (doall
-           (for [[idx _] (map-indexed vector (rum/react table-rows))]
-             (target-row summary idx target-remove-enabled?)))]]]
-      (if target-remove-enabled?
+      (when summary
+        [:div.row
+         [:table
+          {:id "targets-table"}
+          [:thead
+           [:tr
+            [:th (js/loc "inspection-summary.targets.table.state")]
+            [:th (js/loc "inspection-summary.targets.table.target-name")]
+            [:th (js/loc "inspection-summary.targets.table.attachment")]
+            [:th (js/loc "inspection-summary.targets.table.date")]
+            [:th (js/loc "inspection-summary.targets.table.marked-by")]
+            [:th ""]]]
+          [:tbody
+           (doall
+             (for [[idx _] (map-indexed vector (rum/react table-rows))]
+               (target-row summary idx target-remove-enabled?)))]]])
+      (if target-add-enabled?
         [:div.row
          [:button.positive
           {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))}
