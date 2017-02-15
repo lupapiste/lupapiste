@@ -12,7 +12,6 @@
        "img-src 'self' data: https://*.lupapiste.fi https://www.facebook.com;"
        "font-src 'self' data: https://fonts.gstatic.com;"
        "frame-ancestors 'self' ; form-action 'self' ; "
-       "reflected-xss block; referrer no-referrer; "
        "report-uri /api/csp-report;"))
 
 (defn add-security-headers
