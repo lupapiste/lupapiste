@@ -714,23 +714,25 @@
     var fetching = false;
     var needsFetching = true;
 
-    var autoFetched = ko.pureComputed({
-      read: function() {
+    var autoFetched =  function(result) {
+      if (arguments.length === 0) {
         if (needsFetching && !fetching) {
           fetching = true;
           optionsObj.fetchFn(optionsObj.fetchParams);
         }
         return target();
-      },
-      write: function(result) {
+      } else {
         target(result);
         needsFetching = false;
         fetching = false;
       }
-    });
+    };
+
     autoFetched.reset = function() {
+      fetching = false;
       needsFetching = true;
     };
+
     return autoFetched;
   };
 
