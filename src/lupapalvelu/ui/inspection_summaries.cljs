@@ -48,7 +48,7 @@
        (swap! state assoc-in [:view :summary])))
 
 (rum/defc target-row
-  [summary idx remove-enabled?]
+  [summary idx add-enabled? remove-enabled?]
   (let [data      (get-in summary [:targets idx])
         editing?  (:editing? data)
         summaryId (:id summary)]
@@ -56,14 +56,16 @@
      [:td ""]
      [:td
       {:data-test-id (str "target-name-" (:target-name data))}
-      (if editing?
+      (if (and editing? add-enabled?)
         (uc/autofocus-input-field (:target-name data)
-                                  (fn [val]
-                                    (command "add-target-to-inspection-summary"
-                                      (fn [_] (refresh #(update-summary-view summaryId)))
-                                      "id"         (-> @state :applicationId)
-                                      "summaryId"  summaryId
-                                      "targetName" val)))
+          (fn [val]
+            (if (not (empty? val))
+              (command "add-target-to-inspection-summary"
+                (fn [_] (refresh #(update-summary-view summaryId)))
+                "id"         (-> @state :applicationId)
+                "summaryId"  summaryId
+                "targetName" val)
+              (refresh #(update-summary-view summaryId)))))
         (:target-name data))]
      [:td ""]
      [:td ""]
@@ -165,6 +167,7 @@
   (let [{sid :id :as summary}          (rum/react (rum/cursor-in state [:view :summary]))
         bubble-visible                 (rum/cursor-in state [:view :bubble-visible])
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
+        editing?                       (rum/react (rum/derived-atom [state] ::key #(->> % :view :summary :targets (some :editing?))))
         target-add-enabled?            (and summary (.ok auth-model "add-target-to-inspection-summary"))
         table-rows                     (rum/cursor-in state [:view :summary :targets])]
     [:div
@@ -208,8 +211,8 @@
           [:tbody
            (doall
              (for [[idx _] (map-indexed vector (rum/react table-rows))]
-               (target-row summary idx target-remove-enabled?)))]]])
-      (if target-add-enabled?
+               (target-row summary idx target-add-enabled? target-remove-enabled?)))]]])
+      (if (and (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
           {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))}
