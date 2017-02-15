@@ -31,7 +31,7 @@ LUPAPISTE.FileuploadService = function() {
     })();
   }
 
-  self.bindFileInput = function( options ) {
+  self.bindFileInput = function( options, pluginOptions ) {
 
     options = _.defaults( options, {
       maximumUploadSize: 15000000, // 15 MB
@@ -78,7 +78,7 @@ LUPAPISTE.FileuploadService = function() {
 
     var $dropZone = prepareDropZone( options.dropZone );
 
-    $("#" + fileInputId).fileupload({
+    $("#" + fileInputId).fileupload(_.defaults(pluginOptions, {
       url: "/api/raw/upload-file",
       type: "POST",
       dataType: "json",
@@ -135,7 +135,7 @@ LUPAPISTE.FileuploadService = function() {
           e.preventDefault();
         }
       }
-    });
+    }));
 
     hubscribe( "destroy", function()  {
       $("#" + fileInputId ).fileupload( "destroy");
