@@ -26,6 +26,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -607,3 +608,29 @@
 (defmethod attachment/edit-allowed-by-target :verdict [{user :user application :application}]
   (when-not (auth/application-authority? application user)
     (fail :error.unauthorized)))
+
+;; Notifications
+
+(defn state-change-email-model
+  "Generic state change email. :state-text is set per application state.
+  When state changes and if notify is invoked as post-fn from command,
+  result must contain new state in :state key."
+  [command conf recipient]
+  (assoc
+   (notifications/create-app-model command conf recipient)
+   :state-text #(i18n/localize % "email.state-description" (get-in command [:application :state]))))
+
+(def state-change {:subject-key    "state-change"
+                   :template       "application-state-change.md"
+                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                   :tab-fn         (fn [command] (cond (verdict-tab-action? command) "verdict"))
+                   :model-fn       state-change-email-model})
+
+(notifications/defemail :application-state-change state-change)
+
+(notifications/defemail :undo-cancellation
+                        {:subject-key    "undo-cancellation"
+                         :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                         :model-fn       (fn [command conf recipient]
+                                           (assoc (notifications/create-app-model command conf recipient)
+                                             :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
