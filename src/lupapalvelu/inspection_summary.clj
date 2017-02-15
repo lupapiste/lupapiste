@@ -83,8 +83,11 @@
                  {$set   {field templateId}})]
     (org/update-organization organizationId update)))
 
+(defn- new-target [name]
+  (hash-map :target-name name :finished false :id (mongo/create-id)))
+
 (defn- targets-from-template [template]
-  (map #(hash-map :target-name % :finished false :id (mongo/create-id)) (:items template)))
+  (map new-target (:items template)))
 
 (defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
   (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
@@ -105,7 +108,17 @@
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
         (new-summary-for-operation application primaryOperation templateId)))))
 
+(defn- elem-match-query [appId summaryId]
+  {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
+
 (defn remove-target [appId summaryId targetId]
   (mongo/update-by-query :applications
-                         {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}}
+                         (elem-match-query appId summaryId)
                          {$pull {:inspection-summaries.$.targets {:id targetId}}}))
+
+(defn add-target [appId summaryId targetName]
+  (let [new-target (new-target targetName)]
+    (mongo/update :applications
+                  (elem-match-query appId summaryId)
+                  {$push {:inspection-summaries.$.targets new-target}})
+    (:id new-target)))

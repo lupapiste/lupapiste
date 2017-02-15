@@ -48,33 +48,39 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
-(defn- do-remove [row-data]
-  (println "###" row-data)
-  (command "remove-target-from-inspection-summary"
-    (fn [_] (refresh #(update-summary-view (:summaryId row-data))))
-    "id"        (-> @state :applicationId)
-    "summaryId" (:summaryId row-data)
-    "targetId"  (:id row-data)))
-
-(rum/defc remove-link [row-data]
-  [:i.lupicon-remove.primary
-   {:on-click #(uc/confirm-dialog
-                "inspection-summary.targets.remove-confirm.title"
-                "inspection-summary.targets.remove-confirm.message"
-                (fn [] (do-remove row-data)))}])
-
-(rum/defc summary-row [row-data remove-enabled?]
-  [:tr
-   [:td ""]
-   [:td
-    {:data-test-id (str "target-name-" (:target-name row-data))}
-    (:target-name row-data)]
-   [:td ""]
-   [:td ""]
-   [:td ""]
-   [:td
-    (if remove-enabled?
-      (remove-link row-data))]])
+(rum/defc target-row
+  [summary idx remove-enabled?]
+  (let [data      (get-in summary [:targets idx])
+        editing?  (:editing? data)
+        summaryId (:id summary)]
+    [:tr
+     [:td ""]
+     [:td
+      {:data-test-id (str "target-name-" (:target-name data))}
+      (if editing?
+        (uc/autofocus-input-field (:target-name data)
+                                  (fn [val]
+                                    (command "add-target-to-inspection-summary"
+                                      (fn [_] (refresh #(update-summary-view summaryId)))
+                                      "id"         (-> @state :applicationId)
+                                      "summaryId"  summaryId
+                                      "targetName" val)))
+        (:target-name data))]
+     [:td ""]
+     [:td ""]
+     [:td ""]
+     [:td
+      (if (and remove-enabled? (not editing?))
+        [:i.lupicon-remove.primary
+         {:on-click (fn [_]
+                      (uc/confirm-dialog
+                        "inspection-summary.targets.remove-confirm.title"
+                        "inspection-summary.targets.remove-confirm.message"
+                        (fn [] (command "remove-target-from-inspection-summary"
+                                        (fn [_] (refresh #(update-summary-view summaryId)))
+                                        "id"        (-> @state :applicationId)
+                                        "summaryId" summaryId
+                                        "targetId"  (:id data)))))}])]]))
 
 (defn init
   [init-state props]
@@ -157,7 +163,7 @@
                                  {:init init
                                   :will-unmount (fn [& _] (reset! state empty-state))}
   [ko-app auth-model]
-  (let [{sid :id :as summary-in-view}  (rum/react (rum/cursor-in state [:view :summary]))
+  (let [{sid :id :as summary}          (rum/react (rum/cursor-in state [:view :summary]))
         bubble-visible                 (rum/cursor-in state [:view :bubble-visible])
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
         table-rows                     (rum/cursor-in state [:view :summary :targets])]
@@ -200,12 +206,12 @@
           [:th ""]]]
         [:tbody
          (doall
-           (for [row (rum/react table-rows)]
-             (summary-row (assoc row :summaryId sid) target-remove-enabled?)))]]]
+           (for [[idx _] (map-indexed vector (rum/react table-rows))]
+             (target-row summary idx target-remove-enabled?)))]]]
       (if target-remove-enabled?
         [:div.row
          [:button.positive
-          {:on-click (fn [_] (swap! table-rows conj {:target-name "Faas"}))}
+          {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))}
           [:i.lupicon-circle-plus]
           [:span (js/loc "inspection-summary.targets.new.button")]]])]]))
 

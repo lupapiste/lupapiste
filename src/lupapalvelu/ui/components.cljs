@@ -8,6 +8,15 @@
     :value        value}
    (map (fn [[k v]] [:option {:value k} v]) options)])
 
+(rum/defc autofocus-input-field < rum/reactive
+                                  {:did-mount #(-> % rum/dom-node .focus)}
+  [value commit-fn]
+  (let [val (atom value)]
+    [:input {:type      "text"
+             :value     @val
+             :on-change #(reset! val (-> % .-target .-value))
+             :on-blur   #(commit-fn @val)}]))
+
 (defn confirm-dialog [titleKey messageKey callback]
   (.send js/hub
          "show-dialog"

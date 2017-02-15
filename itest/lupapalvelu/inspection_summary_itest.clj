@@ -47,13 +47,22 @@
         (query sipoo :inspection-summaries-for-application :id (:id app-sipoo)) => unauthorized?)
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
-        (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))]
-         (-> summaries first :name) => "foo"
+        (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))
+              default-summary        (first summaries)]
+         (-> default-summary :name) => "foo"
          (fact "Applicant can see the default summary but not create new ones or modify them"
            (query pena :inspection-summaries-for-application :id id1) => ok?
            (command pena :create-inspection-summary :id id1) => unauthorized?
            (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?)
-         (fact "Authority can remove a single target from a created summary"
+         (fact "Authority can remove a single target"
            (command raktark-jarvenpaa :remove-target-from-inspection-summary
-                                      :id id1 :summaryId (-> summaries first :name)
-                                      :targetId (-> summaries first :targets second :id)) => ok?))))))
+                                      :id id1 :summaryId (-> default-summary :id)
+                                      :targetId (-> default-summary :targets second :id)) => ok?
+           (->> (query pena :inspection-summaries-for-application :id id1)
+                :summaries first :targets (map :target-name)) => (just ["bar" "bar3"]))
+         (fact "Authority can add a single target"
+           (command raktark-jarvenpaa :add-target-to-inspection-summary
+                    :id id1 :summaryId (-> default-summary :id)
+                    :targetName "bar4") => ok?
+           (->> (query pena :inspection-summaries-for-application :id id1)
+                :summaries first :targets (map :target-name)) => (just ["bar" "bar3" "bar4"])))))))
