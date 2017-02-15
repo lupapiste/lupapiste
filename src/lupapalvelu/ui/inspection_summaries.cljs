@@ -1,8 +1,11 @@
 (ns lupapalvelu.ui.inspection-summaries
   (:require [rum.core :as rum]
             [clojure.string :as string]
+            [lupapalvelu.ui.attachment.components :as attc]
+            [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :refer [query command]]
-            [lupapalvelu.ui.components :as uc]))
+            [lupapalvelu.ui.components :as uc]
+            [lupapalvelu.ui.util :as jsutil]))
 
 (enable-console-print!)
 
@@ -49,14 +52,26 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
+(defn got-files [hub-event]
+  (doseq [file (.-files hub-event)]
+    (js/console.log file)))
 
-(rum/defc summary-row [row-data]
+
+(rum/defcs summary-row < {:init (fn [state _]
+                                  (assoc state ::input-id (jsutil/unique-elem-id "inspection-row"))
+                                  ; or (-> state :rum/args first :id)
+                                  )}
+                         {:did-mount (fn [state]
+                                       (upload/bindToElem (js-obj "id" (::input-id state)))
+                                       (upload/subscribe-files-uploaded (::input-id state) got-files)
+                                       state)}
+  [state row-data]
   [:tr
    [:td ""]
    [:td
     {:data-test-id (str "target-name-" (:target-name row-data))}
     (:target-name row-data)]
-   [:td ""]
+   [:td (attc/upload-link (::input-id state))]
    [:td ""]
    [:td ""]
    [:td ""]])
