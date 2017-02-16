@@ -60,7 +60,7 @@
                "targetName" val))
     (refresh #(update-summary-view summaryId))))
 
-(rum/defc remove-link [applicationId summaryId targetId]
+(rum/defc remove-link [applicationId summaryId targetId index]
   [:a.lupicon-remove.primary
    {:on-click (fn [_]
                 (uc/confirm-dialog
@@ -70,7 +70,8 @@
                                   (fn [_] (refresh #(update-summary-view summaryId)))
                                   "id"        applicationId
                                   "summaryId" summaryId
-                                  "targetId"  targetId))))}])
+                                  "targetId"  targetId))))
+    :data-test-id (str "remove-icon-" index)}])
 
 (rum/defc target-row
   [summary applicationId idx add-enabled? edit-enabled? remove-enabled?]
@@ -79,11 +80,12 @@
         summaryId (:id summary)
         targetId  (:id data)]
     [:tr
+     {:data-test-id (str "target-" idx)}
      [:td ""]
      [:td.target-name
-      {:data-test-id (str "target-name-" idx)}
       (if (and editing? add-enabled?)
         (uc/autofocus-input-field (:target-name data)
+                                  (str "edit-target-field-" idx)
                                   (partial commit-target-name-edit applicationId summaryId targetId))
         (:target-name data))]
      [:td ""]
@@ -92,10 +94,11 @@
      (vector :td.functions
       (if (and (not editing?) edit-enabled?)
         [:a
-         {:on-click (fn [_] (swap! state assoc-in [:view :summary :targets idx :editing?] true))}
+         {:on-click (fn [_] (swap! state assoc-in [:view :summary :targets idx :editing?] true))
+          :data-test-id (str "edit-link-" idx)}
          (js/loc "edit")])
       (if (and (not editing?) remove-enabled?)
-        (remove-link applicationId summaryId targetId)))]))
+        (remove-link applicationId summaryId targetId idx)))]))
 
 (defn init
   [init-state props]
@@ -166,7 +169,8 @@
                                      (reset! visible? false))
                                    "id"          (-> @state :applicationId)
                                    "operationId" (-> @state :view :new :operation)
-                                   "templateId"  (-> @state :view :new :template)))}
+                                   "templateId"  (-> @state :view :new :template)))
+        :data-test-id "create-summary-button"}
        [:i.lupicon-check]
        [:span (js/loc "button.ok")]]
       [:button.secondary
@@ -207,7 +211,8 @@
        (if (.ok auth-model "create-inspection-summary")
          [:div.col-1.create-new-summary-button
           [:button.positive
-           {:on-click (fn [_] (reset! bubble-visible true))}
+           {:on-click (fn [_] (reset! bubble-visible true))
+            :data-test-id "open-create-summary-bubble"}
            [:i.lupicon-circle-plus]
            [:span (js/loc "inspection-summary.new-summary.button")]]])]
       (if (.ok auth-model "create-inspection-summary")
@@ -231,7 +236,8 @@
       (if (and (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
-          {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))}
+          {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))
+           :data-test-id "new-target-button"}
           [:i.lupicon-circle-plus]
           [:span (js/loc "inspection-summary.targets.new.button")]]])]]))
 
