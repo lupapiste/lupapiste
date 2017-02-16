@@ -89,7 +89,7 @@
                                  (assoc statuses (keyword fid)
                                                  {:subs-id subs-id
                                                   :target-id target-id}))]
-    (swap! state update :fileStatuses #(reduce % create-filestatuses-fn fileIds))
+    (swap! state update :fileStatuses #(reduce create-filestatuses-fn % fileIds))
     (.bindAttachments upload/attachment-service (clj->js bindable-files))))
 
 
