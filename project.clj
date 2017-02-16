@@ -187,7 +187,8 @@
              :intellij {:test-paths ["itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
-  :figwheel {:server-port 3666}
+  :figwheel {:server-port 3666
+             :css-dirs ["resources/public/lp-static/css/main.css"]}
   :java-source-paths ["java-src"]
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts ["clj" "js" "html"]
