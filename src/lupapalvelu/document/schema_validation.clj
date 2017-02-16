@@ -350,7 +350,10 @@
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
-          (opt :order)                       sc/Int}    ;;
+          (opt :order)                       sc/Int
+          ;; Blacklist only works for :neighbor blacklisting. See neighbors API for details.
+          (opt :blacklist)                   [sc/Keyword]
+          }
    (opt :rows) [(sc/cond-pre {sc/Keyword sc/Str} [sc/Str])]
    (opt :template) sc/Str
    :body  [Element]})
