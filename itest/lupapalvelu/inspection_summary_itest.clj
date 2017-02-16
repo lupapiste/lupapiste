@@ -48,21 +48,34 @@
       (fact "Default template created upon verdict given"
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
         (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))
-              default-summary        (first summaries)]
-         (-> default-summary :name) => "foo"
-         (fact "Applicant can see the default summary but not create new ones or modify them"
-           (query pena :inspection-summaries-for-application :id id1) => ok?
-           (command pena :create-inspection-summary :id id1) => unauthorized?
-           (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?)
-         (fact "Authority can remove a single target"
-           (command raktark-jarvenpaa :remove-target-from-inspection-summary
-                                      :id id1 :summaryId (-> default-summary :id)
-                                      :targetId (-> default-summary :targets second :id)) => ok?
-           (->> (query pena :inspection-summaries-for-application :id id1)
-                :summaries first :targets (map :target-name)) => (just ["bar" "bar3"]))
-         (fact "Authority can add a single target"
-           (command raktark-jarvenpaa :add-target-to-inspection-summary
-                    :id id1 :summaryId (-> default-summary :id)
-                    :targetName "bar4") => ok?
-           (->> (query pena :inspection-summaries-for-application :id id1)
-                :summaries first :targets (map :target-name)) => (just ["bar" "bar3" "bar4"])))))))
+              {summaryId1 :id summaryName :name targets :targets
+               :as default-summary} (first summaries)]
+          summaryName => "foo"
+          (fact "Applicant can see the default summary but not create new ones or modify them"
+            (query pena :inspection-summaries-for-application :id id1) => ok?
+            (command pena :create-inspection-summary :id id1) => unauthorized?
+            (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?)
+          (fact "Authority can remove a single target"
+            (command raktark-jarvenpaa :remove-target-from-inspection-summary
+                                       :id id1 :summaryId summaryId1 :targetId (-> targets second :id)) => ok?
+            (->> (query pena :inspection-summaries-for-application :id id1)
+                 :summaries first :targets (map :target-name)) => (just ["bar" "bar3"]))
+          (fact "Authority can add a single target"
+            (command raktark-jarvenpaa :add-target-to-inspection-summary
+                     :id id1 :summaryId summaryId1
+                     :targetName "bar4") => ok?
+            (->> (query pena :inspection-summaries-for-application :id id1)
+                 :summaries first :targets (map :target-name)) => (just ["bar" "bar3" "bar4"]))
+          (fact "Authority can rename targets"
+            (command raktark-jarvenpaa :edit-inspection-summary-target
+                     :id id1 :summaryId summaryId1 :targetId (-> targets first :id)
+                     :targetName "bar1") => ok?
+            (->> (query pena :inspection-summaries-for-application :id id1)
+                 :summaries first :targets (map :target-name)) => (just ["bar1" "bar3" "bar4"])
+            (fact "Removed target can obviously not be renamed"
+              (command raktark-jarvenpaa :remove-target-from-inspection-summary
+                       :id id1 :summaryId summaryId1
+                       :targetId (-> targets first :id)) => ok?
+              (command raktark-jarvenpaa :edit-inspection-summary-target
+                       :id id1 :summaryId summaryId1 :targetId (-> targets first :id)
+                       :targetName "bar1") => (partial expected-failure? :error.summary-target.edit.not-found))))))))

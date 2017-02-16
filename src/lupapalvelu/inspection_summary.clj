@@ -1,6 +1,6 @@
 (ns lupapalvelu.inspection-summary
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
-            [sade.core :refer [now unauthorized]]
+            [sade.core :refer [now unauthorized fail!]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [clojure.string :as s]
@@ -122,3 +122,13 @@
                   (elem-match-query appId summaryId)
                   {$push {:inspection-summaries.$.targets new-target}})
     (:id new-target)))
+
+(defn edit-target [application summaryId targetId & kvs]
+  (let [summary (->> application :inspection-summaries (util/find-by-id summaryId))
+        index   (->> summary :targets (util/position-by-id targetId))
+        updates (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) (apply hash-map kvs))]
+    (when-not index
+      (fail! :error.summary-target.edit.not-found))
+    (mongo/update-by-query :applications
+                           {:_id (:id application) :inspection-summaries {$elemMatch {:id summaryId}}}
+                           {$set updates})))
