@@ -25,9 +25,9 @@ var cljsLoader = {
                     return new LUPAPISTE.CljsComponentModel(newParams);
                   }});
       };
-      if (lupapalvelu) { // If Rum already loaded, initialize component
+      if (typeof goog !== "undefined") { // If Closure dependencies are already loaded, initialize component
         doCallback();
-      } else { // If not loaded, fetch rum-app.js and initialize after
+      } else { // If not loaded, fetch cljs bundle and initialize after
         $.getScript(LUPAPISTE.config.rumURL, function() {
           doCallback();
         });

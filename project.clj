@@ -151,20 +151,24 @@
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
-                             [lupapiste/lein-nitpicker "0.5.1"]]
+                             [lupapiste/lein-nitpicker "0.5.1"]
+                             [lein-figwheel "0.5.9"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}
-                   :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
-                                                                   :output-to "resources/public/lp-static/js/rum-app.js"
-                                                                   :source-map "resources/public/lp-static/js/rum-app.js.map"
-                                                                   :asset-path "/lp-static/js/out"
-                                                                   :parallel-build true
-                                                                   :pretty-print true
-                                                                   :optimizations :simple}}}}}
+                   :cljsbuild {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
+                                                         :on-jsload lupapalvelu.ui.inspection-summaries/reload-hook}
+                                              :compiler {:output-dir "resources/public/lp-static/js/out"
+                                                         :output-to "resources/public/lp-static/js/rum-app.js"
+                                                         :main lupapalvelu.ui.inspection-summaries
+                                                         :source-map true
+                                                         :asset-path "/lp-static/js/out"
+                                                         :parallel-build true
+                                                         :pretty-print true
+                                                         :optimizations :none}}}}}
              :uberjar  {:main lupapalvelu.main
                         :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
                                                                         :output-to "resources/public/lp-static/js/rum-app.js"
@@ -183,6 +187,7 @@
              :intellij {:test-paths ["itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
+  :figwheel {:server-port 3666}
   :java-source-paths ["java-src"]
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts ["clj" "js" "html"]
