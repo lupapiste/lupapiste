@@ -65,7 +65,8 @@
                  :addable-in-states
                  :exclude-from-pdf
                  :editable-in-states
-                 :accordion-fields})
+                 :accordion-fields
+                 :blacklist})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -1564,7 +1565,8 @@
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false
            :approvable true
-           :order 300}
+           :order 300
+           :blacklist [:neighbor]}
     :body (body
            [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
            simple-osoite
