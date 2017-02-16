@@ -4,7 +4,6 @@ Documentation   Application gets verdict
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        inspection_summary_resources.robot
-Library  DebugLibrary
 
 
 *** Test Cases ***
