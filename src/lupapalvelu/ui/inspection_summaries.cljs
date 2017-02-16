@@ -55,13 +55,12 @@
        (swap! state assoc-in [:view :summary])))
 
 (defn to-bindable-file [target-id file]
-  #_:target #_{:type "inspection-item"
-              :id target-id}
   {:type {:type-group "katselmukset_ja_tarkastukset"
           :type-id    "tarkastusasiakirja"}
    :fileId (aget file "fileId")
+   :target {:type "inspection-summary-item"
+            :id target-id}
    :constructionTime true})
-
 
 (defn unsubscribe-if-done [target-id]
   (let [statuses (filter #(= target-id (:target-id %))
