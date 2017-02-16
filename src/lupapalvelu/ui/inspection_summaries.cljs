@@ -139,7 +139,12 @@
                                   (str "edit-target-field-" idx)
                                   (partial commit-target-name-edit (:applicationId @component-state) summaryId targetId))
         (:target-name row-target))]
-     [:td (attc/upload-link (::input-id local-state))]
+     [:td
+      (doall
+        (for [attachment (:attachments row-target)
+              :let [latest (:latestVersion attachment)]]
+          (attc/view-with-download latest)))
+      (attc/upload-link (::input-id local-state))]
      [:td ""]
      [:td ""]
      (vector :td.functions

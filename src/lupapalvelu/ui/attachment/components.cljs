@@ -13,3 +13,16 @@
        [:i.lupicon-circle-plus]
        [:i.wait.spin.lupicon-refresh]
        [:span "Lisää tiedosto"]]]]))
+
+(rum/defc view-with-download
+  "Port of ko.bindingHandlers.viewWithDownload"
+  [latest-version]
+  [:div.view-with-download
+   [:a {:target "_blank"
+        :href (str "/api/raw/view-attachment?attachment-id=" (:fileId latest-version))}
+    (:filename latest-version)]
+    [:br]
+    [:div.download
+     [:a {:href (str "/api/raw/download-attachment?attachment-id=" (:fileId latest-version))}
+      [:i.lupicon-download.btn-small]
+      [:span (js/loc "download-file")]]]])
