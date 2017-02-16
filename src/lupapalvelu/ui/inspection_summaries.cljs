@@ -19,38 +19,38 @@
    {:style {:display (when-not (rum/react visible-atom) "none")}}
    [:span.icon]])
 
-(def empty-state {:applicationId ""
-                  :operations []
-                  :summaries []
-                  :templates []
-                  :view {:bubble-visible false
-                         :new {:operation nil
-                               :template nil}
-                         :summary nil}
-                  :fileStatuses {}})
+(def empty-component-state {:applicationId ""
+                            :operations []
+                            :summaries []
+                            :templates []
+                            :view {:bubble-visible false
+                                   :new {:operation nil
+                                         :template nil}
+                                   :summary nil}
+                            :fileStatuses {}})
 
-(def state         (atom empty-state))
+(def component-state         (atom empty-component-state))
 
 (defn- refresh
   ([] (refresh nil))
   ([cb]
    (query "inspection-summaries-for-application"
           (fn [data]
-            (swap! state assoc
+            (swap! component-state assoc
                    :operations (:operations data)
                    :templates  (:templates data)
                    :summaries  (:summaries data)
                    :fileStatuses {})
             (when cb (cb)))
-          "id" (-> @state :applicationId))))
+          "id" (-> @component-state :applicationId))))
 
 (defn- operation-description-for-select [op]
   (string/join " - " (remove empty? [(:description op) (:op-identifier op)])))
 
 (defn- update-summary-view [id]
-  (->> (:summaries @state)
+  (->> (:summaries @component-state)
        (find-by-key :id id)
-       (swap! state assoc-in [:view :summary])))
+       (swap! component-state assoc-in [:view :summary])))
 
 (defn to-bindable-file [target-id file]
   {:type {:type-group "katselmukset_ja_tarkastukset"
@@ -62,7 +62,7 @@
 
 (defn unsubscribe-if-done [target-id]
   (let [statuses (filter #(= target-id (:target-id %))
-                         (vals (:fileStatuses @state)))]
+                         (vals (:fileStatuses @component-state)))]
     (when (every? #(= "done" (:status %)) statuses)
       (doseq [hub-id (distinct (map :subs-id statuses))]
         (.unsubscribe js/hub hub-id))
@@ -70,7 +70,7 @@
 
 (defn bind-attachment-callback [target-id event]
   (let [clj-event (js->clj event :keywordize-keys true)]
-    (swap! state update-in [:fileStatuses (keyword (:fileId clj-event))] assoc :status (:status clj-event))
+    (swap! component-state update-in [:fileStatuses (keyword (:fileId clj-event))] assoc :status (:status clj-event))
     (unsubscribe-if-done target-id)))
 
 (defn got-files [target-id hub-event]
@@ -86,7 +86,7 @@
                                  (assoc statuses (keyword fid)
                                                  {:subs-id subs-id
                                                   :target-id target-id}))]
-    (swap! state update :fileStatuses #(reduce create-filestatuses-fn % fileIds))
+    (swap! component-state update :fileStatuses #(reduce create-filestatuses-fn % fileIds))
     (.bindAttachments upload/attachment-service (clj->js bindable-files))))
 
 (defn- commit-target-name-edit [applicationId summaryId targetId val]
@@ -116,17 +116,15 @@
     :data-test-id (str "remove-icon-" index)}])
 
 (rum/defcs target-row < {:init (fn [state _]
-                                 ; or (-> state :rum/args first :id)
                                  (-> state
                                      (assoc ::input-id (jsutil/unique-elem-id "inspection-row"))
-                                     (assoc ::row-target (-> state :rum/args first)))
-                                 )}
+                                     (assoc ::row-target (-> state :rum/args first))))}
                         {:did-mount (fn [state]
                                       (upload/bindToElem (js-obj "id" (::input-id state)))
                                       (upload/subscribe-files-uploaded (::input-id state)
                                                                        (partial got-files (-> state ::row-target :id)))
                                       state)}
-  [state summary applicationId idx add-enabled? edit-enabled? remove-enabled?]
+  [local-state summary applicationId idx add-enabled? edit-enabled? remove-enabled?]
   (let [data      (get-in summary [:targets idx])
         editing?  (:editing? data)
         summaryId (:id summary)
@@ -140,13 +138,13 @@
                                   (str "edit-target-field-" idx)
                                   (partial commit-target-name-edit applicationId summaryId targetId))
         (:target-name data))]
-     [:td (attc/upload-link (::input-id state))]
+     [:td (attc/upload-link (::input-id local-state))]
      [:td ""]
      [:td ""]
      (vector :td.functions
       (if (and (not editing?) edit-enabled?)
         [:a
-         {:on-click (fn [_] (swap! state assoc-in [:view :summary :targets idx :editing?] true))
+         {:on-click (fn [_] (swap! component-state assoc-in [:view :summary :targets idx :editing?] true))
           :data-test-id (str "edit-link-" idx)}
          (js/loc "edit")])
       (if (and (not editing?) remove-enabled?)
@@ -157,13 +155,13 @@
   (let [[ko-app auth-model] (-> (aget props ":rum/initial-state") :rum/args)
         id-computed (aget ko-app "id")
         id          (id-computed)]
-    (swap! state assoc :applicationId id)
+    (swap! component-state assoc :applicationId id)
     (when (.ok auth-model "inspection-summaries-for-application")
       (refresh nil))
     init-state))
 
 (rum/defc operations-select [operations selection]
-  (uc/select #(swap! state assoc-in [:view :new :operation] %)
+  (uc/select #(swap! component-state assoc-in [:view :new :operation] %)
              "operations-select"
              selection
              (cons
@@ -183,7 +181,7 @@
                               [(:id s) (str (:name s) " - " op-description)])) summaries))))
 
 (rum/defc templates-select [templates selection]
-  (uc/select #(swap! state assoc-in [:view :new :template] %)
+  (uc/select #(swap! component-state assoc-in [:view :new :template] %)
              "templates-select"
              selection
              (cons
@@ -204,24 +202,24 @@
       [:div.col-4.no-padding
        [:span.select-arrow.lupicon-chevron-small-down
         {:style {:z-index 10}}]
-       (operations-select (rum/react (rum/cursor-in state [:operations]))
-                          (rum/react (rum/cursor-in state [:view :new :operation])))]]
+       (operations-select (rum/react (rum/cursor-in component-state [:operations]))
+                          (rum/react (rum/cursor-in component-state [:view :new :operation])))]]
      [:div.row
       [:label (js/loc "inspection-summary.new-summary.template")]
       [:div.col-4.no-padding
        [:span.select-arrow.lupicon-chevron-small-down
         {:style {:z-index 10}}]
-       (templates-select (rum/react (rum/cursor-in state [:templates]))
-                         (rum/react (rum/cursor-in state [:view :new :template])))]]
+       (templates-select (rum/react (rum/cursor-in component-state [:templates]))
+                         (rum/react (rum/cursor-in component-state [:view :new :template])))]]
      [:div.row.left-buttons
       [:button.positive
        {:on-click (fn [_] (command "create-inspection-summary"
                                    (fn [result]
                                      (refresh #(update-summary-view (:id result)))
                                      (reset! visible? false))
-                                   "id"          (-> @state :applicationId)
-                                   "operationId" (-> @state :view :new :operation)
-                                   "templateId"  (-> @state :view :new :template)))
+                                   "id"          (-> @component-state :applicationId)
+                                   "operationId" (-> @component-state :view :new :operation)
+                                   "templateId"  (-> @component-state :view :new :template)))
         :data-test-id "create-summary-button"}
        [:i.lupicon-check]
        [:span (js/loc "button.ok")]]
@@ -232,16 +230,16 @@
 
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
-                                  :will-unmount (fn [& _] (reset! state empty-state))}
+                                  :will-unmount (fn [& _] (reset! component-state empty-component-state))}
   [ko-app auth-model]
-  (let [{sid :id :as summary}          (rum/react (rum/cursor-in state [:view :summary]))
-        applicationId                  (:applicationId @state)
-        bubble-visible                 (rum/cursor-in state [:view :bubble-visible])
-        editing?                       (rum/react (rum/derived-atom [state] ::key #(->> % :view :summary :targets (some :editing?))))
+  (let [{sid :id :as summary}          (rum/react (rum/cursor-in component-state [:view :summary]))
+        applicationId                  (:applicationId @component-state)
+        bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])
+        editing?                       (rum/react (rum/derived-atom [component-state] ::key #(->> % :view :summary :targets (some :editing?))))
         target-add-enabled?            (and summary (.ok auth-model "add-target-to-inspection-summary"))
         target-edit-enabled?           (and summary (.ok auth-model "edit-inspection-summary-target"))
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
-        table-rows                     (rum/cursor-in state [:view :summary :targets])]
+        table-rows                     (rum/cursor-in component-state [:view :summary :targets])]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
@@ -257,8 +255,8 @@
          [:label (js/loc "inspection-summary.select-summary.label")]
          [:span.select-arrow.lupicon-chevron-small-down
           {:style {:z-index 10}}]
-         (summaries-select (rum/react (rum/cursor-in state [:summaries]))
-                           (rum/react (rum/cursor-in state [:operations]))
+         (summaries-select (rum/react (rum/cursor-in component-state [:summaries]))
+                           (rum/react (rum/cursor-in component-state [:operations]))
                            sid)]]
        (if (.ok auth-model "create-inspection-summary")
          [:div.col-1.create-new-summary-button
