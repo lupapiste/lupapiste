@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Application gets verdict
+Documentation   Auth admin creates inspection summary templates
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        inspection_summary_resources.robot
