@@ -165,10 +165,8 @@
 
 (defn ->public [{documents :documents :as application}]
   (-> application
-      (select-keys [#_:auth
-                    :state
+      (select-keys [:state
                     :location
-                    #_:attachments
                     :organization
                     :title
                     :primaryOperation
@@ -177,9 +175,7 @@
                     :opened
                     :created
                     :propertyId
-                    #_:documents
                     :modified
-                    #_:comments
                     :address
                     :permitType
                     :id
@@ -192,7 +188,7 @@
                                (filter metadata/public-attachment?)))
       (assoc :documents (map
                           strip-document
-                          (remove (fn-> :schema-info :name #{"paatoksen-toimitus-rakval"})
+                          (remove (fn-> :schema-info schemas/get-schema :info :blacklist set :neighbor)
                                   (concat
                                     (filter (fn-> :schema-info :subtype (= "hakija")) documents)
                                     (filter (fn-> :schema-info :type (not= "party")) documents)))))))
