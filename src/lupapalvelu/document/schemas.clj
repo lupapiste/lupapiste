@@ -669,7 +669,7 @@
                    {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}
                    {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
                    {:name "kerrosluku" :type :string :size :s :subtype :number :min 0 :max 50}
-                   {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}]})
+                   {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}]})
 
 (def mitat-muutos (merge mitat
                     {:group-help "mitat-muutos.help"
