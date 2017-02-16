@@ -38,7 +38,7 @@
           (.setDaemon true)
           (.setPriority Thread/NORM_PRIORITY))))))
 
-(defonce upload-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
+(defonce upload-threadpool (Executors/newFixedThreadPool 3 (thread-factory)))
 
 (defn- upload-file [id is-or-file content-type metadata]
   (let [host (env/value :arkisto :host)
