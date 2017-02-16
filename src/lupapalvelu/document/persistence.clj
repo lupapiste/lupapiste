@@ -171,8 +171,8 @@
   [attachments op-id]
   (when (and op-id attachments)
     (seq (map :id (filter
-                    (fn [{op :op versions :versions}]
-                      (and (= (:id op) op-id)
+                    (fn [{versions :versions :as attachment}]
+                      (and ((set (att/get-operation-ids attachment)) op-id)
                            (empty? versions)))
                     attachments)))))
 

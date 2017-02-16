@@ -292,10 +292,6 @@
 
   (fact "two-operations - unmatching op"
     (remove-operation-updates {:groupType :operation :op [{:id ..op-1.. :name ..name-1..} {:id ..op-2.. :name ..name-2..}]} ..op-3..)
-    => nil)
-
-  (fact "unmatching legacy op"
-    (remove-operation-updates {:groupType :operation :op {:id ..op-1.. :name ..name-1..}} ..op-2..)
     => nil))
 
 
