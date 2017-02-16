@@ -312,10 +312,10 @@ LUPAPISTE.AttachmentsService = function() {
     _.forEach(statuses, function(status, fileId) {
       var oldStatus = status();
       status(self.JOB_TIMEOUT);
-      hub.send("bind-attachments-status",
-                   {fileId: fileId,
-                    status: oldStatus, // It is possible be that the file in hand has been successful, although overall job timed out
-                    jobStatus: self.JOB_TIMEOUT});
+      hub.send(self.serviceName + "::bind-attachments-status",
+               {fileId: fileId,
+                status: oldStatus, // It is possible that the file in hand has been successful, although overall job timed out
+                jobStatus: self.JOB_TIMEOUT});
     });
   }
 
@@ -326,7 +326,7 @@ LUPAPISTE.AttachmentsService = function() {
       _.forEach( _.values(job.value), function(fileData) {
         if ( statuses[fileData.fileId] ) {
           statuses[fileData.fileId](fileData.status);
-          hub.send("bind-attachments-status",
+          hub.send(self.serviceName + "::bind-attachments-status",
                    {fileId: fileData.fileId,
                     status: fileData.status,
                     jobStatus: job.status});

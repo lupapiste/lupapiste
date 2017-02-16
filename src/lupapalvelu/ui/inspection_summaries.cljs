@@ -27,7 +27,8 @@
                          :new {:operation nil
                                :template nil}
                          :summary {:id nil
-                                   :targets []}}})
+                                   :targets []}}
+                  :fileStatuses {}})
 
 (def state         (atom empty-state))
 (def table-rows    (rum/cursor-in state [:view :summary :targets]))
@@ -40,7 +41,8 @@
             (swap! state assoc
                    :operations (:operations data)
                    :templates  (:templates data)
-                   :summaries  (:summaries data))
+                   :summaries  (:summaries data)
+                   :fileStatuses {})
             (when cb (cb)))
           "id" (-> @state :applicationId))))
 
@@ -52,18 +54,56 @@
        (find-by-key :id id)
        (swap! state assoc-in [:view :summary])))
 
-(defn got-files [hub-event]
-  (doseq [file (.-files hub-event)]
-    (js/console.log file)))
+(defn to-bindable-file [target-id file]
+  #_:target #_{:type "inspection-item"
+              :id target-id}
+  {:type {:type-group "katselmukset_ja_tarkastukset"
+          :type-id    "tarkastusasiakirja"}
+   :fileId (aget file "fileId")
+   :constructionTime true})
+
+
+(defn unsubscribe-if-done [target-id]
+  (let [statuses (filter #(= target-id (:target-id %))
+                         (vals (:fileStatuses @state)))]
+    (when (every? #(= "done" (:status %)) statuses)
+      (doseq [hub-id (distinct (map :subs-id statuses))]
+        (.unsubscribe js/hub hub-id))
+      (refresh))))
+
+(defn bind-attachment-callback [target-id event]
+  (let [clj-event (js->clj event :keywordize-keys true)]
+    (swap! state update-in [:fileStatuses (keyword (:fileId clj-event))] assoc :status (:status clj-event))
+    (unsubscribe-if-done target-id)))
+
+(defn got-files [target-id hub-event]
+  (let [files          (.-files hub-event)
+        fileIds        (map #(.-fileId %) files)
+        bindable-files (map (partial to-bindable-file target-id) files)
+        subs-id        (.subscribe js/hub
+                                   #js {:eventType "attachmentsService::bind-attachments-status"
+                                        :status "done"
+                                        :jobStatus "done"}
+                                   (partial bind-attachment-callback target-id))
+        create-filestatuses-fn (fn [statuses fid]
+                                 (assoc statuses (keyword fid)
+                                                 {:subs-id subs-id
+                                                  :target-id target-id}))]
+    (swap! state update :fileStatuses #(reduce % create-filestatuses-fn fileIds))
+    (.bindAttachments upload/attachment-service (clj->js bindable-files))))
 
 
 (rum/defcs summary-row < {:init (fn [state _]
-                                  (assoc state ::input-id (jsutil/unique-elem-id "inspection-row"))
+                                  (-> state
+                                      (assoc ::input-id (jsutil/unique-elem-id "inspection-row"))
+                                      (assoc ::row-target (-> state :rum/args first)))
                                   ; or (-> state :rum/args first :id)
                                   )}
                          {:did-mount (fn [state]
                                        (upload/bindToElem (js-obj "id" (::input-id state)))
-                                       (upload/subscribe-files-uploaded (::input-id state) got-files)
+                                       (upload/subscribe-files-uploaded
+                                         (::input-id state)
+                                         (partial got-files (-> state ::row-target :id)))
                                        state)}
   [state row-data]
   [:tr
