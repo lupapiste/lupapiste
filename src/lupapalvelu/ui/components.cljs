@@ -2,8 +2,30 @@
   (:require [rum.core :as rum]))
 
 (rum/defc select [change-fn data-test-id value options]
-          [:select.form-entry.is-middle
-           {:on-change #(change-fn (.. % -target -value))
-            :data-test-id data-test-id
-            :value     value}
-           (map (fn [[k v]] [:option {:value k} v]) options)])
+  [:select.form-entry.is-middle
+   {:on-change    #(change-fn (.. % -target -value))
+    :data-test-id data-test-id
+    :value        value}
+   (map (fn [[k v]] [:option {:value k} v]) options)])
+
+(rum/defc autofocus-input-field < rum/reactive
+                                  {:did-mount #(-> % rum/dom-node .focus)}
+  [value data-test-id commit-fn]
+  (let [val (atom value)]
+    [:input {:type          "text"
+             :value         @val
+             :on-change     #(reset! val (-> % .-target .-value))
+             :on-blur       #(commit-fn @val)
+             :data-test-id  data-test-id}]))
+
+(defn confirm-dialog [titleKey messageKey callback]
+  (.send js/hub
+         "show-dialog"
+         #js
+           {:ltitle titleKey
+            :size   "medium"
+            :component "yes-no-dialog"
+            :componentParams #js {:ltext     messageKey
+                                  :yesFn     callback
+                                  :lyesTitle "ok"
+                                  :lnoTitle  "cancel"}}))

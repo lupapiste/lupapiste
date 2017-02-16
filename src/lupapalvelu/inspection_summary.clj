@@ -1,6 +1,6 @@
 (ns lupapalvelu.inspection-summary
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
-            [sade.core :refer [now unauthorized]]
+            [sade.core :refer [now unauthorized fail!]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [clojure.string :as s]
@@ -83,8 +83,11 @@
                  {$set   {field templateId}})]
     (org/update-organization organizationId update)))
 
+(defn- new-target [name]
+  (hash-map :target-name name :finished false :id (mongo/create-id)))
+
 (defn- targets-from-template [template]
-  (map #(hash-map :target-name % :finished false :id (mongo/create-id)) (:items template)))
+  (map new-target (:items template)))
 
 (defn new-summary-for-operation [{appId :id orgId :organization} {opId :id :as operation} templateId]
   (let [template (util/find-by-key :id templateId (:templates (settings-for-organization orgId)))
@@ -104,3 +107,28 @@
     (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
         (new-summary-for-operation application primaryOperation templateId)))))
+
+(defn- elem-match-query [appId summaryId]
+  {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
+
+(defn remove-target [appId summaryId targetId]
+  (mongo/update-by-query :applications
+                         (elem-match-query appId summaryId)
+                         {$pull {:inspection-summaries.$.targets {:id targetId}}}))
+
+(defn add-target [appId summaryId targetName]
+  (let [new-target (new-target targetName)]
+    (mongo/update :applications
+                  (elem-match-query appId summaryId)
+                  {$push {:inspection-summaries.$.targets new-target}})
+    (:id new-target)))
+
+(defn edit-target [application summaryId targetId & kvs]
+  (let [summary (->> application :inspection-summaries (util/find-by-id summaryId))
+        index   (->> summary :targets (util/position-by-id targetId))
+        updates (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) (apply hash-map kvs))]
+    (when-not index
+      (fail! :error.summary-target.edit.not-found))
+    (mongo/update-by-query :applications
+                           {:_id (:id application) :inspection-summaries {$elemMatch {:id summaryId}}}
+                           {$set updates})))

@@ -1,10 +1,9 @@
 *** Settings ***
 
-Documentation   Application gets verdict
+Documentation   Auth admin creates inspection summary templates
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        inspection_summary_resources.robot
-Library  DebugLibrary
 
 
 *** Test Cases ***
@@ -37,4 +36,7 @@ Authority gives a verdict
 Inspection summary should be created automatically
   Open tab  inspectionSummaries
   Wait until  Select From List by label  xpath=//select[@data-test-id="summaries-select"]  Uusi pohja 1 -
-  Wait until  Element should be visible by test id  target-name-AA
+  Wait until  Element should be visible by test id  target-0
+  Element should contain  //tr[@data-test-id="target-0"]/td[@class="target-name"]  AA
+  Element should contain  //tr[@data-test-id="target-1"]/td[@class="target-name"]  BB
+  Element should contain  //tr[@data-test-id="target-2"]/td[@class="target-name"]  CC

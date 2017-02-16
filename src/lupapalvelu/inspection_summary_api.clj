@@ -92,3 +92,29 @@
             app
             (util/find-by-key :id operationId (app/get-operations app))
             templateId)))
+
+(defcommand add-target-to-inspection-summary
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+   :parameters [:id summaryId targetName]
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
+   :user-roles #{:authority}}
+  [{{appId :id} :application}]
+  (ok :id (inspection-summary/add-target appId summaryId targetName)))
+
+(defcommand edit-inspection-summary-target
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+   :parameters [:id summaryId targetId targetName]
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
+   :user-roles #{:authority}}
+  [{application :application}]
+  (inspection-summary/edit-target application summaryId targetId :target-name targetName)
+  (ok))
+
+(defcommand remove-target-from-inspection-summary
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+   :parameters [:id summaryId targetId]
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
+   :user-roles #{:authority}}
+  [{{appId :id} :application}]
+  (inspection-summary/remove-target appId summaryId targetId)
+  (ok))
