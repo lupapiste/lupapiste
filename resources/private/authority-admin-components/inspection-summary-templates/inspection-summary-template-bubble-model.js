@@ -24,8 +24,8 @@ LUPAPISTE.InspectionSummaryTemplateBubbleModel = function(params) {
 
   self.call = function() {
     lupapisteApp.services.inspectionSummaryService.modifyTemplate(
-      {func: self.functionCode,
-       name: self.name(),
+      self.functionCode === "create",
+      {name: self.name(),
        templateText: self.templateText(),
        templateId: self.templateId()},
        function(event) {

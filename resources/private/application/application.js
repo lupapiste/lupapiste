@@ -55,7 +55,8 @@
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
-  var authorities = ko.observableArray([]);
+  var authorities = lupapisteApp.services.handlerService.applicationAuthorities;
+
   var tosFunctions = ko.observableArray([]);
   var hasEditableDocs = ko.observable();
 
@@ -121,26 +122,7 @@
       .processing(applicationModel.processing)
       .call();
     }
-  });
-
-  function refreshAuthoritiesSelectList(appId) {
-    if (authorizationModel.ok("assign-application")) {
-      ajax.query("application-authorities", {id: appId})
-        .success(function(res) {
-          var auths = res.authorities || [];
-          authorities(auths);
-        })
-        .pending(applicationModel.pending)
-        .call();
-    } else {
-      authorities([]);
-    }
-
-  }
-
-  hub.subscribe("application-model-updated", function(event) {
-    refreshAuthoritiesSelectList(event.applicationId);
-  });
+  });    
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);

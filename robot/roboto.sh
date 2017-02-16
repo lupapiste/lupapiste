@@ -106,7 +106,7 @@ start_lupapiste() {
    test -d src || fail "Cannot start lupapiste at $(pwd), can't see src/ here"
    echo "Starting lupapiste."
    mkdir -p robot/target
-   lein run &> robot/target/lupapiste.log &
+   lein do cljsbuild once, run &> robot/target/lupapiste.log &
    LUPISPID=$!
    echo -n "Waiting for lupapiste $LUPISPID: "
    for foo in $(seq $STARTUPTIMEOUT)

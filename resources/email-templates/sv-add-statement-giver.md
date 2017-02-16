@@ -10,4 +10,4 @@ Allt fler tillst&aring;nds&auml;renden sk&ouml;ts elektroniskt. F&ouml;lj utveck
 
 Smidiga tider med elektroniska utl&aring;tanden &ouml;nskar
 
-{{lupapiste}}
+{{lupapiste.link}}

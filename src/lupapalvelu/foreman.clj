@@ -122,6 +122,10 @@
             nil
             history-group)))
 
+(defn reduce-foreman-history-data [history-data]
+  (let [grouped-history (group-by (juxt :municipality :jobDescription :limitedApproval) history-data)]
+    (mapcat (fn [[_ group]] (reduce-to-highlights group)) grouped-history)))
+
 (defn get-foreman-reduced-history-data [foreman-app]
   (let [history-data    (get-foreman-history-data foreman-app)
         grouped-history (group-by (juxt :municipality :jobDescription :limitedApproval) history-data)]

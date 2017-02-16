@@ -8,4 +8,4 @@ You can change the password by clicking the link below. If the link doesn't work
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

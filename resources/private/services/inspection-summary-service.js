@@ -22,8 +22,9 @@ LUPAPISTE.InspectionSummaryService = function() {
       .call();
   };
 
-  self.modifyTemplate = function(params, cb) {
-    ajax.command("modify-inspection-summary-template", params)
+  self.modifyTemplate = function(isNew, params, cb) {
+    var command = isNew ? "create-inspection-summary-template" : "modify-inspection-summary-template";
+    ajax.command(command, params)
       .success(function(event) {
         cb(event);
         self.getTemplatesAsAuthorityAdmin();
@@ -32,7 +33,7 @@ LUPAPISTE.InspectionSummaryService = function() {
   };
 
   self.deleteTemplateById = function(templateId) {
-    ajax.command("modify-inspection-summary-template", {func: "delete", templateId: templateId})
+    ajax.command("delete-inspection-summary-template", {templateId: templateId})
       .success(function(event) {
         util.showSavedIndicator(event);
         self.getTemplatesAsAuthorityAdmin();

@@ -287,7 +287,8 @@
                                                          {:krysp.MAL.url {$exists true}}
                                                          {:krysp.VVVL.url {$exists true}}
                                                          {:krysp.YI.url {$exists true}}
-                                                         {:krysp.YL.url {$exists true}}]}
+                                                         {:krysp.YL.url {$exists true}}
+                                                         {:krysp.KT.url {$exists true}}]}
                                                    {:krysp 1})
         orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
@@ -432,9 +433,14 @@
         ;; Fallback into fetching xmls consecutively
         (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
 
-      (catch Throwable t
+
+      (catch [:sade.core/type :sade.core/fail] t
+        (errorf "error.integration - Unable to get reviews for %s backend: %s"
+                (:id organization) (select-keys t [:status :text])))
+
+      (catch Object o
         (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
-                permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
+                permit-type (:id organization) (.getName (class o)) (get &throw-context :message ""))))))
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type]
@@ -455,12 +461,12 @@
                           :verdicts true
                           :history true}))))
 
-(defn- fetch-review-updates-for-organization
+(defn fetch-review-updates-for-organization
   [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
   (let [grouped-apps (if (seq applications)
-                       (group-by :permitType applications)
-                       (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
-                            (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
+                         (group-by :permitType applications)
+                         (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
+                              (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
          (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
 

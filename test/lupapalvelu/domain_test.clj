@@ -159,3 +159,48 @@
                                        :id 0}}]]
       (fact "even comments for deleted attachments are returned, but not those which are empty"
         (:comments (filter-targeted-attachment-comments application)) => expected-comments))))
+
+(facts enrich-application-handlers
+  (fact "handlers not used -> not enriched -> no mongo calls"
+    (:organization (enrich-application-handlers {:organization ..org-id..
+                                                 :handlers [{:id ..id..
+                                                             :userId ..user-id..
+                                                             :roleId ..role-id..
+                                                             :firstName ..first-name..
+                                                             :lastName ..last-name..}]})) => ..org-id..
+    (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => irrelevant :times 0))
+
+  (fact "one handler in org - one in app"
+    (:handlers (enrich-application-handlers {:organization ..org-id..
+                                             :handlers [{:id ..id..
+                                                         :userId ..user-id..
+                                                         :roleId ..role-id..
+                                                         :firstName ..first-name..
+                                                         :lastName ..last-name..}]})) => [{:id ..id..
+                                                                                           :userId ..user-id..
+                                                                                           :roleId ..role-id..
+                                                                                           :firstName ..first-name..
+                                                                                           :lastName ..last-name..
+                                                                                           :name ..name..}]
+    (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => {:handler-roles [{:id ..role-id.. :name ..name..}]}))
+
+  (fact "no handlers in org - one in app - handler not enriched"
+    (enrich-application-handlers {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]}) =>
+    {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]}
+    (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => {:handler-roles []}))
+
+  (fact "one handler in org - none in app"
+    (enrich-application-handlers {:organization ..org-id.. :data ..data.. :handlers []}) =>
+    {:organization ..org-id.. :data ..data.. :handlers []}
+    (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => irrelevant :times 0))
+
+  (fact "organization is given as argument"
+    (enrich-application-handlers {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id..}]}
+                                 {:handler-roles [{:id ..role-id.. :name ..name..}]}) =>
+    {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id.. :roleId ..role-id.. :name ..name..}]}
+    (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => irrelevant :times 0))
+
+  (fact "multiple handlers in org - two in app"
+    (enrich-application-handlers {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2..} {:id ..handler-id-0.. :roleId ..role-id-0..}]}) =>
+    {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2.. :name ..name-2..} {:id ..handler-id-0.. :roleId ..role-id-0.. :name ..name-0..}]}
+    (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => {:handler-roles [{:id ..role-id-0.. :name ..name-0..} {:id ..role-id-1.. :name ..name-1..} {:id ..role-id-2.. :name ..name-2..}  {:id ..role-id-3.. :name ..name-3..}]})))

@@ -376,6 +376,12 @@ a.link-btn {
   cursor: pointer;
 }
 
+a.link-btn-inverse {
+  @extend .like-btn;
+  @include styled-input( $lp-orange, $orange, $orange-light);
+  cursor: pointer;
+}
+
 .link-btn--link {
   &:hover, &:active {
              span {

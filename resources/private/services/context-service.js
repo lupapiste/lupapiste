@@ -6,7 +6,7 @@ LUPAPISTE.ContextService = function() {
   var self = this;
 
   var appModel = lupapisteApp.models.application;
-  var latestAppId = null;
+  var latestAppId = ko.observable();
 
   function event( e ) {
     return "contextService::" + e;
@@ -27,12 +27,12 @@ LUPAPISTE.ContextService = function() {
   function checkContext() {
     var appId = appModel.id();
     var inView = isAppView( appId );
-    if( latestAppId !== appId && inView ) {
-      latestAppId = appId;
+    if( latestAppId() !== appId && inView ) {
+      latestAppId(appId);
       hub.send( event("enter"), {applicationId: appId});
     }
-    if( latestAppId && !inView) {
-      latestAppId = null;
+    if( latestAppId() && !inView) {
+      latestAppId(null);
       hub.send( event("leave"));
     }
   }
@@ -42,8 +42,7 @@ LUPAPISTE.ContextService = function() {
   $(window).on("hashchange", checkContext);
   hub.subscribe( "application-model-updated", checkContext );
 
-  self.applicationId = function() {
-    return latestAppId;
-  };
+
+  self.applicationId = latestAppId;
 
 };

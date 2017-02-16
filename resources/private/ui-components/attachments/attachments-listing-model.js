@@ -46,7 +46,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.upload = new LUPAPISTE.UploadModel( self,
                                            {dropZone: "#application-attachments-tab",
                                             allowMultiple: true,
-                                            readOnly: !self.authModel.ok( "upload-attachment"),
+                                            readOnly: self.disposedPureComputed(function() {
+                                              return !self.authModel.ok( "upload-attachment");
+                                            }),
                                             badFileHandler: _.noop} );
 
   function addAttachmentFile( params ) {

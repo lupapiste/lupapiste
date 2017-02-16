@@ -16,4 +16,4 @@ Om du anm&auml;lt arbetsledarna i anslutning till ditt tillst&aring;nd redan tid
 
 H&auml;lsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

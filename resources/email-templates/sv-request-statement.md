@@ -1,15 +1,20 @@
 # Hej {{user.firstName}},
 
-{{requester.firstName}} {{requester.lastName}} har bett dig om ett utl&aring;tande om en tillst&aring;ndsans&ouml;kan p&aring; adressen {{address}}, {{municipality}}. Tillst&aring;ndet s&ouml;ks f&ouml;r &aring;tg&auml;rden {{operation}}.
+{{requester.firstName}} {{requester.lastName}} har bett dig om ett
+utlåtande om en tillståndsansökan på adressen {{address}},
+{{municipality}}. Tillståndet söks för åtgärden {{operation}}.
 
-Du kan ge ditt utl&aring;tande genom att klicka p&aring; l&auml;nken nedan. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
+Du kan ge ditt utlåtande genom att klicka på länken nedan. Om länken
+inte fungerar, kopiera adressen och klistra in den i webbläsarens
+adressfält.
 
 {{link}}
 
-Tidsfristen f&ouml;r utl&aring;tandet g&aring;r ut {{due-date-str}}. Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
+Tidsfristen för utlåtandet går ut {{due-date}}. Den som bett om
+utlåtandet skickar följande hälsningar:
 
 {{message}}
 
-H&auml;lsningar,
+Hälsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

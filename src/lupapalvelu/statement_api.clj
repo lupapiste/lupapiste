@@ -99,7 +99,7 @@
          {:link          #(notifications/get-application-link app "/statement" (name %) recipient)
           :message       saateText
           :requester     caller
-          :due-date-str  (util/to-local-date dueDate)}))
+          :due-date  (util/to-local-date dueDate)}))
 
 
 (notifications/defemail :request-statement

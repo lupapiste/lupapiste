@@ -3,8 +3,9 @@
     <body>
         <section class="page" id="application">
             <div class="application_summary">
-                <div class="container">
-                    <div class="preamble">
+              <div class="container">
+                <div class="preamble"
+                     data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">
                         <div class="application_summary_info" data-bind="with: application">
                           <h1 data-bind="component: {name: 'address',
                                          params: { application: $parent,
@@ -71,9 +72,7 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorities -->
-                              <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
-                              <!-- /ko -->
+                              <div data-bind="component: 'handler-list'"></div>
 
                               <!-- Operations: -->
                               <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
@@ -204,10 +203,15 @@
                         <div class="application_actions" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'application'">
                             <div data-bind="template: 'application-actions-template'"></div>
                         </div>
-                    </div>
-
+                </div>
+                <card params="deck: 'summary',
+                              card: 'edit-handlers'">
+                          <edit-handlers></edit-handlers>
+                </card>
                     <!-- Tabs: -->
-                    <div class="tabs-container" data-bind="with: application">
+                    <div class="tabs-container"
+                         data-bind="with: application,
+                                    visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
                         <ul class="tabs" id="applicationTabs">
                             <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
@@ -232,17 +236,34 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: _.includes(['draft', 'open', 'submitted', 'complementNeeded'], state()),
+                            <li data-bind="if: _.includes(['draft', 'open'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
-                                   class="link-btn">
+                                   class="link-btn-inverse">
                                   <!-- ko if: $root.authorization.ok('approve-application') -->
                                   <span data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></span>
                                   <!-- /ko -->
                                   <!-- ko ifnot: $root.authorization.ok('approve-application') -->
                                   <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span>
                                   <!-- /ko -->
-                                </a></li>
+                                </a>
+                            </li>
+
+                            <li data-bind="if: _.includes(['submitted', 'complementNeeded'], state()),
+                                           css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
+                                  <!-- ko if: $root.authorization.ok('approve-application') -->
+                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
+                                   class="link-btn-inverse">
+                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></span>
+                                </a>
+                                  <!-- /ko -->
+                                  <!-- ko ifnot: $root.authorization.ok('approve-application') -->
+                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
+                                   class="link-btn">
+                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span>
+                                </a>
+                                  <!-- /ko -->
+                            </li>
 
                             <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'statement'}">
                                 <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab"
@@ -287,6 +308,13 @@
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
                               </a></li>
 
+                          <li data-bind="if: !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application'),
+                                         css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
+                            <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" data-test-id="application-open-inspectionSummaries-tab" class="link-btn">
+                              <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
+                            </a>
+                          </li>
+
                             <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
                                 <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
@@ -297,7 +325,8 @@
                 </div>
             </div>
 
-            <div class="container">
+            <div class="container"
+                 data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
                 <div class="tab-content-container content">
 
                     <!-- Application info tab -->
@@ -517,6 +546,12 @@
                       </div>
                     </div>
                     <!-- /ko -->
+
+                  <!-- ko if: selectedTabName() === 'inspectionSummaries' && !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application') -->
+                  <div id="application-inspectionSummaries-tab" class="tab-content">
+                    <cljs-inspection-summaries params="{app: $data.application, authModel: $root.authorization}"></cljs-inspection-summaries>
+                  </div>
+                  <!-- /ko -->
 
                     <!-- Bulletin tab -->
                     <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('publish-bulletin-enabled') -->

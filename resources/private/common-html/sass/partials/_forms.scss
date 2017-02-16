@@ -945,16 +945,26 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
   border: 1px solid $orange-light;
   padding: $marginS $marginS $marginS $marginS;
   margin-top: 15px;
+
+  &.half-width {
+    width: 50%;
+  }
+
   &:after, &:before {
-             bottom: 100%;
-             left: 5%;
-             border: solid transparent;
-             content: " ";
-             height: 0;
-             width: 0;
-             position: absolute;
-             pointer-events: none;
-           }
+    bottom: 100%;
+    left: 5%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+
+  }
+
+  &.arrow-2nd-col:before, &.arrow-2nd-col:after {
+    left: 60%;
+  }
 
   &:after {
     border-color: rgba(255, 255, 255, 0);
@@ -1138,6 +1148,10 @@ $max-columns: 12;
   color: $gray51;
   padding-left: $grid-margin;
   padding-right: $grid-margin;
+
+  &.no-top-border {
+    border-top: none;
+  }
 
   &:last-child {
     border-bottom: none;

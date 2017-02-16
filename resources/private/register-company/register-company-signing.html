@@ -24,7 +24,7 @@
       <div class="register-contentbox">
         <p data-bind="ltext: 'register.company.sign.info'"></p>
         <p data-bind="ltext: 'register.company.sign.info2'"></p>
-        <a data-bind="ltext: 'register.company.sign.download-contract', attr: { href: termsDocumentLink }" target="_blank"/>
+        <p><a data-bind="ltext: 'register.company.sign.download-contract', attr: { href: termsDocumentLink }" target="_blank"></a></p>
 
         <div class="register-terms">
           <input id="termsAccepted" type="checkbox" data-bind="checked: termsAccepted" class="form-input checkbox"/>
@@ -34,7 +34,7 @@
                                                                                   buttonEnabled: termsAccepted }}"></span>
         <button data-bind="click: cancelSign, ltext: 'cancel'" data-test-id="register-company-cancel-sign" type="button" class="btn"></button>
 
-        <h1 data-bind="ltext: 'register.company.vismasign.title'"></h1>
+        <h1 class="top-marginL" data-bind="ltext: 'register.company.vismasign.title'"></h1>
         <p data-bind="ltext: 'register.company.vismasign.desc'"></p>
         <p data-bind="ltext: 'register.company.vismasign.poweredby'"></p>
         <a href="https://allekirjoitus.visma.fi" target="_blank">

@@ -9,7 +9,8 @@ jQuery(document).ready(function() {
                     {name: "municipality-maps-map"},
                     {name: "inspection-summary-templates-list"},
                     {name: "inspection-summary-template-bubble"},
-                    {name: "select-inspection-summary-template-for-operation"}];
+                    {name: "select-inspection-summary-template-for-operation"},
+                    {name: "handler-roles"}];
 
   ko.registerLupapisteComponents(components);
 });

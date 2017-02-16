@@ -15,9 +15,9 @@
   [[:building-site]
    (node :application
          att-tags/application-group-types)
-   (node :operation
-         att-type/type-groups)
    (node :multioperation
+         att-type/type-groups)
+   (node :operation
          att-type/type-groups)])
 
 (defn- get-operation-ids [{op :op :as attachment}]

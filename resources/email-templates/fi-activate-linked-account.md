@@ -10,4 +10,4 @@ P&auml;&auml;set seuraamaan lupa-asioinnin s&auml;hk&ouml;istymist&auml;: {{face
 
 S&auml;hk&ouml;isi&auml; hetki&auml; rakentamiseen toivottaa,
 
-{{lupapiste}}
+{{lupapiste.link}}

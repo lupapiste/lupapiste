@@ -28,8 +28,17 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
                     edit: ko.observable(false)});
   }
 
+
+  function filterIncompleteAssignments(assignments) {
+    return _.filter(assignments, function(a) { return _.get(a, "currentState.type") !== "completed"; });
+  }
+
   self.assignments = ko.pureComputed(function() {
     return _.map(_data(), enrichAssignment);
+  });
+
+  self.incompleteAssignments = ko.pureComputed(function() {
+    return filterIncompleteAssignments(self.assignments());
   });
 
   /*

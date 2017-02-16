@@ -478,11 +478,9 @@
    :submitted 1354532324658
    :location [408048 6693225]
    :attachments [],
-   :authority {:id "777777777777777777000023"
-               :username "sonja"
-               :firstName "Sonja"
-               :lastName "Sibbo"
-               :role "authority"}
+   :handlers[{:firstName "Sonja"
+              :lastName "Sibbo"
+              :general true}]
    :title "s"
    :created 1354532324658
    :documents documents

@@ -68,13 +68,13 @@
   (comment-application sonja app-id false) => ok?)
 
 (fact "Mikko must not be able to assign to himself!"
-  (command mikko :assign-application :id app-id :assigneeId mikko-id) => unauthorized?)
+  (command mikko :upsert-application-handler :id app-id :userId mikko-id :roleId sipoo-general-handler-id) => unauthorized?)
 
 (fact "Teppo must not be able to assign to himself!"
-  (command teppo :assign-application :id app-id :assigneeId teppo-id) => unauthorized?)
+  (command teppo :upsert-application-handler :id app-id :userId teppo-id :roleId sipoo-general-handler-id) => unauthorized?)
 
 (fact "Veikko must not be able to assign to himself!"
-  (command veikko :assign-application :id app-id :assigneeId veikko-id) => not-accessible?)
+  (command veikko :upsert-application-handler :id app-id :userId veikko-id :roleId sipoo-general-handler-id) => not-accessible?)
 
 (fact "Sonja must be able to assign to herself!"
-  (command sonja :assign-application :id app-id :assigneeId sonja-id) => ok?)
+  (command sonja :upsert-application-handler :id app-id :userId sonja-id :roleId sipoo-general-handler-id) => ok?)

@@ -14,4 +14,4 @@ Om du vill redigera uppgifterna om projektet m&aring;ste du kontakta den som ski
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}

@@ -33,6 +33,11 @@
       </section>
 
       <section>
+        <div data-bind="component: {name: 'handler-roles',
+                        params: {organization: organization}}"></>
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.tags'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'tags-editor'"></div>
@@ -97,7 +102,7 @@
       </section>
       <!-- /ko -->
 
-    </div> <!-- container -->
+    </didiv> <!-- container -->
   </section>
 </body>
 </html>

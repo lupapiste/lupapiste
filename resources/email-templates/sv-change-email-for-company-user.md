@@ -8,4 +8,4 @@ Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;s
 
 Hälsningar,
 
-{{lupapiste}}
+{{lupapiste.link}}

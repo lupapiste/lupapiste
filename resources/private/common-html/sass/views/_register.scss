@@ -62,10 +62,10 @@
     cursor: pointer;
     margin-bottom: $marginL;
     &:hover {
-      background-color: $lp-purple-light;
+      background-color: $lp-orange-light;
     }
     &.selected {
-      background-color: $lp-purple;
+      background-color: $lp-orange;
       .price {
         color: white;
       }
@@ -104,15 +104,38 @@
       display: block;
       text-align: center;
       margin: $marginL 0 $marginL *2;
-      color: $lp-purple;
+      color: $lp-orange;
       font-weight: bold;
     }
+
+    .price-original {
+      font-size: 2.5em;
+      display: block;
+      text-align: center;
+      margin: $marginL 0 $marginL *2;
+      color: $grey-text;
+      font-weight: bold;
+    }
+
+    .price-line {
+      text-decoration: line-through;
+      color: $red;
+    }
+
+    .discount-info {
+      font-size: 1em;
+      text-align: center;
+      display: block;
+      padding: $marginM;
+      color: $lp-orange;
+    }
+
     .bullet {
       display: block;
       font-size: 1em;
       padding: $marginM;
       text-align: center;
-      border-top: 3px dotted $lp-purple;
+      border-top: 3px dotted $lp-orange;
     }
     input {
       display: none;
@@ -134,15 +157,15 @@
 
     a {
       text-decoration: none;
-      color: $lp-purple;
+      color: $lp-orange;
     }
 
     .phase-number {
       width: $phase-number-radius * 2;
       height: $phase-number-radius * 2;
       border-radius: $phase-number-radius;
-      color: $lp-purple;
-      border: solid 3px $lp-purple;
+      color: $lp-orange;
+      border: solid 3px $lp-orange;
       font-size: 3em;
       display: block;
       text-align: center;
@@ -180,7 +203,7 @@
         height: 0;
         border-left: 15px solid transparent;
         border-right: 15px solid transparent;
-        border-top: 20px solid $lp-purple;
+        border-top: 20px solid $lp-orange;
         left:0;
         right:0;
         margin-left:auto;
@@ -189,7 +212,7 @@
     }
     &.done {
       .phase-number {
-        background-color: $lp-purple;
+        background-color: $lp-orange;
         color: white;
       }
     }
@@ -214,9 +237,9 @@
   }
 
   .btn-primary {
-    background-color: $lp-purple;
+    background-color: $lp-orange;
     &:hover {
-      background-color: darken($lp-purple, 10%);
+      background-color: darken($lp-orange, 10%);
     }
     &:disabled {
       background-color: $lp-light-grey;
@@ -230,11 +253,11 @@
 }
 
 .register-contentbox {
-  background-color: $lp-purple-light;
+  background-color: $lp-orange-light;
   padding: $marginL;
   p, h1 {
     color: black;
-    width: 60%;
+    width: 80%;
   }
   .register-terms {
     margin: auto;
@@ -260,7 +283,7 @@
 
 #register-company, #new-company-user {
   .register-form {
-    background-color: $lp-purple-light;
+    background-color: $lp-orange-light;
     padding: $marginS;
     .form-group {
       background-color: inherit;

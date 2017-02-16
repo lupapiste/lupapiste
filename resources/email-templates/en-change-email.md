@@ -9,4 +9,4 @@ The activation link is valid for 24 hours (until {{expires}}). If there are prob
 
 Kind regards,
 
-{{lupapiste}}
+{{lupapiste.link}}

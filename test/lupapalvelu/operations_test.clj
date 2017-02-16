@@ -123,4 +123,9 @@
   (fact "YA-operations match"
     (let [lp-ops (set (keys ya-operations))
           commons-ops (set commons-operations/ya-operations)]
+      (= lp-ops commons-ops) => true))
+
+  (fact "P-operations match"
+    (let [lp-ops (set (keys p-operations))
+          commons-ops (set commons-operations/p-operations)]
       (= lp-ops commons-ops) => true)))

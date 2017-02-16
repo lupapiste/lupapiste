@@ -11,6 +11,7 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.model :as model]
@@ -18,6 +19,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
@@ -177,6 +179,9 @@
        :state
        keyword))
 
+(defn enrich-application-handlers [application {roles :handler-roles :as organization}]
+  (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %))))
+
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts" "authority-notices" "info-links"})
 
@@ -191,10 +196,10 @@
     (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
 
 ; Masking
-(defn- person-id-masker-for-user [user {authority :authority :as application}]
+(defn- person-id-masker-for-user [user {handlers :handlers :as application}]
   (cond
-    (usr/same-user? user authority) identity
-    (usr/authority? user) model/mask-person-id-ending
+    (util/find-by-key :userId (:id user) handlers) identity
+    (auth/application-authority? application user) model/mask-person-id-ending
     :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
 
 (defn with-masked-person-ids [application user]
@@ -257,14 +262,11 @@
         doc))
     doc))
 
-(defn process-document-or-task [user {authority :authority :as application} doc]
-  (let [mask-person-ids (person-id-masker-for-user user application)
-        operations      (get-operations application)]
-    (->> doc
-         (validate application)
-         (populate-operation-info operations)
-         mask-person-ids
-         (enrich-single-doc-disabled-flag user))))
+(defn process-document-or-task [user application doc]
+  (->> (validate application doc)
+       (populate-operation-info (get-operations application))
+       ((person-id-masker-for-user user application))
+       (enrich-single-doc-disabled-flag user)))
 
 (defn- process-documents-and-tasks [user application]
   (let [mapper (partial process-document-or-task user application)]
@@ -322,6 +324,12 @@
        action/without-system-keys
        (process-documents-and-tasks user)
        location->object))
+
+(defn post-process-app-for-krysp [application organization]
+  (-> application
+      (domain/enrich-application-handlers organization)
+      meta-fields/enrich-with-link-permit-data
+      link-permit/update-backend-ids-in-link-permit-data))
 
 ;;
 ;; Application creation
@@ -623,8 +631,8 @@
     (fail :error.illegal-state)))
 
 (defn application-org-authz-users
-  [{org-id :organization :as application} & org-authz]
-  (->> (apply usr/find-authorized-users-in-org org-id org-authz)
+  [{org-id :organization :as application} org-authz]
+  (->> (usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
 
 ;; Cancellation
@@ -662,3 +670,11 @@
                                {$unset {:canceled 1}}))
   (assignment/activate-assignments (:id application))
   (ok))
+
+(defn handler-upsert-updates [handler handlers created user]
+  (let [ind (util/position-by-id (:id handler) handlers)
+        handler-updates (if (seq handlers)
+                          {(util/kw-path :handlers (or ind (count handlers))) handler}
+                          {:handlers [handler]})]
+    {$set  (merge {:modified created} handler-updates)
+     $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))

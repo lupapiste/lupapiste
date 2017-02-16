@@ -6,4 +6,4 @@ Om du misst&auml;nker missbruk ska du omedelbart kontakta den tekniska supporten
 
 H&auml;lsningar
 
-{{lupapiste}}
+{{lupapiste.link}}
