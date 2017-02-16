@@ -9,16 +9,16 @@
 (def unzip-attachments-path "/api/unzip-attachments")
 
 (def column-keyword-map
-  {"tiedosto" :filename
-   "tyyppi" :localizedType
-   "sisältö" :contents
-   "piirrosnumero" :drawingNumber
-   "liittyy" :operation
-   "fil" :filename
-   "typ" :localizedType
-   "innehåll" :contents
-   "ritningsnummer" :drawingNumber
-   "ansluter sig" :operation})
+  {"tiedosto"          :filename
+   "tyyppi"            :localizedType
+   "sis\u00e4lt\u00f6" :contents
+   "piirrosnumero"     :drawingNumber
+   "liittyy"           :operation
+   "fil"               :filename
+   "typ"               :localizedType
+   "inneh\u00e5ll"     :contents
+   "ritningsnummer"    :drawingNumber
+   "ansluter sig"      :operation})
 
 (defn unzip-attachment-collection [^File zip-file]
   (timbre/info "Sending zip file" (.getName zip-file) "to muuntaja for processing")
