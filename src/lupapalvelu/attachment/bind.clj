@@ -38,13 +38,13 @@
         attachment         (or
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
-                                                     (assoc (select-keys filedata [:group :contents])
+                                                     (assoc (select-keys filedata [:group :contents :target])
                                                             :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
         version-options (merge
                           (select-keys mongo-file [:fileId :filename :contentType :size])
-                          (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign])
+                          (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
                                            :comment-text contents
