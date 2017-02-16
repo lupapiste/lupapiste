@@ -23,6 +23,7 @@
    (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
                                                                                   (sc/optional-key :name) sc/Str}]})
+   (sc/optional-key :target)           (sc/maybe att/Target)
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -85,7 +86,8 @@
   (if (:attachmentId file)
     file
     (-> file
-        (update :type att/attachment-type-coercer)
+        (update :type   att/attachment-type-coercer)
+        (update :target #(and % (att/attachment-target-coercer %)))
         (update :group (fn [{group-type :groupType operations :operations :as group}]
                          (util/assoc-when nil
                                           :groupType  (and group-type (att/group-type-coercer group-type))
