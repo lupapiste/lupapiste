@@ -53,3 +53,13 @@ ajax.header = function() {};
 
 var util = {};
 util.showSavedIndicator = function() {};
+
+var LUPAPISTE = {};
+LUPAPISTE.FileuploadService = function() {};
+
+
+var hub = {};
+hub.subscribe = function() {};
+hub.unsubscribe = function() {};
+hub.onPageLoad = function() {};
+hub.onPageUnload = function() {};
