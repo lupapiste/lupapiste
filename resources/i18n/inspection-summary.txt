@@ -1,6 +1,6 @@
-"error.summary-target.edit.not-found" "en"
+"error.summary-target.edit.not-found" "en" ""
 "error.summary-target.edit.not-found" "fi" "Tarkastuskohdetta, jota yritit muokata, ei löytynyt."
-"error.summary-target.edit.not-found" "sv"
+"error.summary-target.edit.not-found" "sv" ""
 "inspectionSummaries.tab" "en" ""
 "inspectionSummaries.tab" "fi" "Tarkastusasiakirja"
 "inspectionSummaries.tab" "sv" ""
