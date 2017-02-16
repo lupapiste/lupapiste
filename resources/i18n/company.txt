@@ -262,6 +262,8 @@
 "register.company.account5.price" "en" "€59/month"
 "register.company.account5.price" "fi" "59€/kk"
 "register.company.account5.price" "sv" "59€/månad"
+"register.company.account5.price.discount" "fi" "0€/kk *"
+"register.company.account5.price.discount.info" "fi" "* Yritystilin hinta 1.9.2017 alkaen 59€/kk (alv 0%) ellei palvelua irtisanota 31.8.2017 mennessä. Ilman kirjallista irtisanomista Yritystili-palvelu jatkuu toistaiseksi."
 "register.company.account5.title" "en" "The company's account 5"
 "register.company.account5.title" "fi" "Yrityksen tili 5"
 "register.company.account5.title" "sv" "Företagskonto 5"
