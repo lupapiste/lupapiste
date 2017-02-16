@@ -3,7 +3,8 @@
             [lupapalvelu.file-upload :refer :all]
             [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment.muuntaja-client :as muuntaja]))
+            [lupapalvelu.attachment.muuntaja-client :as muuntaja]
+            [sade.env :as env]))
 
 (facts "about uploading a zipped attachment collection with index file"
   (let [op1 "maverick"
@@ -30,7 +31,8 @@
                :content  content}
         file2 {:filename "foobar.zip"
                :tempfile content}
-        contents "test contents"]
+        contents "test contents"
+        feature-status (env/feature? :unzip-attachments)]
 
     (against-background
       [(mongo/create-id) => file-id
@@ -54,36 +56,37 @@
                                                            :metadata {:linked false, :sessionId "abc"}}]))
 
       (against-background
-        [(muuntaja/unzip-attachment-collection content) => {:attachments [{:file "/path/to/foobar.pdf"
+        [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
                                                                            :filename "foobar1.pdf"
                                                                            :localizedType "Pohjapiirustus"
                                                                            :contents contents
                                                                            :drawingNumber "1"
                                                                            :operation "A"}
-                                                                          {:file "/path/to/foobar.pdf"
+                                                                          {:uri "/path/to/foobar.pdf"
                                                                            :filename "foobar2.pdf"
                                                                            :localizedType "Pohjapiirustus"
                                                                            :contents contents
                                                                            :drawingNumber "2"
                                                                            :operation "B"}
-                                                                          {:file "/path/to/foobar.pdf"
+                                                                          {:uri "/path/to/foobar.pdf"
                                                                            :filename "foobar3.pdf"
                                                                            :localizedType "Julkisivupiirustus"
                                                                            :contents contents
                                                                            :drawingNumber "3"
                                                                            :operation "C,D"}
-                                                                          {:file "/path/to/foobar.pdf"
+                                                                          {:uri "/path/to/foobar.pdf"
                                                                            :filename "foobar4.pdf"
                                                                            :localizedType "Asemapiirros"
                                                                            :contents contents
                                                                            :drawingNumber "4"}
-                                                                          {:file "/path/to/foobar.pdf"
+                                                                          {:uri "/path/to/foobar.pdf"
                                                                            :filename "foobar5.pdf"
                                                                            :localizedType "CV"
                                                                            :contents contents}]}
          (muuntaja/download-file "/path/to/foobar.pdf") => (io/input-stream content)]
 
         (fact "attachment collection zip is parsed and stored as files"
+          (env/enable-feature! :unzip-attachments)
           (save-files application [file2] session-id) => [{:filename "foobar1.pdf"
                                                            :contentType "application/pdf"
                                                            :contents contents
@@ -149,4 +152,5 @@
                                                                   :type-group :osapuolet
                                                                   :type-id :cv}
                                                            :metadata {:linked false, :sessionId "abc"}
-                                                           :group {:groupType :parties}}])))))
+                                                           :group {:groupType :parties}}])))
+    (env/set-feature! feature-status [:unzip-attachments])))
