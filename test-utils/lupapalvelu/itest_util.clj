@@ -896,11 +896,11 @@
 ;; Assignments
 ;;
 
-(defn create-assignment [from to application-id target desc]
+(defn create-assignment [from to application-id targets desc]
   (command from :create-assignment
            :id            application-id
            :recipientId   to
-           :target        target
+           :targets       targets
            :description   desc))
 (defn update-assignment [who id assignment-id recipient description]
   (command who :update-assignment

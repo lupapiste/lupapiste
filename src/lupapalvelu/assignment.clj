@@ -1,6 +1,6 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
-            [monger.operators :refer [$and $in $ne $options $or $regex $set $push]]
+            [monger.operators :refer [$and $in $ne $options $or $regex $set $pull $push]]
             [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
@@ -259,7 +259,7 @@
   (get-assignments user {:application.id application-id
                          :status {$ne "canceled"}}))
 
-(sc/defn assignments-search :- AssignmentsSearchResponse
+(sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [mongo-query (make-query query user)
@@ -322,5 +322,12 @@
 (defn set-assignment-status [application-id target-id status]
   (set-assignments-statuses {:application.id application-id :target.id target-id} status))
 
-(defn remove-assignments-by-target [application-id target-id]
-  (mongo/remove-many :assignments {:application.id application-id :target.id target-id}))
+(defn remove-target-from-assignments
+  "Removes given target from assignments, then removes assignments left with no target"
+  [application-id target-id]
+  (mongo/update-n :assignments
+                  {:application.id application-id
+                   :targets.id target-id}
+                  {$pull {:targets {:id target-id}}})
+  (mongo/remove-many :assignments {:application.id application-id
+                                   :targets []}))

@@ -40,7 +40,7 @@
   (fact "authorities can only see assignments belonging to their organizations"
     (let [{id :id} (create-app sonja :propertyId sipoo-property-id)
           doc-id (-> (query-application sonja id) :documents first :id)
-          {assignment-id :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")]
+          {assignment-id :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")]
       (-> (query sonja :assignments) :assignments count)  => pos?
       (-> (query veikko :assignments) :assignments count) => zero?
 
@@ -57,9 +57,9 @@
           doc-id1 (-> (query-application sonja id1) :documents first :id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)
           doc-id2 (-> (query-application sonja id2) :documents first :id)
-          {assignment-id1-1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Hakemus 1")
-          {assignment-id1-2 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Hakemus 1")
-          {assignment-id2-1 :id} (create-assignment sonja ronja-id id2 {:group "group" :id doc-id2} "Hakemus 1")]
+          {assignment-id1-1 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
+          {assignment-id1-2 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
+          {assignment-id2-1 :id} (create-assignment sonja ronja-id id2 [{:group "group" :id doc-id2}] "Hakemus 1")]
       (-> (query sonja :assignments-for-application :id id1) :assignments count) => 2
       (-> (query ronja :assignments-for-application :id id1) :assignments count) => 2
       (-> (query sonja :assignments-for-application :id id2) :assignments count) => 1
@@ -71,20 +71,20 @@
         doc-id (-> (query-application sonja id) :documents first :id)]
 
     (fact "only authorities can create assignments"
-      (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Kuvaus") => ok?
-      (create-assignment pena sonja-id id {:group "group" :id doc-id} "Hommaa") => unauthorized?)
+      (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Kuvaus") => ok?
+      (create-assignment pena sonja-id id [{:group "group" :id doc-id}] "Hommaa") => unauthorized?)
     (fact "only authorities can receive assignments"
-      (create-assignment sonja pena-id id {:group "group" :id doc-id} "Penalle")        => invalid-receiver?
-      (create-assignment sonja "does_not_exist_id" id {:group "group" :id doc-id} "Desc") => invalid-receiver?)
+      (create-assignment sonja pena-id id [{:group "group" :id doc-id}] "Penalle")        => invalid-receiver?
+      (create-assignment sonja "does_not_exist_id" id [{:group "group" :id doc-id}] "Desc") => invalid-receiver?)
 
     (fact "assignments cannot be created if not enabled in organization"
-      (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) {:group "group" :id doc-id} "Ei onnistu")
+      (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) [{:group "group" :id doc-id}] "Ei onnistu")
       => assignments-not-enabled?)
 
     (fact "authorities can only create assignments for applications in their organizations"
-      (create-assignment veikko sonja-id id {:group "group" :id doc-id} "Ei onnistu") => application-not-accessible?)
+      (create-assignment veikko sonja-id id [{:group "group" :id doc-id}] "Ei onnistu") => application-not-accessible?)
     (fact "after calling create-assignment, the assignment is created"
-      (let [assignment-id (:id (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Luotu?"))
+      (let [assignment-id (:id (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Luotu?"))
             assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
         assignment => truthy
         (sc/check Assignment assignment) => nil?
@@ -115,7 +115,7 @@
 (facts "Editing assignments"
   (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))
         doc-id (-> (query-application sonja id) :documents first :id)
-        {assignment-id :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Edit1")]
+        {assignment-id :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Edit1")]
     (fact "can change text"
       (update-assignment sonja id assignment-id ronja-id "foo") => ok?
       (-> (query ronja :assignment :assignmentId assignment-id)
@@ -139,8 +139,8 @@
 (facts "Completing assignments"
   (let [id (create-app-id sonja :propertyId sipoo-property-id)
         doc-id (-> (query-application sonja id) :documents first :id)
-        {assignment-id1 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")
-        {assignment-id2 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")]
+        {assignment-id1 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
+        {assignment-id2 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")]
     (fact "Only authorities within the same organization can complete assignment"
       (complete-assignment pena assignment-id1)   => unauthorized?
       (complete-assignment veikko assignment-id1) => assignments-not-enabled?
@@ -178,9 +178,9 @@
           _ (generate-documents app-id sonja)
           app (query-application sonja app-id)
           designer-doc     (domain/get-document-by-name app "suunnittelija")
-          assignment-id (:id (create-assignment sonja sonja-id app-id {:group "parties" :id (:id designer-doc)} "Tarkista!"))
+          assignment-id (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}] "Tarkista!"))
           assignments         (get-user-assignments sonja)
-          designer-assignment (util/find-first #(= "parties" (get-in % [:target :group])) assignments)]
+          designer-assignment (util/find-first #(= "parties" (get-in % [:targets 0 :group])) assignments)]
       (fact "assignment has designer target"
         (:id designer-assignment) => assignment-id)
       (fact "party assignment is deleted after party document deletion"
@@ -193,8 +193,8 @@
           app (query-application sonja app-id)
           target-attachment (first (:attachments app))]
       (fact "assignment for attachment"
-        (create-assignment sonja sonja-id app-id {:group "attachments" :id (:id target-attachment)} "Onko liite kunnossa?") => ok?
-        (map (comp :id :target) (get-user-assignments sonja)) => (contains (:id target-attachment)))
+        (create-assignment sonja sonja-id app-id [{:group "attachments" :id (:id target-attachment)}] "Onko liite kunnossa?") => ok?
+        (mapcat (comp (partial map :id) :targets) (get-user-assignments sonja)) => (contains (:id target-attachment)))
       (fact "attachment deletion deletes assignment"
         (command sonja :delete-attachment :id app-id :attachmentId (:id target-attachment)) => ok?
         (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))
@@ -215,8 +215,8 @@
       id2 => truthy)
 
     (facts "text search finds approximate matches in description"
-      (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Kuvaava teksti")
-            {assignment-id2 :id} (create-assignment ronja sonja-id id2 {:group "group" :id doc-id2} "Kuvaava teksti")]
+      (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Kuvaava teksti")
+            {assignment-id2 :id} (create-assignment ronja sonja-id id2 [{:group "group" :id doc-id2}] "Kuvaava teksti")]
         (fact "uva eks - all"
           (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti"))
