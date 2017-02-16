@@ -59,7 +59,10 @@ LUPAPISTE.FileuploadService = function() {};
 
 
 var hub = {};
+hub.send = function() {};
 hub.subscribe = function() {};
 hub.unsubscribe = function() {};
 hub.onPageLoad = function() {};
 hub.onPageUnload = function() {};
+
+var loc = {};
