@@ -5,7 +5,8 @@
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.mapping-common :as common]
             [lupapalvelu.application :refer [get-operations]]
-            [sade.core :refer [def-]]))
+            [sade.core :refer [def-]]
+            [sade.util :as util]))
 
 (def uusi-asia
   {:tag :UusiAsia
@@ -73,12 +74,7 @@
      :filename (writer/get-file-name-on-server fileId (get-in attachment [:latestVersion :filename]))}))
 
 (defn- enrich-attachment-with-operation [attachment operations]
-  (if-let [op-id (get-in attachment [:op :id])]
-    (assoc-in attachment [:op :name] (some
-                                       #(when (= op-id (:id %))
-                                          (:name %))
-                                       operations))
-    attachment))
+  (update attachment :op (partial map #(util/assoc-when % :name (:name (util/find-by-id (:id %) operations))))))
 
 (defn- enrich-attachments-with-operation-data [attachments operations]
   (mapv #(enrich-attachment-with-operation % operations) attachments))

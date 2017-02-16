@@ -46,7 +46,7 @@
                                    :fileId "file123"
                                    :filename "valtakirja.pdf"
                                    :contentType "application/pdf"}
-                   :op {:id "523844e1da063788effc1c56"}
+                   :op [{:id "523844e1da063788effc1c56"}]
                    :modified 1424248442767}
                   {:id :attachment3
                    :type {:type-group "paapiirustus"
@@ -326,5 +326,3 @@
       (let [attachments (assoc-in attachments [0 :target :type] "verdict")
             attachments (assoc-in attachments [1 :target :type] "statement")]
        (attachments-for-write {:attachments attachments}) => empty?))))
-
-
