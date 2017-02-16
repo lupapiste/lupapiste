@@ -14,7 +14,6 @@ var cljsLoader = {
   loadComponent: function(name, componentConfig, callback) {
     "use strict";
     if (_.has(componentConfig, "cljsComponentName")) {
-      var lupapalvelu;
       var cljsComponentName = _.get(componentConfig, "cljsComponentName");
       var elemId = _.uniqueId(cljsComponentName);
       var elems = ko.utils.parseHtmlFragment("<div id='" + elemId + "'></div>");
