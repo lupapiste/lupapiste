@@ -6,7 +6,7 @@
    {:on-change    #(change-fn (.. % -target -value))
     :data-test-id data-test-id
     :value        value}
-   (map (fn [[k v]] [:option {:value k} v]) options)])
+   (map (fn [[k v]] [:option {:key k :value k} v]) options)])
 
 (rum/defc autofocus-input-field < rum/reactive
                                   {:did-mount #(-> % rum/dom-node .focus)}

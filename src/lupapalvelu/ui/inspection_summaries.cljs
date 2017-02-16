@@ -25,7 +25,8 @@
                                :template nil}
                          :summary nil}})
 
-(def state         (atom empty-state))
+(defonce state (atom empty-state))
+(def table-rows (rum/cursor-in state [:view :summary :targets]))
 
 (defn- refresh
   ([] (refresh nil))
@@ -241,6 +242,15 @@
           [:i.lupicon-circle-plus]
           [:span (js/loc "inspection-summary.targets.new.button")]]])]]))
 
+(defonce args (atom {}))
+
+(defn mount-component []
+  (rum/mount (inspection-summaries (:app @args) (:auth-model @args))
+             (.getElementById js/document (:dom-id @args))))
+
 (defn ^:export start [domId componentParams]
-  (rum/mount (inspection-summaries (aget componentParams "app") (aget componentParams "authModel"))
-             (.getElementById js/document (name domId))))
+  (swap! args assoc :app (aget componentParams "app") :auth-model (aget componentParams "authModel") :dom-id (name domId))
+  (mount-component))
+
+(defn reload-hook []
+  (mount-component))
