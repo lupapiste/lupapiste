@@ -149,7 +149,7 @@
           :data-test-id (str "edit-link-" idx)}
          (js/loc "edit")])
       (if (and (not editing?) remove-enabled?)
-        (remove-link applicationId summaryId targetId idx)))]))
+        (remove-link (:applicationId @component-state) summaryId targetId idx)))]))
 
 (defn init
   [init-state props]
