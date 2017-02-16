@@ -186,10 +186,21 @@
         statement (first statements)
         file-id-1 (get-in (upload-file pena "dev-resources/test-attachment.txt") [:files 0 :fileId])
         file-id-2 (get-in (upload-file pena "dev-resources/invalid-pdfa.pdf") [:files 0 :fileId])]
+    (count (:attachments application)) => 4
     statement-resp => ok?
 
+    (fact "Pena can't bind statement"
+      (command pena :bind-attachments :id application-id
+        :filedatas [{:fileId file-id-1
+                     :type {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
+                     :group nil
+                     :target {:id (:id statement) :type "statement"}}
+                    {:fileId file-id-2
+                     :type {:type-group "ennakkoluvat_ja_lausunnot" :type-id "vesi_ja_viemariliitoslausunto_tai_kartta"}
+                     :group nil
+                     :target {:id (:id statement) :type "statement"}}]) => (partial expected-failure? :error.not-statement-owner))
     (let [{job :job :as resp} (command
-                                pena
+                                sonja
                                 :bind-attachments
                                 :id application-id
                                 :filedatas [{:fileId file-id-1 :type {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
@@ -198,14 +209,18 @@
                                             {:fileId file-id-2 :type {:type-group "ennakkoluvat_ja_lausunnot" :type-id "vesi_ja_viemariliitoslausunto_tai_kartta"}
                                              :group nil
                                              :target {:id (:id statement) :type "statement"}}])]
-      resp => ok?
+      (fact "Sonja can add bind statement attachments" resp => ok?)
       (fact "Job id is returned" (:id job) => truthy)
-      (when-not (= "done" (:status job))
+      (when (and (:ok resp) (not= "done" (:status job)))
         (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
 
+      (fact "Pena can't see draft statement attachments"
+        (count (:attachments (query-application pena application-id))) => 4)
       (facts "statement attachments status"
-        (let [attachments (:attachments (query-application pena application-id))
+        (let [attachments (:attachments (query-application ronja application-id))
               statement-attachments (filter #(= (-> % :target :type keyword) :statement) attachments)]
+          (count attachments) => 6
+          (count statement-attachments) => 2
           (doseq [att statement-attachments]
             (fact {:midje/description (str (get-in att [:type :type-id]) " statement as target id")}
               (get-in att [:target :id]) => (:id statement))
