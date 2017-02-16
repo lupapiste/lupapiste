@@ -102,6 +102,18 @@
 (defn default-template-id-for-operation [organization {opName :name}]
   (get-in organization [:inspection-summary :operations-templates (keyword opName)]))
 
+(defn- enrich-summary-targets [attachments targets]
+  (letfn [(add-attachment-data [{tid :id :as target}]
+            (let [target-attachments (filter (fn [{{:keys [id type]} :target}]
+                                               (and (= type "inspection-summary-item")
+                                                    (= id tid)))
+                                             attachments)]
+              (assoc target :attachments (map #(select-keys % [:type :latestVersion :id]) target-attachments))))]
+    (map add-attachment-data targets)))
+
+(defn get-summaries [{:keys [inspection-summaries attachments]}]
+  (map #(update % :targets (partial enrich-summary-targets attachments)) inspection-summaries))
+
 (defn process-verdict-given [{:keys [organization primaryOperation inspection-summaries] :as application}]
   (let [organization (org/get-organization organization)]
     (when (and (:inspection-summaries-enabled organization) (empty? inspection-summaries))
