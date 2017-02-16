@@ -38,7 +38,7 @@
   (fact "Create test data"
     (let [app-sipoo     (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
           {id1 :id :as app-jarvenpaa}
-                        (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Järvikatu 29")
+                        (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
           _ (command jarvenpaa :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\n\n bar3")
           templates (-> (query jarvenpaa :organization-inspection-summary-settings) :templates)]
       (command jarvenpaa :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?
