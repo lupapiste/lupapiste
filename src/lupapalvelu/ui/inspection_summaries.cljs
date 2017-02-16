@@ -116,28 +116,29 @@
     :data-test-id (str "remove-icon-" index)}])
 
 (rum/defcs target-row < {:init (fn [state _]
-                                 (-> state
-                                     (assoc ::input-id (jsutil/unique-elem-id "inspection-row"))
-                                     (assoc ::row-target (-> state :rum/args first))))}
+                                 (let [[_ target] (-> state :rum/args)]
+                                   (-> state
+                                       (assoc ::input-id (jsutil/unique-elem-id "inspection-target-row"))
+                                       (assoc ::row-target target)
+                                       (assoc ::summary  (get-in @component-state [:view :summary])))))}
                         {:did-mount (fn [state]
                                       (upload/bindToElem (js-obj "id" (::input-id state)))
                                       (upload/subscribe-files-uploaded (::input-id state)
                                                                        (partial got-files (-> state ::row-target :id)))
                                       state)}
-  [local-state summary applicationId idx add-enabled? edit-enabled? remove-enabled?]
-  (let [data      (get-in summary [:targets idx])
-        editing?  (:editing? data)
-        summaryId (:id summary)
-        targetId  (:id data)]
+  [local-state idx row-target add-enabled? edit-enabled? remove-enabled?]
+  (let [editing?  (:editing? row-target)
+        summaryId (get-in local-state [::summary :id])
+        targetId  (:id row-target)]
     [:tr
      {:data-test-id (str "target-" idx)}
      [:td ""]
      [:td.target-name
       (if (and editing? add-enabled?)
-        (uc/autofocus-input-field (:target-name data)
+        (uc/autofocus-input-field (:target-name row-target)
                                   (str "edit-target-field-" idx)
-                                  (partial commit-target-name-edit applicationId summaryId targetId))
-        (:target-name data))]
+                                  (partial commit-target-name-edit (:applicationId @component-state) summaryId targetId))
+        (:target-name row-target))]
      [:td (attc/upload-link (::input-id local-state))]
      [:td ""]
      [:td ""]
@@ -281,8 +282,8 @@
             [:th ""]]]
           [:tbody
            (doall
-             (for [[idx _] (map-indexed vector (rum/react table-rows))]
-               (target-row summary applicationId idx target-add-enabled? target-edit-enabled? target-remove-enabled?)))]]])
+             (for [[idx target] (map-indexed vector (rum/react table-rows))]
+               (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled?)))]]])
       (if (and (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
