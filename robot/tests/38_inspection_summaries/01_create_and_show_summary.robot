@@ -37,4 +37,6 @@ Authority gives a verdict
 Inspection summary should be created automatically
   Open tab  inspectionSummaries
   Wait until  Select From List by label  xpath=//select[@data-test-id="summaries-select"]  Uusi pohja 1 -
-  Wait until  Element should be visible by test id  target-name-AA
+  Wait until  Element should be visible by test id  target-name-0
+  Element should contain  //td[@data-test-id="target-name-0"]  AA
+  Element should contain  //td[@data-test-id="target-name-1"]  BB
