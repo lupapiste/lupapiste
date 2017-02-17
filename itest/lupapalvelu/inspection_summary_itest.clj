@@ -155,4 +155,11 @@
           (command raktark-jarvenpaa :edit-inspection-summary-target
                    :id id1 :summaryId summaryId1 :targetId (:id test-target)
                    :targetName "Nope") => (partial expected-failure? :error.inspection-summary-target.finished))
+        (fact "Can't upload to finished"
+          (upload-file-and-bind pena id1 {:type {:type-group "katselmukset_ja_tarkastukset"
+                                                 :type-id    "tarkastusasiakirja"}
+                                          :constructionTime true
+                                          :target {:type "inspection-summary-item"
+                                                   :id (:id test-target)}}
+                                :fails :error.inspection-summary-target.finished))
         ))))

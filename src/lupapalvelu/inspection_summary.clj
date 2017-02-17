@@ -138,6 +138,13 @@
       (when-let [templateId (default-template-id-for-operation organization primaryOperation)]
         (new-summary-for-operation application primaryOperation templateId)))))
 
+(defn get-summary-target [target-id summaries]
+  (reduce (fn [_ {targets :targets :as summary}]
+            (when-let [target (util/find-by-id target-id targets)]
+              (reduced target)))
+          nil
+          summaries))
+
 (defn deny-if-finished
   "Pre-check to validate that target is not finished"
   [{{:keys [summaryId targetId]} :data {:keys [inspection-summaries]} :application}]
@@ -147,6 +154,12 @@
                           (util/find-by-id targetId)))
       (fail :error.inspection-summary-target.finished))))
 
+(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
+  (let [summary-target (get-summary-target tid inspection-summaries)]
+    (when (:finished summary-target)
+      (fail :error.inspection-summary-target.finished))))
+
+
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
 
@@ -155,7 +168,7 @@
     (mongo/update-by-query :applications
                            (elem-match-query appId summaryId)
                            {$pull {:inspection-summaries.$.targets {:id targetId}}})
-    (attachment/delete-attachments! application (remove nil? (map :id target-attachments)))))
+    (att/delete-attachments! application (remove nil? (map :id target-attachments)))))
 
 (defn add-target [appId summaryId targetName]
   (let [new-target (new-target targetName)]
