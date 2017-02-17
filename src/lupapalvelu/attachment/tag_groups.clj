@@ -21,8 +21,7 @@
          att-type/type-groups)])
 
 (defn- get-operation-ids [{op :op :as attachment}]
-  (->> (if (sequential? op) (mapv :id op) [(:id op)])
-       (remove nil?)))
+  (mapv :id op))
 
 (defn- tag-set [attachment]
   (-> attachment :tags set))

@@ -30,9 +30,6 @@
   (fact "parties"
     (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :application :parties :needed} :in-any-order :gaps-ok))
 
-  (fact "legacy operation"
-    (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
-
   (fact "multiple operations"
     (attachment-tags {:groupType "operation" :op [{:id "someOpId"} {:id "otherOpId"}]}) => (just #{:preVerdict :needed :multioperation :other} :in-any-order :gaps-ok))
 
@@ -50,8 +47,8 @@
   (add-operation-tag-groups [] []) => []
   (add-operation-tag-groups [] [[:some] [:fancy] [:hierarchy]]) => [[:some] [:fancy] [:hierarchy]]
   (add-operation-tag-groups [{:no :operation}] [[:drop] [:operation] [:if] [:no] [:operation-attachments]]) => [[:drop] [:if] [:no] [:operation-attachments]]
-  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:operation [:tag]]]) => [["op-id-foo" [:tag]]]
-  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:pre] [:operation [:tag] [:filtered-later-tag]] [:post]]) => [[:pre] ["op-id-foo" [:tag] [:filtered-later-tag]] [:post]])
+  (add-operation-tag-groups [{:op [{:id "foo"}] :tags [:tag]}] [[:operation [:tag]]]) => [["op-id-foo" [:tag]]]
+  (add-operation-tag-groups [{:op [{:id "foo"}] :tags [:tag]}] [[:pre] [:operation [:tag] [:filtered-later-tag]] [:post]]) => [[:pre] ["op-id-foo" [:tag] [:filtered-later-tag]] [:post]])
 
 (facts filter-tag-groups
   (fact "simple two level hierachry"
@@ -99,8 +96,8 @@
 
   (fact "operation"
     (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
-          attachments [{:op {:id operation-id1} :type {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat}}
-                       {:op {:id operation-id1} :type {:type-id :aitapiirustus :type-group :paapiirustus}}]
+          attachments [{:op [{:id operation-id1}] :type {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat}}
+                       {:op [{:id operation-id1}] :type {:type-id :aitapiirustus :type-group :paapiirustus}}]
           application {:attachments attachments}]
       (attachment-tag-groups application) => [[(str "op-id-" operation-id1) [:paapiirustus] [:iv_suunnitelma]]]))
 
@@ -111,14 +108,14 @@
           attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
                         {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
                         {:type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:op [{:id operation-id1}] :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op [{:id operation-id2}] :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op [{:id operation-id2}] :type {:type-group "somegroup" :type-id "anothertype"}}
                         {:op [{:id operation-id3} {:id operation-id2}] :type {:type-group "somegroup" :type-id "multitype"}}
-                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
+                        {:op [{:id operation-id3}] :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op [{:id operation-id3}] :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:op [{:id operation-id3}] :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:op [{:id operation-id3}] :type {:type-group "somegroup" :type-id "other-type"}}]
           application {:primaryOperation {:id operation-id1}
                        :secondaryOperations [{:id operation-id2} {:id operation-id3}]
                        :attachments attachments}
@@ -219,7 +216,7 @@
 
     (fact "attachment type - one attachment"
 
-      (let [attachments  [{:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}]
+      (let [attachments  [{:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "sometype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :iv_suunnitelma :default false}]
@@ -229,9 +226,9 @@
 
     (fact "attachment type - many attachments"
 
-      (let [attachments  [{:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "anothertype"}}
-                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "othertype"}}]
+      (let [attachments  [{:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "othertype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :paapiirustus :default false}
@@ -248,9 +245,9 @@
       (let [attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
                           {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
                           {:type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "anothertype"}}
-                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "othertype"}}]
+                          {:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :op [{:id "op"}] :type {:type-group "somegroup" :type-id "othertype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :general :default false}
