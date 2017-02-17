@@ -107,7 +107,7 @@
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
   [{application :application}]
-  (inspection-summary/edit-target application summaryId targetId :target-name targetName)
+  (inspection-summary/edit-target application summaryId targetId {:set {:target-name targetName}})
   (ok))
 
 (defcommand remove-target-from-inspection-summary
@@ -118,3 +118,17 @@
   [{application :application}]
   (inspection-summary/remove-target application summaryId targetId)
   (ok))
+
+(defcommand set-target-status
+  {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check]
+   :parameters [:id summaryId targetId status]
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
+                      (partial action/boolean-parameters [:status])]
+   :user-roles #{:applicant}}
+  [{application :application user :user}]
+  (let [params (when status
+                 {:set {:finished true :finished-date (now) :finished-by (usr/summary user)}}
+                 {:set {:finished false}
+                  :unset {:finished-date 1 :finished-by 1}})]
+    (inspection-summary/edit-target application summaryId targetId params)
+    (ok)))

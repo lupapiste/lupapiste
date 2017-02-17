@@ -143,12 +143,16 @@
                   {$push {:inspection-summaries.$.targets new-target}})
     (:id new-target)))
 
-(defn edit-target [application summaryId targetId & kvs]
+(defn edit-target [application summaryId targetId {mset :set munset :unset}]
   (let [summary (->> application :inspection-summaries (util/find-by-id summaryId))
         index   (->> summary :targets (util/position-by-id targetId))
-        updates (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) (apply hash-map kvs))]
+        set-updates   (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) mset)
+        unset-updates (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) munset)]
     (when-not index
       (fail! :error.summary-target.edit.not-found))
     (mongo/update-by-query :applications
                            {:_id (:id application) :inspection-summaries {$elemMatch {:id summaryId}}}
-                           {$set updates})))
+                           (merge (when (seq set-updates)
+                                    {$set set-updates})
+                                  (when (seq unset-updates)
+                                    {$unset unset-updates})))))
