@@ -1514,7 +1514,8 @@
            :subtype :maksaja
            :section-help "schemas.maksaja.section.help"
            :accordion-fields hakija-accordion-paths
-           :type :party}
+           :type :party
+           :blacklist [:neighbor]}
     :body maksaja}
 
    {:info {:name "rakennuspaikka"
