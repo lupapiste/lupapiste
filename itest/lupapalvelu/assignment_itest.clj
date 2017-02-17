@@ -174,20 +174,30 @@
 
 (facts "Deleting targets"
   (facts "documents"
-    (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
-          _ (generate-documents app-id sonja)
-          app (query-application sonja app-id)
-          designer-doc     (domain/get-document-by-name app "suunnittelija")
-          assignment-id (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}] "Tarkista!"))
+    (let [app-id         (create-app-id sonja :propertyId sipoo-property-id)
+          _              (generate-documents app-id sonja)
+          app            (query-application sonja app-id)
+          designer-doc   (domain/get-document-by-name app "suunnittelija")
+          maksaja-doc    (domain/get-document-by-name app "maksaja")
+          assignment-id1 (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}] "Tarkista!"))
+          assignment-id2 (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}
+                                                                        {:group "parties" :id (:id maksaja-doc)}] "Kaksi kohdetta"))
           assignments         (get-user-assignments sonja)
           designer-assignment (util/find-first #(= "parties" (get-in % [:targets 0 :group])) assignments)]
       (fact "assignment has designer target"
-        (:id designer-assignment) => assignment-id)
-      (fact "party assignment is deleted after party document deletion"
+        (:id designer-assignment) => assignment-id1)
+      (fact "party assignment is deleted after party document deletion if party is only target"
         (command sonja :remove-doc :id app-id :docId (:id designer-doc)) => ok?
         (let [new-query (get-user-assignments sonja)]
           (count new-query) => (dec (count assignments))
-          new-query =not=> (contains {:id assignment-id})))))
+          new-query =not=> (contains {:id assignment-id1})))
+      (fact "party is removed from targets when there are multiple targets"
+        (->> assignments (mapcat :targets) (map :id)) => (contains (:id maksaja-doc))
+        (command sonja :remove-doc :id app-id :docId (:id maksaja-doc)) => ok?
+        (let [new-query (get-user-assignments sonja)]
+          (count new-query) => (dec (count assignments)) ; no change from previous fact
+          (map :id new-query) => (contains assignment-id2)
+          (->> new-query (mapcat :targets) (map :id)) =not=> (contains (:id maksaja-doc))))))
   (facts "attachments"
     (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
           app (query-application sonja app-id)
@@ -197,8 +207,7 @@
         (mapcat (comp (partial map :id) :targets) (get-user-assignments sonja)) => (contains (:id target-attachment)))
       (fact "attachment deletion deletes assignment"
         (command sonja :delete-attachment :id app-id :attachmentId (:id target-attachment)) => ok?
-        (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))
-    ))
+        (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))))
 
 (facts "Assignments search"
   (apply-remote-minimal)
