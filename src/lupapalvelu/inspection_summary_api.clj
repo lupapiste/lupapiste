@@ -112,7 +112,8 @@
   (ok :id (inspection-summary/add-target appId summaryId targetName)))
 
 (defcommand edit-inspection-summary-target
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/deny-if-finished]
    :parameters [:id summaryId targetId targetName]
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
