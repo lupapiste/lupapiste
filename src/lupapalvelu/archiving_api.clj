@@ -4,6 +4,7 @@
             [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
+            [lupapalvelu.application :as app]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
@@ -18,8 +19,9 @@
    :user-roles       #{:authority}
    :states           states/post-verdict-states
    :pre-checks       [check-user-is-archivist]}
-  [{:keys [application user] :as command}]
-  (if-let [{:keys [error]} (archiving/send-to-archive command (set attachmentIds) (set documentIds))]
+  [{:keys [application user organization] :as command}]
+  (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
+                               (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
     (fail error)
     (ok)))
 

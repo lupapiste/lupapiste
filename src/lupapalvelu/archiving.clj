@@ -12,6 +12,7 @@
             [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.attachment :as att]
@@ -235,7 +236,7 @@
 
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality location
-           location-wgs84 tosFunction verdicts authority closed drawings] :as application}
+           location-wgs84 tosFunction verdicts handlers closed drawings] :as application}
    user
    & [attachment]]
   (let [s2-metadata (or (:metadata attachment) (:metadata application))
@@ -258,7 +259,7 @@
                        :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
-                       :kasittelija           (select-keys authority [:username :firstName :lastName])
+                       :kasittelija           (select-keys (util/find-first :general handlers) [:userId :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
                        :kayttotarkoitukset    (get-usages application (att/get-operation-ids attachment))
                        :kieli                 "fi"
