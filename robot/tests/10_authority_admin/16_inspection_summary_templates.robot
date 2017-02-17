@@ -12,7 +12,7 @@ Feature not in use in Sipoo
   Go to page  applications
   Element should not be visible by test id  inspection-summary-templates-list
   Go to page  operations
-  Element should not be visible by test id  select-inspection-summary-template
+  Element should not be visible by test id  select-inspection-summary-template-kerrostalo-rivitalo
   Logout
 
 Feature in use in Jarvenpaa
@@ -20,7 +20,7 @@ Feature in use in Jarvenpaa
   Go to page  applications
   Element should be visible by test id  inspection-summary-templates-list
   Go to page  operations
-  Element should be visible by test id  select-inspection-summary-template
+  Element should be visible by test id  select-inspection-summary-template-kerrostalo-rivitalo
 
 Create new templates
   Go to page  applications

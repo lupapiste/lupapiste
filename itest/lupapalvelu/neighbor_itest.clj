@@ -198,7 +198,8 @@
           (fact "has hakija document" "hakija-r" => has-doc)
           (fact "has hankkeen-kuvaus-rakennuslupa document" "hankkeen-kuvaus-rakennuslupa" => has-doc)
           (fact "has rakennuspaikka document" "rakennuspaikka" => has-doc)
-          (fact "does not have paatoksen-toimitus-rakval document" "paatoksen-toimitus-rakval" =not=> has-doc))
+          (fact "does not have paatoksen-toimitus-rakval document" "paatoksen-toimitus-rakval" =not=> has-doc)
+          (fact "does not have rakennusjatesuunnitelma document" "rakennusjatesuunnitelma" =not=> has-doc))
 
 
         (fact "attachments"

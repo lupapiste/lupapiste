@@ -235,7 +235,7 @@
   (fact "new entry, no existing handlers"
     (handler-upsert-updates {:id ..new-id.. :info ..info..} [] ..created.. ..user..) =>
     {$push {:history {:handler {:id ..new-id.. :info ..info.., :new-entry true}, :ts ..created.., :user {}}},
-     $set {:handlers [{:id ..new-id.. :info ..info..}], :modified ..created..}})
+     $set {:handlers.0 {:id ..new-id.. :info ..info..}, :modified ..created..}})
 
   (fact "new entry, one existing handler"
     (handler-upsert-updates {:id ..new-id..} [{:id ..id..}] ..created.. ..user..) =>

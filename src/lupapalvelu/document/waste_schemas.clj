@@ -411,16 +411,19 @@
 (defschemas 1
   [{:info {:name basic-construction-waste-plan-name ; "rakennusjatesuunnitelma"
            :order 200
-           :section-help "rakennusjate.help"}
+           :section-help "rakennusjate.help"
+           :blacklist [:neighbor]}
     :body (body rakennusjatesuunnitelma)}
    {:info {:name basic-construction-waste-report-name ; "rakennusjateselvitys"
            :order 201
            :editable-in-states states/post-verdict-states
-           :section-help "rakennusjate.help"}
+           :section-help "rakennusjate.help"
+           :blacklist [:neighbor]}
     :body (body rakennusjateselvitys)}
 
    {:info {:name extended-construction-waste-report-name ; "laajennettuRakennusjateselvitys"
            :order 200
            :editable-in-states (states/all-application-states-but states/terminal-states)
-           :section-help "rakennusjateLaajennettu.help"}
+           :section-help "rakennusjateLaajennettu.help"
+           :blacklist [:neighbor]}
     :body (body laajennettu-rakennusjateselvitys)}])

@@ -3,7 +3,7 @@
 Documentation  Sonja can assign application to herself
 Suite Setup    Apply minimal fixture now
 Resource       ../../common_resource.robot
-Resource       ../37_handlers/handlers_resource.robot
+Resource       ../38_handlers/handlers_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***

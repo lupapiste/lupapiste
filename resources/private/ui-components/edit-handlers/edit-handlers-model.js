@@ -12,7 +12,7 @@ LUPAPISTE.EditHandlersModel = function() {
                     obj.firstName || "" );
   }
 
-  var roles = service.applicationHandlerRoles();
+  var roles = service.applicationHandlerRoles;
   var authorities = ko.observableArray();
 
   function updateAuthorities( auths ) {
@@ -25,11 +25,11 @@ LUPAPISTE.EditHandlersModel = function() {
                        }));
   }
 
-  self.disposedSubscribe(service.applicationAuthorities(), updateAuthorities);
+  self.disposedSubscribe(service.applicationAuthorities, updateAuthorities);
 
   // Initial call just in case. Otherwise coming back to component
   // would not not update authorities
-  updateAuthorities( service.applicationAuthorities()() );
+  updateAuthorities( service.applicationAuthorities() );
 
   self.handlers = service.applicationHandlers;
 
@@ -128,13 +128,17 @@ LUPAPISTE.EditHandlersModel = function() {
     service.removeApplicationHandler( data.id );
   };
 
-  self.isDisabled = function( data ) {
-    if( data.userId() && data.roleId() ) {
+  function isDataDisabled( data ) {
+    if( data && data.userId() && data.roleId() ) {
       var role = _.find( roles(), {id: data.roleId()});
       return !_.find( authorities(), {id: data.userId()})
           || !role
           || _.get( role, "disabled" );
     }
+}
+
+  self.isDisabled = function( data ) {
+    return service.pending() || isDataDisabled( data );
   };
 
   self.back = function() {

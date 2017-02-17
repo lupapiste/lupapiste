@@ -122,6 +122,12 @@ Sonja returns to the application and checks handlers
   List handler is  0  Sibbo Ronja  Käsittelijä
   List handler is  1  Sibbo Sonja  Uusi
   No such test id  handler-2
+
+Sonja goes to applications page and comes back
+  Open application  ${appname}  ${propertyId}
+  List handler is  0  Sibbo Ronja  Käsittelijä
+  List handler is  1  Sibbo Sonja  Uusi
+  No such test id  handler-2  
   [Teardown]  Logout
 
 # -------------------------
@@ -133,6 +139,12 @@ Pena logs in and sees handlers
   List handler is  0  Sibbo Ronja  Käsittelijä
   List handler is  1  Sibbo Sonja  Uusi
   No such test id  handler-2
+
+Pena goes to applications page and comes back
+  Open application  ${appname}  ${propertyId}
+  List handler is  0  Sibbo Ronja  Käsittelijä
+  List handler is  1  Sibbo Sonja  Uusi
+  No such test id  handler-2  
 
 No handlers in inforequest
   Open inforequest  ${appname}-info  ${propertyId}

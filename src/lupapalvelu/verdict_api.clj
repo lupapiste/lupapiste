@@ -18,7 +18,8 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [lupapalvelu.inspection-summary :as inspection-summary]))
 
 ;;
 ;; KRYSP verdicts
@@ -122,6 +123,7 @@
                               (application/state-transition-update next-state timestamp application user)
                               {$set {:verdicts.$.draft false}})]
         (update-application command {:verdicts {$elemMatch {:id id}}} verdict-updates)
+        (inspection-summary/process-verdict-given application)
         (when (seq doc-updates)
           (update-application command
                               (:mongo-query doc-updates)

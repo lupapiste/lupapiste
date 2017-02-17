@@ -287,7 +287,8 @@
                                                          {:krysp.MAL.url {$exists true}}
                                                          {:krysp.VVVL.url {$exists true}}
                                                          {:krysp.YI.url {$exists true}}
-                                                         {:krysp.YL.url {$exists true}}]}
+                                                         {:krysp.YL.url {$exists true}}
+                                                         {:krysp.KT.url {$exists true}}]}
                                                    {:krysp 1})
         orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
@@ -460,7 +461,7 @@
                           :verdicts true
                           :history true}))))
 
-(defn- fetch-review-updates-for-organization
+(defn fetch-review-updates-for-organization
   [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
   (let [grouped-apps (if (seq applications)
                          (group-by :permitType applications)

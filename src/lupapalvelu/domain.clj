@@ -399,7 +399,8 @@
                               :completed   nil}
    :reservations             []
    :warrantyStart            nil ; timestamp
-   :warrantyEnd              nil})
+   :warrantyEnd              nil
+   :inspection-summaries     []})
 
 (def operation-skeleton
   {:name ""

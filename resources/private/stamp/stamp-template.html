@@ -79,18 +79,6 @@
                        data-test-id="stamp-info-section">
               </div>
 
-              <div class="col-2">
-                <label>&nbsp</label>
-                <div class="col--vertical checkbox-wrapper"
-                     data-bind="css: {'wrapper--disabled': status() !== statusReady}">
-                  <input data-bind="checked: includeBuildings,
-                                    disable: status() !== statusReady"
-                         type="checkbox" 
-                         class="form-input"
-                         id="stamp-info-include-buildings">
-                  <label data-bind="ltext: 'stamp.include-buildings'" class="inline-label checkbox-label" for="stamp-info-include-buildings"></label>
-                </div>
-              </div>
             </div>
 
             <div class="row">
@@ -208,8 +196,8 @@
 
             <!-- ko foreach: attachments -->
             <tr class="attachment-row attachment-multiselect-row"
-                data-bind="click: $parents[2].selectRow, 
-                           clickBubble: false, 
+                data-bind="click: $parents[2].selectRow,
+                           clickBubble: false,
                            css: {selected: selected}">
               <td>
                 <state-icons params="attachment: $data"></state-icons>
@@ -257,7 +245,7 @@
                   <input type="checkbox" data-bind="checked: $data.selected,
                                                     enable: $parents[2].status() === $parents[2].statusReady,
                                                     attr: {id: $data.fileId}">
-                  
+
                   <label class="stampbox-label"
                          data-bind="attr: {'for': $data.fileId}"></label>
                 </div>

@@ -27,7 +27,6 @@
     self.applicationId = lupapisteApp.models.application.id;
     self.permitType = lupapisteApp.models.application.permitType;
     self.neighbors = ko.observableArray();
-    self.neighborId = ko.observable();
     self.map = null;
 
     self.x = 0;
@@ -104,7 +103,7 @@
       self.x = x;
       self.y = y;
 
-      self.neighbors(neighbors).neighborId(null);
+      self.neighbors(neighbors);
 
       self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
       self.getNeighbourWKT = self.draw(_.map(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
@@ -130,19 +129,19 @@
     };
 
     self.remove = function(neighbor) {
-      self.neighborId(neighbor.id);
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("neighbors.remove-dialog.title"),
         loc("neighbors.remove-dialog.message"),
-        {title: loc("yes"), fn: self.removeNeighbor},
+        {title: loc("yes"), fn: _.wrap( neighbor, self.removeNeighbor )},
         {title: loc("no")}
       );
       return self;
     };
 
-    self.removeNeighbor = function() {
+    self.removeNeighbor = function( neighbor ) {
+      self.neighbors.remove( neighbor );
       ajax
-        .command("neighbor-remove", {id: self.applicationId(), neighborId: self.neighborId()})
+        .command("neighbor-remove", {id: self.applicationId(), neighborId: neighbor.id})
         .complete(_.partial(repository.load, self.applicationId(), _.noop))
         .call();
       return self;

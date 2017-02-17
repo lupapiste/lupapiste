@@ -60,7 +60,7 @@
 (defn- update-tos-metadata [function-code {:keys [application created user] :as command} & [correction-reason]]
   (if-let [tos-function-map (t/tos-function-with-name function-code (:organization application))]
     (let [orgId (:organization application)
-          updated-attachments (map #(t/document-with-updated-metadata % orgId function-code application) (:attachments application))
+          updated-attachments (pmap #(t/document-with-updated-metadata % orgId function-code application) (:attachments application))
           {updated-metadata :metadata} (t/document-with-updated-metadata application orgId function-code application "hakemus")
           process-metadata (t/calculate-process-metadata (t/metadata-for-process orgId function-code) updated-metadata updated-attachments)]
       (action/update-application command

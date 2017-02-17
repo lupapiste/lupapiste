@@ -87,7 +87,6 @@ Sonja sees stamping info fields
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//label[@for="stamp-info-include-buildings"]
 
 
 Sonja inputs new stamping info values

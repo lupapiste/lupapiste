@@ -26,6 +26,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -43,7 +44,8 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.organization :as org])
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.inspection-summary :as inspection-summary])
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
@@ -286,6 +288,7 @@
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
   (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml))]
+    (inspection-summary/process-verdict-given application)
     (util/deep-merge
      {$set {:verdicts verdicts-with-attachments, :modified created}}
      (get-task-updates application created verdicts-with-attachments app-xml)
@@ -558,7 +561,6 @@
   [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
-        reviews (pc/distinct-by #(select-keys % [:taskname :data]) reviews) ; remove duplicates!
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
@@ -566,6 +568,7 @@
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                             (< pvm (now))))
         review-tasks (map review-to-task (filter historical-timestamp-present? reviews))
+        review-tasks (pc/distinct-by #(select-keys % [:taskname :data]) review-tasks) ; remove duplicates!
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
@@ -591,7 +594,7 @@
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
     (if (some seq validation-errors)
       (fail :error.invalid-task-type :validation-errors validation-errors)
-      (ok :review-count (count reviews)
+      (ok :review-count (count review-tasks)
           :updated-tasks (map :id updated-tasks)
           :updates (util/deep-merge task-updates building-updates state-updates)
           :added-tasks-with-updated-buildings added-tasks-with-updated-buildings))))
@@ -605,3 +608,29 @@
 (defmethod attachment/edit-allowed-by-target :verdict [{user :user application :application}]
   (when-not (auth/application-authority? application user)
     (fail :error.unauthorized)))
+
+;; Notifications
+
+(defn state-change-email-model
+  "Generic state change email. :state-text is set per application state.
+  When state changes and if notify is invoked as post-fn from command,
+  result must contain new state in :state key."
+  [command conf recipient]
+  (assoc
+   (notifications/create-app-model command conf recipient)
+   :state-text #(i18n/localize % "email.state-description" (get-in command [:application :state]))))
+
+(def state-change {:subject-key    "state-change"
+                   :template       "application-state-change.md"
+                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                   :tab-fn         (fn [command] (cond (verdict-tab-action? command) "verdict"))
+                   :model-fn       state-change-email-model})
+
+(notifications/defemail :application-state-change state-change)
+
+(notifications/defemail :undo-cancellation
+                        {:subject-key    "undo-cancellation"
+                         :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
+                         :model-fn       (fn [command conf recipient]
+                                           (assoc (notifications/create-app-model command conf recipient)
+                                             :state-text #(i18n/localize % "email.state-description.undoCancellation")))})

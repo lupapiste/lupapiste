@@ -295,9 +295,9 @@
      :drawings ctc/drawings
      :attachments [{:state "requires_user_action"
                     :target nil
-                    :op {:id "535905834206f413319be7f3"
-                         :name "ya-katulupa-vesi-ja-viemarityot"
-                         :created 1398343043267}
+                    :op [{:id "535905834206f413319be7f3"
+                           :name "ya-katulupa-vesi-ja-viemarityot"
+                           :created 1398343043267}]
                     :locked false
                     :type {:type-group "muut", :type-id "muu"}
                     :applicationState "open"

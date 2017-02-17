@@ -564,7 +564,7 @@
     (fail :error.unknown)))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo includeBuildings kuntalupatunnus section lang]
+  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]
    :categories #{:attachments}
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
                       (partial action/number-parameters [:xMargin :yMargin])
@@ -594,7 +594,6 @@
                           :y-margin (util/->long yMargin)
                           :page     (keyword page)
                           :transparency (util/->long (or transparency 0))
-                          :options      {:include-buildings includeBuildings}
                           :info-fields  {:backend-id   kuntalupatunnus
                                          :section      section
                                          :extra-info   extraInfo

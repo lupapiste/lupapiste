@@ -7,17 +7,17 @@ T&auml;ss&auml; toimintaohjeet vastuun hakemiseen tai ilmoittamiseen:
 1. Jos et viel&auml; ole k&auml;ytt&auml;j&auml;n&auml; Lupapisteess&auml;, {{register}} samalla s&auml;hk&ouml;postiosoitteella, johon sait t&auml;m&auml;n kutsun. Jos sait kutsun eri osoitteeseen, mill&auml; olet rekister&ouml;itynyt Lupapisteeseen, pyyd&auml; kutsun l&auml;hett&auml;j&auml;lt&auml; ({{inviter-email}}) uusi kutsu.
 2. Kirjaudu Lupapisteeseen.
 3. Hyv&auml;ksy Hankkeet-sivulla odottava valtuutuskutsu.
-4. T&auml;ydenn&auml; hakemuksen tiedot.
-5. J&auml;t&auml; hakemus.
+4. T&auml;ydenn&auml; hakemuksen tai ilmoituksen tiedot.
+5. J&auml;t&auml; hakemus tai ilmoitus.
 6. Odota s&auml;hk&ouml;postiviesti&auml; vastuun vahvistamisesta tai viranomaisen esitt&auml;mist&auml; t&auml;ydennyspyynn&ouml;ist&auml;.
 
-T&auml;&auml;lt&auml; p&auml;&auml;set hyv&auml;ksym&auml;&auml;n valtuutuksen ja t&auml;ytt&auml;m&auml;&auml;n hakemuksesi.
+T&auml;&auml;lt&auml; p&auml;&auml;set hyv&auml;ksym&auml;&auml;n valtuutuksen ja t&auml;ytt&auml;m&auml;&auml;n hakemuksesi/ilmoituksesi.
 
 {{link}}
 
-Rakennuslupahakemukseen p&auml;&auml;see tutustumaan ty&ouml;njohtaja-hakemuksesta l&ouml;ytyv&auml;n viiteluvan kautta, linkki l&ouml;ytyy hakemuksen yl&auml;osasta.
+Rakennuslupahakemukseen p&auml;&auml;see tutustumaan ty&ouml;njohtaja-hakemuksesta/ilmoituksesta l&ouml;ytyv&auml;n viiteluvan kautta, linkki l&ouml;ytyy hakemuksen yl&auml;osasta.
 
-Jos vastuun hakeminen liitevaatimuksineen her&auml;tt&auml;&auml; kysymyksi&auml;, ole yhteydess&auml; rakennusvalvontaan esimerkiksi hakemuksen keskusteluketjun kautta.
+Jos vastuun hakeminen liitevaatimuksineen her&auml;tt&auml;&auml; kysymyksi&auml;, ole yhteydess&auml; rakennusvalvontaan esimerkiksi hakemuksen/ilmoituksen keskusteluketjun kautta.
 
 Terveisin,
 

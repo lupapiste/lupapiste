@@ -8,3 +8,14 @@ ko.registerLupapisteComponents = function(components) {
     ko.components.register(component.name, opts);
   });
 };
+
+var origGetComponentNameForNode = ko.components.getComponentNameForNode;
+ko.components.getComponentNameForNode = function(node) {
+  "use strict";
+  var nodeLower = node.tagName && node.tagName.toLowerCase();
+  if (_.startsWith(nodeLower, "cljs-")) {
+    return nodeLower;
+  } else {
+    return origGetComponentNameForNode(node);
+  }
+};

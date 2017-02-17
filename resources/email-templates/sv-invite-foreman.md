@@ -7,17 +7,17 @@ H&auml;r &auml;r anvisningarna f&ouml;r att anm&auml;la eller ans&ouml;ka om ans
 1. Om du &auml;nnu inte anv&auml;nt Lupapiste ska du {{register}} med samma e-postadress som den h&auml;r inbjudan skickades till. Om inbjudan skickades till en annan adress &auml;n den du anv&auml;nt f&ouml;r att registrera dig i Lupapiste ska du be den som bj&ouml;d in dig ({{inviter-email}}) om en ny inbjudan.
 2. Logga in i Lupapiste.
 3. Godk&auml;nn den befogenhetsinbjudan som v&auml;ntar p&aring; sidan Projekt.
-4. Fyll i uppgifterna i ans&ouml;kan.
-5. L&auml;mna in ans&ouml;kan.
+4. Fyll i uppgifterna i ans&ouml;kan eller anm&auml;lan.
+5. L&auml;mna in ans&ouml;kan eller anm&auml;lan.
 6. V&auml;nta in ett e-postmeddelande om bekr&auml;ftandet av ansvaret eller om kompletteringar som myndigheten beg&auml;r.
 
-H&auml;r kan du godk&auml;nna befogenheten och fylla i din ans&ouml;kan
+H&auml;r kan du godk&auml;nna befogenheten och fylla i din ans&ouml;kan/anm&auml;lan
 
 {{link}}
 
-Du kan l&auml;sa ans&ouml;kan om bygglov via det referenslov som finns i arbetsledarans&ouml;kan. L&auml;nken finns l&auml;ngst upp p&aring; ans&ouml;kan.
+Du kan l&auml;sa ans&ouml;kan om bygglov via det referenslov som finns i arbetsledarans&ouml;kan. L&auml;nken finns l&auml;ngst upp p&aring; ans&ouml;kan/anm&auml;lan.
 
-Om du har fr&aring;gor om att ans&ouml;ka om ansvar eller om de bilagor som kr&auml;vs kan du kontakta byggnadstillsynen till exempel genom ans&ouml;kans diskussionstr&aring;d.
+Om du har fr&aring;gor om att ans&ouml;ka om ansvar eller om de bilagor som kr&auml;vs kan du kontakta byggnadstillsynen till exempel genom ans&ouml;kans/anm&auml;lans diskussionstr&aring;d.
 
 H&auml;lsningar
 

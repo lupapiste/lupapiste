@@ -65,7 +65,8 @@
                  :addable-in-states
                  :exclude-from-pdf
                  :editable-in-states
-                 :accordion-fields})
+                 :accordion-fields
+                 :blacklist})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -97,6 +98,9 @@
 
 (defn get-in-schemas [schema-name path]
   (reduce #(util/find-by-key :name (name %2) (:body %1)) (get-schema {:name schema-name}) path))
+
+(defn find-identifier-field-from [schema-name]
+  (util/find-by-key :identifier true (:body (get-schema {:name schema-name}))))
 
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
@@ -665,7 +669,7 @@
                    {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}
                    {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
                    {:name "kerrosluku" :type :string :size :s :subtype :number :min 0 :max 50}
-                   {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}]})
+                   {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}]})
 
 (def mitat-muutos (merge mitat
                     {:group-help "mitat-muutos.help"
@@ -1561,7 +1565,8 @@
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false
            :approvable true
-           :order 300}
+           :order 300
+           :blacklist [:neighbor]}
     :body (body
            [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
            simple-osoite
