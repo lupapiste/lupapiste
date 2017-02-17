@@ -267,10 +267,10 @@
                                  {:init init
                                   :will-unmount (fn [& _] (reset! component-state empty-component-state))}
   [ko-app auth-model]
-  (let [{sid :id :as summary}          (rum/react selected-summary)
+  (let [{summaryId :id :as summary}    (rum/react selected-summary)
         bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])
         editing?                       (rum/react (rum-util/derived-atom [selected-summary] #(->> % :targets (some :editing?))))
-        target-add-enabled?            (and summary (.ok auth-model "add-target-to-inspection-summary"))
+        target-add-enabled?            (.ok auth-model "add-target-to-inspection-summary")
         target-edit-enabled?           (.ok auth-model "edit-inspection-summary-target")
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
         target-status-change-enabled?  (.ok auth-model "set-target-status")
@@ -292,14 +292,31 @@
           {:style {:z-index 10}}]
          (summaries-select (rum/react (rum/cursor-in component-state [:summaries]))
                            (rum/react (rum/cursor-in component-state [:operations]))
-                           sid)]]
+                           summaryId)]]
        (if (.ok auth-model "create-inspection-summary")
-         [:div.col-1.create-new-summary-button
+         [:div.col-1.summary-button-bar
           [:button.positive
            {:on-click (fn [_] (reset! bubble-visible true))
             :data-test-id "open-create-summary-bubble"}
            [:i.lupicon-circle-plus]
-           [:span (js/loc "inspection-summary.new-summary.button")]]])]
+           [:span (js/loc "inspection-summary.new-summary.button")]]])
+       (when (and summary (not-any? #(or (:finished %)
+                                         (not-empty (:attachments %))) @table-rows))
+         [:div.col-2.group-buttons.summary-button-bar
+          [:button.negative.is-right
+           {:on-click (fn [_]
+                        (uc/confirm-dialog
+                          "inspection-summary.delete-confirm.title"
+                          "inspection-summary.delete-confirm.message"
+                          (fn [] (command "delete-inspection-summary"
+                                          (fn [_]
+                                            (swap! component-state assoc-in [:view :selected-summary-id] nil)
+                                            (refresh))
+                                          "id"        (:applicationId @component-state)
+                                          "summaryId" summaryId))))
+            :data-test-id "delete-summary"}
+           [:i.lupicon-remove]
+           [:span (js/loc "inspection-summary.delete.button")]]])]
       (if (.ok auth-model "create-inspection-summary")
         [:div.row.create-summary-bubble (create-summary-bubble bubble-visible)])
       (when summary
@@ -318,7 +335,7 @@
            (doall
              (for [[idx target] (map-indexed vector (rum/react table-rows))]
                (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled? target-status-change-enabled?)))]]])
-      (if (and (not editing?) target-add-enabled?)
+      (if (and summary (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
           {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))

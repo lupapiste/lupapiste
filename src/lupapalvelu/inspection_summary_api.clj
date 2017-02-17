@@ -93,6 +93,16 @@
             (util/find-by-key :id operationId (app/get-operations app))
             templateId)))
 
+(defcommand delete-inspection-summary
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-that-summary-can-be-deleted]
+   :parameters [:id summaryId]
+   :input-validators [(partial action/non-blank-parameters [:summaryId])]
+   :user-roles #{:authority}}
+  [{app :application}]
+  (inspection-summary/delete-summary app summaryId)
+  (ok))
+
 (defcommand add-target-to-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id summaryId targetName]

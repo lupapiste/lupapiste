@@ -64,13 +64,14 @@
 
 }
 
-div.create-new-summary-button {
+div.summary-button-bar {
   padding-top: 24px;
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
 
 #targets-table {
   td {
-
 
     &.functions {
       a {

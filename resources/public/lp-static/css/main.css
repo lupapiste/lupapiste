@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1487336893965');
+@import url('main-blessed1.css?z=1487338804574');
 
 
 /* line 830, ../../../private/common-html/sass/partials/_forms.scss */
@@ -11155,16 +11155,18 @@ label.batch-required {
 }
 
 /* line 67, ../../../private/common-html/sass/views/_inspection_summary.scss */
-div.create-new-summary-button {
+div.summary-button-bar {
   padding-top: 24px;
+  margin-bottom: 0px;
+  margin-top: 0px;
 }
 
-/* line 76, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 77, ../../../private/common-html/sass/views/_inspection_summary.scss */
 #targets-table td.functions a {
   vertical-align: middle;
   margin-right: 6px;
 }
-/* line 82, ../../../private/common-html/sass/views/_inspection_summary.scss */
+/* line 83, ../../../private/common-html/sass/views/_inspection_summary.scss */
 #targets-table td.target-name {
   min-width: 250px;
 }

@@ -53,6 +53,30 @@
                  (domain/owner-or-write-access? application user-id))
     unauthorized))
 
+(defn summary-target-attachment-predicate
+  "Returns function, which can be used as predicate for filter.
+  Predicate returns true on those attachments, who are targets of given target-id"
+  [target-id]
+  (fn [{{:keys [id type]} :target}]
+    (and (= type "inspection-summary-item")
+         (= id target-id))))
+
+(defn- enrich-summary-targets [attachments targets]
+  (letfn [(add-attachment-data [{tid :id :as target}]
+            (let [target-attachments (filter (summary-target-attachment-predicate tid) attachments)]
+              (assoc target :attachments (map #(select-keys % [:type :latestVersion :id]) target-attachments))))]
+    (map add-attachment-data targets)))
+
+(defn validate-that-summary-can-be-deleted
+  "Inspection summary can be deleted if none of its targets contain attachments or are marked as finished by applicant"
+  [{{summaries :inspection-summaries attachments :attachments} :application {:keys [summaryId]} :data}]
+  (let [summary-to-be-deleted (-> (util/find-by-id summaryId summaries)
+                                  (update :targets (partial enrich-summary-targets attachments)))
+        targets               (:targets summary-to-be-deleted)]
+    (when (some #(or (-> % :finished true?)
+                     (not (empty? (:attachments %)))) targets)
+      (fail! :error.inspection-summary.delete.non-empty))))
+
 (defn settings-for-organization [organizationId]
   (get (mongo/by-id :organizations organizationId) :inspection-summary {}))
 
@@ -105,20 +129,6 @@
 (defn default-template-id-for-operation [organization {opName :name}]
   (get-in organization [:inspection-summary :operations-templates (keyword opName)]))
 
-(defn summary-target-attachment-predicate
-  "Returns function, which can be used as predicate for filter.
-  Predicate returns true on those attachments, who are targets of given target-id"
-  [target-id]
-  (fn [{{:keys [id type]} :target}]
-    (and (= type "inspection-summary-item")
-         (= id target-id))))
-
-(defn- enrich-summary-targets [attachments targets]
-  (letfn [(add-attachment-data [{tid :id :as target}]
-            (let [target-attachments (filter (summary-target-attachment-predicate tid) attachments)]
-              (assoc target :attachments (map #(select-keys % [:type :latestVersion :id]) target-attachments))))]
-    (map add-attachment-data targets)))
-
 (defn get-summaries [{:keys [inspection-summaries attachments]}]
   (map #(update % :targets (partial enrich-summary-targets attachments)) inspection-summaries))
 
@@ -158,3 +168,11 @@
                                     {$set set-updates})
                                   (when (seq unset-updates)
                                     {$unset unset-updates})))))
+
+(defn delete-summary [app summaryId]
+  (let [summary (->> app :inspection-summaries (util/find-by-id summaryId))]
+    (when-not summary
+      (fail! :error.inspection-summary.delete.not-found))
+    (mongo/update-by-query :applications
+                           {:_id (:id app)}
+                           {$pull {:inspection-summaries {:id summaryId}}})))
