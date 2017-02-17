@@ -27,11 +27,7 @@
       <form id="account-type-selection">
         <div class="account-box" data-bind="css: { selected: model().accountType() === 'account5' }">
           <h4 data-bind="ltext: 'register.company.account5.title'"></h4>
-          <span class="price" data-bind="lhtml: 'register.company.account5.price.discount'"></span>
-          <span class="price-line">
-            <span class="price-original" data-bind="ltext: 'register.company.account5.price'"></span>
-          </span>
-          <span class="discount-info" data-bind="ltext: 'register.company.account5.price.discount.info'"></span>
+          <span class="price" data-bind="ltext: 'register.company.account5.price'"></span>
           <span class="bullet" data-bind="ltext: 'register.company.account5.bullet1'"></span>
           <span class="bullet" data-bind="ltext: 'register.company.account5.bullet2'"></span>
           <label data-test-id="account-type-account5" for="account5" data-bind="click: accountSelected, checked: model().accountType"></label>
