@@ -25,6 +25,8 @@ Sonja adds some neighbors
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Click by test id  manage-neighbors
+  Wait until  Element should be visible  neighbors-content
+  Element should not be visible  jquery=table.application-neighbors
   Add neighbor  753-416-25-22  a  a@example.com
   Add neighbor  753-416-25-22  b  b@example.com
   # Add neighbor "c" with wrong email, ups. Sonja must correct that later.

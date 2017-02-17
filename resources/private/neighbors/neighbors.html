@@ -15,7 +15,9 @@
       <span data-bind="component: {name: 'help-toggle', params: {show: true, lhtml: ['help.neighbors.map.p1', 'help.neighbors.map.p2']}}"></span>
       </div>
 
-      <table class="application-neighbors"  data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
+      <table class="application-neighbors"
+             data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors',
+                        visible: _.some( neighbors())">
         <thead>
           <tr>
             <th data-bind="ltext: 'neighbors.propertyId'"></th>
@@ -31,7 +33,7 @@
               <!-- ko if: nameOfDeceased -->
               <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
               -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
-              <br/>
+              <br/>W
               <!-- /ko -->
               <span data-bind="text: name" class="owner-name"></span>
               <span data-bind="text: address.street" class="owner-street"></span>
