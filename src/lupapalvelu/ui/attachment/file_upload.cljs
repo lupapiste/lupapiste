@@ -10,5 +10,8 @@
                       "status" "success")
               callback))
 
+(defn subscribe-bind-attachments-status [opts callback]
+  (.subscribe js/hub (clj->js (assoc opts :eventType "attachmentsService::bind-attachments-status")) callback))
+
 (defn bind-attachments [files]
   (.bindAttachments js/lupapisteApp.services.attachmentsService files))

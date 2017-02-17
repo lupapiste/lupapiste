@@ -83,11 +83,8 @@
   (let [files          (.-files hub-event)
         fileIds        (map #(.-fileId %) files)
         bindable-files (map (partial to-bindable-file target-id) files)
-        subs-id        (.subscribe js/hub
-                                   #js {:eventType "attachmentsService::bind-attachments-status"
-                                        :status "done"
-                                        :jobStatus "done"}
-                                   (partial bind-attachment-callback target-id))
+        subs-id        (upload/subscribe-bind-attachments-status {:status "done" :jobStatus "done"}
+                                                                 (partial bind-attachment-callback target-id))
         create-filestatuses-fn (fn [statuses fid]
                                  (assoc statuses (keyword fid)
                                                  {:subs-id subs-id
