@@ -2776,6 +2776,12 @@
   (->> (mongo/select :submitted-applications {:handlers {$exists false}} [:handlers])
        (run! (partial add-empty-handler-array :submitted-applications))))
 
+(defn ensure-op-is-not-object [attachment]
+  (update attachment :op #(if (map? %) [%] %)))
+
+(defmigration attachment-op-to-array
+  (update-applications-array :attachments ensure-op-is-not-object {:attachments.op {$type 3}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

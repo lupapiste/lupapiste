@@ -73,7 +73,7 @@
 (defn- make-ram-attachment [{:keys [id op groupType target type contents scale size] :as base-attachment} application created]
   (->> (att/create-attachment-data application {:created created
                                                 :target target
-                                                :group {:operations (if (map? op) [op] op) :groupType groupType}
+                                                :group {:operations op :groupType groupType}
                                                 :attachment-type type
                                                 :contents contents})
        (#(merge {:ramLink id}

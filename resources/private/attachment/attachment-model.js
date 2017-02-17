@@ -48,7 +48,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   function buildGroup(data) {
     var group = { groupType: _.isEmpty(data.op) ? data.groupType : "operation",
-                  operations: _.isPlainObject(data.op) ? [data.op] : data.op };
+                  operations: data.op };
     return group.groupType ? group : null;
   }
 

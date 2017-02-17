@@ -133,7 +133,6 @@ LUPAPISTE.StampModel = function(params) {
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
   self.page = self.stampFields.page;
   self.extraInfo = self.stampFields.extraInfo;
-  self.includeBuildings = self.stampFields.includeBuildings;
   self.kuntalupatunnus = self.stampFields.kuntalupatunnus;
   self.section = self.stampFields.section;
 
@@ -170,7 +169,6 @@ LUPAPISTE.StampModel = function(params) {
         page: self.page(),
         transparency: self.transparency(),
         extraInfo: self.extraInfo(),
-        includeBuildings: !!self.includeBuildings(),
         kuntalupatunnus: self.kuntalupatunnus(),
         section: getSection()
       })

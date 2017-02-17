@@ -591,7 +591,6 @@
                               :yMargin 0
                               :page "first"
                               :extraInfo ""
-                              :includeBuildings true
                               :kuntalupatunnus ""
                               :section "")
         file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
@@ -639,7 +638,6 @@
                               :yMargin 0
                               :page "all"
                               :extraInfo ""
-                              :includeBuildings false
                               :kuntalupatunnus ""
                               :section "")]
           resp => ok?

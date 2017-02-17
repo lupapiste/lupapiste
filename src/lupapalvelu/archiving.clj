@@ -150,9 +150,9 @@
                   (state-update-fn :valmis application now id)))))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
-(defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
+(defn- find-op [{:keys [primaryOperation secondaryOperations]} op-ids]
   (cond->> (concat [primaryOperation] secondaryOperations)
-           op-id (filter #(= op-id (:id %)))
+           (seq op-ids) (filter (comp (set op-ids) :id))
            true (map :name)
            true (distinct)))
 
@@ -191,19 +191,19 @@
                 (last))]
     (ts->iso-8601-date ts)))
 
-(defn- get-usages [{:keys [documents]} op-id]
+(defn- get-usages [{:keys [documents]} op-ids]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
                                            (get-in d [:data :kaytto :kayttotarkoitus :value])}) op-docs))]
-    (->> (if op-id
-           [(get id-to-usage op-id)]
+    (->> (if (seq op-ids)
+           (map id-to-usage op-ids)
            (vals id-to-usage))
          (remove nil?)
          (distinct))))
 
-(defn- get-building-ids [bldg-key {:keys [buildings]} op-id]
+(defn- get-building-ids [bldg-key {:keys [buildings]} op-ids]
   ;; Only some building lists contain operation ids at all
-  (->> (if-let [filtered-bldgs (and op-id (seq (filter #(= op-id (:operationId %)) buildings)))]
+  (->> (if-let [filtered-bldgs (seq (filter (comp (set op-ids) :operationId) buildings))]
          filtered-bldgs
          buildings)
        (map bldg-key)
@@ -241,11 +241,11 @@
   (let [s2-metadata (or (:metadata attachment) (:metadata application))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
-                       :buildingIds           (get-building-ids :localId application (get-in attachment [:op :id]))
-                       :nationalBuildingIds   (get-building-ids :nationalId application (get-in attachment [:op :id]))
+                       :buildingIds           (get-building-ids :localId application (att/get-operation-ids attachment))
+                       :nationalBuildingIds   (get-building-ids :nationalId application (att/get-operation-ids attachment))
                        :propertyId            propertyId
                        :applicants            _applicantIndex
-                       :operations            (find-op application (get-in attachment [:op :id]))
+                       :operations            (find-op application (att/get-operation-ids attachment))
                        :tosFunction           (first (filter #(= tosFunction (:code %)) (tiedonohjaus/available-tos-functions organization)))
                        :address               address
                        :organization          organization
@@ -260,7 +260,7 @@
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys authority [:username :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
-                       :kayttotarkoitukset    (get-usages application (get-in attachment [:op :id]))
+                       :kayttotarkoitukset    (get-usages application (att/get-operation-ids attachment))
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))
