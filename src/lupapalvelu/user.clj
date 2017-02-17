@@ -1,24 +1,24 @@
 (ns lupapalvelu.user
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
-            [swiss.arrows :refer [-<> some-<>> -<>>]]
-            [clj-time.core :as time]
+  (:require [camel-snake-kebab.core :as csk]
             [clj-time.coerce :refer [to-date]]
-            [camel-snake-kebab.core :as csk]
+            [clj-time.core :as time]
+            [clojure.set :as set]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.security :as security]
+            [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [schema.core :refer [defschema] :as sc]
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
-            [sade.schemas :as ssc]
-            [lupapalvelu.user-enums :as user-enums]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.i18n :as i18n]
-            [clojure.set :as set]))
+            [schema.core :refer [defschema] :as sc]
+            [swiss.arrows :refer [-<> some-<>> -<>>]]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf]]))
 
 ;;
 ;; User schema
@@ -602,6 +602,7 @@
     (or
       (get-user-by-email email)
       (create-new-user current-user {:email email :role "dummy"}))))
+
 
 ;;
 ;; ==============================================================================

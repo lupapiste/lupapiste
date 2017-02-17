@@ -1,16 +1,16 @@
 (ns lupapalvelu.guest
-  (:require [monger.operators :refer :all]
-            [sade.core :refer [fail ok]]
-            [sade.strings :as ss]
-            [lupapalvelu.authorization-messages] ; notification definitions
-            [lupapalvelu.user :as usr]  ;; usr works better with code completion.
-            [lupapalvelu.organization :as org]
+  (:require [lupapalvelu.action :as action]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.authorization-messages] ; notification definitions
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.action :as action]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user-api :as user-api]))
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]  ;; usr works better with code completion.
+            [lupapalvelu.user-utils :as uu]
+            [monger.operators :refer :all]
+            [sade.core :refer [fail ok]]
+            [sade.strings :as ss]))
 
 (defn resolve-guest-authority-candidate
   "Namesake query implementation."
@@ -49,11 +49,11 @@
                               :description description}]))]
     (org/update-organization org-id {$set {:guestAuthorities guests}})
     (when-not (usr/get-user-by-email email)
-      (user-api/do-create-user {:firstName first-name
-                                :lastName last-name
-                                :email email
-                                :role :authority}
-                               admin))))
+      (uu/create-and-notify-user admin
+                                 {:firstName first-name
+                                  :lastName last-name
+                                  :email email
+                                  :role :authority}))))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."

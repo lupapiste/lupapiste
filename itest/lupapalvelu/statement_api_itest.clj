@@ -18,6 +18,7 @@
                            :email pena-email
                            :text "<b>bold</b>"})
 
+
 (def non-existing-user-email "Kirjaamo@museovirasto.example.com")
 (def statement-giver-non-existing-user {:name "Master of museum"
                                         :email non-existing-user-email
@@ -382,9 +383,28 @@
            (filter (comp #{statement-id} :id :target))) => (has every? :readOnly))))
 
 
-(facts "Non-existing user"
-  (fact "Non-existing user cannot be added as a statement person (in authority admin view)"
-    (command sipoo :create-statement-giver :email non-existing-user-email :text "hello") => (partial expected-failure? "error.user-not-found"))
+(facts "Non-existing users"
+       (apply-remote-minimal)
+       (let [email "bad@example.com"]
+         (fact "Non-existing user can be added as a statement giver (in authority admin view)"
+               (create-statement-giver sipoo email) => (contains {:email email
+                                                                  :name (str " " email)}))
+         (fact "Authority user is created"
+               (-> (query admin :users :email email) :users first) =contains=> {:email email
+                                                                                :role "authority"
+                                                                                :enabled false}))
+       (let [email "dumdum@example.com"]
+         (fact "Create dummy user"
+               (:user (command admin :create-user :email email :role "dummy")) =contains=> {:email email
+                                                                                            :role "dummy"
+                                                                                            :enabled false})
+         (fact "Dummy user is promoted to authority as a statement giver (in authority admin view)"
+               (create-statement-giver sipoo email) => (contains {:email email
+                                                                  :name (str " " email)}))
+         (fact "Promoted to authority"
+               (-> (query admin :users :email email) :users first) =contains=> {:email email
+                                                                                :role "authority"
+                                                                                :enabled false}))
 
   (fact "Non-existing user can be requested as a statement person (on the Statements tab)"
     (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
