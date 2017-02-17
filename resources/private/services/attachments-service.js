@@ -33,10 +33,13 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
-  hub.subscribe( "application-model-updated", function() {
+  var reload = function() {
     self.queryAll();
     self.groupTypes.reset();
-  });
+  };
+
+  hub.subscribe("application-model-updated", reload);
+  hub.subscribe(self.serviceName + "::updateAll", reload);
 
   hub.subscribe( "contextService::leave", function() {
     clearData();
