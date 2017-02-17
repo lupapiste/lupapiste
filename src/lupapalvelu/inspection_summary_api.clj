@@ -115,6 +115,6 @@
    :parameters [:id summaryId targetId]
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-roles #{:authority}}
-  [{{appId :id} :application}]
-  (inspection-summary/remove-target appId summaryId targetId)
+  [{application :application}]
+  (inspection-summary/remove-target application summaryId targetId)
   (ok))

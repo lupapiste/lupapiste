@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [clojure.string :as s]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
@@ -102,12 +103,17 @@
 (defn default-template-id-for-operation [organization {opName :name}]
   (get-in organization [:inspection-summary :operations-templates (keyword opName)]))
 
+(defn summary-target-attachment-predicate
+  "Returns function, which can be used as predicate for filter.
+  Predicate returns true on those attachments, who are targets of given target-id"
+  [target-id]
+  (fn [{{:keys [id type]} :target}]
+    (and (= type "inspection-summary-item")
+         (= id target-id))))
+
 (defn- enrich-summary-targets [attachments targets]
   (letfn [(add-attachment-data [{tid :id :as target}]
-            (let [target-attachments (filter (fn [{{:keys [id type]} :target}]
-                                               (and (= type "inspection-summary-item")
-                                                    (= id tid)))
-                                             attachments)]
+            (let [target-attachments (filter (summary-target-attachment-predicate tid) attachments)]
               (assoc target :attachments (map #(select-keys % [:type :latestVersion :id]) target-attachments))))]
     (map add-attachment-data targets)))
 
@@ -123,10 +129,12 @@
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
 
-(defn remove-target [appId summaryId targetId]
-  (mongo/update-by-query :applications
-                         (elem-match-query appId summaryId)
-                         {$pull {:inspection-summaries.$.targets {:id targetId}}}))
+(defn remove-target [application summaryId targetId]
+  (let [target-attachments (filter (summary-target-attachment-predicate targetId)  (:attachments application))]
+    (mongo/update-by-query :applications
+                           (elem-match-query (:id application) summaryId)
+                           {$pull {:inspection-summaries.$.targets {:id targetId}}})
+    (attachment/delete-attachments! application (remove nil? (map :id target-attachments)))))
 
 (defn add-target [appId summaryId targetName]
   (let [new-target (new-target targetName)]
