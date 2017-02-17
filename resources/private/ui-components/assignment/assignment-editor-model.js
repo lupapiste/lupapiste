@@ -65,5 +65,5 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
 
   self.receiverName = function(receiver) {
     return receiver.id ? util.partyFullName(receiver) : loc("applications.search.recipient.no-one");
-  }
+  };
 };
