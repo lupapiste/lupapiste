@@ -92,7 +92,7 @@
                                                  {:subs-id subs-id
                                                   :target-id target-id}))]
     (swap! component-state update :fileStatuses #(reduce create-filestatuses-fn % fileIds))
-    (.bindAttachments upload/attachment-service (clj->js bindable-files))))
+    (upload/bind-attachments (clj->js bindable-files))))
 
 (defn- commit-target-name-edit [applicationId summaryId targetId val]
   (if (not (empty? val))
