@@ -300,8 +300,8 @@
             :data-test-id "open-create-summary-bubble"}
            [:i.lupicon-circle-plus]
            [:span (js/loc "inspection-summary.new-summary.button")]]])
-       (when (and summary (not-any? #(or (:finished %)
-                                         (not-empty (:attachments %))) @table-rows))
+       (when (and summary target-edit-enabled?
+                  (not-any? #(or (:finished %) (not-empty (:attachments %))) @table-rows))
          [:div.col-2.group-buttons.summary-button-bar
           [:button.negative.is-right
            {:on-click (fn [_]
