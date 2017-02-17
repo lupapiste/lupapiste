@@ -77,7 +77,7 @@
    :user-roles #{:authority :applicant}}
   [{app :application}]
   (ok :templates (-> (inspection-summary/settings-for-organization (:organization app)) :templates)
-      :summaries (:inspection-summaries app)
+      :summaries (inspection-summary/get-summaries app)
       :operations (->> (app/get-operations app)
                        (map (partial map-operation-to-frontend app))
                        (remove nil?))))
@@ -115,6 +115,6 @@
    :parameters [:id summaryId targetId]
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-roles #{:authority}}
-  [{{appId :id} :application}]
-  (inspection-summary/remove-target appId summaryId targetId)
+  [{application :application}]
+  (inspection-summary/remove-target application summaryId targetId)
   (ok))

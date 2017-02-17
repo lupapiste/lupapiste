@@ -38,7 +38,7 @@
 "inspection-summary.targets.new.button" "fi" "Lisää uusi tarkastuskohde"
 "inspection-summary.targets.new.button" "sv" ""
 "inspection-summary.targets.remove-confirm.message" "en" ""
-"inspection-summary.targets.remove-confirm.message" "fi" "Oletko varma, että haluat poistaa tarkastuskohteen?"
+"inspection-summary.targets.remove-confirm.message" "fi" "Olet poistamassa tarkastuskohdetta. Kaikki tarkastuskohteeseen lisätyt liitteet poistetaan samalla pysyvästi hankkeelta. Oletko varma, että haluat poistaa tarkastuskohteen?"
 "inspection-summary.targets.remove-confirm.message" "sv" ""
 "inspection-summary.targets.remove-confirm.title" "en" ""
 "inspection-summary.targets.remove-confirm.title" "fi" "Tarkastuskohteen poisto"

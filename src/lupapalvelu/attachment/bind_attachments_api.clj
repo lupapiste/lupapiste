@@ -46,6 +46,12 @@
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}])))
 
+(defn filedatas-precheck
+  "Executes given pre-check against each individual :filedatas from command"
+  [check]
+  (fn [{data :data :as command}]
+    (reduce #(or %1 (check (assoc command :data %2))) nil (:filedatas data))))
+
 (defcommand bind-attachments
   {:description         "API to bind files to attachments, returns job that can be polled for status per file."
    :parameters          [id filedatas]
@@ -56,6 +62,7 @@
    :pre-checks          [app/validate-authority-in-drafts
                          att/allowed-only-for-authority-when-application-sent
                          att/foreman-must-be-uploader
+                         (filedatas-precheck att/upload-to-target-allowed)
                          validate-attachment-ids
                          validate-attachment-groups
                          check-password-for-sign]
