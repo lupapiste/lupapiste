@@ -347,3 +347,4 @@
 "handler-roles.title" "fi" "Käsittelijäroolit"
 "handler-roles.title" "sv" "Handläggarroller"
 "handler-roles.info" "fi" "<b>Huom!</b> Käsittelijärooleihin tehdyt muutokset vaikuttavat kaikilla hakemuksilla näkyviin käsittelijätietohin välittömästi.<br>Ensimmäinen rooli (Käsittelijä) on kiinteästi asetettu rooli, jonka nimen voi muuttaa, mutta jota ei voi poistaa. "
+"error.duplicate-handler-role" "fi" "Käsittelijärooli on jo käytössä"
