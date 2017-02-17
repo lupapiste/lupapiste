@@ -44,14 +44,16 @@
         <!-- /ko -->
       </section>
 
-      <!-- ko if: authorization.ok("organization-inspection-summary-settings") -->
       <section>
-        <h2 data-bind="ltext: 'auth-admin.inspection-summary-templates'"></h2>
-        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <h2 data-bind="ltext: 'auth-admin.inspection-summaries'"></h2>
+        <p><input type="checkbox" class="form-input" id="inspection-summaries-enabled" data-test-id="inspection-summaries-enabled"
+               data-bind="checked: organization.inspectionSummariesEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-inspection-summaries')" />
+        <label for="inspection-summaries-enabled" class="form-label" data-bind="ltext: 'auth-admin.inspection-summaries.enabled'"></label></p>
+        <!-- ko if: organization.inspectionSummariesEnabled -->
+        <h3 data-bind="ltext: 'auth-admin.inspection-summaries.subtitle'"></h3>
         <div data-bind="component: 'inspection-summary-templates-list'"></div>
         <!-- /ko -->
       </section>
-      <!-- /ko -->
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.email-notifications'"></h2>

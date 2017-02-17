@@ -354,6 +354,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
   (ok))
 
+(defcommand set-organization-inspection-summaries
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:inspection-summaries-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-extended-construction-waste-report
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}
