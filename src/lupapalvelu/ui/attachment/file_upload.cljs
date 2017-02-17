@@ -1,7 +1,7 @@
 (ns lupapalvelu.ui.attachment.file-upload)
 
 (defn bindToElem [options]
-  (.bindFileInput js/lupapisteApp.services.fileuploadService options (js-obj "replaceFileInput" false)))
+  (.bindFileInput js/lupapisteApp.services.fileUploadService options (js-obj "replaceFileInput" false)))
 
 (defn subscribe-files-uploaded [input-id callback]
   (.subscribe js/hub
