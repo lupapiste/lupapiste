@@ -7,7 +7,8 @@
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.util :as jsutil]
             [lupapalvelu.ui.rum-util :as rum-util]
-            [cljs-time.core :as cljs-time]))
+            [cljs-time.coerce :as tc]
+            [cljs-time.format :as tf]))
 
 (enable-console-print!)
 
@@ -15,6 +16,8 @@
   "Return item from sequence col of maps where element k (keyword) matches value v."
   [k v col]
   (some (fn [m] (when (= v (get m k)) m)) col))
+
+(def date-formatter (tf/formatter "d.M.yyyy"))
 
 (defn save-indicator [visible-atom]
   [:span.form-indicator.form-input-saved
@@ -173,17 +176,20 @@
           (attc/view-with-download latest)))
       (when-not targetFinished?
         (attc/upload-link (::input-id local-state)))]
-     [:td ""]
-     [:td ""]
+     [:td
+      (when (:finished-date row-target)
+        (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]
+     [:td (when (:finished-by row-target)
+            (js/util.partyFullName (clj->js (:finished-by row-target))))]
      (vector :td.functions
        (if (and (not editing?) status-change-enabled?)
          (change-status-link applicationId summaryId targetId targetFinished? idx))
-       (if (and (not editing?) edit-enabled?)
+       (if (and (not editing?) edit-enabled? (not targetFinished?))
          [:a
           {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
            :data-test-id (str "edit-link-" idx)}
           (js/loc "edit")])
-       (if (and (not editing?) remove-enabled?)
+       (if (and (not editing?) remove-enabled? (not targetFinished?))
          (remove-link applicationId summaryId targetId idx)))]))
 
 (defn init

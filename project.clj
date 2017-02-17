@@ -135,8 +135,7 @@
 
                  [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
-                 ;[figwheel-sidecar "0.5.4-7"]
-                 ]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]]
   :plugins [[lein-cljsbuild "1.1.5"]]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src/lupapalvelu/ui"]}}}
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
