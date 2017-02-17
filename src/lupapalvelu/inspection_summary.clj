@@ -17,6 +17,8 @@
            {:target-name sc/Str   ;Tarkastuskohde
             :id          ssc/ObjectIdStr
             :finished    sc/Bool
+            :finished-by usr/SummaryUser
+            :finished-date ssc/Timestamp
             sc/Keyword   sc/Any})
 
 (defschema InspectionSummary
@@ -129,10 +131,10 @@
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
 
-(defn remove-target [application summaryId targetId]
+(defn remove-target [{appId :id :as application} summaryId targetId]
   (let [target-attachments (filter (summary-target-attachment-predicate targetId)  (:attachments application))]
     (mongo/update-by-query :applications
-                           (elem-match-query (:id application) summaryId)
+                           (elem-match-query appId summaryId)
                            {$pull {:inspection-summaries.$.targets {:id targetId}}})
     (attachment/delete-attachments! application (remove nil? (map :id target-attachments)))))
 
@@ -143,7 +145,7 @@
                   {$push {:inspection-summaries.$.targets new-target}})
     (:id new-target)))
 
-(defn edit-target [application summaryId targetId {mset :set munset :unset}]
+(defn edit-target [{appId :id :as application} summaryId targetId {mset :set munset :unset}]
   (let [summary (->> application :inspection-summaries (util/find-by-id summaryId))
         index   (->> summary :targets (util/position-by-id targetId))
         set-updates   (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) mset)
@@ -151,7 +153,7 @@
     (when-not index
       (fail! :error.summary-target.edit.not-found))
     (mongo/update-by-query :applications
-                           {:_id (:id application) :inspection-summaries {$elemMatch {:id summaryId}}}
+                           (elem-match-query appId summaryId)
                            (merge (when (seq set-updates)
                                     {$set set-updates})
                                   (when (seq unset-updates)

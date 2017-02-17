@@ -126,7 +126,7 @@
                       (partial action/boolean-parameters [:status])]
    :user-roles #{:applicant}}
   [{application :application user :user}]
-  (let [params (when status
+  (let [params (if status
                  {:set {:finished true :finished-date (now) :finished-by (usr/summary user)}}
                  {:set {:finished false}
                   :unset {:finished-date 1 :finished-by 1}})]

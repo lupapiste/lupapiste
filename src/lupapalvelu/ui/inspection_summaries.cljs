@@ -118,6 +118,19 @@
                                   "targetId"  targetId))))
     :data-test-id (str "remove-icon-" index)}])
 
+(rum/defc change-status-link [applicationId summaryId targetId finished? index]
+  [:a
+   {:on-click (fn [_] (command "set-target-status"
+                               #(refresh)
+                               "id"        applicationId
+                               "summaryId" summaryId
+                               "targetId"  targetId
+                               "status"    (not finished?)))
+    :data-test-id (str "change-status-link-" index)}
+   (js/loc (if finished?
+             "inspection-summary.targets.mark-finished.undo"
+             "inspection-summary.targets.mark-finished"))])
+
 (rum/defcs target-row < rum/reactive
                         {:init (fn [state _] (assoc state ::input-id (jsutil/unique-elem-id "inspection-target-row")))}
                         {:did-mount (fn [state]
@@ -135,35 +148,42 @@
                                                                                        (::input-id state)
                                                                                        (partial got-files (:id row-target))))
                                             state)))}
-  [local-state idx row-target add-enabled? edit-enabled? remove-enabled?]
-  (let [editing?  (:editing? row-target)
-        summaryId (:id @selected-summary)
-        targetId  (:id row-target)]
+  [local-state idx row-target add-enabled? edit-enabled? remove-enabled? status-change-enabled?]
+  (let [editing?        (:editing? row-target)
+        applicationId   (:applicationId @component-state)
+        summaryId       (:id @selected-summary)
+        targetId        (:id row-target)
+        targetFinished? (:finished row-target)]
     [:tr
      {:data-test-id (str "target-" idx)}
-     [:td ""]
+     [:td
+      (when targetFinished?
+        [:i.lupicon-circle-check.positive ""])]
      [:td.target-name
       (if (and editing? add-enabled?)
         (uc/autofocus-input-field (:target-name row-target)
                                   (str "edit-target-field-" idx)
-                                  (partial commit-target-name-edit (:applicationId @component-state) summaryId targetId))
+                                  (partial commit-target-name-edit applicationId summaryId targetId))
         (:target-name row-target))]
      [:td
       (doall
         (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
           (attc/view-with-download latest)))
-      (attc/upload-link (::input-id local-state))]
+      (when-not targetFinished?
+        (attc/upload-link (::input-id local-state)))]
      [:td ""]
      [:td ""]
      (vector :td.functions
-      (if (and (not editing?) edit-enabled?)
-        [:a
-         {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
-          :data-test-id (str "edit-link-" idx)}
-         (js/loc "edit")])
-      (if (and (not editing?) remove-enabled?)
-        (remove-link (:applicationId @component-state) summaryId targetId idx)))]))
+       (if (and (not editing?) status-change-enabled?)
+         (change-status-link applicationId summaryId targetId targetFinished? idx))
+       (if (and (not editing?) edit-enabled?)
+         [:a
+          {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
+           :data-test-id (str "edit-link-" idx)}
+          (js/loc "edit")])
+       (if (and (not editing?) remove-enabled?)
+         (remove-link applicationId summaryId targetId idx)))]))
 
 (defn init
   [init-state props]
@@ -251,8 +271,9 @@
         bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])
         editing?                       (rum/react (rum-util/derived-atom [selected-summary] #(->> % :targets (some :editing?))))
         target-add-enabled?            (and summary (.ok auth-model "add-target-to-inspection-summary"))
-        target-edit-enabled?           (and summary (.ok auth-model "edit-inspection-summary-target"))
+        target-edit-enabled?           (.ok auth-model "edit-inspection-summary-target")
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
+        target-status-change-enabled?  (.ok auth-model "set-target-status")
         table-rows                     (rum/cursor selected-summary :targets)]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
@@ -296,7 +317,7 @@
           [:tbody
            (doall
              (for [[idx target] (map-indexed vector (rum/react table-rows))]
-               (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled?)))]]])
+               (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled? target-status-change-enabled?)))]]])
       (if (and (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
