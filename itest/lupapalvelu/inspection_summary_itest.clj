@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [clojure.set :refer [difference]]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.itest-util :refer :all]))
+            [lupapalvelu.itest-util :refer :all]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -41,7 +42,8 @@
                         (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
           _ (command jarvenpaa :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\n\n bar3")
           templates (-> (query jarvenpaa :organization-inspection-summary-settings) :templates)]
-      (command jarvenpaa :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?
+      (fact "auth admin binds template to operation"
+        (command jarvenpaa :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?)
 
       (fact "Feature not enabled in Sipoo"
         (query sipoo :inspection-summaries-for-application :id (:id app-sipoo)) => unauthorized?)
@@ -54,7 +56,29 @@
           (fact "Applicant can see the default summary but not create new ones or modify them"
             (query pena :inspection-summaries-for-application :id id1) => ok?
             (command pena :create-inspection-summary :id id1) => unauthorized?
-            (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?)
+            (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?
+            (command pena :edit-inspection-summary-target :id id1) => unauthorized?)
+          (fact "Applicant can add attachment for target"
+            (let [summary-target (second targets)
+                  file-id (upload-file-and-bind pena id1 {:type {:type-group "katselmukset_ja_tarkastukset"
+                                                                 :type-id    "tarkastusasiakirja"}
+                                                          :constructionTime true
+                                                          :target {:type "inspection-summary-item"
+                                                                   :id (:id summary-target)}})]
+              (fact "Queries have uploaded attachment"
+                (let [summary-attachments (->> (query pena :inspection-summaries-for-application :id id1)
+                                               :summaries
+                                               (util/find-by-id summaryId1)
+                                               :targets
+                                               (util/find-by-id (:id summary-target))
+                                               :attachments)
+                      application-attachments (->> (query-application pena id1)
+                                                   :attachments
+                                                   (filter (fn [{{:keys [id type]} :target}]
+                                                             (and (= type "inspection-summary-item")
+                                                                  (= id (:id summary-target))))))]
+                  (count summary-attachments) => (count application-attachments)
+                  (-> (first summary-attachments) :latestVersion :originalFileId) => file-id))))
           (fact "Authority can remove a single target"
             (command raktark-jarvenpaa :remove-target-from-inspection-summary
                                        :id id1 :summaryId summaryId1 :targetId (-> targets second :id)) => ok?
