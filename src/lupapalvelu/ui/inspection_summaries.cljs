@@ -6,7 +6,8 @@
             [lupapalvelu.ui.common :refer [query command]]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.util :as jsutil]
-            [lupapalvelu.ui.rum-util :as rum-util]))
+            [lupapalvelu.ui.rum-util :as rum-util]
+            [cljs-time.core :as cljs-time]))
 
 (enable-console-print!)
 
