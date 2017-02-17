@@ -826,3 +826,6 @@
 "file_not_linked_to_the_document" "en" "Attachment not found in application"
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" "Bilagan kan inte hittas i ansökan"
+"error.inspection-summary-target.finished" "en" ""
+"error.inspection-summary-target.finished" "fi" "Tarkastuskohde on merkitty jo valmiiksi"
+"error.inspection-summary-target.finished" "sv" ""
