@@ -64,7 +64,7 @@
                     (sc/optional-key :type-key)    sc/Str
                     (sc/optional-key :info-key)    sc/Str
                     (sc/optional-key :description) sc/Str}
-   :recipient      usr/SummaryUser
+   :recipient      (sc/maybe usr/SummaryUser)
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]
    :description    sc/Str})

@@ -65,7 +65,10 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       return [myid];
     } else if (_.includes(selected, lupapisteApp.services.assignmentRecipientFilterService.all)) {
       return [];
-    } else {
+    } else if (_.includes(selected, lupapisteApp.services.assignmentRecipientFilterService.noone)) {
+      return [null];
+    }
+      else {
       return _.map(selected, "id");
     }
   }

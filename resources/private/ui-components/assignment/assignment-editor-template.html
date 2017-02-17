@@ -34,11 +34,10 @@
                            params: {value: recipientId,
                                     options: authorities,
                                     optionsValue: 'id',
-                                    optionsText: util.partyFullName,
+                                    optionsText: receiverName,
                                     valueAllowUnset: true,
                                     id: 'assignment-recipient',
-                                    label: loc('application.assignment.recipient.label'),
-                                    required: true}}">
+                                    label: loc('application.assignment.recipient.label')}}">
            </div>
         </div>
         <div class="row">
@@ -66,11 +65,10 @@
                          params: {value: recipientId,
                                   options: authorities,
                                   optionsValue: 'id',
-                                  optionsText: util.partyFullName,
+                                  optionsText: receiverName,
                                   valueAllowUnset: true,
                                   id: 'assignment-recipient',
-                                  label: loc('application.assignment.recipient.label'),
-                                  required: true}}">
+                                  label: loc('application.assignment.recipient.label')}}">
          </div>
       </div>
       <div class="row">
@@ -87,5 +85,3 @@
     <!-- /ko -->
   </bubble-dialog>
 </script>
-
-

@@ -15,6 +15,7 @@ LUPAPISTE.AutocompleteRecipientModel = function(params) {
                                      label: "fullName"}))
       .sortBy("fullName")
       .filter(function(o) { return o.id !== util.getIn(lupapisteApp.models.currentUser, ["id"]); })
+      .unshift(lupapisteApp.services.assignmentRecipientFilterService.noone)
       .unshift(lupapisteApp.services.assignmentRecipientFilterService.all)
       .unshift(lupapisteApp.services.assignmentRecipientFilterService.myown)
       .value();
