@@ -14,7 +14,7 @@
        [:i.wait.spin.lupicon-refresh]
        [:span "Lisää tiedosto"]]]]))
 
-(rum/defc view-with-download
+(rum/defc view-with-download < {:key-fn (fn [version] (:fileId version))}
   "Port of ko.bindingHandlers.viewWithDownload"
   [latest-version]
   [:div.view-with-download
