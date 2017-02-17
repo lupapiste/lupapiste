@@ -5,7 +5,8 @@
             [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :refer [query command]]
             [lupapalvelu.ui.components :as uc]
-            [lupapalvelu.ui.util :as jsutil]))
+            [lupapalvelu.ui.util :as jsutil]
+            [lupapalvelu.ui.rum-util :as rum-util]))
 
 (enable-console-print!)
 
@@ -26,10 +27,16 @@
                             :view {:bubble-visible false
                                    :new {:operation nil
                                          :template nil}
-                                   :summary nil}
+                                   :selected-summary-id nil}
                             :fileStatuses {}})
 
-(def component-state         (atom empty-component-state))
+(def component-state  (atom empty-component-state))
+(def selected-summary (rum-util/derived-atom
+                        [component-state]
+                        (fn [state]
+                          (when-let [selected-id (get-in state [:view :selected-summary-id])]
+                            (->> (:summaries state)
+                                 (find-by-key :id selected-id))))))
 
 (defn- refresh
   ([] (refresh nil))
@@ -48,9 +55,7 @@
   (string/join " - " (remove empty? [(:description op) (:op-identifier op)])))
 
 (defn- update-summary-view [id]
-  (->> (:summaries @component-state)
-       (find-by-key :id id)
-       (swap! component-state assoc-in [:view :summary])))
+  (swap! component-state assoc-in [:view :selected-summary-id] id))
 
 (defn to-bindable-file [target-id file]
   {:type {:type-group "katselmukset_ja_tarkastukset"
@@ -95,12 +100,12 @@
                      "edit-inspection-summary-target"
                      "add-target-to-inspection-summary")]
       (command cmd-name
-               (fn [_] (refresh #(update-summary-view summaryId)))
+               #(refresh)
                "id"         applicationId
                "summaryId"  summaryId
                "targetId"   targetId
                "targetName" val))
-    (refresh #(update-summary-view summaryId))))
+    (refresh)))
 
 (rum/defc remove-link [applicationId summaryId targetId index]
   [:a.lupicon-remove.primary
@@ -109,18 +114,18 @@
                   "inspection-summary.targets.remove-confirm.title"
                   "inspection-summary.targets.remove-confirm.message"
                   (fn [] (command "remove-target-from-inspection-summary"
-                                  (fn [_] (refresh #(update-summary-view summaryId)))
+                                  #(refresh)
                                   "id"        applicationId
                                   "summaryId" summaryId
                                   "targetId"  targetId))))
     :data-test-id (str "remove-icon-" index)}])
 
-(rum/defcs target-row < {:init (fn [state _]
+(rum/defcs target-row < rum/reactive
+                        {:init (fn [state _]
                                  (let [[_ target] (-> state :rum/args)]
                                    (-> state
                                        (assoc ::input-id (jsutil/unique-elem-id "inspection-target-row"))
-                                       (assoc ::row-target target)
-                                       (assoc ::summary  (get-in @component-state [:view :summary])))))}
+                                       (assoc ::row-target target))))}
                         {:did-mount (fn [state]
                                       (upload/bindToElem (js-obj "id" (::input-id state)))
                                       (upload/subscribe-files-uploaded (::input-id state)
@@ -128,7 +133,7 @@
                                       state)}
   [local-state idx row-target add-enabled? edit-enabled? remove-enabled?]
   (let [editing?  (:editing? row-target)
-        summaryId (get-in local-state [::summary :id])
+        summaryId (:id @selected-summary)
         targetId  (:id row-target)]
     [:tr
      {:data-test-id (str "target-" idx)}
@@ -141,7 +146,7 @@
         (:target-name row-target))]
      [:td
       (doall
-        (for [attachment (:attachments row-target)
+        (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
           (attc/view-with-download latest)))
       (attc/upload-link (::input-id local-state))]
@@ -150,7 +155,7 @@
      (vector :td.functions
       (if (and (not editing?) edit-enabled?)
         [:a
-         {:on-click (fn [_] (swap! component-state assoc-in [:view :summary :targets idx :editing?] true))
+         {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
           :data-test-id (str "edit-link-" idx)}
          (js/loc "edit")])
       (if (and (not editing?) remove-enabled?)
@@ -163,7 +168,7 @@
         id          (id-computed)]
     (swap! component-state assoc :applicationId id)
     (when (.ok auth-model "inspection-summaries-for-application")
-      (refresh nil))
+      (refresh))
     init-state))
 
 (rum/defc operations-select [operations selection]
@@ -238,14 +243,13 @@
                                  {:init init
                                   :will-unmount (fn [& _] (reset! component-state empty-component-state))}
   [ko-app auth-model]
-  (let [{sid :id :as summary}          (rum/react (rum/cursor-in component-state [:view :summary]))
-        applicationId                  (:applicationId @component-state)
+  (let [{sid :id :as summary}          (rum/react selected-summary)
         bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])
-        editing?                       (rum/react (rum/derived-atom [component-state] ::key #(->> % :view :summary :targets (some :editing?))))
+        editing?                       (rum/react (rum-util/derived-atom [selected-summary] #(->> % :targets (some :editing?))))
         target-add-enabled?            (and summary (.ok auth-model "add-target-to-inspection-summary"))
         target-edit-enabled?           (and summary (.ok auth-model "edit-inspection-summary-target"))
         target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
-        table-rows                     (rum/cursor-in component-state [:view :summary :targets])]
+        table-rows                     (rum/cursor selected-summary :targets)]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
