@@ -122,16 +122,22 @@
     :data-test-id (str "remove-icon-" index)}])
 
 (rum/defcs target-row < rum/reactive
-                        {:init (fn [state _]
-                                 (let [[_ target] (-> state :rum/args)]
-                                   (-> state
-                                       (assoc ::input-id (jsutil/unique-elem-id "inspection-target-row"))
-                                       (assoc ::row-target target))))}
+                        {:init (fn [state _] (assoc state ::input-id (jsutil/unique-elem-id "inspection-target-row")))}
                         {:did-mount (fn [state]
                                       (upload/bindToElem (js-obj "id" (::input-id state)))
-                                      (upload/subscribe-files-uploaded (::input-id state)
-                                                                       (partial got-files (-> state ::row-target :id)))
-                                      state)}
+                                      (let [[_ row-target] (-> state :rum/args)]
+                                        (if-let [target-id (:id row-target)]
+                                          (assoc state :fileupload-subscription-id (upload/subscribe-files-uploaded
+                                                                                     (::input-id state)
+                                                                                     (partial got-files target-id)))
+                                          state)))}
+                        {:will-update (fn [state]
+                                        (let [[_ row-target] (-> state :rum/args)]
+                                          (if (and (:id row-target) (not (:fileupload-subscription-id state)))
+                                            (assoc state :fileupload-subscription-id (upload/subscribe-files-uploaded
+                                                                                       (::input-id state)
+                                                                                       (partial got-files (:id row-target))))
+                                            state)))}
   [local-state idx row-target add-enabled? edit-enabled? remove-enabled?]
   (let [editing?  (:editing? row-target)
         summaryId (:id @selected-summary)
