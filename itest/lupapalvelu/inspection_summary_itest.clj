@@ -51,39 +51,55 @@
         (give-verdict raktark-jarvenpaa (:id app-jarvenpaa) :verdictId "3323") => ok?
         (let [{summaries :summaries} (query raktark-jarvenpaa :inspection-summaries-for-application :id (:id app-jarvenpaa))
               {summaryId1 :id summaryName :name targets :targets
-               :as default-summary} (first summaries)]
+               :as default-summary} (first summaries)
+              test-target (second targets)
+              test-target-attachment-pred (fn [{{:keys [id type]} :target}] (and (= type "inspection-summary-item")
+                                                                                 (= id (:id test-target))))]
           summaryName => "foo"
           (fact "Applicant can see the default summary but not create new ones or modify them"
             (query pena :inspection-summaries-for-application :id id1) => ok?
             (command pena :create-inspection-summary :id id1) => unauthorized?
             (command pena :remove-target-from-inspection-summary :id id1) => unauthorized?
             (command pena :edit-inspection-summary-target :id id1) => unauthorized?)
-          (fact "Applicant can add attachment for target"
-            (let [summary-target (second targets)
-                  file-id (upload-file-and-bind pena id1 {:type {:type-group "katselmukset_ja_tarkastukset"
-                                                                 :type-id    "tarkastusasiakirja"}
-                                                          :constructionTime true
-                                                          :target {:type "inspection-summary-item"
-                                                                   :id (:id summary-target)}})]
-              (fact "Queries have uploaded attachment"
-                (let [summary-attachments (->> (query pena :inspection-summaries-for-application :id id1)
-                                               :summaries
-                                               (util/find-by-id summaryId1)
-                                               :targets
-                                               (util/find-by-id (:id summary-target))
-                                               :attachments)
-                      application-attachments (->> (query-application pena id1)
-                                                   :attachments
-                                                   (filter (fn [{{:keys [id type]} :target}]
-                                                             (and (= type "inspection-summary-item")
-                                                                  (= id (:id summary-target))))))]
-                  (count summary-attachments) => (count application-attachments)
-                  (-> (first summary-attachments) :latestVersion :originalFileId) => file-id))))
+          (doseq [{:keys [name apikey]} [{:name "pena" :apikey pena} {:name "raktark-jarvenpaa" :apikey raktark-jarvenpaa}]]
+            (fact {:midje/description (str name " can add attachment for target")}
+              (let [file-id (upload-file-and-bind apikey id1 {:type {:type-group "katselmukset_ja_tarkastukset"
+                                                                   :type-id    "tarkastusasiakirja"}
+                                                            :constructionTime true
+                                                            :target {:type "inspection-summary-item"
+                                                                     :id (:id test-target)}})]
+                (fact "Queries have uploaded attachment"
+                  (let [summary-attachments (->> (query apikey :inspection-summaries-for-application :id id1)
+                                                 :summaries
+                                                 (util/find-by-id summaryId1)
+                                                 :targets
+                                                 (util/find-by-id (:id test-target))
+                                                 :attachments)
+                        application-attachments (->> (query-application apikey id1)
+                                                     :attachments
+                                                     (filter test-target-attachment-pred))]
+                    (count summary-attachments) => (count application-attachments)
+                    (-> (last summary-attachments) :latestVersion :originalFileId) => file-id)))))
           (fact "Authority can remove a single target"
+            (fact "initially two attachments"
+              (->> (query raktark-jarvenpaa :inspection-summaries-for-application :id id1)
+                   :summaries
+                   (util/find-by-id summaryId1)
+                   :targets
+                   second
+                   :attachments
+                   count) => 2)
             (command raktark-jarvenpaa :remove-target-from-inspection-summary
-                                       :id id1 :summaryId summaryId1 :targetId (-> targets second :id)) => ok?
-            (->> (query pena :inspection-summaries-for-application :id id1)
-                 :summaries first :targets (map :target-name)) => (just ["bar" "bar3"]))
+                                       :id id1 :summaryId summaryId1 :targetId (:id test-target)) => ok?
+            (let [targets (->> (query pena :inspection-summaries-for-application :id id1)
+                               :summaries (util/find-by-id summaryId1) :targets)
+                  application-attachments (->> (query-application raktark-jarvenpaa id1)
+                                               :attachments
+                                               (filter test-target-attachment-pred))]
+              (map :target-name targets) => (just ["bar" "bar3"])
+              (map :id targets) =not=> (contains (:id test-target))
+              (fact "Attachments are removed from application"
+                (count application-attachments) => 0)))
           (fact "Authority can add a single target"
             (command raktark-jarvenpaa :add-target-to-inspection-summary
                      :id id1 :summaryId summaryId1
