@@ -672,9 +672,6 @@
   (ok))
 
 (defn handler-upsert-updates [handler handlers created user]
-  (let [ind (util/position-by-id (:id handler) handlers)
-        handler-updates (if (seq handlers)
-                          {(util/kw-path :handlers (or ind (count handlers))) handler}
-                          {:handlers [handler]})]
-    {$set  (merge {:modified created} handler-updates)
+  (let [ind (util/position-by-id (:id handler) handlers)]
+    {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
