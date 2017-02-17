@@ -12,7 +12,7 @@
       [:label {:for input-id}
        [:i.lupicon-circle-plus]
        [:i.wait.spin.lupicon-refresh]
-       [:span "Lisää tiedosto"]]]]))
+       [:span (js/loc "attachment.addFile")]]]]))
 
 (rum/defc view-with-download < {:key-fn (fn [version] (:fileId version))}
   "Port of ko.bindingHandlers.viewWithDownload"
