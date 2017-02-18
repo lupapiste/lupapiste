@@ -66,9 +66,12 @@
   (let [user (usr/get-user-by-email email)]
     (cond
       (usr/authority? user)              user
-      (or (nil? user) (usr/dummy? user)) (->> {:email email
-                                               :firstname ""
-                                               :lastName email
-                                               :role "authority"}
+      ;; Use existing user data if available
+      (or (nil? user) (usr/dummy? user)) (->> (merge
+                                               {:email email
+                                                :firstname ""
+                                                :lastName email}
+                                               user
+                                               {:role "authority"})
                                               (create-and-notify-user caller)
                                               :user))))
