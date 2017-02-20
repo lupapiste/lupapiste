@@ -156,12 +156,12 @@
                           (util/find-by-id targetId)))
       (fail :error.inspection-summary-target.finished))))
 
-(defmethod att/upload-to-target-allowed (keyword attachment-target-type) [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
+(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
   (let [summary-target (get-summary-target tid inspection-summaries)]
     (when (:finished summary-target)
       (fail :error.inspection-summary-target.finished))))
 
-(defmethod att/edit-allowed-by-target (keyword attachment-target-type) [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
+(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
   (when-let [{:keys [target]} (util/find-by-id attachmentId attachments)]
     (when (and (= (:type target) attachment-target-type)
                (-> (:id target)
