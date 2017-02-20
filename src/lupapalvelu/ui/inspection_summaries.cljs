@@ -66,6 +66,8 @@
   {:type {:type-group "katselmukset_ja_tarkastukset"
           :type-id    "tarkastusasiakirja"}
    :fileId (aget file "fileId")
+   :group {:groupType "operation"
+           :operations [(select-keys (:op @selected-summary) [:id :name])]}
    :target {:type "inspection-summary-item"
             :id target-id}
    :constructionTime true})
@@ -157,7 +159,8 @@
         applicationId   (:applicationId @component-state)
         summaryId       (:id @selected-summary)
         targetId        (:id row-target)
-        targetFinished? (:finished row-target)]
+        targetFinished? (:finished row-target)
+        remove-attachment-success (fn [resp] (.showSavedIndicator js/util resp) (refresh))]
     [:tr
      {:data-test-id (str "target-" idx)}
      [:td.target-finished
@@ -173,7 +176,10 @@
       (doall
         (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
-          (attc/view-with-download latest)))
+          (vector :div
+                  (attc/view-with-download-small-inline latest)
+                  (when-not targetFinished?
+                    (attc/delete-attachment-link attachment remove-attachment-success)))))
       (when-not targetFinished?
         (attc/upload-link (::input-id local-state)))]
      [:td

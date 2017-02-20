@@ -9,3 +9,15 @@
        (derived-atom refs key f)))
    ([refs key f]
      (rum/derived-atom refs key f)))
+
+ (defn hubscribe
+   [eventName params callback]
+   {:init (fn [state _]
+            (let [result (if (fn? params) (params state) params)]
+              (update state
+                      :hubscriptions
+                      conj
+                      (.subscribe js/hub
+                                  (clj->js (assoc result :eventType eventName))
+                                  (partial callback state)))))
+    :will-unmount (fn [state] (doseq [subscription (:hubscriptions state)] (.unsubscribe js/hub subscription)))})
