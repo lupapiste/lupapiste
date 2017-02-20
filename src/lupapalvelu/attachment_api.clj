@@ -693,17 +693,6 @@
     (att/update-attachment-data! command attachmentId data created))
   (ok))
 
-(defcommand set-attachment-contents
-  {:parameters [id attachmentId contents]
-   :categories #{:attachments}
-   :user-roles #{:authority}
-   :org-authz-roles #{:archivist}
-   :states     states/all-application-states
-   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
-  [{:keys [created] :as command}]
-  (att/update-attachment-data! command attachmentId {:contents contents} created)
-  (ok))
-
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :categories #{:attachments}
