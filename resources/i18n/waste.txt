@@ -443,7 +443,7 @@
 "waste.aines.kasvualustaMulta" "fi" "Kasvualusta, multa"
 "waste.aines.kasvualustaMulta" "sv" "Odlingsunderlag, mull"
 "waste.aines.kevytsoraVaahtolasimurske" "en" "Lightweight aggregate, cellular glass"
-"waste.aines.kevytsoraVaahtolasimurske" "fi" "Kevytsore, vaahtolasimurske"
+"waste.aines.kevytsoraVaahtolasimurske" "fi" "Kevytsora, vaahtolasimurske"
 "waste.aines.kevytsoraVaahtolasimurske" "sv" "Lättbetong, skumglaskross"
 "waste.aines.liejuRuoppausmassa" "en" "Sludge, dredging material (U4)"
 "waste.aines.liejuRuoppausmassa" "fi" "Lieju, ruoppausmassa (U4)"
