@@ -209,6 +209,25 @@
         (command sonja :delete-attachment :id app-id :attachmentId (:id target-attachment)) => ok?
         (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))))
 
+(facts "Disabling targets"
+  (facts "documents"
+    (let [app-id         (:id (create-and-submit-application sonja :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
+          _              (generate-documents app-id sonja)
+          app            (query-application sonja app-id)
+          designer-doc   (domain/get-document-by-name app "suunnittelija")
+          maksaja-doc    (domain/get-document-by-name app "maksaja")
+          assignment-id1 (:id (create-assignment sonja sonja-id app-id [{:group "documents" :id (:id designer-doc)}] "Tarkista!"))
+          assignment-id2 (:id (create-assignment sonja sonja-id app-id [{:group "documents" :id (:id designer-doc)}
+                                                                        {:group "documents" :id (:id maksaja-doc)}] "Kaksi kohdetta"))
+          _              (give-verdict sonja app-id) => ok?
+          assignments    (get-user-assignments sonja)]
+      (fact "when document is disabled, assignments with the document as only target are canceled"
+        (command sonja :approve-doc :id app-id :doc (:id designer-doc) :path nil :collection "documents") => ok?
+        (command sonja :set-doc-status :id app-id :docId (:id designer-doc) :value "disabled") => ok?
+        (let [assignments (get-user-assignments sonja)]
+          (->> assignments (util/find-first #(= (:id %) assignment-id1)) :status) => "canceled")
+          (->> assignments (util/find-first #(= (:id %) assignment-id2)) :status) => "active"))))
+
 (facts "Assignments search"
   (apply-remote-minimal)
   (let [id1 (create-app-id sonja :propertyId sipoo-property-id :x 404369.304 :y 6693806.957) ; Included into Nikkila area

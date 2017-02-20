@@ -136,6 +136,14 @@
       (ok))
     (fail :error.document-not-found)))
 
+(defn- update-document-assignment-statuses [app-id doc-id doc-status]
+  (if (= doc-status "disabled")
+    (assignment/update-assignments {$and [{:application.id app-id}
+                                          {:targets {$size 1}}
+                                          {:targets.id doc-id}]}
+                                   {$set {:status "canceled"}})
+    (assignment/set-assignment-status app-id doc-id "active")))
+
 (defcommand set-doc-status
   {:description "Set document status to disabled: true or disabled: false"
    :parameters [id docId value]
@@ -153,7 +161,7 @@
   (if (domain/get-document-by-id (:application command) docId)
     (do
       (doc-persistence/set-disabled-status command docId value)
-      (assignment/set-assignment-status id docId (if (= value "disabled") "canceled" "active"))
+      (update-document-assignment-statuses id docId value)
       (ok))
     (fail :error.document-not-found)))
 

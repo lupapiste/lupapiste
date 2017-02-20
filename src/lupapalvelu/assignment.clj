@@ -224,14 +224,13 @@
        (util/map-values (comp (partial into {}) assignment-targets))))
 
 (defn- enrich-assignment-target [application-targets assignment]
-  (let [group-targets (-> assignment :target :group keyword application-targets)]
-    (update assignment :targets
-            (partial map
-                     #(merge % (util/find-by-id (:id %)
-                                                (-> %
-                                                    :group
-                                                    keyword
-                                                    application-targets)))))))
+  (update assignment :targets
+          (partial map
+                   #(merge % (util/find-by-id (:id %)
+                                              (-> %
+                                                  :group
+                                                  keyword
+                                                  application-targets))))))
 
 (defn- enrich-targets [assignments]
   (let [app-id->targets (->> (map (comp :id :application) assignments)
@@ -292,7 +291,7 @@
 (defn- update-to-db [assignment-id query assignment-changes]
   (mongo/update-n :assignments (assoc query :_id assignment-id) assignment-changes))
 
-(defn- update-assignments [query assignment-changes]
+(defn update-assignments [query assignment-changes]
   (mongo/update-n :assignments query assignment-changes :multi true))
 
 (defn count-for-assignment-id [assignment-id]
@@ -320,7 +319,7 @@
   (set-assignments-statuses {:application.id application-id} "active"))
 
 (defn set-assignment-status [application-id target-id status]
-  (set-assignments-statuses {:application.id application-id :target.id target-id} status))
+  (set-assignments-statuses {:application.id application-id :targets.id target-id} status))
 
 (defn remove-target-from-assignments
   "Removes given target from assignments, then removes assignments left with no target"
