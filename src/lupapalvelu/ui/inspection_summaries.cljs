@@ -157,7 +157,8 @@
         applicationId   (:applicationId @component-state)
         summaryId       (:id @selected-summary)
         targetId        (:id row-target)
-        targetFinished? (:finished row-target)]
+        targetFinished? (:finished row-target)
+        remove-attachment-success (fn [resp] (.showSavedIndicator js/util resp) (refresh))]
     [:tr
      {:data-test-id (str "target-" idx)}
      [:td.target-finished
@@ -173,7 +174,9 @@
       (doall
         (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
-          (attc/view-with-download latest)))
+          (vector :div
+                  (attc/view-with-download-small-inline latest)
+                  (attc/delete-attachment-link attachment remove-attachment-success))))
       (when-not targetFinished?
         (attc/upload-link (::input-id local-state)))]
      [:td

@@ -75,6 +75,7 @@ lupapisteApp.services.fileUploadService = {};
 lupapisteApp.services.fileUploadService.bindFileInput = function() {};
 lupapisteApp.services.attachmentsService = {};
 lupapisteApp.services.attachmentsService.bindAttachments = function() {};
+lupapisteApp.services.attachmentsService.removeAttachment = function() {};
 lupapisteApp.services.commentService = {};
 lupapisteApp.services.organizationTagsService = {};
 lupapisteApp.services.applicationFiltersService = {};
