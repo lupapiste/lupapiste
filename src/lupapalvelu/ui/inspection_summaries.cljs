@@ -160,7 +160,7 @@
         targetFinished? (:finished row-target)]
     [:tr
      {:data-test-id (str "target-" idx)}
-     [:td
+     [:td.target-finished
       (when targetFinished?
         [:i.lupicon-circle-check.positive ""])]
      [:td.target-name

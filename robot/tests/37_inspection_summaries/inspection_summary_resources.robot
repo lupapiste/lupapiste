@@ -3,6 +3,18 @@ Resource   ../../common_resource.robot
 
 *** Keywords ***
 
+Create basic template setup
+  Go to page  applications
+  Add new template  Uusi pohja 1  AA\nBB\nCC\n  AA\nBB\nCC  0
+  Add new template  Uusi pohja 2  AA\nDD\n\nCC\n  AA\nDD\nCC  1
+
+Bind template to operation as default
+  [Arguments]  ${name}  ${operation}
+  Go to page  operations
+  Select From List by label   xpath=//select[@data-test-id="select-inspection-summary-template-${operation}"]  ${name}
+  Positive indicator should be visible
+  Positive indicator should not be visible
+
 Add new template
   [Arguments]  ${name}  ${content}  ${savedContent}  ${index}
   Click enabled by test id  show-new-template-bubble

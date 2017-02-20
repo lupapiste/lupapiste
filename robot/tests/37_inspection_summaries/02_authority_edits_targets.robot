@@ -10,9 +10,7 @@ Resource        inspection_summary_resources.robot
 
 Create template setup in auth admin
   Jarvenpaa admin logs in
-  Go to page  applications
-  Add new template  Uusi pohja 1  AA\nBB\nCC\n  AA\nBB\nCC  0
-  Add new template  Uusi pohja 2  AA\nDD\n\nCC\n  AA\nDD\nCC  1
+  Create basic template setup
   Logout
 
 Pena wants to build a block of flats
