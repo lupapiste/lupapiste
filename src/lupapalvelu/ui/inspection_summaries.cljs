@@ -295,9 +295,7 @@
      [:div
       [:label (js/loc "inspection-summary.tab.intro.1")]
       [:br]
-      [:label (js/loc "inspection-summary.tab.intro.2")]
-      [:br]
-      [:label (js/loc "inspection-summary.tab.intro.3")]]
+      [:label (js/loc "inspection-summary.tab.intro.2")]]
      [:div.form-grid.no-top-border.no-padding
       [:div.row
        [:div.col-1
