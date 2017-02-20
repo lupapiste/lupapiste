@@ -53,12 +53,14 @@
                  (domain/owner-or-write-access? application user-id))
     unauthorized))
 
+(def attachment-target-type "inspection-summary-item")
+
 (defn summary-target-attachment-predicate
   "Returns function, which can be used as predicate for filter.
   Predicate returns true on those attachments, who are targets of given target-id"
   [target-id]
   (fn [{{:keys [id type]} :target}]
-    (and (= type "inspection-summary-item")
+    (and (= type attachment-target-type)
          (= id target-id))))
 
 (defn- enrich-summary-targets [attachments targets]
@@ -154,11 +156,18 @@
                           (util/find-by-id targetId)))
       (fail :error.inspection-summary-target.finished))))
 
-(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
+(defmethod att/upload-to-target-allowed (keyword attachment-target-type) [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
   (let [summary-target (get-summary-target tid inspection-summaries)]
     (when (:finished summary-target)
       (fail :error.inspection-summary-target.finished))))
 
+(defmethod att/edit-allowed-by-target (keyword attachment-target-type) [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
+  (when-let [{:keys [target]} (util/find-by-id attachmentId attachments)]
+    (when (and (= (:type target) attachment-target-type)
+               (-> (:id target)
+                   (get-summary-target inspection-summaries)
+                   :finished))
+      (fail :error.inspection-summary-target.finished))))
 
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
