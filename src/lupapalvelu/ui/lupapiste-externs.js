@@ -53,6 +53,8 @@ ajax.header = function() {};
 
 var util = {};
 util.showSavedIndicator = function() {};
+util.partyFullName = function() {};
+
 
 var LUPAPISTE = {};
 LUPAPISTE.FileuploadService = function() {};
@@ -65,4 +67,38 @@ hub.unsubscribe = function() {};
 hub.onPageLoad = function() {};
 hub.onPageUnload = function() {};
 
-var loc = {};
+var loc = function() {};
+
+var lupapisteApp = {};
+lupapisteApp.services = {};
+lupapisteApp.services.fileUploadService = {};
+lupapisteApp.services.fileUploadService.bindFileInput = function() {};
+lupapisteApp.services.attachmentsService = {};
+lupapisteApp.services.attachmentsService.bindAttachments = function() {};
+lupapisteApp.services.commentService = {};
+lupapisteApp.services.organizationTagsService = {};
+lupapisteApp.services.applicationFiltersService = {};
+lupapisteApp.services.areaFilterService = {};
+lupapisteApp.services.handlerFilterService = {};
+lupapisteApp.services.tagFilterService = {};
+lupapisteApp.services.organizationFilterService = {};
+lupapisteApp.services.operationFilterService = {};
+lupapisteApp.services.publishBulletinService = {};
+lupapisteApp.services.documentDataService = {};
+lupapisteApp.services.sidePanelService = {};
+lupapisteApp.services.accordionService = {};
+lupapisteApp.services.verdictAppealService = {};
+lupapisteApp.services.scrollService = {};
+lupapisteApp.services.ramService = {};
+lupapisteApp.services.calendarService = {};
+lupapisteApp.services.sutiService = {};
+lupapisteApp.services.infoService = {};
+lupapisteApp.services.contextService = {};
+lupapisteApp.services.buildingService = {};
+lupapisteApp.services.assignmentService = {};
+lupapisteApp.services.assignmentRecipientFilterService = {};
+lupapisteApp.services.assignmentTargetFilterService = {};
+lupapisteApp.services.eventFilterService = {};
+lupapisteApp.services.inspectionSummaryService = {};
+lupapisteApp.services.handlerService = {};
+lupapisteApp.services.cardService = {};
