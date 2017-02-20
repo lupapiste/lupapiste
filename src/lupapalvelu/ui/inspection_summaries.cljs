@@ -66,6 +66,8 @@
   {:type {:type-group "katselmukset_ja_tarkastukset"
           :type-id    "tarkastusasiakirja"}
    :fileId (aget file "fileId")
+   :group {:groupType "operation"
+           :operations [(select-keys (:op @selected-summary) [:id :name])]}
    :target {:type "inspection-summary-item"
             :id target-id}
    :constructionTime true})
