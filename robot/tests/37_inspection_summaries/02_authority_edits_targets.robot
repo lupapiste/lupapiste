@@ -31,8 +31,11 @@ Create a new inspection summary
   Open tab  inspectionSummaries
   Click by test id  open-create-summary-bubble
   Wait test id visible  create-summary-button
+  Test id disabled  create-summary-button
   Wait until  Select From List by label  xpath=//select[@data-test-id="templates-select"]  Uusi pohja 1
+  Test id disabled  create-summary-button
   Wait until  Select From List by label  xpath=//select[@data-test-id="operations-select"]  (Asuinkerrostalon tai rivitalon rakentaminen)
+  Test id enabled  create-summary-button
   Click by test id  create-summary-button
   Positive indicator should be visible
 
