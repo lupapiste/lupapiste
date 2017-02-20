@@ -91,7 +91,7 @@
   (enlive/transform nodes
                     [:script]
                     (fn [e] (if (= (-> e :attrs :src) "inject-cljs")
-                              (if (env/dev-mode?) (assoc-in e [:attrs :src] uic/rum-app-url) {})
+                              (if (env/dev-mode?) (assoc-in e [:attrs :src] uic/rum-app-url) nil)
                               e))))
 
 (defn inject-content [t {:keys [nav info page footer templates]} component lang theme]
