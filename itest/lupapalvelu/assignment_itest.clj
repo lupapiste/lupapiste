@@ -152,7 +152,7 @@
   (let [id (create-app-id sonja :propertyId sipoo-property-id)
         doc-id (-> (query-application sonja id) :documents first :id)
         {assignment-id1 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
-        {assignment-id2 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")]
+        {assignment-id2 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
         {assignment-id3 :id} (create-assignment sonja nil id [{:group "group" :id doc-id}] "Valmistuva")]
     (fact "Only authorities within the same organization can complete assignment"
       (complete-assignment pena assignment-id1)   => unauthorized?
