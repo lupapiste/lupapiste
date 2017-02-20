@@ -265,10 +265,7 @@ LUPAPISTE.AttachmentsService = function() {
   });
 
   function sendHubNotification(eventType, commandName, params, response) {
-    hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName,
-                                                           ok: response.ok,
-                                                           response: response},
-                                                          params));
+    hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName}, params, response));
   }
 
   self.removeAttachment = function(attachmentId, hubParams) {
