@@ -176,7 +176,7 @@
       (doall
         (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
-          (vector :div
+          (vector :div {:data-test-id (str "target-row-attachment")}
                   (attc/view-with-download-small-inline latest)
                   (when-not targetFinished?
                     (attc/delete-attachment-link attachment remove-attachment-success)))))

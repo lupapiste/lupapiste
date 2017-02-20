@@ -8,9 +8,11 @@
     [:div.inline
      [:input.hidden {:type "file"
                      :name "files[]"
+                     :data-test-id "upload-link-input"
                      :id input-id}]
      [:a.link-btn.link-btn--link
-      [:label {:for input-id}
+      [:label {:for input-id
+               :data-test-id "upload-link"}
        [:i.lupicon-circle-plus]
        [:i.wait.spin.lupicon-refresh]
        [:span (js/loc "attachment.addFile")]]]]))
@@ -61,5 +63,6 @@
                                                        "attachment.delete.message.no-versions")
                                               :yesFn remove-attachment}}))]
     [:div.inline.right
-     [:a.delete-attachment-link {:on-click delete-confirmation}
+     [:a {:on-click delete-confirmation
+          :data-test-id "delete-attachment-link"}
       (str "[" (js/loc "remove") "]")]]))
