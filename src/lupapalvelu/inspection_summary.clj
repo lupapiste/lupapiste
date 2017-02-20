@@ -147,6 +147,11 @@
           nil
           summaries))
 
+(defn- get-inspection-target-id-from-attachment [attachmentId attachments]
+  (when-let [{:keys [target]} (util/find-by-id attachmentId attachments)]
+    (when (= (:type target) attachment-target-type)
+      (:id target))))
+
 (defn deny-if-finished
   "Pre-check to validate that target is not finished"
   [{{:keys [summaryId targetId]} :data {:keys [inspection-summaries]} :application}]
@@ -162,11 +167,8 @@
       (fail :error.inspection-summary-target.finished))))
 
 (defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
-  (when-let [{:keys [target]} (util/find-by-id attachmentId attachments)]
-    (when (and (= (:type target) attachment-target-type)
-               (-> (:id target)
-                   (get-summary-target inspection-summaries)
-                   :finished))
+  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+    (when (-> target-id (get-summary-target inspection-summaries) :finished)
       (fail :error.inspection-summary-target.finished))))
 
 (defn- elem-match-query [appId summaryId]
