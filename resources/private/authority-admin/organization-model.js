@@ -85,6 +85,16 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   ko.computed(function() {
+    var inspectionSummariesEnabled = self.inspectionSummariesEnabled();
+    if (self.initialized) {
+      ajax.command("set-organization-inspection-summaries", {enabled: inspectionSummariesEnabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  ko.computed(function() {
     var extendedConstructionWasteReportEnabled = self.extendedConstructionWasteReportEnabled();
     if (self.initialized) {
       ajax.command("set-organization-extended-construction-waste-report", {enabled: extendedConstructionWasteReportEnabled})

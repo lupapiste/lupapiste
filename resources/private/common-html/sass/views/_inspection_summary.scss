@@ -43,14 +43,45 @@
   &> div {
     margin: $marginM $marginM;
   }
-  button {
-    margin: 0 $marginM;
-  }
   label.required {
     color: $lp-orange;
     &:after {
       content: "*";
       display: inline;
+    }
+  }
+}
+
+.create-summary-bubble {
+  .container-bubble {
+    margin: 0px;
+    padding: 0px 24px;
+  }
+
+  div.row.left-buttons {
+    padding-top: 12px;
+  }
+
+}
+
+div.summary-button-bar {
+  padding-top: 24px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#targets-table {
+  td {
+
+    &.functions {
+      a {
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+    }
+
+    &.target-name {
+      min-width: 250px;
     }
   }
 }

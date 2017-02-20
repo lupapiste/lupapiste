@@ -43,15 +43,15 @@
         "documents.$.data.henkilo.nimi.modified"     some-time}))
 
 
-(def attachments [{:id "1" :op {:id "123"}}
+(def attachments [{:id "1" :op [{:id "123"}]}
                   {:id "2" :op nil}
-                  {:id "3" :op {:id "123"} :versions [{:v 1}]}
-                  {:id "4" :op {:id "123"} :versions [{:v 1}]}
-                  {:id "5" :op {:id "321"} :versions [{:v 1}]}
-                  {:id "6" :op {:id "111"}}
-                  {:id "7" :op {:id "112"} :versions []}
-                  {:id "9" :op {:id "112"} :versions nil}
-                  {:id "8" :op {:id "123"}}])
+                  {:id "3" :op [{:id "123"}] :versions [{:v 1}]}
+                  {:id "4" :op [{:id "123"}] :versions [{:v 1}]}
+                  {:id "5" :op [{:id "321"}] :versions [{:v 1}]}
+                  {:id "6" :op [{:id "111"}]}
+                  {:id "7" :op [{:id "112"}] :versions []}
+                  {:id "9" :op [{:id "112"}] :versions nil}
+                  {:id "8" :op [{:id "123"}]}])
 
 (fact "removable attachments with operation"
   (empty-op-attachments-ids nil nil) => nil

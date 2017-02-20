@@ -16,7 +16,9 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
   self.recipientId = ko.observable(params.recipientId);
   self.description = ko.observable(params.description);
 
-  self.authorities = params.authorities || [];
+  self.authorities = self.disposedPureComputed(function() {
+    return _.concat({id: ""}, self.params.authorities() || []);
+  });
   self.rawTargets = params.targets;
   self.targetGroups = self.disposedPureComputed(function() { return _.keys(self.rawTargets());});
 
@@ -44,14 +46,14 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
   });
 
   self.assignmentOk = self.disposedPureComputed(function() {
-    var observables = [self.selectedTargetGroup(), self.selectedTargetId(), self.recipientId(), self.description()];
+    var observables = [self.selectedTargetGroup(), self.selectedTargetId(), self.description()];
     return !_.some(observables, _.isEmpty);
   });
 
   self.saveAssignment = function() {
     self.sendEvent(myService, "saveAssignment", {id: util.getIn(params, ["applicationId"]),
                                                  assignmentId: self.assignmentId(),
-                                                 recipientId: self.recipientId(),
+                                                 recipientId: self.recipientId() || "",
                                                  targets: [{ group: self.selectedTargetGroup(),
                                                              id: self.selectedTargetId() }],
                                                  description: self.description()});
@@ -61,4 +63,7 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
   // refresh targets from service
   self.sendEvent(myService, "targetsQuery", {applicationId: util.getIn(params, ["applicationId"])});
 
+  self.receiverName = function(receiver) {
+    return receiver.id ? util.partyFullName(receiver) : loc("applications.search.recipient.no-one");
+  };
 };

@@ -18,10 +18,12 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
 - Python 2.x ja [Robot Framework](http://robotframework.org/) selaintestausta varten
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
+  - `pip install robotframework-debuglibrary`
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
   - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
   PDF-tiedostojen kääntämistä ja korjaamista varten. [Apuja OS X -ongelmiin](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
+- Aseta itsellesi paikallisesti IP-ohjaus 127.0.0.1 lupapiste.local (tätä käytetään cljsbuildissä dev-profiililla)
 
 Valinnaisesti:
 

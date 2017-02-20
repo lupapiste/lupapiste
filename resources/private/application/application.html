@@ -5,7 +5,7 @@
             <div class="application_summary">
               <div class="container">
                 <div class="preamble"
-                     data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">                  
+                     data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info', true )">
                         <div class="application_summary_info" data-bind="with: application">
                           <h1 data-bind="component: {name: 'address',
                                          params: { application: $parent,
@@ -73,7 +73,7 @@
 
                               <!-- Authorities: -->
                               <div data-bind="component: 'handler-list'"></div>
-                              
+
                               <!-- Operations: -->
                               <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
                               <div>
@@ -209,7 +209,9 @@
                           <edit-handlers></edit-handlers>
                 </card>
                     <!-- Tabs: -->
-                    <div class="tabs-container" data-bind="with: application">
+                    <div class="tabs-container"
+                         data-bind="with: application,
+                                    visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
                         <ul class="tabs" id="applicationTabs">
                             <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
@@ -306,6 +308,13 @@
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
                               </a></li>
 
+                          <li data-bind="if: !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application'),
+                                         css: {'active': $parent.selectedTabName() === 'inspectionSummaries'}">
+                            <a data-bind="click: changeTab" href="#" data-target="inspectionSummaries" data-test-id="application-open-inspectionSummaries-tab" class="link-btn">
+                              <span data-bind="ltext: 'inspectionSummaries.tab'"></span>
+                            </a>
+                          </li>
+
                             <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
                                 <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
@@ -316,7 +325,8 @@
                 </div>
             </div>
 
-            <div class="container">
+            <div class="container"
+                 data-bind="visible: lupapisteApp.services.cardService.showCard( 'summary', 'info')">
                 <div class="tab-content-container content">
 
                     <!-- Application info tab -->
@@ -340,7 +350,7 @@
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
                         <div class="operation-info">
-
+                            <!-- ko if: !$root.authorization.ok('link-permit-required') -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
                               <div class="help-box">
                                 <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
@@ -350,6 +360,7 @@
                                 </button>
                               </div>
                             </div>
+                            <!-- /ko -->
                             <div data-bind="if: $root.authorization.ok('link-permit-required')">
                               <div class="help-box margins-m">
                                 <p data-bind="ltext: 'help.AddPermit'"></p>
@@ -536,6 +547,12 @@
                       </div>
                     </div>
                     <!-- /ko -->
+
+                  <!-- ko if: selectedTabName() === 'inspectionSummaries' && !_.isEmpty($root.application.id()) && $root.authorization.ok('inspection-summaries-for-application') -->
+                  <div id="application-inspectionSummaries-tab" class="tab-content">
+                    <cljs-inspection-summaries params="{app: $data.application, authModel: $root.authorization}"></cljs-inspection-summaries>
+                  </div>
+                  <!-- /ko -->
 
                     <!-- Bulletin tab -->
                     <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('publish-bulletin-enabled') -->

@@ -15,7 +15,6 @@ var stamping = (function() {
       page: ko.observable("first"),
       transparency: ko.observable(),
       extraInfo: ko.observable(""),
-      includeBuildings: ko.observable(false),
       kuntalupatunnus: ko.observable(""),
       section: ko.observable("")
     },

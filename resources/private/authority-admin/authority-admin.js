@@ -208,17 +208,7 @@
       ajax.command("create-statement-giver", statementGiver)
         .success(self.onSuccess)
         .error(function(result) {
-          var errorText = result.text;
-          if (errorText === "error.user-not-found") {
-            // Create user and retry
-            ajax
-              .command("create-user", {email: data.email(), role: "authority", lastName: data.email()})
-              .success(function() {self.save(data);})
-              .error(function(e){self.error(e.text);})
-              .call();
-          } else {
-            self.error(errorText);
-          }
+          self.error(result.txt);           
         })
         .call();
       return false;

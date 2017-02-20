@@ -3,7 +3,7 @@
 Documentation   Inforequest state handling
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource       ../37_handlers/handlers_resource.robot
+Resource       ../38_handlers/handlers_resource.robot
 
 *** Test Cases ***
 

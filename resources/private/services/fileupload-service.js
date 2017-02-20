@@ -31,7 +31,7 @@ LUPAPISTE.FileuploadService = function() {
     })();
   }
 
-  self.bindFileInput = function( options ) {
+  self.bindFileInput = function( options, pluginOptions ) {
 
     options = _.defaults( options, {
       maximumUploadSize: 15000000, // 15 MB
@@ -77,14 +77,18 @@ LUPAPISTE.FileuploadService = function() {
     }
 
     var $dropZone = prepareDropZone( options.dropZone );
+    var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
+    var apiUrl = applicationId ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
+    var formData = [ { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") } ];
+    if (applicationId) {
+      formData.push({ name: "id", value: applicationId });
+    }
 
-    $("#" + fileInputId).fileupload({
-      url: "/api/raw/upload-file",
+    $("#" + fileInputId).fileupload(_.defaults(pluginOptions, {
+      url: apiUrl,
       type: "POST",
       dataType: "json",
-      formData: [
-        { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
-      ],
+      formData: formData,
       dropZone: $dropZone,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
@@ -135,7 +139,7 @@ LUPAPISTE.FileuploadService = function() {
           e.preventDefault();
         }
       }
-    });
+    }));
 
     hubscribe( "destroy", function()  {
       $("#" + fileInputId ).fileupload( "destroy");

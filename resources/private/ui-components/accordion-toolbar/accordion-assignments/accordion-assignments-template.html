@@ -10,7 +10,7 @@
                                  targets: $component.possibleTargets,
                                  assignmentId: $data.id,
                                  applicationId: $component.params.applicationId,
-                                 recipientId: $data.recipient.id,
+                                 recipientId: $data.recipient ? $data.recipient.id : null,
                                  description: $data.description,
                                  targetGroup: $data.targets[0].group,
                                  targetId: $data.targets[0].id,

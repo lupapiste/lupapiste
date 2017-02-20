@@ -319,6 +319,7 @@
       background: $bg;
     }
   }
+  @content;
 }
 
 table.info-link-editor-view {

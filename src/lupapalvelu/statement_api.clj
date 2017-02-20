@@ -1,12 +1,7 @@
 (ns lupapalvelu.statement-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [monger.operators :refer :all]
-            [sade.env :as env]
-            [sade.util :as util]
-            [sade.core :refer :all]
-            [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
+  (:require [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -17,7 +12,13 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]))
+            [lupapalvelu.user-utils :as uu]
+            [monger.operators :refer :all]
+            [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
 
 ;;
 ;; Authority Admin operations
@@ -44,13 +45,12 @@
                       action/email-validator]
    :notified   true
    :user-roles #{:authorityAdmin}}
-  [{user :user}]
+  [{data :data user :user}]
   (let [organization (organization/get-organization (usr/authority-admins-organization-id user))
         email           (usr/canonize-email email)
         statement-giver-id (mongo/create-id)]
-    (if-let [{fname :firstName lname :lastName :as user} (usr/get-user-by-email email)]
+    (if-let [{fname :firstName lname :lastName :as authority} (uu/authority-by-email user email)]
       (do
-        (when-not (usr/authority? user) (fail! :error.not-authority))
         (organization/update-organization (:id organization) {$push
                                                               {:statementGivers
                                                                {:id statement-giver-id
@@ -59,9 +59,10 @@
                                                                 :name (if-not (and (empty? fname) (empty? lname))
                                                                         (str fname " " lname)
                                                                         email)}}})
-        (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
+        (notifications/notify! :add-statement-giver  {:user authority
+                                                      :data {:text text :organization organization}})
         (ok :id statement-giver-id))
-      (fail :error.user-not-found))))
+      (fail :error.not-authority))))
 
 (defcommand delete-statement-giver
   {:parameters [personId]

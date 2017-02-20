@@ -33,10 +33,13 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
-  hub.subscribe( "application-model-updated", function() {
+  var reload = function() {
     self.queryAll();
     self.groupTypes.reset();
-  });
+  };
+
+  hub.subscribe("application-model-updated", reload);
+  hub.subscribe(self.serviceName + "::updateAll", reload);
 
   hub.subscribe( "contextService::leave", function() {
     clearData();
@@ -309,8 +312,13 @@ LUPAPISTE.AttachmentsService = function() {
 
   function pollTimeout(statuses) {
     warn("Timeout from bind-attachment(s), fileIds: " + _.join(_.keys(statuses), ","));
-    _.forEach(statuses, function(status) {
+    _.forEach(statuses, function(status, fileId) {
+      var oldStatus = status();
       status(self.JOB_TIMEOUT);
+      hub.send(self.serviceName + "::bind-attachments-status",
+               {fileId: fileId,
+                status: oldStatus, // It is possible that the file in hand has been successful, although overall job timed out
+                jobStatus: self.JOB_TIMEOUT});
     });
   }
 
@@ -321,6 +329,10 @@ LUPAPISTE.AttachmentsService = function() {
       _.forEach( _.values(job.value), function(fileData) {
         if ( statuses[fileData.fileId] ) {
           statuses[fileData.fileId](fileData.status);
+          hub.send(self.serviceName + "::bind-attachments-status",
+                   {fileId: fileData.fileId,
+                    status: fileData.status,
+                    jobStatus: job.status});
         }
       });
       if ( job.status === self.JOB_RUNNING ) {

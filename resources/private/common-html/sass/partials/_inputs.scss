@@ -116,6 +116,7 @@
   .#{$cls}-wrapper.wrapper--disabled {
     background-color: $disabled-bg;
 }
+  @content;
 }
 
 @include toggle-helper ( arrow, "e614", "e611" ) {}
@@ -317,6 +318,7 @@ input.grid-style-input--wide {
     }
   }
 }
+@content;
 }
 
 drop-zone {

@@ -294,6 +294,7 @@ td.negative {
       border: none;
     }
   }
+  @content;
 }
 
 @include note-table ( reviews ) {}

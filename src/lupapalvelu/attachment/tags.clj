@@ -60,10 +60,9 @@
     application-group-type-tag))
 
 (defn- tag-by-operation [{op :op :as attachment}]
-  (->> (cond (map? op) (:id op)
-             (= (count op) 1) (get-in op [0 :id])
-             :else nil)
-       op-id->tag))
+  (when (= (count op) 1)
+    (->> (get-in op [0 :id])
+         op-id->tag)))
 
 (defn tag-by-type [{op :op :as attachment}]
   (or (att-type/tag-by-type attachment)

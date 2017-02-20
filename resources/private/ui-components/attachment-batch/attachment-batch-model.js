@@ -74,15 +74,15 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
-  function newRow() {
-    var type = ko.observable();
-    var grouping = ko.observable({});
-    var contentsValue = ko.observable();
+  function newRow(initialType, initialContents, drawingNumber, group) {
+    var type = ko.observable(initialType);
+    var grouping = ko.observable(group || {});
+    var contentsValue = ko.observable(initialContents);
     var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( type ) {
       var contents = service.contentsData( type );
       contentsList( contents.list );
-      contentsValue( contents.defaultValue);
+      contentsValue(initialContents || contents.defaultValue);
       grouping({});
       grouping(service.getDefaultGroupingForType(type));
     } );
@@ -91,7 +91,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var row = { disabled: ko.observable(),
                 type: new Cell( type, true ),
                 contents: contentsCell,
-                drawing: new Cell( ko.observable()),
+                drawing: new Cell( ko.observable(drawingNumber)),
                 grouping: new Cell( grouping ),
                 sign: new Cell( ko.observable()),
                 construction: new Cell( ko.observable() )};
@@ -108,7 +108,10 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       if( oldRows[fileId]) {
         keepRows[fileId] = oldRows[fileId];
       } else {
-        newRows[fileId] = newRow();
+        if (_.isObject(file.type)) {
+          file.type.title = loc(["attachmentType", file.type["type-group"], file.type["type-id"]].join("."));
+        }
+        newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group);
       }
     });
     rows( _.merge( keepRows, newRows ));

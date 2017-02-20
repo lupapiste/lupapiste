@@ -33,33 +33,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
-            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
-
-;; Notifications
-
-(defn state-change-email-model
-  "Generic state change email. :state-text is set per application state.
-  When state changes and if notify is invoked as post-fn from command, result must contain new state in :state key."
-  [command conf recipient]
-  (assoc
-    (notifications/create-app-model command conf recipient)
-    :state-text #(i18n/localize % "email.state-description" (get-in command [:application :state]))))
-
-(def state-change {:subject-key    "state-change"
-                   :template       "application-state-change.md"
-                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
-                   :tab-fn         (fn [command] (cond (verdict/verdict-tab-action? command) "verdict"))
-                   :model-fn       state-change-email-model})
-
-(notifications/defemail :application-state-change state-change)
-
-(notifications/defemail :undo-cancellation
-                        {:subject-key    "undo-cancellation"
-                         :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))
-                         :model-fn       (fn [command conf recipient]
-                                           (assoc (notifications/create-app-model command conf recipient)
-                                             :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)

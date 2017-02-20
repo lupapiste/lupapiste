@@ -564,7 +564,7 @@
     (fail :error.unknown)))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo includeBuildings kuntalupatunnus section lang]
+  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]
    :categories #{:attachments}
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
                       (partial action/number-parameters [:xMargin :yMargin])
@@ -594,7 +594,6 @@
                           :y-margin (util/->long yMargin)
                           :page     (keyword page)
                           :transparency (util/->long (or transparency 0))
-                          :options      {:include-buildings includeBuildings}
                           :info-fields  {:backend-id   kuntalupatunnus
                                          :section      section
                                          :extra-info   extraInfo
@@ -692,17 +691,6 @@
   [{:keys [created] :as command}]
   (let [data (att/meta->attachment-data meta)]
     (att/update-attachment-data! command attachmentId data created))
-  (ok))
-
-(defcommand set-attachment-contents
-  {:parameters [id attachmentId contents]
-   :categories #{:attachments}
-   :user-roles #{:authority}
-   :org-authz-roles #{:archivist}
-   :states     states/all-application-states
-   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
-  [{:keys [created] :as command}]
-  (att/update-attachment-data! command attachmentId {:contents contents} created)
   (ok))
 
 (defcommand set-attachment-not-needed

@@ -1,38 +1,38 @@
 (ns lupapalvelu.user-api
-  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
-            [clojure.set :as set]
-            [noir.request :as request]
-            [noir.response :as resp]
-            [noir.core :refer [defpage]]
-            [slingshot.slingshot :refer [throw+ try+]]
-            [monger.operators :refer :all]
-            [swiss.arrows :refer :all]
-            [schema.core :as sc]
-            [sade.util :refer [future*]]
-            [sade.env :as env]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.core :refer :all]
-            [sade.session :as ssess]
+  (:require [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [lupapalvelu.activation :as activation]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.activation :as activation]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.mime :as mime]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.calendar :as cal]
             [lupapalvelu.idf.idf-client :as idf]
+            [lupapalvelu.mime :as mime]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.password-reset :as pw-reset]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.security :as security]
+            [lupapalvelu.states :as states]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.calendar :as cal]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.user-utils :as uu]
+            [lupapalvelu.vetuma :as vetuma]
+            [monger.operators :refer :all]
+            [noir.core :refer [defpage]]
+            [noir.request :as request]
+            [noir.response :as resp]
+            [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.session :as ssess]
+            [sade.strings :as ss]
+            [sade.util :refer [future*]]
+            [sade.util :as util]
+            [schema.core :as sc]
+            [slingshot.slingshot :refer [throw+ try+]]
+            [swiss.arrows :refer :all]
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
 
 ;;
 ;; ==============================================================================
@@ -101,59 +101,13 @@
 ;; ==============================================================================
 ;;
 
-;; Emails
-
-
-(notifications/defemail :invite-authority
-  {:model-fn (fn [{token :token org-fn :org-fn} _ _]
-               {:link #(pw-reset/reset-link (name %) token)
-                :org org-fn})
-   :recipients-fn notifications/from-user
-   :subject-key "authority-invite.title"})
-
-(notifications/defemail :notify-authority-added
-  {:model-fn (fn [{org-fn :org-fn} _ _] {:org org-fn}),
-   :subject-key "authority-notification.title",
-   :recipients-fn notifications/from-user})
-
-(defn- notify-new-authority [new-user created-by organization-id]
-  (let [token       (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))
-        org-name-fn #(-> (organization/get-organization organization-id [:name])
-                         (get-in [:name (or (keyword %) :fi)]))]
-    (notifications/notify! :invite-authority {:user new-user, :token token :org-fn org-name-fn})))
-
-(defn- notify-authority-added [email organization-id]
-  (let [user (usr/get-user-by-email email)
-        org-name-fn #(-> (organization/get-organization organization-id [:name])
-                         (get-in [:name (or (keyword %) :fi)]))]
-    (notifications/notify! :notify-authority-added {:user user, :org-fn org-name-fn})))
-
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {new-organization (into #{} roles)}
         user-data {:email email :orgAuthz org-authz :role :authority :enabled true :firstName firstName :lastName lastName}
         new-user (usr/create-new-user caller user-data :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
-    (notify-new-authority new-user caller new-organization)
+    (uu/notify-new-authority new-user caller new-organization)
     (ok :operation "invited")))
-
-(defn do-create-user
-  "Since create-user command is typically called by authority admin to
-  create authorities, there are some peculiar details."
- [user-data caller]
- (let [updated-user-data (if (:organization user-data)
-                           (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]})
-                           user-data)
-        user (usr/create-new-user caller updated-user-data :send-email false)]
-    (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
-    (if (usr/authority? user)
-      (do
-        (notify-new-authority user caller (or (:organization user-data) (usr/authority-admins-organization-id caller)))
-        (ok :id (:id user) :user user))
-      (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
-        (ok :id (:id user)
-          :user user
-          :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-          :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
 (defcommand create-user
   {:parameters [:email role]
@@ -162,7 +116,7 @@
    :notified true
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
-  (do-create-user user-data caller))
+  (uu/create-and-notify-user caller user-data))
 
 (defcommand create-rest-api-user
   {:description "Creates REST API user for organization. Admin only."
@@ -364,7 +318,7 @@
         result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
       (do
-        (notify-authority-added email organization-id)
+        (uu/notify-authority-added email organization-id)
         (ok :operation "add"))
       (if-not (usr/get-user-by-email email)
         (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)

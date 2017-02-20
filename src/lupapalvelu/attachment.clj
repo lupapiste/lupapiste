@@ -142,7 +142,7 @@
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
-   :op                                   (sc/conditional sequential? [Operation] map? Operation :else (sc/enum nil))
+   :op                                   (sc/maybe [Operation])
    (sc/optional-key :groupType)          (sc/maybe GroupType)
    :signatures                           [Signature]
    :versions                             [Version]
@@ -242,9 +242,7 @@
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
 (defn get-operation-ids [{op :op :as attachment}]
-  (if (sequential? op)
-    (mapv :id op)
-    [(:id op)]))
+  (mapv :id op))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
@@ -263,9 +261,7 @@
 
 (defn remove-operation-updates [{op :op :as attachment} removed-op-id]
   (when (-> (get-operation-ids attachment) set (contains? removed-op-id))
-    (let [updated-op (->> (if (map? op) [op] op)
-                          (remove (comp #{removed-op-id} :id))
-                          not-empty)]
+    (let [updated-op (not-empty (remove (comp #{removed-op-id} :id) op))]
       {:op updated-op :groupType (when updated-op :operation)})))
 
 (defn make-attachment

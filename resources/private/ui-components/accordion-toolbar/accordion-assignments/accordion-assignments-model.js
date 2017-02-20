@@ -16,7 +16,11 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
   };
 
   self.receiverName = function(data) {
-    return data.recipient.id ? util.partyFullName(data.recipient) : "<"+loc("not-known")+">";
+    if (data.recipient) {
+      return  data.recipient.id ? util.partyFullName(data.recipient) : "<"+loc("not-known")+">";
+    } else {
+      return loc("applications.search.recipient.no-one");
+    }
   };
 
   self.markComplete = function(assignment) {

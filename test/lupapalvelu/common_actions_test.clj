@@ -94,7 +94,7 @@
 (facts "Actions with id and state 'draft' are not allowed for authority"
        (let [allowed-actions #{:invite-guest :delete-guest-application
                                :toggle-guest-subscription :application-guests :decline-invitation
-                               :suti-update-id :suti-update-added :set-attachment-contents
+                               :suti-update-id :suti-update-added
                                :cancel-application :info-links :organization-links
                                :redirect-to-3d-map}]
     (doseq [[action data] (get-actions)

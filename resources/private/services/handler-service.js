@@ -15,9 +15,8 @@ LUPAPISTE.HandlerService = function() {
     return _.startsWith( ko.unwrap(id), TMP );
   }
 
-  function appId() {
-    return lupapisteApp.services.contextService.applicationId();
-  }
+  var appId = lupapisteApp.services.contextService.applicationId;
+  var authModel = lupapisteApp.models.applicationAuthModel;
 
   function indicate( message ) {
     hub.send( "indicator", {message: message,
@@ -31,86 +30,59 @@ LUPAPISTE.HandlerService = function() {
   // Ajax API
   // ---------------------------
 
-  var fetched = {handlers: {flag: ko.observable(),
-                            guard: "application-handlers"},
-                 authorities: {flag: ko.observable(),
-                               guard: "application-authorities"},
-                 roles: {flag: ko.observable(),
-                         guard: "application-organization-handler-roles"}};
-  var pendingFetch = {};
+  self.pending = ko.observable();      
 
-  function canFetch( key, fun ) {
-    var fetch = fetched[key];
-    var authOk = lupapisteApp.models.applicationAuthModel.ok( fetch.guard );
-    if( !fetch.flag() && appId() && authOk ) {
-      fetch.flag( true );
-      return true;
-    } else {
-      // Auth can be undefined if the auth model has not been
-      // initialized yet.
-      if( authOk !== false  ) {
-        pendingFetch[key] = fun;        
-      }
+  function fetch( queryName, successFun ) {
+    if( authModel.ok( queryName )) {
+      ajax.query( queryName, {id: appId()} )
+      .success( successFun )
+      .call();
     }
   }
 
-  function fetchPending() {
-    var funs = _.values(pendingFetch);
-    pendingFetch = {};
-    _.each( funs, function( fun ) {
-      fun();
-    });
+  function fetchAll() {
+    fetch( "application-handlers",
+           function( res ) {
+             self.applicationHandlers( _.map( res.handlers,
+                                              processRawHandler ));
+           });
+    fetch( "application-authorities",
+           function( res ) {
+             authorities( res.authorities );
+           });
+    fetch( "application-organization-handler-roles",
+           function( res ) {
+             roles( _.map( res.handlerRoles,
+                           function( role ) {
+                             return _.defaults( {
+                               name: _.get( role, ["name",
+                                                   loc.getCurrentLanguage()], "")
+                             },
+                                                role );
+                           }));
+           });
   }
+
+  function resetAll() {
+    self.applicationHandlers.removeAll();
+    authorities.removeAll();
+    roles.removeAll();    
+  }
+
+  var latestAppId = null;
 
   ko.computed( function() {
-    if( lupapisteApp.models.applicationAuthModel.getData()) {
-      ko.ignoreDependencies( fetchPending );
-    }
-  });
-
-  function resetFetched() {
-    _.each( _.values( fetched), function( fetch ) {
-      fetch.flag( false );
-    });
-  }
-
-  function fetchApplicationHandlers() {
-    if( canFetch( "handlers", fetchApplicationHandlers )) {
-      ajax.query( "application-handlers", {id: appId()})
-      .success( function( res ) {
-        self.applicationHandlers( _.map( res.handlers,
-                                         processRawHandler ));
-      })
-      .call();
-    }
-  }
-
-  function fetchAuthorities() {
-    if( canFetch( "authorities", fetchAuthorities) ) {
-      ajax.query( "application-authorities", {id: appId()})
-      .success( function( res ) {
-        authorities( res.authorities );
-      })
-      .call();
+    var canFetch = _.some(authModel.getData()) && appId();
+    if( canFetch ) {
+      if( appId() !== latestAppId ) {
+        ko.ignoreDependencies( fetchAll );
+        latestAppId = appId();
+      }      
+    } else {
+      ko.ignoreDependencies( resetAll );
+      latestAppId = null;
     }    
-  }
-
-  function fetchHandlerRoles() {
-    if( canFetch( "roles", fetchHandlerRoles )) {
-      ajax.query( "application-organization-handler-roles", {id: appId()})
-      .success( function( res ) {
-        roles( _.map( res.handlerRoles,
-                      function( role ) {
-                        return _.defaults( {
-                          name: _.get( role, ["name",
-                                              loc.getCurrentLanguage()], "")
-                        },
-                                           role );
-                      }));
-      })
-      .call();
-    }  
-  }
+  });
   
   // Name is object (e.g., {fi: "Uusi nimi", sv: "Nytt namn", en: "New name"}).
   function upsertOrganizationRole( roleId, name ) {
@@ -132,13 +104,14 @@ LUPAPISTE.HandlerService = function() {
     .call();
   }
 
-  function upsertHandler( handlerId, data ) {
+  function upsertHandler( handlerId, data ) {        
     ajax.command( "upsert-application-handler",
                   _.defaults( data,
                               isTemporary( handlerId.peek() )
                                    ? {}
                                    : {handlerId: handlerId.peek()},
                             {id: appId()}))
+    .pending( self.pending )
     .success( function( res ) {
       handlerId( res.id );
       indicateSaved();      
@@ -150,25 +123,16 @@ LUPAPISTE.HandlerService = function() {
     ajax.command( "remove-application-handler",
                   {id: appId(),
                    handlerId: ko.unwrap( handlerId )})
+    .pending( self.pending )
     .success( indicateRemoved)
     .call();
   }
 
  // ---------------------------
 
-  self.applicationAuthorities = function() {
-    if( _.isEmpty( authorities() )) {
-      fetchAuthorities();
-    }
-    return authorities;
-  };
+  self.applicationAuthorities = authorities;
 
-  self.applicationHandlerRoles = function() {
-    if( _.isEmpty( roles() )) {
-      fetchHandlerRoles();
-    }
-    return roles;
-  };  
+  self.applicationHandlerRoles = roles;
 
   function processRawRole( role ) {
     var nameObs = ko.mapping.fromJS( role.name );
@@ -228,21 +192,18 @@ LUPAPISTE.HandlerService = function() {
   };
 
   function updateHandler( handler, data) {
-    // Peeks are needed so the changes (e.g., handler removal) will
-    // not trigger unnecessary ajax call via computed in
-    // processRawHandler (see below).
-    var auth = _.find( authorities.peek(), {id: data.userId });
+    var auth = _.find( authorities(), {id: data.userId });
     if( auth ) {
       handler.firstName(_.get(auth, "firstName", "" ));
       handler.lastName( _.get(auth, "lastName", "" ));
     }
-    var roleName = _.get(_.find( roles.peek(), {id: data.roleId}),
+    var roleName = _.get(_.find( roles(), {id: data.roleId}),
                          "name");
     if( roleName ) {
       handler.roleName( roleName );
     }
     
-    if( data.userId && data.roleId) {
+    if( data.userId && data.roleId ) {
         upsertHandler(handler.id, data);        
       }
   }
@@ -253,7 +214,7 @@ LUPAPISTE.HandlerService = function() {
       var data = {userId: m.userId(),
                   roleId: m.roleId()};
       if( !ko.computedContext.isInitial()) {
-        updateHandler( m, data);
+        ko.ignoreDependencies( _.partial( updateHandler, m, data )); 
       }
     });
     return m;
@@ -276,17 +237,5 @@ LUPAPISTE.HandlerService = function() {
       removeHandler( handlerId );
     }
   };
-
-  hub.subscribe( "contextService::enter", function() {
-    fetchApplicationHandlers();
-    fetchAuthorities();
-    fetchPending();
-  });
-
-  hub.subscribe( "contextService::leave", function() {
-    self.applicationHandlers.removeAll();
-    authorities.removeAll();
-    roles.removeAll();
-    resetFetched();
-  });
+    
 };

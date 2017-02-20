@@ -758,6 +758,24 @@
         :else (do (Thread/sleep 200)
                   (recur (get-in resp [:job :version]) (inc retries)))))))
 
+(defn upload-file-and-bind [apikey id filedata & {:keys [fails attachment-id]}]
+  (let [file-id (get-in (upload-file apikey (or (:filename filedata) "dev-resources/test-attachment.txt")) [:files 0 :fileId])
+        data (if attachment-id
+               {:attachmentId attachment-id}
+               (select-keys filedata [:type :group :target :contents :constructionTime :sign]))
+        {job :job :as resp} (command apikey :bind-attachments :id id :filedatas [(assoc data :fileId file-id)])]
+    (if-not fails
+      (do
+        (fact "Bind-attachments command OK" resp => ok?)
+        (fact "Job id is returned" (:id job) => truthy))
+      (do
+        (fact "Bind-attachment shoud fail" resp => fail?)
+        (when (or (string? fails) (keyword? fails))
+          (fact "Bind-attachments expected failure" resp => (partial expected-failure? fails)))))
+    (when (and (:ok resp) (not= "done" (:status job)))
+      (poll-job apikey :bind-attachments-job (:id job) (:version job) 25) => ok?)
+    file-id))
+
 ;; statements
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]

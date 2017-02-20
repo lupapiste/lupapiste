@@ -6498,7 +6498,7 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 127, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 128, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper.form-input, .docgen-checkbox-wrapper.form-input--inline {
   height: auto;
   width: auto;
@@ -6686,7 +6686,7 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 134, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 135, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   border: none;
 }
@@ -6782,7 +6782,7 @@ input:disabled + .signbox-label:hover.signbox-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 139, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 140, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper {
   border: none;
 }
@@ -6969,17 +6969,17 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 151, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 152, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
-/* line 156, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 157, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break {
   margin-bottom: 24px;
 }
 
-/* line 160, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 161, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break-small {
   margin-bottom: 6px;
 }
@@ -7075,7 +7075,7 @@ input:disabled + .filter-label:hover.filter-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 172, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 173, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -7084,51 +7084,51 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
-/* line 182, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 183, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
-/* line 186, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 187, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
 }
-/* line 189, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 190, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state:hover > i {
   color: #fbc732;
 }
-/* line 193, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 194, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
-/* line 200, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 201, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
 }
-/* line 202, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 203, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input, .button-input button {
   vertical-align: middle;
 }
-/* line 205, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 206, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
 }
 
-/* line 212, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 213, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput {
   box-sizing: border-box;
   padding: 4px;
   display: block;
 }
-/* line 216, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 217, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput:focus {
   border-color: #fbc732;
 }
 
-/* line 221, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 222, ../../../private/common-html/sass/partials/_inputs.scss */
 .textinput.textinput--big {
   min-height: 40px;
   max-height: 40px;
@@ -7137,7 +7137,7 @@ input[type=text].textinput:focus {
   font-size: 16px;
 }
 
-/* line 227, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 228, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7173,11 +7173,11 @@ input.dateinput.warning {
 input.dateinput.required {
   border-color: #f39129;
 }
-/* line 234, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 235, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:focus {
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 237, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 238, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:disabled {
   background-image: url("/lp-static/img/calendar-gray187.png");
   color: #bbbbbb;
@@ -7186,19 +7186,19 @@ input.dateinput:disabled {
   padding-right: 34px;
 }
 
-/* line 246, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 247, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput,
 input.tip.dateinput {
   background-image: url("/lp-static/img/calendar-orange.png");
   border-color: #f39129;
 }
-/* line 250, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 251, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:focus,
 input.tip.dateinput:focus {
   border-color: #fbc732;
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 254, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 255, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:disabled,
 input.tip.dateinput:disabled {
   border-color: #dddddd;
@@ -7206,39 +7206,39 @@ input.tip.dateinput:disabled {
   color: #bbbbbb;
 }
 
-/* line 261, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 262, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small {
   height: 26px;
   background-image: url("/lp-static/img/calendar-12-orange-dark.png");
   min-height: initial;
   font-size: 0.875em;
 }
-/* line 266, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 267, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small:focus {
   background-image: url("/lp-static/img/calendar-12-orange-light.png");
 }
-/* line 269, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 270, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-/* line 274, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 275, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small,
 input.tip.dateinput.dateinput--small {
   background-image: url("/lp-static/img/calendar-12-orange.png");
 }
-/* line 277, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 278, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small:focus,
 input.tip.dateinput.dateinput--small:focus {
   background-image: url("/lp-static/img/calendar-12-orange-light.png");
 }
-/* line 280, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 281, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small:disabled,
 input.tip.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-/* line 287, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 288, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7270,7 +7270,7 @@ input.grid-style-input.required {
   border-color: #f39129;
 }
 
-/* line 291, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 292, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input--wide {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7303,11 +7303,11 @@ input.grid-style-input--wide.required {
   border-color: #f39129;
 }
 
-/* line 322, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 324, ../../../private/common-html/sass/partials/_inputs.scss */
 drop-zone {
   display: none;
 }
-/* line 324, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 326, ../../../private/common-html/sass/partials/_inputs.scss */
 drop-zone .drop-zone-placeholder {
   border: 4px dashed #f39129 !important;
   position: absolute;
@@ -7321,26 +7321,26 @@ drop-zone .drop-zone-placeholder {
   background-color: rgba(255, 255, 255, 0.8);
   padding-top: 2em;
 }
-/* line 336, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 338, ../../../private/common-html/sass/partials/_inputs.scss */
 drop-zone .drop-zone-placeholder > div {
   font-size: 20px;
 }
-/* line 339, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 341, ../../../private/common-html/sass/partials/_inputs.scss */
 drop-zone .drop-zone-placeholder > i {
   font-size: 60px;
 }
 
-/* line 345, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 347, ../../../private/common-html/sass/partials/_inputs.scss */
 .drop-zone--highlight drop-zone {
   display: block;
 }
 
-/* line 349, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 351, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container {
   position: relative;
   display: inline-block;
 }
-/* line 352, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 354, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list {
   position: absolute;
   left: 0;
@@ -7355,17 +7355,17 @@ drop-zone .drop-zone-placeholder > i {
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 365, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 367, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li {
   padding-left: 6px;
 }
-/* line 368, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 370, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li.combobox--selected {
   background-color: #f39129;
   color: white;
 }
 
-/* line 375, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 377, ../../../private/common-html/sass/partials/_inputs.scss */
 .upload-zone {
   min-height: 40px;
   max-height: 40px;
@@ -7379,24 +7379,24 @@ drop-zone .drop-zone-placeholder > i {
   width: auto;
   display: block;
 }
-/* line 387, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 389, ../../../private/common-html/sass/partials/_inputs.scss */
 .upload-zone i, .upload-zone label {
   color: #f39129;
 }
-/* line 390, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 392, ../../../private/common-html/sass/partials/_inputs.scss */
 .upload-zone i {
   margin-right: 10px;
 }
-/* line 393, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 395, ../../../private/common-html/sass/partials/_inputs.scss */
 .upload-zone label {
   font-size: 16px;
 }
-/* line 396, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 398, ../../../private/common-html/sass/partials/_inputs.scss */
 .upload-zone label:hover {
   color: #f7ac2e;
   cursor: pointer;
 }
-/* line 400, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 402, ../../../private/common-html/sass/partials/_inputs.scss */
 .upload-zone label:active {
   color: #fbc732;
 }
@@ -8186,12 +8186,12 @@ div.sticky {
   padding-right: 10px;
 }
 
-/* line 298, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 299, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits {
   display: table;
   white-space: nowrap;
 }
-/* line 301, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 302, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > .reject-edits--input {
   display: table-cell;
   line-height: 32px;
@@ -8199,13 +8199,13 @@ div.sticky {
   min-height: 32px;
   max-height: 32px;
 }
-/* line 308, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 309, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > input.reject-edits--input {
   width: 20em;
   vertical-align: middle;
   padding-right: 4px;
 }
-/* line 313, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 314, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > button.reject-edits--input {
   padding-left: 8px;
   padding-right: 8px;

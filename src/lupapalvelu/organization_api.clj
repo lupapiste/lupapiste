@@ -33,8 +33,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.inspection-summary :as inspection-summary]))
+            [lupapalvelu.i18n :as i18n]))
 ;;
 ;; local api
 ;;
@@ -353,6 +352,14 @@
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
+  (ok))
+
+(defcommand set-organization-inspection-summaries
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:inspection-summaries-enabled enabled}})
   (ok))
 
 (defcommand set-organization-extended-construction-waste-report
@@ -736,47 +743,6 @@
                               :section
                               (ss/trim operationId)
                               flag))
-
-(defquery organization-inspection-summary-settings
-  {:description "Inspection summary templates for given organization."
-   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles #{:authorityAdmin}}
-  [{user :user}]
-  (ok (inspection-summary/settings-for-organization (usr/authority-admins-organization-id user))))
-
-(defcommand modify-inspection-summary-template
-  {:description "CRUD API endpoint for inspection summary templates in the given organization."
-   :parameters  [func]
-   :input-validators [(partial action/select-parameters [:func] #{"create" "update" "delete"})]
-   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles #{:authorityAdmin}}
-  [{user :user {:keys [templateId templateText name]} :data}]
-  (let [organizationId (usr/authority-admins-organization-id user)]
-    (when (and (ss/blank? templateId) (#{"update" "delete"} func))
-      (fail! :error.missing-parameters :parameters "templateId"))
-    (when (and (ss/blank? templateText) (#{"create" "update"} func))
-      (fail! :error.missing-parameters :parameters "templateText"))
-    (when (and (ss/blank? name) (#{"create" "update"} func))
-      (fail! :error.missing-parameters :parameters "name"))
-    (condp = func
-      "create" (inspection-summary/create-template-for-organization organizationId name templateText)
-      "update" (if (= (inspection-summary/update-template organizationId templateId name templateText) 1)
-                 (ok)
-                 (fail :error.not-found))
-      "delete" (if (= (inspection-summary/delete-template organizationId templateId) 1)
-                 (ok)
-                 (fail :error.not-found))
-      (fail :error.illegal-function-code))))
-
-(defcommand set-inspection-summary-template-for-operation
-  {:description "Toggles operation either requiring section or not."
-   :parameters [operationId templateId]
-   :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
-   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
-   :user-roles #{:authorityAdmin}}
-  [{user :user}]
-  (let [organizationId (usr/authority-admins-organization-id user)]
-    (inspection-summary/select-template-for-operation organizationId operationId templateId)))
 
 (defn- validate-handler-role-in-organization
   "Pre-check that fails if roleId is defined but not found in handler-roles of authority admin's organization."

@@ -87,6 +87,13 @@
                       (name component))]
     (enlive/transform t [:body] (fn [e] (assoc-in e [:attrs :class] css-classes)))))
 
+(defn- inject-cljs-app [nodes]
+  (enlive/transform nodes
+                    [:script]
+                    (fn [e] (if (= (-> e :attrs :src) "inject-cljs")
+                              (if (env/dev-mode?) (assoc-in e [:attrs :src] uic/rum-app-url) nil)
+                              e))))
+
 (defn inject-content [t {:keys [nav info page footer templates]} component lang theme]
   (-> t
       (set-body-class component theme)
@@ -94,6 +101,7 @@
       (enlive/transform [:div.notification] (enlive/content (map :content info)))
       (enlive/transform [:section] (enlive/content page))
       (enlive/transform [:footer] (enlive/content (map :content footer)))
+      inject-cljs-app
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (str (resource-url :common :js) "?lang=" (name lang))) e)))
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
       (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))

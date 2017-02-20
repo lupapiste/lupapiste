@@ -38,7 +38,7 @@
 
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj
-            :ttl/threshold 10000))
+            :ttl/threshold 20000))
 
 (defn tos-function-with-name [tos-function-code organization]
   (when (and tos-function-code organization)
@@ -54,7 +54,7 @@
 
 (def metadata-for-document
   (memo/ttl get-metadata-for-document-from-toj
-            :ttl/threshold 10000))
+            :ttl/threshold 20000))
 
 (defn- get-metadata-for-process-from-toj [organization tos-function]
   (if (and organization tos-function)
@@ -63,7 +63,7 @@
 
 (def metadata-for-process
   (memo/ttl get-metadata-for-process-from-toj
-            :ttl/threshold 10000))
+            :ttl/threshold 20000))
 
 (defn- paatospvm-plus-years [verdicts years]
   (when-let [paatos-ts (->> verdicts
@@ -114,7 +114,7 @@
 
 (def toimenpide-for-state
   (memo/ttl get-tos-toimenpide-for-application-state-from-toj
-            :ttl/threshold 10000))
+            :ttl/threshold 20000))
 
 (defn- full-name [{:keys [lastName firstName]}]
   (str lastName " " firstName))

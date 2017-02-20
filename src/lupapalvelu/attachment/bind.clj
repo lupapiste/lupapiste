@@ -23,6 +23,7 @@
    (sc/required-key :group)            (sc/maybe {:groupType  (apply sc/enum att-tags/attachment-groups)
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
                                                                                   (sc/optional-key :name) sc/Str}]})
+   (sc/optional-key :target)           (sc/maybe att/Target)
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -37,13 +38,13 @@
         attachment         (or
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
-                                                     (assoc (select-keys filedata [:group :contents])
+                                                     (assoc (select-keys filedata [:group :contents :target])
                                                             :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
         version-options (merge
                           (select-keys mongo-file [:fileId :filename :contentType :size])
-                          (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign])
+                          (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
                                            :comment-text contents
@@ -85,7 +86,8 @@
   (if (:attachmentId file)
     file
     (-> file
-        (update :type att/attachment-type-coercer)
+        (update :type   att/attachment-type-coercer)
+        (update :target #(and % (att/attachment-target-coercer %)))
         (update :group (fn [{group-type :groupType operations :operations :as group}]
                          (util/assoc-when nil
                                           :groupType  (and group-type (att/group-type-coercer group-type))
