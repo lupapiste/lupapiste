@@ -128,7 +128,6 @@ Stamping page opens, verdict details can be seen
   Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
-  Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@id="stamp-info-include-buildings"]
   Should not be empty  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
   [Teardown]  Logout
 
