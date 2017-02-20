@@ -178,7 +178,8 @@
               :let [latest (:latestVersion attachment)]]
           (vector :div
                   (attc/view-with-download-small-inline latest)
-                  (attc/delete-attachment-link attachment remove-attachment-success))))
+                  (when-not targetFinished?
+                    (attc/delete-attachment-link attachment remove-attachment-success)))))
       (when-not targetFinished?
         (attc/upload-link (::input-id local-state)))]
      [:td
