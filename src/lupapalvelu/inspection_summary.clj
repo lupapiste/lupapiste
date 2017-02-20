@@ -53,12 +53,14 @@
                  (domain/owner-or-write-access? application user-id))
     unauthorized))
 
+(def attachment-target-type "inspection-summary-item")
+
 (defn summary-target-attachment-predicate
   "Returns function, which can be used as predicate for filter.
   Predicate returns true on those attachments, who are targets of given target-id"
   [target-id]
   (fn [{{:keys [id type]} :target}]
-    (and (= type "inspection-summary-item")
+    (and (= type attachment-target-type)
          (= id target-id))))
 
 (defn- enrich-summary-targets [attachments targets]
@@ -145,6 +147,11 @@
           nil
           summaries))
 
+(defn- get-inspection-target-id-from-attachment [attachmentId attachments]
+  (when-let [{:keys [target]} (util/find-by-id attachmentId attachments)]
+    (when (= (:type target) attachment-target-type)
+      (:id target))))
+
 (defn deny-if-finished
   "Pre-check to validate that target is not finished"
   [{{:keys [summaryId targetId]} :data {:keys [inspection-summaries]} :application}]
@@ -154,11 +161,20 @@
                           (util/find-by-id targetId)))
       (fail :error.inspection-summary-target.finished))))
 
-(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
-  (let [summary-target (get-summary-target tid inspection-summaries)]
-    (when (:finished summary-target)
-      (fail :error.inspection-summary-target.finished))))
+(defn- fail-when-target-finished [target-id inspection-summaries]
+  (when (-> target-id (get-summary-target inspection-summaries) :finished)
+    (fail :error.inspection-summary-target.finished)))
 
+(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
+  (fail-when-target-finished tid inspection-summaries))
+
+(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
+  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+    (fail-when-target-finished target-id inspection-summaries)))
+
+(defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
+  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+    (fail-when-target-finished target-id inspection-summaries)))
 
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
