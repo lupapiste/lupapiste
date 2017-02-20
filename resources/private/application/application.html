@@ -350,7 +350,7 @@
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
                         <div class="operation-info">
-
+                            <!-- ko if: !$root.authorization.ok('link-permit-required') -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
                               <div class="help-box">
                                 <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
@@ -360,6 +360,7 @@
                                 </button>
                               </div>
                             </div>
+                            <!-- /ko -->
                             <div data-bind="if: $root.authorization.ok('link-permit-required')">
                               <div class="help-box margins-m">
                                 <p data-bind="ltext: 'help.AddPermit'"></p>
