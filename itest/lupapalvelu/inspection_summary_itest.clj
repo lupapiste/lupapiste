@@ -164,4 +164,6 @@
                                 :fails :error.inspection-summary-target.finished))
         (fact "Can't edit attachment"
           (command pena :set-attachment-meta :id id1 :attachmentId (:id summary-attachment) :meta {:contents "Tarkastuskohde"}) => (partial expected-failure? :error.inspection-summary-target.finished))
+        (fact "Can't delete attachment"
+          (command pena :delete-attachment :id id1 :attachmentId (:id summary-attachment)) => (partial expected-failure? :error.inspection-summary-target.finished))
         ))))

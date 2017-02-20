@@ -161,15 +161,20 @@
                           (util/find-by-id targetId)))
       (fail :error.inspection-summary-target.finished))))
 
+(defn- fail-when-target-finished [target-id inspection-summaries]
+  (when (-> target-id (get-summary-target inspection-summaries) :finished)
+    (fail :error.inspection-summary-target.finished)))
+
 (defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
-  (let [summary-target (get-summary-target tid inspection-summaries)]
-    (when (:finished summary-target)
-      (fail :error.inspection-summary-target.finished))))
+  (fail-when-target-finished tid inspection-summaries))
 
 (defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
   (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
-    (when (-> target-id (get-summary-target inspection-summaries) :finished)
-      (fail :error.inspection-summary-target.finished))))
+    (fail-when-target-finished target-id inspection-summaries)))
+
+(defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
+  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+    (fail-when-target-finished target-id inspection-summaries)))
 
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
