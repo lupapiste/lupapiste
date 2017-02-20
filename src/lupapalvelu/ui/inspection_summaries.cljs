@@ -85,7 +85,7 @@
 
 (defn got-files [target-id hub-event]
   (let [files          (.-files hub-event)
-        fileIds        (map #(.-fileId %) files)
+        fileIds        (map #(aget % "fileId") files)
         bindable-files (map (partial to-bindable-file target-id) files)
         subs-id        (upload/subscribe-bind-attachments-status {:status "done" :jobStatus "done"}
                                                                  (partial bind-attachment-callback target-id))
