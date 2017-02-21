@@ -16,6 +16,11 @@
              :value         @val
              :on-change     #(reset! val (-> % .-target .-value))
              :on-blur       #(commit-fn @val)
+             :on-key-press  #(when (= "Enter" (.-key %))
+                               (do
+                                 (.preventDefault %)
+                                 (.stopPropagation %)
+                                 (commit-fn @val)))
              :data-test-id  data-test-id}]))
 
 (defn confirm-dialog [titleKey messageKey callback]
