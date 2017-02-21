@@ -53,6 +53,25 @@ Applicant can upload attachment to target
   # Delete button is visible
   Wait until  Element should be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
 
+Attachment can be deleted
+  Open tab  attachments
+  Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  1
+  Open tab  inspectionSummaries
+  Wait until  Element should be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
+  Click element  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
+  Confirm yes no dialog
+  Positive indicator should be visible
+  Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  0
+  Open tab  attachments
+  Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  0
+
+Upload attachment again
+  Open tab  inspectionSummaries
+  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  0
+  Upload with hidden input  tr[data-test-id='target-1'] input[data-test-id='upload-link-input']  ${PNG_TESTFILE_PATH}
+  Sleep  1s
+  Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  1
+
 Attachment can be found from attachment listing
   Open tab  attachments
   Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  1
