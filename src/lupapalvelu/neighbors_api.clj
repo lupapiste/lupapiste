@@ -4,6 +4,7 @@
             [sade.env :as env]
             [sade.util :refer [fn-> fn->> dissoc-in] :as util]
             [sade.core :refer [ok fail now]]
+            [sade.strings :as ss]
             [sade.validators :as v]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
@@ -36,7 +37,7 @@
     {:propertyId propertyId
      :owner      (merge
                    (select-keys params [:type :name :businessID :nameOfDeceased])
-                   {:email (usr/canonize-email email)
+                   {:email (ss/canonize-email email)
                     :address (select-keys params [:street :city :zip])})}))
 
 (defn- params->new-neighbor [params user]
@@ -130,7 +131,7 @@
                     (fail :error.unauthorized)))]}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
-        email (usr/canonize-email email)
+        email (ss/canonize-email email)
         expires (+ ttl/neighbor-token-ttl created)]
     (update-application command
                         {:neighbors {$elemMatch {:id neighborId}}}

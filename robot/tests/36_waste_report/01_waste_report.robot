@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation  Extended waste report 
+Documentation  Extended waste report
 Suite Setup    Apply minimal fixture now
 Resource       ../../common_resource.robot
 
@@ -61,14 +61,32 @@ Dangerous error: no unit
   Dangerous input  0  1  kg
   Dangerous sum is  201 kg
   Select from test id  'rakennusJaPurkujate.vaarallisetJatteet.0.yksikko'  ${EMPTY}
-  Dangerous error  
+  Dangerous error
 
 Digging table
   Scroll to test id  sum-kaivettavaMaa-ainekset-hyodynnetaan
 
+Selections survive reload
+  Dig select  0  louhe
+  Dig new row
+  Dig select  1  jaykkaSavi
+  Dig reload
+  Dig select is  0  louhe
+  Dig select is  1  jaykkaSavi
+
+Remove second dig row
+  Scroll to test id  ainekset-row-1
+  Click element  jquery=tr[data-test-id=ainekset-row-1] td.action-column i
+  Confirm yes no dialog
+  No such test id  'kaivettavaMaa.ainekset.1.aines-group.aines'
+
 Dig other shows text field
   No such test id  'kaivettavaMaa.ainekset.0.aines-group.muu'
-  Select from test id  'kaivettavaMaa.ainekset.0.aines-group.aines'  muu
+  Dig select  0  muu
+  Wait test id visible  'kaivettavaMaa.ainekset.0.aines-group.muu'
+
+Other selection survives reload
+  Dig reload
   Wait test id visible  'kaivettavaMaa.ainekset.0.aines-group.muu'
 
 Pena fills the first dig row
@@ -83,14 +101,17 @@ Pena fills the first dig row
   Dig add  2  1.226  2,411  3.64
   Dig footer sums  12.03  9.81  21.84
 
-Dig errors 
+Dig errors
   Dig input  0  ${EMPTY}  4  4
   Dig footer sums  8.03  8.81  16.84
   Fill test id  'kaivettavaMaa.ainekset.0.hyodynnetaan'  foo
   Wait until  Element should be visible  jquery=tr[data-test-id=ainekset-row-0] i.calculation-error
   Wait test id visible  sum-kaivettavaMaa-ainekset-hyodynnetaan-error
   No such test id  sum-kaivettavaMaa-ainekset-poisajettavia-error
-  Wait test id visible  sum-kaivettavaMaa-ainekset-yhteensa-error  
+  Wait test id visible  sum-kaivettavaMaa-ainekset-yhteensa-error
+
+No frontend errors
+  There are no frontend errors
 
 *** Keywords ***
 
@@ -128,7 +149,23 @@ Dig footer sums
   Test id text is  sum-kaivettavaMaa-ainekset-poisajettavia  ${discardSum} tonnia
   Test id text is  sum-kaivettavaMaa-ainekset-yhteensa  ${total}
 
+Dig new row
+  Scroll and click  button[data-test-id=ainekset-append-button]:first
+
 Dig add
   [Arguments]  ${newIndex}  ${use}  ${discard}  ${sum}
-  Scroll and click  button[data-test-id=ainekset-append-button]:first
+  Dig new row
   Dig input  ${newIndex}  ${use}  ${discard}  ${sum}
+
+Dig select
+  [Arguments]  ${index}  ${option}
+  Select from test id  'kaivettavaMaa.ainekset.${index}.aines-group.aines'  ${option}
+
+Dig select is
+  [Arguments]  ${index}  ${option}
+  Test id select is  'kaivettavaMaa.ainekset.${index}.aines-group.aines'  ${option}
+
+Dig reload
+  Reload page
+  Wait test id visible  laajennettuRakennusjateselvitys-accordion-title-text
+  Scroll to test id  sum-kaivettavaMaa-ainekset-hyodynnetaan

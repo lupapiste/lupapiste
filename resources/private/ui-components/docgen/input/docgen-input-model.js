@@ -120,12 +120,23 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return disabled;
   });
 
+  var latestSaved = self.value();
+
   var save = function(val) {
-    service.updateDoc(self.documentId,
-      [[params.path, val]],
-      self.indicator);
+    if( latestSaved !== val ) {
+      service.updateDoc(self.documentId,
+                        [[params.path, val]],
+                        self.indicator);
+      latestSaved = val;
+    }
+  };
+
+  var baseDispose = self.dispose;
+
+  self.dispose = function() {
+    save( self.value());
+    baseDispose();
   };
 
   self.disposedSubscribe(self.value, _.debounce(save, 500));
-
 };

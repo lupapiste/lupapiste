@@ -10,9 +10,7 @@ Resource        inspection_summary_resources.robot
 
 Create template setup in auth admin
   Jarvenpaa admin logs in
-  Go to page  applications
-  Add new template  Uusi pohja 1  AA\nBB\nCC\n  AA\nBB\nCC  0
-  Add new template  Uusi pohja 2  AA\nDD\n\nCC\n  AA\nDD\nCC  1
+  Create basic template setup
   Logout
 
 Pena wants to build a block of flats
@@ -33,8 +31,11 @@ Create a new inspection summary
   Open tab  inspectionSummaries
   Click by test id  open-create-summary-bubble
   Wait test id visible  create-summary-button
+  Test id disabled  create-summary-button
   Wait until  Select From List by label  xpath=//select[@data-test-id="templates-select"]  Uusi pohja 1
+  Test id disabled  create-summary-button
   Wait until  Select From List by label  xpath=//select[@data-test-id="operations-select"]  (Asuinkerrostalon tai rivitalon rakentaminen)
+  Test id enabled  create-summary-button
   Click by test id  create-summary-button
   Positive indicator should be visible
 

@@ -16,7 +16,7 @@
   "Namesake query implementation."
   [admin email]
   (let [candidate          (-> email
-                               usr/canonize-email
+                               ss/canonize-email
                                usr/get-user-by-email
                                usr/with-org-auth)
         admin-org-id       (usr/authority-admins-organization-id admin)
@@ -39,7 +39,7 @@
 (defn update-guest-authority-organization
   "Namesake command implementation."
   [admin email first-name last-name description]
-  (let [email (usr/canonize-email email)
+  (let [email (ss/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
         guests (->> org-id
                     organization-guest-authorities
@@ -58,7 +58,7 @@
 (defn remove-guest-authority-organization
   "Namesake command implementation."
   [admin email]
-  (let [email (usr/canonize-email email)
+  (let [email (ss/canonize-email email)
         {guest-id :id} (usr/get-user-by-email email)
         org-id (usr/authority-admins-organization-id admin)
         match {:id guest-id :role :guestAuthority}]
@@ -104,7 +104,7 @@
     timestamp                    :created
     application                  :application
     :as                          command}]
-  (let [email (usr/canonize-email email)
+  (let [email (ss/canonize-email email)
         existing-user (usr/get-user-by-email email)]
     (if (or (domain/invite application email)
             (auth/has-auth? application (:id existing-user)))

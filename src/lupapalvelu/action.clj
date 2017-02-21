@@ -57,7 +57,7 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (v/email-and-domain-valid? email)
+      (when-not (v/email-and-domain-valid? (ss/canonize-email email))
         (fail :error.email)))))
 
 (defn validate-url [url]

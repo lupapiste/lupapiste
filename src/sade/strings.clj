@@ -207,3 +207,5 @@
 
   nil
   (->plain-string [value] ""))
+
+(def canonize-email (comp lower-case trim))

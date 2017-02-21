@@ -66,6 +66,8 @@
   {:type {:type-group "katselmukset_ja_tarkastukset"
           :type-id    "tarkastusasiakirja"}
    :fileId (aget file "fileId")
+   :group {:groupType "operation"
+           :operations [(select-keys (:op @selected-summary) [:id :name])]}
    :target {:type "inspection-summary-item"
             :id target-id}
    :constructionTime true})
@@ -85,7 +87,7 @@
 
 (defn got-files [target-id hub-event]
   (let [files          (.-files hub-event)
-        fileIds        (map #(.-fileId %) files)
+        fileIds        (map #(aget % "fileId") files)
         bindable-files (map (partial to-bindable-file target-id) files)
         subs-id        (upload/subscribe-bind-attachments-status {:status "done" :jobStatus "done"}
                                                                  (partial bind-attachment-callback target-id))
@@ -157,10 +159,11 @@
         applicationId   (:applicationId @component-state)
         summaryId       (:id @selected-summary)
         targetId        (:id row-target)
-        targetFinished? (:finished row-target)]
+        targetFinished? (:finished row-target)
+        remove-attachment-success (fn [resp] (.showSavedIndicator js/util resp) (refresh))]
     [:tr
      {:data-test-id (str "target-" idx)}
-     [:td
+     [:td.target-finished
       (when targetFinished?
         [:i.lupicon-circle-check.positive ""])]
      [:td.target-name
@@ -173,7 +176,11 @@
       (doall
         (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
-          (attc/view-with-download latest)))
+          (vector :div {:data-test-id (str "target-row-attachment")
+                        :key (str "target-row-attachment-" (:id attachment))}
+                  (attc/view-with-download-small-inline latest)
+                  (when-not targetFinished?
+                    (attc/delete-attachment-link attachment remove-attachment-success)))))
       (when-not targetFinished?
         (attc/upload-link (::input-id local-state)))]
      [:td
@@ -199,7 +206,8 @@
         id          (id-computed)]
     (swap! component-state assoc :applicationId id)
     (when (.ok auth-model "inspection-summaries-for-application")
-      (refresh))
+      (refresh (fn [_]
+                 (update-summary-view (-> @component-state :summaries first :id)))))
     init-state))
 
 (rum/defc operations-select [operations selection]
@@ -207,7 +215,7 @@
              "operations-select"
              selection
              (cons
-               [nil (js/loc "choose")]
+               ["" (js/loc "choose")]
                (map (fn [op] (let [op-name        (js/loc (str "operations." (:name op)))
                                    op-description (operation-description-for-select op)]
                                [(:id op) (str op-description " (" op-name ") ")])) operations))))
@@ -217,7 +225,7 @@
              "summaries-select"
              selection
              (cons
-               [nil (js/loc "choose")]
+               ["" (js/loc "choose")]
                (map (fn [s] (let [operation      (find-by-key :id (-> s :op :id) operations)
                                   op-description (operation-description-for-select operation)]
                               [(:id s) (str (:name s) " - " op-description)])) summaries))))
@@ -227,12 +235,14 @@
              "templates-select"
              selection
              (cons
-               [nil (js/loc "choose")]
+               ["" (js/loc "choose")]
                (map (fn [tmpl] [(:id tmpl) (:name tmpl)]) templates))))
 
 (rum/defc create-summary-bubble < rum/reactive
   [visible?]
-  (let [visibility (rum/react visible?)]
+  (let [visibility (rum/react visible?)
+        selected-op (rum/react (rum/cursor-in component-state [:view :new :operation]))
+        selected-template (rum/react (rum/cursor-in component-state [:view :new :template]))]
     [:div.container-bubble.half-width.arrow-2nd-col
      {:style {:display (when-not visibility "none")}}
      [:div.row
@@ -244,15 +254,13 @@
       [:div.col-4.no-padding
        [:span.select-arrow.lupicon-chevron-small-down
         {:style {:z-index 10}}]
-       (operations-select (rum/react (rum/cursor-in component-state [:operations]))
-                          (rum/react (rum/cursor-in component-state [:view :new :operation])))]]
+       (operations-select (rum/react (rum/cursor-in component-state [:operations])) selected-op)]]
      [:div.row
       [:label (js/loc "inspection-summary.new-summary.template")]
       [:div.col-4.no-padding
        [:span.select-arrow.lupicon-chevron-small-down
         {:style {:z-index 10}}]
-       (templates-select (rum/react (rum/cursor-in component-state [:templates]))
-                         (rum/react (rum/cursor-in component-state [:view :new :template])))]]
+       (templates-select (rum/react (rum/cursor-in component-state [:templates])) selected-template)]]
      [:div.row.left-buttons
       [:button.positive
        {:on-click (fn [_] (command "create-inspection-summary"
@@ -262,7 +270,8 @@
                                    "id"          (-> @component-state :applicationId)
                                    "operationId" (-> @component-state :view :new :operation)
                                    "templateId"  (-> @component-state :view :new :template)))
-        :data-test-id "create-summary-button"}
+        :data-test-id "create-summary-button"
+        :disabled (or (empty? selected-op) (empty? selected-template))}
        [:i.lupicon-check]
        [:span (js/loc "button.ok")]]
       [:button.secondary
@@ -287,9 +296,7 @@
      [:div
       [:label (js/loc "inspection-summary.tab.intro.1")]
       [:br]
-      [:label (js/loc "inspection-summary.tab.intro.2")]
-      [:br]
-      [:label (js/loc "inspection-summary.tab.intro.3")]]
+      [:label (js/loc "inspection-summary.tab.intro.2")]]
      [:div.form-grid.no-top-border.no-padding
       [:div.row
        [:div.col-1
@@ -341,7 +348,7 @@
           [:tbody
            (doall
              (for [[idx target] (map-indexed vector (rum/react table-rows))]
-               (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled? target-status-change-enabled?)))]]])
+               (rum/with-key (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled? target-status-change-enabled?) (str "target-row-" idx))))]]])
       (if (and summary (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
