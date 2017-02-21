@@ -204,8 +204,6 @@
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 
-(def canonize-email (comp ss/lower-case ss/trim))
-
 (defn organization-ids
   "Returns user's organizations as a set of strings"
   [{org-authz :orgAuthz :as user}]
@@ -289,10 +287,10 @@
                   (dissoc :id))
                 query)
         query (if-let [username (:username query)]
-                (assoc query :username (canonize-email username))
+                (assoc query :username (ss/canonize-email username))
                 query)
         query (if-let [email (:email query)]
-                (assoc query :email (canonize-email email))
+                (assoc query :email (ss/canonize-email email))
                 query)
         query (if-let [organization (:organization query)]
                 (-> query
@@ -379,21 +377,21 @@
 
 (defn throttle-login? [username]
   {:pre [username]}
-  (mongo/any? :logins {:_id (canonize-email username)
+  (mongo/any? :logins {:_id (ss/canonize-email username)
                        :failed-logins {$gte (env/value :login :allowed-failures)}
                        :locked {$gt (logins-lock-expires-date)}}))
 
 (defn login-failed [username]
   {:pre [username]}
   (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
-  (mongo/update :logins {:_id (canonize-email username)}
+  (mongo/update :logins {:_id (ss/canonize-email username)}
                 {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
                 :multi false
                 :upsert true))
 
 (defn clear-logins [username]
   {:pre [username]}
-  (mongo/remove :logins (canonize-email username)))
+  (mongo/remove :logins (ss/canonize-email username)))
 
 ;;
 ;; ==============================================================================
@@ -522,7 +520,7 @@
   true)
 
 (defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
-  (let [email (canonize-email (:email user-data))]
+  (let [email (ss/canonize-email (:email user-data))]
     (-<> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :orgAuthz :language
@@ -598,7 +596,7 @@
      :password pw}))
 
 (defn get-or-create-user-by-email [email current-user]
-  (let [email (canonize-email email)]
+  (let [email (ss/canonize-email email)]
     (or
       (get-user-by-email email)
       (create-new-user current-user {:email email :role "dummy"}))))
@@ -640,7 +638,7 @@
   "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
-        n      (mongo/update-n :users {:email (canonize-email email)} {$set {:private.apikey apikey}})]
+        n      (mongo/update-n :users {:email (ss/canonize-email email)} {$set {:private.apikey apikey}})]
     (when-not (= n 1) (fail! :error.user-not-found))
     apikey))
 
@@ -660,7 +658,7 @@
   [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)
-        email             (canonize-email email)
+        email             (ss/canonize-email email)
         updated-user      (mongo/update-one-and-return :users
                             {:email email}
                             {$set {:private.password hashed-password
@@ -683,7 +681,7 @@
   ([email data] (update-user-by-email email {} data))
   ([email extra-query data]
     {:pre [(string? email) (map? extra-query) (map? data)]}
-    (let [query (merge {:email (canonize-email email)} extra-query)
+    (let [query (merge {:email (ss/canonize-email email)} extra-query)
           updates (condp every? (keys data)
                     mongo/operator? data
                     (complement mongo/operator?) {$set data})]

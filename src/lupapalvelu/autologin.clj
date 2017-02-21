@@ -56,7 +56,7 @@
 
 (defn autologin [request]
   (let [[email password] (http/decode-basic-auth request)
-        canonical-email  (user/canonize-email email)
+        canonical-email  (ss/canonize-email email)
         ip (http/client-ip request)
         [ts hash] (parse-ts-hash password)]
 

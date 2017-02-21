@@ -80,7 +80,7 @@
 
 (defn statement-owner [{{:keys [statementId target]} :data {user-email :email} :user application :application}]
   (let [{{statement-email :email} :person} (get-statement application (or statementId (:id target)))]
-    (when-not (= (usr/canonize-email statement-email) (usr/canonize-email user-email))
+    (when-not (= (ss/canonize-email statement-email) (ss/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
 (defn authority-or-statement-owner-applicant [{{role :role} :user :as command}]
@@ -169,7 +169,7 @@
                                       selectedPersons)
                                 (fail :error.missing-parameters))
         has-invalid-email (when (some
-                                  #(not (v/email-and-domain-valid? (:email %)))
+                                  #(not (v/email-and-domain-valid? (ss/canonize-email (:email %))))
                                   selectedPersons)
                             (fail :error.email))]
     (or non-blank-string-keys has-invalid-email)))

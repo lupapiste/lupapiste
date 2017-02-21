@@ -50,7 +50,7 @@
                      application :application
                      :as command}]
   {:pre [(valid-role role)]}
-  (let [email (user/canonize-email email)
+  (let [email (ss/canonize-email email)
         existing-user (user/get-user-by-email email)]
     (if (or (domain/invite application email) (auth/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
@@ -117,7 +117,7 @@
     (zipmap <> (repeat ""))))
 
 (defn- do-remove-auth [{application :application :as command} username]
-  (let [username (user/canonize-email username)
+  (let [username (ss/canonize-email username)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
