@@ -23,9 +23,22 @@
 
 (def- not-nil? (complement nil?))
 
+(defmulti pdf-option-field-value (fn [schema _ _]
+                                   (-> schema :pdf-options keys first)))
+
+(defmethod pdf-option-field-value :other-select
+  [schema data locstring]
+  (let [select-kw (-> schema :pdf-options :other-select)
+        schema-kw (-> schema :name keyword)
+        selected (-> data schema-kw select-kw :value)]
+    (cond
+      (util/=as-kw selected :muu) (or (-> data schema-kw :muu :value) "")
+      (ss/blank? selected) ""
+      :else (loc (format "%s.%s.%s" (or (:i18nkey schema) locstring)  (name select-kw) selected)))))
+
 (defn- combine-schema-field-and-value
   "Gets the field name and field value from a datum field and schema"
-  [{field-name :name field-type :type, :keys [i18nkey body] :as field-schema} data i18npath]
+  [{field-name :name field-type :type, :keys [i18nkey body label] :as field-schema} data i18npath]
   (let [locstring (ss/join "." (conj i18npath field-name))
         localized-field-name (cond
                                (not-nil? i18nkey) (loc i18nkey)
@@ -34,10 +47,10 @@
 
         ; extract, cast and localize field-value according to type
         field-value (get-in data [(keyword field-name) :value])
-
         subschema (util/find-first #(= field-value (:name %)) body)
 
         localized-field-value (cond
+                                (-> field-schema :pdf-options) (pdf-option-field-value field-schema data locstring)
                                 (= :checkbox field-type) (loc (if field-value "yes" "no"))
                                 (:i18nkey subschema) (loc (:i18nkey subschema))
                                 (and (= field-value "other") (= :select field-type)) (loc "select-other")
@@ -56,7 +69,9 @@
 (defn- is-printable-group-type [schema] (printable-group-types (:type schema)))
 
 (def- field-types #{:string :checkbox :select :date :text :hetu :radioGroup :time})
-(defn- is-field-type [schema] (and (not (:hidden schema)) (field-types (:type schema))))
+(defn- is-field-type [schema] (and (not (:hidden schema))
+                                   (or (field-types (:type schema))
+                                       (:pdf-options schema))))
 
 (declare collect-groups)
 

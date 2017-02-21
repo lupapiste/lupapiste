@@ -286,6 +286,7 @@
                                     :footer-sums [{:amount "maara" :unit "yksikko"}]
                                     :body [{:name "jate-group"
                                             :type :group
+                                            :pdf-options {:other-select :jate}
                                             :approvable false
                                             :template "simple-docgen-group-template"
                                             :body [{:name "jate" :type :select :css [:dropdown]
@@ -310,6 +311,7 @@
                                     :footer-sums [{:amount "maara" :unitKey :t}]
                                     :body [{:name "jate-group"
                                             :type :group
+                                            :pdf-options {:other-select :jate}
                                             :approvable false
                                             :template "simple-docgen-group-template"
                                             :body [{:name "jate" :type :select :css [:dropdown]
@@ -367,6 +369,7 @@
                "sijoituspaikka" [:column--50]}
    :approvable false
    :body [{:name "aines-group"
+           :pdf-options {:other-select :aines}
            :type :group
            :i18nkey "waste"
            :approvable false
