@@ -61,7 +61,7 @@
 
 (defn- invalid-parameters [first-name last-name email phone street zip city marketing architect]
   (or
-    (invalid-email email)
+    (invalid-email (ss/canonize-email email))
     (invalid-boolean marketing)
     (invalid-boolean architect)))
 

@@ -169,7 +169,7 @@
                                       selectedPersons)
                                 (fail :error.missing-parameters))
         has-invalid-email (when (some
-                                  #(not (v/email-and-domain-valid? (:email %)))
+                                  #(not (v/email-and-domain-valid? (ss/canonize-email (:email %))))
                                   selectedPersons)
                             (fail :error.email))]
     (or non-blank-string-keys has-invalid-email)))
