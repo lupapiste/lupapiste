@@ -52,6 +52,12 @@
   (fn [{data :data :as command}]
     (reduce #(or %1 (check (assoc command :data %2))) nil (:filedatas data))))
 
+(defn- job-response->trigger-targets [job]
+  (map (fn [[att-id {:keys [type]}]]
+         {:id att-id
+          :trigger-type type})
+       (-> job :job :value seq)))
+
 (defcommand bind-attachments
   {:description         "API to bind files to attachments, returns job that can be polled for status per file."
    :parameters          [id filedatas]
@@ -66,6 +72,7 @@
                          validate-attachment-ids
                          validate-attachment-groups
                          check-password-for-sign]
+   :on-success          [(att/run-assignment-triggers-for-attachments job-response->trigger-targets)]
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command filedatas)))

@@ -963,3 +963,8 @@
      (when (or (:groupType group) (:operations group))
        (or ((some-fn validate-group-op validate-group-type) group)
            (validate-group-is-selectable command))))))
+
+(defn run-assignment-triggers-for-attachments [attachments-fn]
+  (fn [command response]
+    (clojure.pprint/pprint @(:organization command))
+    (clojure.pprint/pprint (attachments-fn response))))
