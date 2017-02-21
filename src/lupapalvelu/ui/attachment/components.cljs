@@ -17,7 +17,7 @@
        [:i.wait.spin.lupicon-refresh]
        [:span (js/loc "attachment.addFile")]]]]))
 
-(rum/defc view-with-download < {:key-fn (fn [version] (:fileId version))}
+(rum/defc view-with-download < {:key-fn #(str "view-with-download-" (:fileId %))}
   "Port of ko.bindingHandlers.viewWithDownload"
   [latest-version]
   [:div.view-with-download
@@ -30,14 +30,14 @@
       [:i.lupicon-download.btn-small]
       [:span (js/loc "download-file")]]]])
 
-(rum/defc view-with-download-small-inline < {:key-fn (fn [version] (:fileId version))}
+(rum/defc view-with-download-small-inline < {:key-fn #(str "view-with-download-inline-" (:fileId %))}
   [latest-version]
   [:div.inline
    [:a {:target "_blank"
         :href (str "/api/raw/view-attachment?attachment-id=" (:fileId latest-version))}
     (:filename latest-version)]])
 
-(rum/defc delete-attachment-link < {:key-fn #(str "delete-attachment-" %1)}
+(rum/defc delete-attachment-link < {:key-fn #(str "delete-attachment-" (:id %1))}
                                    (rum-util/hubscribe "attachmentsService::remove"
                                                        (fn [state]
                                                          {:commandName "delete-attachment"

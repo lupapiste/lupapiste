@@ -176,7 +176,8 @@
       (doall
         (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
               :let [latest (:latestVersion attachment)]]
-          (vector :div {:data-test-id (str "target-row-attachment")}
+          (vector :div {:data-test-id (str "target-row-attachment")
+                        :key (str "target-row-attachment-" (:id attachment))}
                   (attc/view-with-download-small-inline latest)
                   (when-not targetFinished?
                     (attc/delete-attachment-link attachment remove-attachment-success)))))
@@ -347,7 +348,7 @@
           [:tbody
            (doall
              (for [[idx target] (map-indexed vector (rum/react table-rows))]
-               (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled? target-status-change-enabled?)))]]])
+               (rum/with-key (target-row idx target target-add-enabled? target-edit-enabled? target-remove-enabled? target-status-change-enabled?) (str "target-row-" idx))))]]])
       (if (and summary (not editing?) target-add-enabled?)
         [:div.row
          [:button.positive
