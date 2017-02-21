@@ -32,8 +32,7 @@
                 application/validate-only-authority-before-verdict-given]
    :notified   true}
   [{:keys [created user application] :as command}]
-  (let [foreman-user   (when (v/valid-email? foremanEmail)
-                         (user/get-or-create-user-by-email foremanEmail user))
+  (let [foreman-user   (user/get-or-create-user-by-email foremanEmail user)
         foreman-app    (-> (foreman/new-foreman-application command)
                            (foreman/update-foreman-docs application foremanRole)
                            (foreman/copy-auths-from-linked-app foreman-user application user created)
