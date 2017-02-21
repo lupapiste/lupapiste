@@ -33,22 +33,17 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     return util.getIn(self.service.getInDocument(self.documentId, absolutePath), ["model"]);
   }
 
-  var latestSchemas = [];
-  var fullSchemas = [];
-  
-  self.subSchemas = ko.pureComputed( function ()  {
-    var schemas = _(params.schema.body)
-                  .reject(function(schema) {
-                    var hideWhen = schema["hide-when"];
-                    return hideWhen ? _.includes(hideWhen.values, getValueByPathString(self.path, hideWhen.path)) : false;
-                  })
-                  .filter(function(schema) {
-                    var showWhen = schema["show-when"];
-                    return showWhen ? _.includes(showWhen.values, getValueByPathString(self.path, showWhen.path)) : true;
-                  }).value();
-    if( !_.isEqual( schemas, latestSchemas )) {
-      latestSchemas = schemas;      
-      fullSchemas = _.map( schemas, function(schema) {
+  self.subSchemas = ko.pureComputed(function() {
+    return _(params.schema.body)
+      .reject(function(schema) {
+        var hideWhen = schema["hide-when"];
+        return hideWhen ? _.includes(hideWhen.values, getValueByPathString(self.path, hideWhen.path)) : false;
+      })
+      .filter(function(schema) {
+        var showWhen = schema["show-when"];
+        return showWhen ? _.includes(showWhen.values, getValueByPathString(self.path, showWhen.path)) : true;
+      })
+      .map(function(schema) {
         var uicomponent = schema.uicomponent || "docgen-" + schema.type;
         var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
         return _.extend({}, schema, {
@@ -60,10 +55,8 @@ LUPAPISTE.DocgenGroupModel = function(params) {
           documentId: params.documentId,
           service: self.service
         });
-      });      
-    }
-    return fullSchemas;
-  } );
+      }).value();
+  });
 
   function hideSchema(schema, parentPath) {
     var hideWhen = _.get(schema, "hide-when");
