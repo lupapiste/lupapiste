@@ -279,7 +279,7 @@
                                                 :values #{true}}
                                     :type :table
                                     :css [:form-table :form-table--waste]
-                                    :columnCss {"jate" [:column--50]
+                                    :columnCss {"jate-group" [:column--50]
                                                 "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
@@ -303,7 +303,7 @@
                                    {:name "muuJate"
                                     :type :table
                                     :css [:form-table :form-table--waste]
-                                    :columnCss {"jate" [:column--50]
+                                    :columnCss {"jate-group" [:column--50]
                                                 "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
