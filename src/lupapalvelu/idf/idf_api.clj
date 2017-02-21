@@ -9,7 +9,6 @@
             [sade.core :refer :all]
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery] :as action]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
@@ -98,7 +97,7 @@
       (try
         (let [first-name (strip-nonletters first-name)
               last-name  (strip-nonletters last-name)
-              email      (user/canonize-email email)
+              email      (ss/canonize-email email)
               phone      (ss/trim phone)
               ts         (util/to-long ts)
               user-id (link-user! first-name last-name email phone marketing architect app id ts)]

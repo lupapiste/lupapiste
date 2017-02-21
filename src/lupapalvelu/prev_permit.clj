@@ -4,7 +4,6 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.env :as env]
             [sade.property :as p]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
@@ -12,7 +11,6 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -20,7 +18,6 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
@@ -29,7 +26,7 @@
   (-> (or
         (get-in applicant [:henkilo :sahkopostiosoite])
         (get-in applicant [:yritys :sahkopostiosoite]))
-    user/canonize-email
+    ss/canonize-email
     (#(if-not (action/email-validator {:data {:email %}})  ;; action/email-validator returns nil if email was valid
        %
        (do

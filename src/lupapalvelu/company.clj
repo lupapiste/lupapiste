@@ -254,7 +254,7 @@
                                    :model-fn      (fn [model _ __] model)})
 
 (defn add-user-after-company-creation! [user company role submit]
-  (let [user (update-in user [:email] usr/canonize-email)
+  (let [user (update-in user [:email] ss/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role, :submit submit} :auto-consume false)]
     (notif/notify! :new-company-admin-user {:user       user
                                             :company    company
@@ -262,7 +262,7 @@
     token-id))
 
 (defn add-user! [user company role submit]
-  (let [user (update-in user [:email] usr/canonize-email)
+  (let [user (update-in user [:email] ss/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user
                                                           :company company
                                                           :role role

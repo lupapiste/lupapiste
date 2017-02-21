@@ -15,7 +15,6 @@
             [lupapalvelu.user-utils :as uu]
             [monger.operators :refer :all]
             [sade.core :refer :all]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]))
@@ -47,7 +46,7 @@
    :user-roles #{:authorityAdmin}}
   [{data :data user :user}]
   (let [organization (organization/get-organization (usr/authority-admins-organization-id user))
-        email           (usr/canonize-email email)
+        email           (ss/canonize-email email)
         statement-giver-id (mongo/create-id)]
     (if-let [{fname :firstName lname :lastName :as authority} (uu/authority-by-email user email)]
       (do
@@ -123,7 +122,7 @@
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{{:keys [dueDate saateText]} :data user :user {:keys [organization] :as application} :application now :created :as command}]
-  (let [persons     (map #(update % :email usr/canonize-email) selectedPersons)
+  (let [persons     (map #(update % :email ss/canonize-email) selectedPersons)
         new-emails  (->> (map :email persons) (remove usr/get-user-by-email) (set))
         users       (map (comp #(usr/get-or-create-user-by-email % user) :email) persons)
         persons+uid (map #(assoc %1 :userId (:id %2)) persons users)

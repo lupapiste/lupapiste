@@ -5,7 +5,6 @@
             [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.env :as env]
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
@@ -98,8 +97,8 @@
   (or (:given statement)
       (user/authority? user)
       (and (user/applicant? user)
-           (= (-> statement :person :email user/canonize-email)
-              (-> user :email user/canonize-email)))))
+           (= (-> statement :person :email ss/canonize-email)
+              (-> user :email ss/canonize-email)))))
 
 (defn- statement-attachment-hidden-for-user? [{statements :statements} user {target :target :as attachment}]
   (and (= (:type target) "statement")

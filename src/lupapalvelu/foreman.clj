@@ -1,10 +1,8 @@
 (ns lupapalvelu.foreman
-  (:require [clojure.set :as set]
-            [taoensso.timbre :as timbre :refer [error]]
+  (:require [taoensso.timbre :as timbre :refer [error]]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
-            [sade.env :as env]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :as app]
@@ -234,7 +232,7 @@
 (defn- applicant-user-auth [applicant path auth]
   (when-let [applicant-user (some-> applicant
                                     (get-in path)
-                                    usr/canonize-email
+                                    ss/canonize-email
                                     usr/get-user-by-email)]
     ;; Create invite for applicant if authed
     (when (some (partial usr/same-user? applicant-user) auth)
