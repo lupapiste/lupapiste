@@ -139,5 +139,4 @@ LUPAPISTE.DocgenInputModel = function(params) {
   };
 
   self.disposedSubscribe(self.value, _.debounce(save, 500));
-
 };

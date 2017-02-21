@@ -8,14 +8,16 @@
     [:div.inline
      [:input.hidden {:type "file"
                      :name "files[]"
+                     :data-test-id "upload-link-input"
                      :id input-id}]
      [:a.link-btn.link-btn--link
-      [:label {:for input-id}
+      [:label {:for input-id
+               :data-test-id "upload-link"}
        [:i.lupicon-circle-plus]
        [:i.wait.spin.lupicon-refresh]
        [:span (js/loc "attachment.addFile")]]]]))
 
-(rum/defc view-with-download < {:key-fn (fn [version] (:fileId version))}
+(rum/defc view-with-download < {:key-fn #(str "view-with-download-" (:fileId %))}
   "Port of ko.bindingHandlers.viewWithDownload"
   [latest-version]
   [:div.view-with-download
@@ -28,14 +30,14 @@
       [:i.lupicon-download.btn-small]
       [:span (js/loc "download-file")]]]])
 
-(rum/defc view-with-download-small-inline < {:key-fn (fn [version] (:fileId version))}
+(rum/defc view-with-download-small-inline < {:key-fn #(str "view-with-download-inline-" (:fileId %))}
   [latest-version]
   [:div.inline
    [:a {:target "_blank"
         :href (str "/api/raw/view-attachment?attachment-id=" (:fileId latest-version))}
     (:filename latest-version)]])
 
-(rum/defc delete-attachment-link < {:key-fn #(str "delete-attachment-" %1)}
+(rum/defc delete-attachment-link < {:key-fn #(str "delete-attachment-" (:id %1))}
                                    (rum-util/hubscribe "attachmentsService::remove"
                                                        (fn [state]
                                                          {:commandName "delete-attachment"
@@ -61,5 +63,6 @@
                                                        "attachment.delete.message.no-versions")
                                               :yesFn remove-attachment}}))]
     [:div.inline.right
-     [:a.delete-attachment-link {:on-click delete-confirmation}
+     [:a {:on-click delete-confirmation
+          :data-test-id "delete-attachment-link"}
       (str "[" (js/loc "remove") "]")]]))

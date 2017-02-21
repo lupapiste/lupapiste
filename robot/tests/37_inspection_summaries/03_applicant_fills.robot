@@ -4,6 +4,7 @@ Documentation   Applicant fills inspection summary
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        inspection_summary_resources.robot
+Variables      ../06_attachments/variables.py
 
 
 *** Test Cases ***
@@ -38,6 +39,15 @@ View summary targets as applicant
   Element should contain  //tr[@data-test-id="target-0"]/td[@class="target-name"]  AA
   Element should contain  //tr[@data-test-id="target-1"]/td[@class="target-name"]  BB
   Element should contain  //tr[@data-test-id="target-2"]/td[@class="target-name"]  CC
+
+Applicant can upload attachment to target
+  Element should be visible  //tr[@data-test-id="target-1"]//label[@data-test-id='upload-link']
+  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  0
+  Upload with hidden input  tr[data-test-id='target-1'] input[data-test-id='upload-link-input']  ${PNG_TESTFILE_PATH}
+  Sleep  1s
+  Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  1
+  Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PNG_TESTFILE_NAME}
+
 
 Mark target as finished
   Click by test id  change-status-link-1
