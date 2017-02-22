@@ -239,8 +239,8 @@
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
 
-    (fact "Authority is not allowed to submit application for applicant"
-      authority-submit => (partial expected-failure? :error.unauthorized))
+    (fact "Authority is allowed to submit application for applicant"
+      authority-submit => ok?)
 
     (:opened app1) => nil
     (:opened app2) => number?))

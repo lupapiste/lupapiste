@@ -14,6 +14,7 @@
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.combinators :refer [validator-or]]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
@@ -319,7 +320,8 @@
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)]
-   :pre-checks       [domain/validate-owner-or-write-access
+   :pre-checks       [(validator-or domain/validate-owner-or-write-access
+                                    usr/validate-authority)
                       foreman/allow-foreman-only-in-foreman-app
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
