@@ -209,6 +209,7 @@
                                              :address "$applicationDetails.address"
                                              :municipality "$applicationDetails.municipality"}
                             :targets        "$targets"
+                            :trigger        "$trigger"
                             :recipient      "$recipient"
                             :status         "$status"
                             :states         "$states"
