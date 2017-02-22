@@ -182,7 +182,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   .onError("error.unauthorized", notify.ajaxError)
   .pending(self.pending)
   .complete( function() {
-    self.initialized( true )
+    self.initialized( true );
   })
   .call();
 };
