@@ -74,6 +74,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-assignment-targets", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-event", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-triggers-target", template: "autocomplete-triggers-target-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
