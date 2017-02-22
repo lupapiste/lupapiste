@@ -617,11 +617,6 @@
 (defn read-edn-resource [file-path]
   (->> file-path io/resource slurp edn/read-string))
 
-(defn call-in
-  "Takes a function, a path and a datastructure"
-  [f path x]
-  (f (get-in x path)))
-
 (defn distinct-by
   "Given a function comparable-fn and collection coll, builds a new
   collection by keeping elements e for which the result of

@@ -18,6 +18,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.combinators :refer [validator-or]]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]

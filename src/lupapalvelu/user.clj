@@ -5,6 +5,7 @@
             [clojure.set :as set]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.combinators :refer [pred->validator]]
             [lupapalvelu.organization :as org]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
@@ -202,6 +203,11 @@
 
 (defn authority? [{role :role}]
   (contains? #{:authority :oirAuthority} (keyword role)))
+
+(def validate-authority
+  "Validator: current user must be an authority. To be used in commands'
+   :pre-check vectors."
+  (partial util/call-in (pred->validator authority?) [:user]))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))

@@ -5,6 +5,7 @@
             [sade.core :refer [unauthorized fail?]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.combinators :refer [pred->validator]]
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
