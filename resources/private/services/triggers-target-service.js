@@ -11,12 +11,15 @@ LUPAPISTE.TriggerTargetService = function() {
   });
 
   function load() {
-    ajax.query("all-attachment-types-by-user")
-      .success(function(res) {
-        _data(res.attachmentTypes);
-      })
-      .call();
-    return true;
+    if (lupapisteApp.models.globalAuthModel.ok("all-attachment-types-by-user")) {
+      ajax.query("all-attachment-types-by-user")
+        .success(function(res) {
+          _data(res.attachmentTypes);
+        })
+        .call();
+      return true;
+    }
+    return false;
   }
 
   if (!load()) {
