@@ -277,15 +277,17 @@
     (resp/json result)))
 
 ;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
-(defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
-  (let [municipality (trim municipality)]
+(defn plan-urls-by-point-proxy [{{:keys [x y municipality type]} :params}]
+  (let [municipality (trim municipality)
+        type (if (ss/blank? type) "plan-info" type)]
     (if (and (coord/valid-x? x) (coord/valid-y? y) (or (= "liiteri" (ss/lower-case municipality)) (ss/numeric? municipality)))
-      (let [response (wfs/plan-info-by-point x y municipality)
+      (let [response (wfs/plan-info-by-point x y municipality type)
             k (keyword municipality)
-            gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+            t (keyword type)
+            gfi-mapper (if-let [f-name (env/value t k :gfi-mapper)]
                          (resolve (symbol f-name))
                          wfs/gfi-to-features-sito)
-            feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+            feature-mapper (if-let [f-name (env/value t k :feature-mapper)]
                              (resolve (symbol f-name))
                              wfs/feature-to-feature-info-sito)]
         (if response
