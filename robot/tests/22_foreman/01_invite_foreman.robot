@@ -137,6 +137,9 @@ Applicant can set Teppo as foreman substitute
   Open tab  parties
   Input text with jQuery  input[data-docgen-path="sijaistus.sijaistettavaHloEtunimi"]  Bob
 
+Add phone number
+  Input text with jQuery  input[data-docgen-path="yhteystiedot.puhelin"]  12345678
+
 Application is submitted
   Open project application
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
@@ -155,7 +158,8 @@ Original application is approved and given a verdict
 
 All foremen table is shown on the Construction tab
   Open tab  tasks
-  Element should contain  jquery=table.all-foremen-table tbody tr td  (sijainen)
+  Element should contain  jquery=table.all-foremen-table tbody tr  (sijainen)
+  Element should contain  jquery=table.all-foremen-table tbody tr  12345678
   [Teardown]  logout
 
 Applicant can create foreman applications after verdict is given for the original application
