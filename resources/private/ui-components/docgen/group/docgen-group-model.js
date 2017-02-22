@@ -2,6 +2,8 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.path = _.isArray(params.path) ? params.path : [params.path];
   self.applicationId = params.applicationId;
   self.documentId = params.documentId;
@@ -33,7 +35,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     return util.getIn(self.service.getInDocument(self.documentId, absolutePath), ["model"]);
   }
 
-  self.subSchemas = ko.pureComputed(function() {
+  self.subSchemas = self.disposedPureComputed(function() {
     return _(params.schema.body)
       .reject(function(schema) {
         var hideWhen = schema["hide-when"];
@@ -42,6 +44,9 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       .filter(function(schema) {
         var showWhen = schema["show-when"];
         return showWhen ? _.includes(showWhen.values, getValueByPathString(self.path, showWhen.path)) : true;
+      })
+      .filter(function(schema) {
+        return self.service.getInDocument(self.documentId, self.path.concat(schema.name));
       })
       .map(function(schema) {
         var uicomponent = schema.uicomponent || "docgen-" + schema.type;
@@ -81,7 +86,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     return _.last( re.exec( s )) || defaultValue;
   }
 
-  self.rowSchemas = ko.pureComputed(function() {
+  self.rowSchemas = self.disposedPureComputed(function() {
     return _(self.schemaRows)
       .map(function(row) {
         if ( row.row) {
@@ -89,7 +94,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
                   .map(function(schemaName) {
                     var cols = parsePart( schemaName, /::([\d+])/, 1);
                     var colClass = ["col-" + cols, parsePart( schemaName, /\[([^\]]+)\]/)].join( " ");
-                    var pathString = parsePart( schemaName, /^[^[:]+/ );
+                    var pathString = parsePart( schemaName, /^[^\[:]+/ );
                     var path = self.path.concat(pathString.split("/"));
                     var schema = getInSchema(params.schema, self.path, pathString);
                     return schema && _.extend({}, schema, {
