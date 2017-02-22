@@ -154,7 +154,7 @@
                              [lein-figwheel "0.5.9"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}
