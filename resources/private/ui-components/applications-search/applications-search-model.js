@@ -102,7 +102,9 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   });
 
   self.noApplications = ko.pureComputed(function(){
-    return self.searchModel().userTotalCount() <= 0 && self.searchModel().type === "applications";
+    return self.dataProvider.initialized()
+        && self.searchModel().userTotalCount() <= 0
+        && self.searchModel().type === "applications";
   });
 
   self.missingTitle = ko.pureComputed(function() {

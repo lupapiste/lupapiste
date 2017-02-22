@@ -14,10 +14,11 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   var defaultForemanSort = {field: "submitted", asc: false};
 
   var defaultOperations = params.defaultOperations;
-  var initialized = false;
   var fieldsCache = {};
 
   // Observables
+  self.initialized = ko.observable( false );
+
   self.sort = params.sort ||
               {field: ko.observable(defaultSort.field), asc: ko.observable(defaultSort.asc)};
 
@@ -156,15 +157,15 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     }
     // Create dependency to the observable
     var fields = searchFields();
-    if( initialized && cacheMiss()) {
+    if( self.initialized() && cacheMiss()) {
       ajax.datatables("applications-search", fields)
-        .success(function( res ) {
-          fieldsCache = _.cloneDeep(fields);
-          self.onSuccess( res );
-        })
-        .onError("error.unauthorized", notify.ajaxError)
-        .pending(self.pending)
-        .call();
+      .success(function( res ) {
+        fieldsCache = _.cloneDeep(fields);
+        self.onSuccess( res );
+      })
+      .onError("error.unauthorized", notify.ajaxError)
+      .pending(self.pending)
+      .call();
     }
   }
 
@@ -174,14 +175,14 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   // Initialization
   ajax.datatables("applications-search-default", {})
-    .success(function( res ) {
-      fieldsCache = res.search;
-      self.onSuccess( res );
-    })
-    .onError("error.unauthorized", notify.ajaxError)
-    .pending(self.pending)
-    .complete( function() {
-      initialized = true;
-    })
-    .call();
+  .success(function( res ) {
+    fieldsCache = res.search;
+    self.onSuccess( res );
+  })
+  .onError("error.unauthorized", notify.ajaxError)
+  .pending(self.pending)
+  .complete( function() {
+    self.initialized( true )
+  })
+  .call();
 };
