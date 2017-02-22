@@ -238,11 +238,13 @@
 (defvalidator :vrk:CR313
   {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala."
    :schemas ["uusiRakennus"]
-   :fields  [tilavuus        [:mitat :tilavuus ->int]
+   :fields  [tilavuusRaw     [:mitat :tilavuus]  ; eliminate this validation if not a number
+                                                 ;    - there will be illegal-number warning from elsewhere in the code
+             tilavuus        [:mitat :tilavuus ->int]
              kerrosala       [:mitat :kerrosala ->int]]
-   :facts   {:ok   [[6 4]]
-             :fail [[5 4]]}}
-  (and tilavuus (< tilavuus (* 1.5 kerrosala))))
+   :facts   {:ok   [[6 6 4] ["6,5" 6 4]]
+             :fail [[5 5 4]]}}
+  (and (number? tilavuusRaw) tilavuus (< tilavuus (* 1.5 kerrosala))))
 
 (defvalidator :vrk:BR407
   {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kokonaisala jo kayttotapaus on ..."
@@ -411,7 +413,6 @@
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
          Kuitenkin, jos kayttotarkoitus on > 729, saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schemas ["uusiRakennus"]
-   :level  :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             julkisivu       [:rakenne :julkisivu]]
    :facts  {:ok    [["032 luhtitalot"       "tiili"]
@@ -425,7 +426,6 @@
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
          Kuitenkin, jos kayttotarkoitus on > 729, saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schemas ["uusiRakennus"]
-   :level   :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             lammitystapa    [:lammitys :lammitystapa]]
    :facts  {:ok    [["141 ravintolat yms."  "uuni"]

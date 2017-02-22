@@ -249,6 +249,10 @@
 
 (defn- validate [application document]
   (let [all-results   (model/validate-pertinent application document)
+        ; sorting result in ascending order on severity as only the last error ends up visible in the docgen UI per field
+        all-results   (sort-by #(get {:tip 0
+                                      :warn 1
+                                      :error 2} (get-in % [:result 0])) all-results)
         create-result (fn [document result]
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
