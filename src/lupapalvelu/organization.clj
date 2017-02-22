@@ -598,10 +598,11 @@
   (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))
 
 (defn create-trigger [triggerId target handler description]
-  {:id (or triggerId (mongo/create-id))
-   :targets target
-   :handlerRole (create-handler-role (:id handler) (:name handler))
-   :description description})
+  (cond->
+    {:id (or triggerId (mongo/create-id))
+     :targets target
+     :description description}
+    (:name handler) (conj {:handlerRole (create-handler-role (:id handler) (:name handler))})))
 
 (defn add-task-trigger [{org-id :id} trigger]
   (update-organization org-id {$push {:task-triggers trigger}}))

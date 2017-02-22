@@ -841,10 +841,11 @@
          _ (clojure.pprint/pprint trigger)]
      (if (sc/check org/TaskTrigger trigger)
        (fail :error.missing-parameters)
-       (if (true? create-new)
-         (org/update-task-trigger organization trigger triggerId)
-         (org/add-task-trigger organization trigger)))
-     (ok :trigger trigger)))
+       (do
+         (if (true? create-new)
+          (org/update-task-trigger organization trigger triggerId)
+          (org/add-task-trigger organization trigger))
+         (ok :trigger trigger)))))
 
 (defcommand remove-task-trigger
   {:description "Removes task trigger"

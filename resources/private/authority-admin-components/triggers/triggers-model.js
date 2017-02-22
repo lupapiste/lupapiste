@@ -35,8 +35,10 @@ LUPAPISTE.TriggersModel = function( params ) {
       dd.id = trigger.id;
       dd.target(trigger.targets);
       lupapisteApp.services.triggersTargetService.selected(wrapInObject(trigger.targets));
-      var selectedRole = _.find(self.roles(), function(role) { return role.id() === trigger.handlerRole.id });
-      dd.handler(selectedRole);
+      if (trigger.handlerRole !== undefined) {
+        var selectedRole = _.find(self.roles(), function(role) { return role.id() === trigger.handlerRole.id });
+        dd.handler(selectedRole);
+      };
       dd.description(trigger.description);
     }
 

@@ -6,9 +6,6 @@ LUPAPISTE.TriggerTargetService = function() {
 
   self.selected = ko.observableArray([]);
 
-  ko.computed(function() {
-  });
-
   self.data = ko.pureComputed(function() {
     return _data();
   });
