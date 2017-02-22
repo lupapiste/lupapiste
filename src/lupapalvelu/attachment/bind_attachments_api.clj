@@ -55,7 +55,7 @@
 (defn- job-response->trigger-targets [job]
   (map (fn [[att-id {:keys [type]}]]
          {:id att-id
-          :trigger-type type})
+          :trigger-type (apply str ((juxt :type-group :type-id) type))})
        (-> job :job :value seq)))
 
 (defcommand bind-attachments
