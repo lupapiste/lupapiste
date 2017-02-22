@@ -11179,6 +11179,7 @@ div.handler-roles-container {
 }
 
 div.handler-roles-container table.handler-roles {
+  margin-top: 24px;
   margin-bottom: 6px;
 }
 
@@ -11192,6 +11193,10 @@ div.handler-roles-container table.handler-roles tr:hover:nth-child(even) {
 
 div.handler-roles-container table.handler-roles input {
   width: 80%;
+}
+
+div.handler-roles-container table.handler-roles i.lupicon-undo {
+  cursor: pointer;
 }
 
 div.handler-roles-container div.handler-role-warning {
