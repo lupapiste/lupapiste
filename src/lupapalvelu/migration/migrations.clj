@@ -11,6 +11,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
@@ -2790,6 +2791,25 @@
 (defmigration attachment-op-to-array
   (update-applications-array :attachments ensure-op-is-not-object {:attachments.op {$type 3}}))
 
+(defmigration add-assignment-trigger
+  {:apply-when (pos? (mongo/count :assignments {:trigger {$exists false}}))}
+  (mongo/update-n :assignments
+                  {:trigger {$exists false}}
+                  {$set {:trigger assignment/user-created-trigger}}
+                  :multi true))
+
+(defmigration add-assignment-target-timestamps
+  {:apply-when (pos? (mongo/count :assignments {:targets.timestamp {$exists false}}))}
+  (reduce + 0
+          (for [assignment (mongo/select :assignments
+                                         {:targets.timestamp {$exists false}}
+                                         {:targets true, :states true})]
+            (let [targets           (:targets assignment)
+                  created-timestamp (-> assignment :states (get 0) :timestamp)]
+              (mongo/update-n :assignments {:_id (:id assignment)}
+                              {$set {:targets (map (fn [target]
+                                                     (assoc target :timestamp created-timestamp))
+                                                   targets)}})))))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

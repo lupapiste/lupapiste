@@ -53,21 +53,30 @@
    :user usr/SummaryUser
    :timestamp ssc/Timestamp})
 
+
+(def user-created-trigger "user-created")
+
+(defn- user-created-or-uid? [trigger]
+  (or (= trigger user-created-trigger)
+      (nil? (sc/check ssc/ObjectIdStr trigger))))
+
 (sc/defschema Assignment
-  {:id             ssc/ObjectIdStr
-   :application    {:id           ssc/ApplicationId
-                    :organization sc/Str
-                    :address      sc/Str
-                    :municipality sc/Str}
-   :targets        [{:group                         sc/Str
-                     :id                            sc/Str
-                     (sc/optional-key :type-key)    sc/Str
-                     (sc/optional-key :info-key)    sc/Str
-                     (sc/optional-key :description) sc/Str}]
-   :recipient      (sc/maybe usr/SummaryUser)
-   :status         (apply sc/enum assignment-statuses)
-   :states         [AssignmentState]
-   :description    sc/Str})
+  {:id          ssc/ObjectIdStr
+   :application {:id           ssc/ApplicationId
+                 :organization sc/Str
+                 :address      sc/Str
+                 :municipality sc/Str}
+   :trigger     (sc/constrained sc/Str user-created-or-uid?)
+   :targets     [{:group                         sc/Str
+                  :id                            sc/Str
+                  :timestamp                     ssc/Timestamp
+                  (sc/optional-key :type-key)    sc/Str
+                  (sc/optional-key :info-key)    sc/Str
+                  (sc/optional-key :description) sc/Str}]
+   :recipient   (sc/maybe usr/SummaryUser)
+   :status      (apply sc/enum assignment-statuses)
+   :states      [AssignmentState]
+   :description sc/Str})
 
 (sc/defschema NewAssignment
   (-> (select-keys Assignment [:application :description :recipient :targets])
@@ -101,7 +110,8 @@
       (assoc :states [(:state assignment)])                 ; initial state
       (dissoc :state)
       (merge {:id        (mongo/create-id)
-              :status    "active"})))
+              :status    "active"
+              :trigger   user-created-trigger})))
 
 (sc/defn new-state :- AssignmentState
   [type         :- (:type AssignmentState)

@@ -115,7 +115,7 @@
                                                                       [:id :organization :address :municipality])
                                          :state          (assignment/new-state "created" (usr/summary user) created)
                                          :recipient      (userid->summary recipientId)
-                                         :targets        targets
+                                         :targets        (map #(assoc % :timestamp created) targets)
                                          :description    description})))
 
 (defcommand update-assignment
