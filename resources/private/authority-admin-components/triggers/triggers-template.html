@@ -12,17 +12,23 @@
       <tbody data-bind="foreach: triggers">
         <tr>
             <td>
-                <span data-bind="text: loc('attachmentType.' +$data.targets[0])"></span>
-                <!-- ko: if $data.handlerRole.name -->
-                <span data-bind="text: $data.handlerRole.name[loc.currentLanguage]"></span>
-                <!-- -->
+                <span data-bind="foreach: $data.targets">
+                    <span data-bind="text: loc('attachmentType.' +$data) +','"></span>
+                </span>
+                &nbsp;
+                <span data-bind="if: $data.handlerRole">
+                    <span data-bind ="text: $data.handlerRole.name[loc.currentLanguage]"></span>
+                 </span>
+                 <span data-bind="if: !$data.handlerRole">
+                    <span data-bind ="text: loc('triggers.no.handler')"></span>
+                 </span>
             </td>
             <td width="15%" >
-                <span> <!-- LISAA TAHAN AUTH CHEKKI -->
+                <span>
                    <a href="#" data-bind="click: $parent.editTrigger, ltext: 'edit'" data-test-id="edit-trigger" class="modal"></a>
                 </span>
                 &nbsp;&nbsp;&nbsp;
-                <span> <!-- LISAA TAHAN AUTH CHEKKI -->
+                <span>
                    <a href="#" data-bind="click: $parent.removeTrigger, ltext: 'remove'" data-test-id="remove-trigger" class="modal"></a>
                 </span>
             </td>

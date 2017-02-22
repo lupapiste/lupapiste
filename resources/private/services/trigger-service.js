@@ -7,19 +7,18 @@ LUPAPISTE.TriggerService = function() {
   self.processing = ko.observable();
   self.pending = ko.observable();
 
-  self.organizationTaskTriggers = function( organization ) {
-    ko.computed( function() {
-      triggers( _(util.getIn (organization, ["taskTriggers"])).value());
+  self.organizationTaskTriggers = function(organization) {
+    ko.computed(function() {
+      triggers(_(util.getIn (organization, ["taskTriggers"])).value());
     });
     return triggers;
   };
 
-  self.addTaskTrigger = function ( triggerData ) {
-    var selectedType = ko.unwrap(lupapisteApp.services.triggersTargetService.selected);
-    var targets = _.map(selectedType, function(type) {
-      return [type["type-group"], type["type-id"]].join('.');
-    });
-    var handlerObj = null;
+  function wrapHandlerInObject (triggerData) {
+    var handlerObj = {
+      id: null,
+      name: null
+    };
     if (triggerData.handler() != undefined) {
       handlerObj = {
         id: triggerData.handler().id(),
@@ -28,8 +27,22 @@ LUPAPISTE.TriggerService = function() {
           en: triggerData.handler().name["en"]()}
       };
     }
-    var triggerParams = {triggerId: triggerData.id, targets: targets, handler: handlerObj, description: triggerData.description()};
-    ajax.command("upsert-task-trigger", triggerParams)
+    return handlerObj;
+  }
+
+  function wrapTriggerParameters(triggerData) {
+    var selectedType = ko.unwrap(lupapisteApp.services.triggersTargetService.selected);
+    var targets = _.map(selectedType, function(type) {
+      return [type["type-group"], type["type-id"]].join('.');
+    });
+    return {triggerId: triggerData.id,
+            targets: targets,
+            handler: wrapHandlerInObject(triggerData),
+            description: triggerData.description()};
+  }
+
+  self.addTaskTrigger = function ( triggerData ) {
+    ajax.command("upsert-task-trigger", wrapTriggerParameters(triggerData))
       .processing(self.processing)
       .pending(self.pending)
       .success(function(res) {

@@ -12,13 +12,6 @@
       </section>
 
       <section>
-        <h2 data-bind="ltext: 'auth-admin.assignments.title'"></h2>
-        <input type="checkbox" class="form-input" id="assignments-enabled" data-test-id="assignments-enabled"
-               data-bind="checked: organization.assignmentsEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-assignments')" />
-        <label for="assignments-enabled" class="form-label" data-bind="ltext: 'auth-admin.assignments.enabled'"></label>
-      </section>
-
-      <section>
         <h2 data-bind="ltext: 'auth-admin.extended-construction-waste-report.title'"></h2>
         <input type="checkbox" class="form-input" id="extended-construction-waste-report-enabled" data-test-id="extended-construction-waste-report-enabled"
                data-bind="checked: organization.extendedConstructionWasteReportEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report')" />
@@ -30,16 +23,6 @@
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'organization-name-editor'"></div>
         <!-- /ko -->
-      </section>
-
-      <section>
-        <div data-bind="component: {name: 'handler-roles',
-                        params: {organization: organization}}"></div>
-      </section>
-
-      <section>
-          <div data-bind="component: {name: 'triggers',
-                          params: {organization: organization}}"></div>
       </section>
 
       <section>

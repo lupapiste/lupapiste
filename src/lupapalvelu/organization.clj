@@ -598,17 +598,18 @@
   (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))
 
 (defn create-trigger [triggerId target handler description]
-  {:id (or triggerId (mongo/create-id))
-   :targets target
-   :handlerRole (create-handler-role (:id handler) (:name handler))
-   :description description})
+  (cond->
+    {:id (or triggerId (mongo/create-id))
+     :targets target
+     :description description}
+    (:name handler) (conj {:handlerRole (create-handler-role (:id handler) (:name handler))})))
 
 (defn add-task-trigger [{org-id :id} trigger]
   (update-organization org-id {$push {:task-triggers trigger}}))
 
 (defn update-task-trigger [{org-id :id} trigger triggerId]
   (let [query (assoc {:task-triggers {$elemMatch {:id triggerId}}} :_id org-id)
-        changes {$set {:task-triggers.$.target (:target trigger)
+        changes {$set {:task-triggers.$.targets (:targets trigger)
                        :task-triggers.$.handlerRole (:handlerRole trigger)
                        :task-triggers.$.description (:description trigger)}}]
     (mongo/update-by-query :organizations query changes)))

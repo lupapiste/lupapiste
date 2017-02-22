@@ -6,20 +6,20 @@ LUPAPISTE.TriggerTargetService = function() {
 
   self.selected = ko.observableArray([]);
 
-  ko.computed(function() {
-  });
-
   self.data = ko.pureComputed(function() {
     return _data();
   });
 
   function load() {
-    ajax.query("all-attachment-types-by-user")
-      .success(function(res) {
-        _data(res.attachmentTypes);
-      })
-      .call();
-    return true;
+    if (lupapisteApp.models.globalAuthModel.ok("all-attachment-types-by-user")) {
+      ajax.query("all-attachment-types-by-user")
+        .success(function(res) {
+          _data(res.attachmentTypes);
+        })
+        .call();
+      return true;
+    }
+    return false;
   }
 
   if (!load()) {
