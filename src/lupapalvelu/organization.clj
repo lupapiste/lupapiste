@@ -72,6 +72,12 @@
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
+(sc/defschema TaskTrigger
+  {:id ssc/ObjectIdStr
+   :targets [sc/Str]
+   (sc/optional-key :handlerRole) HandlerRole
+   :description sc/Str})
+
 (sc/defschema Organization
   {:id sc/Str
    :name (zipmap i18n/all-languages (repeat sc/Str))
@@ -128,7 +134,8 @@
                               (sc/optional-key :server)  Server}
    (sc/optional-key :inspection-summaries-enabled) sc/Bool
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
-                                          (sc/optional-key :operations-templates) sc/Any}})
+                                          (sc/optional-key :operations-templates) sc/Any}
+   (sc/optional-key :task-triggers) [TaskTrigger]})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -589,3 +596,22 @@
 
 (defn disable-handler-role! [org-id role-id]
   (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))
+
+(defn create-trigger [triggerId target handler description]
+  {:id (or triggerId (mongo/create-id))
+   :targets target
+   :handlerRole (create-handler-role (:id handler) (:name handler))
+   :description description})
+
+(defn add-task-trigger [{org-id :id} trigger]
+  (update-organization org-id {$push {:task-triggers trigger}}))
+
+(defn update-task-trigger [{org-id :id} trigger triggerId]
+  (let [query (assoc {:task-triggers {$elemMatch {:id triggerId}}} :_id org-id)
+        changes {$set {:task-triggers.$.target (:target trigger)
+                       :task-triggers.$.handlerRole (:handlerRole trigger)
+                       :task-triggers.$.description (:description trigger)}}]
+    (mongo/update-by-query :organizations query changes)))
+
+(defn remove-task-trigger [{org-id :id} trigger-id]
+  (update-organization org-id {$pull {:task-triggers {:id trigger-id}}}))

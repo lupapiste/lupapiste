@@ -216,8 +216,10 @@
                    "assignment-target-filter-service.js"
                    "event-filter-service.js"
                    "inspection-summary-service.js"
-                   "handler-service.js",
-                   "card-service.js"]}
+                   "handler-service.js"
+                   "card-service.js"
+                   "triggers-target-service.js"
+                   "trigger-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
