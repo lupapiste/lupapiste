@@ -6,6 +6,7 @@
       <tr>
         <th data-bind="ltext: 'osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label'"></th>
         <th data-bind="ltext: 'foreman'"></th>
+        <th data-bind="ltext: 'puhelin'"></th>
         <th data-bind="ltext: 'buildingPermit'"></th>
       </tr>
     </thead>
@@ -17,6 +18,7 @@
                            ltext: 'tyonjohtaja.substitute'"></span>
         </td>
         <td data-bind="fullName: $data"></td>
+        <td data-bind="text: $data.phone"></td>
         <td>
           <a data-bind="attr: {href: '#!/application/' + $data.id}">
             <span class="foreman-application" data-bind="text: $data.id"></span>
@@ -52,7 +54,7 @@
     <div class="foreman-info" data-bind="visible: !lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'),
                                          lhtml: 'help.AddForeman.authorityInfo'"
          data-test-id="invite-foreman-authority-info"></div>
-    <div data-bind="template: {name: 'application-foreman-list-template', data: $data}"></div>   
+    <div data-bind="template: {name: 'application-foreman-list-template', data: $data}"></div>
     <button class="positive margins-s" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'), click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
   </div>
 </script>
