@@ -208,7 +208,7 @@
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
-            "sass"        ["do" ["sass4clj" "once"] ["shell" "blessc" "--force" "resources/public/lp-static/css/sass4clj/main.css"]]}
+            "sass"        ["do" ["sass4clj" "once"] ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
