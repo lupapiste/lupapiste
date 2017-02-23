@@ -137,30 +137,15 @@
              "inspection-summary.targets.mark-finished.undo"
              "inspection-summary.targets.mark-finished"))])
 
-(rum/defcs target-row < rum/reactive
-                        {:init (fn [state _] (assoc state ::input-id (jsutil/unique-elem-id "inspection-target-row")))}
-                        {:did-mount (fn [state]
-                                      (upload/bindToElem (js-obj "id" (::input-id state)))
-                                      (let [[_ row-target] (-> state :rum/args)]
-                                        (if-let [target-id (:id row-target)]
-                                          (assoc state :fileupload-subscription-id (upload/subscribe-files-uploaded
-                                                                                     (::input-id state)
-                                                                                     (partial got-files target-id)))
-                                          state)))}
-                        {:will-update (fn [state]
-                                        (let [[_ row-target] (-> state :rum/args)]
-                                          (if (and (:id row-target) (not (:fileupload-subscription-id state)))
-                                            (assoc state :fileupload-subscription-id (upload/subscribe-files-uploaded
-                                                                                       (::input-id state)
-                                                                                       (partial got-files (:id row-target))))
-                                            state)))}
-  [local-state idx row-target add-enabled? edit-enabled? remove-enabled? status-change-enabled?]
+(rum/defc target-row < rum/reactive
+  [idx row-target add-enabled? edit-enabled? remove-enabled? status-change-enabled?]
   (let [editing?        (:editing? row-target)
         applicationId   (:applicationId @component-state)
         summaryId       (:id @selected-summary)
         targetId        (:id row-target)
         targetFinished? (:finished row-target)
-        remove-attachment-success (fn [resp] (.showSavedIndicator js/util resp) (refresh))]
+        remove-attachment-success (fn [resp] (.showSavedIndicator js/util resp) (refresh))
+        files-callback  (fn [event] (when targetId (got-files targetId event)))]
     [:tr
      {:data-test-id (str "target-" idx)}
      [:td.target-finished
@@ -181,8 +166,8 @@
                   (attc/view-with-download-small-inline latest)
                   (when-not targetFinished?
                     (attc/delete-attachment-link attachment remove-attachment-success)))))
-      (when-not targetFinished?
-        (attc/upload-link (::input-id local-state)))]
+      (when (and targetId (not targetFinished?))
+        (attc/upload-link files-callback))]
      [:td
       (when (:finished-date row-target)
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]
