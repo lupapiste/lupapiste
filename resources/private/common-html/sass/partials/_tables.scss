@@ -569,6 +569,10 @@ div.handler-roles-container {
     input {
       width: 80%;
     }
+    i.lupicon-undo {
+      cursor: pointer;
+    }
+    margin-top: $marginL;
     margin-bottom: $marginS;
   }
 

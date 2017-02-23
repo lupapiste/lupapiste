@@ -587,5 +587,7 @@
     (update-organization org-id {$set {(util/kw-path :handler-roles ind :id)   (:id handler-role)
                                        (util/kw-path :handler-roles ind :name) (:name handler-role)}})))
 
-(defn disable-handler-role! [org-id role-id]
-  (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))
+(defn toggle-handler-role! [org-id role-id enabled?]
+  (mongo/update :organizations
+                {:_id org-id :handler-roles.id role-id}
+                {$set {:handler-roles.$.disabled (not enabled?)}}))
