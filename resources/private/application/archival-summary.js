@@ -226,7 +226,7 @@
       return attachmentsService.applyFilters(self.attachments(), [["preVerdict"], ["hasFile"]]);
     });
     var postAttachments = self.disposedPureComputed(function() {
-      return attachmentsService.applyFilters(self.attachments(), [["postVerdict"], ["hasFile"]]);
+      return attachmentsService.applyFilters(self.attachments(), [["postVerdict", "ram"], ["hasFile"]]);
     });
 
     var archivedPreAttachments = self.disposedPureComputed(function() {
