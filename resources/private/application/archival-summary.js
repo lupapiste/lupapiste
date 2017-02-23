@@ -8,7 +8,11 @@
 
     ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-    self.attachments = ko.observableArray(attachments);
+    var sortedAttachments = _.sortBy(attachments, function(att) {
+        var localizedGroup = loc(['attachmentType', ko.unwrap(att.type)['type-group'], '_group_label']);
+        return localizedGroup;
+    });
+    self.attachments = ko.observableArray(sortedAttachments);
     self.groupName = groupName;
     var fullGroupDesc = "";
     if (groupDesc) {
