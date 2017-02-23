@@ -167,3 +167,36 @@
         (fact "Can't delete attachment"
           (command pena :delete-attachment :id id1 :attachmentId (:id summary-attachment)) => (partial expected-failure? :error.inspection-summary-target.finished))
         ))))
+
+(facts "Inspection summary locking"
+  (let [app       (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
+        _         (command sipoo :set-organization-inspection-summaries :enabled true) => ok?
+        _         (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
+        templates (-> (query sipoo :organization-inspection-summary-settings) :templates)
+        _         (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?
+        _         (give-verdict sonja (:id app) :verdictId "3323") => ok?
+        {summaries :summaries} (query sonja :inspection-summaries-for-application :id (:id app))
+        {summary-id :id} (first summaries)]
+
+    (fact "One summery exists"
+      (count summaries) => 1)
+
+    (fact "Inspection summary is not locked by default"
+      (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => falsey)
+
+    (fact "Applicant can see the default summary but not lock it"
+      (query pena   :inspection-summaries-for-application :id (:id app)) => ok?
+      (command pena :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked true) => unauthorized?)
+
+    (fact "Authority can toggle inspection summary locking"
+      (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked true) => ok?)
+
+    (fact "Inspection summary is now locked"
+      (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => true)
+
+    (fact "Unlock inspectionsummary"
+      (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked false) => ok?
+      (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => false)
+
+    (fact "Trying to lock unexsisting inspection summary"
+      (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId "not-found-id" :isLocked true) => (partial expected-failure? :error.toggle-inspection-summary-locking.not-found))))

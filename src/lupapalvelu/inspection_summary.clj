@@ -27,7 +27,8 @@
    :op {:id ssc/ObjectIdStr
         (sc/optional-key :name) sc/Str
         (sc/optional-key :description) sc/Str}
-   :targets [InspectionSummaryTargets]})
+   :targets [InspectionSummaryTargets]
+   (sc/optional-key :locked) sc/Bool})
 
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
@@ -217,3 +218,8 @@
   (mongo/update-by-query :applications
                          {:_id (:id app)}
                          {$pull {:inspection-summaries {:id summaryId}}}))
+
+(defn toggle-summary-locking [{app-id :id summaries :inspection-summaries} summary-id locked?]
+  (mongo/update-by-query :applications
+                         {:_id app-id :inspection-summaries {$elemMatch {:id summary-id}}}
+                         {$set {:inspection-summaries.$.locked locked?}}))

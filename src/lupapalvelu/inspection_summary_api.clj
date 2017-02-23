@@ -104,6 +104,17 @@
   (inspection-summary/delete-summary app summaryId)
   (ok))
 
+(defcommand toggle-inspection-summary-locking
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-summary-found-in-application]
+   :parameters [:id summaryId isLocked]
+   :input-validators [(partial action/non-blank-parameters [:summaryId])
+                      (partial action/boolean-parameters [:isLocked])]
+   :user-roles #{:authority}}
+  [{app :application}]
+  (inspection-summary/toggle-summary-locking app summaryId isLocked)
+  (ok))
+
 (defcommand add-target-to-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id summaryId targetName]
