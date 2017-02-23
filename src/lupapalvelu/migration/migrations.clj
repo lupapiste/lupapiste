@@ -2805,7 +2805,7 @@
                                                                                                 :modified (:modified jate)}
                                                                                           :jate {:value "muu"
                                                                                                  :modified (:modified jate)}}
-                                                                              {}))))
+                                                                              {:jate {:value nil}}))))
                                                   {}
                                                   muuJate))]
     (assoc-in doc [:data :rakennusJaPurkujate] rakennus-ja-purku)))
