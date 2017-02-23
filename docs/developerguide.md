@@ -10,11 +10,6 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
     - Mac: `brew install mongodb` (`brew tap homebrew/services` + `brew services start mongodb`)
     - Tarkista, että mongon kantakansiolla ja lokikansiolla on asetettu permissionit
     - Macillä saattaa tulla avoimien tiedostojen raja vastaan: [How to persist ulimit settings in osx](http://unix.stackexchange.com/questions/108174/how-to-persist-ulimit-settings-in-osx-mavericks)
-- CSS ja [Sass](http://sass-lang.com):
-    - [Ruby](https://www.ruby-lang.org)
-    - [Compass](http://compass-style.org/): `gem install compass`
-    - [Node.js](https://nodejs.org)
-    - [Bless](http://blesscss.com): `npm install bless@3.0.3 -g`
 - Python 2.x ja [Robot Framework](http://robotframework.org/) selaintestausta varten
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
@@ -483,12 +478,9 @@ hub.send("indicator-icon", {style: "negative"});
 
 ## Compass + SASS + Bless
 
-CSS-tyylit kirjoitetaan Sass-tiedostoihin `resources/private/common-html/sass` kansiossa. Sass-tiedostot käännetään compass gemillä (kirjoitushetkellä versio 1.0.3). Compassin voi asettaa kuuntelemaan muutoksia `compass.sh` scriptillä projektin juuresta. Vaihtoehtoisesti Sass-tiedostot voi kääntää käsin `compass compile resources/private/common-html`.
+CSS-tyylit kirjoitetaan Sass-tiedostoihin `resources/private/common-html/sass` kansiossa. Sass-tiedostot käännetään lein-sass4clj leiningen pluginilla (kirjoitushetkellä versio 0.3.0). Pluginin voit asetta kuuntelemaan muutoksia `lein sass4clj auto` projektin juuresta. Vaihtoehtoisesti Sass-tiedostot voi kääntää käsin `lein sass4clj once`.
 
-Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`, sisältää mm. Bless-kutsun, joka jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
-
-Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _environment_ tai _output-style_ konfiguroinnilla (config.rb). Esimerkiksi käsin generoitu ei-minifioitu CSS: saa aikaiseksi seuraavalla komennolla (development-mode): `compass compile -e development resources/private/common-html`
-
+`lein sass` ajaa käännöksen kerran ja kutsuu blessiä perään. Bless jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
 
 ## Oskari Map
   The hub between Lupapiste and Oskari Map
@@ -650,7 +642,7 @@ Tarkastuslista:
    ("tila", "tila.title") on lokalisoitu
  - Tilan nimi ja lokalisaatio on viety DW:n lataustiedostoon
  - Tyylit lisätty resources/private/common-html/sass/views/_application.scss
-   tiedostoon ja tiedosto käännetty compassilla
+   tiedostoon ja tiedosto käännetty css:ksi
  - Tila lisätty haluttuun kohtaan järjestystä TOJ:n editorissa (lupapiste-toj.components.editor/state-presentation-order-map)
 
 ## UI komponentit (ui_components.clj, auto-skannatut tiedostot ui-components hakemistossa)

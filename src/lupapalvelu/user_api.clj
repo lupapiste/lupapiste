@@ -15,7 +15,6 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
             [lupapalvelu.token :as token]
-            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
             [lupapalvelu.user-utils :as uu]
             [lupapalvelu.vetuma :as vetuma]
@@ -170,7 +169,7 @@
   {:user-roles #{:applicant :authority :authorityAdmin :admin}
    :input-validators [validate-updatable-user]}
   [{caller :user user-data :data :as command}]
-  (let [email     (usr/canonize-email (or (:email user-data) (:email caller)))
+  (let [email     (ss/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
@@ -314,7 +313,7 @@
   [{caller :user}]
   (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)
-        email           (usr/canonize-email email)
+        email           (ss/canonize-email email)
         result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
       (do
@@ -416,7 +415,7 @@
       (fail :error.email-not-found))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
-  (let [email (usr/canonize-email (:email data))]
+  (let [email (ss/canonize-email (:email data))]
     (usr/change-password email password)
     (infof "password reset performed: email=%s" email)
     (ok)))
@@ -431,7 +430,7 @@
                       action/email-validator]
    :user-roles #{:admin}}
   [_]
-  (let [email (usr/canonize-email email)
+  (let [email (ss/canonize-email email)
        enabled (contains? #{true "true"} enabled)]
    (infof "%s user: email=%s" (if enabled "enable" "disable") email)
    (if (= 1 (mongo/update-n :users {:email email} {$set {:enabled enabled}}))
@@ -514,7 +513,7 @@
     (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
     (when architect
       (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
-    {:email (usr/canonize-email email) :role "applicant" :enabled false}))
+    {:email (ss/canonize-email email) :role "applicant" :enabled false}))
 
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
@@ -540,7 +539,7 @@
                       action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
-        email (usr/canonize-email email)
+        email (ss/canonize-email email)
         token (token/get-token tokenId)]
     (when-not (and vetuma-data
                 (= (:token-type token) :activate-linked-account)

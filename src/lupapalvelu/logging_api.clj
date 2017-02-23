@@ -21,7 +21,7 @@
         level           (get levels (-> level ss/lower-case keyword) :error)
         sanitize        (partial logging/sanitize limit)
         sanitized-page  (sanitize (or page "(unknown)"))
-        user            (or (user/canonize-email email) "(anonymous)")
+        user            (or (ss/canonize-email email) "(anonymous)")
         sanitized-ua    (sanitize user-agent)
         sanitized-build (sanitize build)
         expired?        (not= sanitized-build (:build-number env/buildinfo))

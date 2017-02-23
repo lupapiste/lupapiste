@@ -567,14 +567,16 @@
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                             (< pvm (now))))
-        review-tasks (map review-to-task (filter historical-timestamp-present? reviews))
-        review-tasks (pc/distinct-by #(select-keys % [:taskname :data]) review-tasks) ; remove duplicates!
+        review-tasks (pc/distinct-by #(select-keys % [:taskname :data]) ; remove duplicates!
+                       (map review-to-task (filter historical-timestamp-present? reviews)))
+        validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
+        review-tasks (keep-indexed (fn [idx item]
+                                     (if (empty? (get validation-errors idx)) item)) review-tasks)
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
-        validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}
         state-updates (get-state-updates user created application app-xml)]
     (doseq [task (filter #(and (tasks/task-is-review? %)
@@ -592,12 +594,13 @@
 
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
-    (if (some seq validation-errors)
-      (fail :error.invalid-task-type :validation-errors validation-errors)
-      (ok :review-count (count review-tasks)
-          :updated-tasks (map :id updated-tasks)
-          :updates (util/deep-merge task-updates building-updates state-updates)
-          :added-tasks-with-updated-buildings added-tasks-with-updated-buildings))))
+    (when (some seq validation-errors)
+      (doseq [error (remove empty? validation-errors)]
+        (warnf "Backend task validation error, this was skipped: %s" (pr-str error))))
+    (ok :review-count (count review-tasks)
+        :updated-tasks (map :id updated-tasks)
+        :updates (util/deep-merge task-updates building-updates state-updates)
+        :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
 (defn save-review-updates [user application updates added-tasks-with-updated-buildings]
   (let [update-result (update-application (application->command application) updates)

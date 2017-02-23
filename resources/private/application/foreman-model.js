@@ -41,6 +41,7 @@ LUPAPISTE.ForemanModel = function() {
         var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
 
         var username  = util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]);
+        var phone = util.getIn(foremanDoc, ["data", "yhteystiedot", "puhelin", "value"]);
         var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
         var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
 
@@ -61,6 +62,7 @@ LUPAPISTE.ForemanModel = function() {
         var data = {"state":       app.state,
                     "id":          app.id,
                     "email":       username,
+                    phone:         phone,
                     "firstName":   firstname,
                     "lastName":    lastname,
                     "name":        name,
@@ -128,7 +130,7 @@ LUPAPISTE.ForemanModel = function() {
             .command("link-foreman-task", { id: self.application().id,
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
-            .success(function() { 
+            .success(function() {
               self.indicator({type: "saved"});
             })
             .error(function(err) {

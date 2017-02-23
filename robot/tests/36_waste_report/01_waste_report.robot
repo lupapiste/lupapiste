@@ -75,7 +75,8 @@ Selections survive reload
   Dig select is  1  jaykkaSavi
 
 Remove second dig row
-  Click element  jquery=tr[data-test-id='ainekset-row-1'] td.action-column i
+  Scroll to test id  ainekset-row-1
+  Click element  jquery=tr[data-test-id=ainekset-row-1] td.action-column i
   Confirm yes no dialog
   No such test id  'kaivettavaMaa.ainekset.1.aines-group.aines'
 
@@ -167,4 +168,5 @@ Dig select is
 Dig reload
   Reload page
   Wait test id visible  laajennettuRakennusjateselvitys-accordion-title-text
+  Kill dev-box
   Scroll to test id  sum-kaivettavaMaa-ainekset-hyodynnetaan

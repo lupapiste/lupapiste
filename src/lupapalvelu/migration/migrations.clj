@@ -2782,6 +2782,38 @@
 (defmigration attachment-op-to-array
   (update-applications-array :attachments ensure-op-is-not-object {:attachments.op {$type 3}}))
 
+(defn migrate-rakennusJaPurkujate
+  "1) Other selection to vaarallisetJatteet 2) Other selection to
+  muuJate 3) Migrate old muuJate values to new values."
+  [{{{:keys[vaarallisetJatteet muuJate]} :rakennusJaPurkujate} :data :as doc}]
+  (let [rakennus-ja-purku (assoc (-> doc :data :rakennusJaPurkujate)
+                                 :vaarallisetJatteet (reduce (fn [acc [index {jate :jate :as row}]]
+                                                               (assoc acc index (assoc-in (dissoc row :jate)
+                                                                                          [:jate-group :jate]
+                                                                                          jate)))
+                                                             {}
+                                                             vaarallisetJatteet)
+                                 :muuJate (reduce (fn [acc [index {jate :jate :as row}]]
+                                                    (assoc acc index (assoc (dissoc row :jate)
+                                                                            :jate-group
+                                                                            (case (:value jate)
+                                                                              ("betoni" "tiilet") {:jate {:value "betoni-tiili"
+                                                                                                          :modified (:modified jate)}}
+                                                                              ("pinnoittamatonPuu" "pinnoitettuPuu") {:jate {:value "puu"
+                                                                                                                             :modified (:modified jate)}}
+                                                                              "sekajate" {:muu {:value "Sekaj\u00e4te"
+                                                                                                :modified (:modified jate)}
+                                                                                          :jate {:value "muu"
+                                                                                                 :modified (:modified jate)}}
+                                                                              {:jate {:value nil}}))))
+                                                  {}
+                                                  muuJate))]
+    (assoc-in doc [:data :rakennusJaPurkujate] rakennus-ja-purku)))
+
+(defmigration extended-waste-report-changes
+  (update-applications-array :documents
+                             migrate-rakennusJaPurkujate
+                             {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

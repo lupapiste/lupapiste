@@ -171,6 +171,18 @@
 ;; Extended report schemas start here
 ;; ---------------------------------------------------------
 
+(def extended-contact {:name "extended-contact"
+                       :type :group
+                       :uicomponent :docgenGroup
+                       :approvable false
+                       :template "form-grid-docgen-group-template"
+                       :group-help "contact.help"
+                       :rows [["name" "phone" "email"]]
+                       :body [{:name "name" :type :string}
+                              {:name "phone" :type :string :subtype :tel}
+                              {:name "email" :type :string :subtype :email}
+                              ]})
+
 (def toteutus {:name "toteutus"
                :type :group
                :uicomponent :docgenGroup
@@ -267,13 +279,24 @@
                                                 :values #{true}}
                                     :type :table
                                     :css [:form-table :form-table--waste]
-                                    :columnCss {"jate" [:column--50]
+                                    :columnCss {"jate-group" [:column--50]
                                                 "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
                                     :footer-sums [{:amount "maara" :unit "yksikko"}]
-                                    :body [{:name "jate" :type :select :css [:dropdown]
-                                            :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
+                                    :body [{:name "jate-group"
+                                            :type :group
+                                            :pdf-options {:other-select :jate}
+                                            :approvable false
+                                            :template "simple-docgen-group-template"
+                                            :body [{:name "jate" :type :select :css [:dropdown]
+                                                    :label false
+                                                    :body (conj (mapv #(hash-map :name %)
+                                                                      ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu" "lyijy"])
+                                                                {:name "muu" :i18nkey "select-other"})
+                                                    :hide-when {:path "jate" :values #{"muu"}}}
+                                                   {:name "muu" :type :string :label false
+                                                    :show-when {:path "jate" :values #{"muu"}}}]}
                                            {:name "maara" :type :string :subtype :decimal}
                                            {:name "yksikko" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name % :i18nkey (str "unit." %)) ["kg" "tonnia"])}
@@ -281,13 +304,25 @@
                                    {:name "muuJate"
                                     :type :table
                                     :css [:form-table :form-table--waste]
-                                    :columnCss {"jate" [:column--50]
+                                    :columnCss {"jate-group" [:column--50]
                                                 "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
                                     :footer-sums [{:amount "maara" :unitKey :t}]
-                                    :body [{:name "jate" :type :select :css [:dropdown]
-                                            :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
+                                    :body [{:name "jate-group"
+                                            :type :group
+                                            :pdf-options {:other-select :jate}
+                                            :approvable false
+                                            :template "simple-docgen-group-template"
+                                            :body [{:name "jate" :type :select :css [:dropdown]
+                                                    :label false
+                                                    :body (conj (mapv #(hash-map :name %)
+                                                                      ["betoni-tiili" "kipsi" "puu" "lasi"
+                                                                       "maa-ja-kivi" "metalli" "muovi" "paperi"])
+                                                                {:name "muu" :i18nkey "select-other"})
+                                                    :hide-when {:path "jate" :values #{"muu"}}}
+                                                   {:name "muu" :type :string :label false
+                                                    :show-when {:path "jate" :values #{"muu"}}}]}
                                            {:name "maara" :type :string :subtype :decimal}
                                            {:name "sijoituspaikka" :type :string}]}]})
 
@@ -334,6 +369,7 @@
                "sijoituspaikka" [:column--50]}
    :approvable false
    :body [{:name "aines-group"
+           :pdf-options {:other-select :aines}
            :type :group
            :i18nkey "waste"
            :approvable false
@@ -396,7 +432,8 @@
                          {:name "selvitysVieraslajeista" :type :text :max-len 4000}]})
 
 
-(def laajennettu-rakennusjateselvitys [toteutus
+(def laajennettu-rakennusjateselvitys [extended-contact
+                                       toteutus
                                        purkaminen
                                        vaaralliset-aineet
                                        rakennus-ja-purkujate

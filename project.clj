@@ -136,7 +136,9 @@
                  [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]]
-  :plugins [[lein-cljsbuild "1.1.5"]]
+  :plugins [[lein-cljsbuild "1.1.5"]
+            [lein-shell "0.5.0"]
+            [deraen/lein-sass4clj "0.3.0"]]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src/lupapalvelu/ui"]}}}
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
@@ -158,6 +160,8 @@
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}
+                   :sass {:output-style :expanded
+                          :source-map   true}
                    :cljsbuild {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
                                                          :on-jsload lupapalvelu.ui.inspection-summaries/reload-hook}
                                               :compiler {:output-dir "resources/public/lp-static/js/out"
@@ -188,6 +192,9 @@
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :figwheel {:server-port 3666
              :css-dirs ["resources/public/lp-static/css/main.css"]}
+  :sass {:target-path  "resources/public/lp-static/css/"
+         :source-paths ["resources/private/common-html/sass/"]
+         :output-style :compressed}
   :java-source-paths ["java-src"]
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts ["clj" "js" "html"]
@@ -200,7 +207,8 @@
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]}
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]
+            "sass"        ["do" ["sass4clj" "once"] ["shell" "blessc" "--force" "resources/public/lp-static/css/main.css"]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}

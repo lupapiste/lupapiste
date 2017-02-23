@@ -33,6 +33,8 @@ Authority gives a verdict
 View summary targets as applicant
   Pena logs in
   Open application  ${appname}  186-401-1-2111
+  Open tab  attachments
+  Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  0
   Open tab  inspectionSummaries
   Wait until  Select From List by label  xpath=//select[@data-test-id="summaries-select"]  Uusi pohja 1 -
   Wait until  Element should be visible by test id  target-0
@@ -47,18 +49,64 @@ Applicant can upload attachment to target
   Sleep  1s
   Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  1
   Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PNG_TESTFILE_NAME}
+  Wait until  Element should be visible  //tr[@data-test-id="target-1"]//label[@data-test-id='upload-link']
+  # Delete button is visible
+  Wait until  Element should be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
 
+Attachment can be deleted
+  Open tab  attachments
+  Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  1
+  Open tab  inspectionSummaries
+  Wait until  Element should be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
+  Click element  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
+  Confirm yes no dialog
+  Positive indicator should be visible
+  Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  0
+  Open tab  attachments
+  Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  0
+
+Upload attachment again
+  Open tab  inspectionSummaries
+  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  0
+  Upload with hidden input  tr[data-test-id='target-1'] input[data-test-id='upload-link-input']  ${PNG_TESTFILE_PATH}
+  Sleep  1s
+  Wait until  Xpath should match x times  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment']  1
+
+Attachment can be found from attachment listing
+  Open tab  attachments
+  Wait Until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']  1
+  Element text should be  //div[@id='application-attachments-tab']//tr[@data-test-type='katselmukset_ja_tarkastukset.tarkastusasiakirja']//td[@data-test-id='file-info']//a  ${PNG_TESTFILE_NAME}
+
+Attachment belongs to operation and is construction time
+  Open attachment details  katselmukset_ja_tarkastukset.tarkastusasiakirja
+  Wait until  Autocomplete selection by test id contains  attachment-group-autocomplete  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait until  Checkbox should be selected  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
+  Element should be disabled  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
+  Return to application
 
 Mark target as finished
+  Open tab  inspectionSummaries
   Click by test id  change-status-link-1
   Wait until  Element should be visible  //tr[@data-test-id="target-1"]//td[@class="target-finished"]//i
   Click by test id  change-status-link-2
   Wait until  Element should be visible  //tr[@data-test-id="target-2"]//td[@class="target-finished"]//i
+
+Attachment can't be added nor deleted
+  Wait until  Element text should be  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a  ${PNG_TESTFILE_NAME}
+  Element should not be visible  //tr[@data-test-id="target-1"]//label[@data-test-id='upload-link']
+  Element should not be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
+  # Previous target without attachment also doesn't have upload link
+  Element should not be visible  //tr[@data-test-id="target-2"]//label[@data-test-id='upload-link']
+
+Undo finished marking
   Test id text is  change-status-link-1  Kumoa merkintä
   Test id text is  change-status-link-2  Kumoa merkintä
   Click by test id  change-status-link-1
   Wait until  Element should not be visible  //tr[@data-test-id="target-1"]//td[@class="target-finished"]//i
   Test id text is  change-status-link-1  Merkitse tehdyksi
+  # Attachment actions are visible again
+  Element should be visible  //tr[@data-test-id="target-1"]//label[@data-test-id='upload-link']
+  Element should be visible  //tr[@data-test-id="target-1"]//div[@data-test-id='target-row-attachment'][1]//a[@data-test-id='delete-attachment-link']
   Logout
 
 Authority can not edit target name for finished target
@@ -68,4 +116,5 @@ Authority can not edit target name for finished target
   Wait until  Select From List by label  xpath=//select[@data-test-id="summaries-select"]  Uusi pohja 1 -
   Wait until  Element should be visible  //tr[@data-test-id="target-2"]//td[@class="target-finished"]//i
   Element should not be visible by test id  edit-target-2
+  Element should not be visible  //tr[@data-test-id="target-2"]//label[@data-test-id='upload-link']
   Logout
