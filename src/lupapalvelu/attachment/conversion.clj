@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :refer [debug]]
             [clojure.java.io :as io]
             [schema.core :as sc]
-            [sade.env :as env]
             [sade.files :as files]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
@@ -26,18 +25,13 @@
     :text/plain})
 
 
-(defn libreoffice-conversion-required? [{:keys [filename attachment-type]}]
-  "Check if libre office conversion is required.
-  Attachment type deprecation warning: attachment-type check is not needed after convert-all-attachments
-  feature is enabled in production."
-  {:pre [(map? attachment-type)]}
-  (let [mime-type (mime/mime-type (mime/sanitize-filename filename))
-        {:keys [type-group type-id]} attachment-type]
-    (and (libre-conversion/enabled?)
-         (or (env/feature? :convert-all-attachments)        ;; TODO remove attachment-type check when feature is used in prod
-             (and (= :paatoksenteko (keyword type-group))
-                  (#{:paatos :paatosote} (keyword type-id))))
-         (libre-conversion-file-types (keyword mime-type)))))
+(defn libreoffice-conversion-required? [{:keys [filename]}]
+  "Check if libre office conversion is required for given filename."
+  (boolean (and (libre-conversion/enabled?)
+                (libre-conversion-file-types (-> filename
+                                                 mime/sanitize-filename
+                                                 mime/mime-type
+                                                 keyword)))))
 
 (defn ->libre-pdfa!
   "Converts content to PDF/A using Libre Office conversion client.
@@ -78,9 +72,8 @@
     (let [valid? (tiff-validation/valid-tiff? tmp-file)]
       {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})))
 
-(defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
-  (if (and (env/feature? :convert-all-attachments)
-           (pdf-conversion/pdf-a-required? (:organization application)))
+(defmethod convert-file :image/jpeg [application {:keys [content filename]}]
+  (if (pdf-conversion/pdf-a-required? (:organization application))
     (files/with-temp-file tmp-file
       (let [pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf") ] ; deleted via temp-file-input-stream
         (try
