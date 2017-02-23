@@ -32,14 +32,12 @@
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
 
-(defn organization-has-inspection-summary-feature? [organizationId]
-  (pos? (mongo/count :organizations {:_id organizationId :inspection-summaries-enabled true})))
-
 (defn inspection-summary-api-auth-admin-pre-check
-  [{user :user}]
-  (let [org-set (usr/organization-ids-by-roles user #{:authorityAdmin})]
-    (when (or (empty? org-set) (not (some organization-has-inspection-summary-feature? org-set)))
-      unauthorized)))
+  [{user :user organizations :user-organizations}]
+  (when-not (-> (usr/authority-admins-organization-id user)
+                (util/find-by-id organizations)
+                :inspection-summaries-enabled)
+    unauthorized))
 
 (defn inspection-summary-api-authority-pre-check
   [{organization :organization}]
