@@ -69,8 +69,7 @@
    :group {:groupType "operation"
            :operations [(select-keys (:op @selected-summary) [:id :name])]}
    :target {:type "inspection-summary-item"
-            :id target-id}
-   :constructionTime true})
+            :id target-id}})
 
 (defn unsubscribe-if-done [target-id]
   (let [statuses (filter #(= target-id (:target-id %))
