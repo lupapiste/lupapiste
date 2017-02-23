@@ -1,6 +1,6 @@
 (ns lupapalvelu.inspection-summary
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
-            [sade.core :refer [now unauthorized fail! fail]]
+            [sade.core :refer [now unauthorized fail]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -71,13 +71,23 @@
 
 (defn validate-that-summary-can-be-deleted
   "Inspection summary can be deleted if none of its targets contain attachments or are marked as finished by applicant"
-  [{{summaries :inspection-summaries attachments :attachments} :application {:keys [summaryId]} :data}]
+  [{{summaries :inspection-summaries attachments :attachments} :application {:keys [summaryId]} :data action :action}]
   (let [summary-to-be-deleted (-> (util/find-by-id summaryId summaries)
                                   (update :targets (partial enrich-summary-targets attachments)))
         targets               (:targets summary-to-be-deleted)]
     (when (some #(or (-> % :finished true?)
                      (not (empty? (:attachments %)))) targets)
-      (fail! :error.inspection-summary.delete.non-empty))))
+      (fail (util/kw-path :error action :non-empty)))))
+
+(defn validate-summary-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data action :action}]
+  (when-not (util/find-by-id summaryId summaries)
+    (fail (util/kw-path :error action :not-found))))
+
+(defn validate-summary-target-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId targetId]} :data action :action}]
+  (when-not (->> (util/find-by-id summaryId summaries)
+                 :targets
+                 (util/find-by-id targetId))
+    (fail (util/kw-path :error action :not-found))))
 
 (defn settings-for-organization [organizationId]
   (get (mongo/by-id :organizations organizationId) :inspection-summary {}))
@@ -198,8 +208,6 @@
         index   (->> summary :targets (util/position-by-id targetId))
         set-updates   (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) mset)
         unset-updates (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) munset)]
-    (when-not index
-      (fail! :error.summary-target.edit.not-found))
     (mongo/update-by-query :applications
                            (elem-match-query appId summaryId)
                            (merge (when (seq set-updates)
@@ -208,9 +216,6 @@
                                     {$unset unset-updates})))))
 
 (defn delete-summary [app summaryId]
-  (let [summary (->> app :inspection-summaries (util/find-by-id summaryId))]
-    (when-not summary
-      (fail! :error.inspection-summary.delete.not-found))
-    (mongo/update-by-query :applications
-                           {:_id (:id app)}
-                           {$pull {:inspection-summaries {:id summaryId}}})))
+  (mongo/update-by-query :applications
+                         {:_id (:id app)}
+                         {$pull {:inspection-summaries {:id summaryId}}}))

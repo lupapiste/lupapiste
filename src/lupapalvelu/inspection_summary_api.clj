@@ -95,7 +95,8 @@
 
 (defcommand delete-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
-                inspection-summary/validate-that-summary-can-be-deleted]
+                inspection-summary/validate-that-summary-can-be-deleted
+                inspection-summary/validate-summary-found-in-application]
    :parameters [:id summaryId]
    :input-validators [(partial action/non-blank-parameters [:summaryId])]
    :user-roles #{:authority}}
@@ -113,7 +114,8 @@
 
 (defcommand edit-inspection-summary-target
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
-                inspection-summary/deny-if-finished]
+                inspection-summary/deny-if-finished
+                inspection-summary/validate-summary-target-found-in-application]
    :parameters [:id summaryId targetId targetName]
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
@@ -131,7 +133,8 @@
   (ok))
 
 (defcommand set-target-status
-  {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check
+                inspection-summary/validate-summary-target-found-in-application]
    :parameters [:id summaryId targetId status]
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
                       (partial action/boolean-parameters [:status])]

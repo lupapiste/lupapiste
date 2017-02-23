@@ -118,7 +118,7 @@
                        :targetId (-> targets first :id)) => ok?
               (command raktark-jarvenpaa :edit-inspection-summary-target
                        :id id1 :summaryId summaryId1 :targetId (-> targets first :id)
-                       :targetName "bar1") => (partial expected-failure? :error.summary-target.edit.not-found)))))))
+                       :targetName "bar1") => (partial expected-failure? :error.edit-inspection-summary-target.not-found)))))))
 
   (facts "Marking inspection target DONE"
     (let [{id1 :id :as app-jarvenpaa} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 29")
