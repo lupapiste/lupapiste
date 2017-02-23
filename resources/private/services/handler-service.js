@@ -99,10 +99,10 @@ LUPAPISTE.HandlerService = function() {
     .call();
   }
 
-  function toggleOrganizationRole( roleId, flag ) {
+  function toggleOrganizationRole( roleId, enabled ) {
     ajax.command( "toggle-handler-role", {roleId: roleId,
-                                          flag: flag})
-    .success( flag ? indicateRecovered : indicateRemoved )
+                                          enabled: enabled})
+    .success( enabled ? indicateRecovered : indicateRemoved )
     .call();
   }
 

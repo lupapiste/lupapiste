@@ -9,7 +9,7 @@ Resource       handlers_resource.robot
 
 ${appname}     Handlung
 ${propertyId}  753-416-25-30
-  
+
 *** Test Cases ***
 
 # -------------------------
@@ -35,15 +35,15 @@ Partly filled roles show required highlights
   No required  2  en
   Warning not visible
   Edit handler role  2  fi  Uusi
-  No required  2  fi     
-  Yes required  2  sv    
+  No required  2  fi
+  Yes required  2  sv
   Yes required  2  en
-  Warning visible    
+  Warning visible
   Edit handler role  2  en  New
-  No required  2  fi     
-  Yes required  2  sv    
-  No required  2  en 
-  Warning visible        
+  No required  2  fi
+  Yes required  2  sv
+  No required  2  en
+  Warning visible
   Edit handler role  2  sv  Nytt  True
   No required  2  fi
   No required  2  sv
@@ -56,7 +56,7 @@ Partly filled roles are not saved
   Edit handler role  3  en  Gone soon
   Reload page
   No such test id  edit-role-3-en
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 # -------------------------
 # Applicant
@@ -98,7 +98,7 @@ Sonja adds handler
 Sonja adds second handler but cannot reuse role
   Click by test id  add-handler
   Unavailable roles  1  Käsittelijä
-  Edit handler  1  Sibbo Ronja  KVV-Käsittelijä  
+  Edit handler  1  Sibbo Ronja  KVV-Käsittelijä
 
 Sonja adds third handler
   Click by test id  add-handler
@@ -127,7 +127,7 @@ Sonja goes to applications page and comes back
   Open application  ${appname}  ${propertyId}
   List handler is  0  Sibbo Ronja  Käsittelijä
   List handler is  1  Sibbo Sonja  Uusi
-  No such test id  handler-2  
+  No such test id  handler-2
   [Teardown]  Logout
 
 # -------------------------
@@ -144,7 +144,7 @@ Pena goes to applications page and comes back
   Open application  ${appname}  ${propertyId}
   List handler is  0  Sibbo Ronja  Käsittelijä
   List handler is  1  Sibbo Sonja  Uusi
-  No such test id  handler-2  
+  No such test id  handler-2
 
 No handlers in inforequest
   Open inforequest  ${appname}-info  ${propertyId}
@@ -162,7 +162,7 @@ Sipoo logs and fires Ronja
 Sipoo renames Käsittelijä handler role
   Go to page  applications
   Edit handler role  0  fi  Muutettu  True
-  
+
 Sipoo removes Uusi handler role
   Click by test id  remove-role-2
   Remove indicated
@@ -183,7 +183,7 @@ Both handlers are disabled in the edit view
   Handler is  0  Sibbo Ronja  Muutettu
   Handler is  1  Sibbo Sonja  Uusi
   Handler disabled  0
-  Handler disabled  1    
+  Handler disabled  1
 
 Sonja opens inforequest and changes language to English
   Open inforequest  ${appname}-info  ${propertyId}
@@ -212,28 +212,40 @@ Pena sees the handler on the inforequest
   Open inforequest  ${appname}-info  ${propertyId}
   List handler is  0  Sibbo Sonja  Muutettu
   [Teardown]  Logout
-  
-  
-  
 
+# -------------------------
+# Authorit admin
+# -------------------------
+Sipoo logs in to revisit deleted handler roles
+  Sipoo logs in
+  Go to page  applications
+  No such test id  edit-role-2-fi
 
-    
+Show also the deleted roles
+  Scroll and click test id  show-all-handler-roles-label
+  Disabled handler role is  2  Uusi  Nytt  New
+  Wait test id visible  recover-role-2
+  Handler role is  0  Muutettu  Handläggare  Handy  False
+  Handler role is  1  KVV-Käsittelijä  EVVK-Handläggare  KVV-Handler
 
-  
-  
+Recover role
+  Click by test id  recover-role-2
+  Recovery indicated
+  Handler role is  2  Uusi  Nytt  New
 
+Delete KVV Handler role
+  Click by test id  remove-role-1
+  Remove indicated
+  Disabled handler role is  1  KVV-Käsittelijä  EVVK-Handläggare  KVV-Handler
 
-
-
-  
-  
-
-  
-  
-  
-
-  
-  
-
-
-  
+Changes survice reload
+  Reload page
+  Scroll to  table.handler-roles
+  Toggle not selected  show-all-handler-roles
+  Kill dev-box
+  No such test id  edit-role-1-fi
+  Handler role is  2  Uusi  Nytt  New
+  Scroll and click test id  show-all-handler-roles-label
+  Disabled handler role is  1  KVV-Käsittelijä  EVVK-Handläggare  KVV-Handler
+  Handler role is  2  Uusi  Nytt  New
+  [Teardown]  Logout

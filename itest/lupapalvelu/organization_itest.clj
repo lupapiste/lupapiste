@@ -929,22 +929,22 @@
   (fact "cannot disable with unexisting id"
     (command sipoo :toggle-handler-role
              :roleId "abba1111111111111666acdc"
-             :flag false) => (partial expected-failure? :error.unknown-handler))
+             :enabled false) => (partial expected-failure? :error.unknown-handler))
 
   (fact "cannot disable with blank id"
     (command sipoo :toggle-handler-role
              :roleId ""
-             :flag false) => (partial expected-failure? :error.missing-parameters))
+             :enabled false) => (partial expected-failure? :error.missing-parameters))
 
   (fact "cannot disable general handler role"
         (command sipoo :toggle-handler-role
-                 :flag false
+                 :enabled false
                  :roleId (-> sipoo-handler-roles first :id))
         => (partial expected-failure? :error.illegal-handler-role))
 
   (fact "disable handler role"
         (command sipoo :toggle-handler-role
-                 :flag false
+                 :enabled false
                  :roleId (-> sipoo-handler-roles second :id))=> ok?
 
         (let [handler-roles (get-in (query sipoo :organization-by-user) [:organization :handler-roles])]
@@ -955,14 +955,15 @@
                 (-> handler-roles second :disabled) => true)
 
           (fact "second handler is not name and id is not edited"
-                (-> handler-roles second (select-keys [:id :name])) => (-> sipoo-handler-roles second (select-keys [:id :name])))
+                (-> handler-roles second (select-keys [:id :name]))
+                => (-> sipoo-handler-roles second (select-keys [:id :name])))
 
           (fact "other handler-roles not updated"
                 (first handler-roles) => (first sipoo-handler-roles))))
 
   (fact "enable handler role"
         (command sipoo :toggle-handler-role
-                 :flag true
+                 :enabled true
                  :roleId (-> sipoo-handler-roles second :id)) => ok?)
   (fact "second handler is now enabled"
         (-> (get-in (query sipoo :organization-by-user) [:organization :handler-roles])

@@ -778,12 +778,12 @@
 
 (defcommand toggle-handler-role
   {:description "Enable/disable organization handler role."
-   :parameters [roleId flag]
+   :parameters [roleId enabled]
    :pre-checks [validate-handler-role-in-organization
                 validate-handler-role-not-general]
    :input-validators [(partial non-blank-parameters [:roleId])
-                      (partial boolean-parameters [:flag])]
+                      (partial boolean-parameters [:enabled])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (-> (usr/authority-admins-organization-id user)
-      (org/toggle-handler-role! roleId flag)))
+      (org/toggle-handler-role! roleId enabled)))
