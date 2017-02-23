@@ -32,7 +32,7 @@
 (sc/defschema BindableFile (sc/if :attachmentId NewVersion NewAttachment))
 
 (defn bind-single-attachment! [{:keys [application user created]} mongo-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data    (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
+  (let [conversion-data    (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
         placeholder-id     (or attachmentId
                                (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
         attachment         (or
