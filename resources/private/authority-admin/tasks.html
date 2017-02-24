@@ -18,7 +18,8 @@
 
       <section data-bind="visible: organization.assignmentsEnabled">
           <div data-bind="component: {name: 'triggers',
-                          params: {organization: organization}}"></div>
+                          params: {organization: organization}}"
+               data-test-id="trigger-component"></div>
       </section>
     </div>
   </section>

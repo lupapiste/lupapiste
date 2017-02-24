@@ -1,7 +1,8 @@
 (ns lupapalvelu.organization-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.organization :refer :all]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.mongo :as mongo]))
 
 (facts
  (let [organization {:operations-attachments {:kikka [["type-group-1" "type-id-123"]]}
@@ -31,3 +32,21 @@
   (fact "update existing when there is multiple handlers in org"
     (upsert-handler-role! {:id ..org-id.. :handler-roles [{:id ..role-id-0..} {:id ..role-id-1..} {:id ..role-id-2..} {:id ..role-id-3..}]} {:id ..role-id-2.. :name ..name..}) => "done"
     (provided (update-organization ..org-id.. {$set {:handler-roles.2.id ..role-id-2.. :handler-roles.2.name ..name..}}) => "done")))
+
+(facts update-task-triggers
+  (fact "update existing"
+    (update-task-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole ..handlerRole... :description ..description..} ..trigger-id..) => "done"
+    (provided (mongo/update-by-query :organizations
+                                     {:task-triggers {"$elemMatch" {:id ..trigger-id..}}, :_id ..org-id..}
+                                     {"$set" {:task-triggers.$.targets ..targets.., :task-triggers.$.handlerRole ..handlerRole..., :task-triggers.$.description ..description..}}) => "done")))
+
+(facts create-trigger
+  (fact "create trigger with handler"
+  (create-trigger 123 ["target.attachment"] {:id 456 :name {:fi "Nimi" :sv "Namn" :en "Name"}} "Description") => {:id 123
+                                                                                                                  :targets ["target.attachment"]
+                                                                                                                  :handlerRole {:id 456 :name {:fi "Nimi" :sv "Namn" :en "Name"}}
+                                                                                                                  :description "Description"})
+  (fact "create trigger without handler"
+  (create-trigger 123 ["target.attachment"] nil "Description") => {:id 123
+                                                                   :targets ["target.attachment"]
+                                                                   :description "Description"}))
