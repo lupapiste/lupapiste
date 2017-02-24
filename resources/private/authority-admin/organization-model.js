@@ -88,7 +88,11 @@ LUPAPISTE.OrganizationModel = function () {
     var inspectionSummariesEnabled = self.inspectionSummariesEnabled();
     if (self.initialized) {
       ajax.command("set-organization-inspection-summaries", {enabled: inspectionSummariesEnabled})
-        .success(util.showSavedIndicator)
+        .success(function(event) {
+          util.showSavedIndicator(event);
+          if (inspectionSummariesEnabled)
+            lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
+        })
         .error(util.showSavedIndicator)
         .call();
     }
@@ -227,6 +231,10 @@ LUPAPISTE.OrganizationModel = function () {
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
 
     self.inspectionSummariesEnabled(organization["inspection-summaries-enabled"] || false);
+
+    if (organization["inspection-summaries-enabled"]) {
+      lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
+    }
 
     self.useAttachmentLinksIntegration(organization["use-attachment-links-integration"] === true);
 
