@@ -392,3 +392,4 @@
 "triggers.no.handler" "en" ""
 "triggers.no.handler" "fi" "Ei käsittelijää"
 "triggers.no.handler" "sv" ""
+"handler-roles.show-all" "fi" "Näytä myös poistetut"

@@ -157,9 +157,20 @@
                                                       waste-plain-columns
                                                       [:toteutunutMaara
                                                        :jatteenToimituspaikka])})
+
+(defn other-column [prefix selected other]
+  (cond
+    (= selected "muu")       other
+    (ss/not-blank? selected) (localize :fi (format "%s.%s" prefix selected))
+    :default                 ""))
+
 (defn extended-columns [kind]
-  [{:name :jate
-    :loc (format "laajennettuRakennusjateselvitys.rakennusJaPurkujate.%s.jate" (name kind))}
+  [{:name :jate-group
+    :fun (fn [{:keys [muu jate]}]
+           (other-column (format "laajennettuRakennusjateselvitys.rakennusJaPurkujate.%s.jate-group.jate"
+                                 (name kind))
+                         jate
+                         muu))}
    :maara
    (if (= kind :muuJate)
      {:fixed (localize :fi "unit.tonnia")}
@@ -167,22 +178,18 @@
       :loc "unit"})
    :sijoituspaikka])
 
-(def other-columns [{:name :aines-group
-                    :fun (fn [{:keys [muu aines]}]
-                           (if (ss/blank? muu)
-                             (if (ss/not-blank? aines)
-                               (localize :fi (format "waste.aines.%s" aines))
-                               "")
-                             muu))}
-                   :hyodynnetaan
-                   :poisajettavia
-                   :sijoituspaikka])
+(def relocatable-columns [{:name :aines-group
+                           :fun (fn [{:keys [muu aines]}]
+                                  (other-column "waste.aines" aines muu))}
+                          :hyodynnetaan
+                          :poisajettavia
+                          :sijoituspaikka])
 
 (def extended-waste-columns {:vaarallisetJatteet (extended-columns :vaarallisetJatteet)
                              :muuJate (extended-columns :muuJate)
-                             :muutKaivettavatMassat other-columns
-                             :orgaaninenAines other-columns
-                             :kaivettavaMaa other-columns})
+                             :muutKaivettavatMassat relocatable-columns
+                             :orgaaninenAines relocatable-columns
+                             :kaivettavaMaa relocatable-columns})
 
 
 (defn- waste-data []

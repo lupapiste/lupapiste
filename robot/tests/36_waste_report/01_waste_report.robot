@@ -168,4 +168,5 @@ Dig select is
 Dig reload
   Reload page
   Wait test id visible  laajennettuRakennusjateselvitys-accordion-title-text
+  Kill dev-box
   Scroll to test id  sum-kaivettavaMaa-ainekset-hyodynnetaan

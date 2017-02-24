@@ -69,4 +69,5 @@ user.properties
 node_modules
 /.ctags
 
+resources/public/lp-static/css/*.css.map
 resources/public/lp-static/js/*

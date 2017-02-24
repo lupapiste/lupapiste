@@ -7,7 +7,9 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
   var self = this;
 
   var enable = ko.observable( true );
- 
+
+  self.showAll = ko.observable( false );
+
   ko.utils.extend( self,
                    new LUPAPISTE.EnableComponentModel( _.defaults( params,
                                                                    {enable: enable}) ));
@@ -15,7 +17,7 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
   self.disposedComputed( function() {
     enable( Boolean(lupapisteApp.models.globalAuthModel.ok("upsert-handler-role")));
   });
-  
+
   var service = lupapisteApp.services.handlerService;
 
   self.roles = service.organizationHandlerRoles( params.organization );
@@ -28,8 +30,9 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
                     loc( "lang." + lang));
   };
 
-  self.removeRole = function( role ) {
-    service.removeOrganizationHandlerRole( role.id );    
+  self.toggleRole = function( role ) {
+    role.disabled( !role.disabled());
+    service.toggleOrganizationHandlerRole( role.id, role.disabled );
   };
 
   self.addRole = function() {
@@ -46,7 +49,6 @@ LUPAPISTE.HandlerRolesModel = function( params ) {
     return _.some( self.roles(), function( role ) {
       return _.some( self.languages(),
                      _.partial( self.isRequired, role.name ));
-    });        
+    });
   });
 };
-

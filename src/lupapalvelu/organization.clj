@@ -616,3 +616,8 @@
 
 (defn remove-task-trigger [{org-id :id} trigger-id]
   (update-organization org-id {$pull {:task-triggers {:id trigger-id}}}))
+
+(defn toggle-handler-role! [org-id role-id enabled?]
+  (mongo/update :organizations
+                {:_id org-id :handler-roles.id role-id}
+                {$set {:handler-roles.$.disabled (not enabled?)}}))

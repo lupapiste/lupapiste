@@ -723,9 +723,7 @@
                              (:content file-options)
                              ;; stream is consumed at this point, load from mongo
                              ((-> original-filedata :fileId mongo/download :content)))
-        conversion-data    (conversion application (assoc original-filedata
-                                                     :content content
-                                                     :attachment-type (:attachment-type attachment-options)))]
+        conversion-data    (conversion application (assoc original-filedata :content content))]
     (attach! command attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]

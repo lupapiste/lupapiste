@@ -5,8 +5,6 @@ LUPAPISTE.InspectionSummaryTemplatesListModel = function() {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
-
   self.templates = ko.observableArray([]);
 
   self.newTemplateBubbleVisible = ko.observable(false);
