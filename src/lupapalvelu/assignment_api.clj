@@ -111,12 +111,13 @@
   [{user         :user
     created      :created
     application  :application}]
-  (ok :id (assignment/insert-assignment {:application    (select-keys application
-                                                                      [:id :organization :address :municipality])
-                                         :state          (assignment/new-state "created" (usr/summary user) created)
-                                         :recipient      (userid->summary recipientId)
-                                         :targets        (map #(assoc % :timestamp created) targets)
-                                         :description    description})))
+  (ok :id (assignment/insert-assignment (assignment/new-assignment (usr/summary user)
+                                                                   (userid->summary recipientId)
+                                                                   application
+                                                                   assignment/user-created-trigger
+                                                                   created
+                                                                   description
+                                                                   targets))))
 
 (defcommand update-assignment
   {:description      "Updates an assignment"

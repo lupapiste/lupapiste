@@ -963,20 +963,3 @@
      (when (or (:groupType group) (:operations group))
        (or ((some-fn validate-group-op validate-group-type) group)
            (validate-group-is-selectable command))))))
-
-(defn group-by-triggers [triggers targets]
-  (->> triggers
-       (map (fn [trigger]
-              {:trigger trigger
-               :targets (->> targets
-                             (filter (comp (set (:targets trigger))
-                                           :trigger-type)))}))
-       (remove (comp empty? :targets))))
-
-(defn run-assignment-triggers-for-attachments [attachments-fn]
-  (fn [command response]
-    (let [organization @(:organization command)
-          org-id (:id organization)
-          triggers (:task-triggers organization)]
-      (clojure.pprint/pprint (group-by-triggers triggers
-                                                (attachments-fn response))))))

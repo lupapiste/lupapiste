@@ -1,6 +1,6 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
-            [monger.operators :refer [$and $in $ne $options $or $regex $set $pull $push]]
+            [monger.operators :refer [$and $each $setOnInsert $in $ne $options $or $regex $set $pull $push]]
             [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
@@ -46,7 +46,7 @@
    When application is canceled, also assignment status is set to canceled."
   #{"active" "canceled"})
 
-(def assignment-state-types #{"created" "completed"})
+(def assignment-state-types #{"created" "completed" "targets-added"})
 
 (sc/defschema AssignmentState
   {:type (apply sc/enum assignment-state-types)
@@ -60,13 +60,15 @@
   (or (= trigger user-created-trigger)
       (nil? (sc/check ssc/ObjectIdStr trigger))))
 
+(sc/defschema AssignmentTriggerId (sc/constrained sc/Str user-created-or-uid?))
+
 (sc/defschema Assignment
   {:id          ssc/ObjectIdStr
    :application {:id           ssc/ApplicationId
                  :organization sc/Str
                  :address      sc/Str
                  :municipality sc/Str}
-   :trigger     (sc/constrained sc/Str user-created-or-uid?)
+   :trigger     AssignmentTriggerId
    :targets     [{:group                         sc/Str
                   :id                            sc/Str
                   :timestamp                     ssc/Timestamp
@@ -104,15 +106,6 @@
    :totalCount     sc/Int
    :assignments    [Assignment]})
 
-(sc/defn ^:private new-assignment :- Assignment
-  [assignment :- NewAssignment]
-  (-> assignment
-      (assoc :states [(:state assignment)])                 ; initial state
-      (dissoc :state)
-      (merge {:id        (mongo/create-id)
-              :status    "active"
-              :trigger   user-created-trigger})))
-
 (sc/defn new-state :- AssignmentState
   [type         :- (:type AssignmentState)
    user-summary :- (:user AssignmentState)
@@ -120,6 +113,24 @@
   {:type type
    :user user-summary
    :timestamp created})
+
+(sc/defn ^:always-validate new-assignment :- Assignment
+  [user        :- usr/SummaryUser
+   recipient   :- (sc/maybe usr/SummaryUser)
+   application
+   trigger     :- AssignmentTriggerId
+   created     :- ssc/Timestamp
+   description :- sc/Str
+   targets     :- [{:group sc/Str, :id sc/Str}]]
+  {:id             (mongo/create-id)
+   :status         "active"
+   :trigger        trigger
+   :application    (select-keys application
+                                [:id :organization :address :municipality])
+   :states         [(new-state "created" user created)]
+   :recipient      recipient
+   :targets        (map #(assoc % :timestamp created) targets)
+   :description    description})
 
 ;;
 ;; Querying assignments
@@ -294,10 +305,9 @@
 ;;
 
 (sc/defn ^:always-validate insert-assignment :- ssc/ObjectIdStr
-  [assignment :- NewAssignment]
-  (let [created-assignment (new-assignment assignment)]
-    (mongo/insert :assignments created-assignment)
-    (:id created-assignment)))
+  [assignment :- Assignment]
+  (mongo/insert :assignments assignment)
+  (:id assignment))
 
 (defn- update-to-db [assignment-id query assignment-changes]
   (mongo/update-n :assignments (assoc query :_id assignment-id) assignment-changes))
@@ -341,3 +351,65 @@
                   {$pull {:targets {:id target-id}}})
   (mongo/remove-many :assignments {:application.id application-id
                                    :targets []}))
+
+;;
+;; Upserting dynamic assignments based on assignment triggers
+;;
+
+(defn- group-by-triggers [triggers targets]
+  (->> triggers
+       (map (fn [trigger]
+              {:trigger trigger
+               :targets (->> targets
+                             (filter (comp (set (:targets trigger))
+                                           :trigger-type)))}))
+       (remove (comp empty? :targets))))
+
+(defn- ->target
+  ([group {:keys [id]}]
+   {:id    id
+    :group group})
+  ([group timestamp {:keys [id]}]
+   {:id        id
+    :group     group
+    :timestamp timestamp}))
+
+(defn- upsert-assignment-targets
+  [user application trigger timestamp assignment-group targets]
+  (clojure.pprint/pprint targets)
+  ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
+  ; https://jira.mongodb.org/browse/SERVER-10711
+  (let [query {:application.id (:id application)
+               :status "active"
+               :trigger (:id trigger)}
+        update {$push {:targets {$each (map (partial ->target assignment-group timestamp)
+                                            targets)}
+                       :states (new-state "targets-added"
+                                          user
+                                          timestamp)}}]
+    (when (not (pos? (mongo/update-n :assignments query update)))
+      (try (insert-assignment (new-assignment (usr/summary user)
+                                              nil
+                                              application
+                                              (:id trigger)
+                                              timestamp
+                                              (:description trigger)
+                                              (map (partial ->target assignment-group)
+                                                   targets)))
+           (catch Exception e
+             (mongo/update-n :assignments query update))))))
+
+(defn run-assignment-triggers [assignment-group targets-fn]
+  (fn [command response]
+    (let [user         (:user command)
+          organization @(:organization command)
+          org-id       (:id organization)
+          triggers (:task-triggers organization)]
+      (doseq [{:keys [trigger targets]} (group-by-triggers triggers
+                                                           (targets-fn response))]
+        (upsert-assignment-targets (usr/summary user)
+                                   (-> command :application)
+                                   trigger
+                                   (:created command)
+                                   assignment-group
+                                   targets)))))
