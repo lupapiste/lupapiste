@@ -2814,6 +2814,23 @@
   (update-applications-array :documents
                              migrate-rakennusJaPurkujate
                              {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
+
+(defn dissoc-rakennusJaPurkujate-from-wrong-documents
+  "Above migration associated :rakennusJaPurkuJate key to every document.
+  This function dissociates that data from wrong documents"
+  [{schema :schema-info :as doc}]
+  (if (= (:name schema) "laajennettuRakennusjateselvitys")
+    doc                                                     ; Migration target was laajennettuRakennusjateselvitys, it will be left intact
+    (-> (update-in doc [:data :rakennusJaPurkujate] dissoc :vaarallisetJatteet :muuJate) ; Remove accidentaly added keys
+        (update :data (fn [{:keys [rakennusJaPurkujate] :as data}]
+                        (if (empty? rakennusJaPurkujate)    ; this preserves old data in "rakennusjatesuunnitelma" document
+                          (dissoc data :rakennusJaPurkujate)
+                          data))))))
+
+(defmigration fix-waste-data-migration
+  (update-applications-array :documents
+                             dissoc-rakennusJaPurkujate-from-wrong-documents
+                             {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
