@@ -72,7 +72,7 @@
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
-(sc/defschema TaskTrigger
+(sc/defschema AssignmentTrigger
   {:id ssc/ObjectIdStr
    :targets [sc/Str]
    (sc/optional-key :handlerRole) HandlerRole
@@ -135,7 +135,7 @@
    (sc/optional-key :inspection-summaries-enabled) sc/Bool
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
                                           (sc/optional-key :operations-templates) sc/Any}
-   (sc/optional-key :task-triggers) [TaskTrigger]})
+   (sc/optional-key :assignment-triggers) [AssignmentTrigger]})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -604,18 +604,18 @@
      :description description}
     (:name handler) (conj {:handlerRole (create-handler-role (:id handler) (:name handler))})))
 
-(defn add-task-trigger [{org-id :id} trigger]
-  (update-organization org-id {$push {:task-triggers trigger}}))
+(defn add-assignment-trigger [{org-id :id} trigger]
+  (update-organization org-id {$push {:assignment-triggers trigger}}))
 
-(defn update-task-trigger [{org-id :id} trigger triggerId]
-  (let [query (assoc {:task-triggers {$elemMatch {:id triggerId}}} :_id org-id)
-        changes {$set {:task-triggers.$.targets (:targets trigger)
-                       :task-triggers.$.handlerRole (:handlerRole trigger)
-                       :task-triggers.$.description (:description trigger)}}]
+(defn update-assignment-trigger [{org-id :id} trigger triggerId]
+  (let [query (assoc {:assignment-triggers {$elemMatch {:id triggerId}}} :_id org-id)
+        changes {$set {:assignment-triggers.$.targets (:targets trigger)
+                       :assignment-triggers.$.handlerRole (:handlerRole trigger)
+                       :assignment-triggers.$.description (:description trigger)}}]
     (mongo/update-by-query :organizations query changes)))
 
-(defn remove-task-trigger [{org-id :id} trigger-id]
-  (update-organization org-id {$pull {:task-triggers {:id trigger-id}}}))
+(defn remove-assignment-trigger [{org-id :id} trigger-id]
+  (update-organization org-id {$pull {:assignment-triggers {:id trigger-id}}}))
 
 (defn toggle-handler-role! [org-id role-id enabled?]
   (mongo/update :organizations

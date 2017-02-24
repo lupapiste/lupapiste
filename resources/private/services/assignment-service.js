@@ -41,6 +41,10 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     return filterIncompleteAssignments(self.assignments());
   });
 
+  self.triggerAssignments = ko.pureComputed(function() {
+    return _.filter(self.assignments(), function(a) { return a.trigger !== "user-created"; });
+  });
+
   /*
    * Targets are two levels deep and represented as objects.
    * Keys are the "target groups", and value for each key is array of corresponding items in application.

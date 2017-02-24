@@ -33,12 +33,12 @@
     (upsert-handler-role! {:id ..org-id.. :handler-roles [{:id ..role-id-0..} {:id ..role-id-1..} {:id ..role-id-2..} {:id ..role-id-3..}]} {:id ..role-id-2.. :name ..name..}) => "done"
     (provided (update-organization ..org-id.. {$set {:handler-roles.2.id ..role-id-2.. :handler-roles.2.name ..name..}}) => "done")))
 
-(facts update-task-triggers
+(facts update-assignment-triggers
   (fact "update existing"
-    (update-task-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole ..handlerRole... :description ..description..} ..trigger-id..) => "done"
+    (update-assignment-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole ..handlerRole... :description ..description..} ..trigger-id..) => "done"
     (provided (mongo/update-by-query :organizations
-                                     {:task-triggers {"$elemMatch" {:id ..trigger-id..}}, :_id ..org-id..}
-                                     {"$set" {:task-triggers.$.targets ..targets.., :task-triggers.$.handlerRole ..handlerRole..., :task-triggers.$.description ..description..}}) => "done")))
+                                     {:assignment-triggers {"$elemMatch" {:id ..trigger-id..}}, :_id ..org-id..}
+                                     {"$set" {:assignment-triggers.$.targets ..targets.., :assignment-triggers.$.handlerRole ..handlerRole..., :assignment-triggers.$.description ..description..}}) => "done")))
 
 (facts create-trigger
   (fact "create trigger with handler"

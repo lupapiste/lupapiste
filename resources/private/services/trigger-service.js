@@ -7,9 +7,9 @@ LUPAPISTE.TriggerService = function() {
   self.processing = ko.observable();
   self.pending = ko.observable();
 
-  self.organizationTaskTriggers = function(organization) {
+  self.organizationAssignmentTriggers = function(organization) {
     ko.computed(function() {
-      triggers(_(util.getIn (organization, ["taskTriggers"])).value());
+      triggers(_(util.getIn (organization, ["assignmentTriggers"])).value());
     });
     return triggers;
   };
@@ -41,8 +41,8 @@ LUPAPISTE.TriggerService = function() {
             description: triggerData.description()};
   }
 
-  self.addTaskTrigger = function ( triggerData ) {
-    ajax.command("upsert-task-trigger", wrapTriggerParameters(triggerData))
+  self.addAssignmentTrigger = function ( triggerData ) {
+    ajax.command("upsert-assignment-trigger", wrapTriggerParameters(triggerData))
       .processing(self.processing)
       .pending(self.pending)
       .success(function(res) {
@@ -61,9 +61,9 @@ LUPAPISTE.TriggerService = function() {
   };
 
 
-  self.removeTaskTrigger = function (triggerId) {
+  self.removeAssignmentTrigger = function (triggerId) {
     triggers.remove (function (trigger) {return trigger.id === triggerId;});
-    ajax.command( "remove-task-trigger", {triggerId: triggerId })
+    ajax.command( "remove-assignment-trigger", {triggerId: triggerId })
       .success(function() {
         hub.send("indicator", {style: "positive"});
       })

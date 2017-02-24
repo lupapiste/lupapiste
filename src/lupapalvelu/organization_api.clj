@@ -795,8 +795,8 @@
   (-> (usr/authority-admins-organization-id user)
       (org/toggle-handler-role! roleId)))
 
-(defcommand upsert-task-trigger
-  {:description "Set and update automated tasks trigger"
+(defcommand upsert-assignment-trigger
+  {:description "Set and update automated assignment trigger"
    :parameters [targets]
    :optional-parameters [triggerId description handler]
    :input-validators [(partial vector-parameters [:targets])]
@@ -806,15 +806,15 @@
          organization (util/find-by-id (usr/authority-admins-organization-id user) user-orgs)
          create-new (some? triggerId)
          _ (clojure.pprint/pprint trigger)]
-     (if (sc/check org/TaskTrigger trigger)
+     (if (sc/check org/AssignmentTrigger trigger)
        (fail :error.missing-parameters)
        (do
          (if (true? create-new)
-          (org/update-task-trigger organization trigger triggerId)
-          (org/add-task-trigger organization trigger))
+          (org/update-assignment-trigger organization trigger triggerId)
+          (org/add-assignment-trigger organization trigger))
          (ok :trigger trigger)))))
 
-(defcommand remove-task-trigger
+(defcommand remove-assignment-trigger
   {:description "Removes task trigger"
    :parameters [triggerId]
    :input-validators [(partial non-blank-parameters [:triggerId])]
@@ -822,4 +822,4 @@
    [{user :user user-orgs :user-organizations}]
    (do (-> (usr/authority-admins-organization-id user)
            (util/find-by-id user-orgs)
-           (org/remove-task-trigger triggerId))))
+           (org/remove-assignment-trigger triggerId))))

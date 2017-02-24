@@ -5,7 +5,7 @@ LUPAPISTE.TriggersModel = function( params ) {
   var triggerService = lupapisteApp.services.triggerService;
   var handlerService = lupapisteApp.services.handlerService;
 
-  self.triggers = triggerService.organizationTaskTriggers( params.organization );
+  self.triggers = triggerService.organizationAssignmentTriggers( params.organization );
   self.roles = handlerService.organizationHandlerRoles( params.organization );
 
   function wrapInObject(types) {
@@ -40,7 +40,7 @@ LUPAPISTE.TriggersModel = function( params ) {
         dd.handler(selectedRole);
       };
       dd.description(trigger.description);
-    }
+    };
 
     dd.isGood = ko.pureComputed( function() {
       var selectedType = ko.unwrap(lupapisteApp.services.triggersTargetService.selected);
@@ -48,7 +48,7 @@ LUPAPISTE.TriggersModel = function( params ) {
     });
 
     dd.saveTrigger = function() {
-      triggerService.addTaskTrigger(dd);
+      triggerService.addAssignmentTrigger(dd);
     };
   };
 
@@ -68,7 +68,7 @@ LUPAPISTE.TriggersModel = function( params ) {
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("triggers.confirm.remove.title"),
       loc("triggers.confirm.remove.label"),
-      {title: loc("yes"), fn: _.partial(triggerService.removeTaskTrigger, trigger.id)},
+      {title: loc("yes"), fn: _.partial(triggerService.removeAssignmentTrigger, trigger.id)},
       {title: loc("no")}
     );
   };
