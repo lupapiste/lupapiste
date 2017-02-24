@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment.bind-attachments-api
   (:require [lupapalvelu.action :as action :refer [defcommand defquery]]
             [lupapalvelu.application :as app]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
             [lupapalvelu.authorization :as auth]
@@ -72,7 +73,7 @@
                          validate-attachment-ids
                          validate-attachment-groups
                          check-password-for-sign]
-   :on-success          [(att/run-assignment-triggers-for-attachments job-response->trigger-targets)]
+   :on-success          [(assignment/run-assignment-triggers "attachments" job-response->trigger-targets)]
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command filedatas)))
