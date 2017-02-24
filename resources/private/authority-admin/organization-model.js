@@ -90,8 +90,9 @@ LUPAPISTE.OrganizationModel = function () {
       ajax.command("set-organization-inspection-summaries", {enabled: inspectionSummariesEnabled})
         .success(function(event) {
           util.showSavedIndicator(event);
-          if (inspectionSummariesEnabled)
+          if (inspectionSummariesEnabled) {
             lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
+          }
         })
         .error(util.showSavedIndicator)
         .call();
