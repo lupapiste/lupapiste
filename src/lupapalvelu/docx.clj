@@ -1,15 +1,18 @@
 (ns lupapalvelu.docx
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info warn error]]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.walk :as walk]
+            [sade.env :as env]
+            [lupapalvelu.campaign :as camp]
             [sade.core :refer :all]
-            [sade.util :as util])
-  (:import [java.io OutputStream InputStream ByteArrayOutputStream ByteArrayInputStream]
-           [fr.opensagres.xdocreport.converter Options ConverterTypeTo ConverterTypeVia]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [taoensso.timbre :as timbre :refer [debug debugf info warn error]])
+  (:import [fr.opensagres.xdocreport.converter Options ConverterTypeTo ConverterTypeVia]
            [fr.opensagres.xdocreport.document IXDocReport]
            [fr.opensagres.xdocreport.document.registry XDocReportRegistry]
            [fr.opensagres.xdocreport.template IContext]
-           [fr.opensagres.xdocreport.template TemplateEngineKind]))
+           [fr.opensagres.xdocreport.template TemplateEngineKind]
+           [java.io OutputStream InputStream ByteArrayOutputStream ByteArrayInputStream]))
 
 (set! *warn-on-reflection* true)
 
@@ -38,7 +41,13 @@
                                        :contact {:firstName "", :lastName ""}
                                        :account {:type "", :price ""}})
 
-(defn ^InputStream yritystilisopimus [company contact account timestamp]
+(defmulti yritystilisopimus (fn [company & _]
+                              (when (and (env/feature? camp/campaign-feature)
+                                       (-> company :campaign ss/not-blank?))
+                                :campaign)))
+
+(defmethod ^InputStream yritystilisopimus :default
+  [company contact account timestamp]
   {:pre [(map? company) (map? contact) (map? account)]}
   (let [model (util/deep-merge
                 yritystilisopimus-default-model
@@ -48,3 +57,16 @@
                  :account account})]
     (docx-template-to-pdf "yritystilisopimus.docx" model)))
 
+(defmethod ^InputStream yritystilisopimus :campaign
+  [company contact account timestamp]
+  {:pre [(map? company) (map? contact) (map? account)]}
+  (let [model (util/deep-merge
+                yritystilisopimus-default-model
+                {:date (util/to-local-date timestamp)
+                 :company company
+                 :contact contact
+                 :account account
+                 :campaign (let [campaign (camp/active-campaign (:campaign company))]
+                             {:price (->  company :accountType keyword campaign)
+                              :billing (:billing campaign)})})]
+    (docx-template-to-pdf "kampanja-yritystilisopimus.docx" model)))

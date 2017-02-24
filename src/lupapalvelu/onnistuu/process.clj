@@ -171,7 +171,7 @@
         {:keys [type identifier name timestamp uuid]} (first signatures)
         resp-assert! (fn [result expected message]
                       (when-not (= result expected)
-                        (errorf "sing:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
+                        (errorf "sign:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
                         (process-update! process :error ts)
                         (fail! :bad-request)))]
     (resp-assert! (:stamp process)          stamp              "wrong stamp")

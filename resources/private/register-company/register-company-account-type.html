@@ -58,6 +58,12 @@
       </button>
       <button data-bind="enable: canCancelInfo, click: cancelInfo, ltext: 'cancel'" data-test-id="account-type-cancel"></button>
     </div>
+    <div data-bind="feature: 'company-campaign'">
+      <input type="text"
+             class="grid-style-input"
+             data-bind="value: lupapisteApp.services.campaignService.code">
+      <span data-bind="ltext: lupapisteApp.services.campaignService.error"></span>
+    </div>
   </section>
 </body>
 </html>

@@ -217,7 +217,8 @@
                    "event-filter-service.js"
                    "inspection-summary-service.js"
                    "handler-service.js",
-                   "card-service.js"]}
+                   "card-service.js"
+                   "campaign-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

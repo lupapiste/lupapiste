@@ -1,0 +1,5 @@
+"error.campaign-not-found" "fi"  "Koodia ei löydy tai se ei ole voimassa."
+"error.invalid-campaign" "fi" "Kampanjatiedot ovat väärät tai puutteelliset."
+"error.campaign-period" "fi" "Kampanja ei voi alkaa loppumisajan jälkeen."
+"error.campaign-pricing" "fi" "Kampanjan hinnoittelu on ristiriitainen."
+"error.campaign-conflict" "fi" "Kampanjakoodi on jo käytössä."
