@@ -12,7 +12,7 @@
                  ; Web frameworks
                  [ring "1.5.1" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
+                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
                  [metosin/ring-swagger "0.22.12"]
                  [metosin/ring-swagger-ui "2.2.5-0"]
 
