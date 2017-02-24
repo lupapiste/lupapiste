@@ -45,7 +45,7 @@
                  [pandect "0.6.0"]
 
                  ; JSON
-                 [cheshire "5.6.3"]
+                 [cheshire "5.7.0"]
 
                  ; HTTP client
                  [clj-http "3.3.0" :exclusions [commons-codec]]
