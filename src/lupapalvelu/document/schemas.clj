@@ -1259,7 +1259,8 @@
    {:info {:name "hankkeen-kuvaus"
            :subtype :hankkeen-kuvaus
            :approvable true
-           :order 1}
+           :order 1
+           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
 
@@ -1267,7 +1268,8 @@
            :subtype :hankkeen-kuvaus
            :i18name "hankkeen-kuvaus"
            :approvable true
-           :order 1}
+           :order 1
+           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
     :body [kuvaus
            hankkeen-vaativuus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
