@@ -23,8 +23,8 @@
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
                  ; Logging
-                 [com.taoensso/timbre "4.7.4"]
-                 [org.slf4j/slf4j-log4j12 "1.7.21"]
+                 [com.taoensso/timbre "4.8.0"]
+                 [org.slf4j/slf4j-log4j12 "1.7.22"]
 
                  ;;Hystrix
                  [com.netflix.hystrix/hystrix-clj "1.5.6"]
