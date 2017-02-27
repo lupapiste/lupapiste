@@ -4,7 +4,7 @@ Documentation  Approvals not visible on bulletins.
 Suite Setup    Apply minimal fixture now
 Resource       ../../common_resource.robot
 Resource       ../common_keywords/approve_helpers.robot
-Resource       ../27_julkipano/julkipano_common.robot  
+Resource       ../27_julkipano/julkipano_common.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -44,7 +44,6 @@ Olli opens bulletin and checks that not icons are visible
   No icons  attachments
 
 No frontend errors
-  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***
@@ -52,7 +51,7 @@ No frontend errors
 No icons
   [Arguments]  ${tab}
   Wait test id visible  bulletin-open-${tab}-tab
-  Scroll and click test id  bulletin-open-${tab}-tab  
+  Scroll and click test id  bulletin-open-${tab}-tab
   Page should not contain  jquery=i.lupicon-circle-check
   Page should not contain  jquery=i.lupicon-circle-attention
-  
+

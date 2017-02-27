@@ -55,7 +55,6 @@
 
 (facts* "Foreman application"
         (let [apikey                       mikko
-              email                        (email-for-key apikey)
               fake-application             (create-and-submit-application apikey :operation "pientalo") => truthy
               {application-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
               application                  (query-application apikey application-id)
@@ -74,6 +73,9 @@
 
           (fact "Initial permit subtype is blank"
             (:permitSubtype foreman-application) => ss/blank?)
+
+          (fact "Auths are correct, no empty foreman user"
+            (map :username (:auth foreman-application)) => (just ["sonja" "mikko@example.com"]))
 
           (fact "Foreman application contains link to application"
                 (:id foreman-link-permit-data) => application-id)

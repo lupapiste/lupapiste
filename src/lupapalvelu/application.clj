@@ -55,11 +55,6 @@
    :user (usr/summary user)
    :correction correction-reason})
 
-(defn authority-history-entry [authority timestamp user]
-  {:authority authority
-   :ts timestamp
-   :user (usr/summary user)})
-
 (defn handler-history-entry [handler timestamp user]
   {:handler handler
    :ts timestamp

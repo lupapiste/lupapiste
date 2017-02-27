@@ -156,7 +156,7 @@ Mikko logs in and sees only one appeal title
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   jQuery should match X times  h2[data-test-id=verdict-appeal-title]  1
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 # ---------------------
 # Sonja
@@ -313,7 +313,6 @@ Appeals row file check
   Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
 
 No frontend errors
-  [Tags]  non-roboto-proof
   Logout
   There are no frontend errors
 

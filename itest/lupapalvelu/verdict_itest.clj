@@ -6,8 +6,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [sade.util :as util]
-            [sade.env :as env]
-            [sade.strings :as s]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreclient]))
 
 (apply-remote-minimal)

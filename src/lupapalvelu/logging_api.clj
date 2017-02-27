@@ -7,12 +7,16 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.logging :as logging]))
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.mongo :as mongo]))
 
 (defonce frontend-log (atom {}))
 
 (def levels #{:debug :info :warn :error :fatal})
+
+(defmacro with-test-context [& body]
+  `(let [~'dbname (or mongo/*db-name* mongo/default-db-name)]
+     ~@body))
 
 (defcommand frontend-log
   {:user-roles #{:anonymous}}
@@ -32,15 +36,17 @@
         formatted-msg   (format "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
                           user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)]
     (when (env/dev-mode?)
-      (swap! frontend-log update level conj {:ts ts :msg formatted-msg}))
+      (with-test-context
+        (swap! frontend-log update-in [(keyword dbname) level] conj {:ts ts :msg formatted-msg})))
     (timbre/log level formatted-msg)
     (when expired?
       (ok :expired true))))
 
 (defquery frontend-log-entries
-  {:user-roles #{:admin}}
+  {:user-roles #{:admin}
+   :description "Returns frontend entries from all test runs."}
   [_]
-  (ok :log (merge (zipmap levels (repeat [])) @frontend-log)))
+  (ok :log (merge (zipmap levels (repeat [])) (reduce (partial merge-with concat) @frontend-log))))
 
 (defquery newest-version
   {:user-roles #{:anonymous}
@@ -73,9 +79,10 @@
     (ok))
 
   (defn log-entries [reset]
-    (let [entries (->> (mapcat (fn [[level entries]] (map #(assoc % :level (name level)) entries)) @frontend-log)
+    (let [entries (->> (with-test-context (get @frontend-log (keyword dbname)))
+                       (mapcat (fn [[level entries]] (map #(assoc % :level (name level)) entries)))
                        (sort-by :ts))]
-      (when reset (reset! frontend-log {}))
+      (when reset (with-test-context (swap! frontend-log dissoc (keyword dbname))))
       entries))
 
   (defpage "/api/frontend-log" {reset :reset}

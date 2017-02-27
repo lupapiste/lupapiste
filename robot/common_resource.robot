@@ -1558,8 +1558,8 @@ Toggle not selected
 
 Toggle toggle
   [Arguments]  ${tid}
-  Click label by test id  ${tid}-label  
-  
+  Click label by test id  ${tid}-label
+
 
 Select from test id
   [Arguments]  ${id}  ${value}
@@ -1574,7 +1574,7 @@ jQuery should match X times
   Wait until  Javascript?  $("${selector}").length === ${count}
 
 Test id autocomplete options check
-  [Arguments]  ${tid}  ${included}  @{options}  
+  [Arguments]  ${tid}  ${included}  @{options}
   :FOR  ${text}  IN  @{options}
   \  Javascript?  _.includes($("div[data-test-id='${tid}'] div.autocomplete-dropdown .autocomplete-result-item span").map( function() {return this.innerText;}).get(), "${text}") === ${included}
 
@@ -1599,7 +1599,6 @@ Open frontend log
   Wait until  Element text should be  xpath=//h1  Frontend log
 
 There are no frontend errors
-  [Tags]  non-roboto-proof
   Open frontend log
   Set test variable  ${FATAL_LOG_XPATH}  //div[@data-test-level='fatal']
   Set test variable  ${ERROR_LOG_XPATH}  //div[@data-test-level='error']
