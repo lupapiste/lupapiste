@@ -27,6 +27,17 @@
   (when (some :sign filedatas)
     (usr/check-password-pre-check command)))
 
+(defn- job-response-fn [command job]
+  {:targets (map (fn [{:keys [attachment-id type]}]
+                   {:id attachment-id
+                    :trigger-type (ss/join "." (map name ((juxt :type-group :type-id) type)))})
+                 job)
+   :user             (:user command)
+   :organization     @(:organization command)
+   :application      (:application command)
+   :assignment-group "attachments"
+   :timestamp        (:created command)})
+
 (defcommand bind-attachment
   {:description         "API to bind file to attachment, returns job that can be polled for status."
    :parameters          [id attachmentId fileId]
@@ -45,19 +56,14 @@
    :input-validators    [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
    :states              bind-states}
   [command]
-  (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}])))
+  (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}]
+                               (assignment/run-assignment-triggers (partial job-response-fn command)))))
 
 (defn filedatas-precheck
   "Executes given pre-check against each individual :filedatas from command"
   [check]
   (fn [{data :data :as command}]
     (reduce #(or %1 (check (assoc command :data %2))) nil (:filedatas data))))
-
-(defn- job-response->trigger-targets [job]
-  (map (fn [[att-id {:keys [type]}]]
-         {:id att-id
-          :trigger-type (ss/join "." (map name ((juxt :type-group :type-id) type)))})
-       (-> job :job :value seq)))
 
 (defcommand bind-attachments
   {:description         "API to bind files to attachments, returns job that can be polled for status per file."
@@ -73,10 +79,10 @@
                          validate-attachment-ids
                          validate-attachment-groups
                          check-password-for-sign]
-   :on-success          [(assignment/run-assignment-triggers "attachments" job-response->trigger-targets)]
    :states              bind-states}
   [command]
-  (ok :job (bind/make-bind-job command filedatas)))
+  (ok :job (bind/make-bind-job command filedatas
+                               (assignment/run-assignment-triggers (partial job-response-fn command)))))
 
 (defquery bind-attachments-job
   {:parameters [jobId version]

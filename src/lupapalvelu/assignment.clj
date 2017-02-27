@@ -376,7 +376,6 @@
 
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
-  (clojure.pprint/pprint targets)
   ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
   ; https://jira.mongodb.org/browse/SERVER-10711
   (let [query {:application.id (:id application)
@@ -399,17 +398,15 @@
            (catch Exception e
              (mongo/update-n :assignments query update))))))
 
-(defn run-assignment-triggers [assignment-group targets-fn]
-  (fn [command response]
-    (let [user         (:user command)
-          organization @(:organization command)
-          org-id       (:id organization)
+(defn run-assignment-triggers [response-fn]
+  (fn [response]
+    (let [{:keys [user organization application targets assignment-group timestamp]} (response-fn response)
+          org-id   (:id organization)
           triggers (:assignment-triggers organization)]
-      (doseq [{:keys [trigger targets]} (group-by-triggers triggers
-                                                           (targets-fn response))]
+      (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]
         (upsert-assignment-targets (usr/summary user)
-                                   (-> command :application)
+                                   application
                                    trigger
-                                   (:created command)
+                                   timestamp
                                    assignment-group
                                    targets)))))
