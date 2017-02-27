@@ -2831,6 +2831,17 @@
   (update-applications-array :documents
                              dissoc-rakennusJaPurkujate-from-wrong-documents
                              {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
+
+(defmigration fix-empty-foreman-user
+  {:apply-when (pos? (mongo/count :users {:email ""}))}
+  (let [malformed-user-id "58afe17a28e06f2484a6e82f"]
+    (mongo/remove :users malformed-user-id)
+    (mongo/update-by-query :submitted-applications
+                           {:auth.id malformed-user-id}
+                           {$pull {:auth {:id malformed-user-id}}})
+    (mongo/update-by-query :applications
+                           {:auth.id malformed-user-id}
+                           {$pull {:auth {:id malformed-user-id}}})))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
