@@ -1,6 +1,6 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
-            [monger.operators :refer [$and $each $setOnInsert $in $ne $options $or $regex $set $pull $push]]
+            [monger.operators :refer [$and $each $setOnInsert $in $ne $nin $options $or $regex $set $pull $push]]
             [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
@@ -326,8 +326,8 @@
                                                 completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
   (update-to-db assignment-id
-                     (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
-                     {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
+                (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
+                {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
 (defn- set-assignments-statuses [query status]
   {:pre [(assignment-statuses status)]}
@@ -380,6 +380,7 @@
   ; https://jira.mongodb.org/browse/SERVER-10711
   (let [query {:application.id (:id application)
                :status "active"
+               :states.type {$nin ["completed"]}
                :trigger (:id trigger)}
         update {$push {:targets {$each (map (partial ->target assignment-group timestamp)
                                             targets)}
