@@ -79,13 +79,13 @@
       (fail (util/kw-path :error action :non-empty)))))
 
 (defn validate-summary-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data action :action}]
-  (when-not (util/find-by-id summaryId summaries)
+  (when (and summaryId (not (util/find-by-id summaryId summaries)))
     (fail (util/kw-path :error action :not-found))))
 
 (defn validate-summary-target-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId targetId]} :data action :action}]
-  (when-not (->> (util/find-by-id summaryId summaries)
-                 :targets
-                 (util/find-by-id targetId))
+  (when (and summaryId targetId (not (->> (util/find-by-id summaryId summaries)
+                                          :targets
+                                          (util/find-by-id targetId))))
     (fail (util/kw-path :error action :not-found))))
 
 (defn settings-for-organization [organizationId]

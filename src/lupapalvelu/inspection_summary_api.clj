@@ -10,6 +10,14 @@
             [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]))
 
+(defn- build-inspection-summary-query-params [{application-id :id} {summary-id :id}]
+  {:id        application-id
+   :summaryId summary-id})
+
+(defmethod action/allowed-actions-for-category :inspection-summaries
+  [command]
+  (action/allowed-actions-for-collection :inspection-summaries build-inspection-summary-query-params command))
+
 (defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
    :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
@@ -73,6 +81,7 @@
                   inspection-summary/inspection-summary-api-authority-pre-check
                   inspection-summary/inspection-summary-api-applicant-pre-check)]
    :parameters [:id]
+   :categories #{:inspection-summaries}
    :states states/post-verdict-states
    :user-roles #{:authority :applicant}}
   [{app :application}]
@@ -85,6 +94,7 @@
 (defcommand create-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id templateId operationId]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
    :user-roles #{:authority}}
   [{app :application}]
@@ -98,6 +108,7 @@
                 inspection-summary/validate-that-summary-can-be-deleted
                 inspection-summary/validate-summary-found-in-application]
    :parameters [:id summaryId]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId])]
    :user-roles #{:authority}}
   [{app :application}]
@@ -108,6 +119,7 @@
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
                 inspection-summary/validate-summary-found-in-application]
    :parameters [:id summaryId isLocked]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId])
                       (partial action/boolean-parameters [:isLocked])]
    :user-roles #{:authority}}
@@ -118,6 +130,7 @@
 (defcommand add-target-to-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id summaryId targetName]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
   [{{appId :id} :application}]
@@ -128,6 +141,7 @@
                 inspection-summary/deny-if-finished
                 inspection-summary/validate-summary-target-found-in-application]
    :parameters [:id summaryId targetId targetName]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
   [{application :application}]
@@ -137,6 +151,7 @@
 (defcommand remove-target-from-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
    :parameters [:id summaryId targetId]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-roles #{:authority}}
   [{application :application}]
@@ -147,6 +162,7 @@
   {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check
                 inspection-summary/validate-summary-target-found-in-application]
    :parameters [:id summaryId targetId status]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
                       (partial action/boolean-parameters [:status])]
    :user-roles #{:applicant}}
