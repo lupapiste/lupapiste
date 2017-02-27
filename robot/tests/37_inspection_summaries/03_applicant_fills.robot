@@ -80,8 +80,6 @@ Attachment can be found from attachment listing
 Attachment belongs to operation and is construction time
   Open attachment details  katselmukset_ja_tarkastukset.tarkastusasiakirja
   Wait until  Autocomplete selection by test id contains  attachment-group-autocomplete  Asuinkerrostalon tai rivitalon rakentaminen
-  Wait until  Checkbox should be selected  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
-  Element should be disabled  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
   Return to application
 
 Mark target as finished
