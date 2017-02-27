@@ -471,6 +471,8 @@
 (defn- validate-create-new-user! [caller user-data]
   (when-let [missing (util/missing-keys user-data [:email :role])]
     (fail! :error.missing-parameters :parameters missing))
+  (when (ss/blank? (:email user-data))
+    (fail! :error.email))
 
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
