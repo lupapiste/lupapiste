@@ -567,8 +567,13 @@
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                             (< pvm (now))))
-        review-tasks (pc/distinct-by #(select-keys % [:taskname :data]) ; remove duplicates!
-                       (map review-to-task (filter historical-timestamp-present? reviews)))
+        review-tasks (pc/distinct-by (fn [task]
+                                       (-> task ; remove muuTunnus from data before comparison, as source background system...
+                                           (util/dissoc-in [:data :muuTunnus]) ;...might have exactly same data saved with two different IDs
+                                           (select-keys [:taskname :data]))) ; remove duplicates!
+                                     (->> reviews
+                                          (filter historical-timestamp-present?)
+                                          (map review-to-task)))
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
         review-tasks (keep-indexed (fn [idx item]
                                      (if (empty? (get validation-errors idx)) item)) review-tasks)
