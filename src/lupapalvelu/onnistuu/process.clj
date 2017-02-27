@@ -13,6 +13,7 @@
             [sade.schemas :refer [max-length-string]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
+            [sade.strings :as ss]
             [sade.validators :refer [valid-email? valid-hetu?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
@@ -155,6 +156,10 @@
   {:model-fn  (fn [command conf recipient] command)
    :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
 
+(notifications/defemail :onnistuu-success-campaign
+  {:model-fn  (fn [command conf recipient] command)
+   :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
+
 (defn success! [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
         signer     (:signer process)
@@ -199,7 +204,10 @@
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
                (:currentUser signer)))
-      (notifications/notify! :onnistuu-success mail-model))
+      (notifications/notify! (if (-> mail-model :company :campaign ss/not-blank?)
+                               :onnistuu-success-campaign
+                               :onnistuu-success)
+                             mail-model))
     process))
 
 ;

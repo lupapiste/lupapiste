@@ -3,3 +3,4 @@
 "error.campaign-period" "fi" "Kampanja ei voi alkaa loppumisajan jälkeen."
 "error.campaign-pricing" "fi" "Kampanjan hinnoittelu on ristiriitainen."
 "error.campaign-conflict" "fi" "Kampanjakoodi on jo käytössä."
+"email.title.onnistuu-success-campaign" "fi" "KAMPANJA - Visma Sign -allekirjoitus"
