@@ -404,7 +404,7 @@
     (let [user         (:user command)
           organization @(:organization command)
           org-id       (:id organization)
-          triggers (:task-triggers organization)]
+          triggers (:assignment-triggers organization)]
       (doseq [{:keys [trigger targets]} (group-by-triggers triggers
                                                            (targets-fn response))]
         (upsert-assignment-targets (usr/summary user)
