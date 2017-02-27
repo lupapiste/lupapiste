@@ -36,7 +36,7 @@ Sonja sees comment indicator on applications list
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
-  No such test id  handler-0  
+  No such test id  handler-0
 
 Sonja sees Mikko's person ID masked
   Open tab  parties
@@ -51,7 +51,7 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  General handler to  Sibbo Sonja  
+  General handler to  Sibbo Sonja
 
 Assignee has changed
   General handler is  Sibbo Sonja
@@ -101,11 +101,11 @@ Application is shown after login
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Mikko sees that application is assigned to Sonja
-  General handler is  Sibbo Sonja  
+  General handler is  Sibbo Sonja
 
 ... even after a page reload
   Reload page and kill dev-box
-  General handler is  Sibbo Sonja  
+  General handler is  Sibbo Sonja
   [Teardown]  Logout
 
 Sonja logs in and clears authority
@@ -130,14 +130,14 @@ Sipoo admin logs in and removes Ronja
 Sonja logs in and sees Ronja still assigned
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  General handler is  Sibbo Ronja  
-  
+  General handler is  Sibbo Ronja
+
 Sonja removes Ronja handler and assigns application to herself
   Remove first handler
   General handler to  Sibbo Sonja
   Reload page and kill dev-box
-  General handler is  Sibbo Sonja  
-  
+  General handler is  Sibbo Sonja
+
 
 # LUPA-791
 Sonja cancels the application with reason
@@ -150,5 +150,4 @@ Sonja checks that the reason is in the comments
   Logout
 
 No errors so far
-  [Tags]  non-roboto-proof
   There are no frontend errors

@@ -36,5 +36,4 @@ Sonja approves designer again
   [Teardown]  Logout
 
 No frontend errors
-  [Tags]  non-roboto-proof
   There are no frontend errors

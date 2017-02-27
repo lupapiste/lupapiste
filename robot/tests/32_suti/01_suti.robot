@@ -236,6 +236,5 @@ Luukas logs in, sees Suti but cannot edit
   [Teardown]  Logout
 
 No frontend errors
-  [Tags]  non-roboto-proof
   There are no frontend errors
 

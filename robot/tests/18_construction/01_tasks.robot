@@ -296,7 +296,6 @@ Attachments have been updated
 # This would require a well-formed application with all the required fields.
 
 No errors so far
-  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***
