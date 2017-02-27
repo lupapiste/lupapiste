@@ -49,8 +49,8 @@
   (body
     {:name "tyoaika-alkaa-pvm" :type :date :hidden true} ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date :hidden true}
-    {:name "tyoaika-alkaa-ms" :type :msDate}
-    {:name "tyoaika-paattyy-ms" :type :msDate}))
+    {:name "tyoaika-alkaa-ms" :type :msDate :required true}
+    {:name "tyoaika-paattyy-ms" :type :msDate :required true}))
 
 (def tyo-aika-for-jatkoaika
   (body
