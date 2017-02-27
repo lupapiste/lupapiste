@@ -3,7 +3,8 @@
             [clojure.string :as string]
             [lupapalvelu.ui.attachment.components :as attc]
             [lupapalvelu.ui.attachment.file-upload :as upload]
-            [lupapalvelu.ui.common :refer [query command]]
+            [lupapalvelu.ui.authorization :as auth]
+            [lupapalvelu.ui.common :refer [query command] :as common]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.util :as jsutil]
             [lupapalvelu.ui.rum-util :as rum-util]
@@ -201,11 +202,11 @@
 
 (defn init
   [init-state props]
-  (let [[ko-app auth-model] (-> (aget props ":rum/initial-state") :rum/args)
-        id-computed (aget ko-app "id")
-        id          (id-computed)]
-    (swap! component-state assoc :applicationId id)
-    (when (.ok auth-model "inspection-summaries-for-application")
+  (let [[ko-app auth-models] (-> (aget props ":rum/initial-state") :rum/args)
+        app-id  (aget ko-app "_js" "id")]
+    (swap! component-state assoc :applicationId app-id)
+    (when (auth/ok? (:application auth-models) :inspection-summaries-for-application)
+      (auth/refresh-auth-models-for-category component-state :inspection-summaries)
       (refresh (fn [_]
                  (update-summary-view (-> @component-state :summaries first :id)))))
     init-state))
@@ -282,14 +283,15 @@
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
                                   :will-unmount (fn [& _] (reset! component-state empty-component-state))}
-  [ko-app auth-model]
-  (let [{summaryId :id :as summary}    (rum/react selected-summary)
+  [ko-app auth-models]
+  (let [{summary-id :id :as summary}   (rum/react selected-summary)
+        auth-model                     (rum/react (rum-util/derived-atom [component-state] (partial auth/get-auth-model :inspection-summaries summary-id)))
         bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])
         editing?                       (rum/react (rum-util/derived-atom [selected-summary] #(->> % :targets (some :editing?))))
-        target-add-enabled?            (.ok auth-model "add-target-to-inspection-summary")
-        target-edit-enabled?           (.ok auth-model "edit-inspection-summary-target")
-        target-remove-enabled?         (.ok auth-model "remove-target-from-inspection-summary")
-        target-status-change-enabled?  (.ok auth-model "set-target-status")
+        target-add-enabled?            (auth/ok? auth-model :add-target-to-inspection-summary)
+        target-edit-enabled?           (auth/ok? auth-model :edit-inspection-summary-target)
+        target-remove-enabled?         (auth/ok? auth-model :remove-target-from-inspection-summary)
+        target-status-change-enabled?  (auth/ok? auth-model :set-target-status)
         table-rows                     (rum/cursor selected-summary :targets)]
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
@@ -306,8 +308,8 @@
           {:style {:z-index 10}}]
          (summaries-select (rum/react (rum/cursor-in component-state [:summaries]))
                            (rum/react (rum/cursor-in component-state [:operations]))
-                           summaryId)]]
-       (if (.ok auth-model "create-inspection-summary")
+                           summary-id)]]
+       (when (auth/ok? auth-model :create-inspection-summary)
          [:div.col-1.summary-button-bar
           [:button.positive
            {:on-click (fn [_] (reset! bubble-visible true))
@@ -327,11 +329,11 @@
                                             (swap! component-state assoc-in [:view :selected-summary-id] nil)
                                             (refresh))
                                           "id"        (:applicationId @component-state)
-                                          "summaryId" summaryId))))
+                                          "summaryId" summary-id))))
             :data-test-id "delete-summary"}
            [:i.lupicon-remove]
            [:span (js/loc "inspection-summary.delete.button")]]])]
-      (if (.ok auth-model "create-inspection-summary")
+      (if (auth/ok? auth-model :create-inspection-summary)
         [:div.row.create-summary-bubble (create-summary-bubble bubble-visible)])
       (when summary
         [:div.row
@@ -360,11 +362,11 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (rum/mount (inspection-summaries (:app @args) (:auth-model @args))
+  (rum/mount (inspection-summaries (:app @args) (:auth-models @args))
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :app (aget componentParams "app") :auth-model (aget componentParams "authModel") :dom-id (name domId))
+  (swap! args assoc :app (aget componentParams "app") :auth-models {:application (aget componentParams "authModel")} :dom-id (name domId))
   (mount-component))
 
 (defn reload-hook []
