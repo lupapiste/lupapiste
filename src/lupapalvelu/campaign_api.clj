@@ -6,9 +6,18 @@
             [sade.core :refer :all]))
 
 (defcommand add-campaign
-  {:description "Creates new campaign. A campaign includes campaign
-  code, prices, active period and a message. See campaign namespace
-  for details."
+
+  {:description "Creates new campaign. Parameters:
+
+  code: Campaign code string. Unique among
+  campaigns (case-insensitive).
+
+  starts, ends: ISO dates (e.g, 2017-2-27). Dates are in Finnish time.
+
+  account5, account 15, account30: Account prices (€/m) during the
+
+  discount period.  lastDiscountDate: Last date of the discount
+  period. ISO date in Finnish time."
    :user-roles #{:admin}
    :input-validators [camp/good-campaign]
    :feature camp/campaign-feature}

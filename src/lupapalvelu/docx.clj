@@ -1,9 +1,9 @@
 (ns lupapalvelu.docx
   (:require [clojure.java.io :as io]
             [clojure.walk :as walk]
-            [sade.env :as env]
             [lupapalvelu.campaign :as camp]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [taoensso.timbre :as timbre :refer [debug debugf info warn error]])
@@ -66,7 +66,5 @@
                  :company company
                  :contact contact
                  :account account
-                 :campaign (let [campaign (camp/active-campaign (:campaign company))]
-                             {:price (->  company :accountType keyword campaign)
-                              :billing (:billing campaign)})})]
+                 :campaign (camp/contract-info company)})]
     (docx-template-to-pdf "kampanja-yritystilisopimus.docx" model)))

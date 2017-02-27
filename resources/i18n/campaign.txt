@@ -4,3 +4,4 @@
 "error.campaign-pricing" "fi" "Kampanjan hinnoittelu on ristiriitainen."
 "error.campaign-conflict" "fi" "Kampanjakoodi on jo käytössä."
 "email.title.onnistuu-success-campaign" "fi" "KAMPANJA - Visma Sign -allekirjoitus"
+"error.campaign-last-date" "fi" "Kampanja ei voi olla aktiivinen alennusajan jälkeen."

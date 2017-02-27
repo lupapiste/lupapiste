@@ -20,4 +20,8 @@ LUPAPISTE.CampaignService = function() {
       .call();
     }
   });
+
+  if( features.enabled( "company-campaign")) {
+    self.code( "huhtikuu2017");
+  }
 };
