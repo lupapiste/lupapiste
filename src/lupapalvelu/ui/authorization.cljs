@@ -1,7 +1,5 @@
 (ns lupapalvelu.ui.authorization
-  (:require [rum.core :as rum]
-            [lupapalvelu.ui.rum-util :as rum-util]
-            [lupapalvelu.ui.common :as common]))
+  (:require [lupapalvelu.ui.common :as common]))
 
 (defn get-auth-model [category id state]
   (get-in state [:auth-models (keyword category) (keyword id)]))
