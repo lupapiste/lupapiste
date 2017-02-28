@@ -113,6 +113,14 @@
                "targetName" val))
     (refresh)))
 
+(defn- toggle-summary-locking [application-id summary-id locked?]
+ (command "toggle-inspection-summary-locking"
+           #(refresh)
+           "id"         application-id
+           "summaryId"  summary-id
+           "isLocked"   locked?)
+  (refresh))
+
 (rum/defc remove-link [applicationId summaryId targetId index]
   [:a.lupicon-remove.primary
    {:on-click (fn [_]
@@ -132,6 +140,16 @@
     :data-test-id "open-create-summary-bubble"}
    [:i.lupicon-circle-plus]
    [:span (js/loc "inspection-summary.new-summary.button")]])
+
+(rum/defc toggle-inspection-summary-locking-button [application-id summary-id locked?]
+  (letfn [(toggle [] (toggle-summary-locking application-id summary-id (not locked?)))]
+    (if locked?
+      [:button.secondary {:on-click toggle}
+       [:i.lupicon-lock-open-fully]
+       [:span (js/loc "inspection-summary.unlock.button")]]
+      [:button.positive {:on-click toggle}
+       [:i.lupicon-lock]
+       [:span (js/loc "inspection-summary.lock.button")]])))
 
 (rum/defc change-status-link [applicationId summaryId targetId finished? index]
   [:a
@@ -364,7 +382,16 @@
           {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))
            :data-test-id "new-target-button"}
           [:i.lupicon-circle-plus]
-          [:span (js/loc "inspection-summary.targets.new.button")]]])]]))
+          [:span (js/loc "inspection-summary.targets.new.button")]]])
+
+      (when (and (auth/ok? auth-model :toggle-inspection-summary-locking) (not (:locked summary)))
+        [:div.row
+           [:label (js/loc "inspection-summary.locking.info")]
+           [:label (js/loc "inspection-summary.locking-archive.info")]])
+
+      (when (auth/ok? auth-model :toggle-inspection-summary-locking)
+        [:div.row
+         (toggle-inspection-summary-locking-button (:applicationId @component-state) summary-id (:locked summary))])]]))
 
 (defonce args (atom {}))
 
