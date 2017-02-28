@@ -47,7 +47,8 @@
 (defn- refresh
   ([] (refresh nil))
   ([cb]
-   (query "inspection-summaries-for-application"
+   (auth/refresh-auth-models-for-category component-state :inspection-summaries)
+   (query :inspection-summaries-for-application
           (fn [data]
             (swap! component-state assoc
                    :operations (:operations data)
@@ -55,7 +56,7 @@
                    :summaries  (:summaries data)
                    :fileStatuses {})
             (when cb (cb)))
-          "id" (-> @component-state :applicationId))))
+          :id (-> @component-state :applicationId))))
 
 (defn- operation-description-for-select [op]
   (string/join " - " (remove empty? [(:description op) (:op-identifier op)])))
@@ -208,7 +209,6 @@
         app-id  (aget ko-app "_js" "id")]
     (swap! component-state assoc :applicationId app-id :auth-models {:application application-auth-model})
     (when (auth/ok? application-auth-model :inspection-summaries-for-application)
-      (auth/refresh-auth-models-for-category component-state :inspection-summaries)
       (refresh (fn [_]
                  (update-summary-view (-> @component-state :summaries first :id)))))
     init-state))
