@@ -170,7 +170,7 @@
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
                       (partial action/boolean-parameters [:status])]
-   :user-roles #{:applicant}}
+   :user-roles #{:applicant :authority}}
   [{application :application user :user}]
   (let [params (if status
                  {:set {:finished true :finished-date (now) :finished-by (usr/summary user)}}
