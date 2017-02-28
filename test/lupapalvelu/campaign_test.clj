@@ -93,3 +93,22 @@
           :lastDiscount "1.7.2017"
           :firstRegular "2.7.2017"}
       (provided (camp/active-campaign "good") => good))
+
+(fact "Contract info assert"
+      (camp/contract-info {:campaign "good" :accountType "account15"})
+      => (throws AssertionError #"Campaign good is not active.")
+      (provided (camp/active-campaign "good") => nil))
+
+(fact "Campaign is active prechecker: ok"
+      (camp/campaign-is-active {:data {:company {:campaign "good"}}}) => nil?
+      (provided (camp/active-campaign "good") => good))
+
+(fact "Campaign is active prechecker: fail"
+      (camp/campaign-is-active {:data {:company {:campaign "bad"}}})
+      => (err :error.campaign-not-found)
+      (provided (camp/active-campaign "bad") => nil))
+
+(fact "Campaign is active prechecker: blank is ok"
+      (camp/campaign-is-active {:data {:company {:campaign "  "}}}) => nil)
+(fact "Campaign is active prechecker: missing is ok"
+      (camp/campaign-is-active {:data {:company {}}}) => nil)

@@ -47,12 +47,13 @@
                           (fail :email-in-use)))
                       (fn [{{lang :lang} :data}]
                         (when-not ((set (map name i18n/languages)) lang)
-                          (fail :bad-lang)))]}
+                          (fail :bad-lang)))
+                      camp/campaign-is-active]}
   [{:keys [^Long created user]}]
   (let [company (merge c/company-skeleton
                        company
-                       (when-let [{id :id} (camp/active-campaign (:code company))]
-                         {:campaign id}))
+                       (when-let [campaign (:campaign company)]
+                         {:campaign (camp/code->id campaign)}))
         signer (get-signer user signer)]
     (sc/validate c/Company company)
     (let [config       (env/value :onnistuu)

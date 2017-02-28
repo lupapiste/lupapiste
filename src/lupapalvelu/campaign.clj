@@ -70,6 +70,14 @@
                         [:account5 :account15
                          :account30 :lastDiscountDate]))))
 
+(defn campaign-is-active
+  "Pre-checker that fails if campaign parameter is given but not refer to
+  an active campaign."
+  [command]
+  (when-let [id (-> command :data :company :campaign code->id)]
+    (when-not (or (ss/blank? id) (active-campaign id))
+      (fail :error.campaign-not-found))))
+
 (defn good-campaign
   "Pre-checker that fails if the command does not contain valid
   and consistent campaign data."
@@ -96,6 +104,9 @@
      (errorf "Campaign code conflict: %s" (.getMessage e))
      (fail :error.campaign-conflict))))
 
+(defn delete-campaign [code]
+  (mongo/remove :campaigns (code->id code)))
+
 (defn campaigns []
   (map campaign->front
        (mongo/select :campaigns)))
@@ -113,9 +124,9 @@
 (defn contract-info
   "Provide campaign map for populating the company registration
   contract. See docx namespace for the client code."
-  [{id :campaign account :accountType}]
-  (let [campaign     (active-campaign id)
-        _            (assert campaign)
+  [{code :campaign account :accountType}]
+  (let [campaign     (active-campaign code)
+        _            (assert campaign (format "Campaign %s is not active." code))
         last-date    (-> campaign :lastDiscountDate fmt/parse-local-date)
         regular-date (time/plus last-date (time/days 1))]
     {:price        (->  account keyword campaign)

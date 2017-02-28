@@ -12,7 +12,7 @@ LUPAPISTE.CompanyRegistrationInitModel = function(params) {
 
   hub.subscribe("company-info-submitted", function(data) {
     var campaign = lupapisteApp.services.campaignService.campaign();
-    var campArg = campaign.id ? {campaign: campaign.id} : {};
+    var campArg = campaign.code ? {campaign: campaign.code} : {};
     ajax
     .command("init-sign", {company: _.defaults(data.company, campArg),
                            signer: data.signer, lang: loc.currentLanguage})
