@@ -4,32 +4,37 @@
             [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.attachment.file-upload :as upload]))
 
-(rum/defcs upload-link < {:init          (fn [state _]
-                                           (let [[callback input-id] (:rum/args state)]
-                                             (assoc state ::input-id (or input-id (jsutil/unique-elem-id "upload-link"))
-                                                          ::file-callback callback)))
-                          :did-mount    (fn [state]
-                                          (upload/bindToElem (js-obj "id" (::input-id state)))
-                                          (assoc state ::fileupload-subscription-id
-                                                       (upload/subscribe-files-uploaded
-                                                         (::input-id state)
-                                                         (::file-callback state)))
-                                          state)
-                          :should-update (fn [old new] (if (not= (::input-id old) (::input-id new))
-                                                         (do
-                                                           (.send js/hub "fileuploadService::destroy" (js-obj "input" (::input-id old)))
-                                                           true)
-                                                         false))
+(defn- destroy-file-upload-subscription [state]
+  (.send js/hub "fileuploadService::destroy" (js-obj "input" (::input-id state)))
+  (.unsubscribe js/hub (::fileupload-subscription-id state))
+  true)
+
+(rum/defcs upload-link < {:did-mount     (fn [state]
+                                           (let [[callback input-id] (:rum/args state)
+                                                 input-id (or input-id (jsutil/unique-elem-id "upload-link"))]
+                                             (upload/bindToElem (js-obj "id" (::input-id state)))
+                                             (assoc state
+                                                    ::input-id input-id
+                                                    ::file-callback callback
+                                                    ::fileupload-subscription-id (upload/subscribe-files-uploaded input-id callback))))
+
+                          :should-update (fn [old new]
+                                           (let [[old-callback _] (:rum/args old)
+                                                 [new-callback _] (:rum/args new)]
+                                             (if (or (not= (::input-id old) (::input-id new))
+                                                     (not= old-callback new-callback))
+                                               (destroy-file-upload-subscription old)
+                                               false)))
+
                           :did-update    (fn [state]
-                                           (upload/bindToElem (js-obj "id" (::input-id state)))
-                                           (assoc state ::fileupload-subscription-id
-                                                        (upload/subscribe-files-uploaded
-                                                          (::input-id state)
-                                                          (::file-callback state)))
-                                           state)
+                                           (let [[callback _] (:rum/args state)]
+                                             (upload/bindToElem (js-obj "id" (::input-id state)))
+                                             (assoc state
+                                                    ::file-callback callback
+                                                    ::fileupload-subscription-id (upload/subscribe-files-uploaded (::input-id state) callback))))
+
                           :will-unmount  (fn [state]
-                                           (.send js/hub "fileuploadService::destroy" (js-obj "input" (::input-id state)))
-                                           (.unsubscribe js/hub (::fileupload-subscription-id state))
+                                           (destroy-file-upload-subscription state)
                                            state)}
   "Handles file upload with fileupload-service.
   First param must be callback function, which receives filedata event via hub.
