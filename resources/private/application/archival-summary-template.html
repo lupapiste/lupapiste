@@ -149,10 +149,10 @@
               <div class="group-label">
                 <div>
                   <span data-bind="if: $data.type">
-                    <span data-bind="text: loc(['attachmentType', ko.unwrap($data.type)['type-group'], '_group_label'])"></span>
+                    <span data-test-id="type-group" data-bind="text: loc(['attachmentType', ko.unwrap($data.type)['type-group'], '_group_label'])"></span>
                   </span>
                   <span data-bind="if: $data.attachmentType()">
-                    - <span data-bind="text: loc(['attachmentType', $data.attachmentType()])"></span>
+                    - <span data-test-id="type-id" data-bind="text: loc(['attachmentType', $data.attachmentType()])"></span>
                   </span>
                   <span data-bind="if: $data.ramLink">
                     <span data-bind="ltext: 'ram.postfix'"></span>
