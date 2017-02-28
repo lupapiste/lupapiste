@@ -65,7 +65,6 @@
             (fact {:midje/description (str name " can add attachment for target")}
               (let [file-id (upload-file-and-bind apikey id1 {:type {:type-group "katselmukset_ja_tarkastukset"
                                                                    :type-id    "tarkastusasiakirja"}
-                                                              :constructionTime true
                                                               :target {:type "inspection-summary-item"
                                                                        :id (:id test-target)}})]
                 (fact "Queries have uploaded attachment"
@@ -134,7 +133,6 @@
       (fact "Pena sees summaries" (count summaries) => 1)
       (upload-file-and-bind pena id1 {:type {:type-group "katselmukset_ja_tarkastukset"
                                              :type-id    "tarkastusasiakirja"}
-                                      :constructionTime true
                                       :target {:type "inspection-summary-item"
                                                :id (:id test-target)}})
       (fact "Pena marks target as done"
@@ -158,7 +156,6 @@
         (fact "Can't upload to finished"
           (upload-file-and-bind pena id1 {:type {:type-group "katselmukset_ja_tarkastukset"
                                                  :type-id    "tarkastusasiakirja"}
-                                          :constructionTime true
                                           :target {:type "inspection-summary-item"
                                                    :id (:id test-target)}}
                                 :fails :error.inspection-summary-target.finished))

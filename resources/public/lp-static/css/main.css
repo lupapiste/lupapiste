@@ -11179,6 +11179,7 @@ div.handler-roles-container {
 }
 
 div.handler-roles-container table.handler-roles {
+  margin-top: 24px;
   margin-bottom: 6px;
 }
 
@@ -11192,6 +11193,10 @@ div.handler-roles-container table.handler-roles tr:hover:nth-child(even) {
 
 div.handler-roles-container table.handler-roles input {
   width: 80%;
+}
+
+div.handler-roles-container table.handler-roles i.lupicon-undo {
+  cursor: pointer;
 }
 
 div.handler-roles-container div.handler-role-warning {
@@ -13375,7 +13380,7 @@ div.accordion-assignments .assignment .editor {
 
 .archival-summary-table .attachment-type-container .group-label, .archival-summary-table .attachment-type-container .type-id {
   float: left;
-  width: 50%;
+  width: 90%;
 }
 
 .archival-summary-table .column-header-row {

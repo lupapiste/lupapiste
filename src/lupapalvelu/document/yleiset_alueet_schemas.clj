@@ -15,10 +15,12 @@
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
            :type :group
+           :subtype :hankkeen-kuvaus
            :removable false
            :repeating false
            :approvable true
-           :order 60}
+           :order 60
+           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
     :body hankkeen-kuvaus-kayttolupa}])
 
 
@@ -47,8 +49,8 @@
   (body
     {:name "tyoaika-alkaa-pvm" :type :date :hidden true} ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date :hidden true}
-    {:name "tyoaika-alkaa-ms" :type :msDate}
-    {:name "tyoaika-paattyy-ms" :type :msDate}))
+    {:name "tyoaika-alkaa-ms" :type :msDate :required true}
+    {:name "tyoaika-paattyy-ms" :type :msDate :required true}))
 
 (def tyo-aika-for-jatkoaika
   (body
@@ -63,10 +65,12 @@
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
            :type :group
+           :subtype :hankkeen-kuvaus
            :removable false
            :repeating false
            :approvable true
-           :order 60}
+           :order 60
+           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
     :body hankkeen-kuvaus-kaivulupa}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :i18name "osapuoli"
@@ -102,6 +106,7 @@
            :order 63}
     :body tyo-aika-for-jatkoaika}
    {:info {:name "hankkeen-kuvaus-jatkoaika"
+           :subtype :hankkeen-kuvaus
            :approvable true
            :order 1}
     :body hankkeen-kuvaus-jatkoaika}])
@@ -165,10 +170,12 @@
 (defschemas
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+           :subtype :hankkeen-kuvaus
            :removable false
            :approvable true
            :repeating false
-           :order 65}
+           :order 65
+           :after-update 'lupapalvelu.application-meta-fields/update-project-description-index}
     :body hankkeen-kuvaus-sijoituslupa}])
 
 

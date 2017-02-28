@@ -112,6 +112,9 @@ Veikko sees application in list
   Request should be visible  create-veikko-auth-app
   [Teardown]  logout
 
+Frontend errors check
+  There are no frontend errors
+
 
 
 #Setting maps disabled again after the tests

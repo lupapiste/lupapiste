@@ -71,8 +71,7 @@
    :group {:groupType "operation"
            :operations [(select-keys (:op @selected-summary) [:id :name])]}
    :target {:type "inspection-summary-item"
-            :id target-id}
-   :constructionTime true})
+            :id target-id}})
 
 (defn unsubscribe-if-done [target-id]
   (let [statuses (filter #(= target-id (:target-id %))
@@ -191,24 +190,8 @@
              "inspection-summary.targets.mark-finished.undo"
              "inspection-summary.targets.mark-finished"))])
 
-(rum/defcs target-row < rum/reactive
-                        {:init (fn [state _] (assoc state ::input-id (jsutil/unique-elem-id "inspection-target-row")))}
-                        {:did-mount (fn [state]
-                                      (upload/bindToElem (js-obj "id" (::input-id state)))
-                                      (let [[_ row-target] (-> state :rum/args)]
-                                        (if-let [target-id (:id row-target)]
-                                          (assoc state :fileupload-subscription-id (upload/subscribe-files-uploaded
-                                                                                     (::input-id state)
-                                                                                     (partial got-files target-id)))
-                                          state)))}
-                        {:will-update (fn [state]
-                                        (let [[_ row-target] (-> state :rum/args)]
-                                          (if (and (:id row-target) (not (:fileupload-subscription-id state)))
-                                            (assoc state :fileupload-subscription-id (upload/subscribe-files-uploaded
-                                                                                       (::input-id state)
-                                                                                       (partial got-files (:id row-target))))
-                                            state)))}
-  [local-state idx row-target]
+(rum/defc target-row < rum/reactive
+  [idx row-target]
   (let [editing?        (:editing? row-target)
         application-id  (:applicationId @component-state)
         summary-id      (:id @selected-summary)
@@ -237,8 +220,8 @@
                   (attc/view-with-download-small-inline latest)
                   (when-not (or locked? targetFinished?)
                     (attc/delete-attachment-link attachment remove-attachment-success)))))
-      (when-not (or locked? targetFinished?)
-        (attc/upload-link (::input-id local-state)))]
+     (when (and target-id (not locked?) (not targetFinished?))
+       [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
       (when (:finished-date row-target)
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]

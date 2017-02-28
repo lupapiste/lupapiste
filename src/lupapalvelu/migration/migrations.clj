@@ -2805,7 +2805,7 @@
                                                                                                 :modified (:modified jate)}
                                                                                           :jate {:value "muu"
                                                                                                  :modified (:modified jate)}}
-                                                                              {}))))
+                                                                              {:jate {:value nil}}))))
                                                   {}
                                                   muuJate))]
     (assoc-in doc [:data :rakennusJaPurkujate] rakennus-ja-purku)))
@@ -2814,6 +2814,80 @@
   (update-applications-array :documents
                              migrate-rakennusJaPurkujate
                              {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
+
+(def project-description-types
+  #{:hankkeen-kuvaus
+   :hankkeen-kuvaus-rakennuslupa
+   :hankkeen-kuvaus-minimum
+   :hankkeen-kuvaus-jatkoaika
+   :hankkeen-kuvaus-vesihuolto
+   :yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+   :yleiset-alueet-hankkeen-kuvaus-kaivulupa
+   :yleiset-alueet-hankkeen-kuvaus-kayttolupa})
+
+(defn- add-subtype [document]
+  (if (contains? project-description-types (keyword (get-in document [:schema-info :name])))
+    (assoc-in document [:schema-info :subtype] :hankkeen-kuvaus)
+    document))
+
+(defmigration add-project-description-subtype-to-documents
+  {:apply-when (pos? (mongo/count :applications
+                                  {:documents
+                                  {$elemMatch {:schema-info.name {$in ["hankkeen-kuvaus",
+                                                                              "hankkeen-kuvaus-rakennuslupa",
+                                                                              "hankkeen-kuvaus-minimum",
+                                                                              "hankkeen-kuvaus-jatkoaika",
+                                                                              "hankkeen-kuvaus-vesihuolto",
+                                                                              "yleiset-alueet-hankkeen-kuvaus-sijoituslupa",
+                                                                              "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
+                                                                              "yleiset-alueet-hankkeen-kuvaus-kayttolupa"]},
+                                               :schema-info.subtype {$exists false}}}}))}
+  (update-applications-array :documents
+                             add-subtype
+                             {:documents
+                              {$elemMatch {:schema-info.name {$in ["hankkeen-kuvaus",
+                                                                          "hankkeen-kuvaus-rakennuslupa",
+                                                                          "hankkeen-kuvaus-minimum",
+                                                                          "hankkeen-kuvaus-jatkoaika",
+                                                                          "hankkeen-kuvaus-vesihuolto",
+                                                                          "yleiset-alueet-hankkeen-kuvaus-sijoituslupa",
+                                                                          "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
+                                                                          "yleiset-alueet-hankkeen-kuvaus-kayttolupa"]},
+                                           :schema-info.subtype {$exists false}}}}))
+
+(defmigration project-description-index
+  (reduce +
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:documents.schema-info.subtype "hankkeen-kuvaus"} {:documents 1})]
+        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/update-project-description-index %)) applications))))))
+
+(defn dissoc-rakennusJaPurkujate-from-wrong-documents
+  "Above migration associated :rakennusJaPurkuJate key to every document.
+  This function dissociates that data from wrong documents"
+  [{schema :schema-info :as doc}]
+  (if (= (:name schema) "laajennettuRakennusjateselvitys")
+    doc                                                     ; Migration target was laajennettuRakennusjateselvitys, it will be left intact
+    (-> (update-in doc [:data :rakennusJaPurkujate] dissoc :vaarallisetJatteet :muuJate) ; Remove accidentaly added keys
+        (update :data (fn [{:keys [rakennusJaPurkujate] :as data}]
+                        (if (empty? rakennusJaPurkujate)    ; this preserves old data in "rakennusjatesuunnitelma" document
+                          (dissoc data :rakennusJaPurkujate)
+                          data))))))
+
+(defmigration fix-waste-data-migration
+  (update-applications-array :documents
+                             dissoc-rakennusJaPurkujate-from-wrong-documents
+                             {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
+
+(defmigration fix-empty-foreman-user
+  {:apply-when (pos? (mongo/count :users {:email ""}))}
+  (let [malformed-user-id "58afe17a28e06f2484a6e82f"]
+    (mongo/remove :users malformed-user-id)
+    (mongo/update-by-query :submitted-applications
+                           {:auth.id malformed-user-id}
+                           {$pull {:auth {:id malformed-user-id}}})
+    (mongo/update-by-query :applications
+                           {:auth.id malformed-user-id}
+                           {$pull {:auth {:id malformed-user-id}}})))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

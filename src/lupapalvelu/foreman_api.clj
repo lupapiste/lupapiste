@@ -1,20 +1,15 @@
 (ns lupapalvelu.foreman-api
-  (:require [clojure.set :as set]
-            [taoensso.timbre :as timbre :refer [error]]
+  (:require [taoensso.timbre :refer [error]]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.company :as company]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.notifications :as notif]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [sade.core :refer :all]
-            [sade.env :as env]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
             [monger.operators :refer :all]))
@@ -30,9 +25,11 @@
    :states (states/all-application-states-but states/terminal-states)
    :pre-checks [application/validate-authority-in-drafts
                 application/validate-only-authority-before-verdict-given]
-   :notified   true}
+   :notified   true
+   :description "Creates foreman application based on current application. Foreman email can be nil."}
   [{:keys [created user application] :as command}]
-  (let [foreman-user   (user/get-or-create-user-by-email foremanEmail user)
+  (let [foreman-user   (when (v/valid-email? foremanEmail)
+                         (user/get-or-create-user-by-email foremanEmail user))
         foreman-app    (-> (foreman/new-foreman-application command)
                            (foreman/update-foreman-docs application foremanRole)
                            (foreman/copy-auths-from-linked-app foreman-user application user created)

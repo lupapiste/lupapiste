@@ -137,6 +137,5 @@ Sonja sets recipient filter to Ei vastaanottajaa and sees two assignments
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
 
 No frontend errors
-  [Tags]  non-roboto-proof
   Logout
   There are no frontend errors

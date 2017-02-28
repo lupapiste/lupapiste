@@ -10,9 +10,9 @@
                  [org.clojure/core.memoize "0.5.9"]
 
                  ; Web frameworks
-                 [ring "1.5.0" :exclusions [commons-fileupload org.clojure/tools.reader]]
+                 [ring "1.5.1" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
+                 [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
                  [metosin/ring-swagger "0.22.12"]
                  [metosin/ring-swagger-ui "2.2.5-0"]
 
@@ -23,8 +23,8 @@
                  [com.novemberain/monger "3.1.0" :exclusions [[com.google.guava/guava]]]
 
                  ; Logging
-                 [com.taoensso/timbre "4.7.4"]
-                 [org.slf4j/slf4j-log4j12 "1.7.21"]
+                 [com.taoensso/timbre "4.8.0"]
+                 [org.slf4j/slf4j-log4j12 "1.7.22"]
 
                  ;;Hystrix
                  [com.netflix.hystrix/hystrix-clj "1.5.6"]
@@ -45,7 +45,7 @@
                  [pandect "0.6.0"]
 
                  ; JSON
-                 [cheshire "5.6.3"]
+                 [cheshire "5.7.0"]
 
                  ; HTTP client
                  [clj-http "3.3.0" :exclusions [commons-codec]]
@@ -123,7 +123,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.89"]
+                 [lupapiste/commons "0.7.91"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

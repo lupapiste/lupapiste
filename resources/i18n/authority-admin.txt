@@ -358,3 +358,4 @@
 "handler-roles.title" "en" "Handler roles"
 "handler-roles.title" "fi" "Käsittelijäroolit"
 "handler-roles.title" "sv" "Handläggarroller"
+"handler-roles.show-all" "fi" "Näytä myös poistetut"

@@ -24,7 +24,6 @@
                                                           :locked true
                                                           :read-only true})
         archivability-result (conversion/archivability-conversion app {:content ((:content file))
-                                                                       :attachment-type type
                                                                        :filename (:filename file)
                                                                        :contentType (or (:contentType file) (:content-type file))})
         converted-filedata   (when (:autoConversion archivability-result)
