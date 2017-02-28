@@ -202,10 +202,10 @@
 
 (defn init
   [init-state props]
-  (let [[ko-app auth-models] (-> (aget props ":rum/initial-state") :rum/args)
+  (let [[ko-app application-auth-model] (-> (aget props ":rum/initial-state") :rum/args)
         app-id  (aget ko-app "_js" "id")]
-    (swap! component-state assoc :applicationId app-id)
-    (when (auth/ok? (:application auth-models) :inspection-summaries-for-application)
+    (swap! component-state assoc :applicationId app-id :auth-models {:application application-auth-model})
+    (when (auth/ok? application-auth-model :inspection-summaries-for-application)
       (auth/refresh-auth-models-for-category component-state :inspection-summaries)
       (refresh (fn [_]
                  (update-summary-view (-> @component-state :summaries first :id)))))
@@ -283,7 +283,7 @@
 (rum/defc inspection-summaries < rum/reactive
                                  {:init init
                                   :will-unmount (fn [& _] (reset! component-state empty-component-state))}
-  [ko-app auth-models]
+  [ko-app application-auth-model]
   (let [{summary-id :id :as summary}   (rum/react selected-summary)
         auth-model                     (rum/react (rum-util/derived-atom [component-state] (partial auth/get-auth-model :inspection-summaries summary-id)))
         bubble-visible                 (rum/cursor-in component-state [:view :bubble-visible])
@@ -309,7 +309,7 @@
          (summaries-select (rum/react (rum/cursor-in component-state [:summaries]))
                            (rum/react (rum/cursor-in component-state [:operations]))
                            summary-id)]]
-       (when (auth/ok? auth-model :create-inspection-summary)
+       (when (auth/ok? application-auth-model :create-inspection-summary)
          [:div.col-1.summary-button-bar
           [:button.positive
            {:on-click (fn [_] (reset! bubble-visible true))
@@ -362,11 +362,11 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (rum/mount (inspection-summaries (:app @args) (:auth-models @args))
+  (rum/mount (inspection-summaries (:app @args) (:auth-model @args))
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :app (aget componentParams "app") :auth-models {:application (aget componentParams "authModel")} :dom-id (name domId))
+  (swap! args assoc :app (aget componentParams "app") :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (mount-component))
 
 (defn reload-hook []
