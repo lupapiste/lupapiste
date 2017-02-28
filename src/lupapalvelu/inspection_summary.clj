@@ -188,7 +188,7 @@
         (fail-when-target-finished target-id inspection-summaries))))
 
 (defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
-  (or (validate-summary-not-locked)
+  (or (validate-summary-not-locked command)
       (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
         (fail-when-target-finished target-id inspection-summaries))))
 
