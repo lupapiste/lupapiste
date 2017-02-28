@@ -212,14 +212,13 @@
                                   (partial commit-target-name-edit target-id))
         (:target-name row-target))]
      [:td
-      (doall
-        (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
-              :let [latest (:latestVersion attachment)]]
-          (vector :div {:data-test-id (str "target-row-attachment")
-                        :key (str "target-row-attachment-" (:id attachment))}
-                  (attc/view-with-download-small-inline latest)
-                  (when-not (or locked? targetFinished?)
-                    (attc/delete-attachment-link attachment remove-attachment-success)))))
+      (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
+            :let [latest (:latestVersion attachment)]]
+        [:div {:data-test-id (str "target-row-attachment")
+               :key (str "target-row-attachment-" (:id attachment))}
+         (attc/view-with-download-small-inline latest)
+         (when-not (or locked? targetFinished?)
+           (attc/delete-attachment-link attachment remove-attachment-success))])
      (when (and target-id (not locked?) (not targetFinished?))
        [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
@@ -227,16 +226,16 @@
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]
      [:td (when (:finished-by row-target)
             (js/util.partyFullName (clj->js (:finished-by row-target))))]
-     (vector :td.functions
-             (when (and (not editing?) (auth/ok? auth-model :set-target-status))
-               (change-status-link application-id summary-id target-id targetFinished? idx))
-       (when (and (not editing?) (auth/ok? auth-model :edit-inspection-summary-target) (not targetFinished?))
-         [:a
-          {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
-           :data-test-id (str "edit-link-" idx)}
-          (js/loc "edit")])
-       (when (and (auth/ok? auth-model :remove-target-from-inspection-summary) (not editing?) (not targetFinished?))
-         (remove-link application-id summary-id target-id idx)))]))
+     [:td.functions
+      (when (and (not editing?) (auth/ok? auth-model :set-target-status))
+        (change-status-link target-id targetFinished? idx))
+      (when (and (not editing?) (auth/ok? auth-model :edit-inspection-summary-target) (not targetFinished?))
+        [:a
+         {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
+          :data-test-id (str "edit-link-" idx)}
+         (js/loc "edit")])
+      (when (and (auth/ok? auth-model :remove-target-from-inspection-summary) (not editing?) (not targetFinished?))
+        (remove-link application-id summary-id target-id idx))]]))
 
 (defn init
   [init-state props]
@@ -276,6 +275,15 @@
                ["" (js/loc "choose")]
                (map (fn [tmpl] [(:id tmpl) (:name tmpl)]) templates))))
 
+(defn- create-inspection-summary [cb]
+  (command :create-inspection-summary
+           (fn [result]
+             (refresh #(update-summary-view (:id result)))
+             (cb result))
+           :id          (-> @component-state :applicationId)
+           :operationId (-> @component-state :view :new :operation)
+           :templateId  (-> @component-state :view :new :template)))
+
 (rum/defc create-summary-bubble < rum/reactive
   [visible?]
   (let [visibility (rum/react visible?)
@@ -301,13 +309,7 @@
        (templates-select (rum/react (rum/cursor-in component-state [:templates])) selected-template)]]
      [:div.row.left-buttons
       [:button.positive
-       {:on-click (fn [_] (command "create-inspection-summary"
-                                   (fn [result]
-                                     (refresh #(update-summary-view (:id result)))
-                                     (reset! visible? false))
-                                   "id"          (-> @component-state :applicationId)
-                                   "operationId" (-> @component-state :view :new :operation)
-                                   "templateId"  (-> @component-state :view :new :template)))
+       {:on-click (partial create-inspection-summary (fn [_] (reset! visible? false?)))
         :data-test-id "create-summary-button"
         :disabled (or (empty? selected-op) (empty? selected-template))}
        [:i.lupicon-check]
@@ -368,9 +370,8 @@
             [:th (js/loc "inspection-summary.targets.table.marked-by")]
             [:th ""]]]
           [:tbody
-           (doall
-             (for [[idx target] (map-indexed vector (rum/react table-rows))]
-               (rum/with-key (target-row idx target) (str "target-row-" idx))))]]])
+           (for [[idx target] (map-indexed vector (rum/react table-rows))]
+             (rum/with-key (target-row idx target) (str "target-row-" idx)))]]])
 
       (when (auth/ok? auth-model :add-target-to-inspection-summary)
         [:div.row
