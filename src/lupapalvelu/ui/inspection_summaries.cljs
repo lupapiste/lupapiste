@@ -114,12 +114,20 @@
     (refresh)))
 
 (defn- toggle-summary-locking [application-id summary-id locked?]
- (command "toggle-inspection-summary-locking"
+ (command :toggle-inspection-summary-locking
            #(refresh)
-           "id"         application-id
-           "summaryId"  summary-id
-           "isLocked"   locked?)
+           :id         application-id
+           :summaryId  summary-id
+           :isLocked   locked?)
   (refresh))
+
+(defn- delete-inspection-summary [summary-id]
+  (command :delete-inspection-summary
+           (fn [_]
+             (swap! component-state assoc-in [:view :selected-summary-id] nil)
+             (refresh))
+           :id        (:applicationId @component-state)
+           :summaryId summary-id))
 
 (rum/defc remove-link [applicationId summaryId targetId index]
   [:a.lupicon-remove.primary
@@ -140,6 +148,26 @@
     :data-test-id "open-create-summary-bubble"}
    [:i.lupicon-circle-plus]
    [:span (js/loc "inspection-summary.new-summary.button")]])
+
+(rum/defc delete-inspection-summary-button [summary-id]
+  [:button.negative.is-right
+   {:on-click (fn [_]
+                (uc/confirm-dialog
+                 "inspection-summary.delete-confirm.title"
+                 "inspection-summary.delete-confirm.message"
+                 (partial delete-inspection-summary summary-id)))
+    :data-test-id "delete-summary"}
+   [:i.lupicon-remove]
+   [:span (js/loc "inspection-summary.delete.button")]])
+
+(rum/defc add-target-button [disabled?]
+  (let [table-rows (rum/cursor selected-summary :targets)]
+    [:button.positive
+     {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))
+      :disabled disabled?
+      :data-test-id "new-target-button"}
+     [:i.lupicon-circle-plus]
+     [:span (js/loc "inspection-summary.targets.new.button")]]))
 
 (rum/defc toggle-inspection-summary-locking-button [application-id summary-id locked?]
   (letfn [(toggle [] (toggle-summary-locking application-id summary-id (not locked?)))]
@@ -338,25 +366,11 @@
        (when (auth/ok? application-auth-model :create-inspection-summary)
          [:div.col-1.summary-button-bar
           (new-inspection-summary-button bubble-visible)])
-       (when (and summary (auth/ok? auth-model :edit-inspection-summary-target)
-                  (not-any? #(or (:finished %) (not-empty (:attachments %))) @table-rows))
+       (when (auth/ok? auth-model :delete-inspection-summary)
          [:div.col-2.group-buttons.summary-button-bar
-          [:button.negative.is-right
-           {:on-click (fn [_]
-                        (uc/confirm-dialog
-                          "inspection-summary.delete-confirm.title"
-                          "inspection-summary.delete-confirm.message"
-                          (fn [] (command "delete-inspection-summary"
-                                          (fn [_]
-                                            (swap! component-state assoc-in [:view :selected-summary-id] nil)
-                                            (refresh))
-                                          "id"        (:applicationId @component-state)
-                                          "summaryId" summary-id))))
-            :data-test-id "delete-summary"}
-           [:i.lupicon-remove]
-           [:span (js/loc "inspection-summary.delete.button")]]])]
+          (delete-inspection-summary-button summary-id)])]
 
-      (when (auth/ok? auth-model :create-inspection-summary)
+      (when (auth/ok? application-auth-model :create-inspection-summary)
         [:div.row.create-summary-bubble (create-summary-bubble bubble-visible)])
 
       (when summary
@@ -376,18 +390,14 @@
              (for [[idx target] (map-indexed vector (rum/react table-rows))]
                (rum/with-key (target-row idx target) (str "target-row-" idx))))]]])
 
-      (when (and (not editing?) (auth/ok? auth-model :add-target-to-inspection-summary))
+      (when (auth/ok? auth-model :add-target-to-inspection-summary)
         [:div.row
-         [:button.positive
-          {:on-click (fn [_] (swap! table-rows conj {:target-name "" :editing? true}))
-           :data-test-id "new-target-button"}
-          [:i.lupicon-circle-plus]
-          [:span (js/loc "inspection-summary.targets.new.button")]]])
+         (add-target-button editing?)])
 
       (when (and (auth/ok? auth-model :toggle-inspection-summary-locking) (not (:locked summary)))
         [:div.row
-           [:label (js/loc "inspection-summary.locking.info")]
-           [:label (js/loc "inspection-summary.locking-archive.info")]])
+         [:label (js/loc "inspection-summary.locking.info")]
+         [:label (js/loc "inspection-summary.locking-archive.info")]])
 
       (when (auth/ok? auth-model :toggle-inspection-summary-locking)
         [:div.row
