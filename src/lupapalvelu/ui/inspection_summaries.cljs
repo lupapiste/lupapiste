@@ -55,7 +55,7 @@
                    :templates  (:templates data)
                    :summaries  (:summaries data)
                    :fileStatuses {})
-            (when cb (cb)))
+            (when cb (cb data)))
           :id (-> @component-state :applicationId))))
 
 (defn- operation-description-for-select [op]
@@ -100,46 +100,45 @@
     (swap! component-state update :fileStatuses #(reduce create-filestatuses-fn % fileIds))
     (upload/bind-attachments (clj->js bindable-files))))
 
-(defn- commit-target-name-edit [applicationId summaryId targetId val]
+(defn- commit-target-name-edit [target-id val]
   (if (not (empty? val))
-    (let [cmd-name (if targetId
-                     "edit-inspection-summary-target"
-                     "add-target-to-inspection-summary")]
+    (let [cmd-name (if target-id
+                     :edit-inspection-summary-target
+                     :add-target-to-inspection-summary)]
       (command cmd-name
-               #(refresh)
-               "id"         applicationId
-               "summaryId"  summaryId
-               "targetId"   targetId
-               "targetName" val))
+               refresh
+               :id         (:applicationId @component-state)
+               :summaryId  (:id @selected-summary)
+               :targetId   target-id
+               :targetName val))
     (refresh)))
 
-(defn- toggle-summary-locking [application-id summary-id locked?]
+(defn- toggle-summary-locking [locked?]
  (command :toggle-inspection-summary-locking
-           #(refresh)
-           :id         application-id
-           :summaryId  summary-id
-           :isLocked   locked?)
-  (refresh))
+          refresh
+          :id         (:applicationId @component-state)
+          :summaryId  (:id @selected-summary)
+          :isLocked   locked?))
 
-(defn- delete-inspection-summary [summary-id]
+(defn- delete-inspection-summary []
   (command :delete-inspection-summary
            (fn [_]
              (swap! component-state assoc-in [:view :selected-summary-id] nil)
              (refresh))
            :id        (:applicationId @component-state)
-           :summaryId summary-id))
+           :summaryId (:id @selected-summary)))
 
-(rum/defc remove-link [applicationId summaryId targetId index]
+(rum/defc remove-link [target-id index]
   [:a.lupicon-remove.primary
    {:on-click (fn [_]
                 (uc/confirm-dialog
                   "inspection-summary.targets.remove-confirm.title"
                   "inspection-summary.targets.remove-confirm.message"
-                  (fn [] (command "remove-target-from-inspection-summary"
+                  (fn [] (command :remove-target-from-inspection-summary
                                   (fn [_] (.send js/hub "attachmentsService::updateAll") (refresh))
-                                  "id"        applicationId
-                                  "summaryId" summaryId
-                                  "targetId"  targetId))))
+                                  :id        (:applicationId @component-state)
+                                  :summaryId (:id @selected-summary)
+                                  :targetId  target-id))))
     :data-test-id (str "remove-icon-" index)}])
 
 (rum/defc new-inspection-summary-button [bubble-visible]
@@ -149,13 +148,13 @@
    [:i.lupicon-circle-plus]
    [:span (js/loc "inspection-summary.new-summary.button")]])
 
-(rum/defc delete-inspection-summary-button [summary-id]
+(rum/defc delete-inspection-summary-button []
   [:button.negative.is-right
    {:on-click (fn [_]
                 (uc/confirm-dialog
                  "inspection-summary.delete-confirm.title"
                  "inspection-summary.delete-confirm.message"
-                 (partial delete-inspection-summary summary-id)))
+                 delete-inspection-summary))
     :data-test-id "delete-summary"}
    [:i.lupicon-remove]
    [:span (js/loc "inspection-summary.delete.button")]])
@@ -169,8 +168,8 @@
      [:i.lupicon-circle-plus]
      [:span (js/loc "inspection-summary.targets.new.button")]]))
 
-(rum/defc toggle-inspection-summary-locking-button [application-id summary-id locked?]
-  (letfn [(toggle [] (toggle-summary-locking application-id summary-id (not locked?)))]
+(rum/defc toggle-inspection-summary-locking-button [locked?]
+  (letfn [(toggle [] (toggle-summary-locking (not locked?)))]
     (if locked?
       [:button.secondary {:on-click toggle}
        [:i.lupicon-lock-open-fully]
@@ -179,14 +178,14 @@
        [:i.lupicon-lock]
        [:span (js/loc "inspection-summary.lock.button")]])))
 
-(rum/defc change-status-link [applicationId summaryId targetId finished? index]
+(rum/defc change-status-link [target-id finished? index]
   [:a
-   {:on-click (fn [_] (command "set-target-status"
-                               #(refresh)
-                               "id"        applicationId
-                               "summaryId" summaryId
-                               "targetId"  targetId
-                               "status"    (not finished?)))
+   {:on-click (fn [_] (command :set-target-status
+                               refresh
+                               :id        (:applicationId @component-state)
+                               :summaryId (:id @selected-summary)
+                               :targetId  target-id
+                               :status    (not finished?)))
     :data-test-id (str "change-status-link-" index)}
    (js/loc (if finished?
              "inspection-summary.targets.mark-finished.undo"
@@ -227,7 +226,7 @@
       (if (and editing? (auth/ok? auth-model :add-target-to-inspection-summary))
         (uc/autofocus-input-field (:target-name row-target)
                                   (str "edit-target-field-" idx)
-                                  (partial commit-target-name-edit application-id summary-id target-id))
+                                  (partial commit-target-name-edit target-id))
         (:target-name row-target))]
      [:td
       (doall
@@ -368,7 +367,7 @@
           (new-inspection-summary-button bubble-visible)])
        (when (auth/ok? auth-model :delete-inspection-summary)
          [:div.col-2.group-buttons.summary-button-bar
-          (delete-inspection-summary-button summary-id)])]
+          (delete-inspection-summary-button)])]
 
       (when (auth/ok? application-auth-model :create-inspection-summary)
         [:div.row.create-summary-bubble (create-summary-bubble bubble-visible)])
@@ -401,7 +400,7 @@
 
       (when (auth/ok? auth-model :toggle-inspection-summary-locking)
         [:div.row
-         (toggle-inspection-summary-locking-button (:applicationId @component-state) summary-id (:locked summary))])]]))
+         (toggle-inspection-summary-locking-button (:locked summary))])]]))
 
 (defonce args (atom {}))
 
