@@ -106,7 +106,8 @@
 (defcommand delete-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
                 inspection-summary/validate-that-summary-can-be-deleted
-                inspection-summary/validate-summary-found-in-application]
+                inspection-summary/validate-summary-found-in-application
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId])]
@@ -128,7 +129,8 @@
   (ok))
 
 (defcommand add-target-to-inspection-summary
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetName]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
@@ -139,7 +141,8 @@
 (defcommand edit-inspection-summary-target
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
                 inspection-summary/deny-if-finished
-                inspection-summary/validate-summary-target-found-in-application]
+                inspection-summary/validate-summary-target-found-in-application
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId targetName]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
@@ -149,7 +152,8 @@
   (ok))
 
 (defcommand remove-target-from-inspection-summary
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
@@ -160,7 +164,8 @@
 
 (defcommand set-target-status
   {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check
-                inspection-summary/validate-summary-target-found-in-application]
+                inspection-summary/validate-summary-target-found-in-application
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId status]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])

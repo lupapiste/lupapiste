@@ -78,6 +78,10 @@
                      (not (empty? (:attachments %)))) targets)
       (fail (util/kw-path :error action :non-empty)))))
 
+(defn validate-summary-not-locked [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data}]
+  (when (:locked (util/find-by-id summaryId summaries))
+    (fail (util/kw-path :error.inspection-summary.locked))))
+
 (defn validate-summary-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data action :action}]
   (when (and summaryId (not (util/find-by-id summaryId summaries)))
     (fail (util/kw-path :error action :not-found))))
@@ -174,16 +178,19 @@
   (when (-> target-id (get-summary-target inspection-summaries) :finished)
     (fail :error.inspection-summary-target.finished)))
 
-(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
-  (fail-when-target-finished tid inspection-summaries))
+(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{target-id :id} :target} :data :as command}]
+  (or (validate-summary-not-locked command)
+      (fail-when-target-finished target-id inspection-summaries)))
 
-(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
-  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
-    (fail-when-target-finished target-id inspection-summaries)))
+(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
+  (or (validate-summary-not-locked command)
+      (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+        (fail-when-target-finished target-id inspection-summaries))))
 
-(defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
-  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
-    (fail-when-target-finished target-id inspection-summaries)))
+(defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
+  (or (validate-summary-not-locked)
+      (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+        (fail-when-target-finished target-id inspection-summaries))))
 
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
