@@ -126,6 +126,13 @@
                                   "targetId"  targetId))))
     :data-test-id (str "remove-icon-" index)}])
 
+(rum/defc new-inspection-summary-button [bubble-visible]
+  [:button.positive
+   {:on-click (fn [_] (reset! bubble-visible true))
+    :data-test-id "open-create-summary-bubble"}
+   [:i.lupicon-circle-plus]
+   [:span (js/loc "inspection-summary.new-summary.button")]])
+
 (rum/defc change-status-link [applicationId summaryId targetId finished? index]
   [:a
    {:on-click (fn [_] (command "set-target-status"
@@ -312,11 +319,7 @@
                            summary-id)]]
        (when (auth/ok? application-auth-model :create-inspection-summary)
          [:div.col-1.summary-button-bar
-          [:button.positive
-           {:on-click (fn [_] (reset! bubble-visible true))
-            :data-test-id "open-create-summary-bubble"}
-           [:i.lupicon-circle-plus]
-           [:span (js/loc "inspection-summary.new-summary.button")]]])
+          (new-inspection-summary-button bubble-visible)])
        (when (and summary (auth/ok? auth-model :edit-inspection-summary-target)
                   (not-any? #(or (:finished %) (not-empty (:attachments %))) @table-rows))
          [:div.col-2.group-buttons.summary-button-bar
