@@ -35,17 +35,33 @@
                                         {:type-group "hakija", :type-id "valtakirja"}
                                         {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat", :type-id "vaestonsuojasuunnitelma"}]))
 
-    (fact "unknown attachmentId"
-      (command pena :bind-attachments
-        :id application-id
-        :filedatas [{:fileId file-id-1 :type (:type (first attachments))
-                     :group {:groupType "operation"
-                             :operations [operation]}
-                     :contents "eka"}
-                    {:fileId file-id-2 :type (:type (second attachments))
-                     :group {:groupType nil}
-                     :contents "toka"
-                     :attachmentId "foo"}]) => (partial expected-failure? :error.attachment.id))
+    (facts "validation errors"
+      (fact "unknown attachmentId"
+        (command pena :bind-attachments
+                 :id application-id
+                 :filedatas [{:fileId file-id-1 :type (:type (first attachments))
+                              :group {:groupType "operation"
+                                      :operations [operation]}
+                              :contents "eka"}
+                             {:fileId file-id-2 :type (:type (second attachments))
+                              :group {:groupType nil}
+                              :contents "toka"
+                              :attachmentId "foo"}]) => (partial expected-failure? :error.attachment.id))
+      (fact "invalid operation"
+        (command pena :bind-attachments
+                 :id application-id
+                 :filedatas [{:fileId file-id-1 :type (:type (first attachments))
+                              :group {:groupType "operation"
+                                      :operations [operation]} ; this is valid
+                              :contents "eka"}
+                             {:fileId file-id-3 :type (:type (first attachments))
+                              :group {:groupType "operation"
+                                      :operations [{:id "fooo"}]} ; this is invalid
+                              :contents "eka"}
+                             {:fileId file-id-2 :type (:type (second attachments))
+                              :group {:groupType nil}
+                              :contents "toka"
+                              :attachmentId (-> attachments first :id)}]) => (partial expected-failure? :error.illegal-attachment-operation)))
 
     (let [{job :job :as resp} (command
                                 pena
@@ -106,6 +122,7 @@
             (when-not (= "done" (:status job))
               (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
             (fact "new version exists"
+              (count (:versions att1)) => 1                 ; old count
               (-> (query-application pena application-id) :attachments first :versions count) => 2)))))))
 
 (facts "new attachment bind"

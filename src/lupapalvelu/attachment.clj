@@ -953,11 +953,18 @@
     (when-not ((set att-tags/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
+(defn- ensure-operation-id-exists [application op-id]
+  (when-not (op/operation-id-exists? application op-id)
+    (fail :error.illegal-attachment-operation)))
+
 (defn validate-group
   ([command]
    (validate-group [:group] command))
   ([group-path command]
    (let [group (get-in command (cons :data group-path))]
-     (when (or (:groupType group) (:operations group))
+     (when (or (:groupType group) (not-empty (:operations group)))
        (or ((some-fn validate-group-op validate-group-type) group)
-           (validate-group-is-selectable command))))))
+           (validate-group-is-selectable command)
+           (->> (:operations group)
+                (map :id)
+                (some (partial ensure-operation-id-exists (:application command)))))))))
