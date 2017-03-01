@@ -16708,6 +16708,79 @@ div.organization-link-cell {
   display: inline-block;
 }
 
+div.company-steps h1, div.company-steps h2 {
+  text-transform: none;
+  text-align: center;
+  margin-top: 1em;
+}
+
+div.company-steps h1 {
+  font-size: 3em;
+  font-weight: bold;
+}
+
+div.company-steps h2 {
+  margin-top: 1.5em;
+  font-size: 1.5em;
+  font-weight: normal;
+}
+
+div.company-steps .tabby {
+  width: 80%;
+  margin: 24px auto;
+  text-align: center;
+  vertical-align: middle;
+}
+
+div.company-steps .tabby .tabby__cell {
+  padding-left: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+div.company-steps .tabby .circle-title {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+div.company-steps .tabby .circle-row {
+  display: table-row;
+}
+
+div.company-steps .tabby .circle-number {
+  min-width: 80px;
+  min-height: 80px;
+  line-height: 80px;
+  border-radius: 40px;
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
+  background-color: #dddddd;
+  display: table-cell;
+}
+
+div.company-steps .tabby .circle-number.current {
+  background-color: #f39129;
+}
+
+div.company-steps .tabby .circle-number.past {
+  background-color: #2ca92c;
+}
+
+div.company-steps .tabby .edge {
+  box-sizing: content-box;
+  width: 100%;
+  background-color: #dddddd;
+  height: 4px;
+  z-index: -1;
+}
+
+div.company-steps .tabby .circle-pad {
+  display: table-cell;
+  width: 50%;
+  vertical-align: middle;
+}
+
 #login h1 {
   margin-bottom: 1em;
   color: #f59c00;

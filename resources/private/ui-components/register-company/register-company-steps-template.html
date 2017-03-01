@@ -1,0 +1,46 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-steps-template">
+  <div class="company-steps">
+    <h1 data-bind="ltext: 'register.company.title'"></h1>
+    <h2 data-bind="ltext: 'register.company.subtitle'"></h2>
+    <div class="tabby">
+      <div class="tabby__row"
+           data-bind="foreach: stepNames">
+        <!-- ko if: $index -->
+        <div class="tabby__cell tabby--33">
+        </div>
+        <!-- /ko -->
+        <div class="tabby__cell">
+          <div class="circle-title"
+               data-bind="ltext: $data"></div>
+        </div>
+      </div>
+      <div class="tabby__row"
+           data-bind="foreach: stepNames">
+        <!-- ko if: $index -->
+        <div class="tabby__cell">
+          <div class="edge">&nbsp;</div>
+        </div>
+        <!-- /ko -->
+
+        <div class="tabby__cell">
+          <div class="circle-row">
+            <div class="circle-pad">
+              <div class="edge"
+                   data-bind="visible: $index">&nbsp;</div>
+            </div>
+            <div class="circle-number"
+                 data-bind="text: $index() + 1,
+                            css: {current: $index() === $parent.currentStep,
+                            past: $index() < $parent.currentStep}">
+            </div>
+            <div class="circle-pad">
+              <div class="edge"
+                   data-bind="visible: !$parent.isLast( $index())">&nbsp;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>

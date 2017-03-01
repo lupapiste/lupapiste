@@ -2,27 +2,9 @@
 <html>
 <body>
   <section class="page container" id="register-company-account-type">
-    <div class="content company-account-register">
-      <div class="register-progress">
-        <div class="register-phase done active">
-          <span class="phase-number">1</span>
-          <span class="phase-title" data-bind="ltext: 'register.company.phase.1'"></span>
-        </div>
-        <div class="register-phase">
-          <span class="phase-number">2</span>
-          <span class="phase-title" data-bind="ltext: 'register.company.phase.2'"></span>
-        </div>
-        <div class="register-phase">
-          <span class="phase-number">3</span>
-          <span class="phase-title" data-bind="ltext: 'register.company.phase.3'"></span>
-        </div>
-        <div class="register-phase">
-          <span class="phase-number">4</span>
-          <span class="phase-title" data-bind="ltext: 'register.company.phase.4'"></span>
-        </div>
-      </div>
+    <register-company-steps params="step: 1"></register-company-steps>
 
-      <h3 class="account-select-help" data-bind="ltext: 'register.company.accountselect.help'"></h3>
+    <div class="content company-account-register">
 
       <form id="account-type-selection">
         <div class="account-box" data-bind="css: { selected: model().accountType() === 'account5' }">
