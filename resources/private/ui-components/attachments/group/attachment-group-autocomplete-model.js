@@ -40,7 +40,11 @@ LUPAPISTE.AttachmentGroupAutocompleteModel = function(params) {
     if (!groupType || _.isEmpty(groupTypes)) {
       return [];
     } else if (groupType === "operation") {
-      return _.map(group.operations, function(op) { return _.find(groupTypes, ["id", op.id]); });
+      return _(group.operations)
+               .map(function(op) {
+                 return _.find(groupTypes, ["id", op.id]);})
+               .filter(_.identity) // remove undefined values, if groupTypes doesn't have respective op
+               .value();
     } else {
       return [_.find(options(), ["groupType", group.groupType])];
     }
