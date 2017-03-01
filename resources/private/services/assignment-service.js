@@ -41,8 +41,11 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     return filterIncompleteAssignments(self.assignments());
   });
 
-  self.triggerAssignments = ko.pureComputed(function() {
-    return _.filter(self.assignments(), function(a) { return a.trigger !== "user-created"; });
+  self.automaticAssignments = ko.pureComputed(function() {
+    return _.filter(self.assignments(), function(a) {
+      return a.trigger !== "user-created" &&
+        _.get(a, "currentState.type") !== "completed";
+    });
   });
 
   /*
