@@ -33,8 +33,15 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     return _.filter(assignments, function(a) { return _.get(a, "currentState.type") !== "completed"; });
   }
 
-  self.assignments = ko.pureComputed(function() {
+  // both user generated and automatic assignments
+  var allAssignments = ko.pureComputed(function() {
     return _.map(_data(), enrichAssignment);
+  });
+
+  self.assignments = ko.pureComputed(function() {
+    return _.filter(allAssignments(), function(a) {
+      return a.trigger === "user-created";
+    });
   });
 
   self.incompleteAssignments = ko.pureComputed(function() {
@@ -42,7 +49,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   });
 
   self.automaticAssignments = ko.pureComputed(function() {
-    return _.filter(self.assignments(), function(a) {
+    return _.filter(allAssignments(), function(a) {
       return a.trigger !== "user-created" &&
         _.get(a, "currentState.type") !== "completed";
     });
