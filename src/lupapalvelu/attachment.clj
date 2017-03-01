@@ -958,6 +958,8 @@
     (fail :error.illegal-attachment-operation)))
 
 (defn validate-group
+  "Validates :group from command against schema.
+   If :operations are given, their existence in application is validated also."
   ([command]
    (validate-group [:group] command))
   ([group-path command]
