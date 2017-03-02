@@ -10,24 +10,18 @@
 (mongo/connect!)
 
 (facts "Conversion"
-  ;; TODO remove attachemnt-type specific keys when convert-all-attachments feature is in PROD
   (fact "(Attachment type), content type, filename and content must be defined"
-    (archivability-conversion nil {:foo :faa :attachment-type {:foo :faa}}) => (throws AssertionError))
+    (archivability-conversion nil {:foo :faa}) => (throws AssertionError))
   (fact "invalid mime"
-    (archivability-conversion
-      nil
-      {:contentType "foo"
-       :filename "foo.foo"
-       :content (io/file "dev-resources/test-attachment.txt")
-       :attachment-type {:foo :faa}}) => {:archivable false
-                                          :archivabilityError :invalid-mime-type})
+    (archivability-conversion nil {:contentType "foo"
+                                   :filename "foo.foo"
+                                   :content (io/file "dev-resources/test-attachment.txt")})
+    => {:archivable false
+        :archivabilityError :invalid-mime-type})
   (fact "TXT conversion"
-    (let [result (archivability-conversion
-                   nil
-                   {:attachment-type {:foo :faa}
-                    :filename "foo.txt"
-                    :contentType "text/plain"
-                    :content (io/file "dev-resources/test-attachment.txt")})]
+    (let [result (archivability-conversion nil {:filename "foo.txt"
+                                                :contentType "text/plain"
+                                                :content (io/file "dev-resources/test-attachment.txt")})]
       (if (libre/enabled?)
         (do
           result => (just {:archivabilityError nil
@@ -40,8 +34,7 @@
         result => (just {:archivabilityError :invalid-mime-type :archivable false}))))
 
   (fact "PDF conversion - no archive => not-validated"
-    (archivability-conversion nil {:attachment-type {:foo :faa}
-                                   :filename "foo.pdf"
+    (archivability-conversion nil {:filename "foo.pdf"
                                    :contentType "application/pdf"
                                    :content (io/file "dev-resources/invalid-pdfa.pdf")}) => {:archivable false :archivabilityError :not-validated}
     (provided
@@ -49,8 +42,7 @@
 
   (when pdfa/pdf2pdf-enabled?
     (fact "PDF conversion - with archive => archivable"
-      (let [result (archivability-conversion nil {:attachment-type {:foo :faa}
-                                                  :filename "foo.pdf"
+      (let [result (archivability-conversion nil {:filename "foo.pdf"
                                                   :contentType "application/pdf"
                                                   :content (io/file "dev-resources/invalid-pdfa.pdf")})]
         result => (contains {:archivabilityError nil

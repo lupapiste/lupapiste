@@ -81,6 +81,20 @@
 (defn foreman-index-update [application]
   {$set (foreman-index application)})
 
+(defn- project-description-from-doc [application]
+  (when-let [document (first (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus"))]
+    (if (ss/starts-with (get-in document [:schema-info :name]) "hankkeen-kuvaus")
+      (get-in document [:data :kuvaus :value])              ;; R type of document structure
+      (get-in document [:data :kayttotarkoitus :value]))))  ;; YA type of document structure
+
+(defn project-description-index [application]
+  (let [description-index (project-description-from-doc application)]
+    (tracef "project description index: %s" description-index)
+    {:_projectDescriptionIndex description-index}))
+
+(defn update-project-description-index [application]
+  {$set (project-description-index application)})
+
 (defn- count-unseen-comments [user app]
   (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
     (count (filter (fn [comment]

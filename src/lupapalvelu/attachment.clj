@@ -723,9 +723,7 @@
                              (:content file-options)
                              ;; stream is consumed at this point, load from mongo
                              ((-> original-filedata :fileId mongo/download :content)))
-        conversion-data    (conversion application (assoc original-filedata
-                                                     :content content
-                                                     :attachment-type (:attachment-type attachment-options)))]
+        conversion-data    (conversion application (assoc original-filedata :content content))]
     (attach! command attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]
@@ -955,11 +953,20 @@
     (when-not ((set att-tags/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
+(defn- ensure-operation-id-exists [application op-id]
+  (when-not (op/operation-id-exists? application op-id)
+    (fail :error.illegal-attachment-operation)))
+
 (defn validate-group
+  "Validates :group from command against schema.
+   If :operations are given, their existence in application is validated also."
   ([command]
    (validate-group [:group] command))
   ([group-path command]
    (let [group (get-in command (cons :data group-path))]
-     (when (or (:groupType group) (:operations group))
+     (when (or (:groupType group) (not-empty (:operations group)))
        (or ((some-fn validate-group-op validate-group-type) group)
-           (validate-group-is-selectable command))))))
+           (validate-group-is-selectable command)
+           (->> (:operations group)
+                (map :id)
+                (some (partial ensure-operation-id-exists (:application command)))))))))

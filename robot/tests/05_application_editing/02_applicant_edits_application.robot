@@ -222,7 +222,6 @@ Authority deletes maksaja
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 No errors logged in editing
-  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***

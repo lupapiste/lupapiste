@@ -271,7 +271,9 @@
                        :scale                 (:scale attachment)
                        :tyomaasta-vastaava    (tyomaasta-vastaava application)
                        :closed                (ts->iso-8601-date closed)
-                       :drawing-wgs84         (seq (map :geometry-wgs84 drawings))}]
+                       :drawing-wgs84         (seq (map :geometry-wgs84 drawings))
+                       :ramLink               (:ramLink attachment)
+                       :projectDescription    (:_projectDescriptionIndex application)}]
     (-> base-metadata
         su/remove-blank-keys
         (merge s2-metadata))))

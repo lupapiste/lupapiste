@@ -100,9 +100,16 @@
                      (fact "download-attachment as pena should be possible"
                            (raw pena "download-attachment" :attachment-id file-id) => http200?))
                    (fact "operation info"
-                         (upload-attachment pena application-id {:type {:type-id "muu" :type-group "muut"}
-                                                                 :op-id (-> application :primaryOperation :id)} true)
-                         (->> (query-application pena application-id) :attachments last :op (map :name)) => ["kerrostalo-rivitalo"])))
+                     (upload-file-and-bind pena application-id {:type {:type-group "muut"
+                                                                       :type-id    "muu"}
+                                                                :group {:groupType "operation"
+                                                                        :operations [{:id "foo"}]}}
+                                           :fails :error.illegal-attachment-operation)
+                     (upload-file-and-bind pena application-id {:type {:type-group "muut"
+                                                                       :type-id    "muu"}
+                                                                :group {:groupType "operation"
+                                                                        :operations [{:id (-> application :primaryOperation :id)}]}})
+                     (->> (query-application pena application-id) :attachments last :op (map :name)) => ["kerrostalo-rivitalo"])))
 
            (fact "Pena submits the application"
                  (command pena :submit-application :id application-id) => ok?
@@ -135,6 +142,11 @@
                  (let [{:keys [primaryOperation]} (query-application pena application-id)
                        op-id (:id primaryOperation)]
 
+                   (fact "Invalid operation fails"
+                     (command pena :set-attachment-meta
+                              :id application-id
+                              :attachmentId (first attachment-ids)
+                              :meta {:group {:groupType :operation :operations [{:id "fail"}]}}) => (partial expected-failure? :error.illegal-attachment-operation))
                    (fact "Pena can change operation"
                          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :operations [{:id op-id}]}}) => ok?)
                    (fact "Pena can change contents"

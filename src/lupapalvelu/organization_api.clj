@@ -776,13 +776,14 @@
               (org/upsert-handler-role! handler-role))
           (ok :id (:id handler-role))))))
 
-(defcommand disable-handler-role
-  {:description "Set organization handler role disabled"
-   :parameters [roleId]
+(defcommand toggle-handler-role
+  {:description "Enable/disable organization handler role."
+   :parameters [roleId enabled]
    :pre-checks [validate-handler-role-in-organization
                 validate-handler-role-not-general]
-   :input-validators [(partial non-blank-parameters [:roleId])]
+   :input-validators [(partial non-blank-parameters [:roleId])
+                      (partial boolean-parameters [:enabled])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (-> (usr/authority-admins-organization-id user)
-      (org/disable-handler-role! roleId)))
+      (org/toggle-handler-role! roleId enabled)))

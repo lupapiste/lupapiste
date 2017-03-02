@@ -6,7 +6,7 @@ LUPAPISTE.HandlerService = function() {
   var self = this;
 
   var TMP = "temporary-";
-  
+
   var authorities = ko.observableArray();
   self.applicationHandlers = ko.observableArray();
   var roles = ko.observableArray();
@@ -23,14 +23,15 @@ LUPAPISTE.HandlerService = function() {
                             style: "positive"} );
   }
 
-  var indicateSaved   = _.wrap( "saved", indicate );
-  var indicateRemoved = _.wrap( "calendar.deleted", indicate );
- 
+  var indicateSaved     = _.wrap( "saved", indicate );
+  var indicateRecovered = _.wrap( "statement.palautettu", indicate );
+  var indicateRemoved   = _.wrap( "calendar.deleted", indicate );
+
   // ---------------------------
   // Ajax API
   // ---------------------------
 
-  self.pending = ko.observable();      
+  self.pending = ko.observable();
 
   function fetch( queryName, successFun ) {
     if( authModel.ok( queryName )) {
@@ -66,24 +67,29 @@ LUPAPISTE.HandlerService = function() {
   function resetAll() {
     self.applicationHandlers.removeAll();
     authorities.removeAll();
-    roles.removeAll();    
+    roles.removeAll();
   }
 
-  var latestAppId = null;
+  var latest = null;
+
+  function current() {
+    return {appId: appId(),
+            state: lupapisteApp.models.application.state()};
+  }
 
   ko.computed( function() {
     var canFetch = _.some(authModel.getData()) && appId();
     if( canFetch ) {
-      if( appId() !== latestAppId ) {
+      if( appId() && !_.isEqual( current(), latest ) ) {
         ko.ignoreDependencies( fetchAll );
-        latestAppId = appId();
-      }      
+        latest = current();
+      }
     } else {
       ko.ignoreDependencies( resetAll );
-      latestAppId = null;
-    }    
+      latest = null;
+    }
   });
-  
+
   // Name is object (e.g., {fi: "Uusi nimi", sv: "Nytt namn", en: "New name"}).
   function upsertOrganizationRole( roleId, name ) {
     ajax.command( "upsert-handler-role",
@@ -98,13 +104,14 @@ LUPAPISTE.HandlerService = function() {
     .call();
   }
 
-  function disableOrganizationRole( roleId ) {
-    ajax.command( "disable-handler-role", {roleId: roleId })
-    .success( indicateRemoved )
+  function toggleOrganizationRole( roleId, enabled ) {
+    ajax.command( "toggle-handler-role", {roleId: roleId,
+                                          enabled: enabled})
+    .success( enabled ? indicateRecovered : indicateRemoved )
     .call();
   }
 
-  function upsertHandler( handlerId, data ) {        
+  function upsertHandler( handlerId, data ) {
     ajax.command( "upsert-application-handler",
                   _.defaults( data,
                               isTemporary( handlerId.peek() )
@@ -114,7 +121,7 @@ LUPAPISTE.HandlerService = function() {
     .pending( self.pending )
     .success( function( res ) {
       handlerId( res.id );
-      indicateSaved();      
+      indicateSaved();
     } )
     .call();
   }
@@ -143,11 +150,14 @@ LUPAPISTE.HandlerService = function() {
         upsertOrganizationRole( roleObs, ko.mapping.toJS( nameObs ));
       }
     });
-    return _.defaults( {id: roleObs, name: nameObs}, role);
+    return _.defaults( {id: roleObs,
+                        name: nameObs,
+                        disabled: ko.observable( role.disabled)},
+                       role);
   }
 
   var latestOrgId = null;
-  
+
   self.organizationHandlerRoles = function( organization ) {
     ko.computed( function() {
       var orgId = util.getIn( organization, ["organizationId"]);
@@ -157,24 +167,22 @@ LUPAPISTE.HandlerService = function() {
         roles.removeAll();
         latestOrgId = orgId;
         roles( _(rawRoles)
-               .reject( {disabled: true})
                .map( processRawRole )
                .value());
-      }                        
-    });        
+      }
+    });
     return roles;
   };
-  
+
   self.organizationLanguages = ko.pureComputed( function() {
     return _.keys( ko.mapping.toJS( _.get( roles(),
                                            "0.name",
                                            {})));
   });
 
-  self.removeOrganizationHandlerRole = function( roleId ) {
-    roles.remove( function( r ) {return r.id() === roleId();});
+  self.toggleOrganizationHandlerRole = function( roleId, disabled ) {
     if( !isTemporary( roleId )) {
-      disableOrganizationRole( roleId() );
+      toggleOrganizationRole( roleId(), !disabled() );
     }
   };
 
@@ -183,7 +191,7 @@ LUPAPISTE.HandlerService = function() {
                                 name: _( self.organizationLanguages())
                                       .map( function( lang ) {return [lang, ""];})
                                       .fromPairs()
-                                      .value()}));    
+                                      .value()}));
   };
 
   self.findHandlerRole = function( roleId ) {
@@ -202,10 +210,9 @@ LUPAPISTE.HandlerService = function() {
     if( roleName ) {
       handler.roleName( roleName );
     }
-    
     if( data.userId && data.roleId ) {
-        upsertHandler(handler.id, data);        
-      }
+      upsertHandler(handler.id, data);
+    }
   }
 
   function processRawHandler( raw ) {
@@ -214,12 +221,12 @@ LUPAPISTE.HandlerService = function() {
       var data = {userId: m.userId(),
                   roleId: m.roleId()};
       if( !ko.computedContext.isInitial()) {
-        ko.ignoreDependencies( _.partial( updateHandler, m, data )); 
+        ko.ignoreDependencies( _.partial( updateHandler, m, data ));
       }
     });
     return m;
   }
-  
+
   self.newApplicationHandler = function() {
     self.applicationHandlers.push(processRawHandler( {id: _.uniqueId( TMP ),
                                                       roleId: "",
@@ -237,5 +244,5 @@ LUPAPISTE.HandlerService = function() {
       removeHandler( handlerId );
     }
   };
-    
+
 };

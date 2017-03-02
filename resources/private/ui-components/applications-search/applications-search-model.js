@@ -30,9 +30,8 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     }
   };
 
-
-  self.searchModels =
-    ko.observableArray([new LUPAPISTE.SearchSectionModel({
+  self.initialized = false;
+  self.searchModels = ko.observableArray([new LUPAPISTE.SearchSectionModel({
       type:             "applications",
       lLabel:           "navigation",
       dataProvider:     self.dataProvider,
@@ -43,45 +42,52 @@ LUPAPISTE.ApplicationsSearchModel = function() {
       pagingComponent:  "applications-search-paging",
       tabsComponent:    "applications-search-tabs"
     })]);
-  if (self.authorizationModel.ok("enable-foreman-search")) {
-    self.searchModels.push(new LUPAPISTE.SearchSectionModel({
-      type:             "foreman",
-      lLabel:           "applications.search.foremen",
-      dataProvider:     self.dataProvider,
-      externalApi:      null,
-      limits:           self.limits,
-      filterComponent:  "applications-foreman-search-filter",
-      resultsComponent: "applications-foreman-search-results",
-      pagingComponent:  "applications-search-paging",
-      tabsComponent:    "applications-foreman-search-tabs"
-    }));
-  }
-  if (self.authorizationModel.ok("assignments-search")) {
-    var dataProviderForAssignments = new LUPAPISTE.AssignmentsDataProvider({
-                                       sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
-                                       searchResultType: "created",
-                                       currentLimit:     self.currentLimit
-                                     });
-    var label = ko.pureComputed(function() {
-      var count = dataProviderForAssignments.assignmentsCount();
-      return loc("application.assignment.search.label")
-        + (count ? " (" + count + ")" : "");
-    });
 
-    self.searchModels.push(new LUPAPISTE.SearchSectionModel({
-      type:             "assignments",
-      label:            label,
-      dataProvider:     dataProviderForAssignments,
-      externalApi:      null,
-      resultsTextKey:   "application.assignment.search.results",
-      limits:           self.limits,
-      currentLimit:     self.currentLimit,
-      filterComponent:  "assignments-search-filter",
-      resultsComponent: "assignments-search-results",
-      pagingComponent:  "applications-search-paging",
-      tabsComponent:    "assignments-search-tabs"
-    }));
-  }
+  ko.computed(function() {
+    var data = self.authorizationModel.getData();
+    if (!_.isEmpty(data) && !self.initialized) {
+      self.initialized = true;
+      if (self.authorizationModel.ok("enable-foreman-search")) {
+        self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+          type:             "foreman",
+          lLabel:           "applications.search.foremen",
+          dataProvider:     self.dataProvider,
+          externalApi:      null,
+          limits:           self.limits,
+          filterComponent:  "applications-foreman-search-filter",
+          resultsComponent: "applications-foreman-search-results",
+          pagingComponent:  "applications-search-paging",
+          tabsComponent:    "applications-foreman-search-tabs"
+        }));
+      }
+      if (self.authorizationModel.ok("assignments-search")) {
+        var dataProviderForAssignments = new LUPAPISTE.AssignmentsDataProvider({
+                                           sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
+                                           searchResultType: "created",
+                                           currentLimit:     self.currentLimit
+                                         });
+        var label = ko.pureComputed(function() {
+          var count = dataProviderForAssignments.assignmentsCount();
+          return loc("application.assignment.search.label")
+            + (count ? " (" + count + ")" : "");
+        });
+
+        self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+          type:             "assignments",
+          label:            label,
+          dataProvider:     dataProviderForAssignments,
+          externalApi:      null,
+          resultsTextKey:   "application.assignment.search.results",
+          limits:           self.limits,
+          currentLimit:     self.currentLimit,
+          filterComponent:  "assignments-search-filter",
+          resultsComponent: "assignments-search-results",
+          pagingComponent:  "applications-search-paging",
+          tabsComponent:    "assignments-search-tabs"
+        }));
+      }
+    }
+  });
 
   self.searchModel = ko.pureComputed(function () {
     return _.find(self.searchModels(), function (searchModel) {

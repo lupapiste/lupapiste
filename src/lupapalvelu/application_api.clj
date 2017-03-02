@@ -234,6 +234,7 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:authority :applicant}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app/last-history-item application)))

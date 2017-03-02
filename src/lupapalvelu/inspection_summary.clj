@@ -1,6 +1,6 @@
 (ns lupapalvelu.inspection-summary
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
-            [sade.core :refer [now unauthorized fail! fail]]
+            [sade.core :refer [now unauthorized fail]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -27,19 +27,18 @@
    :op {:id ssc/ObjectIdStr
         (sc/optional-key :name) sc/Str
         (sc/optional-key :description) sc/Str}
-   :targets [InspectionSummaryTargets]})
+   :targets [InspectionSummaryTargets]
+   (sc/optional-key :locked) sc/Bool})
 
 (defn- split-into-template-items [text]
   (remove ss/blank? (map ss/trim (s/split-lines text))))
 
-(defn organization-has-inspection-summary-feature? [organizationId]
-  (pos? (mongo/count :organizations {:_id organizationId :inspection-summaries-enabled true})))
-
 (defn inspection-summary-api-auth-admin-pre-check
-  [{user :user}]
-  (let [org-set (usr/organization-ids-by-roles user #{:authorityAdmin})]
-    (when (or (empty? org-set) (not (some organization-has-inspection-summary-feature? org-set)))
-      unauthorized)))
+  [{user :user organizations :user-organizations}]
+  (when-not (-> (usr/authority-admins-organization-id user)
+                (util/find-by-id organizations)
+                :inspection-summaries-enabled)
+    unauthorized))
 
 (defn inspection-summary-api-authority-pre-check
   [{organization :organization}]
@@ -71,23 +70,39 @@
 
 (defn validate-that-summary-can-be-deleted
   "Inspection summary can be deleted if none of its targets contain attachments or are marked as finished by applicant"
-  [{{summaries :inspection-summaries attachments :attachments} :application {:keys [summaryId]} :data}]
+  [{{summaries :inspection-summaries attachments :attachments} :application {:keys [summaryId]} :data action :action}]
   (let [summary-to-be-deleted (-> (util/find-by-id summaryId summaries)
                                   (update :targets (partial enrich-summary-targets attachments)))
         targets               (:targets summary-to-be-deleted)]
     (when (some #(or (-> % :finished true?)
                      (not (empty? (:attachments %)))) targets)
-      (fail! :error.inspection-summary.delete.non-empty))))
+      (fail (util/kw-path :error action :non-empty)))))
+
+(defn validate-summary-not-locked [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data}]
+  (when (:locked (util/find-by-id summaryId summaries))
+    (fail :error.inspection-summary.locked)))
+
+(defn validate-summary-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data action :action}]
+  (when (and summaryId (not (util/find-by-id summaryId summaries)))
+    (fail (util/kw-path :error action :not-found))))
+
+(defn validate-summary-target-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId targetId]} :data action :action}]
+  (when (and summaryId targetId (not (->> (util/find-by-id summaryId summaries)
+                                          :targets
+                                          (util/find-by-id targetId))))
+    (fail (util/kw-path :error action :not-found))))
 
 (defn settings-for-organization [organizationId]
   (get (mongo/by-id :organizations organizationId) :inspection-summary {}))
 
 (defn create-template-for-organization [organizationId name templateText]
-  (org/update-organization organizationId
-                           {$push {:inspection-summary.templates {:name     name
-                                                                  :modified (now)
-                                                                  :id       (mongo/create-id)
-                                                                  :items    (split-into-template-items templateText)}}}))
+  (let [template-id (mongo/create-id)]
+    (org/update-organization organizationId
+                             {$push {:inspection-summary.templates {:name     name
+                                                                    :modified (now)
+                                                                    :id       template-id
+                                                                    :items    (split-into-template-items templateText)}}})
+    template-id))
 
 (defn update-template [organizationId templateId name templateText]
   (let [query (assoc {:inspection-summary.templates {$elemMatch {:id templateId}}} :_id organizationId)
@@ -165,16 +180,19 @@
   (when (-> target-id (get-summary-target inspection-summaries) :finished)
     (fail :error.inspection-summary-target.finished)))
 
-(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{tid :id} :target} :data}]
-  (fail-when-target-finished tid inspection-summaries))
+(defmethod att/upload-to-target-allowed :inspection-summary-item [{{:keys [inspection-summaries]} :application {{target-id :id} :target} :data :as command}]
+  (or (validate-summary-not-locked command)
+      (fail-when-target-finished target-id inspection-summaries)))
 
-(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
-  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
-    (fail-when-target-finished target-id inspection-summaries)))
+(defmethod att/edit-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
+  (or (validate-summary-not-locked command)
+      (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+        (fail-when-target-finished target-id inspection-summaries))))
 
-(defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data}]
-  (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
-    (fail-when-target-finished target-id inspection-summaries)))
+(defmethod att/delete-allowed-by-target :inspection-summary-item [{{:keys [inspection-summaries attachments]} :application {:keys [attachmentId]} :data :as command}]
+  (or (validate-summary-not-locked command)
+      (when-let [target-id (get-inspection-target-id-from-attachment attachmentId attachments)]
+        (fail-when-target-finished target-id inspection-summaries))))
 
 (defn- elem-match-query [appId summaryId]
   {:_id appId :inspection-summaries {$elemMatch {:id summaryId}}})
@@ -198,8 +216,6 @@
         index   (->> summary :targets (util/position-by-id targetId))
         set-updates   (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) mset)
         unset-updates (util/map-keys #(util/kw-path :inspection-summaries.$.targets index %) munset)]
-    (when-not index
-      (fail! :error.summary-target.edit.not-found))
     (mongo/update-by-query :applications
                            (elem-match-query appId summaryId)
                            (merge (when (seq set-updates)
@@ -208,9 +224,11 @@
                                     {$unset unset-updates})))))
 
 (defn delete-summary [app summaryId]
-  (let [summary (->> app :inspection-summaries (util/find-by-id summaryId))]
-    (when-not summary
-      (fail! :error.inspection-summary.delete.not-found))
-    (mongo/update-by-query :applications
-                           {:_id (:id app)}
-                           {$pull {:inspection-summaries {:id summaryId}}})))
+  (mongo/update-by-query :applications
+                         {:_id (:id app)}
+                         {$pull {:inspection-summaries {:id summaryId}}}))
+
+(defn toggle-summary-locking [{app-id :id summaries :inspection-summaries} summary-id locked?]
+  (mongo/update-by-query :applications
+                         {:_id app-id :inspection-summaries {$elemMatch {:id summary-id}}}
+                         {$set {:inspection-summaries.$.locked locked?}}))
