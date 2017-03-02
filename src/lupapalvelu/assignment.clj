@@ -114,6 +114,18 @@
    :user user-summary
    :timestamp created})
 
+(sc/defn new-recipient :- usr/SummaryUser
+  [id        :- (:id usr/SummaryUser)
+   username  :- (:username usr/SummaryUser)
+   lastName  :- (:lastName usr/SummaryUser)
+   firstName :- (:firstName usr/SummaryUser)
+   role      :- (:role usr/SummaryUser)]
+  {:id id
+   :username username
+   :firstName firstName
+   :lastName lastName
+   :role role})
+
 (sc/defn ^:always-validate new-assignment :- Assignment
   [user        :- usr/SummaryUser
    recipient   :- (sc/maybe usr/SummaryUser)
@@ -374,6 +386,14 @@
     :group     group
     :timestamp timestamp}))
 
+(defn recipient [trigger application]
+  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
+  (new-recipient (:userId handler)
+                 (:username (usr/get-user-by-id (:userId handler)))
+                 (:firstName handler)
+                 (:lastName handler)
+                 (:role (usr/get-user-by-id (:userId handler))))))
+
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
   ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
@@ -386,10 +406,11 @@
                                             targets)}
                        :states (new-state "targets-added"
                                           user
-                                          timestamp)}}]
+                                          timestamp)}
+                $set {:recipient (recipient trigger application)}}]
     (when (not (pos? (mongo/update-n :assignments query update)))
       (try (insert-assignment (new-assignment (usr/summary user)
-                                              nil
+                                              (recipient trigger application)
                                               application
                                               (:id trigger)
                                               timestamp
