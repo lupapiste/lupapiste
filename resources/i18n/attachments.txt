@@ -531,3 +531,6 @@
 "uploadzone.text-two" "en" "on your computer. You can add multiple files at once."
 "uploadzone.text-two" "fi" "omalta koneeltasi. Voit lisätä useita tiedostoja kerralla."
 "uploadzone.text-two" "sv" "från din dator. Du kan lägga till flera filer."
+"attachment.showConversionLog" "fi" "Näytä PDF/A-muunnoksen tekninen loki"
+"attachment.showConversionLog" "sv" ""
+"attachment.showConversionLog" "en" ""
