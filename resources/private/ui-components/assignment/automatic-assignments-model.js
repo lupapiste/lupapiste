@@ -5,6 +5,7 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.assignments = params.assignments;
+  self.authModel = params.authModel;
 
   self.assignmentText = function(assignment) {
     return (assignment.recipient ?

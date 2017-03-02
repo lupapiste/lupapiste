@@ -1,5 +1,4 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="automatic-assignments-template">
-  <!-- ko if lupapisteApp.models.applicationAuthModel.ok("assignments-for-application") && assignments().length > 0 -->
   <div class="automatic-assignments" data-bind="foreach: {data: assignments, afterRender: window.Stickyfill.rebuild}">
     <div class="assignment-container">
       <div class="assignment"
@@ -7,7 +6,6 @@
                       attr: {'data-test-id': 'automatic-assignment-' + $index()}"></div>
     </div>
   </div>
-  <!-- /ko -->
 </script>
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="automatic-single-assignment-template">
@@ -18,6 +16,7 @@
   <div class="no-wrap-whitespace">
     <button data-bind="click: $parent.markComplete,
                        clickBubble: false,
+                       enable: $parent.authModel.ok('complete-assignment'),
                        attr: {'data-test-id': 'mark-assignment-complete'}"
             class="positive">
       <i class="lupicon-check"></i>
