@@ -8,10 +8,12 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
 
   self.assignmentText = function(assignment) {
     return (assignment.recipient ?
-            assignment.recipient.firstName
-            + " " + assignment.recipient.lastName + ": "
-            : "") + assignment.description + ", "
-      + assignment.targets.length + " liitett\u00e4";
+              assignment.recipient.firstName + " " + assignment.recipient.lastName + ": " :
+            "")
+      + loc("application.assignment.automatic.target.attachment.message") + ": "
+      + assignment.description + ", "
+      + assignment.targets.length + " "
+      + loc("application.assignment.automatic.target.attachment." + (assignment.targets.length === 1 ? "singular" : "plural"));
   };
 
   self.markComplete = function(assignment) {
