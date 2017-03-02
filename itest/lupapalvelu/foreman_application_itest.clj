@@ -75,7 +75,8 @@
             (:permitSubtype foreman-application) => ss/blank?)
 
           (fact "Auths are correct, no empty foreman user"
-            (map :username (:auth foreman-application)) => (just ["sonja" "mikko@example.com"]))
+            (map :username (:auth foreman-application)) => (just ["sonja" "mikko@example.com"])
+            (map :username (:auth application)) => (just ["mikko@example.com"]))
 
           (fact "Foreman application contains link to application"
                 (:id foreman-link-permit-data) => application-id)
@@ -667,7 +668,12 @@
             {foreman-app2 :id} resp]
         resp => ok?
         (command foreman :approve-invite :id foreman-app2) => ok?
+        (:state (query-application foreman foreman-app2)) => "draft"
 
         (fact "Foreman CAN cancel foreman application"
-          (command foreman :cancel-application :id foreman-app2 :lang "fi" :text "") => ok?)))
+          (command foreman :cancel-application :id foreman-app2 :lang "fi" :text "") => ok?
+          (:state (query-application foreman foreman-app2)) => "canceled")
+        (fact "Foreman CAN undo his cancellation"
+          (command foreman :undo-cancellation :id foreman-app2) => ok?
+          (:state (query-application foreman foreman-app2)) => "draft" => "draft")))
     ))
