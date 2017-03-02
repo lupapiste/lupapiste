@@ -166,16 +166,16 @@
         ))))
 
 (facts "Inspection summary locking"
-  (let [app         (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
-        _           (command sipoo :set-organization-inspection-summaries :enabled true) => ok?
-        template-id (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
-        _           (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId template-id) => ok?
-        _           (give-verdict sonja (:id app) :verdictId "3323") => ok?
-        {summaries :summaries} (query sonja :inspection-summaries-for-application :id (:id app))
-        {summary-id :id} (first summaries)
-        {target-id :id} (command sonja :add-target-to-inspection-summary :id (:id app) :summaryId summary-id :targetName "some name")]
+  (let [app               (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
+        _                 (command sipoo :set-organization-inspection-summaries :enabled true) => ok?
+        {template-id :id} (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
+        _                 (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId template-id) => ok?
+        _                 (give-verdict sonja (:id app) :verdictId "3323") => ok?
+        {summaries :summaries :as result} (query sonja :inspection-summaries-for-application :id (:id app))
+        {summary-id :id}  (first summaries)
+        {target-id :id}   (command sonja :add-target-to-inspection-summary :id (:id app) :summaryId summary-id :targetName "some name")]
 
-    (fact "One summery exists"
+    (fact "One summary exists"
       (count summaries) => 1)
 
     (fact "Inspection summary is not locked by default"
