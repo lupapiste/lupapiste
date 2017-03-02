@@ -125,5 +125,15 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     }
   });
 
+  function assignmentTargetIds(assignments) {
+    return _.map(_.flatten(_.map(assignments, "targets")), "id");
+  }
 
+  // When attachment is removed, reload assignments if the assignment was a target for an automatic assignment
+  hub.subscribe("attachmentsService::remove", function(event) {
+    if (event.ok === true &&
+        _.includes(assignmentTargetIds(self.automaticAssignments()), _.get(event, "attachmentId"))) {
+      assignmentsForApplication(_.get(event, "id"));
+    }
+  });
 };

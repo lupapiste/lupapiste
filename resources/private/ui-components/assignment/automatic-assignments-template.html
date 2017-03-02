@@ -1,8 +1,10 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="automatic-assignments-template">
-  <!-- ko if lupapisteApp.models.applicationAuthModel.ok("assignments-for-application") -->
+  <!-- ko if lupapisteApp.models.applicationAuthModel.ok("assignments-for-application") && assignments().length > 0 -->
   <div class="automatic-assignments" data-bind="foreach: {data: assignments, afterRender: window.Stickyfill.rebuild}">
     <div class="assignment-container">
-      <div class="assignment" data-test-id="automatic-assignment" data-bind="template: 'automatic-single-assignment-template'"></div>
+      <div class="assignment"
+           data-bind="template: 'automatic-single-assignment-template',
+                      attr: {'data-test-id': 'automatic-assignment-' + $index()}"></div>
     </div>
   </div>
   <!-- /ko -->

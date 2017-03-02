@@ -63,3 +63,7 @@ Sonja can see two automatic assignments
   Open tab  attachments
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  Aita ja asema, 1
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-1']//div[@data-test-id='assignment-text']  ELY ja naapuri, 1
+
+Sonja deletes ELY:n tai kunnan poikkeamapäätös attachment, and the associated automatic assignment is deleted
+  Wait Until  Delete attachment  ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos
+  Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment-1']
