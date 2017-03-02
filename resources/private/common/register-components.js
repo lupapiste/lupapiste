@@ -178,7 +178,9 @@ jQuery(document).ready(function() {
     {name: "handler-list"},
     {name: "card"},
     {name: "edit-handlers"},
-    {name: "register-company-steps"}
+    {name: "register-company-steps"},
+    {name: "register-company-buttons"},
+    {name: "register-company-account-type"}
 ];
 
   ko.registerLupapisteComponents(components);

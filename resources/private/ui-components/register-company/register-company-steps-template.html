@@ -19,7 +19,8 @@
            data-bind="foreach: stepNames">
         <!-- ko if: $index -->
         <div class="tabby__cell">
-          <div class="edge">&nbsp;</div>
+          <div class="edge"
+               data-bind="css: $parent.stepCss( $index() - 1 )">&nbsp;</div>
         </div>
         <!-- /ko -->
 
@@ -27,16 +28,17 @@
           <div class="circle-row">
             <div class="circle-pad">
               <div class="edge"
-                   data-bind="visible: $index">&nbsp;</div>
+                   data-bind="visible: $index,
+                              css: $parent.stepCss( $index() - 1 )">&nbsp;</div>
             </div>
             <div class="circle-number"
                  data-bind="text: $index() + 1,
-                            css: {current: $index() === $parent.currentStep,
-                            past: $index() < $parent.currentStep}">
+                            css: $parent.stepCss( $index )">
             </div>
             <div class="circle-pad">
               <div class="edge"
-                   data-bind="visible: !$parent.isLast( $index())">&nbsp;</div>
+                   data-bind="visible: !$parent.isLast( $index()),
+                              css: $parent.stepCss( $index )">&nbsp;</div>
             </div>
           </div>
         </div>

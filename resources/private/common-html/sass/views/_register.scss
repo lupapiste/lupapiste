@@ -299,72 +299,154 @@
   display: inline-block;
 }
 
-div.company-steps {
-  $disabled: $gray221;
+div.register-company-wizard {
   h1, h2 {
     text-transform: none;
     text-align: center;
     margin-top: 1em;
   }
   h1 {
-    font: {
-      size: 3em;
-      weight: bold;
-    }
+      font: {
+        size: 3em;
+        weight: bold;
+      }
   }
   h2 {
     margin-top: 1.5em;
     font-size: 1.5em;
     font-weight: normal;
   }
-  .tabby {
-    width: 80%;
-    margin: $marginL auto;
-    // margin-top: $marginL;
-    // margin-bottom: $marginL;
+
+  div.company-steps {
+    $disabled: $gray221;
+    h1, h2 {
+      text-transform: none;
+      text-align: center;
+      margin-top: 1em;
+    }
+    h1 {
+      font: {
+        size: 3em;
+        weight: bold;
+      }
+    }
+    h2 {
+      margin-top: 1.5em;
+      margin-bottom: 1.5em;
+      font-size: 1.5em;
+      font-weight: normal;
+    }
+    .tabby {
+      width: 80%;
+      margin: $marginL auto;
+      // margin-top: $marginL;
+      // margin-bottom: $marginL;
+      text-align: center;
+      vertical-align: middle;
+      .tabby__cell {
+        padding-left: 0;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+      .circle-title {
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      .circle-row {
+        display: table-row;
+      }
+      .circle-number {
+        $radius: 40px;
+        min-width: 2 * $radius;
+        min-height: 2 * $radius;
+        line-height: 2 * $radius;
+        border-radius: $radius;
+        font-size: 2em;
+        font-weight: bold;
+        color: white;
+        background-color: $disabled;
+        display: table-cell;
+      }
+      .circle-number.current {
+        background-color: $primary;
+      }
+      .circle-number.past {
+        background-color: $positive;
+      }
+      .edge {
+        box-sizing: content-box;
+        width: 100%;
+        background-color: $disabled;
+        height: 4px;
+        z-index: -1;
+        &.past {
+          background-color: $positive;
+        }
+      }
+      .circle-pad {
+        display: table-cell;
+        width: 50%;
+        vertical-align: middle;
+      }
+    }
+  }
+  div.account-type-boxes {
+    margin-top: 1em;
+    div.account-type-box {
+      text-align: center;
+      background-color: $gray246;
+      border: 4px solid white;
+      padding: {
+        top: 3em;
+        left: 2em;
+        right: 2em;
+        bottom: 3em;
+      }
+      &.not-selected:hover {
+        border: 4px solid $orange-hover;
+        cursor: pointer;
+        > .account-type-price {
+          color: $orange-hover;
+        }
+        opacity: 1;
+        background-color: $gray246;
+      }
+      &.selected {
+        border: 4px solid $orange-dark;
+      }
+      &.other-selected {
+        opacity: 0.5;
+        background-color: $gray238;
+      }
+      > h3 {
+        font-size: 2em;
+        font-weight: bold;
+      }
+      > .account-type-price {
+        margin-top: 0.5em;
+        margin-bottom: 1em;
+        font-size: 4em;
+        font-weight: bold;
+        color: $orange-dark;
+        white-space: nowrap;
+      }
+      > .account-type-description {
+        border-top: 3px dashed  $gray221;
+        padding-top: 1em;
+        font-weight: bold;
+      }
+    }
+  }
+  register-company-buttons {
+    display: block;
     text-align: center;
-    vertical-align: middle;
-    .tabby__cell {
-      padding-left: 0;
-      white-space: nowrap;
-      vertical-align: middle;
-    }
-    .circle-title {
-      font-weight: bold;
-      white-space: nowrap;
-    }
-    .circle-row {
-      display: table-row;
-    }
-    .circle-number {
-      $radius: 40px;
-      min-width: 2 * $radius;
-      min-height: 2 * $radius;
-      line-height: 2 * $radius;
-      border-radius: $radius;
-      font-size: 2em;
-      font-weight: bold;
-      color: white;
-      background-color: $disabled;
-      display: table-cell;
-    }
-    .circle-number.current {
-      background-color: $primary;
-    }
-    .circle-number.past {
-      background-color: $positive;
-    }
-    .edge {
-      box-sizing: content-box;
-      width: 100%;
-      background-color: $disabled;
-      height: 4px;
-      z-index: -1;
-    }
-    .circle-pad {
-      display: table-cell;
-      width: 50%;
-      vertical-align: middle;
+    .register-company-buttons-group {
+      margin-top: 2em;
+      display: inline-block;
+      icon-button {
+        margin-left: 1em;
+        margin-right: 1em;
+      }
     }
   }
 }
