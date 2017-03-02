@@ -804,15 +804,13 @@
    [{user :user user-orgs :user-organizations}]
    (let [trigger (org/create-trigger triggerId targets handler description)
          organization (util/find-by-id (usr/authority-admins-organization-id user) user-orgs)
-         create-new (some? triggerId)
-         _ (clojure.pprint/pprint trigger)]
-     (if (sc/check org/AssignmentTrigger trigger)
-       (fail :error.missing-parameters)
-       (do
-         (if (true? create-new)
-          (org/update-assignment-trigger organization trigger triggerId)
-          (org/add-assignment-trigger organization trigger))
-         (ok :trigger trigger)))))
+         create-new (some? triggerId)]
+     (when (sc/check org/AssignmentTrigger trigger)
+       (fail :error.validator))
+     (if (true? create-new)
+      (org/update-assignment-trigger organization trigger triggerId)
+      (org/add-assignment-trigger organization trigger))
+     (ok :trigger trigger)))
 
 (defcommand remove-assignment-trigger
   {:description "Removes task trigger"

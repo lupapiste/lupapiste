@@ -489,7 +489,7 @@
       organization: organizationModel,
       reportsModel: new LUPAPISTE.OrganizationReportsModel()
     });
-    $("#tasks").applyBindings({
+    $("#assignments").applyBindings({
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });

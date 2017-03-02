@@ -10,7 +10,7 @@ Resource        ../../common_resource.robot
 
 Authority admin goes to the tasks page
   Sipoo logs in
-  Go to page  tasks
+  Go to page  assignments
 
 Authority admin adds new handler role
   Click enabled by test id  add-handler-role
@@ -29,6 +29,15 @@ Authority admin should see triggers only when assignments are anabled
   Checkbox should not be selected  assignments-enabled
   Wait until  Element should not be visible by test id  trigger-component
   Select checkbox  assignments-enabled
+
+Organization already have two triggers
+  Wait Until  Xpath Should Match X Times  //div[@id='triggers-table']//table/tbody/tr  2
+  Click remove trigger
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Positive indicator should be visible
+  Click remove trigger
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Positive indicator should be visible
 
 Authority adds trigger
   Click enabled by test id  add-trigger
@@ -53,7 +62,14 @@ Authority should be able to edit trigger
   Wait until  Element text should be  xpath=//span[@id="trigger-handler"]  Käsittelijä
 
 Authority should be able to delete trigger
-  Click by test id  remove-trigger
+  Click remove trigger
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Positive indicator should be visible
   Wait Until  Xpath Should Match X Times  //div[@id='triggers-table']//table/tbody/tr  0
+
+
+*** Keywords ***
+
+Click remove trigger
+  ${selector} =   Set Variable  $("[data-test-id='remove-trigger']:visible")
+  Execute Javascript  ${selector}[0].click();
