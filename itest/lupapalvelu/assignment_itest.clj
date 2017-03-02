@@ -341,18 +341,25 @@
   (Thread/sleep 1000))
 
 (defn query-trigger-assignments [apikey trigger-id]
-  (->> (query apikey :assignments-search :recipient [])
+  (->> (query apikey :assignments-search)
        :data :assignments (filter #(= (:trigger %) trigger-id))))
 
 (facts "automatic assignments"
   (let [trigger-resp   (command sipoo :upsert-assignment-trigger
                                 :description "Paapiirustuksia"
                                 :targets ["paapiirustus.asemapiirros" "paapiirustus.pohjapiirustus" "hakija.valtakirja"
-                                          "pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma"])
+                                          "pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma"]
+                                :handler {:id "abba1111111111111112acdc" :name {:fi "KVV-K\u00e4sittelij\u00e4"
+                                                                                :sv "KVV-Handl\u00e4ggare"
+                                                                                :en "KVV-Handler"}})
         trigger        (-> trigger-resp :trigger)
         application    (create-and-submit-application pena :propertyId sipoo-property-id)
         operation      (:primaryOperation application)
         application-id (:id application)
+        handler-resp   (command sonja :upsert-application-handler
+                                :id application-id
+                                :roleId "abba1111111111111112acdc"
+                                :userId (id-for-key sonja))
         attachments    (:attachments application)
         resp1 (upload-file pena "dev-resources/test-attachment.txt")
         file-id-1 (get-in resp1 [:files 0 :fileId])
@@ -367,7 +374,8 @@
       application  =not=> nil?
       resp1        =>     ok?
       resp2        =>     ok?
-      resp3        =>     ok?)
+      resp3        =>     ok?
+      handler-resp =>     ok?)
     (fact "automatic assignment is created from a trigger"
       (let [{job :job :as job-resp} (command
                                      pena
@@ -388,6 +396,16 @@
         (->> trigger-assignments first :targets (map :id)) => (just [(:id (first attachments))
                                                                      (:id (second attachments))]
                                                                     :in-any-order)))
+    (fact "automatic assignment have recipient when application have handler with corresponding role"
+      (let [trigger-assignment (first (query-trigger-assignments sonja (:id trigger)))]
+        (:recipient trigger-assignment) => {:id "777777777777777777000023",
+                                            :username "sonja",
+                                            :firstName "Sibbo",
+                                            :lastName "Sonja",
+                                            :role "authority"}))
+    (fact "automatic assignment havent recipient when application havent handler with corresponding role"
+      (let [trigger-assignment (first (query-trigger-assignments sonja "dead1111111111111112beef"))]
+        (:recipient trigger-assignment) => nil))
     (fact "new attachment is added as targets to existing trigger assignments"
       (let [{job :job :as job-resp} (command
                                      pena

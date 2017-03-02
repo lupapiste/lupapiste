@@ -11,7 +11,7 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
             assignment.recipient.firstName
             + " " + assignment.recipient.lastName + ": "
             : "") + assignment.description + ", "
-      + assignment.targets.length + " liitettä";
+      + assignment.targets.length + " liitett\u00e4";
   };
 
   self.markComplete = function(assignment) {
