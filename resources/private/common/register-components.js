@@ -180,7 +180,9 @@ jQuery(document).ready(function() {
     {name: "edit-handlers"},
     {name: "register-company-steps"},
     {name: "register-company-buttons"},
-    {name: "register-company-account-type"}
+    {name: "register-company-account-type"},
+    {name: "register-company-info"},
+    {name: "cell-invoice-operator"}
 ];
 
   ko.registerLupapisteComponents(components);

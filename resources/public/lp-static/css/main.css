@@ -16725,6 +16725,10 @@ div.register-company-wizard h2 {
   font-weight: normal;
 }
 
+div.register-company-wizard h2 .required {
+  color: #df3215;
+}
+
 div.register-company-wizard div.company-steps h1, div.register-company-wizard div.company-steps h2 {
   text-transform: none;
   text-align: center;
@@ -16795,6 +16799,10 @@ div.register-company-wizard div.company-steps .tabby .edge {
 
 div.register-company-wizard div.company-steps .tabby .edge.past {
   background-color: #2ca92c;
+}
+
+div.register-company-wizard div.company-steps .tabby .edge.current {
+  background-color: #f39129;
 }
 
 div.register-company-wizard div.company-steps .tabby .circle-pad {
@@ -16870,6 +16878,26 @@ div.register-company-wizard register-company-buttons .register-company-buttons-g
 div.register-company-wizard register-company-buttons .register-company-buttons-group icon-button {
   margin-left: 1em;
   margin-right: 1em;
+}
+
+div.register-company-wizard div.form-grid {
+  margin-top: 2em;
+  border: 1px solid #eeeeee;
+}
+
+div.register-company-wizard div.form-grid h3 {
+  font-weight: bold;
+  font-size: 1.5em;
+  margin-bottom: 0;
+}
+
+div.register-company-wizard div.form-grid label.mandatory:after {
+  content: " *";
+  color: #df3215;
+}
+
+div.register-company-wizard .form-grid + .form-grid {
+  margin-top: 0;
 }
 
 #login h1 {

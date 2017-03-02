@@ -20,7 +20,7 @@
         <!-- ko if: $index -->
         <div class="tabby__cell">
           <div class="edge"
-               data-bind="css: $parent.stepCss( $index() - 1 )">&nbsp;</div>
+               data-bind="css: $parent.stepCss( $index )">&nbsp;</div>
         </div>
         <!-- /ko -->
 
@@ -29,7 +29,7 @@
             <div class="circle-pad">
               <div class="edge"
                    data-bind="visible: $index,
-                              css: $parent.stepCss( $index() - 1 )">&nbsp;</div>
+                              css: $parent.stepCss( $index )">&nbsp;</div>
             </div>
             <div class="circle-number"
                  data-bind="text: $index() + 1,
@@ -38,7 +38,7 @@
             <div class="circle-pad">
               <div class="edge"
                    data-bind="visible: !$parent.isLast( $index()),
-                              css: $parent.stepCss( $index )">&nbsp;</div>
+                              css: $parent.stepCss( $index() + 1)">&nbsp;</div>
             </div>
           </div>
         </div>

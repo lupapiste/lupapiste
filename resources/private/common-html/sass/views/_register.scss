@@ -315,6 +315,9 @@ div.register-company-wizard {
     margin-top: 1.5em;
     font-size: 1.5em;
     font-weight: normal;
+    .required {
+      color: $label-required-star-color;
+    }
   }
 
   div.company-steps {
@@ -382,6 +385,9 @@ div.register-company-wizard {
         &.past {
           background-color: $positive;
         }
+        &.current {
+          background-color: $primary;
+        }
       }
       .circle-pad {
         display: table-cell;
@@ -448,5 +454,21 @@ div.register-company-wizard {
         margin-right: 1em;
       }
     }
+  }
+  div.form-grid {
+    margin-top: 2em;
+    border: 1px solid $gray238;
+    h3 {
+      font-weight: bold;
+      font-size: 1.5em;
+      margin-bottom: 0;
+    }
+    label.mandatory:after {
+      content: " *";
+      color: $label-required-star-color;
+    }
+  }
+  .form-grid + .form-grid {
+    margin-top: 0;
   }
 }
