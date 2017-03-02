@@ -166,14 +166,14 @@
         ))))
 
 (facts "Inspection summary locking"
-  (let [app       (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
-        _         (command sipoo :set-organization-inspection-summaries :enabled true) => ok?
-        _         (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
-        templates (-> (query sipoo :organization-inspection-summary-settings) :templates)
-        _         (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId (-> templates first :id)) => ok?
-        _         (give-verdict sonja (:id app) :verdictId "3323") => ok?
+  (let [app         (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")
+        _           (command sipoo :set-organization-inspection-summaries :enabled true) => ok?
+        template-id (command sipoo :create-inspection-summary-template :name "foo" :templateText "bar\nbar2\nbar3") => ok?
+        _           (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId template-id) => ok?
+        _           (give-verdict sonja (:id app) :verdictId "3323") => ok?
         {summaries :summaries} (query sonja :inspection-summaries-for-application :id (:id app))
-        {summary-id :id} (first summaries)]
+        {summary-id :id} (first summaries)
+        {target-id :id} (command sonja :add-target-to-inspection-summary :id (:id app) :summaryId summary-id :targetName "some name")]
 
     (fact "One summery exists"
       (count summaries) => 1)
@@ -191,9 +191,28 @@
     (fact "Inspection summary is now locked"
       (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => true)
 
-    (fact "Unlock inspectionsummary"
+    (facts "Restricted actions for locked inspection summary"
+      (fact "delete-inspection-summary"
+        (command sonja :delete-inspection-summary :id (:id app) :summaryId summary-id) => (partial expected-failure? :error.inspection-summary.locked))
+
+      (fact "add-target-to-inspection-summary"
+        (command sonja :add-target-to-inspection-summary :id (:id app) :summaryId summary-id :targetName "some name") => (partial expected-failure? :error.inspection-summary.locked))
+
+      (fact "edit-inspection-summary-target"
+        (command sonja :edit-inspection-summary-target :id (:id app) :summaryId summary-id :targetId target-id :targetName "some name") => (partial expected-failure? :error.inspection-summary.locked))
+
+      (fact "remove-target-from-inspection-summary"
+        (command sonja :remove-target-from-inspection-summary :id (:id app) :summaryId summary-id :targetId target-id) => (partial expected-failure? :error.inspection-summary.locked))
+
+      (fact "set-target-status"
+        (command pena :set-target-status :id (:id app) :summaryId summary-id :targetId target-id :status true) => (partial expected-failure? :error.inspection-summary.locked)))
+
+    (fact "Unlock inspection summary"
       (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked false) => ok?
       (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => false)
+
+    (fact "Setting status is allowed for unlocked inspection summary"
+      (command pena :set-target-status :id (:id app) :summaryId summary-id :targetId target-id :status true) => ok?)
 
     (fact "Trying to lock unexsisting inspection summary"
       (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId "not-found-id" :isLocked true) => (partial expected-failure? :error.toggle-inspection-summary-locking.not-found))))

@@ -33,7 +33,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
-    (inspection-summary/create-template-for-organization organizationId name templateText)))
+    (ok :id (inspection-summary/create-template-for-organization organizationId name templateText))))
 
 (defcommand delete-inspection-summary-template
   {:description "Modify inspection summary templates in the given organization."

@@ -80,7 +80,7 @@
 
 (defn validate-summary-not-locked [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data}]
   (when (:locked (util/find-by-id summaryId summaries))
-    (fail (util/kw-path :error.inspection-summary.locked))))
+    (fail :error.inspection-summary.locked)))
 
 (defn validate-summary-found-in-application [{{summaries :inspection-summaries} :application {:keys [summaryId]} :data action :action}]
   (when (and summaryId (not (util/find-by-id summaryId summaries)))
@@ -96,11 +96,13 @@
   (get (mongo/by-id :organizations organizationId) :inspection-summary {}))
 
 (defn create-template-for-organization [organizationId name templateText]
-  (org/update-organization organizationId
-                           {$push {:inspection-summary.templates {:name     name
-                                                                  :modified (now)
-                                                                  :id       (mongo/create-id)
-                                                                  :items    (split-into-template-items templateText)}}}))
+  (let [template-id (mongo/create-id)]
+    (org/update-organization organizationId
+                             {$push {:inspection-summary.templates {:name     name
+                                                                    :modified (now)
+                                                                    :id       template-id
+                                                                    :items    (split-into-template-items templateText)}}})
+    template-id))
 
 (defn update-template [organizationId templateId name templateText]
   (let [query (assoc {:inspection-summary.templates {$elemMatch {:id templateId}}} :_id organizationId)
