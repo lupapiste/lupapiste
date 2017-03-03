@@ -33,7 +33,10 @@
         (-> (query jarvenpaa :organization-inspection-summary-settings) :operations-templates) =not=> (contains {:pientalo id1})))
       (fact "Deleting the template"
         (command jarvenpaa :delete-inspection-summary-template :templateId id1) => ok?
-        (-> (query jarvenpaa :organization-inspection-summary-settings) :operations-templates) => empty?))))
+        (-> (query jarvenpaa :organization-inspection-summary-settings) :operations-templates) => empty?)
+      (fact "Can not be associated with P permits"
+        (command jarvenpaa :set-inspection-summary-template-for-operation :operationId :poikkeamis :templateId id1)
+          => (partial expected-failure? :error.inspection-summary.invalid-permit-type)))))
 
 (facts "Inspection summaries in applications"
   (fact "Create test data"

@@ -1,3 +1,6 @@
+"error.inspection-summary.invalid-permit-type" "en" "Inspection document summaries are only enabled in construction permits."
+"error.inspection-summary.invalid-permit-type" "fi" "Tarkastusasiakirjat ovat käytössä vain rakentamisen luvilla."
+"error.inspection-summary.invalid-permit-type" "sv" "Inspektionsprotokoll är i bruk endast för bygglov."
 "error.inspection-summary.delete.non-empty" "en" "Inspection documents with attachments or inspection targets marked as done cannot be deleted."
 "error.inspection-summary.delete.non-empty" "fi" "Tarkastusasiakirjaa, jossa on liitteitä, tai jonka tarkastuskohteita on merkitty valmiiksi, ei voi poistaa."
 "error.inspection-summary.delete.non-empty" "sv" "Inspektionsprotokoll med bilagor, eller vars Inspektionsobjekt redan fyllts i, kan ej raderas."
