@@ -11,7 +11,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
             [schema.core :as sc :refer [defschema]]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.operations :as operations]))
 
 (defschema InspectionSummaryTargets
            {:target-name sc/Str   ;Tarkastuskohde
@@ -52,6 +53,16 @@
                  (-> @organization :inspection-summaries-enabled)
                  (domain/owner-or-write-access? application user-id))
     unauthorized))
+
+(defn application-has-R-permit-type-pre-check
+  [{{:keys [permitType]} :application}]
+  (when-not (= (keyword permitType) :R)
+    (fail :error.inspection-summary.invalid-permit-type)))
+
+(defn operation-has-R-permit-type
+  [{{:keys [operationId]} :data}]
+  (when-not (= (keyword (operations/permit-type-of-operation operationId)) :R)
+    (fail :error.inspection-summary.invalid-permit-type)))
 
 (def attachment-target-type "inspection-summary-item")
 

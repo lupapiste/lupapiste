@@ -55,7 +55,8 @@
   {:description "Toggles operation either requiring section or not."
    :parameters [operationId templateId]
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
-   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check]
+   :pre-checks [inspection-summary/inspection-summary-api-auth-admin-pre-check
+                inspection-summary/operation-has-R-permit-type]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
@@ -71,7 +72,8 @@
 (defquery inspection-summaries-for-application
   {:pre-checks [(action/some-pre-check
                   inspection-summary/inspection-summary-api-authority-pre-check
-                  inspection-summary/inspection-summary-api-applicant-pre-check)]
+                  inspection-summary/inspection-summary-api-applicant-pre-check)
+                inspection-summary/application-has-R-permit-type-pre-check]
    :parameters [:id]
    :states states/post-verdict-states
    :user-roles #{:authority :applicant}}
@@ -83,7 +85,8 @@
                        (remove nil?))))
 
 (defcommand create-inspection-summary
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/application-has-R-permit-type-pre-check]
    :parameters [:id templateId operationId]
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
    :user-roles #{:authority}}
