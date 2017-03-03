@@ -9,11 +9,11 @@
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params:field('companyName')}"></div>
+                        params:field('name')}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                params:field('companyY')}"></div>
+                params:field('y')}"></div>
       </div>
     </div>
   </div>
@@ -25,7 +25,7 @@
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('address')}"></div>
+                        params: field('address1')}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
@@ -43,11 +43,7 @@
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('eInvoice')}"></div>
-      </div>
-      <div class="col-1">
-        <div data-bind="component: {name: 'form-cell',
-                        params: field('ovt')}"></div>
+                        params: field('netbill')}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
@@ -68,26 +64,29 @@
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('firstName')}"></div>
+                        params: field('firstName', userCell)}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('lastName')}"></div>
+                        params: field('lastName', userCell)}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('email')}"></div>
+                        params: field('email', userCell)}"></div>
       </div>
-      <div class="col-1">
+      <div class="col-1"
+           data-bind="ifnot: loggedIn">
         <div data-bind="component: {name: 'form-cell',
                         params: field('personId')}"></div>
       </div>
     </div>
+    <!-- ko ifnot: loggedIn -->
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
                         params: languageField()}"></div>
       </div>
     </div>
+    <!-- /ko -->
   </div>
 </script>

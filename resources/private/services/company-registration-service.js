@@ -4,17 +4,24 @@ LUPAPISTE.CompanyRegistrationService = function() {
 
   var accountPrices = ko.observable({account5: 59, account15: 79, account30: 99 });
 
+  // User summary or null.
+  function user() {
+    var u = lupapisteApp.models.currentUser;
+    return u.id()
+         ? ko.mapping.toJS( _.pick( u, ["firstName", "lastName", "email"]))
+         : null;
+  }
+
   function newRegistration() {
     return {
       accountType: ko.observable(),
-      companyName: ko.observable(),
-      companyY: ko.observable(),
-      address: ko.observable(),
+      name: ko.observable(),
+      y: ko.observable(),
+      address1: ko.observable(),
       zip: ko.observable(),
       po: ko.observable(),
       country: ko.observable(),
-      eInvoice: ko.observable(),
-      ovt: ko.observable(),
+      netbill: ko.observable(),
       pop: ko.observable(),
       reference: ko.observable(),
       firstName: ko.observable(),
@@ -25,14 +32,33 @@ LUPAPISTE.CompanyRegistrationService = function() {
     };
   }
 
+  function requiredFields() {
+    var fields = ["name", "y",
+                  "address1", "zip", "po"];
+    return user()
+         ? fields
+         : _.concat( fields, [ "firstName", "lastName",
+                               "email", "personId"]);
+  }
+
   // Guard makes sure that the wizard components are disposed.
   self.guard = ko.observable( true );
   self.registration = newRegistration();
+  // Current step [0-3] in the registration wizard.
+  self.currentStep = ko.observable( 0 );
+
+  ko.computed( function() {
+    var u = user();
+    if( u ) {
+      self.registration.firstName( u.firstName );
+      self.registration.lastName( u.lastName );
+      self.registration.email( u.email );
+    }
+  });
 
   var warnings = {
-    companyY: ko.observable(),
+    y: ko.observable(),
     zip: ko.observable(),
-    ovt: ko.observable(),
     email: ko.observable(),
     personId: ko.observable()
   };
@@ -42,25 +68,28 @@ LUPAPISTE.CompanyRegistrationService = function() {
     return _.size( s ) > 4 && /^[0-9]+$/.test( s );
   }
 
-  // TODO: Email already in use.
-  // TODO: Current user.
+  function isValidEmail( s ) {
+    var isOk = util.isValidEmailAddress( s );
+    if( isOk && !user() ) {
+      ajax.query( "email-in-use", {email: s })
+      .success( _.partial( warnings.email, "email-in-use" ))
+      .error( _.noop )
+      .call();
+    }
+    return isOk || user();
+  }
 
   var validators = {
-    companyY: {fun: util.isValidY,
+    y: {fun: util.isValidY,
               msg: "error.invalidY"},
     zip: {fun: isValidZip,
           msg: "error.illegal-zip"},
-    ovt: {fun: util.isValidOVT,
-          msg: "error.invalidOVT"},
-    email: {fun: util.isValidEmailAddress,
+    email: {fun: isValidEmail,
             msg: "error.illegal-email"},
     personId: {fun: util.isValidPersonId,
               msg: "error.illegal-hetu"}
   };
 
-  var requiredFields = ["companyName", "companyY",
-                        "address", "zip", "po",
-                       "firstName", "lastName", "email", "personId"];
 
   // Warnings are updated.
   ko.computed( function() {
@@ -73,15 +102,11 @@ LUPAPISTE.CompanyRegistrationService = function() {
   });
 
   self.field = function( fieldName ) {
-    return {required: _.includes( requiredFields, fieldName ),
+    return {required: _.includes( requiredFields(), fieldName ),
             value: self.registration[fieldName],
             label: "register.company.form." + fieldName,
             warning: warnings[fieldName]};
   };
-
-
-  self.currentStep = ko.observable( 0 );
-
 
   self.accountTypes = ko.computed( function() {
     return _.map( [5, 15, 30], function( n ) {
@@ -114,10 +139,38 @@ LUPAPISTE.CompanyRegistrationService = function() {
   }
 
   function fieldsOk() {
-    return _.every( requiredFields, function( field ) {
+    return _.every( requiredFields(), function( field ) {
       return _.trim(self.registration[field]());
     } )
         && _.every( _.values( warnings) , _.flow( ko.unwrap, _.isEmpty ));
+  }
+
+  var latestSignParams = {};
+
+  self.signResults = ko.observable( {} );
+  self.pending = ko.observable();
+
+  function initSign() {
+    var reg = _.omitBy( ko.mapping.toJS( self.registration ) );
+    var params = {lang: reg.language,
+                  company: _.pick( reg,
+                                   ["accountType", "name", "y", "address1",
+                                    "zip", "po", "country", "netbill",
+                                    "pop", "reference"]),
+                  signer: _.pick( reg,
+                                 ["firsName", "lastName", "email",
+                                  "personId"])};
+    if( !_.isEqual( latestSignParams, params )) {
+      ajax.command( "init-sign", params )
+      .pending( self.pending )
+      .success( function( res ) {
+        latestSignParams = params;
+        self.signResults( _.omit( res, "ok" ));
+        nextStep();
+      })
+      .call();
+    }
+
   }
 
   var stepConfigs = [{component: "register-company-account-type",
@@ -125,7 +178,9 @@ LUPAPISTE.CompanyRegistrationService = function() {
                       continueClick: nextStep},
                      {component: "register-company-info",
                       continueEnable: fieldsOk,
-                      continueClick: _.noop}];
+                      continueClick: initSign},
+                    {component: "regist-company-sign",
+                     showButtons: false}];
 
   self.currentConfig = function() {
     return stepConfigs[self.currentStep()];

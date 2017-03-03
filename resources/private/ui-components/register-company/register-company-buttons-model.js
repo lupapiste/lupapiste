@@ -7,6 +7,7 @@ LUPAPISTE.RegisterCompanyButtonsModel = function() {
 
   var service = lupapisteApp.services.companyRegistrationService;
 
+  self.waiting = service.pending;
   self.cancelClick = service.cancel;
 
   self.showContinue = self.disposedComputed( function() {
