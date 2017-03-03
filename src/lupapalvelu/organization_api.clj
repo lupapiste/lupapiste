@@ -793,7 +793,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (-> (usr/authority-admins-organization-id user)
-      (org/toggle-handler-role! roleId)))
+      (org/toggle-handler-role! roleId enabled)))
 
 (defcommand upsert-assignment-trigger
   {:description "Set and update automated assignment trigger"
