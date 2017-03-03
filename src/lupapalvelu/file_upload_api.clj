@@ -34,7 +34,7 @@
 
 (defraw upload-file-authenticated
   {:user-roles       #{:authority :applicant}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman :statementGiver)
    :parameters       [files id]
    :input-validators [file-mime-type-accepted file-size-legal]
    :states           states/all-states}
