@@ -13,7 +13,7 @@
                 <th data-bind="ltext: permitType"
                     class="sot--full-width"></th>
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
-                <th data-bind="ltext: 'auth-admin.inspection-summary-template'"></th>
+                <th><span data-bind="ltext: 'auth-admin.inspection-summary-template', if: permitType === 'R'"></span></th>
                 <!-- /ko -->
                 <!-- ko if: $root.organization.verdictSectionEnabled -->
                 <th data-bind="ltext: 'section.column'"></th>
@@ -28,10 +28,12 @@
                 <td data-bind="text: text"></td>
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
                 <td class="sot--center">
+                  <!-- ko if: $parent.permitType === "R" -->
                   <div data-bind="component: {name: 'select-inspection-summary-template-for-operation',
                                               params: {operation: $data,
                                                        templates: $root.organization.inspectionSummaryTemplates,
                                                        operationsMapping: $root.organization.operationsInspectionSummaryTemplates}}"></div>
+                  <!-- /ko -->
                 </td>
                 <!-- /ko -->
                 <!-- ko if: $root.organization.verdictSectionEnabled -->
