@@ -1317,7 +1317,7 @@
   {:apply-when (pos? (mongo/count :statistics {$and [{:type "pdfa-conversion"} {"years.2015" {$exists true}}]}))}
   (mongo/update :statistics {:type "pdfa-conversion"} {$unset {"years.2015" ""}}))
 
-(defmigration ya-katselmukset-remove-tila-and-convert-katselmuksenLaji
+#_(defmigration ya-katselmukset-remove-tila-and-convert-katselmuksenLaji
   {:apply-when (pos? (mongo/count :applications {:permitType "YA"
                                                  :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
                                                                            {$or [{"data.tila" {$exists true}}
