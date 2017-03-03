@@ -12,10 +12,10 @@ LUPAPISTE.TriggersModel = function( params ) {
     return _.map(types, function(type) {
       return {
         title: loc(["attachmentType", type].join(".")),
-        'type-group': type.split('.')[0],
-        'type-id': type.split('.')[1]};
+        "type-group": type.split(".")[0],
+        "type-id": type.split(".")[1]};
     });
-  };
+  }
 
   function DialogData() {
     var dd = this;
@@ -36,9 +36,9 @@ LUPAPISTE.TriggersModel = function( params ) {
       dd.target(trigger.targets);
       lupapisteApp.services.triggersTargetService.selected(wrapInObject(trigger.targets));
       if (trigger.handlerRole !== undefined && trigger.handlerRole !== null) {
-        var selectedRole = _.find(self.roles(), function(role) { return role.id() === trigger.handlerRole.id });
+        var selectedRole = _.find(self.roles(), function(role) { return role.id() === trigger.handlerRole.id; });
         dd.handler(selectedRole);
-      };
+      }
       dd.description(trigger.description);
     };
 
@@ -50,7 +50,7 @@ LUPAPISTE.TriggersModel = function( params ) {
     dd.saveTrigger = function() {
       triggerService.addAssignmentTrigger(dd);
     };
-  };
+  }
 
   self.dialogData = new DialogData();
 

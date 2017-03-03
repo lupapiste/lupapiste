@@ -1,4 +1,4 @@
-LUPAPISTE.AutocompleteTriggersTargetModel = function(params) {
+LUPAPISTE.AutocompleteTriggersTargetModel = function() {
   "use strict";
   var self = this;
 
@@ -47,4 +47,3 @@ LUPAPISTE.AutocompleteTriggersTargetModel = function(params) {
       label: "title"}));
   });
 };
-

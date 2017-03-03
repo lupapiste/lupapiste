@@ -19,12 +19,12 @@ LUPAPISTE.TriggerService = function() {
       id: null,
       name: null
     };
-    if (triggerData.handler() != undefined) {
+    if (triggerData.handler() !== undefined) {
       handlerObj = {
         id: triggerData.handler().id(),
-        name: {fi: triggerData.handler().name["fi"](),
-          sv: triggerData.handler().name["sv"](),
-          en: triggerData.handler().name["en"]()}
+        name: {fi: triggerData.handler().name.fi(),
+               sv: triggerData.handler().name.sv(),
+               en: triggerData.handler().name.en()}
       };
     }
     return handlerObj;
@@ -33,7 +33,7 @@ LUPAPISTE.TriggerService = function() {
   function wrapTriggerParameters(triggerData) {
     var selectedType = ko.unwrap(lupapisteApp.services.triggersTargetService.selected);
     var targets = _.map(selectedType, function(type) {
-      return [type["type-group"], type["type-id"]].join('.');
+      return [type["type-group"], type["type-id"]].join(".");
     });
     return {triggerId: triggerData.id,
             targets: targets,
