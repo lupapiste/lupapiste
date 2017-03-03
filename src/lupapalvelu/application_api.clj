@@ -171,11 +171,11 @@
    :input-validators [(partial action/non-blank-parameters [:id :userId :roleId])]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created {handlers :handlers application-org :organization app-id :id} :application user :user :as command}]
+  [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
   (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
                      (usr/create-handler handlerId roleId))]
     (update-application command (app/handler-upsert-updates handler handlers created user))
-    (assignment/change-assignment-recipient app-id roleId handler)
+    (assignment/change-assignment-recipient id roleId handler)
     (ok :id (:id handler))))
 
 (defcommand remove-application-handler
@@ -185,10 +185,14 @@
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
   [{created :created {handlers :handlers} :application user :user :as command}]
-  (update-application command
-                      {$set  {:modified created}
-                       $pull {:handlers {:id handlerId}}
-                       $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}}))
+  (let [result   (update-application command
+                                     {$set  {:modified created}
+                                      $pull {:handlers {:id handlerId}}
+                                      $push {:history  (app/handler-history-entry {:id handlerId :removed true} created user)}})]
+    (assignment/remove-assignment-recipient id handlerId)
+    result))
+
+
 
 ;;
 ;; Cancel

@@ -64,7 +64,8 @@
 
 (sc/defschema Recipient
   (-> usr/SummaryUser
-      (assoc (sc/optional-key :roleId) ssc/ObjectIdStr)))
+      (assoc (sc/optional-key :roleId) ssc/ObjectIdStr)
+      (assoc (sc/optional-key :handlerId) ssc/ObjectIdStr)))
 
 (sc/defschema Assignment
   {:id          ssc/ObjectIdStr
@@ -124,13 +125,15 @@
    firstName :- (:firstName usr/SummaryUser)
    lastName  :- (:lastName usr/SummaryUser)
    role      :- (:role usr/SummaryUser)
-   roleId    :- (sc/maybe ssc/ObjectIdStr)]
+   roleId    :- (sc/maybe ssc/ObjectIdStr)
+   handlerId :- (sc/maybe ssc/ObjectIdStr)]
   {:id id
    :username username
    :firstName firstName
    :lastName lastName
    :role role
-   :roleId roleId})
+   :roleId roleId
+   :handlerId handlerId})
 
 (sc/defn ^:always-validate new-assignment :- Assignment
   [user        :- usr/SummaryUser
@@ -398,7 +401,8 @@
                  (:firstName handler)
                  (:lastName handler)
                  (:role (usr/get-user-by-id (:userId handler)))
-                 (:roleId handler)))
+                 (:roleId handler)
+                 (:id handler)))
 
 (defn recipient [trigger application]
   (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
@@ -451,3 +455,8 @@
                      :recipient.roleId role-id}
         update      {$set {:recipient (create-recipient handler)}}]
     (mongo/update-n :assignments query update)))
+
+(defn remove-assignment-recipient [app-id handler-id]
+  (mongo/remove-many :assignments
+                     {:application.id app-id
+                      :recipient.handlerId handler-id}))

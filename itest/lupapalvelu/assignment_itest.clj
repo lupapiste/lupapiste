@@ -410,7 +410,8 @@
                                             :firstName "Sonja",
                                             :lastName "Sibbo",
                                             :roleId "abba1111111111111112acdc",
-                                            :role "authority"}))
+                                            :role "authority",
+                                            :handlerId (:id handler-resp)}))
     (fact "automatic assignment havent recipient when application havent handler with corresponding role"
       (let [trigger-assignment (first (query-trigger-assignments sonja "dead1111111111111112beef"))]
         (:recipient trigger-assignment) => nil))
@@ -460,4 +461,11 @@
                                 :firstName "Ronja"
                                 :lastName "Sibbo"
                                 :role "authority"
-                                :roleId "abba1111111111111112acdc"}))))
+                                :roleId "abba1111111111111112acdc"
+                                :handlerId (:id handler-resp)}))
+    (fact "When handler is removed from application, assignment is also removed"
+      (let [remove-handler-resp  (command sonja :remove-application-handler
+                                          :id application-id
+                                          :handlerId (:id handler-resp))]
+        remove-handler-resp => ok?
+        (count (query-trigger-assignments sonja (:id trigger))) => 0))))
