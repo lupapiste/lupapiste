@@ -583,7 +583,7 @@
   (when (seq attachment-ids)
     (let [ids-str (pr-str attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
-      (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+      (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
       (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)

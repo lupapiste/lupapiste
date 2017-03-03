@@ -94,9 +94,10 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
-  [command file-infos]
+  [command file-infos trigger-assignments-fn]
   (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
         job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
                 (job/start bind-job-status))]
-    (util/future* (bind-attachments! command coerced-file-infos (:id job)))
+    (util/future* (-> (bind-attachments! command coerced-file-infos (:id job))
+                      (trigger-assignments-fn)))
     job))

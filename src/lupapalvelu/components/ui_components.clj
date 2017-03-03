@@ -216,8 +216,10 @@
                    "assignment-target-filter-service.js"
                    "event-filter-service.js"
                    "inspection-summary-service.js"
-                   "handler-service.js",
-                   "card-service.js"]}
+                   "handler-service.js"
+                   "card-service.js"
+                   "triggers-target-service.js"
+                   "trigger-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -447,7 +449,7 @@
                               "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
-                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html"]}
+                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

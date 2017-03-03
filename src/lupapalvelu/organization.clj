@@ -72,6 +72,12 @@
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
+(sc/defschema AssignmentTrigger
+  {:id ssc/ObjectIdStr
+   :targets [sc/Str]
+   (sc/optional-key :handlerRole) HandlerRole
+   :description sc/Str})
+
 (sc/defschema Organization
   {:id sc/Str
    :name (zipmap i18n/all-languages (repeat sc/Str))
@@ -128,7 +134,8 @@
                               (sc/optional-key :server)  Server}
    (sc/optional-key :inspection-summaries-enabled) sc/Bool
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
-                                          (sc/optional-key :operations-templates) sc/Any}})
+                                          (sc/optional-key :operations-templates) sc/Any}
+   (sc/optional-key :assignment-triggers) [AssignmentTrigger]})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -586,6 +593,29 @@
                 (count handler-roles))]
     (update-organization org-id {$set {(util/kw-path :handler-roles ind :id)   (:id handler-role)
                                        (util/kw-path :handler-roles ind :name) (:name handler-role)}})))
+
+(defn disable-handler-role! [org-id role-id]
+  (mongo/update :organizations {:_id org-id :handler-roles.id role-id} {$set {:handler-roles.$.disabled true}}))
+
+(defn create-trigger [triggerId target handler description]
+  (cond->
+    {:id (or triggerId (mongo/create-id))
+     :targets target
+     :description description}
+    (:name handler) (conj {:handlerRole (create-handler-role (:id handler) (:name handler))})))
+
+(defn add-assignment-trigger [{org-id :id} trigger]
+  (update-organization org-id {$push {:assignment-triggers trigger}}))
+
+(defn update-assignment-trigger [{org-id :id} trigger triggerId]
+  (let [query (assoc {:assignment-triggers {$elemMatch {:id triggerId}}} :_id org-id)
+        changes {$set {:assignment-triggers.$.targets (:targets trigger)
+                       :assignment-triggers.$.handlerRole (:handlerRole trigger)
+                       :assignment-triggers.$.description (:description trigger)}}]
+    (mongo/update-by-query :organizations query changes)))
+
+(defn remove-assignment-trigger [{org-id :id} trigger-id]
+  (update-organization org-id {$pull {:assignment-triggers {:id trigger-id}}}))
 
 (defn toggle-handler-role! [org-id role-id enabled?]
   (mongo/update :organizations

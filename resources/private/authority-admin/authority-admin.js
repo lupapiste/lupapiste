@@ -489,6 +489,10 @@
       organization: organizationModel,
       reportsModel: new LUPAPISTE.OrganizationReportsModel()
     });
+    $("#assignments").applyBindings({
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel
+    });
     if (features.enabled("ajanvaraus")) {
       $("#organization-calendars").applyBindings({
         calendars:           calendarsModel,

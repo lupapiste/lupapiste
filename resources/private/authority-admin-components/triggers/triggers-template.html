@@ -1,0 +1,85 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="triggers-template">
+    <h2 data-bind="ltext: 'triggers.title'"></h2>
+    <div id="triggers-table">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'triggers.header.title'"></th>
+              <th width="15%" data-bind="ltext: 'triggers.header.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: triggers">
+            <tr>
+                <td>
+                    <span data-bind="foreach: $data.targets" id="trigger-target">
+                        <span data-bind="text: loc('attachmentType.' +$data) +','"></span>
+                    </span>
+                    &nbsp;
+                    <span data-bind="if: $data.handlerRole" id="trigger-handler">
+                        <span data-bind ="text: $data.handlerRole.name[loc.currentLanguage]"></span>
+                     </span>
+                     <span data-bind="if: !$data.handlerRole">
+                        <span data-bind ="text: loc('triggers.no.handler')"></span>
+                     </span>
+                </td>
+                <td width="15%" >
+                    <span>
+                       <a href="#" data-bind="click: $parent.editTrigger, ltext: 'edit'" data-test-id="edit-trigger" class="modal"></a>
+                    </span>
+                    &nbsp;&nbsp;&nbsp;
+                    <span>
+                       <a href="#" data-bind="click: $parent.removeTrigger, ltext: 'remove'" data-test-id="remove-trigger" class="modal"></a>
+                    </span>
+                </td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+  <icon-button params="ltext: 'triggers.add',
+                       click: addTrigger,
+                       icon: 'circle-plus',
+                       testId: 'add-trigger'"
+               data-bind="visible: true"></icon-button>
+  <div id="dialog-add-trigger" class="window autosized selectm-dialog">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'triggers.add'"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content">
+        <form>
+            <div>
+                <label data-bind="ltext: 'triggers.label.target'"></label>
+                <div data-test-id="triggers-target-component"
+                     data-bind="component: {name: 'autocomplete-triggers-target'}"></div>
+            </div>
+            <div>
+                <label data-bind="ltext: 'triggers.label.handler'"></label>
+                <select class="dropdown dropdown--full-width"
+                        data-test-id="triggers-handler-select"
+                        data-bind="options: roles,
+                                   optionsText: function(item) { return _.get(item, 'name.' + loc.currentLanguage); },
+                                   optionsCaption: loc('triggers.no.handler'),
+                                   value: dialogData.handler"></select>
+             </div>
+             <div>
+                <label data-bind="ltext: 'triggers.label.description'"></label>
+                <input data-test-id="triggers-description-input"
+                       class="form-input long grid-style-input"
+                       data-bind="value: dialogData.description"
+                       id="triggers.add.description"
+                       type="text"/>
+             </div>
+
+             <button data-bind="click: dialogData.saveTrigger,
+                                enable: dialogData.isGood,
+                                css: {waiting: dialogData.waitingOk}"
+                     class="positive btn-dialog"
+                     data-test-id="save-trigger-dialog-ok">
+                <i class="wait spin lupicon-refresh"></i>
+                <span data-bind="ltext: 'save'"></span>
+             </button>
+        </form>
+      </div>
+  </div>
+</script>

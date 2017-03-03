@@ -1,6 +1,6 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
-            [monger.operators :refer [$and $in $ne $options $or $regex $set $push]]
+            [monger.operators :refer [$and $each $setOnInsert $in $ne $nin $options $or $regex $set $pull $push]]
             [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
@@ -46,31 +46,42 @@
    When application is canceled, also assignment status is set to canceled."
   #{"active" "canceled"})
 
-(def assignment-state-types #{"created" "completed"})
+(def assignment-state-types #{"created" "completed" "targets-added"})
 
 (sc/defschema AssignmentState
   {:type (apply sc/enum assignment-state-types)
    :user usr/SummaryUser
    :timestamp ssc/Timestamp})
 
+
+(def user-created-trigger "user-created")
+
+(defn- user-created-or-uid? [trigger]
+  (or (= trigger user-created-trigger)
+      (nil? (sc/check ssc/ObjectIdStr trigger))))
+
+(sc/defschema AssignmentTriggerId (sc/constrained sc/Str user-created-or-uid?))
+
 (sc/defschema Assignment
-  {:id             ssc/ObjectIdStr
-   :application    {:id           ssc/ApplicationId
-                    :organization sc/Str
-                    :address      sc/Str
-                    :municipality sc/Str}
-   :target         {:group                         sc/Str
-                    :id                            sc/Str
-                    (sc/optional-key :type-key)    sc/Str
-                    (sc/optional-key :info-key)    sc/Str
-                    (sc/optional-key :description) sc/Str}
-   :recipient      (sc/maybe usr/SummaryUser)
-   :status         (apply sc/enum assignment-statuses)
-   :states         [AssignmentState]
-   :description    sc/Str})
+  {:id          ssc/ObjectIdStr
+   :application {:id           ssc/ApplicationId
+                 :organization sc/Str
+                 :address      sc/Str
+                 :municipality sc/Str}
+   :trigger     AssignmentTriggerId
+   :targets     [{:group                         sc/Str
+                  :id                            sc/Str
+                  :timestamp                     ssc/Timestamp
+                  (sc/optional-key :type-key)    sc/Str
+                  (sc/optional-key :info-key)    sc/Str
+                  (sc/optional-key :description) sc/Str}]
+   :recipient   (sc/maybe usr/SummaryUser)
+   :status      (apply sc/enum assignment-statuses)
+   :states      [AssignmentState]
+   :description sc/Str})
 
 (sc/defschema NewAssignment
-  (-> (select-keys Assignment [:application :description :recipient :target])
+  (-> (select-keys Assignment [:application :description :recipient :targets])
       (assoc :state AssignmentState)))
 
 (sc/defschema UpdateAssignment
@@ -95,14 +106,6 @@
    :totalCount     sc/Int
    :assignments    [Assignment]})
 
-(sc/defn ^:private new-assignment :- Assignment
-  [assignment :- NewAssignment]
-  (-> assignment
-      (assoc :states [(:state assignment)])                 ; initial state
-      (dissoc :state)
-      (merge {:id        (mongo/create-id)
-              :status    "active"})))
-
 (sc/defn new-state :- AssignmentState
   [type         :- (:type AssignmentState)
    user-summary :- (:user AssignmentState)
@@ -110,6 +113,36 @@
   {:type type
    :user user-summary
    :timestamp created})
+
+(sc/defn new-recipient :- usr/SummaryUser
+  [id        :- (:id usr/SummaryUser)
+   username  :- (:username usr/SummaryUser)
+   lastName  :- (:lastName usr/SummaryUser)
+   firstName :- (:firstName usr/SummaryUser)
+   role      :- (:role usr/SummaryUser)]
+  {:id id
+   :username username
+   :firstName firstName
+   :lastName lastName
+   :role role})
+
+(sc/defn ^:always-validate new-assignment :- Assignment
+  [user        :- usr/SummaryUser
+   recipient   :- (sc/maybe usr/SummaryUser)
+   application
+   trigger     :- AssignmentTriggerId
+   created     :- ssc/Timestamp
+   description :- sc/Str
+   targets     :- [{:group sc/Str, :id sc/Str}]]
+  {:id             (mongo/create-id)
+   :status         "active"
+   :trigger        trigger
+   :application    (select-keys application
+                                [:id :organization :address :municipality])
+   :states         [(new-state "created" user created)]
+   :recipient      recipient
+   :targets        (map #(assoc % :timestamp created) targets)
+   :description    description})
 
 ;;
 ;; Querying assignments
@@ -163,7 +196,7 @@
                           {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
                                                 "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
                         (when-not (empty? targetType)
-                          {:target.group {$in targetType}})
+                          {:targets.group {$in targetType}})
                         {:status {$ne "canceled"}}])
   :post-lookup (filter seq
                        [(when-not (ss/blank? searchText)
@@ -198,7 +231,8 @@
                                              :organization "$applicationDetails.organization"
                                              :address "$applicationDetails.address"
                                              :municipality "$applicationDetails.municipality"}
-                            :target         "$target"
+                            :targets        "$targets"
+                            :trigger        "$trigger"
                             :recipient      "$recipient"
                             :status         "$status"
                             :states         "$states"
@@ -212,7 +246,8 @@
              (map
                  #(dissoc % :description-ci :created :currentState)
                  (map #(rename-keys % {:_id :id}) res))]
-      converted)
+      {:count       (count converted)
+       :assignments (->> converted (drop skip) (take limit))})
     (catch com.mongodb.MongoException e
       (errorf "Assignment search query=%s failed: %s" mongo-query e)
       (fail! :error.unknown))))
@@ -223,8 +258,13 @@
        (util/map-values (comp (partial into {}) assignment-targets))))
 
 (defn- enrich-assignment-target [application-targets assignment]
-  (let [group-targets (-> assignment :target :group keyword application-targets)]
-    (update assignment :target #(merge % (util/find-by-id (:id %) group-targets)))))
+  (update assignment :targets
+          (partial map
+                   #(merge % (util/find-by-id (:id %)
+                                              (-> %
+                                                  :group
+                                                  keyword
+                                                  application-targets))))))
 
 (defn- enrich-targets [assignments]
   (let [app-id->targets (->> (map (comp :id :application) assignments)
@@ -256,16 +296,15 @@
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [mongo-query (make-query query user)
-        assignments (search query
-                            mongo-query
-                            (util/->long (:skip query))
-                            (util/->long (:limit query))
-                            (:sort query))]
+        assignments-result (search query
+                                   mongo-query
+                                   (util/->long (:skip query))
+                                   (util/->long (:limit query))
+                                   (:sort query))]
     {:userTotalCount (mongo/count :assignments)
      ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
-     :totalCount     (count assignments)
-     :assignments    (->> assignments
-                          (enrich-targets))}))
+     :totalCount     (:count assignments-result)
+     :assignments    (->> (:assignments assignments-result))}))
 
 (sc/defn ^:always-validate count-active-assignments-for-user :- sc/Int
   [{user-id :id}]
@@ -278,15 +317,14 @@
 ;;
 
 (sc/defn ^:always-validate insert-assignment :- ssc/ObjectIdStr
-  [assignment :- NewAssignment]
-  (let [created-assignment (new-assignment assignment)]
-    (mongo/insert :assignments created-assignment)
-    (:id created-assignment)))
+  [assignment :- Assignment]
+  (mongo/insert :assignments assignment)
+  (:id assignment))
 
 (defn- update-to-db [assignment-id query assignment-changes]
   (mongo/update-n :assignments (assoc query :_id assignment-id) assignment-changes))
 
-(defn- update-assignments [query assignment-changes]
+(defn update-assignments [query assignment-changes]
   (mongo/update-n :assignments query assignment-changes :multi true))
 
 (defn count-for-assignment-id [assignment-id]
@@ -300,8 +338,8 @@
                                                 completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
   (update-to-db assignment-id
-                     (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
-                     {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
+                (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
+                {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
 (defn- set-assignments-statuses [query status]
   {:pre [(assignment-statuses status)]}
@@ -314,7 +352,83 @@
   (set-assignments-statuses {:application.id application-id} "active"))
 
 (defn set-assignment-status [application-id target-id status]
-  (set-assignments-statuses {:application.id application-id :target.id target-id} status))
+  (set-assignments-statuses {:application.id application-id :targets.id target-id} status))
 
-(defn remove-assignments-by-target [application-id target-id]
-  (mongo/remove-many :assignments {:application.id application-id :target.id target-id}))
+(defn remove-target-from-assignments
+  "Removes given target from assignments, then removes assignments left with no target"
+  [application-id target-id]
+  (mongo/update-n :assignments
+                  {:application.id application-id
+                   :targets.id target-id}
+                  {$pull {:targets {:id target-id}}})
+  (mongo/remove-many :assignments {:application.id application-id
+                                   :targets []}))
+
+;;
+;; Upserting dynamic assignments based on assignment triggers
+;;
+
+(defn- group-by-triggers [triggers targets]
+  (->> triggers
+       (map (fn [trigger]
+              {:trigger trigger
+               :targets (->> targets
+                             (filter (comp (set (:targets trigger))
+                                           :trigger-type)))}))
+       (remove (comp empty? :targets))))
+
+(defn- ->target
+  ([group {:keys [id]}]
+   {:id    id
+    :group group})
+  ([group timestamp {:keys [id]}]
+   {:id        id
+    :group     group
+    :timestamp timestamp}))
+
+(defn recipient [trigger application]
+  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
+  (new-recipient (:userId handler)
+                 (:username (usr/get-user-by-id (:userId handler)))
+                 (:firstName handler)
+                 (:lastName handler)
+                 (:role (usr/get-user-by-id (:userId handler))))))
+
+(defn- upsert-assignment-targets
+  [user application trigger timestamp assignment-group targets]
+  ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
+  ; https://jira.mongodb.org/browse/SERVER-10711
+  (let [query {:application.id (:id application)
+               :status "active"
+               :states.type {$nin ["completed"]}
+               :trigger (:id trigger)}
+        update {$push {:targets {$each (map (partial ->target assignment-group timestamp)
+                                            targets)}
+                       :states (new-state "targets-added"
+                                          user
+                                          timestamp)}
+                $set {:recipient (recipient trigger application)}}]
+    (when (not (pos? (mongo/update-n :assignments query update)))
+      (try (insert-assignment (new-assignment (usr/summary user)
+                                              (recipient trigger application)
+                                              application
+                                              (:id trigger)
+                                              timestamp
+                                              (:description trigger)
+                                              (map (partial ->target assignment-group)
+                                                   targets)))
+           (catch Exception e
+             (mongo/update-n :assignments query update))))))
+
+(defn run-assignment-triggers [response-fn]
+  (fn [response]
+    (let [{:keys [user organization application targets assignment-group timestamp]} (response-fn response)
+          org-id   (:id organization)
+          triggers (:assignment-triggers organization)]
+      (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]
+        (upsert-assignment-targets (usr/summary user)
+                                   application
+                                   trigger
+                                   timestamp
+                                   assignment-group
+                                   targets)))))
