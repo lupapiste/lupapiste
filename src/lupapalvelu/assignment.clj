@@ -62,6 +62,10 @@
 
 (sc/defschema AssignmentTriggerId (sc/constrained sc/Str user-created-or-uid?))
 
+(sc/defschema Recipient
+  (-> usr/SummaryUser
+      (assoc (sc/optional-key :roleId) ssc/ObjectIdStr)))
+
 (sc/defschema Assignment
   {:id          ssc/ObjectIdStr
    :application {:id           ssc/ApplicationId
@@ -75,7 +79,7 @@
                   (sc/optional-key :type-key)    sc/Str
                   (sc/optional-key :info-key)    sc/Str
                   (sc/optional-key :description) sc/Str}]
-   :recipient   (sc/maybe usr/SummaryUser)
+   :recipient   (sc/maybe Recipient)
    :status      (apply sc/enum assignment-statuses)
    :states      [AssignmentState]
    :description sc/Str})
@@ -114,21 +118,23 @@
    :user user-summary
    :timestamp created})
 
-(sc/defn new-recipient :- usr/SummaryUser
+(sc/defn new-recipient :- Recipient
   [id        :- (:id usr/SummaryUser)
    username  :- (:username usr/SummaryUser)
-   lastName  :- (:lastName usr/SummaryUser)
    firstName :- (:firstName usr/SummaryUser)
-   role      :- (:role usr/SummaryUser)]
+   lastName  :- (:lastName usr/SummaryUser)
+   role      :- (:role usr/SummaryUser)
+   roleId    :- (sc/maybe ssc/ObjectIdStr)]
   {:id id
    :username username
    :firstName firstName
    :lastName lastName
-   :role role})
+   :role role
+   :roleId roleId})
 
 (sc/defn ^:always-validate new-assignment :- Assignment
   [user        :- usr/SummaryUser
-   recipient   :- (sc/maybe usr/SummaryUser)
+   recipient   :- (sc/maybe Recipient)
    application
    trigger     :- AssignmentTriggerId
    created     :- ssc/Timestamp
@@ -386,13 +392,17 @@
     :group     group
     :timestamp timestamp}))
 
-(defn recipient [trigger application]
-  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
+(defn- create-recipient [handler]
   (new-recipient (:userId handler)
                  (:username (usr/get-user-by-id (:userId handler)))
                  (:firstName handler)
                  (:lastName handler)
-                 (:role (usr/get-user-by-id (:userId handler))))))
+                 (:role (usr/get-user-by-id (:userId handler)))
+                 (:roleId handler)))
+
+(defn recipient [trigger application]
+  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
+    (create-recipient handler)))
 
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
@@ -432,3 +442,12 @@
                                    timestamp
                                    assignment-group
                                    targets)))))
+
+(defn change-assignment-recipient [app-id role-id handler]
+  (let [query       {:application.id app-id
+                     :status "active"
+                     :states.type {$nin ["completed"]}
+                     :trigger {$nin ["user-created"]}
+                     :recipient.roleId role-id}
+        update      {$set {:recipient (create-recipient handler)}}]
+    (mongo/update-n :assignments query update)))

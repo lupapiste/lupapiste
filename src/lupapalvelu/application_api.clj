@@ -33,7 +33,8 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
+            [lupapalvelu.assignment :as assignment]))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -170,10 +171,11 @@
    :input-validators [(partial action/non-blank-parameters [:id :userId :roleId])]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created {handlers :handlers application-org :organization} :application user :user :as command}]
+  [{created :created {handlers :handlers application-org :organization app-id :id} :application user :user :as command}]
   (let [handler (->> (usr/find-user {:id userId (util/kw-path :orgAuthz application-org) "authority"})
                      (usr/create-handler handlerId roleId))]
     (update-application command (app/handler-upsert-updates handler handlers created user))
+    (assignment/change-assignment-recipient app-id roleId handler)
     (ok :id (:id handler))))
 
 (defcommand remove-application-handler

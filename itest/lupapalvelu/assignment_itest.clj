@@ -344,6 +344,13 @@
   (->> (query apikey :assignments-search)
        :data :assignments (filter #(= (:trigger %) trigger-id))))
 
+(defn query-recipients-by-role [apikey role-id]
+  (->> (query apikey :assignments-search)
+       :data
+       :assignments
+       (map :recipient)
+       (filter #(= (:roleId %) role-id))))
+
 (facts "automatic assignments"
   (let [trigger-resp   (command sipoo :upsert-assignment-trigger
                                 :description "Paapiirustuksia"
@@ -400,8 +407,9 @@
       (let [trigger-assignment (first (query-trigger-assignments sonja (:id trigger)))]
         (:recipient trigger-assignment) => {:id "777777777777777777000023",
                                             :username "sonja",
-                                            :firstName "Sibbo",
-                                            :lastName "Sonja",
+                                            :firstName "Sonja",
+                                            :lastName "Sibbo",
+                                            :roleId "abba1111111111111112acdc",
                                             :role "authority"}))
     (fact "automatic assignment havent recipient when application havent handler with corresponding role"
       (let [trigger-assignment (first (query-trigger-assignments sonja "dead1111111111111112beef"))]
@@ -438,4 +446,18 @@
         complete-resp => ok?
         (count trigger-assignments) => 2
         (count non-completed-trigger-assignments) => 1
-        (-> non-completed-trigger-assignments first :id) =not=> old-trigger-assignment-id))))
+        (-> non-completed-trigger-assignments first :id) =not=> old-trigger-assignment-id))
+    (fact "When handler with assignment is changed, assignments handler should be changed"
+      (let [upsert-handler-resp   (command sonja :upsert-application-handler
+                                    :id application-id
+                                    :roleId "abba1111111111111112acdc"
+                                    :userId (id-for-key ronja)
+                                    :handlerId (:id handler-resp))
+            recipients (query-recipients-by-role sonja "abba1111111111111112acdc")]
+        upsert-handler-resp => ok?
+        (second recipients) => {:id (id-for-key ronja)
+                                :username "ronja"
+                                :firstName "Ronja"
+                                :lastName "Sibbo"
+                                :role "authority"
+                                :roleId "abba1111111111111112acdc"}))))
