@@ -129,3 +129,20 @@
     (let [lp-ops (set (keys p-operations))
           commons-ops (set commons-operations/p-operations)]
       (= lp-ops commons-ops) => true)))
+
+(fact "operation-id exists?"
+  (operation-id-exists? {} nil) => false
+  (operation-id-exists? nil nil) => false
+  (operation-id-exists? {} "foo") => false
+  (operation-id-exists? {:primaryOperation {:id nil}} nil) => false
+  (operation-id-exists? {:primaryOperation {:id "123"}} nil) => false
+  (operation-id-exists? {:primaryOperation {:id "123"}} "1") => false
+  (operation-id-exists? {:primaryOperation {:id "123"}} "123") => true
+  (operation-id-exists? {:primaryOperation {:id "123"}
+                         :secondaryOperations [{:id "321"}]} "123") => true
+  (operation-id-exists? {:primaryOperation {:id "123"}
+                         :secondaryOperations [{:id "123"}]} "123") => true
+  (operation-id-exists? {:primaryOperation {:id "123"}
+                         :secondaryOperations [{:id "321"} {:id "1"}]} "1") => true
+  (operation-id-exists? {:primaryOperation {:id "123"}
+                         :secondaryOperations [{:id "321"} {:id "1"}]} 1) => false)

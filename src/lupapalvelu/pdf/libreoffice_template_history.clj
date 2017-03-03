@@ -18,6 +18,7 @@
        :review (i18n/localize lang "caseFile.operation.review")
        :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
        :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection")
+       :handler-change (i18n/localize lang "caseFile.handlerChange")
        "")
      ": "
      (cond

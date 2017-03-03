@@ -1,5 +1,5 @@
 (ns lupapalvelu.assignment-api
-  (:require [lupapalvelu.action :as action :refer [defcommand defquery parameters-matching-schema]]
+  (:require [lupapalvelu.action :as action :refer [defcommand defquery disallow-impersonation parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
@@ -106,7 +106,8 @@
    :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/vector-parameters [:targets])]
    :pre-checks       [validate-receiver
-                      assignments-enabled-for-application]
+                      assignments-enabled-for-application
+                      disallow-impersonation]
    :states           states/all-application-states-but-draft-or-terminal}
   [{user         :user
     created      :created
@@ -126,7 +127,8 @@
    :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :pre-checks       [validate-receiver
-                      validate-assignment-id]
+                      validate-assignment-id
+                      disallow-impersonation]
    :states           states/all-application-states-but-draft-or-terminal}
   [_]
   (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
@@ -136,7 +138,8 @@
   {:description "Complete an assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
-   :pre-checks [assignments-enabled]
+   :pre-checks [assignments-enabled
+                disallow-impersonation]
    :input-validators [(partial action/non-blank-parameters [:assignmentId])]
    :categories #{:documents}}
   [{user    :user

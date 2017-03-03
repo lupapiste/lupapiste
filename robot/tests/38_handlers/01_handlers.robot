@@ -214,7 +214,7 @@ Pena sees the handler on the inforequest
   [Teardown]  Logout
 
 # -------------------------
-# Authorit admin
+# Authority admin
 # -------------------------
 Sipoo logs in to revisit deleted handler roles
   Sipoo logs in
@@ -248,4 +248,19 @@ Changes survice reload
   Scroll and click test id  show-all-handler-roles-label
   Disabled handler role is  1  KVV-Käsittelijä  EVVK-Handläggare  KVV-Handler
   Handler role is  2  Uusi  Nytt  New
+  [Teardown]  Logout
+
+# -------------------------
+# Authority
+# -------------------------
+Sonja logs in creates application
+  Sonja logs in
+  Create application with state  Duplicate fix  ${propertyId}  pientalo  submitted
+
+No handlers in application
+  No such test id  handler-0
+
+Sonja approves application and becomes handler automatically
+  Approve application no dialogs
+  List handler is  0  Sibbo Sonja  Muutettu
   [Teardown]  Logout

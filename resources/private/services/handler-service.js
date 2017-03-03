@@ -70,18 +70,23 @@ LUPAPISTE.HandlerService = function() {
     roles.removeAll();
   }
 
-  var latestAppId = null;
+  var latest = null;
+
+  function current() {
+    return {appId: appId(),
+            state: lupapisteApp.models.application.state()};
+  }
 
   ko.computed( function() {
     var canFetch = _.some(authModel.getData()) && appId();
     if( canFetch ) {
-      if( appId() !== latestAppId ) {
+      if( appId() && !_.isEqual( current(), latest ) ) {
         ko.ignoreDependencies( fetchAll );
-        latestAppId = appId();
+        latest = current();
       }
     } else {
       ko.ignoreDependencies( resetAll );
-      latestAppId = null;
+      latest = null;
     }
   });
 
