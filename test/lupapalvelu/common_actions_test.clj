@@ -36,6 +36,7 @@
                           :set-attachment-meta
                           :set-attachment-group-enabled
                           :upload-attachment
+                          :upload-file-authenticated
                           :bind-attachment
                           :bind-attachments
                           :rotate-pdf
