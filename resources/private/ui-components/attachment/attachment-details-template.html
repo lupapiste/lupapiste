@@ -334,27 +334,6 @@
             </div>
           </div>
           <!-- /ko -->
-
-          <!-- ko if: $data.attachment().latestVersion && !_.isEmpty($data.attachment().latestVersion.conversionLog) -->
-          <div style="margin-top: 15px;">
-            <button class="btn" data-bind="toggleClick: $data.showConversionLog">
-              <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($data.showConversionLog),
-                                  'lupicon-chevron-small-down': $data.showConversionLog}"></i>
-              <span data-bind="ltext: 'attachment.showConversionLog'"></span>
-            </button>
-
-            <div data-bind="slider: $data.showConversionLog">
-              <table class="table">
-                <tbody data-bind="foreach: $data.attachment().latestVersion.conversionLog">
-                <tr>
-                  <td data-bind="text: $data"></td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <!-- /ko -->
-
         </div>
       </div>
 
@@ -420,5 +399,25 @@
                                          attachmentId: $data.attachment().id,
                                          allowedAttachmentTypes: $data.allowedAttachmentTypes}}">
   </div>
+
+   <!-- ko if: $data.attachment().latestVersion && !_.isEmpty($data.attachment().latestVersion.conversionLog) -->
+  <div style="margin-top: 15px;">
+    <button class="btn" data-bind="toggleClick: $data.showConversionLog">
+      <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($data.showConversionLog),
+                          'lupicon-chevron-small-down': $data.showConversionLog}"></i>
+      <span data-bind="ltext: 'attachment.showConversionLog'"></span>
+    </button>
+
+    <div data-bind="slider: $data.showConversionLog">
+      <table class="table">
+        <tbody data-bind="foreach: $data.attachment().latestVersion.conversionLog">
+        <tr>
+          <td data-bind="text: $data"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- /ko -->
 
 </script>
