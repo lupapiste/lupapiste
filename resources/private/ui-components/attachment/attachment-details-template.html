@@ -400,7 +400,7 @@
                                          allowedAttachmentTypes: $data.allowedAttachmentTypes}}">
   </div>
 
-   <!-- ko if: $data.attachment().latestVersion && !_.isEmpty($data.attachment().latestVersion.conversionLog) -->
+  <!-- ko if: $data.attachment().latestVersion && !_.isEmpty($data.attachment().latestVersion.conversionLog) -->
   <div style="margin-top: 15px;">
     <button class="btn" data-bind="toggleClick: $data.showConversionLog">
       <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($data.showConversionLog),
