@@ -5929,6 +5929,14 @@ div.automatic-assignments .assignment .editor {
   margin-bottom: 0.5em;
 }
 
+.archival-summary-conversion-log {
+  margin-top: 15px;
+}
+
+.archival-summary-conversion-log button {
+  margin-top: 15px;
+}
+
 .applications-search-top {
   background-color: #eeeeee;
   border-bottom: 2px solid #dddddd;

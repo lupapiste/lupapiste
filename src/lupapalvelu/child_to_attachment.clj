@@ -66,6 +66,7 @@
                               :archivable         is-pdf-a?
                               :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                               :missing-fonts      []
+                              :conversionLog      []
                               :source             {:type (name type) :id id}}]
     (cond-> base-attachment-opts
             (= :tasks type) (assoc :target {:type :task :id id}))))
