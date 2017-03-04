@@ -75,6 +75,13 @@
     (remove nil?)
     (seq)))
 
+(defn- replace-file-names-in-log [log-lines input-file output-file]
+  (let [ifp (.getCanonicalPath input-file)
+        ofp (.getCanonicalPath output-file)]
+    (map (fn [line] (-> (ss/replace line ifp "original PDF file")
+                        (ss/replace ofp "converted PDF/A file")))
+         log-lines)))
+
 (defn- pdf-was-already-compliant? [lines]
   (ss/contains? (apply str lines) "will be copied only since it is already conformant"))
 
@@ -99,6 +106,10 @@
   (let [cl (compliance-level input-file output-file opts)
         {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
+    (println (.getCanonicalPath input-file))
+    (println (.getName input-file))
+    (println (.getCanonicalPath output-file))
+    (println (.getName output-file))
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
@@ -113,7 +124,7 @@
                            :conversionLog (cons (if (= exit 5)
                                                   "PDF/A conversion failed because it can't be done losslessly"
                                                   "PDF/A conversion failed probably because of a typography / font related error")
-                                                log-lines)})
+                                                (replace-file-names-in-log  log-lines input-file output-file))})
       (= exit 10) (do
                     (error "pdf2pdf - not a valid license")
                     {:pdfa? false
