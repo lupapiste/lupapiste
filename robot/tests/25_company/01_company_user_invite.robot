@@ -132,13 +132,12 @@ Registration page opens
   Wait until  Page should contain  1060155-5
 
 Password must be at least 8 characters
-  Input text by test id  company-user-password1  lyhyt12
-  Input text by test id  company-user-password2  lyhyt12
-  Element should be disabled  testCompanyUserSubmitPassword
-  Input text by test id  company-user-password1  pitka123
-  Input text by test id  company-user-password2  pitka123
-  Element should be enabled  testCompanyUserSubmitPassword
-  Click element  testCompanyUserSubmitPassword
+  Input text by test id  password1  lyhyt12
+  Input text by test id  password2  lyhyt12
+  Test id disabled  testCompanyUserSubmitPassword
+  Input text by test id  password1  pitka123
+  Input text by test id  password2  pitka123
+  Click enabled by test id  testCompanyUserSubmitPassword
   Wait Until  Page should contain  Salasana asetettu.
   Confirm notification dialog
 
@@ -328,4 +327,3 @@ Edit company user
   Click by test id  company-user-edit-${index}
   Select from test id  company-user-edit-role-${index}  ${role}
   Select from test id  company-user-edit-submit-${index}  ${submit}
-

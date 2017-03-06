@@ -8,5 +8,6 @@ LUPAPISTE.CellModel = function( params ) {
 
   self.value = params.value;
   self.attributes = params.attr || {};
-  self.params = _.omit( params, ["value", "attr"]);
+  self.testId = params.testId;
+  self.params = _.omit( params, ["value", "attr", "testId"]);
 };

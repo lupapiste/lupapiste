@@ -6,7 +6,9 @@
          data-bind="if: lupapisteApp.services.companyRegistrationService.guard">
       <register-company-steps></register-company-steps>
       <div data-bind="component: lupapisteApp.services.companyRegistrationService.currentConfig().component"></div>
+      <!-- ko ifnot: lupapisteApp.services.companyRegistrationService.currentConfig().noButtons -->
       <register-company-buttons></register-company-buttons>
+      <!-- /ko -->
     </div>
   </section>
 </body>

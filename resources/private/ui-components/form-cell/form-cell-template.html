@@ -1,6 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="form-cell-template">
   <div class="col--vertical"
        data-bind="css: {'form-cell--warning': warning,
+                  'form-cell--message': showMessage,
                   'form-cell--required': required}">
     <label data-bind="attr: {'for': id},
                       css: {mandatory: isMandatory},
@@ -11,6 +12,11 @@
     <div class="btn-base form-cell__message">
       <i class="lupicon-warning"></i>
       <span data-bind="ltext: warning"></span>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: showMessage -->
+    <div class="btn-base form-cell__message">
+      <span data-bind="ltext: message"></span>
     </div>
     <!-- /ko -->
   </div>

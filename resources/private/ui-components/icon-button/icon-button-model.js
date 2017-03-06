@@ -10,6 +10,7 @@
 //  [enable]: Similar to kO binding (default true)
 //  [disable]: Similar to binding (false)
 //  [waiting]: Waiting observable (false)
+//  [type] Button type (button)
 //  Button is enabled when waiting and disable are false and enable is true.
 LUPAPISTE.IconButtonModel = function( params ) {
   "use strict";
@@ -22,6 +23,7 @@ LUPAPISTE.IconButtonModel = function( params ) {
   self.testId = params.testId || "icon-button";
 
   self.buttonClass = params.buttonClass || "positive";
+  self.buttonType = params.type || "button";
 
   self.isDisabled = self.disposedPureComputed( function() {
     return ko.unwrap( self.waiting )

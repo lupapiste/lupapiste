@@ -8940,9 +8940,9 @@ div.alleYli-radioGroup {
 }
 
 .form-cell__message {
-  background-color: #df3215;
+  background-color: #2ca92c;
   color: white;
-  display: none;
+  display: inline-block;
   width: 100%;
 }
 
@@ -8953,11 +8953,21 @@ div.alleYli-radioGroup {
 }
 
 .form-cell--warning .form-cell__message {
-  display: inline-block;
+  background-color: #df3215;
 }
 
 .form-cell--required input, .form-cell--required select {
   border: 1px solid #f39129 !important;
+  margin-bottom: 0 !important;
+}
+
+label.mandatory:after {
+  content: " *";
+  color: #df3215;
+}
+
+.form-cell--message input, .form-cell--message select {
+  border: 1px solid #2ca92c !important;
   margin-bottom: 0 !important;
 }
 
@@ -16721,6 +16731,7 @@ div.register-company-wizard h1 {
 
 div.register-company-wizard h2 {
   margin-top: 1.5em;
+  margin-bottom: 1em;
   font-size: 1.5em;
   font-weight: normal;
 }
@@ -16891,13 +16902,46 @@ div.register-company-wizard div.form-grid h3 {
   margin-bottom: 0;
 }
 
-div.register-company-wizard div.form-grid label.mandatory:after {
-  content: " *";
-  color: #df3215;
+div.register-company-wizard div.form-grid.form-grid--no-border {
+  margin-top: 0;
+  border: none;
 }
 
 div.register-company-wizard .form-grid + .form-grid {
   margin-top: 0;
+}
+
+div.register-company-wizard div.register-company-container {
+  margin-top: 0;
+  border: 1px solid #eeeeee;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+div.register-company-wizard div.register-company-container p {
+  margin-bottom: 6px;
+}
+
+div.register-company-wizard div.register-company-container h3 {
+  font-weight: bold;
+  font-size: 1.5em;
+  margin-bottom: .5em;
+}
+
+div.register-company-wizard div.register-company-container a.link-btn {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+div.register-company-wizard div.register-company-container form {
+  margin-top: 2em;
+  margin-top: 1em;
+}
+
+div.register-company-wizard div.register-company-container form icon-button {
+  margin-right: 2em;
 }
 
 #login h1 {

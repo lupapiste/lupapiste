@@ -7,7 +7,8 @@
         <div class="tabby__cell tabby--33">
           <div class="account-type-box"
                data-bind="click: _.wrap( id, $parent.selected ),
-                          css: $parent.selectedCss( id )">
+                          css: $parent.selectedCss( id ),
+                          testId: 'account-type-' + id">
             <h3 data-bind="text: title"></h3>
             <div class="account-type-price"
                  data-bind="text: price"></div>

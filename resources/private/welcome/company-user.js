@@ -19,40 +19,32 @@
     self.email = ko.observable();
 
     self.pending = ko.observable(false);
-    self.password1 = ko.observable();
-    self.password2 = ko.observable();
-    self.passwordQuality = ko.computed(function() { return util.getPwQuality(self.password1()); });
-    self.ok = ko.computed(function() {
-      var t = self.token(),
-          p1 = self.password1(),
-          p2 = self.password2();
-      return t && t.length && p1 && p1.length >= LUPAPISTE.config.passwordMinLength && p1 === p2;
-    });
+    self.password = ko.observable();
+
     self.success = ko.observable(false);
     self.fail = ko.observable(false);
 
     self.reset = function() {
       return self
-        .token("")
-        .loading(true)
-        .loaded(false)
-        .notFound(false)
-        .companyName("")
-        .companyY("")
-        .firstName("")
-        .lastName("")
-        .email("")
-        .pending(true)
-        .password1("")
-        .password2("");
+             .token("")
+             .loading(true)
+             .loaded(false)
+             .notFound(false)
+             .companyName("")
+             .companyY("")
+             .firstName("")
+             .lastName("")
+             .email("")
+             .pending(true)
+             .password("");
     };
 
     self.send = function() {
       ajax
         .post("/api/token/" + self.token())
-        .json({password: self.password1()})
+        .json({password: self.password()})
         .success(function() {
-          self.password1("").password2("");
+          self.password("");
 
           hub.send("show-dialog",
               {id: PW_CHANGED_DIALOG_ID,

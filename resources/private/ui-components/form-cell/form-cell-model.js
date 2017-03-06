@@ -3,8 +3,13 @@
 // validation and mandatory status (required) are taken care of in this
 // level thus making the actual cell-components very lightweight.
 // params [optional]:
-//  [warning]: Observable that includes the error ltext if the cell is invalid.
-//  [required]: Is the cell required to have value (default false)
+//
+//  [message]: Observable that includes a message ltext that is shown below
+//  the cell.
+//  [warning]: Observable that includes the error ltext if the cell is
+//  invalid. Warning always overrides message.
+//  [required]: Is the cell required to have value. Can be observable
+//  (default false).
 //  label: Label ltext for the cell
 //  cell:  Cell componen name without the cell prefix (e.g, 'date', 'text')
 //  attr:  Params object that will be passed to the cell components attr binding.
@@ -14,13 +19,20 @@ LUPAPISTE.FormCellModel = function( params ) {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+
   self.warning = params.warning;
+  self.message = params.message;
 
   self.required = params.required
-    ? ko.pureComputed( function() {
+    ? self.disposedPureComputed( function() {
       return !_.trim(params.value());
     })
   : false;
+
+  self.showMessage = self.disposedComputed( function() {
+    return !ko.unwrap( self.warning ) && ko.unwrap( self.message );
+  });
 
   self.isMandatory = Boolean( self.required );
   self.id = _.uniqueId( "form-cell-id-");

@@ -105,7 +105,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
     return {required: _.includes( requiredFields(), fieldName ),
             value: self.registration[fieldName],
             label: "register.company.form." + fieldName,
-            warning: warnings[fieldName]};
+            warning: warnings[fieldName],
+            testId: "register-company-" + fieldName};
   };
 
   self.accountTypes = ko.computed( function() {
@@ -151,26 +152,31 @@ LUPAPISTE.CompanyRegistrationService = function() {
   self.pending = ko.observable();
 
   function initSign() {
-    var reg = _.omitBy( ko.mapping.toJS( self.registration ) );
+    var reg = _.omitBy( ko.mapping.toJS( self.registration ), _.isBlank );
     var params = {lang: reg.language,
                   company: _.pick( reg,
                                    ["accountType", "name", "y", "address1",
                                     "zip", "po", "country", "netbill",
                                     "pop", "reference"]),
                   signer: _.pick( reg,
-                                 ["firsName", "lastName", "email",
-                                  "personId"])};
+                                 ["firstName", "lastName", "email",
+                                  "personId", "language"])};
     if( !_.isEqual( latestSignParams, params )) {
       ajax.command( "init-sign", params )
       .pending( self.pending )
       .success( function( res ) {
         latestSignParams = params;
-        self.signResults( _.omit( res, "ok" ));
+        self.signResults( _.reduce(  _.omit( res, "ok" ),
+                                     function( acc, v, k ) {
+                                      return _.set( acc, _.camelCase( k ), v );
+                                     },
+                                     {}));
         nextStep();
       })
       .call();
+    } else {
+      nextStep();
     }
-
   }
 
   var stepConfigs = [{component: "register-company-account-type",
@@ -179,10 +185,24 @@ LUPAPISTE.CompanyRegistrationService = function() {
                      {component: "register-company-info",
                       continueEnable: fieldsOk,
                       continueClick: initSign},
-                    {component: "regist-company-sign",
-                     showButtons: false}];
+                    {component: "register-company-sign",
+                     noButtons: true}];
 
   self.currentConfig = function() {
     return stepConfigs[self.currentStep()];
+  };
+
+  self.devFill = function() {
+    self.registration.name( "Foobar Oy");
+    self.registration.y( "0000000-0");
+    self.registration.address1( "Katuosoite 1");
+    self.registration.zip( "12345");
+    self.registration.po( "Kaupunki");
+    if( !user()) {
+      self.registration.firstName( "Etunimi");
+      self.registration.lastName( "Sukunimi");
+      self.registration.email( "foo@example.com");
+      self.registration.personId( "150805-325W" );
+    }
   };
 };
