@@ -777,12 +777,14 @@
       (files/with-temp-file temp-pdf
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
-          (att/upload-and-attach! {:application application :user user}
-                                         {:attachment-id attachmentId
-                                          :comment-text nil
-                                          :required false
-                                          :created created
-                                          :stamped stamped
-                                          :original-file-id fileId}
-                                         {:content temp-pdf :filename filename})))
-      (ok))))
+          (let [{:keys [archivable archivabilityError]} (att/upload-and-attach! {:application application :user user}
+                                                                                {:attachment-id attachmentId
+                                                                                 :comment-text nil
+                                                                                 :required false
+                                                                                 :created created
+                                                                                 :stamped stamped
+                                                                                 :original-file-id fileId}
+                                                                                {:content temp-pdf :filename filename})]
+            (if archivable
+              (ok)
+              (fail archivabilityError))))))))

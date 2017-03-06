@@ -117,7 +117,8 @@
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum conversion/archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
-   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)})
+   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)
+   (sc/optional-key :conversionLog)      (sc/maybe [sc/Str])})
 
 (defschema Type
   "Attachment type"
@@ -414,7 +415,7 @@
 
 (defn make-version
   [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
-                           stamped archivable archivabilityError missing-fonts autoConversion]}]
+                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
@@ -436,7 +437,8 @@
          :archivable     (boolean archivable)}
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
-        :autoConversion autoConversion))))
+        :autoConversion autoConversion
+        :conversionLog conversionLog))))
 
 (defn- ->approval [state user timestamp]
   (sc/validate Approval
@@ -583,7 +585,7 @@
   (when (seq attachment-ids)
     (let [ids-str (pr-str attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
-      (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+      (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
       (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)

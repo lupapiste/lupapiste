@@ -9,7 +9,7 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
 
   self.openApplication = function(model) {
     var target = null;
-    switch (model.target.group) {
+    switch (model.targets[0].group) {
       case "documents":
         target = "info";
         break;

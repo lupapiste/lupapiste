@@ -300,7 +300,8 @@
                  file-id         (ssg/generator ssc/ObjectIdStr)
                  archivability   (ssg/generator (sc/maybe {:archivable         sc/Bool
                                                            :archivabilityError (apply sc/enum nil conversion/archivability-errors)
-                                                           :missing-fonts      (sc/eq ["Arial"])}))
+                                                           :missing-fonts      (sc/eq ["Arial"])
+                                                           :conversionLog      (sc/eq ["error"])}))
                  user            (ssg/generator user/SummaryUser)
                  general-options (ssg/generator {:filename sc/Str
                                                  :contentType sc/Str
@@ -321,7 +322,8 @@
                   (is (or (not (:stamped options)) (:stamped version)))
                   (is (or (not (:archivable options)) (:archivable version)))
                   (is (= (:archivabilityError version) (:archivabilityError options)))
-                  (is (= (:missing-fonts version) (:missing-fonts options))))))
+                  (is (= (:missing-fonts version) (:missing-fonts options)))
+                  (is (= (:conversionLog version) (:conversionLog options))))))
 
 (defspec make-version-update-existing {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment options] (gen/fmap (fn [[att ver fids opt]] [(-> (update att :versions assoc 0 (assoc ver :originalFileId (first fids)))

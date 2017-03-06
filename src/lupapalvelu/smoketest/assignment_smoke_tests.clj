@@ -41,13 +41,25 @@
                            :documents
                            (util/find-by-id targetId)))))
 
-(defn- status-corresponds-to-application-state [{:keys [application status target]}]
-  (when-not (= (or (application-canceled? (:id application))
-                   (target-disabled? application target))
-               (= status "canceled"))
-    (str "status was '" status "', but application was "
-         (if (application-canceled? (:id application))
-           "" "not ")
-         "canceled")))
+(defn status-mismatch-str [status target canceled?]
+  (str "status was '" status "', but " target " was "
+       (if canceled?
+         "" "not ")
+       "canceled"))
 
-(mongocheck :assignments status-corresponds-to-application-state :application :status :target)
+(defn- status-corresponds-to-application-state [{:keys [application status targets]}]
+  (when-not (= (application-canceled? (:id application))
+               (= status "canceled"))
+    (status-mismatch-str status "application" (application-canceled? (:id application)))))
+
+(mongocheck :assignments status-corresponds-to-application-state :application :status :targets)
+
+(defn- status-corresponds-to-document-target-state [{:keys [application status targets]}]
+  (when (and (= (count targets) 1)
+             (= (:group (first targets)) "documents"))
+    (let [only-document-target-disabled? (target-disabled? application (first targets))]
+      (when-not (= only-document-target-disabled?
+                   (= status "canceled"))
+        (status-mismatch-str status "document" only-document-target-disabled?)))))
+
+(mongocheck :assignments status-corresponds-to-document-target-state :application :status :targets)

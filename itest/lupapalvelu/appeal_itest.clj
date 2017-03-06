@@ -405,13 +405,13 @@
           (create-assignment raktark-jarvenpaa
                              raktark-jarvenpaa-id
                              app-id
-                             {:group "attachments" :id (:id target-attachment)}
+                             [{:group "attachments" :id (:id target-attachment)}]
                              "Onko aiheellinen?") => ok?))
 
       (fact "removing second attachment from appeal"
         (let [assignment (first (get-user-assignments raktark-jarvenpaa))
-              assignment-attachment-id (get-in assignment [:target :id])]
-          (get-in assignment [:target :group]) => "attachments"
+              assignment-attachment-id (get-in assignment [:targets 0 :id])]
+          (get-in assignment [:targets 0 :group]) => "attachments"
           (fact "assignment has correct attachment target"
             (:target (get-attachment-by-id raktark-jarvenpaa app-id assignment-attachment-id)) => {:type "appeal"
                                                                                                    :id aid})

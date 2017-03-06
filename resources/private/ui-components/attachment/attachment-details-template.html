@@ -265,21 +265,21 @@
                 <div class="archive-valid"
                      data-bind="with: $data.attachment().latestVersion">
                   <div>
-                    <span data-bind="ltext: 'attachment.archivability'"></span>:
-                    <span class="lupicon-circle-check positive"
-                          data-bind="visible: $data.archivable"></span>
-                    <span class="lupicon-circle-attention negative"
-                          data-bind="visible: !$data.archivable,
-                                     attr: {title: loc($data.archivabilityError)}"></span>
+                    <i data-bind="css: {'lupicon-circle-check': $data.archivable,
+                                        'positive': $data.archivable,
+                                        'lupicon-circle-attention': !$data.archivable,
+                                        'negative': !$data.archivable}"></i>
+                    <!-- ko ifnot: $data.archivabilityError -->
+                    <span data-bind="visible: $data.autoConversion, ltext: 'attachment.archivable.converted'"></span>
+                    <span data-bind="visible: !ko.unwrap($data.autoConversion), ltext: 'attachment.archivable.notConverted'"></span>
+                    <!-- /ko -->
+                    <span data-bind="visible: $data.archivabilityError, ltext: $data.archivabilityError"></span>
                   </div>
                   <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
                     <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>
                     <div data-bind="foreach: $data['missing-fonts']">
                       <span data-bind="text: $data"></span><br>
                     </div>
-                  </div>
-                  <div data-bind="if: $data['autoConversion']">
-                    <span data-bind="ltext: 'attachment.converted'"></span>
                   </div>
                 </div>
               </div>
@@ -334,7 +334,6 @@
             </div>
           </div>
           <!-- /ko -->
-
         </div>
       </div>
 
@@ -400,5 +399,25 @@
                                          attachmentId: $data.attachment().id,
                                          allowedAttachmentTypes: $data.allowedAttachmentTypes}}">
   </div>
+
+  <!-- ko if: $data.attachment().latestVersion && !_.isEmpty($data.attachment().latestVersion.conversionLog) -->
+  <div style="margin-top: 15px;">
+    <button class="btn" data-bind="toggleClick: $data.showConversionLog">
+      <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($data.showConversionLog),
+                          'lupicon-chevron-small-down': $data.showConversionLog}"></i>
+      <span data-bind="ltext: 'attachment.showConversionLog'"></span>
+    </button>
+
+    <div data-bind="slider: $data.showConversionLog">
+      <table class="table">
+        <tbody data-bind="foreach: $data.attachment().latestVersion.conversionLog">
+        <tr>
+          <td data-bind="text: $data"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- /ko -->
 
 </script>

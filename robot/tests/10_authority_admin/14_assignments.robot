@@ -19,7 +19,7 @@ Assignments are enabled in Sipoo
 
 Authority admin goes to the application page
   Sipoo logs in
-  Go to page  applications
+  Go to page  assignments
 
 Sees assignments are enabled
   Checkbox should be selected  assignments-enabled
