@@ -187,10 +187,10 @@
 (defn authority? [{role :role}]
   (contains? #{:authority :oirAuthority} (keyword role)))
 
-(def validate-authority
+(def validate-authority-in-organization
   "Validator: current user must be an authority. To be used in commands'
    :pre-check vectors."
-  (partial util/call-in (pred->validator authority?) [:user]))
+  (partial util/call-in (pred->validator user-is-authority-in-organization?) [:user]))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))

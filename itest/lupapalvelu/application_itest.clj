@@ -240,6 +240,7 @@
         app2 (query-application pena id) => truthy]
 
     (fact "Authority is allowed to submit application for applicant"
+      (:state (query-application pena id)) => "submitted"
       authority-submit => ok?)
 
     (:opened app1) => nil

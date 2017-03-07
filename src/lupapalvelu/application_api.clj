@@ -322,7 +322,7 @@
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)]
    :pre-checks       [(validator-or domain/validate-owner-or-write-access
-                                    usr/validate-authority)
+                                    usr/validate-authority-in-organization)
                       foreman/allow-foreman-only-in-foreman-app
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
