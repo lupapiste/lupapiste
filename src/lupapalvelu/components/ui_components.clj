@@ -347,9 +347,9 @@
 
    :register-company {:depends [:common-html]
                       :js ["company-registration.js"]
-                      :html [
-                             "register-company.html" "register-company-success.html" "register-company-fail.html"
-                             "register-company-account-type.html" "register-company-signing.html"
+                      :html ["register-company-success.html"
+                             "register-company-fail.html"
+                             "register-company-account-type.html"
                              "register-company-existing-user-success.html"]}
 
    :link-account {:depends [:register]
