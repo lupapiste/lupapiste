@@ -114,6 +114,13 @@
                         (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
+(defquery all-attachment-types-by-user
+  {:description "Lists all attachment types of users permit type"
+   :user-roles #{:authorityAdmin}}
+   [{user :user}]
+   (let [attachment-types (att-type/get-all-attachment-types-for-permit-type :R)]
+   (ok :attachmentTypes attachment-types)))
+
 (defquery organization-name-by-user
   {:description "Lists organization names for all languages."
    :user-roles #{:authorityAdmin}}
@@ -787,3 +794,30 @@
   [{user :user}]
   (-> (usr/authority-admins-organization-id user)
       (org/toggle-handler-role! roleId enabled)))
+
+(defcommand upsert-assignment-trigger
+  {:description "Set and update automated assignment trigger"
+   :parameters [targets]
+   :optional-parameters [triggerId description handler]
+   :input-validators [(partial vector-parameters [:targets])]
+   :user-roles #{:authorityAdmin}}
+   [{user :user user-orgs :user-organizations}]
+   (let [trigger (org/create-trigger triggerId targets handler description)
+         organization (util/find-by-id (usr/authority-admins-organization-id user) user-orgs)
+         create-new (some? triggerId)]
+     (when (sc/check org/AssignmentTrigger trigger)
+       (fail :error.validator))
+     (if (true? create-new)
+      (org/update-assignment-trigger organization trigger triggerId)
+      (org/add-assignment-trigger organization trigger))
+     (ok :trigger trigger)))
+
+(defcommand remove-assignment-trigger
+  {:description "Removes task trigger"
+   :parameters [triggerId]
+   :input-validators [(partial non-blank-parameters [:triggerId])]
+   :user-roles #{:authorityAdmin}}
+   [{user :user user-orgs :user-organizations}]
+   (do (-> (usr/authority-admins-organization-id user)
+           (util/find-by-id user-orgs)
+           (org/remove-assignment-trigger triggerId))))

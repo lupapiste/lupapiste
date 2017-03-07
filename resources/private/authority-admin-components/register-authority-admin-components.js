@@ -10,7 +10,8 @@ jQuery(document).ready(function() {
                     {name: "inspection-summary-templates-list"},
                     {name: "inspection-summary-template-bubble"},
                     {name: "select-inspection-summary-template-for-operation"},
-                    {name: "handler-roles"}];
+                    {name: "handler-roles"},
+                    {name: "triggers"}];
 
   ko.registerLupapisteComponents(components);
 });

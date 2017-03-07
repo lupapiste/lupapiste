@@ -40,7 +40,7 @@
   (fact "authorities can only see assignments belonging to their organizations"
     (let [{id :id} (create-app sonja :propertyId sipoo-property-id)
           doc-id (-> (query-application sonja id) :documents first :id)
-          {assignment-id :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")]
+          {assignment-id :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")]
       (-> (query sonja :assignments) :assignments count)  => pos?
       (-> (query veikko :assignments) :assignments count) => zero?
 
@@ -57,9 +57,9 @@
           doc-id1 (-> (query-application sonja id1) :documents first :id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)
           doc-id2 (-> (query-application sonja id2) :documents first :id)
-          {assignment-id1-1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Hakemus 1")
-          {assignment-id1-2 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Hakemus 1")
-          {assignment-id2-1 :id} (create-assignment sonja ronja-id id2 {:group "group" :id doc-id2} "Hakemus 1")]
+          {assignment-id1-1 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
+          {assignment-id1-2 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Hakemus 1")
+          {assignment-id2-1 :id} (create-assignment sonja ronja-id id2 [{:group "group" :id doc-id2}] "Hakemus 1")]
       (-> (query sonja :assignments-for-application :id id1) :assignments count) => 2
       (-> (query ronja :assignments-for-application :id id1) :assignments count) => 2
       (-> (query sonja :assignments-for-application :id id2) :assignments count) => 1
@@ -71,20 +71,20 @@
         doc-id (-> (query-application sonja id) :documents first :id)]
 
     (fact "only authorities can create assignments"
-      (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Kuvaus") => ok?
-      (create-assignment pena sonja-id id {:group "group" :id doc-id} "Hommaa") => unauthorized?)
+      (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Kuvaus") => ok?
+      (create-assignment pena sonja-id id [{:group "group" :id doc-id}] "Hommaa") => unauthorized?)
     (fact "only authorities can receive assignments"
-      (create-assignment sonja pena-id id {:group "group" :id doc-id} "Penalle")        => invalid-receiver?
-      (create-assignment sonja "does_not_exist_id" id {:group "group" :id doc-id} "Desc") => invalid-receiver?)
+      (create-assignment sonja pena-id id [{:group "group" :id doc-id}] "Penalle")        => invalid-receiver?
+      (create-assignment sonja "does_not_exist_id" id [{:group "group" :id doc-id}] "Desc") => invalid-receiver?)
 
     (fact "assignments cannot be created if not enabled in organization"
-      (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) {:group "group" :id doc-id} "Ei onnistu")
+      (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) [{:group "group" :id doc-id}] "Ei onnistu")
       => assignments-not-enabled?)
 
     (fact "authorities can only create assignments for applications in their organizations"
-      (create-assignment veikko sonja-id id {:group "group" :id doc-id} "Ei onnistu") => application-not-accessible?)
+      (create-assignment veikko sonja-id id [{:group "group" :id doc-id}] "Ei onnistu") => application-not-accessible?)
     (fact "after calling create-assignment, the assignment is created"
-      (let [assignment-id (:id (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Luotu?"))
+      (let [assignment-id (:id (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Luotu?"))
             assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
         assignment => truthy
         (sc/check Assignment assignment) => nil?
@@ -119,7 +119,7 @@
 (facts "Editing assignments"
   (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))
         doc-id (-> (query-application sonja id) :documents first :id)
-        {assignment-id :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Edit1")]
+        {assignment-id :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Edit1")]
     (fact "can change text"
       (update-assignment sonja id assignment-id ronja-id "foo") => ok?
       (-> (query ronja :assignment :assignmentId assignment-id)
@@ -151,9 +151,9 @@
 (facts "Completing assignments"
   (let [id (create-app-id sonja :propertyId sipoo-property-id)
         doc-id (-> (query-application sonja id) :documents first :id)
-        {assignment-id1 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")
-        {assignment-id2 :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")
-        {assignment-id3 :id} (create-assignment sonja nil id {:group "group" :id doc-id} "Valmistuva")]
+        {assignment-id1 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
+        {assignment-id2 :id} (create-assignment sonja ronja-id id [{:group "group" :id doc-id}] "Valmistuva")
+        {assignment-id3 :id} (create-assignment sonja nil id [{:group "group" :id doc-id}] "Valmistuva")]
     (fact "Only authorities within the same organization can complete assignment"
       (complete-assignment pena assignment-id1)   => unauthorized?
       (complete-assignment veikko assignment-id1) => assignments-not-enabled?
@@ -189,31 +189,59 @@
 
 (facts "Deleting targets"
   (facts "documents"
-    (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
-          _ (generate-documents app-id sonja)
-          app (query-application sonja app-id)
-          designer-doc     (domain/get-document-by-name app "suunnittelija")
-          assignment-id (:id (create-assignment sonja sonja-id app-id {:group "parties" :id (:id designer-doc)} "Tarkista!"))
+    (let [app-id         (create-app-id sonja :propertyId sipoo-property-id)
+          _              (generate-documents app-id sonja)
+          app            (query-application sonja app-id)
+          designer-doc   (domain/get-document-by-name app "suunnittelija")
+          maksaja-doc    (domain/get-document-by-name app "maksaja")
+          assignment-id1 (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}] "Tarkista!"))
+          assignment-id2 (:id (create-assignment sonja sonja-id app-id [{:group "parties" :id (:id designer-doc)}
+                                                                        {:group "parties" :id (:id maksaja-doc)}] "Kaksi kohdetta"))
           assignments         (get-user-assignments sonja)
-          designer-assignment (util/find-first #(= "parties" (get-in % [:target :group])) assignments)]
+          designer-assignment (util/find-first #(= "parties" (get-in % [:targets 0 :group])) assignments)]
       (fact "assignment has designer target"
-        (:id designer-assignment) => assignment-id)
-      (fact "party assignment is deleted after party document deletion"
+        (:id designer-assignment) => assignment-id1)
+      (fact "party assignment is deleted after party document deletion if party is only target"
         (command sonja :remove-doc :id app-id :docId (:id designer-doc)) => ok?
         (let [new-query (get-user-assignments sonja)]
           (count new-query) => (dec (count assignments))
-          new-query =not=> (contains {:id assignment-id})))))
+          new-query =not=> (contains {:id assignment-id1})))
+      (fact "party is removed from targets when there are multiple targets"
+        (->> assignments (mapcat :targets) (map :id)) => (contains (:id maksaja-doc))
+        (command sonja :remove-doc :id app-id :docId (:id maksaja-doc)) => ok?
+        (let [new-query (get-user-assignments sonja)]
+          (count new-query) => (dec (count assignments)) ; no change from previous fact
+          (map :id new-query) => (contains assignment-id2)
+          (->> new-query (mapcat :targets) (map :id)) =not=> (contains (:id maksaja-doc))))))
   (facts "attachments"
     (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
           app (query-application sonja app-id)
           target-attachment (first (:attachments app))]
       (fact "assignment for attachment"
-        (create-assignment sonja sonja-id app-id {:group "attachments" :id (:id target-attachment)} "Onko liite kunnossa?") => ok?
-        (map (comp :id :target) (get-user-assignments sonja)) => (contains (:id target-attachment)))
+        (create-assignment sonja sonja-id app-id [{:group "attachments" :id (:id target-attachment)}] "Onko liite kunnossa?") => ok?
+        (mapcat (comp (partial map :id) :targets) (get-user-assignments sonja)) => (contains (:id target-attachment)))
       (fact "attachment deletion deletes assignment"
         (command sonja :delete-attachment :id app-id :attachmentId (:id target-attachment)) => ok?
-        (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))
-    ))
+        (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))))
+
+(facts "Disabling targets"
+  (facts "documents"
+    (let [app-id         (:id (create-and-submit-application sonja :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
+          _              (generate-documents app-id sonja)
+          app            (query-application sonja app-id)
+          designer-doc   (domain/get-document-by-name app "suunnittelija")
+          maksaja-doc    (domain/get-document-by-name app "maksaja")
+          assignment-id1 (:id (create-assignment sonja sonja-id app-id [{:group "documents" :id (:id designer-doc)}] "Tarkista!"))
+          assignment-id2 (:id (create-assignment sonja sonja-id app-id [{:group "documents" :id (:id designer-doc)}
+                                                                        {:group "documents" :id (:id maksaja-doc)}] "Kaksi kohdetta"))
+          _              (give-verdict sonja app-id) => ok?
+          assignments    (get-user-assignments sonja)]
+      (fact "when document is disabled, assignments with the document as only target are canceled"
+        (command sonja :approve-doc :id app-id :doc (:id designer-doc) :path nil :collection "documents") => ok?
+        (command sonja :set-doc-status :id app-id :docId (:id designer-doc) :value "disabled") => ok?
+        (let [assignments (get-user-assignments sonja)]
+          (->> assignments (util/find-first #(= (:id %) assignment-id1)) :status) => "canceled")
+          (->> assignments (util/find-first #(= (:id %) assignment-id2)) :status) => "active"))))
 
 (facts "Assignments search"
   (apply-remote-minimal)
@@ -230,8 +258,8 @@
       id2 => truthy)
 
     (facts "text search finds approximate matches in description"
-      (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Kuvaava teksti")
-            {assignment-id2 :id} (create-assignment ronja sonja-id id2 {:group "group" :id doc-id2} "Kuvaava teksti")]
+      (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 [{:group "group" :id doc-id1}] "Kuvaava teksti")
+            {assignment-id2 :id} (create-assignment ronja sonja-id id2 [{:group "group" :id doc-id2}] "Kuvaava teksti")]
         (fact "uva eks - all"
           (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti"))
@@ -306,3 +334,138 @@
           (fact "count for completed"
             (-> (datatables sonja :assignments-search :state "completed") :data :assignments count) => 1)))
       )))
+
+(defn poll-attachment-job [apikey job]
+  (fact "poll was successful"
+    (poll-job apikey :bind-attachments-job (:id job) (:version job) 25) => ok?)
+  (Thread/sleep 1000))
+
+(defn query-trigger-assignments [apikey trigger-id]
+  (->> (query apikey :assignments-search)
+       :data :assignments (filter #(= (:trigger %) trigger-id))))
+
+(defn query-recipients-by-role [apikey role-id]
+  (->> (query apikey :assignments-search)
+       :data
+       :assignments
+       (map :recipient)
+       (filter #(= (:roleId %) role-id))))
+
+(facts "automatic assignments"
+  (let [trigger-resp   (command sipoo :upsert-assignment-trigger
+                                :description "Paapiirustuksia"
+                                :targets ["paapiirustus.asemapiirros" "paapiirustus.pohjapiirustus" "hakija.valtakirja"
+                                          "pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma"]
+                                :handler {:id "abba1111111111111112acdc" :name {:fi "KVV-K\u00e4sittelij\u00e4"
+                                                                                :sv "KVV-Handl\u00e4ggare"
+                                                                                :en "KVV-Handler"}})
+        trigger        (-> trigger-resp :trigger)
+        application    (create-and-submit-application pena :propertyId sipoo-property-id)
+        operation      (:primaryOperation application)
+        application-id (:id application)
+        handler-resp   (command sonja :upsert-application-handler
+                                :id application-id
+                                :roleId "abba1111111111111112acdc"
+                                :userId (id-for-key sonja))
+        attachments    (:attachments application)
+        resp1 (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-1 (get-in resp1 [:files 0 :fileId])
+        resp2 (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-2 (get-in resp2 [:files 0 :fileId])
+        resp3 (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-3 (get-in resp3 [:files 0 :fileId])
+        resp4 (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-4 (get-in resp4 [:files 0 :fileId])]
+    (fact "preliminary checks"
+      trigger-resp =>     ok?
+      application  =not=> nil?
+      resp1        =>     ok?
+      resp2        =>     ok?
+      resp3        =>     ok?
+      handler-resp =>     ok?)
+    (fact "automatic assignment is created from a trigger"
+      (let [{job :job :as job-resp} (command
+                                     pena
+                                     :bind-attachments
+                                     :id application-id
+                                     :filedatas [{:fileId file-id-1 :type (:type (first attachments))
+                                                  :group {:groupType "operation"
+                                                          :operations [operation]
+                                                          :title "Osapuolet"}
+                                                  :contents "eka"}
+                                                 {:fileId file-id-2 :type (:type (second attachments))
+                                                  :group {:groupType nil}
+                                                  :contents "toka"}]) => ok?
+            _ (poll-attachment-job pena job)
+            trigger-assignments (query-trigger-assignments sonja (:id trigger))]
+        (count trigger-assignments) => 1
+        (-> trigger-assignments first :description)        => (:description trigger)
+        (->> trigger-assignments first :targets (map :id)) => (just [(:id (first attachments))
+                                                                     (:id (second attachments))]
+                                                                    :in-any-order)))
+    (fact "automatic assignment have recipient when application have handler with corresponding role"
+      (let [trigger-assignment (first (query-trigger-assignments sonja (:id trigger)))]
+        (:recipient trigger-assignment) => {:id "777777777777777777000023",
+                                            :username "sonja",
+                                            :firstName "Sonja",
+                                            :lastName "Sibbo",
+                                            :roleId "abba1111111111111112acdc",
+                                            :role "authority",
+                                            :handlerId (:id handler-resp)}))
+    (fact "automatic assignment havent recipient when application havent handler with corresponding role"
+      (let [trigger-assignment (first (query-trigger-assignments sonja "dead1111111111111112beef"))]
+        (:recipient trigger-assignment) => nil))
+    (fact "new attachment is added as targets to existing trigger assignments"
+      (let [{job :job :as job-resp} (command
+                                     pena
+                                     :bind-attachments
+                                     :id application-id
+                                     :filedatas [{:fileId file-id-3 :type (:type (get attachments 2))
+                                                  :group {:groupType "parties"}
+                                                  :contents "hakija"}]) => ok?
+            _ (poll-attachment-job pena job)
+            trigger-assignments (query-trigger-assignments sonja (:id trigger))]
+        (count trigger-assignments) => 1
+        (->> trigger-assignments first :targets (map :id)) => (->> attachments
+                                                                   (take 3)
+                                                                   (map :id))))
+    (fact "if the automatic assignment is completed, a new one is created when a new assignment is added for the corresponding trigger"
+      (let [old-trigger-assignments (->> (query sonja :assignments-search :recipient [])
+                                         :data :assignments (filter #(= (:trigger %) (:id trigger))))
+            old-trigger-assignment-id (-> old-trigger-assignments first :id)
+            complete-resp (complete-assignment sonja old-trigger-assignment-id)
+            {job :job :as job-resp} (command
+                                     pena
+                                     :bind-attachments
+                                     :id application-id
+                                     :filedatas [{:fileId file-id-4 :type (:type (get attachments 3))
+                                                  :contents "suunnitelma"}])
+            _ (poll-attachment-job pena job)
+            trigger-assignments (query-trigger-assignments sonja (:id trigger))
+            non-completed-trigger-assignments (filter #(not ((set (map :type (:states %))) "completed"))
+                                                      trigger-assignments)]
+        complete-resp => ok?
+        (count trigger-assignments) => 2
+        (count non-completed-trigger-assignments) => 1
+        (-> non-completed-trigger-assignments first :id) =not=> old-trigger-assignment-id))
+    (fact "When handler with assignment is changed, assignments handler should be changed"
+      (let [upsert-handler-resp   (command sonja :upsert-application-handler
+                                    :id application-id
+                                    :roleId "abba1111111111111112acdc"
+                                    :userId (id-for-key ronja)
+                                    :handlerId (:id handler-resp))
+            recipients (query-recipients-by-role sonja "abba1111111111111112acdc")]
+        upsert-handler-resp => ok?
+        (second recipients) => {:id (id-for-key ronja)
+                                :username "ronja"
+                                :firstName "Ronja"
+                                :lastName "Sibbo"
+                                :role "authority"
+                                :roleId "abba1111111111111112acdc"
+                                :handlerId (:id handler-resp)}))
+    (fact "When handler is removed from application, assignment is also removed"
+      (let [remove-handler-resp  (command sonja :remove-application-handler
+                                          :id application-id
+                                          :handlerId (:id handler-resp))]
+        remove-handler-resp => ok?
+        (count (query-trigger-assignments sonja (:id trigger))) => 0))))

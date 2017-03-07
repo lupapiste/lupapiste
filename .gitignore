@@ -26,6 +26,9 @@ pom.xml
 .lein-*
 checkouts
 
+# CLJS repl:
+.cljs_rhino_repl
+
 # For SCSS/SASS generation
 .sass-cache
 

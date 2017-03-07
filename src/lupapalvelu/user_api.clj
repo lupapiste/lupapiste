@@ -76,7 +76,7 @@
   (if-let [organization-ids (seq (usr/organization-ids user))]
     (let [query {$and [{:role "authority"}, (usr/org-authz-match organization-ids)]}
           users (usr/find-users query)]
-      (ok :users (map usr/summary users)))
+      (ok :users (map usr/summary-for-search-filter users)))
     (ok :users [])))
 
 (env/in-dev

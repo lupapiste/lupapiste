@@ -101,23 +101,39 @@
     {:attachment-id id
      :error "Has versions, but marked as not needed"}))
 
-(defn validate-YA-attachments
-  "YA attachments should not have 'op' or 'groupType' fields"
-  [application-permitType {:keys [id op groupType]}]
-  (when (and (= application-permitType "YA")
-             (or op groupType))
-    {:attachment-id id
-     :error "Not valid YA attachment"
-     :op op
-     :groupType groupType}))
+(defn validate-attachments-grouping
+  "YA attachments should not have 'op' or 'groupType' fields.
+   Other attachment should have valid operation IDs, if defined."
+  [application-permitType op-ids {:keys [id op groupType]}]
+  (when (not-empty op-ids)
+    (if (= application-permitType "YA")
+      (when (or (seq op) groupType)
+        {:attachment-id id
+         :error "Not valid YA attachment (should not have op/groupType)"
+         :op op
+         :groupType groupType})
+      (when (and (= "operation" groupType)
+                 (not-empty op)
+                 (not-every? (set op-ids) (map :id op)))
+        {:error "Invalid operation ids"
+         :attachment-id id
+         :application-ops op-ids
+         :attachment-ops (map :id op)}))))
 
-(defn validate-attachments [{attachments :attachments permitType :permitType}]
-  (->> attachments
-       (mapcat (juxt validate-attachment-against-schema validate-latest-version validate-not-needed (partial validate-YA-attachments permitType)))
-       (remove nil?)
-       seq))
 
-(mongocheck :applications validate-attachments :attachments)
+
+(defn validate-attachments
+  [{:keys [_id attachments permitType primaryOperation secondaryOperations]}]
+  (let [operation-ids (map :id (cons primaryOperation secondaryOperations))]
+    (->> attachments
+         (mapcat (juxt validate-attachment-against-schema
+                       validate-latest-version
+                       validate-not-needed
+                       (partial validate-attachments-grouping permitType operation-ids)))
+         (remove nil?)
+         seq)))
+
+(mongocheck :applications validate-attachments :primaryOperation :secondaryOperations :attachments :permitType)
 
 ;; Documents have operation information
 

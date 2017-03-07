@@ -54,7 +54,7 @@
       data)))
 
 (def required-fields-from-db
-  [:id :primaryOperation.name :propertyId :address :municipality
+  [:id :primaryOperation :propertyId :address :municipality
    :submitted :location :documents :permitType :drawings])
 
 (defn- query-applications [organization]

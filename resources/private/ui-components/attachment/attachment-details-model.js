@@ -201,6 +201,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Permanent archive
   self.permanentArchiveEnabled = function() { return authModel.ok("permanent-archive-enabled"); };
+  self.showConversionLog = ko.observable(false);
 
   // Signatures
   self.hasSignature = function() { return !_.isEmpty(self.attachment().signatures); };

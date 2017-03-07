@@ -50,12 +50,15 @@
     (let [pdf-file (files/temp-file "lupapiste-attach-converted-pdf-file" ".pdf")] ; deleted via temp-file-input-stream, when input was not converted or in catch
       (try
         (let [processing-result (pdf-conversion/convert-to-pdf-a content pdf-file {:application application :filename filename})
-              {:keys [output-file missing-fonts] auto-conversion :autoConversion :or {missing-fonts []}} processing-result
+              {:keys [output-file missing-fonts conversionLog] auto-conversion :autoConversion :or {missing-fonts []}} processing-result
               archivability-error (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)]
           (when-not auto-conversion (io/delete-file pdf-file :silently))
           (cond
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
-            (not (:pdfa? processing-result)) {:archivable false :missing-fonts missing-fonts :archivabilityError archivability-error}
+            (not (:pdfa? processing-result)) {:archivable false
+                                              :missing-fonts missing-fonts
+                                              :archivabilityError archivability-error
+                                              :conversionLog conversionLog}
             (:pdfa? processing-result) {:archivable true
                                         :filename (files/filename-for-pdfa filename)
                                         :archivabilityError nil
@@ -101,7 +104,8 @@
    (sc/optional-key :missing-fonts)  [sc/Str]
    (sc/optional-key :autoConversion) sc/Bool
    (sc/optional-key :content)        (sc/cond-pre File InputStream)
-   (sc/optional-key :filename)       sc/Str})
+   (sc/optional-key :filename)       sc/Str
+   (sc/optional-key :conversionLog)  [sc/Str]})
 
 (defn archivability-conversion
   "Validates file for archivability, and converts content if needed. Content type must be defined correctly.

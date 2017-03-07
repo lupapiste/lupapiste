@@ -148,7 +148,8 @@
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.7"]
-                                  [pdfboxing "0.1.10"]]
+                                  [pdfboxing "0.1.10"]
+                                  [com.cemerick/piggieback "0.2.1"]]
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
@@ -162,6 +163,7 @@
                               :test-paths []}
                    :sass {:output-style :expanded
                           :source-map   true}
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                    :cljsbuild {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
                                                          :on-jsload lupapalvelu.ui.inspection-summaries/reload-hook}
                                               :compiler {:output-dir "resources/public/lp-static/js/out"

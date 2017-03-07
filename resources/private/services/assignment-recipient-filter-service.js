@@ -33,7 +33,10 @@ LUPAPISTE.AssignmentRecipientFilterService = function() {
   });
 
   function mapUser(user) {
-    user.fullName = _.filter([user.lastName, user.firstName]).join("\u00a0");
+    user.fullName = _.filter([user.lastName, user.firstName]).join("\u00a0") || user.email;
+    if (!user.enabled) {
+      user.fullName += " " + loc("account.not-in-use");
+    }
     return user;
   }
 

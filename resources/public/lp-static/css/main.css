@@ -12992,6 +12992,47 @@ div.accordion-assignments .assignment .editor {
   border-right: none;
 }
 
+div.automatic-assignments {
+  color: black;
+  margin: 0 auto;
+  margin-bottom: 12px;
+  min-height: 40px;
+}
+
+div.automatic-assignments .assignment-container {
+  border: 1px solid #dddddd;
+  border-top: none;
+  padding: 6px 6px;
+  background-color: white;
+}
+
+div.automatic-assignments .assignment-container:first-child {
+  border-top: 1px solid #dddddd;
+}
+
+div.automatic-assignments .assignment {
+  width: 100%;
+  display: block;
+}
+
+div.automatic-assignments .assignment > * {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 0 6px;
+}
+
+div.automatic-assignments .assignment > .assignment-text {
+  width: 100%;
+}
+
+div.automatic-assignments .assignment div.no-wrap-whitespace button:first-child {
+  margin-right: 6px;
+}
+
+div.automatic-assignments .assignment .editor {
+  display: table-row;
+}
+
 #ui-datepicker-div {
   background: #f6f6f6;
   border: 1px solid #dddddd;
@@ -13610,6 +13651,14 @@ div.accordion-assignments .assignment .editor {
   margin-bottom: 0.5em;
 }
 
+.archival-summary-conversion-log {
+  margin-top: 15px;
+}
+
+.archival-summary-conversion-log button {
+  margin-top: 15px;
+}
+
 .applications-search-top {
   background-color: #eeeeee;
   border-bottom: 2px solid #dddddd;
@@ -13895,6 +13944,10 @@ div.search i {
 
 .assignments-search-result__table tr td.completed {
   color: #46b02d;
+}
+
+.assignments-search-result__table tr td.targets-added {
+  color: #df3215;
 }
 
 .search-results-waiting i.spin {
