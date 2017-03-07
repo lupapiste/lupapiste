@@ -34,10 +34,16 @@ LUPAPISTE.FormCellModel = function( params ) {
     return !ko.unwrap( self.warning ) && ko.unwrap( self.message );
   });
 
+  self.spanTestId = function( span ) {
+    return params.testId ? sprintf( "%s-%s", params.testId, span ) : null;
+  };
+
+
   self.isMandatory = Boolean( self.required );
   self.id = _.uniqueId( "form-cell-id-");
   self.label = params.label;
   self.componentName = "cell-" + params.cell;
-  self.componentParams = _.omit( params, ["$raw", "warning", "required", "id", "label", "cell"]);
+  self.componentParams = _.omit( params, ["$raw", "warning", "message",
+                                          "required", "id", "label", "cell"]);
   self.componentParams.attr = _.defaults( self.componentParams.attr, {id: self.id});
 };

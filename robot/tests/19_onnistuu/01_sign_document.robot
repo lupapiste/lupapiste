@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   A new user signs company agreement
+Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -9,17 +10,32 @@ Setup
   Go to  ${LAST EMAIL URL}
   Go to  ${LOGIN URL}
 
-Bob decides to register his company, but then cancels his mind
+Bob decides to register his company (he will change his mind later)
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Test id disabled  register-company-continue
   Select account type  account5
+  Click by test id  register-company-continue
+
+Bob checks that input validation works
+  Validate input  register-company-y  foobar  2341528-4
+  Validate input  register-company-zip  22  22222
+  Validate input  register-company-personId  foobar  290735-9501
+  Validate input  register-company-email  bob  bob@example.org
+
+Existing user email cannot be used
+  Validate input  register-company-email  pena@example.com  bob@example.org
+
+Bobo cancels his mind
+  Click by test id  register-company-cancel
   Test id enabled  register-company-continue
   Click by test id  register-company-cancel
+  Test id enabled  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
 Bob decides to register his company after all, but still chickens out
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Account type not selected
   Select account type  account5
   Click enabled by test id  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-continue']
@@ -66,8 +82,8 @@ Bob decides to register his company after all, and this time he means it
   Select from test id  register-company-language  sv
   Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-continue
+  Wait until    Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
   Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
   Toggle toggle  register-company-agree
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-sign']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
@@ -125,3 +141,14 @@ Select account type
 Account type selected
   [Arguments]  ${type}
   Wait Until  Element should be visible  jquery=div.account-type-box[data-test-id=account-type-${type}].selected
+
+Account type not selected
+  Wait Until  Element should not be visible  jquery=div.account-type-box.selected
+
+Validate input
+  [Arguments]  ${tid}  ${bad}  ${good}
+  No such test id  ${tid}-warning
+  Input text by test id  ${tid}  ${bad}
+  Wait test id visible  ${tid}-warning
+  Input text by test id  ${tid}  ${good}
+  No such test id  ${tid}-warning

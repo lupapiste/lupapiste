@@ -11,12 +11,14 @@
     <!-- ko if: warning -->
     <div class="btn-base form-cell__message">
       <i class="lupicon-warning"></i>
-      <span data-bind="ltext: warning"></span>
+      <span data-bind="ltext: warning,
+                       testId: spanTestId( 'warning' )"></span>
     </div>
     <!-- /ko -->
     <!-- ko if: showMessage -->
     <div class="btn-base form-cell__message">
-      <span data-bind="ltext: message"></span>
+      <span data-bind="ltext: message,
+                       testId: spanTestId( 'message' )"></span>
     </div>
     <!-- /ko -->
   </div>
