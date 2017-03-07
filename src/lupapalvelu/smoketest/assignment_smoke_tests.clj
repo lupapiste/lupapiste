@@ -47,29 +47,31 @@
          "" "not ")
        target-status))
 
-(defn document-target? [target]
-  (or (= (:group target) "documents")
-      (= (:group target) "parties")))
+(defn document-target? [targets]
+  (and (= 1 (count targets))
+       (or (= (:group (first targets)) "documents")
+           (= (:group (first targets)) "parties"))))
 
-(defn attachment-target? [target]
-  (= (:group target) "attachments"))
+(defn attachment-target? [targets]
+  (and (= 1 (count targets))
+       (= (:group targets) "attachments")))
 
-(defn- status-corresponds-to-application-and-target-state [{:keys [application status target]}]
+(defn- status-corresponds-to-application-and-target-state [{:keys [application status targets]}]
   (cond (and (application-canceled? (:id application))       ; if application is canceled, assignments should be too
              (not= status "canceled"))
         (status-mismatch-str status "application" false "canceled")
 
         (and (not (application-canceled? (:id application))) ; given application is not canceled, assignment should be
-             (document-target? target)                       ; canceled iff document is disabled
-             (not= (target-disabled? application target)
+             (document-target? targets)                      ; canceled iff document is disabled
+             (not= (target-disabled? application (first targets))
                    (= status "canceled")))
         (status-mismatch-str status "document" true "disabled")
 
-        (and (attachment-target? target)                     ; attachment assignment status should be same as application's
+        (and (attachment-target? targets)                    ; attachment assignment status should be same as application's
              (not= (application-canceled? (:id application))
                    (= status "canceled")))
         (status-mismatch-str status "application" (application-canceled? (:id application)) "canceled")
 
         :else nil))
 
-(mongocheck :assignments status-corresponds-to-application-and-target-state :application :status :target)
+(mongocheck :assignments status-corresponds-to-application-and-target-state :application :status :targets)
