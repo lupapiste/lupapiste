@@ -8,7 +8,8 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.env :as env]))
 
 (defn- build-inspection-summary-query-params [{application-id :id} {summary-id :id}]
   {:id        application-id
@@ -121,7 +122,9 @@
 
 (defcommand toggle-inspection-summary-locking
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
-                inspection-summary/validate-summary-found-in-application]
+                inspection-summary/validate-summary-found-in-application
+                (fn [_] (when-not (env/feature? :inspection-summary-locking)
+                          (fail :error.feature-not-enabled)))]
    :parameters [:id summaryId isLocked]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId])
