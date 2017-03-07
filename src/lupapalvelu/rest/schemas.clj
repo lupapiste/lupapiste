@@ -12,6 +12,9 @@
 (sc/defschema Kuntalupatunnus
   (field sc/Str "Taustaj\u00e4rjestelm\u00e4ss\u00e4 olevan hakemuksen kuntalupatunnus"))
 
+(sc/defschema AuthorizeApplicantsBoolean
+  (field sc/Bool "Valtuutetaanko hakijaosapuolet Lupapisteen hakemukselle, jos tämän operaation seurauksena luodaan uusi hakemus. Oletus true, jos arvo puuttuu"))
+
 (sc/defschema Kiinteistotunnus
   (field sc/Str "Kiinteist\u00f6tunnus"))
 
