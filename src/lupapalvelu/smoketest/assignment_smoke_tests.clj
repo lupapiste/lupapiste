@@ -41,25 +41,35 @@
                            :documents
                            (util/find-by-id targetId)))))
 
-(defn status-mismatch-str [status target canceled?]
+(defn status-mismatch-str [status target canceled? target-status]
   (str "status was '" status "', but " target " was "
        (if canceled?
          "" "not ")
-       "canceled"))
+       target-status))
 
-(defn- status-corresponds-to-application-state [{:keys [application status targets]}]
-  (when-not (= (application-canceled? (:id application))
-               (= status "canceled"))
-    (status-mismatch-str status "application" (application-canceled? (:id application)))))
+(defn document-target? [target]
+  (or (= (:group target) "documents")
+      (= (:group target) "parties")))
 
-(mongocheck :assignments status-corresponds-to-application-state :application :status :targets)
+(defn attachment-target? [target]
+  (= (:group target) "attachments"))
 
-(defn- status-corresponds-to-document-target-state [{:keys [application status targets]}]
-  (when (and (= (count targets) 1)
-             (= (:group (first targets)) "documents"))
-    (let [only-document-target-disabled? (target-disabled? application (first targets))]
-      (when-not (= only-document-target-disabled?
-                   (= status "canceled"))
-        (status-mismatch-str status "document" only-document-target-disabled?)))))
+(defn- status-corresponds-to-application-and-target-state [{:keys [application status target]}]
+  (cond (and (application-canceled? (:id application))       ; if application is canceled, assignments should be too
+             (not= status "canceled"))
+        (status-mismatch-str status "application" false "canceled")
 
-(mongocheck :assignments status-corresponds-to-document-target-state :application :status :targets)
+        (and (not (application-canceled? (:id application))) ; given application is not canceled, assignment should be
+             (document-target? target)                       ; canceled iff document is disabled
+             (not= (target-disabled? application target)
+                   (= status "canceled")))
+        (status-mismatch-str status "document" true "disabled")
+
+        (and (attachment-target? target)                     ; attachment assignment status should be same as application's
+             (not= (application-canceled? (:id application))
+                   (= status "canceled")))
+        (status-mismatch-str status "application" (application-canceled? (:id application)) "canceled")
+
+        :else nil))
+
+(mongocheck :assignments status-corresponds-to-application-and-target-state :application :status :target)
