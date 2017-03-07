@@ -180,17 +180,17 @@
     (make-free-text-query filter-search)))
 
 (defn search-query [data]
-  (merge {:searchText nil
-          :state "all"
-          :recipient nil
-          :operation nil
-          :area nil
-          :createdDate nil
-          :targetType nil
-          :skip   0
-          :limit  100
-          :sort   {:asc true :field "created"}}
-         (select-keys data (keys AssignmentsSearchQuery))))
+  (->> (select-keys data (keys AssignmentsSearchQuery))
+       (merge {:searchText nil
+               :state "all"
+               :recipient nil
+               :operation nil
+               :area nil
+               :createdDate nil
+               :targetType nil
+               :skip   0
+               :limit  100
+               :sort   {:asc true :field "created"}})))
 
 (defn- make-query [{:keys [searchText recipient operation area createdDate targetType]} user]
   "Returns query parameters in two parts:
@@ -219,6 +219,15 @@
    (let [dir (if (:asc sort) 1 -1)]
       {(:field sort) dir}))
 
+(defn match-state [state]
+  (cond (= state "created")
+        {"$match" {$or [{:currentState.type "created"}
+                        {:currentState.type "targets-added"}]}}
+
+        (= state "all") nil
+
+        :else {"$match" {:currentState.type state}}))
+
 (defn search [{state :state} {:keys [pre-lookup post-lookup] :as mongo-query} skip limit sort]
   (try
     (let [aggregate (->> [(when-not (empty? pre-lookup)
@@ -246,8 +255,7 @@
                             :status         "$status"
                             :states         "$states"
                             :description    "$description"}}
-                          (when (and (string? state) (not= "all" state))
-                            {"$match" {:currentState.type state}})
+                          (match-state state)
                           {"$sort" (sort-query sort)}]
                          (remove nil?))
           res (collection/aggregate (mongo/get-db) "assignments" aggregate)
