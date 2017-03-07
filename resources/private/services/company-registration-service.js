@@ -1,17 +1,18 @@
+// Service that facilitates the company registration wizard.
 LUPAPISTE.CompanyRegistrationService = function() {
   "use strict";
   var self = this;
-
-  var accountTypes = LUPAPISTE.config.accountTypes;
 
   // User summary or null.
   function user() {
     var u = lupapisteApp.models.currentUser;
     return u.id()
-         ? ko.mapping.toJS( _.pick( u, ["firstName", "lastName", "email"]))
+         ? ko.mapping.toJS( _.pick( u, ["firstName", "lastName",
+                                        "email", "language"]))
          : null;
   }
 
+  // Property names are the same as used by the backend.
   function newRegistration() {
     return {
       accountType: ko.observable(),
@@ -47,15 +48,19 @@ LUPAPISTE.CompanyRegistrationService = function() {
   // Current step [0-3] in the registration wizard.
   self.currentStep = ko.observable( 0 );
 
-  ko.computed( function() {
+  // User login updates the current registration just in case.
+  function updateRegistrationUserInfo() {
     var u = user();
     if( u ) {
       self.registration.firstName( u.firstName );
       self.registration.lastName( u.lastName );
       self.registration.email( u.email );
+      self.registration.language( u.language );
     }
-  });
+  }
+  ko.computed( updateRegistrationUserInfo );
 
+  // Validation warnings for corresponding registration properties.
   var warnings = {
     y: ko.observable(),
     zip: ko.observable(),
@@ -79,19 +84,21 @@ LUPAPISTE.CompanyRegistrationService = function() {
     return isOk || user();
   }
 
+  // Property names match to the registration. When fun returns
+  // falsey, the corresponding warning is updated with msg.
   var validators = {
     y: {fun: util.isValidY,
-              msg: "error.invalidY"},
+        msg: "error.invalidY"},
     zip: {fun: isValidZip,
           msg: "error.illegal-zip"},
     email: {fun: isValidEmail,
             msg: "error.illegal-email"},
     personId: {fun: util.isValidPersonId,
-              msg: "error.illegal-hetu"}
+               msg: "error.illegal-hetu"}
   };
 
 
-  // Warnings are updated.
+  // Warnings are updated when "tracked" properties change.
   ko.computed( function() {
     _.each( validators, function( validator, k ) {
       var txt = _.trim( self.registration[k]());
@@ -101,6 +108,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
     });
   });
 
+  // Convenience function for populating form-cell component
+  // parameters. See register-company-info component for usage.
   self.field = function( fieldName ) {
     return {required: _.includes( requiredFields(), fieldName ),
             value: self.registration[fieldName],
@@ -110,7 +119,7 @@ LUPAPISTE.CompanyRegistrationService = function() {
   };
 
   self.accountTypes = ko.computed( function() {
-    return _.map( accountTypes, function( account ) {
+    return _.map( LUPAPISTE.config.accountTypes, function( account ) {
       return { id: account.name,
                title: loc( sprintf( "register.company.%s.title",
                                     account.name )),
@@ -122,9 +131,12 @@ LUPAPISTE.CompanyRegistrationService = function() {
     });
   });
 
+  // Guard makes sure that components are disposed, when they are
+  // located within suitable if.
   function reset() {
     self.guard( false );
     self.registration = newRegistration() ;
+    updateRegistrationUserInfo();
     self.currentStep( 0 );
     self.guard( true );
   }
@@ -149,6 +161,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
         && _.every( _.values( warnings) , _.flow( ko.unwrap, _.isEmpty ));
   }
 
+  // We cache the sent init-sign parameters to avoid superfluous ajax calls.
+  // (cancel -> continue -> cancel -> continue ...)
   var latestSignParams = {};
 
   self.signResults = ko.observable( {} );
@@ -182,30 +196,41 @@ LUPAPISTE.CompanyRegistrationService = function() {
     }
   }
 
+  // Definitions for the first three wizard steps. The last step
+  // (Activation) is accessed via an email link and does not use the
+  // service.
   var stepConfigs = [{component: "register-company-account-type",
                       continueEnable: self.registration.accountType,
                       continueClick: nextStep},
                      {component: "register-company-info",
                       continueEnable: fieldsOk,
                       continueClick: initSign},
-                    {component: "register-company-sign",
-                     noButtons: true}];
+                     {component: "register-company-sign",
+                      noButtons: true}];
 
   self.currentConfig = function() {
     return stepConfigs[self.currentStep()];
   };
 
-  self.devFill = function() {
-    self.registration.name( "Foobar Oy");
-    self.registration.y( "0000000-0");
-    self.registration.address1( "Katuosoite 1");
-    self.registration.zip( "12345");
-    self.registration.po( "Kaupunki");
-    if( !user()) {
-      self.registration.firstName( "Etunimi");
-      self.registration.lastName( "Sukunimi");
-      self.registration.email( "foo@example.com");
-      self.registration.personId( "150805-325W" );
-    }
-  };
+  if( LUPAPISTE.config.mode === "dev") {
+    self.devFill = function() {
+      self.registration.name( "Foobar Oy");
+      self.registration.y( "0000000-0");
+      self.registration.address1( "Katuosoite 1");
+      self.registration.zip( "12345");
+      self.registration.po( "Kaupunki");
+      if( !user()) {
+        self.registration.firstName( "Etunimi");
+        self.registration.lastName( "Sukunimi");
+        self.registration.email( sprintf( "foo%s@example.com",
+                                          _( _.range( 4 ) )
+                                          .map( _.partial( _.random, 0, 9,
+                                                           false ))
+                                          .join("")
+                                        ));
+        self.registration.personId( "110785-950A" );
+      }
+    };
+  }
+
 };
