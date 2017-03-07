@@ -235,7 +235,7 @@
           :data-test-id (str "edit-link-" idx)}
          (js/loc "edit")])
       (when (and (auth/ok? auth-model :remove-target-from-inspection-summary) (not editing?) (not targetFinished?))
-        (remove-link application-id summary-id target-id idx))]]))
+        (remove-link target-id idx))]]))
 
 (defn init
   [init-state props]
