@@ -749,6 +749,18 @@
                                         :name {:fi "KVV-K\u00e4sittelij\u00e4"
                                                :sv "KVV-Handl\u00e4ggare"
                                                :en "KVV-Handler"}}]
+                       :assignment-triggers [{:id "dead1111111111111111beef"
+                                              :targets ["ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos"
+                                                        "ennakkoluvat_ja_lausunnot.naapurin_suostumus"]
+                                              :description "ELY ja naapuri"}
+                                             {:id "dead1111111111111112beef"
+                                              :targets ["paapiirustus.aitapiirustus"
+                                                        "paapiirustus.asemapiirros"]
+                                              :description "Aita ja asema"
+                                              :handlerRole {:id "abba1111111111111111acdc"
+                                                            :name {:fi "K\u00e4sittelij\u00e4"
+                                                                   :sv "Handl\u00e4ggare"
+                                                                   :en "Handler"}}}]
                        :kopiolaitos-email "sipoo@example.com"
                        :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                        :kopiolaitos-orderer-email "tilaaja@example.com"

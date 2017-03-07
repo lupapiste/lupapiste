@@ -59,6 +59,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.inspectionSummaryTemplates = ko.observableArray([]);
   self.operationsInspectionSummaryTemplates = ko.observable({});
   self.handlerRoles = ko.observableArray();
+  self.assignmentTriggers = ko.observableArray();
 
   self.sectionOperations = ko.observableArray();
 
@@ -88,7 +89,12 @@ LUPAPISTE.OrganizationModel = function () {
     var inspectionSummariesEnabled = self.inspectionSummariesEnabled();
     if (self.initialized) {
       ajax.command("set-organization-inspection-summaries", {enabled: inspectionSummariesEnabled})
-        .success(util.showSavedIndicator)
+        .success(function(event) {
+          util.showSavedIndicator(event);
+          if (inspectionSummariesEnabled) {
+            lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
+          }
+        })
         .error(util.showSavedIndicator)
         .call();
     }
@@ -228,6 +234,10 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.inspectionSummariesEnabled(organization["inspection-summaries-enabled"] || false);
 
+    if (organization["inspection-summaries-enabled"]) {
+      lupapisteApp.services.inspectionSummaryService.getTemplatesAsAuthorityAdmin();
+    }
+
     self.useAttachmentLinksIntegration(organization["use-attachment-links-integration"] === true);
 
     // Operation attachments
@@ -325,6 +335,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.sectionOperations(_.get( organization, "section.operations", []));
 
     self.handlerRoles( _.get( organization, "handler-roles", []));
+
+    self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
     self.initialized = true;
   };

@@ -25,6 +25,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   var stateClasses = {
     created: "lupicon-circle-attention",
+    "targets-added": "lupicon-circle-attention",
     completed: "lupicon-circle-check"
   };
 
@@ -39,9 +40,9 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       creatorName: createdState.user.firstName + " " + createdState.user.lastName,
       statusClass: stateClasses[currentState.type],
       addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality]),
-      targetGroup: loc("application.assignment.type." + assignment.target.group),
-      targetType: loc(assignment.target["type-key"]),
-      targetInfo: assignment.target["info-key"] && loc(assignment.target["info-key"]) || assignment.target.description
+      targetGroup: loc("application.assignment.type." + assignment.targets[0].group),
+      targetType: loc(assignment.targets[0]["type-key"]),
+      targetInfo: assignment.targets[0]["info-key"] && loc(assignment.target[0]["info-key"]) || assignment.targets[0].description
     });
   }
 

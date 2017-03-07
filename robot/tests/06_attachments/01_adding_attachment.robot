@@ -429,7 +429,6 @@ Mikko signs everything blindly
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
 
 No frontend errors
-  [Tags]  non-roboto-proof
   There are no frontend errors
 
 

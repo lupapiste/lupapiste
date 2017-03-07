@@ -24,7 +24,7 @@ Pena adds attachment
 
 Pena add another attachment with contents
   Upload attachment  ${TXT_TESTFILE_PATH}  Julkisivupiirustus  Facade  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
-  Open attachment details  paapiirustus.julkisivupiirustus  
+  Open attachment details  paapiirustus.julkisivupiirustus
   Wait test id visible  attachment-contents-input
   Input text by test id  attachment-contents-input  Julkisivupiirustus
   Return to application
@@ -187,6 +187,7 @@ Julkisivu is marked as will publish
 
 Edit application document metadata
   Toggle additional controls  archived-application-documents  application-documents  application-document
+  Toggle additional controls  archived-application-documents  application-documents  application-document
   Fill in archival metadata
 
 Application document group is changed
@@ -227,11 +228,11 @@ Attachment content is
 
 Attachment type group is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.group-label  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.group-label span[data-test-id='type-group']  ${text}
 
 Attachment type id is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.type-id span  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.group-label span[data-test-id='type-id']  ${text}
 
 Attachment is archivable
   [Arguments]  ${section}  ${group}  ${type}

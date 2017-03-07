@@ -149,10 +149,10 @@
               <div class="group-label">
                 <div>
                   <span data-bind="if: $data.type">
-                    <span data-bind="text: loc(['attachmentType', ko.unwrap($data.type)['type-group'], '_group_label'])"></span>
+                    <span data-test-id="type-group" data-bind="text: loc(['attachmentType', ko.unwrap($data.type)['type-group'], '_group_label'])"></span>
                   </span>
                   <span data-bind="if: $data.attachmentType()">
-                    - <span data-bind="text: loc(['attachmentType', $data.attachmentType()])"></span>
+                    - <span data-test-id="type-id" data-bind="text: loc(['attachmentType', $data.attachmentType()])"></span>
                   </span>
                   <span data-bind="if: $data.ramLink">
                     <span data-bind="ltext: 'ram.postfix'"></span>
@@ -209,6 +209,30 @@
             </div>
             <div data-bind="if: $data.convertableToPdfA">
               <button class="btn-primary" data-bind="click: $component.convertToPdfA, ltext: 'Konvertoi PDF/A-muotoon'"></button>
+            </div>
+            <div class="additional-data-container archival-summary-conversion-log"
+                 data-bind="visible: $data.latestVersion.archivabilityError, with: $data.latestVersion">
+              <div class="header" data-bind="ltext: 'archivalSummary.previousConversionResult'"></div>
+              <div class="contents">
+                <span data-bind="ltext: archivabilityError"></span>
+                <div data-bind="if: !_.isEmpty($data.conversionLog)">
+                  <button class="btn" data-bind="toggleClick: $parent.showConversionLog">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($parent.showConversionLog),
+                                        'lupicon-chevron-small-down': $parent.showConversionLog}"></i>
+                    <span data-bind="ltext: 'attachment.showConversionLog'"></span>
+                  </button>
+
+                  <div data-bind="slider: $parent.showConversionLog">
+                    <table class="table">
+                      <tbody data-bind="foreach: $data.conversionLog">
+                      <tr>
+                        <td data-bind="text: $data"></td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

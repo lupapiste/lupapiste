@@ -8,7 +8,16 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.env :as env]))
+
+(defn- build-inspection-summary-query-params [{application-id :id} {summary-id :id}]
+  {:id        application-id
+   :summaryId summary-id})
+
+(defmethod action/allowed-actions-for-category :inspection-summaries
+  [command]
+  (action/allowed-actions-for-collection :inspection-summaries build-inspection-summary-query-params command))
 
 (defquery organization-inspection-summary-settings
   {:description "Inspection summary templates for given organization."
@@ -25,7 +34,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [organizationId (usr/authority-admins-organization-id user)]
-    (inspection-summary/create-template-for-organization organizationId name templateText)))
+    (ok :id (inspection-summary/create-template-for-organization organizationId name templateText))))
 
 (defcommand delete-inspection-summary-template
   {:description "Modify inspection summary templates in the given organization."
@@ -75,6 +84,7 @@
                   inspection-summary/inspection-summary-api-applicant-pre-check)
                 inspection-summary/application-has-R-permit-type-pre-check]
    :parameters [:id]
+   :categories #{:inspection-summaries}
    :states states/post-verdict-states
    :user-roles #{:authority :applicant}}
   [{app :application}]
@@ -88,6 +98,7 @@
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
                 inspection-summary/application-has-R-permit-type-pre-check]
    :parameters [:id templateId operationId]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:operationId :templateId])]
    :user-roles #{:authority}}
   [{app :application}]
@@ -98,17 +109,36 @@
 
 (defcommand delete-inspection-summary
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
-                inspection-summary/validate-that-summary-can-be-deleted]
+                inspection-summary/validate-that-summary-can-be-deleted
+                inspection-summary/validate-summary-found-in-application
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId])]
    :user-roles #{:authority}}
   [{app :application}]
   (inspection-summary/delete-summary app summaryId)
   (ok))
 
+(defcommand toggle-inspection-summary-locking
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-summary-found-in-application
+                (fn [_] (when-not (env/feature? :inspection-summary-locking)
+                          (fail :error.feature-not-enabled)))]
+   :parameters [:id summaryId isLocked]
+   :categories #{:inspection-summaries}
+   :input-validators [(partial action/non-blank-parameters [:summaryId])
+                      (partial action/boolean-parameters [:isLocked])]
+   :user-roles #{:authority}}
+  [{app :application}]
+  (inspection-summary/toggle-summary-locking app summaryId isLocked)
+  (ok))
+
 (defcommand add-target-to-inspection-summary
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetName]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
   [{{appId :id} :application}]
@@ -116,8 +146,11 @@
 
 (defcommand edit-inspection-summary-target
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
-                inspection-summary/deny-if-finished]
+                inspection-summary/deny-if-finished
+                inspection-summary/validate-summary-target-found-in-application
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId targetName]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
   [{application :application}]
@@ -125,8 +158,10 @@
   (ok))
 
 (defcommand remove-target-from-inspection-summary
-  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-roles #{:authority}}
   [{application :application}]
@@ -134,11 +169,14 @@
   (ok))
 
 (defcommand set-target-status
-  {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check]
+  {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check
+                inspection-summary/validate-summary-target-found-in-application
+                inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId status]
+   :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
                       (partial action/boolean-parameters [:status])]
-   :user-roles #{:applicant}}
+   :user-roles #{:applicant :authority}}
   [{application :application user :user}]
   (let [params (if status
                  {:set {:finished true :finished-date (now) :finished-by (usr/summary user)}}
