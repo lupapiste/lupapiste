@@ -41,13 +41,35 @@
                            :documents
                            (util/find-by-id targetId)))))
 
-(defn- status-corresponds-to-application-state [{:keys [application status target]}]
-  (when-not (= (or (application-canceled? (:id application))
-                   (target-disabled? application target))
-               (= status "canceled"))
-    (str "status was '" status "', but application was "
-         (if (application-canceled? (:id application))
-           "" "not ")
-         "canceled")))
+(defn status-mismatch-str [status target canceled? target-status]
+  (str "status was '" status "', but " target " was "
+       (if canceled?
+         "" "not ")
+       target-status))
 
-(mongocheck :assignments status-corresponds-to-application-state :application :status :target)
+(defn document-target? [target]
+  (or (= (:group target) "documents")
+      (= (:group target) "parties")))
+
+(defn attachment-target? [target]
+  (= (:group target) "attachments"))
+
+(defn- status-corresponds-to-application-and-target-state [{:keys [application status target]}]
+  (cond (and (application-canceled? (:id application))       ; if application is canceled, assignments should be too
+             (not= status "canceled"))
+        (status-mismatch-str status "application" false "canceled")
+
+        (and (not (application-canceled? (:id application))) ; given application is not canceled, assignment should be
+             (document-target? target)                       ; canceled iff document is disabled
+             (not= (target-disabled? application target)
+                   (= status "canceled")))
+        (status-mismatch-str status "document" true "disabled")
+
+        (and (attachment-target? target)                     ; attachment assignment status should be same as application's
+             (not= (application-canceled? (:id application))
+                   (= status "canceled")))
+        (status-mismatch-str status "application" (application-canceled? (:id application)) "canceled")
+
+        :else nil))
+
+(mongocheck :assignments status-corresponds-to-application-and-target-state :application :status :target)
