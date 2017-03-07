@@ -101,7 +101,7 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
-(defn- do-create-application-from-previous-permit [command operation xml app-info location-info authoriseApplicants]
+(defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorizeApplicants]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
                                                                     (when-not (ss/blank? rakennusvalvontaasianKuvaus)
@@ -122,7 +122,7 @@
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
 
-    (if (true? authoriseApplicants)
+    (if (true? authorizeApplicants)
       (invite-applicants command hakijat))
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
@@ -147,7 +147,7 @@
         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
       location-info)))
 
-(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authoriseApplicants]} :data :as command}]
+(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id "" :permitType permit-type :organization organizationId}
@@ -165,7 +165,7 @@
       (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       validation-result            validation-result
-      :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info authoriseApplicants)]
+      :else                        (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info authorizeApplicants)]
                                      (if no-proper-applicants?
                                        (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
                                        (ok :id id))))))
