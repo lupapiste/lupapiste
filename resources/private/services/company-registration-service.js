@@ -2,7 +2,7 @@ LUPAPISTE.CompanyRegistrationService = function() {
   "use strict";
   var self = this;
 
-  var accountPrices = ko.observable({account5: 59, account15: 79, account30: 99 });
+  var accountTypes = LUPAPISTE.config.accountTypes;
 
   // User summary or null.
   function user() {
@@ -110,12 +110,15 @@ LUPAPISTE.CompanyRegistrationService = function() {
   };
 
   self.accountTypes = ko.computed( function() {
-    return _.map( [5, 15, 30], function( n ) {
-      return { id: "account" + n,
-               title: loc( sprintf( "register.company.account%s.title", n )),
-               price: loc( sprintf( "register.company.account%s.price", n),
-                          _.get( accountPrices(), "account" + n )),
-               description: loc( "register.company.account.description", n )};
+    return _.map( accountTypes, function( account ) {
+      return { id: account.name,
+               title: loc( sprintf( "register.company.%s.title",
+                                    account.name )),
+               price: loc( sprintf( "register.company.%s.price",
+                                    account.name),
+                           account.price),
+               description: loc( "register.company.account.description",
+                                 account.limit )};
     });
   });
 
