@@ -39,7 +39,7 @@
                           :x 0
                           :address ""
                           :propertyId nil
-                          :authoriseApplicants true})
+                          :authorizeApplicants true})
                   (mapcat seq))]
     (apply local-command apikey :create-application-from-previous-permit args)))
 
@@ -215,7 +215,7 @@
       (fact "When not authorise applicants"
        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
                                               :kuntalupatunnus "14-0241-R 10"
-                                              :authoriseApplicants false))
+                                              :authorizeApplicants false))
             (query-application local-query raktark-jarvenpaa)
             (:auth)
             (count)) => 1 ;; owner of the application
@@ -225,7 +225,7 @@
       (fact "When authorise applicants"
        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
                                               :kuntalupatunnus "14-0241-R 11"
-                                              :authoriseApplicants true))
+                                              :authorizeApplicants true))
             (query-application local-query raktark-jarvenpaa)
             (:auth)
             (count)) => 4
