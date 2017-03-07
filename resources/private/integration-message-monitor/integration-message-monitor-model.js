@@ -4,6 +4,7 @@ LUPAPISTE.IntegrationMessageMonitorModel = function(params) {
 
   self.processing = ko.observable(true);
   self.fileGroups = ko.observable([]);
+  self.fileGroupsEmpty = ko.observable(true);
 
   self.init = function() {
     ajax.query("integration-messages", {id:params.id})
@@ -21,6 +22,8 @@ LUPAPISTE.IntegrationMessageMonitorModel = function(params) {
         return {lname: loc(["application.integration-messages", group]),
                 files: _.sortBy(_.flatten(files), "modified").reverse()};
       }));
+      self.fileGroupsEmpty = _.every(self.fileGroups(), function (gr) { return _.isEmpty(gr.files); });
+
     })
     .call();
   };
