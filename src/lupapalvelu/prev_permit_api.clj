@@ -12,7 +12,7 @@
             [noir.response :as resp]))
 
 (defraw get-lp-id-from-previous-permit
-  {:parameters [kuntalupatunnus]
+  {:parameters [kuntalupatunnus authorizeApplicants]
    :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
    :user-roles #{:rest-api}}
   [{:keys [user] :as command}]
@@ -29,7 +29,7 @@
           (select-keys result [:ok :text]))))))
 
 (defcommand create-application-from-previous-permit
-  {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus authoriseApplicants]
+  {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus authorizeApplicants]
    :user-roles       #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang :organizationId]) ;; no :address included
                       ;; the propertyId parameter can be nil

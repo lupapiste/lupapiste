@@ -66,9 +66,12 @@
 (defendpoint "/rest/get-lp-id-from-previous-permit"
   {:summary     "Luo Lupapiste-hakemuksen taustaj\u00e4rjestelm\u00e4n hakemuksesta tai palauttaa olemassa olevan hakemuksen tunnuksen."
    :description "Paluuarvot:\n* id - Luodun/aiemmin luodun Lupapiste-hakemuksen tunnus\n* ok - Onnistuiko pyynt\u00f6\n* text - Kuvaus muutoksista, voi olla\n    * created-new-application - Luotiin uusi hakemus\n    * already-existing-application - Kuntalupatunnusta vasten oli jo olemassa hakemus"
-   :parameters  [:kuntalupatunnus Kuntalupatunnus]
+   :parameters  [:kuntalupatunnus Kuntalupatunnus
+                 :authorizeApplicants (sc/maybe AuthorizeApplicantsBoolean)]
    :returns     IdFromPreviousPermitResponse}
-   (let [response (execute (assoc (action/make-raw "get-lp-id-from-previous-permit" {:kuntalupatunnus kuntalupatunnus}) :user user))]
+   (let [authorizeApplicants (if-not (false? authorizeApplicants) true false)
+         response (execute (assoc (action/make-raw "get-lp-id-from-previous-permit" {:kuntalupatunnus kuntalupatunnus
+                                                                                     :authorizeApplicants authorizeApplicants}) :user user))]
      (if (action/response? response)
        response
        (if (:ok response)
