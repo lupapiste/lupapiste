@@ -152,6 +152,12 @@
   (when user
     (select-keys user summary-keys)))
 
+(defn summary-for-search-filter
+  "Returns common information about the user or nil"
+  [user]
+  (when user
+    (select-keys user (conj summary-keys :email :enabled))))
+
 (defn coerce-org-authz
   "Coerces orgAuthz to schema {Keyword #{Keyword}}"
   [org-authz]
