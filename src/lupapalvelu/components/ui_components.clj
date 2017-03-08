@@ -218,6 +218,7 @@
                    "inspection-summary-service.js"
                    "handler-service.js"
                    "card-service.js"
+                   "campaign-service.js"
                    "company-registration-service.js"
                    "triggers-target-service.js"
                    "trigger-service.js"]}

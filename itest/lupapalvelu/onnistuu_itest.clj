@@ -29,7 +29,7 @@
                  :signer {:firstName   "First"
                           :lastName    "Last"
                           :email       "a@b.c"
-                          :personId    "131052-308T"}
+                          :personId "131052-308T"}
                  :lang "fi")
       :process-id
       get-process))

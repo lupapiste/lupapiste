@@ -55,6 +55,7 @@
               (sc/optional-key :document)    sc/Str
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     ssc/Timestamp
+              (sc/optional-key :campaign)    sc/Str
               })
 
 (def company-skeleton ; required keys
