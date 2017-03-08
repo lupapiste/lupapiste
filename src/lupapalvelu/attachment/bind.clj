@@ -73,7 +73,7 @@
         (do
           (warnf "no file with file-id %s in mongo" fileId)
           (job/update job-id assoc fileId {:status :error :fileId fileId})
-          {:fileId fileId :type type :status :error})))
+          (conj results {:fileId fileId :type type :status :error}))))
     []
     file-infos))
 

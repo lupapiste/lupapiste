@@ -1381,9 +1381,9 @@ $max-columns: 12;
 // is laid out differently and encompasses
 // the input as well.
 .form-cell__message {
-  background-color: $negative;
+  background-color: $positive;
   color: white;
-  display: none;
+  display: inline-block;
   width: 100%;
 }
 
@@ -1394,12 +1394,25 @@ $max-columns: 12;
     margin-bottom: 0 !important;
   }
   .form-cell__message {
-    display: inline-block;
+    background-color: $negative;
   }
 }
+
 .form-cell--required {
   input, select {
     border: 1px solid $orange-dark !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+label.mandatory:after {
+  content: " *";
+  color: $label-required-star-color;
+}
+
+.form-cell--message {
+  input, select {
+    border: 1px solid $positive !important;
     margin-bottom: 0 !important;
   }
 }

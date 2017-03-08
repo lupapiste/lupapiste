@@ -279,6 +279,9 @@ div.search {
     td.completed {
       color: $green;
     }
+    td.targets-added {
+      color: $red-dark;
+    }
   }
 }
 

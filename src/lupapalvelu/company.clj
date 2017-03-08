@@ -27,11 +27,14 @@
 ;;
 
 (def account-types [{:name :account5
-                     :limit 5}
+                     :limit 5
+                     :price 59}
                     {:name :account15
-                     :limit 15}
+                     :limit 15
+                     :price 79}
                     {:name :account30
-                     :limit 30}])
+                     :limit 30
+                     :price 99}])
 
 (defn user-limit-for-account-type [account-name]
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
@@ -52,6 +55,7 @@
               (sc/optional-key :document)    sc/Str
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     ssc/Timestamp
+              (sc/optional-key :campaign)    sc/Str
               })
 
 (def company-skeleton ; required keys

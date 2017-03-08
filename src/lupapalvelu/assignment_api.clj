@@ -25,7 +25,8 @@
     (fail :error.invalid-assignment-receiver)))
 
 (defn- validate-assignment-id [{{:keys [assignmentId]} :data}]
-  (when-not (pos? (assignment/count-for-assignment-id assignmentId))
+  (when (and (not (ss/empty? assignmentId))
+             (not (pos? (assignment/count-for-assignment-id assignmentId))))
     (fail :error.invalid-assignment-id)))
 
 (defn- assignments-enabled [{orgs :user-organizations}]

@@ -728,6 +728,7 @@ LUPAPISTE.ApplicationModel = function() {
         .query("fetch-validation-errors", {id: self.id.peek()})
         .success(function (data) {
           self.updateMissingApplicationInfo(data.results);
+          checkForNonApprovedDesigners();
         })
         .processing(self.processing)
         .call();

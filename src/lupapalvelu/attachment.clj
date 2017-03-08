@@ -29,7 +29,9 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.authorization :as auth])
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.archiving-util :as archiving-util])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -590,7 +592,9 @@
       (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)
       (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
-      (info "4/4 deleted meta-data of attachments" ids-str))))
+      (info "4/4 deleted meta-data of attachments" ids-str)))
+  (when (org/some-organization-has-archive-enabled? #{(:organization application)})
+    (archiving-util/mark-application-archived-if-done application (now))))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."

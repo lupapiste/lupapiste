@@ -476,7 +476,7 @@ hub.send("indicator-icon", {style: "negative"});
   - config
 - Docgen, viittaus skeemojen määrittelyyn
 
-## Compass + SASS + Bless
+## Leiningen + SASS + Bless
 
 CSS-tyylit kirjoitetaan Sass-tiedostoihin `resources/private/common-html/sass` kansiossa. Sass-tiedostot käännetään lein-sass4clj leiningen pluginilla (kirjoitushetkellä versio 0.3.0). Pluginin voit asetta kuuntelemaan muutoksia `lein sass4clj auto` projektin juuresta. Vaihtoehtoisesti Sass-tiedostot voi kääntää käsin `lein sass4clj once`.
 

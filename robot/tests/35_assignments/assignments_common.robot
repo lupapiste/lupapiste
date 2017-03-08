@@ -46,8 +46,19 @@ Open assignments search
   Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
   Select Radio Button  searchType  searchTypeAssignments
 
+Open applications search
+  Go to page  applications
+  Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
+  Select Radio Button  searchType  applications
+
 Count of open assignments is
   [Arguments]  ${count}
   Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
   Run Keyword Unless  ${count}==0  Wait until  Element should contain  xpath=//label[@for='searchTypeAssignments']  ${count}
   Run Keyword If  ${count}==0  Wait until  Element should not contain  xpath=//label[@for='searchTypeAssignments']  ${count}
+
+Edit handler
+  [Arguments]  ${index}  ${person}  ${role}
+  Select from autocomplete by test id  edit-person-${index}  ${person}
+  Select from autocomplete by test id  edit-role-${index}  ${role}
+  Positive indicator should be visible

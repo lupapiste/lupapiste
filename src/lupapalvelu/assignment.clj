@@ -62,6 +62,11 @@
 
 (sc/defschema AssignmentTriggerId (sc/constrained sc/Str user-created-or-uid?))
 
+(sc/defschema Recipient
+  (-> usr/SummaryUser
+      (assoc (sc/optional-key :roleId) ssc/ObjectIdStr)
+      (assoc (sc/optional-key :handlerId) ssc/ObjectIdStr)))
+
 (sc/defschema Assignment
   {:id          ssc/ObjectIdStr
    :application {:id           ssc/ApplicationId
@@ -75,7 +80,7 @@
                   (sc/optional-key :type-key)    sc/Str
                   (sc/optional-key :info-key)    sc/Str
                   (sc/optional-key :description) sc/Str}]
-   :recipient   (sc/maybe usr/SummaryUser)
+   :recipient   (sc/maybe Recipient)
    :status      (apply sc/enum assignment-statuses)
    :states      [AssignmentState]
    :description sc/Str})
@@ -114,21 +119,25 @@
    :user user-summary
    :timestamp created})
 
-(sc/defn new-recipient :- usr/SummaryUser
+(sc/defn new-recipient :- Recipient
   [id        :- (:id usr/SummaryUser)
    username  :- (:username usr/SummaryUser)
-   lastName  :- (:lastName usr/SummaryUser)
    firstName :- (:firstName usr/SummaryUser)
-   role      :- (:role usr/SummaryUser)]
+   lastName  :- (:lastName usr/SummaryUser)
+   role      :- (:role usr/SummaryUser)
+   roleId    :- (sc/maybe ssc/ObjectIdStr)
+   handlerId :- (sc/maybe ssc/ObjectIdStr)]
   {:id id
    :username username
    :firstName firstName
    :lastName lastName
-   :role role})
+   :role role
+   :roleId roleId
+   :handlerId handlerId})
 
 (sc/defn ^:always-validate new-assignment :- Assignment
   [user        :- usr/SummaryUser
-   recipient   :- (sc/maybe usr/SummaryUser)
+   recipient   :- (sc/maybe Recipient)
    application
    trigger     :- AssignmentTriggerId
    created     :- ssc/Timestamp
@@ -171,17 +180,17 @@
     (make-free-text-query filter-search)))
 
 (defn search-query [data]
-  (merge {:searchText nil
-          :state "all"
-          :recipient nil
-          :operation nil
-          :area nil
-          :createdDate nil
-          :targetType nil
-          :skip   0
-          :limit  100
-          :sort   {:asc true :field "created"}}
-         (select-keys data (keys AssignmentsSearchQuery))))
+  (->> (select-keys data (keys AssignmentsSearchQuery))
+       (merge {:searchText nil
+               :state "all"
+               :recipient nil
+               :operation nil
+               :area nil
+               :createdDate nil
+               :targetType nil
+               :skip   0
+               :limit  100
+               :sort   {:asc true :field "created"}})))
 
 (defn- make-query [{:keys [searchText recipient operation area createdDate targetType]} user]
   "Returns query parameters in two parts:
@@ -210,6 +219,15 @@
    (let [dir (if (:asc sort) 1 -1)]
       {(:field sort) dir}))
 
+(defn match-state [state]
+  (cond (= state "created")
+        {"$match" {$or [{:currentState.type "created"}
+                        {:currentState.type "targets-added"}]}}
+
+        (= state "all") nil
+
+        :else {"$match" {:currentState.type state}}))
+
 (defn search [{state :state} {:keys [pre-lookup post-lookup] :as mongo-query} skip limit sort]
   (try
     (let [aggregate (->> [(when-not (empty? pre-lookup)
@@ -237,8 +255,7 @@
                             :status         "$status"
                             :states         "$states"
                             :description    "$description"}}
-                          (when (and (string? state) (not= "all" state))
-                            {"$match" {:currentState.type state}})
+                          (match-state state)
                           {"$sort" (sort-query sort)}]
                          (remove nil?))
           res (collection/aggregate (mongo/get-db) "assignments" aggregate)
@@ -386,13 +403,18 @@
     :group     group
     :timestamp timestamp}))
 
-(defn recipient [trigger application]
-  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
+(defn- create-recipient [handler]
   (new-recipient (:userId handler)
                  (:username (usr/get-user-by-id (:userId handler)))
                  (:firstName handler)
                  (:lastName handler)
-                 (:role (usr/get-user-by-id (:userId handler))))))
+                 (:role (usr/get-user-by-id (:userId handler)))
+                 (:roleId handler)
+                 (:id handler)))
+
+(defn recipient [trigger application]
+  (when-let [handler   (first (filter #(= (get-in trigger [:handlerRole :id]) (:roleId %)) (:handlers application)))]
+    (create-recipient handler)))
 
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
@@ -432,3 +454,17 @@
                                    timestamp
                                    assignment-group
                                    targets)))))
+
+(defn change-assignment-recipient [app-id role-id handler]
+  (let [query       {:application.id app-id
+                     :status "active"
+                     :states.type {$nin ["completed"]}
+                     :trigger {$nin ["user-created"]}
+                     :recipient.roleId role-id}
+        update      {$set {:recipient (create-recipient handler)}}]
+    (mongo/update-n :assignments query update)))
+
+(defn remove-assignment-recipient [app-id handler-id]
+  (mongo/remove-many :assignments
+                     {:application.id app-id
+                      :recipient.handlerId handler-id}))

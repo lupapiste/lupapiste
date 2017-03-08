@@ -25,6 +25,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   var stateClasses = {
     created: "lupicon-circle-attention",
+    "targets-added": "lupicon-circle-attention",
     completed: "lupicon-circle-check"
   };
 

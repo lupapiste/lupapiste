@@ -1,19 +1,20 @@
 (ns lupapalvelu.onnistuu-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+  (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.campaign :as camp]
+            [lupapalvelu.company :as c]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.onnistuu.process :as p]
+            [lupapalvelu.user :as u]
             [noir.core :refer [defpage]]
-            [noir.response :as resp]
             [noir.request :as request]
-            [schema.core :as sc]
-            [slingshot.slingshot :refer [try+]]
-            [sade.env :as env]
+            [noir.response :as resp]
             [sade.core :refer [ok fail fail! now]]
+            [sade.env :as env]
             [sade.session :as ssess]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.onnistuu.process :as p]
-            [lupapalvelu.company :as c]
-            [lupapalvelu.user :as u]
-            [lupapalvelu.i18n :as i18n]))
+            [schema.core :as sc]
+            [slingshot.slingshot :refer [try+]]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]))
 
 ;;
 ;; Onnistuu.fi integration: Web API
@@ -41,14 +42,18 @@
   {:parameters [company signer lang]
    :user-roles #{:anonymous}
    :input-validators [(fn [{{signer :signer} :data user :user}]
-                        (when (and (not= (:email signer) (:email user)) 
+                        (when (and (not= (:email signer) (:email user))
                                    (u/email-in-use? (:email signer)))
                           (fail :email-in-use)))
                       (fn [{{lang :lang} :data}]
                         (when-not ((set (map name i18n/languages)) lang)
-                          (fail :bad-lang)))]}
+                          (fail :bad-lang)))
+                      camp/campaign-is-active]}
   [{:keys [^Long created user]}]
-  (let [company (merge c/company-skeleton company)
+  (let [company (merge c/company-skeleton
+                       company
+                       (when-let [campaign (:campaign company)]
+                         {:campaign (camp/code->id campaign)}))
         signer (get-signer user signer)]
     (sc/validate c/Company company)
     (let [config       (env/value :onnistuu)

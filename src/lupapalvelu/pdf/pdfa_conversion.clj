@@ -106,10 +106,6 @@
   (let [cl (compliance-level input-file output-file opts)
         {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
-    (println (.getCanonicalPath input-file))
-    (println (.getName input-file))
-    (println (.getCanonicalPath output-file))
-    (println (.getName output-file))
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
