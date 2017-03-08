@@ -19,6 +19,6 @@ LUPAPISTE.RegisterCompanyButtonsModel = function() {
   });
 
   self.continueClick = function() {
- service.currentConfig().continueClick();
+    service.currentConfig().continueClick();
   };
 };

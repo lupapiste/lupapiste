@@ -35,6 +35,8 @@ LUPAPISTE.SetPasswordModel = function( params ) {
     return self.password2() && !matches() ? "setpw.notSame" : null;
   });
 
+  // Guard is used to make sure that two input fields are not cleared
+  // by accident, when the password is cleared.
   var guard = ko.observable();
 
   self.disposedComputed( function() {

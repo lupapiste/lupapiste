@@ -1353,6 +1353,7 @@ Fill in new company password
   [Arguments]  ${section}  ${password}
   Wait Until  Element should be visible  xpath=//section[@id='${section}']//h3[@data-test-id='company-setpw-header']
   Input text  xpath=//section[@id='${section}']//input[@data-test-id='password1']  ${password}
+  Wait test id visible  password1-message
   Test id disabled  testCompanyUserSubmitPassword
   Input text  xpath=//section[@id='${section}']//input[@data-test-id='password2']  ${password}
   Test id enabled  testCompanyUserSubmitPassword

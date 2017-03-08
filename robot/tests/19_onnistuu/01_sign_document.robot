@@ -106,6 +106,24 @@ Second link in email should lead to password reset
   Wait Until  Element should be visible  new-company-user
   Wait Until  Page should contain  2341528-4
   Page should contain  puuha.pete@pete-rakennus.fi
+
+Password messages and warnings
+  No such test id  password1-warning
+  No such test id  password1-message
+  No such test id  password2-warning
+  Input text by test id  password1  bad
+  Wait test id visible  password1-warning
+  Input text by test id  password1  1234567
+  Wait test id visible  password1-warning
+  Input text by test id  password1  12345678
+  No such test id  password1-warning
+  Wait test id visible  password1-message
+  Input text by test id  password2  different
+  Wait test id visible  password2-warning
+  Input text by test id  password2  12345678
+  No such test id  password2-warning
+
+Finally fill in proper password
   Fill in new company password  new-company-user  company123
 
 Login with the new password

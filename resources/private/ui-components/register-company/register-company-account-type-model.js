@@ -1,3 +1,4 @@
+// Company account type selection.
 LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
   "use strict";
   var self = this;
@@ -7,9 +8,6 @@ LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
   self.accountTypes = service.accountTypes;
 
   self.selected = service.registration.accountType;
-  self.cancelClick = _.noop;
-  self.continueClick = _.noop;
-  self.continueEnable = self.selected;
 
   self.selectedCss = function( id ) {
     var isSelected = id === self.selected();

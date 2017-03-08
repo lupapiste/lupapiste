@@ -1,3 +1,4 @@
+// Signing step UI for the company registration.
 LUPAPISTE.RegisterCompanySignModel = function() {
   "use strict";
   var self = this;
@@ -11,6 +12,4 @@ LUPAPISTE.RegisterCompanySignModel = function() {
     return sprintf( "/api/sign/document/%s", util.getIn( self.form, ["processId"]) );
   });
   self.cancelClick = service.cancel;
-  self.signClick = _.noop;
-
 };
