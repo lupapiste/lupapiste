@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment.bind-attachments-api
-  (:require [lupapalvelu.action :as action :refer [defcommand defquery]]
+  (:require [taoensso.timbre :refer [warn]]
+            [lupapalvelu.action :as action :refer [defcommand defquery]]
             [lupapalvelu.application :as app]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
@@ -27,11 +28,19 @@
   (when (some :sign filedatas)
     (usr/check-password-pre-check command)))
 
+(defn- trigger-target [{:keys [attachment-id type status]}]
+  (when (= status :done)
+    (let [{:keys [type-group type-id]} type]
+      (if (and type-group type-id)
+        {:id attachment-id
+         :trigger-type (ss/join "." (map name [type-group type-id]))}
+        (warn (str "could not create trigger type for attachment id "
+                   attachment-id
+                   ": type-group " (or type-group "nil")
+                   ", type-id " (or type-id "nil")))))))
+
 (defn- job-response-fn [command job]
-  {:targets (map (fn [{:keys [attachment-id type]}]
-                   {:id attachment-id
-                    :trigger-type (ss/join "." (map name ((juxt :type-group :type-id) type)))})
-                 job)
+  {:targets          (->> job (map trigger-target) (remove nil?))
    :user             (:user command)
    :organization     @(:organization command)
    :application      (:application command)
