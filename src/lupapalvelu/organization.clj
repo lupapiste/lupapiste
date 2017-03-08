@@ -319,6 +319,7 @@
     tags))
 
 (defn some-organization-has-archive-enabled? [organization-ids]
+  (println "!!!-SO")
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
 
 (defn earliest-archive-enabled-ts [organization-ids]

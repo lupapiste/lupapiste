@@ -10,7 +10,9 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.attachment :as att]))
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.archiving :as archiving]
+            [lupapalvelu.archiving-util :as archiving-util]))
 
 (facts "attachment-not-readOnly"
 
@@ -134,3 +136,25 @@
                (att/allowed-only-for-authority-when-application-sent
                    {:application app :user {:id "bar" :role "authority" :orgAuthz {:753-R #{:authority}}}})
                => nil)))
+
+(facts "mark-application-archived-if-done is called if organisation has archive enabled and attachments are being removed"
+       (let [archivist-user {:orgAuthz      {:753-R #{:authority :archivist}}
+                             :role          :authority}
+             base-command {:application {:organization "753-R"
+                                         :id           "ABC123"
+                                         :state        "constructionStarted"
+                                         :permitType   "R"
+                                         :archived     {:application 1233 :completed nil}
+                                         :attachments  [{:id "5234"} {:id "5744" :metadata {:tila :arkistoitu}} {:id "5988" :metadata {:tila :arkistoitu}}]}
+                           :created     1000
+                           :user        archivist-user
+                           :data        {:id           "ABC123"
+                                         :attachmentId "5234"}}
+             delete-command (util/deep-merge base-command {:action "delete-attachment"
+                                                           :data   {:id "ABC123"
+                                                                    :attachmentId "5234"}})]
+
+         (execute delete-command) => {:ok true}
+         (provided
+           (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
+           (archiving-util/mark-application-archived-if-done anything anything) => nil)))
