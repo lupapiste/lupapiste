@@ -31,6 +31,7 @@
   lupapisteApp.services.inspectionSummaryService = new LUPAPISTE.InspectionSummaryService();
   lupapisteApp.services.handlerService = new LUPAPISTE.HandlerService();
   lupapisteApp.services.cardService = new LUPAPISTE.CardService();
+  lupapisteApp.services.companyRegistrationService = new LUPAPISTE.CompanyRegistrationService();
   lupapisteApp.services.triggersTargetService = new LUPAPISTE.TriggerTargetService();
   lupapisteApp.services.triggerService = new LUPAPISTE.TriggerService();
 

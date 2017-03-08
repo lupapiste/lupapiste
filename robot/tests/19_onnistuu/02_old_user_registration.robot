@@ -16,16 +16,14 @@ There is no company info
 
 Start registration
   Click by test id  logged-user-register-company-start
-  Wait until  Element Should Be Visible  continueToCompanyInfo
-  Element Should Be Disabled  continueToCompanyInfo
+  Test id disabled  register-company-continue
   Click by test id  account-type-account5
-  Click enabled by test id  account-type-submit
-  Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
+  Click enabled by test id  register-company-continue
 
 Name and person id should be filled in
-  Disabled input value is  register-company-firstName  Teppo
-  Disabled input value is  register-company-lastName   Nieminen
-  Disabled input value is  register-company-email      teppo@example.com
+  Test id text is  register-company-firstName  Teppo
+  Test id text is  register-company-lastName   Nieminen
+  Test id text is  register-company-email      teppo@example.com
   Element Should Not Be Visible  xpath=//input[@data-test-id='register-company-personId']
 
 Fill in info
@@ -34,20 +32,18 @@ Fill in info
   Input text by test id  register-company-address1    Katukatu 2
   Input text by test id  register-company-zip         00002
   Input text by test id  register-company-po          Kunta
-  Input text by test id  register-company-ovt         003701091602900C
-  Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
-  Click enabled by test id  register-company-submit
+  Select From Test id  register-company-pop  Basware Oyj (BAWCFI22)
+  Click enabled by test id  register-company-continue
 
 Accept terms
-  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-start-sign']
-  Select Checkbox  termsAccepted
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
+  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
+  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Toggle toggle  register-company-agree
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-sign']
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
 
 Sign
-  Click Element  xpath=//*[@data-test-id='register-company-start-sign']
+  Click Element  xpath=//*[@data-test-id='register-company-sign']
   Wait until  Element should be visible  xpath=//span[@data-test-id='onnistuu-dummy-status']
   Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  ready
   Page Should Contain  210281-0002

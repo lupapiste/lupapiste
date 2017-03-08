@@ -10,13 +10,17 @@ LUPAPISTE.CellSelectModel = function( params ) {
 
   ko.utils.extend( self, new LUPAPISTE.CellModel( params ) );
 
-  self.optionsText = function( item ) {
-    var opt = params.optionsText;
-    return loc( opt ? item[opt] : item);
-  };
+  self.optionsText = _.isFunction( params.optionsText)
+                   ? params.optionsText
+                   : function( item ) {
+                     var opt = params.optionsText;
+                     return loc( opt ? item[opt] : item);
+                   };
 
-  self.optionsValue = function( item ) {
-    var opt = params.optionsValue;
-    return opt ? item[opt] : item;
-  };
+  self.optionsValue = _.isFunction( params.optionsValue )
+                    ? params.optionsValue
+                    : function( item ) {
+                      var opt = params.optionsValue;
+                      return opt ? item[opt] : item;
+                    };
 };
