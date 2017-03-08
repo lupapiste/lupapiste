@@ -198,20 +198,21 @@
                                                      application: $root.application}}"></div>
             </div>
           </div>
-          <div class="left" data-bind="if: !_.isEmpty($data.latestVersion)">
+          <!-- ko if: !_.isEmpty($data.latestVersion) -->
+          <div class="left" data-bind="with: $data.latestVersion">
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
-                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + util.getIn($data, ['latestVersion','fileId'])}" target="_blank">
-                  <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + util.getIn($data, ['latestVersion','fileId'])}">
+                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + util.getIn($data, ['fileId'])}" target="_blank">
+                  <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + util.getIn($data, ['fileId'])}">
                 </a>
               </div>
             </div>
-            <div data-bind="if: $data.convertableToPdfA">
+            <div data-bind="if: $parent.convertableToPdfA">
               <button class="btn-primary" data-bind="click: $component.convertToPdfA, ltext: 'Konvertoi PDF/A-muotoon'"></button>
             </div>
-            <div class="additional-data-container archival-summary-conversion-log"
-                 data-bind="visible: $data.latestVersion.archivabilityError, with: $data.latestVersion">
+            <!-- ko ifnot: _.isUndefined(archivabilityError) -->
+            <div class="additional-data-container archival-summary-conversion-log">
               <div class="header" data-bind="ltext: 'archivalSummary.previousConversionResult'"></div>
               <div class="contents">
                 <span data-bind="ltext: archivabilityError"></span>
@@ -234,7 +235,9 @@
                 </div>
               </div>
             </div>
+            <!-- /ko -->
           </div>
+          <!-- /ko -->
         </div>
 
       </div>
