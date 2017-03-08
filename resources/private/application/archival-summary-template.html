@@ -211,7 +211,7 @@
             <div data-bind="if: $parent.convertableToPdfA">
               <button class="btn-primary" data-bind="click: $component.convertToPdfA, ltext: 'Konvertoi PDF/A-muotoon'"></button>
             </div>
-            <!-- ko ifnot: _.isUndefined(archivabilityError) -->
+            <!-- ko ifnot: _.isUndefined($data.archivabilityError) -->
             <div class="additional-data-container archival-summary-conversion-log">
               <div class="header" data-bind="ltext: 'archivalSummary.previousConversionResult'"></div>
               <div class="contents">
