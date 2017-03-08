@@ -170,11 +170,15 @@ LUPAPISTE.CompanyRegistrationService = function() {
 
   function initSign() {
     var reg = _.omitBy( ko.mapping.toJS( self.registration ), _.isBlank );
+    var campaign = lupapisteApp.services.campaignService.campaign();
+    if( campaign.code ) {
+      _.set( reg, "campaign", campaign.code );
+    }
     var params = {lang: reg.language,
                   company: _.pick( reg,
                                    ["accountType", "name", "y", "address1",
                                     "zip", "po", "country", "netbill",
-                                    "pop", "reference"]),
+                                    "pop", "reference", "campaign"]),
                   signer: _.pick( reg,
                                  ["firstName", "lastName", "email",
                                   "personId", "language"])};

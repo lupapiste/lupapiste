@@ -168,3 +168,22 @@
       (or (and (env/feature? :english)
                (contains? (set supported-langs) :en))
           (not (contains? (set supported-langs) :en))) => truthy)
+
+(facts "Localize and fill"
+       (fact "Simple usage"
+             (localize-and-fill :fi "register.company.account5.price" "foo")
+             => "foo €/kk"
+             (localize-and-fill "fi" :register.company.account5.price 88)
+             => "88 €/kk"
+             (localize-and-fill :fi ["register" "company" "account5.price"] :hi)
+             => "hi €/kk"
+             (localize-and-fill "fi" [:register "company" :account5 :price] 99)
+             => "99 €/kk")
+       (fact "Multiple substitutions"
+             (localize-and-fill :en "applications.results" "one" 2 :three "out")
+             => "My Projects one - 2 / three"
+             (localize-and-fill :en "applications.results" "one" 2)
+             => "My Projects one - 2 / {2}")
+       (fact "No substitutions"
+             (localize-and-fill :fi :applications.operation "foo" "bar")
+             => "Toimenpide"))

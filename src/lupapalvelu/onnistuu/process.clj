@@ -14,6 +14,7 @@
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
             [sade.strings :as ss]
+            [sade.util :as util]
             [sade.validators :refer [valid-email? valid-hetu?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
@@ -137,9 +138,13 @@
         (debug "sign:fetch-document:download-from-mongo")
         [content-type ((:content pdf))])
       (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
-            account-type (get-in process [:company :accountType])
+            account-type (keyword (get-in process [:company :accountType]))
             account {:type  (i18n/localize "fi" :register :company account-type :title)
-                     :price (i18n/localize "fi" :register :company account-type :price)}
+                     :price (i18n/localize-and-fill "fi"
+                                                    [:register :company account-type :price]
+                                                    (:price (util/find-by-key :name
+                                                                              account-type
+                                                                              c/account-types)))}
             pdf (docx/yritystilisopimus (:company process) (:signer process) account ts)
             sha256 (pandect/sha256 pdf)]
         (debug "sign:fetch-document:upload-to-mongo")

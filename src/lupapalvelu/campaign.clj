@@ -70,13 +70,6 @@
                         [:account5 :account15
                          :account30 :lastDiscountDate]))))
 
-(defn campaign-is-active
-  "Pre-checker that fails if campaign parameter is given but not refer to
-  an active campaign."
-  [command]
-  (when-let [id (-> command :data :company :campaign code->id)]
-    (when-not (or (ss/blank? id) (active-campaign id))
-      (fail :error.campaign-not-found))))
 
 (defn good-campaign
   "Pre-checker that fails if the command does not contain valid
@@ -119,6 +112,13 @@
                                                   :starts {$lt timestamp}
                                                   :ends   {$gt timestamp}}))))
 
+(defn campaign-is-active
+  "Pre-checker that fails if campaign parameter is given but not refer to
+  an active campaign."
+  [command]
+  (when-let [id (-> command :data :company :campaign code->id)]
+    (when-not (or (ss/blank? id) (active-campaign id))
+      (fail :error.campaign-not-found))))
 (def finnish-formatter (fmt/formatter "d.M.yyyy"))
 
 (defn contract-info
