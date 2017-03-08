@@ -5,10 +5,11 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ApplicationsSearchResultsModel(params));
 
   self.results = self.dataProvider.results;
+  self.completeEnabled = lupapisteApp.models.globalAuthModel.ok("complete-assignment");
 
   self.openApplication = function(model) {
     var target = null;
-    switch (model.target.group) {
+    switch (model.targets[0].group) {
       case "documents":
         target = "info";
         break;

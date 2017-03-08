@@ -26,6 +26,9 @@ pom.xml
 .lein-*
 checkouts
 
+# CLJS repl:
+.cljs_rhino_repl
+
 # For SCSS/SASS generation
 .sass-cache
 
@@ -71,3 +74,4 @@ node_modules
 
 resources/public/lp-static/css/*.css.map
 resources/public/lp-static/js/*
+/resources/public/lp-static/css/main-blessed1.css

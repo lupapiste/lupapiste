@@ -216,9 +216,12 @@
                    "assignment-target-filter-service.js"
                    "event-filter-service.js"
                    "inspection-summary-service.js"
-                   "handler-service.js",
+                   "handler-service.js"
                    "card-service.js"
-                   "campaign-service.js"]}
+                   "campaign-service.js"
+                   "company-registration-service.js"
+                   "triggers-target-service.js"
+                   "trigger-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -347,9 +350,9 @@
 
    :register-company {:depends [:common-html]
                       :js ["company-registration.js"]
-                      :html [
-                             "register-company.html" "register-company-success.html" "register-company-fail.html"
-                             "register-company-account-type.html" "register-company-signing.html"
+                      :html ["register-company-success.html"
+                             "register-company-fail.html"
+                             "register-company-account-type.html"
                              "register-company-existing-user-success.html"]}
 
    :link-account {:depends [:register]
@@ -448,7 +451,7 @@
                               "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
-                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html"]}
+                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

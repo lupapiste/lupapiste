@@ -65,6 +65,7 @@ jQuery(document).ready(function() {
     {name: "assignments-search-tabs", template: "applications-search-tabs-template"},
     {name: "assignments-search-results"},
     {name: "assignments-search-filter"},
+    {name: "automatic-assignments"},
     {name: "autocomplete-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-operations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
@@ -74,6 +75,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-assignment-targets", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-event", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-triggers-target", template: "autocomplete-triggers-target-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
@@ -126,7 +128,7 @@ jQuery(document).ready(function() {
     {name: "verdict-appeal-bubble"},
     {name: "file-upload"},
     {name: "form-cell"},
-    {name: "cell-text", model: "cell-model"},
+    {name: "cell-text"},
     {name: "cell-span"},
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
@@ -177,7 +179,14 @@ jQuery(document).ready(function() {
     {name: "link-permit-autocomplete"},
     {name: "handler-list"},
     {name: "card"},
-    {name: "edit-handlers"}
+    {name: "edit-handlers"},
+    {name: "register-company-steps"},
+    {name: "register-company-buttons"},
+    {name: "register-company-account-type"},
+    {name: "register-company-info"},
+    {name: "cell-invoice-operator"},
+    {name: "register-company-sign"},
+    {name: "set-password"}
 ];
 
   ko.registerLupapisteComponents(components);

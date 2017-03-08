@@ -14,9 +14,9 @@
 (facts "email titles"
   (facts "{{municipality}} is rendered to subject"
     (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tampere" } "new-comment" "fi")
-    => "Lupapiste: Haavikontie 9, Tampere - sinulle on uusi kommentti"
+    => "Lupapiste: Haavikontie 9, Tampere - sinulle on uusi viesti"
     (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tammerfors" } "new-comment" "sv")
-    => "Lupapiste: Haavikontie 9, Tammerfors - du har f\u00e5tt en ny kommentar")
+    => "Lupapiste: Haavikontie 9, Tammerfors - du har f\u00e5tt ett ny meddelande")
 
   (fact "Without valid localization, application address is returned"
     (get-email-subject {:address "Haavikontie 9" :municipality "837" } {:municipality "Tampere" } "foo" "cn")

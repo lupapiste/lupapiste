@@ -1351,12 +1351,13 @@ Fill in new password
 
 Fill in new company password
   [Arguments]  ${section}  ${password}
-  Wait Until  Element should be visible  xpath=//section[@id='${section}']//h2[@data-test-id='company-setpw-header']
-  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password1']  ${password}
-  Element Should Be Disabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
-  Input text  xpath=//section[@id='${section}']//input[@data-test-id='company-user-password2']  ${password}
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
-  Click Element  xpath=//section[@id='${section}']//button[@id='testCompanyUserSubmitPassword']
+  Wait Until  Element should be visible  xpath=//section[@id='${section}']//h3[@data-test-id='company-setpw-header']
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='password1']  ${password}
+  Wait test id visible  password1-message
+  Test id disabled  testCompanyUserSubmitPassword
+  Input text  xpath=//section[@id='${section}']//input[@data-test-id='password2']  ${password}
+  Test id enabled  testCompanyUserSubmitPassword
+  Click by test id  testCompanyUserSubmitPassword
   Confirm notification dialog
 
 

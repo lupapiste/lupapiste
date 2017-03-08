@@ -1,0 +1,92 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-info-template">
+  <h2 data-bind="lhtml: 'register.company.info.title'"></h2>
+  <div class="form-grid">
+    <div class="row">
+      <h3 class="col-4"
+          data-bind="ltext: 'register.company.form.company'"></h3>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params:field('name')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                params:field('y')}"></div>
+      </div>
+    </div>
+  </div>
+  <div class="form-grid">
+    <div class="row">
+      <h3 class="col-4"
+          data-bind="ltext: 'register.company.form.billing'"></h3>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('address1')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('zip')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('po')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('country')}"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('netbill')}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field( 'pop', 'invoice-operator')}">
+        </div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params:field('reference')}"></div>
+      </div>
+    </div>
+  </div>
+    <div class="form-grid">
+    <div class="row">
+      <h3 class="col-4"
+          data-bind="ltext: 'register.company.form.applicant'"></h3>
+    </div>
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('firstName', userCell)}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('lastName', userCell)}"></div>
+      </div>
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('email', userCell)}"></div>
+      </div>
+      <div class="col-1"
+           data-bind="ifnot: loggedIn">
+        <div data-bind="component: {name: 'form-cell',
+                        params: field('personId')}"></div>
+      </div>
+    </div>
+    <!-- ko ifnot: loggedIn -->
+    <div class="row">
+      <div class="col-1">
+        <div data-bind="component: {name: 'form-cell',
+                        params: languageField()}"></div>
+      </div>
+    </div>
+    <!-- /ko -->
+  </div>
+</script>

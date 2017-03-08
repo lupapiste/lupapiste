@@ -75,6 +75,13 @@
     (remove nil?)
     (seq)))
 
+(defn- replace-file-names-in-log [log-lines input-file output-file]
+  (let [ifp (.getCanonicalPath input-file)
+        ofp (.getCanonicalPath output-file)]
+    (map (fn [line] (-> (ss/replace line ifp "original PDF file")
+                        (ss/replace ofp "converted PDF/A file")))
+         log-lines)))
+
 (defn- pdf-was-already-compliant? [lines]
   (ss/contains? (apply str lines) "will be copied only since it is already conformant"))
 
@@ -99,26 +106,31 @@
   (let [cl (compliance-level input-file output-file opts)
         {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
+    (println (.getCanonicalPath input-file))
+    (println (.getName input-file))
+    (println (.getCanonicalPath output-file))
+    (println (.getName output-file))
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
                   :output-file output-file
                   :autoConversion (not (pdf-was-already-compliant? log-lines))}
-      (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
-                     (warn log-lines)
-                     {:pdfa? false})
-      (#{6 139} exit) (let [error-lines (parse-errors-from-log-lines log-lines)]
-                        (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
+      (#{5 6 139} exit) (if-let [fonts (-> log-lines
+                                           parse-errors-from-log-lines
+                                           parse-missing-fonts-from-log-lines)]
                           {:pdfa? false
                            :missing-fonts fonts}
-                          (do (warn "PDF/A conversion failed probably because of missing fonts")
-                              (warn error-lines)
-                              {:pdfa? false})))
+                          {:pdfa? false
+                           :conversionLog (cons (if (= exit 5)
+                                                  "PDF/A conversion failed because it can't be done losslessly"
+                                                  "PDF/A conversion failed probably because of a typography / font related error")
+                                                (replace-file-names-in-log  log-lines input-file output-file))})
       (= exit 10) (do
                     (error "pdf2pdf - not a valid license")
-                    {:pdfa? false})
+                    {:pdfa? false
+                     :conversionLog ["No valid license key for conversion tool"]})
       :else (do (warnf "pdf2pdf failed with exit status %s, stderr: %s" exit err)
-                (warn (parse-errors-from-log-lines log-lines))
+                (warn log-lines)
                 {:pdfa? false}))))
 
 (defn- get-pdf-page-count [input-file-path]

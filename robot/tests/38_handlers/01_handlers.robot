@@ -17,7 +17,7 @@ ${propertyId}  753-416-25-30
 # -------------------------
 Sipoo logs in and sees the default handler roles plus one
   Sipoo logs in
-  Go to page  applications
+  Go to page  assignments
   Handler role is  0  Käsittelijä  Handläggare  Handler  False
   Handler role is  1  KVV-Käsittelijä  KVV-Handläggare  KVV-Handler
 
@@ -160,7 +160,7 @@ Sipoo logs and fires Ronja
   Confirm  dynamic-yes-no-confirm-dialog
 
 Sipoo renames Käsittelijä handler role
-  Go to page  applications
+  Go to page  assignments
   Edit handler role  0  fi  Muutettu  True
 
 Sipoo removes Uusi handler role
@@ -214,11 +214,11 @@ Pena sees the handler on the inforequest
   [Teardown]  Logout
 
 # -------------------------
-# Authorit admin
+# Authority admin
 # -------------------------
 Sipoo logs in to revisit deleted handler roles
   Sipoo logs in
-  Go to page  applications
+  Go to page  assignments
   No such test id  edit-role-2-fi
 
 Show also the deleted roles
@@ -248,4 +248,19 @@ Changes survice reload
   Scroll and click test id  show-all-handler-roles-label
   Disabled handler role is  1  KVV-Käsittelijä  EVVK-Handläggare  KVV-Handler
   Handler role is  2  Uusi  Nytt  New
+  [Teardown]  Logout
+
+# -------------------------
+# Authority
+# -------------------------
+Sonja logs in creates application
+  Sonja logs in
+  Create application with state  Duplicate fix  ${propertyId}  pientalo  submitted
+
+No handlers in application
+  No such test id  handler-0
+
+Sonja approves application and becomes handler automatically
+  Approve application no dialogs
+  List handler is  0  Sibbo Sonja  Muutettu
   [Teardown]  Logout

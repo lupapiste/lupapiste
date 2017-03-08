@@ -1184,6 +1184,9 @@
 (defn- is-add-operation-allowed-for-operation [operation]
   (get-operation-metadata operation :add-operation-allowed))
 
+(defn operation-id-exists? [{:keys [primaryOperation secondaryOperations]} op-id]
+  (string? ((set (cons (:id primaryOperation) (map :id secondaryOperations))) op-id)))
+
 (defn operations-in [operation-path]
   (-> (util/get-in-tree operation-tree operation-path) util/get-leafs))
 

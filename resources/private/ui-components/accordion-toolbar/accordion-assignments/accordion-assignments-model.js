@@ -7,6 +7,8 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
 
   var myService = self.params.myService || "assignmentService";
 
+  self.completeEnabled = lupapisteApp.models.globalAuthModel.ok("complete-assignment");
+  self.updateEnabled = lupapisteApp.models.globalAuthModel.ok("update-assignment");
 
   self.assignments = params.documentAssignments;
   self.possibleTargets = _.get(lupapisteApp.services.assignmentService, "targets");

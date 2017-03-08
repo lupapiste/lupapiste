@@ -106,13 +106,6 @@
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
 
-(defn- validate-operation-in-application
-  ([command] (validate-operation-in-application [:group] command))
-  ([group-path {data :data application :application}]
-   (when-let [op-ids (->> (get-in data group-path) :operations (map :id) not-empty)]
-     (when (not-every? #(util/find-by-id % (app/get-operations application)) op-ids)
-       (fail :error.illegal-attachment-operation)))))
-
 ;;
 ;; Attachments
 ;;
@@ -494,7 +487,6 @@
                 att/allowed-only-for-authority-when-application-sent
                 validate-attachment-type
                 app/validate-authority-in-drafts
-                validate-operation-in-application
                 att/validate-group]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
@@ -686,7 +678,6 @@
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
                 att/edit-allowed-by-target
-                (partial validate-operation-in-application [:meta :group])
                 (partial att/validate-group [:meta :group])]}
   [{:keys [created] :as command}]
   (let [data (att/meta->attachment-data meta)]
@@ -786,12 +777,14 @@
       (files/with-temp-file temp-pdf
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
-          (att/upload-and-attach! {:application application :user user}
-                                         {:attachment-id attachmentId
-                                          :comment-text nil
-                                          :required false
-                                          :created created
-                                          :stamped stamped
-                                          :original-file-id fileId}
-                                         {:content temp-pdf :filename filename})))
-      (ok))))
+          (let [{:keys [archivable archivabilityError]} (att/upload-and-attach! {:application application :user user}
+                                                                                {:attachment-id attachmentId
+                                                                                 :comment-text nil
+                                                                                 :required false
+                                                                                 :created created
+                                                                                 :stamped stamped
+                                                                                 :original-file-id fileId}
+                                                                                {:content temp-pdf :filename filename})]
+            (if archivable
+              (ok)
+              (fail archivabilityError))))))))

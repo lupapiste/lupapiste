@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="register-company-account-type-template">
+    <h2 data-bind="ltext: 'register.company.select'"></h2>
+    <div class="tabby account-type-boxes">
+      <div class="tabby__row"
+           data-bind="foreach: accountTypes">
+        <div class="tabby__cell tabby--33">
+          <div class="account-type-box"
+               data-bind="click: _.wrap( id, $parent.selected ),
+                          css: $parent.selectedCss( id ),
+                          testId: 'account-type-' + id">
+            <h3 data-bind="text: title"></h3>
+            <div class="account-type-price"
+                 data-bind="text: price"></div>
+            <div class="account-type-description"
+                 data-bind="text: description"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+</script>

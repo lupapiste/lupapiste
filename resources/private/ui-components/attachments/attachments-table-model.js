@@ -66,16 +66,19 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   self.authorities = accordionService.authorities;
 
+  function isAssignmentShownInTable(attachmentIds, assignment) {
+    return assignment.targets.length === 1
+      && assignment.targets[0].group === "attachments"
+      && _.includes(attachmentIds, assignment.targets[0].id)
+      && assignment.currentState.type !== "completed";
+  }
+
   self.assignments = self.disposedPureComputed(function() {
     var attachmentIds = _.map(attachments, function(att) { return util.getIn(att, ["id"]); });
     if (assignmentService) {
       return  _(assignmentService.assignments())
-        .filter(function(assignment) {
-          return assignment.target.group === "attachments"
-            && _.includes(attachmentIds, assignment.target.id)
-            && assignment.currentState.type !== "completed";
-        })
-        .groupBy("target.id")
+        .filter(_.partial(isAssignmentShownInTable, attachmentIds))
+        .groupBy("targets[0].id")
         .value();
     } else {
       return {};

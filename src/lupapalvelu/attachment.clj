@@ -29,7 +29,9 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.authorization :as auth])
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.archiving-util :as archiving-util])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -117,7 +119,8 @@
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum conversion/archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
-   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)})
+   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)
+   (sc/optional-key :conversionLog)      (sc/maybe [sc/Str])})
 
 (defschema Type
   "Attachment type"
@@ -414,7 +417,7 @@
 
 (defn make-version
   [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
-                           stamped archivable archivabilityError missing-fonts autoConversion]}]
+                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
@@ -436,7 +439,8 @@
          :archivable     (boolean archivable)}
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
-        :autoConversion autoConversion))))
+        :autoConversion autoConversion
+        :conversionLog conversionLog))))
 
 (defn- ->approval [state user timestamp]
   (sc/validate Approval
@@ -583,12 +587,14 @@
   (when (seq attachment-ids)
     (let [ids-str (pr-str attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
-      (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+      (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
       (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)
       (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
-      (info "4/4 deleted meta-data of attachments" ids-str))))
+      (info "4/4 deleted meta-data of attachments" ids-str)))
+  (when (org/some-organization-has-archive-enabled? #{(:organization application)})
+    (archiving-util/mark-application-archived-if-done application (now))))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
@@ -953,11 +959,20 @@
     (when-not ((set att-tags/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
+(defn- ensure-operation-id-exists [application op-id]
+  (when-not (op/operation-id-exists? application op-id)
+    (fail :error.illegal-attachment-operation)))
+
 (defn validate-group
+  "Validates :group from command against schema.
+   If :operations are given, their existence in application is validated also."
   ([command]
    (validate-group [:group] command))
   ([group-path command]
    (let [group (get-in command (cons :data group-path))]
-     (when (or (:groupType group) (:operations group))
+     (when (or (:groupType group) (not-empty (:operations group)))
        (or ((some-fn validate-group-op validate-group-type) group)
-           (validate-group-is-selectable command))))))
+           (validate-group-is-selectable command)
+           (->> (:operations group)
+                (map :id)
+                (some (partial ensure-operation-id-exists (:application command)))))))))
