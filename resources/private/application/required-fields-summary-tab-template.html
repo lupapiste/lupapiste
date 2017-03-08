@@ -101,7 +101,7 @@
               </thead>
               <tbody data-bind="foreach: lupapisteApp.services.assignmentService.incompleteAssignments()">
               <tr data-test-id="incomplete-assignment">
-                <td data-bind="ltext: 'application.assignment.type.' + $data.target['group'], testId: 'target-group'"></td>
+                <td data-bind="ltext: 'application.assignment.type.' + $data.targets[0]['group'], testId: 'target-group'"></td>
                 <td data-bind="ltext: $data.target['type-key'], testId: 'target-type'"></td>
                 <td data-bind="text: util.partyFullName($data.recipient), testId: 'recipient'"></td>
                 <td data-bind="text: $data.description, testId: 'description'"></td>
