@@ -187,11 +187,6 @@
 (defn authority? [{role :role}]
   (contains? #{:authority :oirAuthority} (keyword role)))
 
-(def validate-authority-in-organization
-  "Validator: current user must be an authority. To be used in commands'
-   :pre-check vectors."
-  (partial util/call-in (pred->validator user-is-authority-in-organization?) [:user]))
-
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
 
@@ -249,6 +244,12 @@
 (defn user-is-authority-in-organization? [user organization-id]
   (let [org-set (organization-ids-by-roles user #{:authority})]
     (contains? org-set organization-id)))
+
+(def validate-authority-in-organization
+  "Validator: current user must be an authority. To be used in commands'
+   :pre-check vectors."
+  (partial util/call-in (pred->validator user-is-authority-in-organization?) [:user]))
+
 
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
