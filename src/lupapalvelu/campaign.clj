@@ -18,9 +18,9 @@
   {:id               (sc/constrained sc/Str #(re-matches #"[a-z0-9-]+" %))
    :starts           ssc/Timestamp  ;; At midnight
    :ends             ssc/Timestamp  ;; At 23:59:59
-   :account5         sc/Int         ;; €/month
-   :account15        sc/Int         ;; €/month
-   :account30        sc/Int         ;; €/month
+   :account5         sc/Int         ;; EUR/month
+   :account15        sc/Int         ;; EUR/month
+   :account30        sc/Int         ;; EUR/month
    :lastDiscountDate (ssc/date-string "yyyy-MM-dd")})
 
 (defn code->id [code]

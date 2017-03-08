@@ -13,8 +13,8 @@
 
   starts, ends: ISO dates (e.g, 2017-2-27). Dates are in Finnish time.
 
-  account5, account 15, account30: Account prices (€/m) during the
-  discount period.
+  account5, account 15, account30: Account prices (EUR/month) during
+  the discount period.
 
   lastDiscountDate: Last date of the discount period. ISO date in
   Finnish time."
