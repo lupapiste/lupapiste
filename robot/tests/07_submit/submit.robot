@@ -124,8 +124,19 @@ The filled-up warning field and party info plus the added attachment cause corre
 
 Mikko could submit application after missing stuff have been added
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+  Logout
+
+Sonja could submit Mikko's application when it's submittable by Mikko
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  requiredFieldSummary
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+  Logout
 
 Submit date is not be visible
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  requiredFieldSummary
   Element should not be visible  xpath=//span[@data-test-id='application-submitted-date']
 
 Mikko submits application
