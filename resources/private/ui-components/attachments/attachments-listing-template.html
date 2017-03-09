@@ -39,7 +39,8 @@
                          lbutton: 'attachment.legend.help'"></help-toggle>
 
     <div data-bind="component: { name: 'attachments-accordions',
-                                 params: { pageName: $data.pageName} }"></div>
+                                 params: { pageName: $data.pageName,
+                                           upload: upload } }"></div>
     <!-- /ko -->
 
     <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->

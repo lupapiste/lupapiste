@@ -10,6 +10,7 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
 
   self.pageName = params.pageName;
   self.level = params.level;
+  self.upload = params.upload;
 
   var groupPath = params.path;
 

@@ -54,6 +54,7 @@
           <td data-bind="if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('bind-attachment')">
             <attachment-upload params="id: $data.id,
                                        ltext: 'attachment.addFile',
+                                       uploadModel: $component.upload,
                                        template: 'attachment-upload-link-template'"></attachment-upload>
           </td>
           <td data-bind="if: $data.authModel.ok('set-attachment-not-needed')">
