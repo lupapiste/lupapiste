@@ -99,7 +99,6 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   }
 
   self.disposedSubscribe( self.upload.files, function( files ) {
-    console.log(files);
     var oldRows = rows();
     var newRows = {};
     var keepRows = {};
