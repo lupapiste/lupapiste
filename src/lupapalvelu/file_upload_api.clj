@@ -2,6 +2,7 @@
   (:require [noir.response :as resp]
             [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
+            [sade.env :as env]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
@@ -10,11 +11,10 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.authorization :as auth]))
 
-(def file-upload-max-size 100000000)
-
-(defn- file-size-legal [{{files :files} :data}]
-  (when-not (every? #(< % file-upload-max-size) (map :size files))
-    (fail :error.file-upload.illegal-upload-size)))
+(defn- file-size-legal [{{files :files} :data {role :role} :user}]
+  (let [authentication-status (if (auth/all-authenticated-user-roles role) :logged-in :anonymous)]
+    (when-not (every? #(< % (env/value :file-upload :max-size authentication-status)) (map :size files))
+      (fail :error :file-upload.illegal-upload-size))))
 
 (defn- file-mime-type-accepted [{{files :files} :data}]
   (when-not (every? mime/allowed-file? (map :filename files))

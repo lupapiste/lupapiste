@@ -62,7 +62,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   }
 
   function bindToService() {
-    service.bindFileInput({maximumUploadSize: 100000000, // 100 MB
+    service.bindFileInput({maximumUploadSize: LUPAPISTE.config.loggedInUploadMaxSize, // 100 MB
                            id: self.fileInputId,
                            dropZone: params.dropZone,
                            allowMultiple: params.allowMultiple});

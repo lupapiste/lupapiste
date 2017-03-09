@@ -34,7 +34,7 @@ LUPAPISTE.FileuploadService = function() {
   self.bindFileInput = function( options, pluginOptions ) {
 
     options = _.defaults( options, {
-      maximumUploadSize: 15000000, // 15 MB
+      maximumUploadSize: LUPAPISTE.config.anonymousUploadMaxSize, // 15 MB
       id: util.randomElementId("fileupload-input"),
       allowMultiple: true
     });
