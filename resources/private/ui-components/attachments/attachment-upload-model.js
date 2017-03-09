@@ -24,10 +24,14 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
     return self.upload.waiting() || self.bindWaiting();
   });
 
+  function enrichFileForBatchTable(file) {
+    file.attachmentId = self.id;
+    return file;
+  }
+
   if (_.get(params.uploadModel, "batchMode")) {
     self.disposedSubscribe(self.upload.files, function(files) {
-      console.log("filez", files);
-      params.uploadModel.files(files);
+      params.uploadModel.files(_.map(files, enrichFileForBatchTable));
     });
   } else {
     self.disposedSubscribe(self.upload.files, function(files) {
