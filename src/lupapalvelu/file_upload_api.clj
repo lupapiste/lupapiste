@@ -12,9 +12,9 @@
             [lupapalvelu.authorization :as auth]))
 
 (defn- file-size-legal [{{files :files} :data {role :role} :user}]
-  (let [authentication-status (if (auth/all-authenticated-user-roles role) :logged-in :anonymous)]
-    (when-not (every? #(< % (env/value :file-upload :max-size authentication-status)) (map :size files))
-      (fail :error :file-upload.illegal-upload-size))))
+  (let [max-size (env/value :file-upload :max-size (if (auth/all-authenticated-user-roles (keyword role)) :logged-in :anonymous))]
+    (when-not (every? #(< % max-size) (map :size files))
+      (fail :error.file-upload.illegal-upload-size :errorParams (/ max-size 1000 1000)))))
 
 (defn- file-mime-type-accepted [{{files :files} :data}]
   (when-not (every? mime/allowed-file? (map :filename files))
