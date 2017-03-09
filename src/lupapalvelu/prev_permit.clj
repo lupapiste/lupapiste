@@ -36,7 +36,7 @@
 (defn- get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
 
-(defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
+(defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
 
   (let [applicants-with-no-info (remove get-applicant-type applicants)
         applicants (filter get-applicant-type applicants)]
@@ -56,15 +56,17 @@
             (let [applicant-email (get-applicant-email applicant)]
 
               ;; Invite applicants
-              (when-not (ss/blank? applicant-email)
-                (authorization/send-invite!
-                  (update-in command [:data] merge {:email        applicant-email
-                                                    :text         (i18n/localize lang "invite.default-text")
-                                                    :documentName nil
-                                                    :documentId   nil
-                                                    :path         nil
-                                                    :role         "writer"}))
-                (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id])))
+              (if (true? authorize-applicants)
+                (when-not (ss/blank? applicant-email)
+                  (authorization/send-invite!
+                    (update-in command [:data] merge {:email        applicant-email
+                                                      :text         (i18n/localize lang "invite.default-text")
+                                                      :documentName nil
+                                                      :documentId   nil
+                                                      :path         nil
+                                                      :role         "writer"}))
+                  (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))))
+
 
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
@@ -101,7 +103,7 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
-(defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorizeApplicants]
+(defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
                                                                     (when-not (ss/blank? rakennusvalvontaasianKuvaus)
@@ -122,8 +124,7 @@
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
 
-    (if (true? authorizeApplicants)
-      (invite-applicants command hakijat))
+    (invite-applicants command hakijat authorize-applicants)
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))

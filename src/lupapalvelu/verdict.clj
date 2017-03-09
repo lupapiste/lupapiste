@@ -507,8 +507,8 @@
 (defn- bg-id [task]
   (get-in task [:data :muuTunnus :value]))
 
-(defn- non-empty-review-task-with-bg-id? [task]
-  (and (tasks/task-is-review? task) (not (empty-review-task? task)) (not (ss/blank? (bg-id task)))))
+(defn- non-empty-review-task? [task]
+  (and (tasks/task-is-review? task) (not (empty-review-task? task))))
 
 (defn- merge-review-tasks
   "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
@@ -529,7 +529,7 @@
       (cond
         (= current nil)
           ; Recursion end condition
-          (let [added-or-updated (concat added-or-updated (filter non-empty-review-task-with-bg-id? from-update))]
+          (let [added-or-updated (concat added-or-updated (filter non-empty-review-task? from-update))]
             (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
             [unchanged added-or-updated])
 

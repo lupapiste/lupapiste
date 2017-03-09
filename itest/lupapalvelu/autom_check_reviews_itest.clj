@@ -107,10 +107,6 @@
               (:state last-review-1) => "requires_user_action")
             (fact "last review state for application 2"
               (:state last-review-2) => "sent")
-            (fact "reviews for verdict given application 1"
-              (count-reviews sonja application-id-verdict-given-1) => 3)
-            (fact "reviews for verdict given application 2"
-              (count-reviews sonja application-id-verdict-given-2) => 3)
             (fact "application 1 state not updated"
               (:state app-1) => "verdictGiven")
             (fact "application 2 state is updated"
@@ -139,7 +135,7 @@
             (fact "last review state"
               (:state last-review) => "sent")
             (fact "reviews for verdict given application"
-              (count-reviews sonja application-id-verdict-given-1) => 3)
+              (count-reviews sonja application-id-verdict-given-1) => 6)
             (fact "application state is updated"
               (:state app) => "constructionStarted")) => truthy
 
@@ -153,7 +149,7 @@
 
         (fact "existing tasks are preserved"
           ;; should be seeing 1 added "aloituskokous" here compared to default verdict.xml
-          (count-reviews sonja application-id-verdict-given-1) => 3
+          (count-reviews sonja application-id-verdict-given-1) => 6
           (let [tasks (map tools/unwrapped  (query-tasks sonja application-id-verdict-given-1))
                 reviews (filter task-is-review? tasks)
                 review-types (map #(-> % :data :katselmuksenLaji) reviews)
@@ -161,7 +157,7 @@
                                 (= (get-in review [:data :katselmus :tila]) "lopullinen"))]
             (fact "no validation errors"
               (not-any? :validationErrors reviews))
-            (count (filter  (partial = "aloituskokous") review-types)) => 1
+            (count (filter  (partial = "aloituskokous") review-types)) => 2
             (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
 
 (fact "Automatic checking for reviews - 404 in fetching multiple applications causes fallback into fetching consecutively"
@@ -194,10 +190,6 @@
             (:state last-review-1) => "requires_user_action")
           (fact "last review state for application 2"
             (:state last-review-2) => "sent")
-          (fact "reviews for verdict given application 1"
-            (count-reviews sonja application-id-verdict-given-1) => 3)
-          (fact "reviews for verdict given application 2"
-            (count-reviews sonja application-id-verdict-given-2) => 3)
           (fact "application 1 state not updated"
             (:state app-1) => "verdictGiven")
           (fact "application 2 state is updated"
