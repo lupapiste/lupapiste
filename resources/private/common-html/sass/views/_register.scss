@@ -64,7 +64,7 @@ div.register-company-wizard {
   }
   h1 {
       font: {
-        size: 3em;
+        size: 60px;
         weight: bold;
       }
   }
@@ -80,27 +80,20 @@ div.register-company-wizard {
 
   div.company-steps {
     $disabled: $gray221;
-    h1, h2 {
-      text-transform: none;
-      text-align: center;
-      margin-top: 1em;
-    }
-    h1 {
-      font: {
-        size: 3em;
-        weight: bold;
-      }
-    }
     h2 {
-      margin-top: 1.5em;
       margin-bottom: 1.5em;
-      font-size: 1.5em;
-      font-weight: normal;
     }
+    h2.register-company-subtitle {
+      max-width: 44em;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 0;
+    }
+
     .tabby {
       width: 80%;
-      margin: $marginL auto;
-      // margin-top: $marginL;
+      margin: 0 auto;
+      padding-top: 1.5em;
       // margin-bottom: $marginL;
       text-align: center;
       vertical-align: middle;
@@ -193,11 +186,32 @@ div.register-company-wizard {
         font-weight: bold;
         color: $orange-dark;
         white-space: nowrap;
+        &.campaign {
+          margin-bottom: 0;
+        }
       }
       > .account-type-description {
-        border-top: 3px dashed  $gray221;
+        border-top: 3px dotted  $gray221;
         padding-top: 1em;
         font-weight: bold;
+        padding-bottom: 1em;
+      }
+      > .small-print {
+        border-top: 3px dotted  $gray221;
+        padding-top: 1em;
+      }
+      > .last-discount-date {
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+      > .overstrike-price {
+        font-size: 2em;
+        font-weight: bold;
+        text-decoration: line-through;
+        margin-top: 1em;
+        margin-bottom: 1em;
       }
     }
   }

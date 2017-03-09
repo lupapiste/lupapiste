@@ -123,9 +123,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
       return { id: account.name,
                title: loc( sprintf( "register.company.%s.title",
                                     account.name )),
-               price: loc( sprintf( "register.company.%s.price",
-                                    account.name),
-                           account.price),
+               price: loc(  "register.company.price",
+                            account.price),
                description: loc( "register.company.account.description",
                                  account.limit )};
     });

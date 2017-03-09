@@ -289,7 +289,7 @@ body {
   font-size: 15px;
   line-height: 24px;
   margin-bottom: 24px;
-  color: #595959;
+  color: #333333;
 }
 
 p {
@@ -304,7 +304,7 @@ h1, .h1 {
   font-size: 24px;
   margin-bottom: 12px;
   text-transform: uppercase;
-  color: #595959;
+  color: #333333;
 }
 
 h2, .h2 {
@@ -7018,7 +7018,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   top: 20px;
   right: 8px;
   padding: 6px;
-  color: #595959;
+  color: #333333;
   background-color: white;
   border: 1px solid #f6f6f6;
   box-shadow: 1px 1px 2px #4f4f4f;
@@ -11513,7 +11513,7 @@ ul.tabs {
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-bottom: #595959 dotted 1px;
+  border-bottom: #333333 dotted 1px;
 }
 
 .comment .comment-party span {
@@ -11534,7 +11534,7 @@ ul.tabs {
 }
 
 .comment .attachment-details a, .comment .new-attachment-version-details a {
-  color: #595959;
+  color: #333333;
 }
 
 .comment .deleted-attachment {
@@ -12202,7 +12202,7 @@ ul.tabs {
 }
 
 .ol-popup .ol-popup-closer {
-  color: #595959;
+  color: #333333;
   font-size: 12px;
   font-weight: bold;
   top: 6px;
@@ -13389,7 +13389,7 @@ div.automatic-assignments .assignment .editor {
   font-weight: normal;
   margin: 24px 0 0 0;
   text-transform: uppercase;
-  color: #595959;
+  color: #333333;
 }
 
 .archival-summary-document-set .buttons a {
@@ -13831,7 +13831,7 @@ div.search i {
   padding-left: 2px;
   display: table-cell;
   vertical-align: middle;
-  color: #595959;
+  color: #333333;
 }
 
 .applications-search-results__indicator .application-search-results__urgency.urgent {
@@ -16520,7 +16520,7 @@ div.register-company-wizard h1, div.register-company-wizard h2 {
 }
 
 div.register-company-wizard h1 {
-  font-size: 3em;
+  font-size: 60px;
   font-weight: bold;
 }
 
@@ -16535,27 +16535,21 @@ div.register-company-wizard h2 .required {
   color: #df3215;
 }
 
-div.register-company-wizard div.company-steps h1, div.register-company-wizard div.company-steps h2 {
-  text-transform: none;
-  text-align: center;
-  margin-top: 1em;
-}
-
-div.register-company-wizard div.company-steps h1 {
-  font-size: 3em;
-  font-weight: bold;
-}
-
 div.register-company-wizard div.company-steps h2 {
-  margin-top: 1.5em;
   margin-bottom: 1.5em;
-  font-size: 1.5em;
-  font-weight: normal;
+}
+
+div.register-company-wizard div.company-steps h2.register-company-subtitle {
+  max-width: 44em;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 0;
 }
 
 div.register-company-wizard div.company-steps .tabby {
   width: 80%;
-  margin: 24px auto;
+  margin: 0 auto;
+  padding-top: 1.5em;
   text-align: center;
   vertical-align: middle;
 }
@@ -16665,10 +16659,35 @@ div.register-company-wizard div.account-type-boxes div.account-type-box > .accou
   white-space: nowrap;
 }
 
+div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-price.campaign {
+  margin-bottom: 0;
+}
+
 div.register-company-wizard div.account-type-boxes div.account-type-box > .account-type-description {
-  border-top: 3px dashed #dddddd;
+  border-top: 3px dotted #dddddd;
   padding-top: 1em;
   font-weight: bold;
+  padding-bottom: 1em;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .small-print {
+  border-top: 3px dotted #dddddd;
+  padding-top: 1em;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .last-discount-date {
+  font-weight: bold;
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+div.register-company-wizard div.account-type-boxes div.account-type-box > .overstrike-price {
+  font-size: 2em;
+  font-weight: bold;
+  text-decoration: line-through;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 div.register-company-wizard register-company-buttons {
@@ -17072,7 +17091,7 @@ ul.appeals-files li span.appeals-files__size {
 }
 
 #side-panel .comment {
-  color: #595959;
+  color: #333333;
 }
 
 #side-panel #notice-template {

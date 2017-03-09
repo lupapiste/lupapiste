@@ -5,3 +5,7 @@
 "error.campaign-conflict" "fi" "Kampanjakoodi on jo käytössä."
 "email.title.onnistuu-success-campaign" "fi" "KAMPANJA - Visma Sign -allekirjoitus"
 "error.campaign-last-date" "fi" "Kampanja ei voi olla aktiivinen alennusajan jälkeen."
+"company.campaign.title" "fi" "Rekisteröi Yritystili maksutta!"
+"company.campaign.subtitle" "fi" "Nyt kannattaa kokeilla ja ihastua! Uusille yritysasiakkaille Lupapiste Yritystili maksutta {0} asti, minkä jälkeen sopimus jatkuu normaalihintaisena toistaiseksi voimassa olevana, ellei sitä irtisanota."
+"company.campaign.until" "fi" "{0} asti*"
+"company.campaign.small-print" "fi" "* Yritystilin hinta {0} alkaen <b>{1} €/kk</b> (alv 0 %) ja palvelu jatkuu toistaiseksi voimassa olevana, ellei sitä irtisanota kirjallisesti {2} mennessä."

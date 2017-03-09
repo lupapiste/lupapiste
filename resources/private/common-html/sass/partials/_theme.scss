@@ -9,8 +9,6 @@ $color-dark-bg: rgb(136,138,140);
 $grey-text: rgb(89,89,89);
 $error-text: red;
 $lp-light-green: rgb(185,254,190);
-$lp-purple: rgb(218,109,237);
-$lp-purple-light: lighten($lp-purple, 20%);
 
 $lupapisteBlue: #01BEF5;
 $borderColor: #01BEF5;
@@ -93,6 +91,7 @@ $turqo-active:   $turqo-light;
 $gray17:  make-gray( 17 );
 $gray51:  make-gray( 51 );
 $gray69:  make-gray( 69 );
+$gray79:  make-gray( 79 );
 $gray85:  make-gray( 85 );
 $gray119: make-gray( 119 );
 $gray153: make-gray( 153 );
@@ -111,7 +110,7 @@ $grid-margin: 20px;
 $grid-margin-large: 40px;
 $grid-font-size: 16px;
 
-$checkbox-color:          $orange-dark; 
+$checkbox-color:          $orange-dark;
 $checkbox-selected-color: $orange-dark;
 $checkbox-border-color:   $gray221;
 $checkbox-hover-color:    $orange-light;
@@ -149,3 +148,8 @@ $light-gray-active: $gray187;
 $primary:   $orange-dark;
 $positive:  $green-dark;
 $negative:  $red-dark;
+
+// Legacy gray color variables
+$lp-dark-grey: $gray79;
+$lp-light-grey: $gray246;
+$grey-text: $gray51;
