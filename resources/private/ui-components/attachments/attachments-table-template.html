@@ -53,6 +53,8 @@
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('bind-attachment')">
             <attachment-upload params="id: $data.id,
+                                       type: $data.type,
+                                       group: $data.group,
                                        ltext: 'attachment.addFile',
                                        uploadModel: $component.upload,
                                        template: 'attachment-upload-link-template'"></attachment-upload>

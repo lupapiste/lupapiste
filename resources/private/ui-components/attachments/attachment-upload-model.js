@@ -26,6 +26,8 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
 
   function enrichFileForBatchTable(file) {
     file.attachmentId = self.id;
+    file.type = ko.unwrap(params.type);
+    file.group = ko.unwrap(params.group);
     return file;
   }
 
