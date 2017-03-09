@@ -209,7 +209,7 @@
               </div>
             </div>
             <div data-bind="if: $parent.convertableToPdfA">
-              <button class="btn-primary" data-bind="click: $component.convertToPdfA, ltext: 'Konvertoi PDF/A-muotoon'"></button>
+              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $parent), ltext: 'Konvertoi PDF/A-muotoon'"></button>
             </div>
             <!-- ko ifnot: _.isUndefined($data.archivabilityError) -->
             <div class="additional-data-container archival-summary-conversion-log">
