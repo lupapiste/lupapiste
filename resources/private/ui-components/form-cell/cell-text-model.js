@@ -8,7 +8,6 @@ LUPAPISTE.CellTextModel = function( params ) {
 
   ko.utils.extend( self, new LUPAPISTE.CellModel( params ));
 
+  self.immediate = params.immediate;
   self.attributes = _.defaults( self.attributes, {type: "text"});
-  self.textInput = params.immediate ? self.value : null;
-  self.textValue = params.immediate ? null : self.value;
 };

@@ -6,9 +6,9 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
 
   var service = lupapisteApp.services.companyRegistrationService;
 
-  self.loggedIn = lupapisteApp.models.currentUser.id();
+  self.loggedIn = lupapisteApp.models.currentUser.id;
 
-  self.userCell = self.loggedIn ? "span" : "text";
+  self.userCell = self.loggedIn() ? "span" : "text";
 
   self.field = function( fieldName, cell ) {
     var opts = _.defaults( service.field( fieldName),
@@ -24,4 +24,14 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
                          options: loc.getSupportedLanguages(),
                          optionsText: loc });
   };
+  self.userInfo = self.disposedPureComputed( function() {
+    var reg = service.registration;
+    return sprintf( "%s %s, %s", reg.firstName(), reg.lastName(), reg.email());
+  });
+
+  var emailWarning = service.field( "email" ).warning;
+
+  self.showLogin = self.disposedComputed( function() {
+    return  !self.loggedIn() && emailWarning() === "email-in-use";
+  });
 };

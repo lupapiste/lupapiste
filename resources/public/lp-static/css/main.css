@@ -16725,6 +16725,11 @@ div.register-company-wizard .form-grid + .form-grid {
   margin-top: 0;
 }
 
+div.register-company-wizard .existing-user-sign-in {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
 div.register-company-wizard div.register-company-container {
   margin-top: 0;
   border: 1px solid #eeeeee;
@@ -16761,6 +16766,10 @@ div.register-company-wizard div.register-company-container form icon-button {
 div.register-company-wizard div.register-company-container img.logo {
   width: 200px;
   height: auto;
+}
+
+.login--error {
+  color: #df3215;
 }
 
 #login h1 {

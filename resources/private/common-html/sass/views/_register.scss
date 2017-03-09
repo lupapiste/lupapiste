@@ -243,6 +243,11 @@ div.register-company-wizard {
   .form-grid + .form-grid {
     margin-top: 0;
   }
+  .existing-user-sign-in {
+    padding-top: $marginS;
+    padding-bottom: $marginS;
+
+  }
   div.register-company-container {
     margin-top: 0;
     border: 1px solid $gray238;
@@ -276,4 +281,8 @@ div.register-company-wizard {
       height: auto;
     }
   }
+}
+
+.login--error {
+  color: $negative;
 }
