@@ -107,10 +107,6 @@
               (:state last-review-1) => "requires_user_action")
             (fact "last review state for application 2"
               (:state last-review-2) => "sent")
-            (fact "reviews for verdict given application 1"
-              (count-reviews sonja application-id-verdict-given-1) => 3)
-            (fact "reviews for verdict given application 2"
-              (count-reviews sonja application-id-verdict-given-2) => 3)
             (fact "application 1 state not updated"
               (:state app-1) => "verdictGiven")
             (fact "application 2 state is updated"
@@ -194,10 +190,6 @@
             (:state last-review-1) => "requires_user_action")
           (fact "last review state for application 2"
             (:state last-review-2) => "sent")
-          (fact "reviews for verdict given application 1"
-            (count-reviews sonja application-id-verdict-given-1) => 3)
-          (fact "reviews for verdict given application 2"
-            (count-reviews sonja application-id-verdict-given-2) => 3)
           (fact "application 1 state not updated"
             (:state app-1) => "verdictGiven")
           (fact "application 2 state is updated"
