@@ -212,19 +212,28 @@
 
 
     (facts "Applicants invitation should be selectable"
-      (fact "When not authorise applicants"
-       (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
+      (fact "When not authorise applicants - there should be only one authorised"
+        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
                                               :kuntalupatunnus "14-0241-R 10"
                                               :authorizeApplicants false))
             (query-application local-query raktark-jarvenpaa)
             (:auth)
             (count)) => 1 ;; owner of the application
-       (provided
-         (krysp-reader/get-app-info-from-message anything anything) => example-app-info))
+        (provided
+          (krysp-reader/get-app-info-from-message anything anything) => example-app-info))
+
+      (fact "When not authorise applicants - there should be five applicant documents"
+        (let [application (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
+                                                                 :kuntalupatunnus "14-0241-R 11"
+                                                                 :authorizeApplicants false))
+                               (query-application local-query raktark-jarvenpaa))]
+            (count (domain/get-documents-by-subtype (:documents application) :hakija))) => 5
+        (provided
+          (krysp-reader/get-app-info-from-message anything anything) => example-app-info))
 
       (fact "When authorise applicants"
        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
-                                              :kuntalupatunnus "14-0241-R 11"
+                                              :kuntalupatunnus "14-0241-R 12"
                                               :authorizeApplicants true))
             (query-application local-query raktark-jarvenpaa)
             (:auth)
