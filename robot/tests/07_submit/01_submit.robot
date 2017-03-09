@@ -5,6 +5,15 @@ Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables       ../06_attachments/variables.py
 
+*** Keywords ***
+
+Open test application in required field summary tab
+  Open application  ${appname}  ${propertyId}
+  Open tab  requiredFieldSummary
+
+Submit button is enabled
+  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+
 *** Test Cases ***
 
 Mikko creates a new application
@@ -19,13 +28,13 @@ Mikko creates a new application
 
 Mikko could submit application (when required fields are not obligatory)
   Open tab  requiredFieldSummary
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+  Wait Until  Submit button is enabled
   Logout
 
-Sonja can not submit application
+Sonja can submit application
   Sonja logs in
-  Open application  ${appname}  ${propertyId}
-  Wait until  Element should not be visible  application-requiredFieldSummary-tab
+  Open test application in required field summary tab
+  Wait until  Submit button is enabled
   Logout
 
 #
@@ -123,20 +132,18 @@ The filled-up warning field and party info plus the added attachment cause corre
   Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[contains(@class,'info-line')]  4
 
 Mikko could submit application after missing stuff have been added
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+  Wait Until  Submit button is enabled
   Logout
 
 Sonja could submit Mikko's application when it's submittable by Mikko
   Sonja logs in
-  Open application  ${appname}  ${propertyId}
-  Open tab  requiredFieldSummary
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+  Open test application in required field summary tab
+  Wait Until  Submit button is enabled
   Logout
 
 Submit date is not be visible
   Mikko logs in
-  Open application  ${appname}  ${propertyId}
-  Open tab  requiredFieldSummary
+  Open test application in required field summary tab
   Element should not be visible  xpath=//span[@data-test-id='application-submitted-date']
 
 Mikko submits application
@@ -147,3 +154,4 @@ Mikko cant re-submit application
 
 Submit date should be visible
   Wait until  Element should be visible  xpath=//span[@data-test-id='application-submitted-date']
+
