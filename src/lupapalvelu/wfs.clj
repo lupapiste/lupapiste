@@ -284,12 +284,12 @@
           street (if (seq street-by-lang)
                    street-by-lang
                    (sxml/get-text feature [:mkos:Osoite :yht:osoitenimi :yht:teksti]))
-          xy (ss/split (sxml/get-text feature [:mkos:Osoite :yht:pistesijainti :gml:Point :gml:pos]) #"\s")]
+          [x y] (ss/split (sxml/get-text feature [:mkos:Osoite :yht:pistesijainti :gml:Point :gml:pos]) #"\s")]
       {:street street
        :number (sxml/get-text feature [:mkos:Osoite :yht:osoitenumero])
        :municipality (sxml/get-text feature [:mkos:Osoite :yht:kunta])
-       :x (util/->double (first xy))
-       :y (util/->double (second xy))})))
+       :x (util/->double x)
+       :y (util/->double y)})))
 
 (defn feature-to-property-info [feature]
   (when (seq feature)
