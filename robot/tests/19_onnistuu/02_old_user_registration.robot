@@ -108,6 +108,21 @@ Sonja is ultimately redirected to the Applications page
   Wait test id visible  own-applications
   [Teardown]  Logout
 
+# ---------------------
+# Company user
+# ---------------------
+Kaino starts registering company
+  Start registering  account15
+  Initiate login  kaino@solita.fi
+
+Kaino is ultimately redirected to the Applications page
+  Finalize login  kaino@solita.fi  kaino123
+  Confirm ok dialog
+  User should be logged in  Kaino Solita
+  Wait test id visible  own-applications
+  [Teardown]  Logout
+
+
 
 *** Keywords ***
 

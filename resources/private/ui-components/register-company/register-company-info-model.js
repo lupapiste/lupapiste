@@ -34,21 +34,24 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
   self.loginCallback = function() {
     pageutil.showAjaxWait();
     var user = lupapisteApp.models.currentUser;
+    var isAuth = user.isAuthority();
+    var isCom = user.company.id();
     var redirectFn = function() {
       window.location =
         sprintf( "/app/%s/%s#!/%s",
                  user.language(),
-                 user.isAuthority() ? "authority" : "applicant",
-                 user.isAuthority() ? "applications" : "register-company-account-type");
+                 isAuth ? "authority" : "applicant",
+                 (isAuth || isCom) ? "applications" : "register-company-account-type");
     };
-    if( user.isAuthority() ) {
+    if( isAuth || isCom ) {
       hub.subscribe( "dialog-close", redirectFn, true);
       hub.send( "show-dialog",
-                {ltitle: "authority",
+                {ltitle: "register.company.dialog-title",
                  size: "small",
                  component: "ok-dialog",
                  componentParams: {
-                   ltext: "register.company.existing-user-is-authority"
+                   ltext: sprintf( "register.company.existing-user-is-%s",
+                                 isAuth ? "authority" : "company")
                  }});
     } else {
       service.save();

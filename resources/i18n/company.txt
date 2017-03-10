@@ -474,3 +474,5 @@
 "register.company.confirm-account" "fi" "Vahvista yritystili"
 "register.company.existing-user-sign-in" "fi" "Antamallasi sähköpostiosoitteella on jo käyttäjätili. Jos haluat muuttaa sen käyttäjätilin yrityksen ylläpitäjätiliksi, kirjaudu sisään ja jatka yritystilin rekisteröintiä. Muussa tapauksessa anna toinen sähköpostiosoite, josta tulee yrityksen ylläpitäjä."
 "register.company.existing-user-is-authority" "fi" "Viranomaiskäyttäjä ei voi rekisteröidä Yritystiliä. Sinut ohjatataan Hankkeet-sivulle."
+"register.company.existing-user-is-company" "fi" "Olet jo Yritystilin käyttäjä. Sinut ohjatataan Hankkeet-sivulle."
+"register.company.dialog-title" "fi" "Yritystilin rekisteröinti"
