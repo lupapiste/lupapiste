@@ -16749,7 +16749,7 @@ div.register-company-wizard div.register-company-container h3 {
   margin-bottom: .5em;
 }
 
-div.register-company-wizard div.register-company-container a.link-btn {
+div.register-company-wizard div.register-company-container a.btn, div.register-company-wizard div.register-company-container .dataTables_paginate a.paginate_disabled_previous, .dataTables_paginate div.register-company-wizard div.register-company-container a.paginate_disabled_previous, div.register-company-wizard div.register-company-container .dataTables_paginate a.paginate_disabled_next, .dataTables_paginate div.register-company-wizard div.register-company-container a.paginate_disabled_next {
   margin-top: 24px;
   margin-bottom: 24px;
 }
