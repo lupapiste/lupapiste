@@ -88,7 +88,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
     self.listenService( "badFile", params.badFileHandler || indicatorError);
   }
 
-  // Removes file from files but from server.
+  // Removes file from files but not from server.
   self.clearFile = function( fileId ) {
     if (!_.isEmpty( self.files.remove( function( file ) {
       return file.fileId === fileId;
