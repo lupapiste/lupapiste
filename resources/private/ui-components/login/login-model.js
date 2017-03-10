@@ -1,3 +1,9 @@
+// Login UI and initial login action.
+// Params [optional]:
+// [username]: Initially filled default username (empty)
+// [callback]: After successful login command, "login" message with
+// command response is sent to hub. In addition, callback function (no
+// arguments) is called if it is given.
 LUPAPISTE.LoginModel = function( params ) {
   "use strict";
   var self = this;

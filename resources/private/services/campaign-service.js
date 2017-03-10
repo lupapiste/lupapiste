@@ -42,7 +42,7 @@ LUPAPISTE.CampaignService = function() {
                            self.campaign().lastDiscountDate),
            lastDiscount: loc( "company.campaign.until",
                             self.campaign().lastDiscountDate)}
-         : null;
+         : {};
   });
 
   self.campaignPrice = function( id ) {

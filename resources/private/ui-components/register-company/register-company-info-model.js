@@ -35,11 +35,29 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
     return  !self.loggedIn() && emailWarning() === "email-in-use";
   });
 
+
   self.loginCallback = function() {
-    service.save();
+    pageutil.showAjaxWait();
     var user = lupapisteApp.models.currentUser;
-    window.location = sprintf( "/app/%s/%s#!/register-company-account-type",
-                             user.language(),
-                             user.isAuthority() ? "authority" : "applicant");
+    var redirectFn = function() {
+      window.location =
+        sprintf( "/app/%s/%s#!/%s",
+                 user.language(),
+                 user.isAuthority() ? "authority" : "applicant",
+                 user.isAuthority() ? "applications" : "register-company-account-type");
+    };
+    if( user.isAuthority() ) {
+      hub.subscribe( "dialog-close", redirectFn, true);
+      hub.send( "show-dialog",
+                {ltitle: "authority",
+                 size: "small",
+                 component: "ok-dialog",
+                 componentParams: {
+                   ltext: "register.company.existing-user-is-authority"
+                 }});
+    } else {
+      service.save();
+      redirectFn();
+    }
   };
 };
