@@ -279,15 +279,15 @@
               :sv (xml1-> feature :oso:Osoitepiste :oso:kuntanimiSwe text)}})))
 
 (defn krysp-to-address-details [lang feature]
-  (when (seq feature)
-    (let [street-by-lang (xml-> feature :mkos:Osoite :yht:osoitenimi :yht:teksti (attr= :xml:lang lang) text)
+  (when (map? feature)
+    (let [street-by-lang (sxml/get-text feature [:mkos:Osoite :yht:osoitenimi :yht:teksti (enlive/attr= :xml:lang lang)])
           street (if (seq street-by-lang)
                    street-by-lang
-                   (xml-> feature :mkos:Osoite :yht:osoitenimi :yht:teksti text))
-          xy (ss/split (first (xml-> feature :mkos:Osoite :yht:pistesijainti :gml:Point :gml:pos text)) #"\s")]
-      {:street (first street)
-       :number (first (xml-> feature :mkos:Osoite :yht:osoitenumero text))
-       :municipality (first (xml-> feature :mkos:Osoite :yht:kunta text))
+                   (sxml/get-text feature [:mkos:Osoite :yht:osoitenimi :yht:teksti]))
+          xy (ss/split (sxml/get-text feature [:mkos:Osoite :yht:pistesijainti :gml:Point :gml:pos]) #"\s")]
+      {:street street
+       :number (sxml/get-text feature [:mkos:Osoite :yht:osoitenumero])
+       :municipality (sxml/get-text feature [:mkos:Osoite :yht:kunta])
        :x (util/->double (first xy))
        :y (util/->double (second xy))})))
 
@@ -327,8 +327,8 @@
 (defn parse-features-as-latin1 [s]
   (-> s (s/replace-first "UTF-8" "ISO-8859-1") (->features sxml/startparse-sax-no-doctype "ISO-8859-1")))
 
-(defn exec
-  ([method url q] (exec method url nil q))
+(defn exec-raw
+  ([method url q] (exec-raw method url nil q))
   ([method url credentials q]
     (let [[http-fn param-key] (method http-method)
          timeout (env/value :http-client :conn-timeout)
@@ -343,15 +343,30 @@
         :error   (case data
                    400 (errorf "error.integration -  wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
                    (errorf "error.integration - wfs status %s: url=%s, response body=%s" data url error-text))
-        :ok      (let [xml (if (= url nearestfeature)
-                             (parse-features-as-latin1 data)
-                             (->features data sxml/startparse-sax-no-doctype))
-                       member-list (xml-> xml :gml:featureMember)]
-                   ; Differences in WFS implementations:
-                   ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
-                   (if (seq member-list)
-                     member-list
-                     (xml-> xml :gml:featureMembers)))))))
+        :ok      data))))
+
+(defn exec-get-xml
+  [& args]
+  (let [[_ url & _] args
+        data  (apply exec-raw args)
+        xml (-> (.getBytes data)
+                java.io.ByteArrayInputStream.
+                (xml/parse sxml/startparse-sax-no-doctype))]
+    xml))
+
+(defn exec
+  [& args]
+  (let [[_ url & _] args
+        data  (apply exec-raw args)
+        xml (if (= url nearestfeature)
+              (parse-features-as-latin1 data)
+              (->features data sxml/startparse-sax-no-doctype))
+        member-list (xml-> xml :gml:featureMember)]
+    ; Differences in WFS implementations:
+    ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+    (if (seq member-list)
+      member-list
+      (xml-> xml :gml:featureMembers))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -438,7 +453,7 @@
                   ; Queries to some bockends must have the SRS defined at the end of BBOX,
                   ; but some bockends return NO RESULTS if it is defened!
                   bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))
-                  results (exec :get url credentials
+                  results (exec-get-xml :get url credentials
                             {:REQUEST "GetFeature"
                              :SERVICE "WFS"
                              :VERSION "1.1.0"
@@ -447,7 +462,7 @@
                              :BBOX bbox
                              :MAXFEATURES "50"})]]
         (if (seq results)
-          results
+          (sxml/select results [:mkos:Osoite])
           (warnf "No results for x/y %s/%s within radius of %d. %s"
             x y radius (if (= radius (last radii)) "Giving up!" "Increasing radius...")))))))
 
