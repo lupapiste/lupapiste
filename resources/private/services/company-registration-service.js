@@ -3,6 +3,8 @@ LUPAPISTE.CompanyRegistrationService = function() {
   "use strict";
   var self = this;
 
+  var serviceName = "companyRegistrationService";
+
   // User summary or null.
   function user() {
     var u = lupapisteApp.models.currentUser;
@@ -55,6 +57,7 @@ LUPAPISTE.CompanyRegistrationService = function() {
       self.registration.firstName( u.firstName );
       self.registration.lastName( u.lastName );
       self.registration.email( u.email );
+      self.registration.personId( ""); // Just in case
       self.registration.language( u.language );
     }
   }
@@ -214,6 +217,35 @@ LUPAPISTE.CompanyRegistrationService = function() {
   self.currentConfig = function() {
     return stepConfigs[self.currentStep()];
   };
+
+  // Save the current step and registration data to session
+  // storage. This is needed, when the user signs in and the page is
+  // reloaded.
+  function saveItem( name, value ) {
+    sessionStorage.setItem( serviceName + "::" + name, value );
+  }
+  self.save = function() {
+    saveItem( "saved", true );
+    saveItem( "currentStep", self.currentStep());
+    saveItem( "registration", ko.mapping.toJSON( self.registration ) );
+  };
+
+  // Read and clear the stored data when service is (re)initialized.
+  function readItem( name ) {
+    var key = serviceName + "::" + name;
+    var value = sessionStorage.getItem( key );
+    sessionStorage.removeItem( key );
+    return value;
+  }
+
+  if( readItem( "saved" )) {
+    self.currentStep( _.toInteger(readItem( "currentStep")));
+    _.each(JSON.parse(readItem( "registration")),
+          function( v, k ) {
+            _.get( self.registration, k, _.noop)( v );
+          });
+    updateRegistrationUserInfo();
+  }
 
   if( LUPAPISTE.config.mode === "dev") {
     self.devFill = function() {

@@ -34,4 +34,12 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
   self.showLogin = self.disposedComputed( function() {
     return  !self.loggedIn() && emailWarning() === "email-in-use";
   });
+
+  self.loginCallback = function() {
+    service.save();
+    var user = lupapisteApp.models.currentUser;
+    window.location = sprintf( "/app/%s/%s#!/register-company-account-type",
+                             user.language(),
+                             user.isAuthority() ? "authority" : "applicant");
+  };
 };

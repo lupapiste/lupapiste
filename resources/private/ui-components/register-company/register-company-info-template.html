@@ -98,7 +98,8 @@
     <div class="row">
       <div class="col-4 existing-user-sign-in"
            data-bind="ltext: 'register.company.existing-user-sign-in'"></div>
-      <login params="username: lupapisteApp.services.companyRegistrationService.registration.email"></login>
+      <login params="username: lupapisteApp.services.companyRegistrationService.registration.email,
+                     callback: loginCallback"></login>
     </div>
     <!-- /ko -->
   </div>

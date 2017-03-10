@@ -7,6 +7,7 @@ LUPAPISTE.LoginModel = function( params ) {
   self.username = ko.observable( ko.unwrap( params.username ) || "" );
   self.password = ko.observable();
   self.error = ko.observable();
+  var callback = params.callback || _.noop;
 
   self.canLogin = self.disposedComputed( function() {
     var can = _.trim(self.username()) && self.password();
@@ -18,7 +19,10 @@ LUPAPISTE.LoginModel = function( params ) {
   self.login = function() {
     ajax.command( "login", {username: _.trim( self.username()),
                           password: self.password()})
-    .success( _.partial( hub.send, "login"))
+    .success( function( res ) {
+      hub.send( "login", res );
+      callback();
+    })
     .error( function( res ) {
       self.error( res.text );
     })

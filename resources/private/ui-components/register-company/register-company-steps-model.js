@@ -16,6 +16,7 @@ LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
 
   self.stepNames = _.map( _.range(1, 5),
                           _.partial( sprintf, "register.company.phase.%s"));
+
   self.isLast = function( index ) {
     return index === _.size( self.stepNames ) - 1;
   };
