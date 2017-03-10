@@ -8,14 +8,9 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
 
   self.loggedIn = lupapisteApp.models.currentUser.id;
 
-  self.userCell = self.loggedIn() ? "span" : "text";
-
   self.field = function( fieldName, cell ) {
-    var opts = _.defaults( service.field( fieldName),
+    return _.defaults( service.field( fieldName),
                            {cell: cell || "text"});
-    return opts.required && cell === "span"
-         ? _.set( opts, "required", false )
-         : opts;
   };
 
   self.languageField = function() {
