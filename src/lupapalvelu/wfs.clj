@@ -347,12 +347,15 @@
 
 (defn exec-get-xml
   [& args]
-  (let [[_ url & _] args
-        data  (apply exec-raw args)
-        xml (-> (.getBytes data)
-                java.io.ByteArrayInputStream.
-                (xml/parse sxml/startparse-sax-no-doctype))]
-    xml))
+  (let [[_ url & _] args]
+    (try
+      (-> (apply exec-raw args)
+          (.getBytes)
+          java.io.ByteArrayInputStream.
+          (xml/parse sxml/startparse-sax-no-doctype))
+      (catch Exception e
+        (errorf "Exception caught in wfs req from url %s %s" url e)
+        nil))))
 
 (defn exec
   [& args]
