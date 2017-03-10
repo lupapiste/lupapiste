@@ -5,6 +5,7 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.selected = params.selectedType;
+  self.disabled = params.disabled;
   var selectedGroup = params.selectedTypeGroup;
 
   var service = lupapisteApp.services.attachmentsService;

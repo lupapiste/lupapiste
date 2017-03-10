@@ -28,7 +28,8 @@
           <div class="batch-autocomplete fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'type'),
                           testId: 'batch-type-' + $index()">
-            <attachment-type-autocomplete params="selectedType: $parent.cell( $data, 'type').value"
+            <attachment-type-autocomplete params="selectedType: $parent.cell( $data, 'type').value,
+                                                  disabled: !_.isUndefined($data.attachmentId)"
                                           data-bind="css: {'no-events': $parent.rowDisabled( $data )}">
             </attachment-type-autocomplete>
             <icon-button params="click: $parent.filler( 'type', $data),
