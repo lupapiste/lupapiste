@@ -73,6 +73,8 @@
                  :accountTypes          company/account-types
                  :eInvoiceOperators     schemas/e-invoice-operators
                  :postVerdictStates     states/post-verdict-states
+                 :loggedInUploadMaxSize (env/value :file-upload :max-size :logged-in)
+                 :anonymousUploadMaxSize (env/value :file-upload :max-size :anonymous)
                  :writerRoles           domain/owner-or-write-roles
                  :stampableMimes        (filter identity (map mime/mime-types file-types))
                  :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
