@@ -164,16 +164,18 @@
                      (wfs/ogc-and
                        (wfs/property-is-like "mkos:Osoite/yht:osoitenimi/yht:teksti" street)
                        (wfs/property-is-equal "mkos:Osoite/yht:osoitenumero" number)))
-        filter-str (sxml/element-to-string (assoc filter-xml :attrs wfs/krysp-namespaces))]
-    (wfs/exec :get url
-      credentials
-      {:REQUEST "GetFeature"
-       :SERVICE "WFS"
-       :VERSION "1.1.0"
-       :TYPENAME "mkos:Osoite"
-       :SRSNAME "EPSG:3067"
-       :FILTER filter-str
-       :MAXFEATURES "10"})))
+        filter-str (sxml/element-to-string (assoc filter-xml :attrs wfs/krysp-namespaces))
+        data (wfs/exec-get-xml :get url
+                           credentials
+                           {:REQUEST "GetFeature"
+                            :SERVICE "WFS"
+                            :VERSION "1.1.0"
+                            :TYPENAME "mkos:Osoite"
+                            :SRSNAME "EPSG:3067"
+                            :FILTER filter-str
+                            :MAXFEATURES "10"})]
+    (-> data
+        (sxml/select [:mkos:Osoite]))))
 
 (defn search [term lang]
   (condp re-find (ss/trim term)

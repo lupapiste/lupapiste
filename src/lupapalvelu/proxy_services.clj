@@ -128,7 +128,7 @@
       (if-let [endpoint (org/municipality-address-endpoint municipality)]
         (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
                                      (map (partial wfs/krysp-to-address-details (or lang "fi")))
-                                     (remove (fn [addr] #{{:x 0 :y 0}} (select-keys addr [:x :y])))
+                                     (remove (fn [addr] (= {:x 0 :y 0} (select-keys addr [:x :y]))))
                                      (map (fn [{x2 :x y2 :y :as f}]
                                             (assoc f :distance (distance x_d y_d x2 y2)
                                                      :name {:fi (i18n/localize :fi :municipality municipality)
