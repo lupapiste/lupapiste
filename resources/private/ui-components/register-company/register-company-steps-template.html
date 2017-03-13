@@ -1,10 +1,12 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="register-company-steps-template">
   <div class="company-steps">
-    <h1 data-bind="ltext: texts().title"></h1>
+    <h1 data-bind="ltext: texts().title"
+        data-test-id="register-company-title"></h1>
     <!-- ko if: texts().subtitle -->
     <h2 data-bind="text: texts().subtitle"
-        class="register-company-subtitle"></h2>
+        class="register-company-subtitle"
+        data-test-id="register-company-subtitle"></h2>
     <!-- /ko -->
     <div class="tabby">
       <div class="tabby__row"

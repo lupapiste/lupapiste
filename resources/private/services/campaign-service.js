@@ -18,14 +18,19 @@ LUPAPISTE.CampaignService = function() {
     campaign[path] = finnishFormat( m );
   }
 
+  function processCampaign( campaign ) {
+    _.each( ["starts", "ends", "lastDiscountDate"],
+            _.partial( processDate, campaign ));
+    return campaign;
+  }
+
   ko.computed( function() {
     self.error( "");
     self.campaign({});
     if( _.trim( self.code())) {
       ajax.query( "campaign", {code: self.code()})
       .success( function( res ) {
-        _.each( ["starts", "ends", "lastDiscountDate"],
-              _.partial( processDate, res.campaign ));
+        processCampaign( res.campaign );
         self.campaign( res.campaign );
       })
       .error( function( res ) {
@@ -42,7 +47,7 @@ LUPAPISTE.CampaignService = function() {
                            self.campaign().lastDiscountDate),
            lastDiscount: loc( "company.campaign.until",
                             self.campaign().lastDiscountDate)}
-         : {};
+         : null;
   });
 
   self.campaignPrice = function( id ) {
@@ -61,6 +66,29 @@ LUPAPISTE.CampaignService = function() {
 
   };
 
+  // -------------------------
+  // Admin admin
+  // -------------------------
+
+  self.campaigns = ko.observableArray();
+  self.waiting = ko.observable();
+
+  self.queryCampaigns = function() {
+    ajax.query( "campaigns")
+    .pending( self.waiting )
+    .success( function( res ) {
+      self.campaigns( _.map( res.campaigns, processCampaign ));
+    })
+    .call();
+  };
+
+  self.deleteCampaign = function( code ) {
+    ajax.command( "delete-campaign", {code: code})
+    .success( self.queryCampaigns )
+    .call();
+  };
+
+  // Hardcoded campaign code for April 2017
   if( features.enabled( "company-campaign")) {
     self.code( "huhtikuu2017");
   }

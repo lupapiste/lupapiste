@@ -25,6 +25,8 @@ LUPAPISTE.RegisterCompanyAccountTypeModel = function() {
   };
 
   self.campaign = campService.campaign;
-  self.lastDiscount = campService.campaignTexts().lastDiscount;
+  self.lastDiscount = self.disposedPureComputed( function() {
+    return util.getIn( campService.campaignTexts, ["lastDiscount"]);
+  });
   self.campaignSmallPrint = campService.campaignSmallPrint;
 };

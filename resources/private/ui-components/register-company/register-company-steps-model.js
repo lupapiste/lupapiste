@@ -1,4 +1,8 @@
 // Container for company registration "wizard" steps.
+// Params [optional]:
+// [step]: The current step. Range for real steps is [0,3]
+// inclusive. Greater steps make every step green. By default, step is
+// provided by the companyRegistrationService
 LUPAPISTE.RegisterCompanyStepsModel = function( params ) {
   "use strict";
   var self = this;

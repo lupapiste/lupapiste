@@ -85,7 +85,7 @@
         (not (valid-campaign? campaign))        (fail :error.invalid-campaign)
         (> starts ends)                         (fail :error.campaign-period)
         (time/after? end-date last-date)        (fail :error.campaign-last-date)
-        (not (<= account5 account15 account30)) (fail :error.campaign-pricing)))
+        (not (<= 0 account5 account15 account30)) (fail :error.campaign-pricing)))
     (catch Exception e
       (errorf "Bad campaign: %s" (.getMessage e))
       (fail :error.invalid-campaign))))

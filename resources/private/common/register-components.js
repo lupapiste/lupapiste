@@ -187,7 +187,8 @@ jQuery(document).ready(function() {
     {name: "cell-invoice-operator"},
     {name: "register-company-sign"},
     {name: "set-password"},
-    {name: "login"}
+    {name: "login"},
+    {name: "campaign-editor"}
 ];
 
   ko.registerLupapisteComponents(components);
