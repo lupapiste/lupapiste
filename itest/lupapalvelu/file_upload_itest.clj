@@ -17,7 +17,7 @@
       (-> (bulletin-util/send-file cookie-store)
           :body
           (json/decode keyword))
-      upload-resp => (partial expected-failure? :error.user-not-vetuma-authenticated))))
+       => (partial expected-failure? :error.user-not-vetuma-authenticated))))
 
 (facts "Upload and remove attachment for a bulletin comment"
   (let [store         (atom {})
