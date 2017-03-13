@@ -405,7 +405,7 @@
       (some #(% command) validators)
       (let [application (get-application command)
             ^{:doc "Organization as delay"} organization (when application
-                                                           (delay (org/get-organization (:organization application))))
+                                                           (delay (org/get-organization-with-trigger-assignments (:organization application))))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             command (assoc command :application application :organization organization :user-organizations user-organizations)]
         (or
