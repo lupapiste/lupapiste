@@ -4,6 +4,7 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   var service = lupapisteApp.services.attachmentsService;
+  var accordionService = lupapisteApp.services.accordionService;
 
   self.appModel = lupapisteApp.models.application;
   self.authModel = lupapisteApp.models.applicationAuthModel;
@@ -75,13 +76,15 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
   }
 
   function getOperationLocalization(operationId) {
-    var allOperations = lupapisteApp.models.application.allOperations();
-    var operation = ko.toJS(_.find(allOperations, function(op) {
-      return util.getIn(op, ["id"]) === operationId;
-    }));
-    return operation
-      ? _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ")
-      : "";
+    var doc = accordionService && accordionService.getDocumentByOpId(operationId);
+    if (util.getIn(doc, ["operation"])) {
+      var identifier = util.getIn(accordionService.getIdentifier(doc.docId), ["value"]);
+      var opDescription = util.getIn(doc, ["operation", "description"]);
+      var accordionFields = docutils.accordionText(doc.accordionPaths, doc.data);
+      return loc([doc.operation.name(), "_group_label"]) + docutils.headerDescription(identifier, opDescription, accordionFields);
+    } else {
+      return "";
+    }
   }
 
   self.accordionName = self.disposedPureComputed(function() {
