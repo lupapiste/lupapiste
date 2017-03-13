@@ -56,8 +56,8 @@
   (when-not (has-person-id? user)
     (fail :error.unauthorized)))
 
-(defn- validate-is-basic-company-user [{user :user}]
-  (when-not (= "user" (get-in user [:company :role]))
+(defn- validate-is-company-user [{user :user}]
+  (when (-> user :company :role ss/blank?)
     (fail :error.unauthorized)))
 
 (defcommand change-email-init
@@ -66,7 +66,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified   true
-   :pre-checks [(some-pre-check validate-has-person-id validate-is-basic-company-user)]
+   :pre-checks [(some-pre-check validate-has-person-id validate-is-company-user)]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (change-email/init-email-change user email))
