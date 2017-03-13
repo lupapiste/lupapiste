@@ -13,7 +13,7 @@
         cookie-store  (doto (->cookie-store store)
                         (.addCookie test-db-cookie))]
 
-    (fact "Uploaded is not allowed"
+    (fact "Upload is not allowed"
       (-> (bulletin-util/send-file cookie-store)
           :body
           (json/decode keyword))
