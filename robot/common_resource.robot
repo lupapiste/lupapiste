@@ -24,8 +24,8 @@ ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
 ${CREATE BULLETIN URL}          ${SERVER}/dev/publish-bulletin-quickly
-${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
-${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
+${LAST EMAIL URL}               ${SERVER}/api/last-email
+${LAST EMAILS URL}              ${SERVER}/api/last-emails
 ${FRONTEND LOG URL}             ${SERVER}/api/frontend-log
 ${SELENIUM}                     ${EMPTY}
 ${DB COOKIE}                    test_db_name
@@ -73,11 +73,15 @@ Go to bulletins page
   Wait Until  Page should contain  Kuntien julkipanoilmoitukset
 
 Open last email
-  Go to  ${LAST EMAIL URL}
+  [Arguments]  ${reset}=True
+  Run keyword if  ${reset}  Go to  ${LAST EMAIL URL}?reset=true
+  Run keyword unless  ${reset}  Go to  ${LAST EMAIL URL}
   Wait until  Element should be visible  //*[@data-test-id='subject']
 
 Open all latest emails
-  Go to  ${LAST EMAILS URL}
+  [Arguments]  ${reset}=True
+  Run keyword if  ${reset}  Go to  ${LAST EMAILS URL}?reset=true
+  Run keyword unless  ${reset}  Go to  ${LAST EMAILS URL}
   Wait until  Element should be visible  //*[@data-test-id='subject']
 
 Applications page should be open
@@ -1495,7 +1499,7 @@ No such test id
 
 Test id should contain
   [Arguments]  ${id}  ${text}
-  Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Element should contain  jquery=[data-test-id=${id}]:visible  ${text}
 
 Test id input is
   [Arguments]  ${id}  ${text}
@@ -1561,7 +1565,6 @@ Toggle toggle
   [Arguments]  ${tid}
   Click label by test id  ${tid}-label
 
-
 Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
@@ -1569,6 +1572,11 @@ Select from test id
 Test id select is
   [Arguments]  ${id}  ${value}
   List selection should be  jquery=select[data-test-id=${id}]  ${value}
+
+Test id select text is
+  [Arguments]  ${id}  ${text}
+  ${label}=  Get Selected List Label  jquery=select[data-test-id=${id}]
+  Should be true  '${label}' == '${text}'
 
 jQuery should match X times
   [Arguments]  ${selector}  ${count}

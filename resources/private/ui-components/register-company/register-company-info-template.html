@@ -61,31 +61,46 @@
       <h3 class="col-4"
           data-bind="ltext: 'register.company.form.applicant'"></h3>
     </div>
+    <!-- ko ifnot: loggedIn -->
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('firstName', userCell)}"></div>
+                        params: field('firstName')}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('lastName', userCell)}"></div>
+                        params: field('lastName')}"></div>
       </div>
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
-                        params: field('email', userCell)}"></div>
+                        params: field('email')}"></div>
       </div>
-      <div class="col-1"
-           data-bind="ifnot: loggedIn">
+      <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
                         params: field('personId')}"></div>
       </div>
     </div>
-    <!-- ko ifnot: loggedIn -->
     <div class="row">
       <div class="col-1">
         <div data-bind="component: {name: 'form-cell',
                         params: languageField()}"></div>
       </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: loggedIn -->
+    <div class="row">
+      <div class="col-4"
+           data-bind="text: userInfo"
+           data-test-id="register-company-userinfo">
+      </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: showLogin -->
+    <div class="row">
+      <div class="col-4 existing-user-sign-in"
+           data-bind="ltext: 'register.company.existing-user-sign-in'"></div>
+      <login params="username: lupapisteApp.services.companyRegistrationService.registration.email,
+                     callback: loginCallback"></login>
     </div>
     <!-- /ko -->
   </div>
