@@ -4,6 +4,7 @@ Documentation   Mikko adds an sensitive attachment to application, and hides it 
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables       variables.py
+Library         Debug
 
 *** Test Cases ***
 
@@ -28,9 +29,8 @@ Mikko sets CV to be visible only to himself and authorities
   Wait Until  Tab should be visible  attachments
 
 Mikko uploads attachment to placeholder asemapiirros
-  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
-  Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}  Asemapiirros
+  Click by test id  batch-ready
   Wait Until  Tab should be visible  attachments
 
 Mikko invites Teppo and Pena
@@ -49,6 +49,7 @@ Teppo uploads new version to asemapiirros
   # When Teppo uploads version to attachment, he is authed to attachment and can see contents even if visibility is set to only-authority level
   Open attachment details  paapiirustus.asemapiirros
   Add attachment version  ${PNG_TESTFILE_PATH}
+  Debug
   Wait Until  Click button  id=show-attachment-versions
   Wait Until  Xpath Should Match X Times  //section[@id='attachment']//div[@class='attachment-file-versions-content']//table/tbody/tr  2
 
