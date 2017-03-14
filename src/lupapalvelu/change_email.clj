@@ -9,13 +9,15 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.vetuma :as vetuma]))
 
+
 (defn- notify-init-email-change [user new-email]
   (let [token-id (token/make-token :change-email user {:new-email new-email}
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
-        token (token/get-token token-id)
-        user-with-person-id (usr/find-user {:_id (:id user)})]
-    (notifications/notify! (if (:personId user-with-person-id) :change-email :change-email-for-company-user)
+        token (token/get-token token-id)]
+    (notifications/notify! (if (usr/company-user? user)
+                             :change-email-for-company-user
+                             :change-email)
                            {:user (assoc user :email new-email)
                             :data {:old-email (:email user)
                                    :new-email new-email
@@ -65,14 +67,19 @@
 (defn- change-email-with-token [token stamp]
   {:pre [(map? token)]}
 
-  (let [{hetu :personId old-email :email id :id :as user} (usr/get-user-by-id! (:user-id token))
-        new-email (get-in token [:data :new-email])
-        vetuma-data (when hetu (vetuma/get-user stamp))]
+  (let [{hetu      :personId
+         old-email :email
+         id        :id :as user} (usr/get-user-by-id! (:user-id token))
+        new-email                (get-in token [:data :new-email])
+        com-admin?               (usr/company-admin? user)
+        {vetuma-hetu :userid}    (when (or hetu com-admin?)
+                                   (vetuma/get-user stamp))
+        not-company?             (-> user :company :role ss/blank?)]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
-      (and (not hetu) (not= "user" (get-in user [:company :role]))) (fail! :error.missing-person-id)
-      (and hetu (not= hetu (:userid vetuma-data))) (fail! :error.personid-mismatch)
-      (usr/email-in-use? new-email) (fail! :error.duplicate-email))
+      (and (not hetu) not-company?)            (fail! :error.missing-person-id)
+      (and hetu (not= hetu vetuma-hetu))       (fail! :error.personid-mismatch)
+      (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
 
     (when-let [{dummy-id :id :as dummy-user} (usr/get-user-by-email new-email)]
       (when (usr/dummy? dummy-user)
@@ -84,7 +91,9 @@
     ;; Access to applications is determined by user id.
     (usr/update-user-by-email old-email
                               {:personId hetu}
-                              {$set {:username new-email :email new-email}})
+                              {$set (merge {:username new-email :email new-email}
+                                           (when (and (not hetu) com-admin?)
+                                             {:personId vetuma-hetu}))})
 
     (update-email-in-application-auth! id old-email new-email)
 

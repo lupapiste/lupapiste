@@ -456,18 +456,18 @@
                   ; Queries to some bockends must have the SRS defined at the end of BBOX,
                   ; but some bockends return NO RESULTS if it is defened!
                   bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))
-                  results (exec-get-xml :get url credentials
+                  results (sxml/select (exec-get-xml :get url credentials
                             {:REQUEST "GetFeature"
                              :SERVICE "WFS"
                              :VERSION "1.1.0"
                              :TYPENAME "mkos:Osoite"
                              :SRSNAME "EPSG:3067"
                              :BBOX bbox
-                             :MAXFEATURES "50"})]]
-        (if (seq results)
-          (sxml/select results [:mkos:Osoite])
-          (warnf "No results for x/y %s/%s within radius of %d. %s"
-            x y radius (if (= radius (last radii)) "Giving up!" "Increasing radius...")))))))
+                             :MAXFEATURES "50"}) [:mkos:Osoite])]]
+        (if (not-empty results)
+          results
+          (warnf "No results for x/y %s/%s within radius of %d. %s (bbox=%s)"
+            x y radius (if (= radius (last radii)) "Giving up!" "Increasing radius...") bbox))))))
 
 (defn property-id-by-point [x y]
   (post ktjkii

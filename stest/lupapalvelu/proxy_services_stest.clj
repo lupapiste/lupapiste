@@ -371,13 +371,13 @@
     (municipality-by-point 281160 6936532.8125001) => "301"))
 
 (facts "Get address from Salo"
-  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx"})
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx" :no-bbox-srs true})
 
   (fact "address-by-point-proxy"
-    (let [response (address-by-point-proxy {:params {:lang "fi" :x "279444.75" :y "6703424.390625"}})
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "281813" :y "6702378"}})
           body (json/decode (:body response) true)]
       (fact (:street body) => "Vanha Turuntie")
-      (fact (:number body) => "534")
+      (fact (:number body) => "222")
       (fact (:fi (:name body)) => "Salo")
       )))
 
