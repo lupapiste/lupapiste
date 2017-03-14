@@ -1,5 +1,5 @@
 (ns lupapalvelu.attachment.tags
-  (:require [sade.util :refer [fn->>]]
+  (:require [sade.util :refer [fn->> find-first]]
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.operations :as op]))
@@ -113,9 +113,25 @@
       [{:tag :needed    :default true}
        {:tag :notNeeded :default false}])))
 
+(defn- assignment-trigger-filters [application-id triggers trigger-assignments]
+  (->> trigger-assignments
+       (filter #(= (:id (:application %)) application-id)) ; todo: we should not need to fetch all the trigger assignments
+       (map :trigger)
+       (distinct)
+       (map (fn [trigger-id]
+              {:tag (keyword (str "trigger-" trigger-id))
+               :description (:description (find-first #(= (:id %) trigger-id)
+                                                      triggers))
+               :default false}))
+       (concat [{:tag :user-created :default false}])))
+
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [application]
-  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+  [application organization]
+  (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+             (when (and organization (:trigger-assignments organization))
+               (assignment-trigger-filters (:id application)
+                                           (:assignment-triggers organization)
+                                           @(:trigger-assignments organization))))
        (remove nil?)
        (filter (fn->> count (< 1)))))

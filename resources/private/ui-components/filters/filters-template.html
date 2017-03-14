@@ -15,11 +15,19 @@
         <input type="checkbox"
                data-bind="attr: {'id': $parent.id( $index() ),
                                  'data-test-id': tag + '-filter-checkbox'},
-                          checked: active">
+                                 checked: active">
+        <!-- ko if: $parent.customDescriptions && $data.description -->
         <label class="filter-label"
                data-bind="attr: {'for': $parent.id( $index() ),
-                                 'data-test-id': tag + '-filter-label'},
+                          'data-test-id': tag + '-filter-label'},
+                          text: $data.description"></label>
+        <!-- /ko -->
+        <!-- ko ifnot: $parent.customDescriptions && $data.description -->
+        <label class="filter-label"
+               data-bind="attr: {'for': $parent.id( $index() ),
+                          'data-test-id': tag + '-filter-label'},
                           ltext: 'filter.' + $data.tag"></label>
+        <!-- /ko -->
     </div></div>
   </div>
 </script

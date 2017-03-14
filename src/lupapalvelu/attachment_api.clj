@@ -152,8 +152,11 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{application :application}]
-  (ok :attachmentsFilters (att-tags/attachments-filters application)))
+  [{application :application org :organization user :user}]
+  (ok :attachmentsFilters
+      (att-tags/attachments-filters application
+                                    (when (usr/authority? user)
+                                      @org))))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."

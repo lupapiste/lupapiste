@@ -49,3 +49,6 @@
 "filter.technical-reports" "en" "Technical reports"
 "filter.technical-reports" "fi" "Tekniset selvitykset"
 "filter.technical-reports" "sv" "Teknisk beskrivning"
+"filter.user-created" "en" ""
+"filter.user-created" "fi" "Käsittelijöiden luomia tehtäviä"
+"filter.user-created" "sv" ""
