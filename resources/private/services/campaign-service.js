@@ -88,8 +88,6 @@ LUPAPISTE.CampaignService = function() {
     .call();
   };
 
-  // Hardcoded campaign code for April 2017
-  if( features.enabled( "company-campaign")) {
-    self.code( "huhtikuu2017");
-  }
+  // Hardcoded campaign code
+  self.code( LUPAPISTE.config.campaignCode );
 };

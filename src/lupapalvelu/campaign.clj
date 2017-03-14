@@ -12,8 +12,6 @@
             [schema.core :as sc]
             [taoensso.timbre :refer [errorf]]))
 
-(defonce campaign-feature :company-campaign)
-
 (sc/defschema Campaign
   {:id               (sc/constrained sc/Str #(re-matches #"[a-z0-9-]+" %))
    :starts           ssc/Timestamp  ;; At midnight
