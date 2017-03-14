@@ -81,7 +81,8 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
       var identifier = util.getIn(accordionService.getIdentifier(doc.docId), ["value"]);
       var opDescription = util.getIn(doc, ["operation", "description"]);
       var accordionFields = docutils.accordionText(doc.accordionPaths, doc.data);
-      return loc([doc.operation.name(), "_group_label"]) + docutils.headerDescription(identifier, opDescription, accordionFields);
+      return loc([doc.operation.name(), "_group_label"]).toUpperCase() +
+               docutils.headerDescription(identifier, opDescription, accordionFields);
     } else {
       return "";
     }
@@ -93,7 +94,7 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
     if (opIdRegExp.test(key)) {
       return getOperationLocalization(opIdRegExp.exec(key)[1]);
     } else {
-      return loc(["application", "attachments", key]);
+      return loc(["application", "attachments", key]).toUpperCase();
     }
   });
 
