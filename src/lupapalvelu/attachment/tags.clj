@@ -123,7 +123,7 @@
                :description (:description (find-first #(= (:id %) trigger-id)
                                                       triggers))
                :default false}))
-       (concat [{:tag :user-created :default false}])))
+       (concat [{:tag :trigger-user-created :default false}])))
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."

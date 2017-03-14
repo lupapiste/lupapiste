@@ -110,6 +110,31 @@
 ;; Attachments
 ;;
 
+(defn- attachment-in-targets? [attachment-id assignment]
+  (boolean ((set (map :id (:targets assignment))) attachment-id)))
+
+(defn- trigger-tags [trigger-assignments attachment]
+  (->> trigger-assignments
+       (filter (partial attachment-in-targets? (:id attachment)))
+       (map #(str "trigger-" (:trigger %)))
+       (distinct)))
+
+(defn- enrich-attachment-and-add-trigger-tags
+  [trigger-assignments attachment]
+  (update (att/enrich-attachment attachment) :tags
+          #(concat % (trigger-tags trigger-assignments attachment))))
+
+(defn- enrich-attachment [application user org attachment]
+  (if-let [trigger-assignments (and (usr/authority? user)
+                                    (:trigger-assignments @org)
+                                    @(:trigger-assignments @org))]
+    (enrich-attachment-and-add-trigger-tags
+     (->> trigger-assignments
+          (filter #(= (:id (:application %)) (:id application))) ;todo: we should not need to fetch all the trigger assignments
+          )
+     attachment)
+    (att/enrich-attachment attachment)))
+
 (defquery attachments
   {:description "Get all attachments in application filtered by user visibility"
    :parameters [:id]
@@ -117,8 +142,9 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application :as command}]
-  (ok :attachments (map att/enrich-attachment attachments)))
+  [{{attachments :attachments :as application} :application user :user org :organization :as command}]
+  (ok :attachments (map (partial enrich-attachment application user org)
+                        attachments)))
 
 (defquery attachment
   {:description "Get single attachment"
@@ -129,10 +155,10 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application :as command}]
+  [{{attachments :attachments :as application} :application user :user org :org :as command}]
   (let [attachment (att/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (att/enrich-attachment attachment))
+      (ok :attachment (enrich-attachment application user org attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
