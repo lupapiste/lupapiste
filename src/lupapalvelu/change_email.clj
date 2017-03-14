@@ -9,18 +9,13 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.vetuma :as vetuma]))
 
-(defn- company-user? [user]
-  (= (-> user :company :role) "user"))
-
-(defn- company-admin? [user]
-  (= (-> user :company :role) "admin"))
 
 (defn- notify-init-email-change [user new-email]
   (let [token-id (token/make-token :change-email user {:new-email new-email}
                                    :auto-consume false
                                    :ttl ttl/change-email-token-ttl)
         token (token/get-token token-id)]
-    (notifications/notify! (if (company-user? user)
+    (notifications/notify! (if (usr/company-user? user)
                              :change-email-for-company-user
                              :change-email)
                            {:user (assoc user :email new-email)
@@ -76,13 +71,13 @@
          old-email :email
          id        :id :as user} (usr/get-user-by-id! (:user-id token))
         new-email                (get-in token [:data :new-email])
-        com-admin?               (company-admin? user)
+        com-admin?               (usr/company-admin? user)
         {vetuma-hetu :userid}    (when (or hetu com-admin?)
                                    (vetuma/get-user stamp))
-        not-company              (-> user :company :role ss/blank?)]
+        not-company?             (-> user :company :role ss/blank?)]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
-      (and (not hetu) not-company)             (fail! :error.missing-person-id)
+      (and (not hetu) not-company?)            (fail! :error.missing-person-id)
       (and hetu (not= hetu vetuma-hetu))       (fail! :error.personid-mismatch)
       (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
 

@@ -210,6 +210,13 @@
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 
+(defn company-user? [user]
+  (= (-> user :company :role) "user"))
+
+(defn company-admin? [user]
+  (= (-> user :company :role) "admin"))
+
+
 (defn organization-ids
   "Returns user's organizations as a set of strings"
   [{org-authz :orgAuthz :as user}]
