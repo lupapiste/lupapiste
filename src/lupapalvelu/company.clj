@@ -89,6 +89,30 @@
   (= :custom (keyword type)))
 
 ;;
+;; Pre-checkers
+;;
+
+(defn validate-has-company-role
+  "Role :any matches any role excluding nil. Thus, even with :any the
+  user must have some company role."
+  [role]
+  (fn [{user :user}]
+    (let [com-role (-> user :company :role)]
+      (when-not (or (util/=as-kw role com-role)
+                    (and (util/=as-kw role :any)
+                         (ss/not-blank? com-role)))
+        unauthorized))))
+
+(defn validate-is-admin [{user :user}]
+  (when-not (usr/admin? user)
+    unauthorized))
+
+(defn validate-belongs-to-company [{:keys [user data]}]
+  (when-not (= (-> user :company :id)
+               (:company data))
+    unauthorized))
+
+;;
 ;; API:
 ;;
 
