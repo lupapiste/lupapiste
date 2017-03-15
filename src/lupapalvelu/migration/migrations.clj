@@ -2949,12 +2949,6 @@
                           (op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update documents)))
     (count applications)))
 
-
-(comment "    documents: {\n
-  $elemMatch: {\n
-       \"schema-info.type\":\"party\",\n
-              \"schema-info.op.name\": {\n                $exists:true,\n                $ne:\"tyonjohtajan-nimeaminen-v2\"\n            }\n        }\n    }")
-
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
