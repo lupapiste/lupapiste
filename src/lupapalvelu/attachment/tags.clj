@@ -1,7 +1,8 @@
 (ns lupapalvelu.attachment.tags
-  (:require [sade.util :refer [fn->> find-first]]
+  (:require [sade.util :refer [fn->> find-first distinct-by]]
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.operations :as op]))
 
 (def attachment-groups [:parties :building-site :reports :technical-reports :operation])
@@ -113,25 +114,37 @@
       [{:tag :needed    :default true}
        {:tag :notNeeded :default false}])))
 
-(defn- assignment-trigger-filters [application-id triggers trigger-assignments]
-  (->> trigger-assignments
-       (filter #(= (:id (:application %)) application-id)) ; todo: we should not need to fetch all the trigger assignments
-       (map :trigger)
-       (distinct)
-       (map (fn [trigger-id]
-              {:tag (keyword (str "trigger-" trigger-id))
-               :description (:description (find-first #(= (:id %) trigger-id)
-                                                      triggers))
-               :default false}))
-       (concat [{:tag :trigger-user-created :default false}])))
+(defn- targeting-assignments [assignments attachments]
+  (or (not-empty (assignment/targeting-assignments assignments attachments))
+      [{:trigger "not-targeted"}]))
+
+(defn- sort-filters [filters]
+  (sort (fn [a b]
+          (if-let [user-created (first (filter #(= (:tag %) (assignment/assignment-tag "user-created")) [a b]))]
+            (if (= user-created a) -1 1)
+            (if-let [not-targeted (first (filter #(= (:tag %) (assignment/assignment-tag "not-targeted")) [a b]))]
+              (if (= not-targeted a) -1 1)
+              (compare (:description a) (:description b)))))
+        filters))
+
+(defn- assignment-trigger-filters [{:keys [attachments assignments]}]
+  (->> attachments
+       (mapcat (partial targeting-assignments @assignments))
+       (map #(select-keys % [:trigger :description]))
+       (distinct-by :trigger)
+       (map (fn [{:keys [trigger description]}]
+              (merge {:tag (assignment/assignment-tag trigger)
+                      :default false}
+                     (when (and description
+                                (not= "user-created" trigger))
+                       {:description description}))))
+       sort-filters))
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [application organization]
+  [application & add-trigger-filters?]
   (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
-             (when (and organization (:trigger-assignments organization))
-               (assignment-trigger-filters (:id application)
-                                           (:assignment-triggers organization)
-                                           @(:trigger-assignments organization))))
+             (when add-trigger-filters?
+               (assignment-trigger-filters application)))
        (remove nil?)
        (filter (fn->> count (< 1)))))

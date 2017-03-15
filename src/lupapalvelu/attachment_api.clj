@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -110,29 +111,23 @@
 ;; Attachments
 ;;
 
-(defn- attachment-in-targets? [attachment-id assignment]
-  (boolean ((set (map :id (:targets assignment))) attachment-id)))
-
-(defn- trigger-tags [trigger-assignments attachment]
-  (->> trigger-assignments
-       (filter (partial attachment-in-targets? (:id attachment)))
-       (map #(str "trigger-" (:trigger %)))
-       (distinct)))
+(defn- assignment-trigger-tags [assignments attachment]
+  (or (not-empty (->> (assignment/targeting-assignments assignments attachment)
+                      (map #(assignment/assignment-tag (:trigger %)))
+                      distinct))
+      [(assignment/assignment-tag "not-targeted")]))
 
 (defn- enrich-attachment-and-add-trigger-tags
-  [trigger-assignments attachment]
+  [assignments attachment]
   (update (att/enrich-attachment attachment) :tags
-          #(concat % (trigger-tags trigger-assignments attachment))))
+          #(concat % (assignment-trigger-tags assignments attachment))))
 
-(defn- enrich-attachment [application user org attachment]
-  (if-let [trigger-assignments (and (usr/authority? user)
-                                    (:trigger-assignments @org)
-                                    @(:trigger-assignments @org))]
-    (enrich-attachment-and-add-trigger-tags
-     (->> trigger-assignments
-          (filter #(= (:id (:application %)) (:id application))) ;todo: we should not need to fetch all the trigger assignments
-          )
-     attachment)
+(defn- enrich-attachment [application user attachment]
+  (if-let [assignments (and (usr/authority? user)
+                            (:assignments application)
+                            @(:assignments application))]
+    (enrich-attachment-and-add-trigger-tags assignments
+                                            attachment)
     (att/enrich-attachment attachment)))
 
 (defquery attachments
@@ -143,7 +138,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{{attachments :attachments :as application} :application user :user org :organization :as command}]
-  (ok :attachments (map (partial enrich-attachment application user org)
+  (ok :attachments (map (partial enrich-attachment application user)
                         attachments)))
 
 (defquery attachment
@@ -158,7 +153,7 @@
   [{{attachments :attachments :as application} :application user :user org :org :as command}]
   (let [attachment (att/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (enrich-attachment application user org attachment))
+      (ok :attachment (enrich-attachment application user attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
@@ -181,8 +176,7 @@
   [{application :application org :organization user :user}]
   (ok :attachmentsFilters
       (att-tags/attachments-filters application
-                                    (when (usr/authority? user)
-                                      @org))))
+                                    (usr/authority? user))))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."

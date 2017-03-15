@@ -7,7 +7,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.application-utils :refer [location->object]]
+            [lupapalvelu.application-utils :refer [location->object without-assignments-delay]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
@@ -322,7 +322,8 @@
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
-       location->object))
+       location->object
+       without-assignments-delay))
 
 (defn post-process-app-for-krysp [application organization]
   (-> application

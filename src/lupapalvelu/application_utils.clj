@@ -54,3 +54,6 @@
                      :location-wgs84)]
      (when (seq filtered-features)
        {$or (map (fn [feature] {target-kw {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)}))))
+
+(defn without-assignments-delay [application]
+  (dissoc application :assignments))

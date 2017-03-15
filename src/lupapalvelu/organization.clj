@@ -181,17 +181,6 @@
         remove-sensitive-data
         with-scope-defaults)))
 
-(defn- get-trigger-assignments [organization]
-  (mongo/select :assignments
-                {:application.organization (:id organization)
-                 :trigger {$in (->> organization :assignment-triggers (map :id))}
-                 :states {$not {$elemMatch {:type "completed"}}}
-                 :status {$ne "canceled"}}))
-
-(defn get-organization-with-trigger-assignments [id]
-  (let [organization (get-organization id)]
-    (assoc organization :trigger-assignments (delay (get-trigger-assignments organization)))))
-
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
   (mongo/update-by-id :organizations id changes))

@@ -35,6 +35,15 @@
 
 ;; Helpers and schemas
 
+(defn targeting-assignments
+  "Given assignments and attachment, retuns assignments that target attachment"
+  [assignments attachment]
+  (->> assignments
+       (filter #((set (map :id (:targets %))) (:id attachment)))))
+
+(defn assignment-tag [tag-id]
+  (str "assignment-" tag-id))
+
 (defn- assignment-in-user-organization-query [user]
   {:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}})
 
