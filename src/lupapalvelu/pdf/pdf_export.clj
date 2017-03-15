@@ -52,6 +52,7 @@
         localized-field-value (cond
                                 (-> field-schema :pdf-options) (pdf-option-field-value field-schema data locstring)
                                 (= :checkbox field-type) (loc (if field-value "yes" "no"))
+                                (= :msDate field-type) (util/to-local-date field-value)
                                 (:i18nkey subschema) (loc (:i18nkey subschema))
                                 (and (= field-value "other") (= :select field-type)) (loc "select-other")
                                 (and field-value (not (ss/blank? field-value)) (= :select field-type)) (loc (if i18nkey i18nkey locstring) field-value)
@@ -68,7 +69,7 @@
 (def- printable-group-types #{:group :table})
 (defn- is-printable-group-type [schema] (printable-group-types (:type schema)))
 
-(def- field-types #{:string :checkbox :select :date :text :hetu :radioGroup :time})
+(def- field-types #{:string :checkbox :select :msDate :date :text :hetu :radioGroup :time})
 (defn- is-field-type [schema] (and (not (:hidden schema))
                                    (or (field-types (:type schema))
                                        (:pdf-options schema))))
