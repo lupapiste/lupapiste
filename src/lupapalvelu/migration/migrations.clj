@@ -2918,6 +2918,43 @@
                            {:auth.id malformed-user-id}
                            {$pull {:auth {:id malformed-user-id}}})))
 
+(def ya-katulupa-types
+  #{:ya-katulupa-vesi-ja-viemarityot
+    :ya-katulupa-maalampotyot
+    :ya-katulupa-kaukolampotyot
+    :ya-katulupa-kaapelityot
+    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat})
+
+(defn- op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update [documents]
+  (letfn [(find-doc-index [schema-name]
+            (first (util/positions #(= (get-in % [:schema-info :name]) schema-name) documents)))]
+    (let [source-doc-index (find-doc-index "tyomaastaVastaava")
+          target-doc-index (find-doc-index "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+          op-ref           (get-in documents [source-doc-index :schema-info :op])]
+      (if (and source-doc-index target-doc-index op-ref)
+        {$unset {(util/kw-path :documents source-doc-index :schema-info :op) 1}
+         $set   {(util/kw-path :documents target-doc-index :schema-info :op) op-ref}}))))
+
+(defmigration fix-katulupa-op-documents
+  {:apply-when (pos? (mongo/count :applications
+                                  {:documents
+                                   {$elemMatch {:schema-info.name    "tyomaastaVastaava"
+                                                :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}}))}
+  (let [applications (mongo/select :applications
+                                   {:documents
+                                    {$elemMatch {:schema-info.name    "tyomaastaVastaava"
+                                                 :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}})]
+    (doseq [{:keys [id documents]} applications]
+      (mongo/update-by-id :applications id
+                          (op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update documents)))
+    (count applications)))
+
+
+(comment "    documents: {\n
+  $elemMatch: {\n
+       \"schema-info.type\":\"party\",\n
+              \"schema-info.op.name\": {\n                $exists:true,\n                $ne:\"tyonjohtajan-nimeaminen-v2\"\n            }\n        }\n    }")
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
