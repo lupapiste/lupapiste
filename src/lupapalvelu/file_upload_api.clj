@@ -36,8 +36,10 @@
 (defraw upload-file-authenticated
   {:user-roles       #{:authority :applicant}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman :statementGiver)
-   :parameters       [files id]
-   :input-validators [file-mime-type-accepted file-size-legal]
+   :parameters       [files]
+   :optional-parameters [id]
+   :input-validators [file-mime-type-accepted
+                      file-size-legal]
    :states           states/all-states}
   [{:keys [application]}]
   (->> {:files (file-upload/save-files application files (vetuma/session-id))

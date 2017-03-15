@@ -76,9 +76,10 @@ LUPAPISTE.FileuploadService = function() {
     }
 
     var $dropZone = prepareDropZone( options.dropZone );
-    var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
-    var apiUrl = applicationId ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
+    var isAuthenticated = Boolean(util.getIn(lupapisteApp, ["models","currentUser","username"]));
+    var apiUrl = isAuthenticated ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
     var formData = [ { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") } ];
+    var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
     if (applicationId) {
       formData.push({ name: "id", value: applicationId });
     }
@@ -91,7 +92,7 @@ LUPAPISTE.FileuploadService = function() {
       dropZone: $dropZone,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
-        var maximumUploadSize = util.getIn(lupapisteApp.models, ["currentUser", "username"]) ? LUPAPISTE.config.loggedInUploadMaxSize : LUPAPISTE.config.anonymousUploadMaxSize;
+        var maximumUploadSize = isAuthenticated ? LUPAPISTE.config.loggedInUploadMaxSize : LUPAPISTE.config.anonymousUploadMaxSize;
         // if allowMultiple is false, accept only first of the given files (in case of drag and dropping multiple files)
         if (options.allowMultiple || _.indexOf(data.originalFiles, file) === 0) {
           var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
