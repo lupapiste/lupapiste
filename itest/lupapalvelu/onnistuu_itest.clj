@@ -15,37 +15,32 @@
 (defn get-process-status [process-id]
   (:status (get-process process-id)))
 
+(def company-map {:name  "company-name"
+                  :y     "2341528-4"
+                  :accountType "account5"
+                  :address1 "katu"
+                  :zip "33100"
+                  :po "Tampere"
+                  :customAccountLimit nil})
 (defn init-sign []
   (-> (command pena :init-sign
-                 :company {:name  "company-name"
-                           :y     "2341528-4"
-                           :accountType "account5"
-                           :address1 "katu"
-                           :zip "33100"
-                           :po "Tampere"
-                           :customAccountLimit nil}
-                 :signer {:firstName   "First"
-                          :lastName    "Last"
-                          :email       "a@b.c"
-                          :personId "131052-308T"}
-                 :lang "fi")
+               :company company-map
+               :signer {:firstName   "First"
+                        :lastName    "Last"
+                        :email       "a@b.c"
+                        :personId "131052-308T"}
+               :lang "fi")
       :process-id
       get-process))
 
 (defn init-sign-existing-user []
   (-> (command pena :init-sign
-                 :company {:name  "company-name"
-                           :y     "2341528-4"
-                           :accountType "account5"
-                           :address1 "katu"
-                           :zip "33100"
-                           :po "Tampere"
-                           :customAccountLimit nil}
-                 :signer {:firstName   ""
-                          :lastName    ""
-                          :email       "pena@example.com"
-                          :personId    nil}
-                 :lang "fi")
+               :company company-map
+               :signer {:firstName   ""
+                        :lastName    ""
+                        :email       "pena@example.com"
+                        :personId    nil}
+               :lang "fi")
       :process-id
       get-process))
 
