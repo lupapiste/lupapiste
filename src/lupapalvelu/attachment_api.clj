@@ -117,8 +117,9 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application :as command}]
-  (ok :attachments (map att/enrich-attachment attachments)))
+  [command]
+  (ok :attachments (map att/enrich-attachment
+                        (att/sorted-attachments command))))
 
 (defquery attachment
   {:description "Get single attachment"
