@@ -215,6 +215,23 @@
         (get-application-no-access-checking $ {:attachments true})
         (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
+(defn sorted-attachments
+  "Sorted attachments for command:
+    1. Localized type info ascending (using lang in command)
+    2. Latest version timestamp descending."
+  [{{attachments :attachments} :application lang :lang}]
+  (letfn [(type-text [{{:keys [type-id type-group]} :type}]
+            (i18n/localize lang (format "attachmentType.%s.%s" type-group type-id)))
+          (filestamp [attachment]
+            (-> attachment :latestVersion :created))]
+    (sort (fn [att1 att2]
+            (let [txt1        (type-text att1)
+                  txt2        (type-text att2)
+                  txt-compare (compare txt1 txt2)]
+              (if (zero? txt-compare)
+                (compare (filestamp att2) (filestamp att1))
+                txt-compare)))
+          attachments)))
 ;;
 ;; Api
 ;;
