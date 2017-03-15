@@ -399,3 +399,28 @@
                                  :type {:type-group "some-type-group" :type-id "some-type-id"}
                                  :contents "some content"})
     => {:id ..id.. :type-key "attachmentType.some-type-group.some-type-id" :description "some content"}))
+
+(facts "Sorted attachments"
+       (let [attachments [{:id "rasitesopimus"
+                           :type {:type-group "kiinteiston_hallinta"
+                                  :type-id "rasitesopimus"}
+                           :latestVersion {:created 123}}
+                          {:id "rasitesopimus2"
+                           :type {:type-group "kiinteiston_hallinta"
+                                  :type-id "rasitesopimus"}
+                           :latestVersion {:created 321}}
+                          {:id "rasitesopimus3"
+                           :type {:type-group "kiinteiston_hallinta"
+                                  :type-id "rasitesopimus"}}
+                          {:id "yhtiojarjestys"
+                           :type {:type-group "kiinteiston_hallinta"
+                                  :type-id "yhtiojarjestys"}
+                           :latestVersion {:created 888}}
+                          {:id "empty"}]]
+
+         (fact "Finnish"
+               (map :id (sorted-attachments {:application {:attachments attachments} :lang :fi}))
+               => ["empty" "rasitesopimus2" "rasitesopimus" "rasitesopimus3" "yhtiojarjestys"])
+         (fact "Swedish"
+               (map :id (sorted-attachments {:application {:attachments attachments} :lang :sv}))
+               => ["empty" "yhtiojarjestys" "rasitesopimus2" "rasitesopimus" "rasitesopimus3"])))
