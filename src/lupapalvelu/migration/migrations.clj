@@ -2935,19 +2935,24 @@
         {$unset {(util/kw-path :documents source-doc-index :schema-info :op) 1}
          $set   {(util/kw-path :documents target-doc-index :schema-info :op) op-ref}}))))
 
+(defn- do-fix-katulupa-op-documents [collection]
+  (let [applications (mongo/select collection
+                                   {:documents
+                                    {$elemMatch {:schema-info.name    "tyomaastaVastaava"
+                                                 :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}})]
+    (doseq [{:keys [id documents]} applications]
+      (mongo/update-by-id collection id
+                          (op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update documents)))
+    (count applications)))
+
 (defmigration fix-katulupa-op-documents
   {:apply-when (pos? (mongo/count :applications
                                   {:documents
                                    {$elemMatch {:schema-info.name    "tyomaastaVastaava"
                                                 :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}}))}
-  (let [applications (mongo/select :applications
-                                   {:documents
-                                    {$elemMatch {:schema-info.name    "tyomaastaVastaava"
-                                                 :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}})]
-    (doseq [{:keys [id documents]} applications]
-      (mongo/update-by-id :applications id
-                          (op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update documents)))
-    (count applications)))
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (do-fix-katulupa-op-documents collection))))
 
 ;;
 ;; ****** NOTE! ******
