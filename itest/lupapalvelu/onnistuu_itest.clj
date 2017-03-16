@@ -49,13 +49,7 @@
 
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
-                            :company {:name "company-name"
-                                      :y    "2341528-4"
-                                      :accountType "account5"
-                                      :address1 "katu"
-                                      :zip "33100"
-                                      :po "Tampere"
-                                      :customAccountLimit nil}
+                            :company company-map
                             :signer {:firstName   "First"
                                      :lastName    "Last"
                                      :email        "a@b.c"
@@ -93,13 +87,7 @@
 
 (fact "init-sign-for-existing-user"
       (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
-                                              :company {:name        "company-name"
-                                                        :y           "2341528-4"
-                                                        :accountType "account5"
-                                                        :address1 "katu"
-                                                        :zip "33100"
-                                                        :po "Tampere"
-                                                        :customAccountLimit nil}
+                                              :company company-map
                                               :signer  {:firstName   "Pena"
                                                         :lastName    "Panaani"
                                                         :email       "pena@example.com"
@@ -163,3 +151,15 @@
         response   (http-get (str (server-address) "/api/sign/fail/" process-id) params)]
     response => http200?
     (get-process-status process-id) => "fail"))
+
+(facts "Email in use checks"
+       (letfn [(err [msg] (partial expected-failure? msg))]
+         (fact "Pena cannot register company as Teppo"
+               (command pena :init-sign :company company-map :lang :fi :signer {:email "teppo@example.com"})
+               => (err :email-in-use))
+         (fact "Sonja is authority and cannot register company"
+               (command sonja :init-sign :company company-map :lang :fi :signer {:email "sonja.sibbo@sipoo.fi"})
+               => (err :error.not-applicant))
+         (fact "Kaino cannot register another company"
+               (command kaino :init-sign :company company-map :lang :fi :signer {:email "kaino@solita.fi"})
+               => (err :error.already-in-company))))

@@ -1,10 +1,10 @@
 (ns lupapalvelu.onnistuu-api
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.campaign :as camp]
-            [lupapalvelu.company :as c]
+            [lupapalvelu.company :as com]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.onnistuu.process :as p]
-            [lupapalvelu.user :as u]
+            [lupapalvelu.user :as usr]
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as resp]
@@ -35,27 +35,36 @@
   (if (= (:email signer) (:email current-user))
     (merge
       (assoc signer :currentUser (:id current-user))
-      (select-keys (u/get-user-by-id (:id current-user)) [:firstName :lastName :personId]))
+      (select-keys (usr/get-user-by-id (:id current-user)) [:firstName :lastName :personId]))
     signer))
+
+(defn- validate-email-in-use
+  "Signer email is OK if it is not in use or belongs to the current
+  user whose role is non-company applicant."
+  [{{signer :signer} :data user :user}]
+  (let [signer-email                 (:email signer)
+        {:keys [email role company]} user]
+    (cond
+      (not (usr/email-in-use? signer-email)) nil
+      (not= email signer-email)              (fail :email-in-use)
+      (not= role "applicant")                (fail :error.not-applicant)
+      (-> company :role ss/not-blank?)       (fail :error.already-in-company))))
 
 (defcommand init-sign
   {:parameters [company signer lang]
    :user-roles #{:anonymous}
-   :input-validators [(fn [{{signer :signer} :data user :user}]
-                        (when (and (not= (:email signer) (:email user))
-                                   (u/email-in-use? (:email signer)))
-                          (fail :email-in-use)))
+   :input-validators [validate-email-in-use
                       (fn [{{lang :lang} :data}]
                         (when-not ((set (map name i18n/languages)) lang)
                           (fail :bad-lang)))
                       camp/campaign-is-active]}
   [{:keys [^Long created user]}]
-  (let [company (merge c/company-skeleton
+  (let [company (merge com/company-skeleton
                        company
                        (when-let [campaign (:campaign company)]
                          {:campaign (camp/code->id campaign)}))
         signer (get-signer user signer)]
-    (sc/validate c/Company company)
+    (sc/validate com/Company company)
     (let [config       (env/value :onnistuu)
           base-url     (or (:return-base-url config) (env/value :host))
           document-url (str base-url "/api/sign/document")
@@ -119,9 +128,9 @@
           lang    (-> process :lang)]
       (if (nil? (get-in process [:signer :currentUser]))
         (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-success"))
-        (let [current-user (u/current-user (request/ring-request))
-              response     (ssess/merge-to-session (request/ring-request) (resp/redirect (str (env/value :host) "/app/" lang "/" (u/applicationpage-for (:role current-user)) "#!/register-company-existing-user-success"))
-                                                   {:user (u/session-summary (u/get-user-by-id (:id current-user)))})]
+        (let [current-user (usr/current-user (request/ring-request))
+              response     (ssess/merge-to-session (request/ring-request) (resp/redirect (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for (:role current-user)) "#!/register-company-existing-user-success"))
+                                                   {:user (usr/session-summary (usr/get-user-by-id (:id current-user)))})]
           response)))))
 
 ;
@@ -132,10 +141,10 @@
   (with-error-handling
     (let [process      (p/failed! id error message (now))
           lang         (-> process :lang)
-          current-user (u/current-user (request/ring-request))]
+          current-user (usr/current-user (request/ring-request))]
       (if (nil? (get-in process [:signer :currentUser]))
         (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-fail"))
-        (resp/redirect (str (env/value :host) "/app/" lang "/" (u/applicationpage-for (:role current-user)) "#!/register-company-fail"))))))
+        (resp/redirect (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for (:role current-user)) "#!/register-company-fail"))))))
 
 (when (env/feature? :dummy-onnistuu)
 
