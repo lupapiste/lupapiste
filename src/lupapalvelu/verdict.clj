@@ -184,9 +184,9 @@
 
 (defn- attachment-type-from-krysp-type [type]
   (case (ss/lower-case type)
-    "paatos" "paatos"
+    "paatosote" "paatosote"
     "lupaehto" "muu"
-    "paatosote"))
+    "paatos"))
 
 (defn- content-disposition-filename
   "Extracts the filename from the Content-Disposition header of the
