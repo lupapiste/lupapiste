@@ -4,7 +4,6 @@ Documentation   Mikko adds an sensitive attachment to application, and hides it 
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables       variables.py
-Library         Debug
 
 *** Test Cases ***
 
@@ -49,7 +48,6 @@ Teppo uploads new version to asemapiirros
   # When Teppo uploads version to attachment, he is authed to attachment and can see contents even if visibility is set to only-authority level
   Open attachment details  paapiirustus.asemapiirros
   Add attachment version  ${PNG_TESTFILE_PATH}
-  Debug
   Wait Until  Click button  id=show-attachment-versions
   Wait Until  Xpath Should Match X Times  //section[@id='attachment']//div[@class='attachment-file-versions-content']//table/tbody/tr  2
 
@@ -57,7 +55,6 @@ Teppo sets asemapiirros to only-authority visibility
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
   Select From List By Value  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  viranomainen
   Positive indicator icon should be visible
-
   Logout
 
 Pena logs in, doesn't see Mikko's CV, nor asemapiirros

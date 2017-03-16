@@ -37,7 +37,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   self.waiting = ko.observable();
   self.readOnly = params.readOnly;
   self.allowMultiple = params.allowMultiple;
-  self.batchMode = params.batchMode || false;
+  self.batchMode = params.batchMode;
 
   self.batchListHidden = self.disposedPureComputed(_.flow(self.files, _.isEmpty));
 

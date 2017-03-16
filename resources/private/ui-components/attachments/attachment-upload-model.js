@@ -9,8 +9,8 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
   self.id = params.id;
   self.ltext = params.ltext;
 
-  if (params.uploadModel && !params.uploadModel.batchMode) {
-    self.upload = params.uploadModel;
+  if (params.upload && !params.upload.batchMode) {
+    self.upload = params.upload;
   } else {
     self.upload = new LUPAPISTE.UploadModel(self, { allowMultiple:false });
     self.upload.init();
@@ -31,11 +31,11 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
     return file;
   }
 
-  if (_.get(params.uploadModel, "batchMode")) {
+  if (_.get(params.upload, "batchMode")) {
     self.disposedSubscribe(self.upload.files, function(files) {
       if (!_.isEmpty(files)) {
         var f = _.last(files);
-        var inputId = params.uploadModel.fileInputId;
+        var inputId = params.upload.fileInputId;
         hub.send("fileuploadService::fileAdded", {file: f, input: inputId});
         hub.send("fileuploadService::filesUploadingProgress", {file: {name: f.filename}, input: inputId, progress: 100, loaded: f.size, size: f.size});
         hub.send("fileuploadService::filesUploaded", {input: inputId, status: "success", files: [enrichFileForBatchTable(f)]});

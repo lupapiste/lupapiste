@@ -859,7 +859,6 @@ Add attachment file
   Upload with hidden input  ${row} input[data-test-id=add-attachment-file-input]  ${path}
   Wait Until  Element should not be visible  jquery=${row} label[data-test-id=add-attachment-file-label]
   Fill test id   batch-contents-0  ${contents}
-  Debug
   Execute javascript  $("[data-test-id='batch-contents-0']").blur();
   Wait Until  Test id enabled  batch-ready
 
