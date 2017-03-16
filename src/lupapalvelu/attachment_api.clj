@@ -122,9 +122,9 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application user :user assignments :application-assignments :as command}]
+  [{user :user assignments :application-assignments :as command}]
   (ok :attachments (map (partial att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user))
-                        attachments)))
+                        (att/sorted-attachments command))))
 
 (defquery attachment
   {:description "Get single attachment"

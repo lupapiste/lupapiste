@@ -1,6 +1,12 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="cell-text-template">
+  <!-- ko if: immediate -->
   <input data-bind="attr: attributes,
-                    textInput: textInput,
-                    value: textValue,
+                    textInput: value,
                     testId: testId">
+  <!-- /ko -->
+  <!-- ko ifnot: immediate -->
+  <input data-bind="attr: attributes,
+                    value: value,
+                    testId: testId">
+  <!-- /ko -->
 </script>

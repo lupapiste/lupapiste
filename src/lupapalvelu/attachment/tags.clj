@@ -16,6 +16,7 @@
 
 (defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations} _]
   (->> (cons primary-op secondary-ops)
+       (remove empty?)
        (map (partial merge {:groupType :operation}))))
 
 (defn attachment-groups-for-application [application]

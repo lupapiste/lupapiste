@@ -222,13 +222,13 @@
                       :lisatieto ""
                       :linkki "http://liiteri.ymparisto.fi/maarays/0912007x.pdf"
                       :type "yleiskaava"}
-     (second body) => {:id "0911001"
-                       :nimi "Helsingin yleiskaava 2002"
-                       :pvm "2003-11-26"
+     (second body) => {:id "0911010"
+                       :nimi "Helsingin uusi yleiskaava - kaupunkikaava"
+                       :pvm "2016-10-26"
                        :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                        :oikeusvaik "Oikeusvaikutteinen"
-                       :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
-                       :linkki "http://liiteri.ymparisto.fi/maarays/0911001x.pdf"
+                       :lisatieto "Kaavasta valitettu, ei lainvoimainen. Kaavasta rajapinnassa aluevarauskartta, kaavan kaikki 9 karttalehte\u00e4 ovat m\u00e4\u00e4r\u00e4ysten kanssa samassa teidostossa."
+                       :linkki "http://liiteri.ymparisto.fi/maarays/0911010x.pdf"
                        :type "yleiskaava"})))
 
 (facts "geoserver-layers"
@@ -371,13 +371,13 @@
     (municipality-by-point 281160 6936532.8125001) => "301"))
 
 (facts "Get address from Salo"
-  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx"})
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx" :no-bbox-srs true})
 
   (fact "address-by-point-proxy"
-    (let [response (address-by-point-proxy {:params {:lang "fi" :x "279444.75" :y "6703424.390625"}})
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "281813" :y "6702378"}})
           body (json/decode (:body response) true)]
       (fact (:street body) => "Vanha Turuntie")
-      (fact (:number body) => "534")
+      (fact (:number body) => "222")
       (fact (:fi (:name body)) => "Salo")
       )))
 

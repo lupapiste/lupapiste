@@ -244,11 +244,11 @@
 (def- kaupunkikuva_toimenpide_liitteet [:paapiirustus [:asemapiirros
                                                        :julkisivupiirros]])
 
-(def- ya-katulupa-general {:schema "tyomaastaVastaava"
+(def- ya-katulupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                            :permit-type permit/YA
                            :applicant-doc-schema applicant-doc-schema-name-YA
                            :required (conj common-yleiset-alueet-schemas
-                                       "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                       "tyomaastaVastaava"
                                        "tyoaika")
                            :attachments []
                            :attachment-op-selector false

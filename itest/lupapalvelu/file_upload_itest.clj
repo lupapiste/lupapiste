@@ -14,10 +14,7 @@
                         (.addCookie test-db-cookie))]
 
     (fact "Upload is not allowed"
-      (-> (bulletin-util/send-file cookie-store)
-          :body
-          (json/decode keyword))
-      upload-resp => (partial expected-failure? :error.user-not-vetuma-authenticated))))
+      (bulletin-util/send-file cookie-store) => http404?)))
 
 (facts "Upload and remove attachment for a bulletin comment"
   (let [store         (atom {})

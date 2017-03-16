@@ -71,6 +71,8 @@
                  :attachmentScales      attachment-scales
                  :attachmentSizes       attachment-sizes
                  :accountTypes          company/account-types
+                 ;; Hardcoded campaign code for April 2017
+                 :campaignCode          :huhtikuu2017
                  :eInvoiceOperators     schemas/e-invoice-operators
                  :postVerdictStates     states/post-verdict-states
                  :loggedInUploadMaxSize (env/value :file-upload :max-size :logged-in)
@@ -461,12 +463,13 @@
                          :ui-components :authority-admin-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js"
                     "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
-                    "create-scope-model.js" "logs.js" "reports.js"]
+                    "create-scope-model.js" "logs.js" "reports.js" "campaigns.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html"
                       "features.html" "actions.html" "sso-keys.html"
                       "screenmessages-list.html" "notifications.html"
-                      "create-scope-template.html" "logs.html" "reports.html"]}
+                      "create-scope-template.html" "logs.html" "reports.html"
+                      "campaigns.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

@@ -23,10 +23,12 @@ Mikko creates application
 
 Mikko adds png attachment without comment
   Open tab  attachments
-  Add attachment file  tr[data-test-type='${type}']  ${PNG_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='${type}']  ${PNG_TESTFILE_PATH}  ${type}
+  Click by test id  batch-ready
   Application state should be  submitted
 
 Mikko opens attachment details
+  Open attachment details  ${type}
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Title Should Be  ${appname} - Lupapiste
 
@@ -246,7 +248,7 @@ Unselects filters
   Wait until  Total attachments row count is  6
 
 Add shelter file and approve it
-  Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}  ${shelter}
   Attachment is  approved
   Return to application
 

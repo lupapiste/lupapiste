@@ -1,10 +1,14 @@
 *** Settings ***
 
 Documentation   Existing User signs company agreement
+Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
+# ---------------------
+# Teppo
+# ---------------------
 Teppo opens own details
   Teppo logs in
   Click Element  user-name
@@ -20,11 +24,8 @@ Start registration
   Click by test id  account-type-account5
   Click enabled by test id  register-company-continue
 
-Name and person id should be filled in
-  Test id text is  register-company-firstName  Teppo
-  Test id text is  register-company-lastName   Nieminen
-  Test id text is  register-company-email      teppo@example.com
-  Element Should Not Be Visible  xpath=//input[@data-test-id='register-company-personId']
+Userinfo is filled
+  Userinfo is  Teppo Nieminen, teppo@example.com
 
 Fill in info
   Input text by test id  register-company-name        Peten saneeraus Oy
@@ -58,8 +59,105 @@ Company data is set
   Disabled input value is  edit-company-y     2341529-2
   [Teardown]  Logout
 
+# ---------------------
+# Pena
+# ---------------------
+Pena starts registering company without logging in
+  Start registering  account30
+
+Pena fills info
+  Input text by test id  register-company-name        Pena & Co.
+  Input text by test id  register-company-y           2341529
+  Input text by test id  register-company-address1    Katukatu 8
+  Input text by test id  register-company-zip         0008
+  Input text by test id  register-company-po          City
+
+Warnings are visible
+  Wait test id visible  register-company-y-warning
+  Wait test id visible  register-company-zip-warning
+
+Login fields become visible when Pena enters his email
+  Initiate login  pena@example.com
+
+Pena logs in
+  Finalize login  pena  pena
+
+The page reflects login, but old data is retained
+  User should be logged in  Pena Panaani
+  Userinfo is  Pena Panaani, pena@example.com
+  Test id input is  register-company-name        Pena & Co.
+  Test id input is  register-company-y           2341529
+  Test id input is  register-company-address1    Katukatu 8
+  Test id input is  register-company-zip         0008
+  Test id input is  register-company-po          City
+  Wait test id visible  register-company-y-warning
+  Wait test id visible  register-company-zip-warning
+  [Teardown]  Logout
+
+# ---------------------
+# Authority
+# ---------------------
+Sonja starts registering company
+  Start registering  account5
+  Initiate login  sonja.sibbo@sipoo.fi
+
+Sonja is ultimately redirected to the Applications page
+  Finalize login  sonja  sonja
+  Confirm ok dialog
+  User should be logged in  Sonja Sibbo
+  Wait test id visible  own-applications
+  [Teardown]  Logout
+
+# ---------------------
+# Company user
+# ---------------------
+Kaino starts registering company
+  Start registering  account15
+  Initiate login  kaino@solita.fi
+
+Kaino is ultimately redirected to the Applications page
+  Finalize login  kaino@solita.fi  kaino123
+  Confirm ok dialog
+  User should be logged in  Kaino Solita
+  Wait test id visible  own-applications
+  [Teardown]  Logout
+
+
+
 *** Keywords ***
+
+Start registering
+  [Arguments]  ${account-type}
+  Wait and click  register-button
+  Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Click by test id  account-type-${account-type}
+  Click by test id  register-company-continue
+
 Disabled input value is
   [Arguments]  ${dataTestId}  ${expected}
   Wait Until  Textfield Value Should Be  xpath=//input[@data-test-id='${dataTestId}']  ${expected}
   Element Should Be Disabled  xpath=//input[@data-test-id='${dataTestId}']
+
+Userinfo is
+  [Arguments]  ${userinfo}
+  No such test id  register-company-firstName
+  No such test id  register-company-lastName
+  No such test id  register-company-email
+  No such test id  register-company-personId
+  No such test id  register-company-language
+  Test id text is  register-company-userinfo  ${userinfo}
+
+Initiate login
+  [Arguments]  ${email}
+  No such test id  login-button
+  Input text by test id  register-company-email  ${email}
+  Wait test id visible  register-company-email-warning
+  Test id input is  login-username  ${email}
+  Test id input is  login-password  ${EMPTY}
+  Test id disabled  login-button
+
+Finalize login
+  [Arguments]  ${username}  ${password}
+  Input text by test id  login-username  ${username}
+  Input text by test id  login-password  ${password}
+  Click by test id  login-button

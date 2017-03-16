@@ -11,9 +11,25 @@
                           testId: 'account-type-' + id">
             <h3 data-bind="text: title"></h3>
             <div class="account-type-price"
-                 data-bind="text: price"></div>
+                 data-bind="text: $parent.price( $data ),
+                            css: {campaign: $parent.campaign().code},
+                            testId: id + '-price'"></div>
+            <!-- ko if: $parent.campaign().code -->
+            <div class="last-discount-date"
+                 data-bind="text: $parent.lastDiscount,
+                            testId: id + '-last-discount-date'"></div>
+            <div class="overstrike-price"
+                 data-bind="text: price,
+                            testId: id + '-old-price'"></div>
+            <!-- /ko -->
             <div class="account-type-description"
                  data-bind="text: description"></div>
+            <!-- ko if: $parent.campaign().code -->
+            <div class="small-print"
+                 data-bind="html: $parent.campaignSmallPrint( id ),
+                            testId: id + '-small-print'">
+            </div>
+            <!-- /ko -->
           </div>
         </div>
       </div>

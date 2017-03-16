@@ -141,7 +141,7 @@
             account-type (keyword (get-in process [:company :accountType]))
             account {:type  (i18n/localize "fi" :register :company account-type :title)
                      :price (i18n/localize-and-fill "fi"
-                                                    [:register :company account-type :price]
+                                                    [:register :company :price]
                                                     (:price (util/find-by-key :name
                                                                               account-type
                                                                               c/account-types)))}

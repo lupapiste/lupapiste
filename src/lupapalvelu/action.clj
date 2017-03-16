@@ -43,6 +43,13 @@
 ;; some utils
 ;;
 
+(defn not-pre-check
+  "Pre-check fails if given pre-check succeeds."
+  [pre-check]
+  (fn [command]
+    (when-not (pre-check command)
+      (fail :error.pre-check))))
+
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
   Pre-check returns result of the first argument in case of failure."

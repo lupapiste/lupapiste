@@ -141,6 +141,7 @@ Company details include company name, identifier and PDF link
 
 Company info page has the registered information
   Click by test id  company-edit-info
+  Test id select text is  company-account-select  Företagskonto 5 (59 €/månad)
   Test id input is  edit-company-name        Peten rakennus Oy
   Test id input is  edit-company-y           2341528-4
   Test id input is  edit-company-address1    Katukatu

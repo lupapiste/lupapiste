@@ -62,7 +62,7 @@
         attachment-id (mongo/create-id)]
     (attachment/upload-and-attach! {:application application :user batchrun-user}
                                    {:attachment-id attachment-id
-                                    :attachment-type {:type-group "muut" :type-id "muu"}
+                                    :attachment-type {:type-group "muut" :type-id "paatos"}
                                     :target target
                                     :required false
                                     :locked true

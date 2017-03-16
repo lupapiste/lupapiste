@@ -1,90 +1,74 @@
 (ns lupapalvelu.company-api
   (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.action :refer [defquery defcommand some-pre-check] :as action]
             [lupapalvelu.application :as application]
-            [lupapalvelu.company :as c]
-            [lupapalvelu.user :as u]
+            [lupapalvelu.company :as com]
+            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [sade.strings :as ss]))
 
-;;
-;; Company API:
-;;
-
-; Validator: check is user is either :admin or user belongs to requested company
-
-(defn validate-user-is-admin-or-company-member [{{:keys [role company]} :user {requested-company :company} :data}]
-  (when-not (or (= role "admin")
-                (= (:id company) requested-company))
-    unauthorized))
-
-(defn validate-user-is-admin-or-company-admin [{user :user}]
-  (when-not (or (= (:role user) "admin")
-                (= (get-in user [:company :role]) "admin"))
-    unauthorized))
-
-;;
-;; Basic API:
-;;
-
 (defquery company
   {:user-roles #{:applicant :authority}
-   :input-validators [validate-user-is-admin-or-company-member]
+   :input-validators [(some-pre-check com/validate-is-admin
+                                      com/validate-belongs-to-company)]
    :parameters [company]}
   [{{:keys [users]} :data}]
-  (ok :company     (c/find-company! {:id company})
-      :users       (and users (c/find-company-users company))
-      :invitations (and users (c/find-user-invitations company))))
+  (ok :company     (com/find-company! {:id company})
+      :users       (and users (com/find-company-users company))
+      :invitations (and users (com/find-user-invitations company))))
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
   [{user :user}]
-  (if (u/admin? user)
-    (let [admins (->> (u/find-users {"company.role" "admin"})
+  (if (usr/admin? user)
+    (let [admins (->> (usr/find-users {"company.role" "admin"})
                    (partition-by (comp :id :company))
                    (map (fn [company-admins]
-                          [(-> company-admins first :company :id), (map u/summary company-admins)]))
+                          [(-> company-admins first :company :id), (map usr/summary company-admins)]))
                    (into {}))]
-      (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (c/find-companies))))
-    (ok :companies (map (fn [company] (select-keys company [:id :name :y :address1 :zip :po])) (c/find-companies)))))
+      (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (com/find-companies))))
+    (ok :companies (map (fn [company] (select-keys company [:id :name :y :address1 :zip :po])) (com/find-companies)))))
 
 (defcommand company-update
   {:parameters [company updates]
    :input-validators [(partial action/non-blank-parameters [:company])
-                      (partial action/map-parameters [:updates])]
+                      (partial action/map-parameters [:updates])
+                      (some-pre-check com/validate-is-admin
+                                      com/validate-belongs-to-company)]
    :user-roles #{:applicant :admin}
-   :pre-checks [validate-user-is-admin-or-company-admin]}
+   :pre-checks [(some-pre-check com/validate-is-admin
+                                (com/validate-has-company-role :admin))]}
   [{caller :user}]
-  (ok :company (c/update-company! company updates caller)))
+  (ok :company (com/update-company! company updates caller)))
 
 (defcommand company-user-update
   {:parameters [user-id role submit]
    :input-validators [(partial action/non-blank-parameters [:user-id])
                       (partial action/boolean-parameters [:submit])
                       (partial action/select-parameters [:role] #{"user" "admin"})]
-   :pre-checks [c/company-user-edit-allowed]
+   :pre-checks [com/company-user-edit-allowed]
    :user-roles #{:applicant :admin}}
   [_]
-  (c/update-user! user-id role submit))
+  (com/update-user! user-id role submit))
 
 (defcommand company-user-delete
   {:parameters [user-id]
    :input-validators [(partial action/non-blank-parameters [:user-id])]
    :user-roles #{:applicant :admin}
-   :pre-checks [c/company-user-edit-allowed]}
+   :pre-checks [com/company-user-edit-allowed]}
   [_]
-  (c/delete-user! user-id))
+  (com/delete-user! user-id))
 
 (defn- user-limit-not-exceeded [command]
-  (let [company (c/find-company-by-id (get-in command [:user :company :id]))
-        company-users (c/company-users-count (:id company))
-        invitations (c/find-user-invitations (:id company))
+  (let [company (com/find-company-by-id (get-in command [:user :company :id]))
+        company-users (com/company-users-count (:id company))
+        invitations (com/find-user-invitations (:id company))
         users (+ (count invitations) company-users)]
     (when-not (:accountType company)
       (fail! :error.account-type-not-defined-for-company))
-    (let [user-limit (or (:customAccountLimit company) (c/user-limit-for-account-type (keyword (:accountType company))))]
+    (let [user-limit (or (:customAccountLimit company) (com/user-limit-for-account-type (keyword (:accountType company))))]
       (when-not (< users user-limit)
         (fail :error.company-user-limit-exceeded)))))
 
@@ -94,10 +78,11 @@
    :user-roles #{:applicant}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :pre-checks [validate-user-is-admin-or-company-admin]}
+   :pre-checks [(some-pre-check com/validate-is-admin
+                                (com/validate-has-company-role :admin))]}
   [{caller :user}]
-  (c/search-result caller email (fn [user]
-                                  (ok (assoc (select-keys user [:firstName :lastName :role]) :result :found)))))
+  (com/search-result caller email (fn [user]
+                                    (ok (assoc (select-keys user [:firstName :lastName :role]) :result :found)))))
 
 (defcommand company-invite-user
   {:parameters [email admin submit]
@@ -107,10 +92,12 @@
                       (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
    :notified   true
-   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
+   :pre-checks [(some-pre-check com/validate-is-admin
+                                (com/validate-has-company-role :admin))
+                user-limit-not-exceeded]}
   [{caller :user}]
-  (c/search-result caller email (fn [_]
-                                  (c/invite-user! caller
+  (com/search-result caller email (fn [_]
+                                  (com/invite-user! caller
                                                   email
                                                   (-> caller :company :id)
                                                   (if admin :admin :user)
@@ -126,10 +113,12 @@
                       (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
    :notified   true
-   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
+   :pre-checks [(some-pre-check com/validate-is-admin
+                                (com/validate-has-company-role :admin))
+                user-limit-not-exceeded]}
   [{user :user}]
-  (c/add-user! {:firstName firstName :lastName lastName :email email}
-               (assoc (c/find-company-by-id (-> user :company :id)) :admin user)
+  (com/add-user! {:firstName firstName :lastName lastName :email email}
+               (assoc (com/find-company-by-id (-> user :company :id)) :admin user)
                (if admin :admin :user)
                submit)
   (ok))
@@ -140,17 +129,18 @@
    :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
    :pre-checks [application/validate-authority-in-drafts
-                c/company-not-already-invited]
+                com/company-not-already-invited]
    :notified   true}
   [{caller :user application :application}]
-  (c/company-invite caller application company-id)
+  (com/company-invite caller application company-id)
   (ok))
 
 (defcommand company-cancel-invite
   {:parameters [tokenId]
    :input-validators [(partial action/non-blank-parameters [:tokenId])]
    :user-roles #{:applicant}
-   :pre-checks [validate-user-is-admin-or-company-admin]}
+   :pre-checks [(some-pre-check com/validate-is-admin
+                                (com/validate-has-company-role :admin))]}
   [{:keys [created user application] :as command}]
   (let [token (mongo/by-id :token tokenId)
         token-company-id (get-in token [:data :company :id])
