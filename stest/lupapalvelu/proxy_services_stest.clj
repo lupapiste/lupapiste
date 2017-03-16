@@ -222,13 +222,13 @@
                       :lisatieto ""
                       :linkki "http://liiteri.ymparisto.fi/maarays/0912007x.pdf"
                       :type "yleiskaava"}
-     (second body) => {:id "0911001"
-                       :nimi "Helsingin yleiskaava 2002"
-                       :pvm "2003-11-26"
+     (second body) => {:id "0911010"
+                       :nimi "Helsingin uusi yleiskaava - kaupunkikaava"
+                       :pvm "2016-10-26"
                        :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                        :oikeusvaik "Oikeusvaikutteinen"
-                       :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
-                       :linkki "http://liiteri.ymparisto.fi/maarays/0911001x.pdf"
+                       :lisatieto "Kaavasta valitettu, ei lainvoimainen. Kaavasta rajapinnassa aluevarauskartta, kaavan kaikki 9 karttalehteä ovat määräysten kanssa samassa teidostossa."
+                       :linkki "http://liiteri.ymparisto.fi/maarays/0911010x.pdf"
                        :type "yleiskaava"})))
 
 (facts "geoserver-layers"
