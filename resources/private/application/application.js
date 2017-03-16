@@ -270,14 +270,14 @@
         docgen.displayDocuments("partiesDocgen",
                                 app,
                                 partyDocs,
-                                {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                {dataTestSpecifiers: devMode});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
                                   app,
                                   applicationModel.summaryAvailable() ? [] : nonpartyDocs,
-                                  {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                  {dataTestSpecifiers: devMode});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -287,7 +287,7 @@
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
               applicationModel.summaryAvailable() ? uneditableDocs : [],
-              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+              {dataTestSpecifiers: devMode});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
@@ -297,8 +297,7 @@
           docgen.displayDocuments("constructionTimeDocgen",
                                   app,
                                   editableDocs,
-                                  {dataTestSpecifiers: devMode,
-                                   accordionCollapsed: isAuthority});
+                                  {dataTestSpecifiers: devMode});
         } else {
           docgen.clear("constructionTimeDocgen");
         }

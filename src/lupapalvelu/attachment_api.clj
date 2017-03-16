@@ -685,7 +685,7 @@
   [_])
 
 (defquery set-attachment-group-enabled
-  {:description "Pseudo-query for checking that attachment group can selected for application."
+  {:description "Pseudo-query for checking that attachment group can be selected for application."
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :pre-checks       [att/validate-group-is-selectable]
