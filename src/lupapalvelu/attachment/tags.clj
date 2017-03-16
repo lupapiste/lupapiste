@@ -142,7 +142,7 @@
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [application & add-trigger-filters?]
+  [application & [add-trigger-filters?]]
   (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
              (when add-trigger-filters?
                (assignment-trigger-filters application)))

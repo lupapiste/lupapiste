@@ -556,7 +556,7 @@
                                       :submitted (or (:submitted application) created)}
                                 $push {:history {$each history-entries}}}))
   (try
-    (mongo/insert :submitted-applications (-> application
+    (mongo/insert :submitted-applications (-> (without-assignments-delay application)
                                               meta-fields/enrich-with-link-permit-data
                                               (dissoc :id)
                                               (assoc :_id (:id application))))

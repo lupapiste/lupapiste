@@ -13,7 +13,6 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
-            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -111,25 +110,6 @@
 ;; Attachments
 ;;
 
-(defn- assignment-trigger-tags [assignments attachment]
-  (or (not-empty (->> (assignment/targeting-assignments assignments attachment)
-                      (map #(assignment/assignment-tag (:trigger %)))
-                      distinct))
-      [(assignment/assignment-tag "not-targeted")]))
-
-(defn- enrich-attachment-and-add-trigger-tags
-  [assignments attachment]
-  (update (att/enrich-attachment attachment) :tags
-          #(concat % (assignment-trigger-tags assignments attachment))))
-
-(defn- enrich-attachment [application user attachment]
-  (if-let [assignments (and (usr/authority? user)
-                            (:assignments application)
-                            @(:assignments application))]
-    (enrich-attachment-and-add-trigger-tags assignments
-                                            attachment)
-    (att/enrich-attachment attachment)))
-
 (defquery attachments
   {:description "Get all attachments in application filtered by user visibility"
    :parameters [:id]
@@ -138,7 +118,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{{attachments :attachments :as application} :application user :user org :organization :as command}]
-  (ok :attachments (map (partial enrich-attachment application user)
+  (ok :attachments (map (partial att/enrich-attachment-with-trigger-tags application user)
                         attachments)))
 
 (defquery attachment
@@ -153,7 +133,7 @@
   [{{attachments :attachments :as application} :application user :user org :org :as command}]
   (let [attachment (att/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (enrich-attachment application user attachment))
+      (ok :attachment (att/enrich-attachment-with-trigger-tags application user attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
