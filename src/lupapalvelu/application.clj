@@ -7,7 +7,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.application-utils :refer [location->object without-assignments-delay]]
+            [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
@@ -322,8 +322,7 @@
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        (process-documents-and-tasks user)
-       location->object
-       without-assignments-delay))
+       location->object))
 
 (defn post-process-app-for-krysp [application organization]
   (-> application
@@ -556,7 +555,7 @@
                                       :submitted (or (:submitted application) created)}
                                 $push {:history {$each history-entries}}}))
   (try
-    (mongo/insert :submitted-applications (-> (without-assignments-delay application)
+    (mongo/insert :submitted-applications (-> application
                                               meta-fields/enrich-with-link-permit-data
                                               (dissoc :id)
                                               (assoc :_id (:id application))))

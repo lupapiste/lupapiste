@@ -110,6 +110,11 @@
 ;; Attachments
 ;;
 
+(defn- maybe-assignments [assignments-delay user]
+  (and (usr/authority? user)
+       assignments-delay
+       @assignments-delay))
+
 (defquery attachments
   {:description "Get all attachments in application filtered by user visibility"
    :parameters [:id]
@@ -117,8 +122,8 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application user :user org :organization :as command}]
-  (ok :attachments (map (partial att/enrich-attachment-with-trigger-tags application user)
+  [{{attachments :attachments :as application} :application user :user assignments :application-assignments :as command}]
+  (ok :attachments (map (partial att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user))
                         attachments)))
 
 (defquery attachment
@@ -130,10 +135,10 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application user :user org :org :as command}]
+  [{{attachments :attachments :as application} :application user :user assignments :application-assignments :as command}]
   (let [attachment (att/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (att/enrich-attachment-with-trigger-tags application user attachment))
+      (ok :attachment (att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user) attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
@@ -153,10 +158,12 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{application :application org :organization user :user}]
+  [{application :application user :user assignments :application-assignments}]
   (ok :attachmentsFilters
       (att-tags/attachments-filters application
-                                    (usr/authority? user))))
+                                    (and (usr/authority? user)
+                                         assignments
+                                         @assignments))))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."

@@ -127,9 +127,9 @@
               (compare (:description a) (:description b)))))
         filters))
 
-(defn- assignment-trigger-filters [{:keys [attachments assignments]}]
+(defn- assignment-trigger-filters [{:keys [attachments]} assignments]
   (->> attachments
-       (mapcat (partial targeting-assignments @assignments))
+       (mapcat (partial targeting-assignments assignments))
        (map #(select-keys % [:trigger :description]))
        (distinct-by :trigger)
        (map (fn [{:keys [trigger description]}]
@@ -142,9 +142,9 @@
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [application & [add-trigger-filters?]]
+  [application & [assignments]]
   (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
-             (when add-trigger-filters?
-               (assignment-trigger-filters application)))
+             (when assignments
+               (assignment-trigger-filters application assignments)))
        (remove nil?)
        (filter (fn->> count (< 1)))))

@@ -62,6 +62,8 @@
    :user usr/SummaryUser
    :timestamp ssc/Timestamp})
 
+(defn completed? [assignment]
+  (= "completed" (-> (:states assignment) last :type)))
 
 (def user-created-trigger "user-created")
 

@@ -139,20 +139,12 @@
   ([application {roles :handler-roles :as organization}]
    (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %)))))
 
-(defn- enrich-assignments
-  [{id :id :as application}]
-  (assoc application :assignments
-         ; using functions from lupapalvelu.assignment would cause circular dependencies
-         (delay (mongo/select :assignments {:application.id id
-                                            :status {$ne "canceled"}}))))
-
 (defn- enrich-application [application]
   (some-> application
           (update :documents (partial map schemas/with-current-schema-info))
           (update :tasks (partial map schemas/with-current-schema-info))
           (update :reservations (partial map with-participants-info))
-          (enrich-application-handlers)
-          (enrich-assignments)))
+          (enrich-application-handlers)))
 
 (defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}
