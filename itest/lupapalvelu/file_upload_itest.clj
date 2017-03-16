@@ -8,10 +8,19 @@
 
 (apply-remote-minimal)
 
+(facts "User not authenticated in Vetuma"
+  (let [store         (atom {})
+        cookie-store  (doto (->cookie-store store)
+                        (.addCookie test-db-cookie))]
+
+    (fact "Upload is not allowed"
+      (bulletin-util/send-file cookie-store) => http404?)))
+
 (facts "Upload and remove attachment for a bulletin comment"
   (let [store         (atom {})
         cookie-store  (doto (->cookie-store store)
                         (.addCookie test-db-cookie))
+        _ (vetuma-util/authenticate-to-vetuma! cookie-store)
         upload-resp   (-> (bulletin-util/send-file cookie-store)
                           :body
                           (json/decode keyword))
@@ -35,8 +44,6 @@
               uploaded-file (first (:files upload-resp))]
 
           upload-resp => ok?
-
-          (vetuma-util/authenticate-to-vetuma! cookie-store)
 
           ;attach to comment
           (command sonja :add-bulletin-comment :bulletinId (:id bulletin) :bulletinVersionId (:versionId bulletin) :comment "foobar" :files [uploaded-file] :cookie-store cookie-store) => ok?

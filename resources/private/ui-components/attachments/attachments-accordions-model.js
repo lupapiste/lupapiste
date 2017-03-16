@@ -9,6 +9,7 @@ LUPAPISTE.AttachmentsAccordionsModel = function(params) {
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
   self.pageName = params.pageName;
+  self.upload = params.upload;
 
   var filterSet = service.getFilters( self.pageName );
   var tagGroupSet  = service.getTagGroups( self.pageName );

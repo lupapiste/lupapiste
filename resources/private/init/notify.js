@@ -13,7 +13,7 @@ var notify = (function() {
   return {
     error: _.partial(displayMessage, "error.dialog.title"),
     ajaxError: function(resp) {
-      displayMessage("error.dialog.title", loc(resp.text));
+      displayMessage("error.dialog.title", _.apply(loc, null, _.concat(resp.text, resp.errorParams)));
     },
     success: _.partial(displayMessage, "success.dialog.title")
   };

@@ -42,8 +42,7 @@
                                        :account {:type "", :price ""}})
 
 (defmulti yritystilisopimus (fn [company & _]
-                              (when (and (env/feature? camp/campaign-feature)
-                                       (-> company :campaign ss/not-blank?))
+                              (when (-> company :campaign ss/not-blank?)
                                 :campaign)))
 
 (defmethod ^InputStream yritystilisopimus :default

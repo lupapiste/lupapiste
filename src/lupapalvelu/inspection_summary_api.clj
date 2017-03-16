@@ -176,6 +176,7 @@
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
                       (partial action/boolean-parameters [:status])]
+   :user-authz-roles #{:writer :owner :foreman}
    :user-roles #{:applicant :authority}}
   [{application :application user :user}]
   (let [params (if status

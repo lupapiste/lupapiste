@@ -19,7 +19,7 @@
 (defn- verdict-dates [lang dates]
   (cond-> []
           (:anto dates) (conj [(i18n/localize lang "verdict.anto") (or (util/to-local-date (:anto dates)) "-")])
-          (:lainvoimainen dates) (conj [(i18n/localize lang "verdict.lainvoimainen") (or (util/to-local-date (:lainvoimainen dates)) "-")])
+          (and (:lainvoimainen dates) (> (:lainvoimainen dates) 0)) (conj [(i18n/localize lang "verdict.lainvoimainen") (or (util/to-local-date (:lainvoimainen dates)) "-")])
           (:aloitettava dates) (conj [(i18n/localize lang "verdict.aloitettava") (or (util/to-local-date (:aloitettava dates)) "-")])
           (:voimassaHetki dates) (conj [(i18n/localize lang "verdict.voimassaHetki") (or (util/to-local-date (:voimassaHetki dates)) "-")])
           (:viimeinenValitus dates) (conj [(i18n/localize lang "verdict.viimeinenValitus") (or (util/to-local-date (:viimeinenValitus dates)) "-")])
@@ -119,7 +119,7 @@
                                  "LPVALUE_VERDICT_GIVEN" (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")
 
                                  "LPTITLE_VERDICT_LEGAL" (i18n/localize lang "verdict.lainvoimainen")
-                                 "LPVALUE_VERDICT_LEGAL" (or (util/to-local-date (get-in paatos [:paivamaarat :lainvoimainen])) "-")
+                                 "LPVALUE_VERDICT_LEGAL" (or (if (> (get-in paatos [:paivamaarat :lainvoimainen]) 0) (util/to-local-date (get-in paatos [:paivamaarat :lainvoimainen]))) "-")
 
                                  "LPTITLE_VERDICT_STATE" (i18n/localize lang "verdict.status")
                                  "LPVALUE_VERDICT_STATE" (verdict-status paatos lang)

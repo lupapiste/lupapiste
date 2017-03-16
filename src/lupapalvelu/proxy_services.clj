@@ -128,7 +128,7 @@
       (if-let [endpoint (org/municipality-address-endpoint municipality)]
         (if-let [address-from-muni (->> (wfs/address-by-point-from-municipality x y endpoint)
                                      (map (partial wfs/krysp-to-address-details (or lang "fi")))
-                                     (remove (fn [addr] #{{:x 0 :y 0}} (select-keys addr [:x :y])))
+                                     (remove (fn [addr] (= {:x 0 :y 0} (select-keys addr [:x :y]))))
                                      (map (fn [{x2 :x y2 :y :as f}]
                                             (assoc f :distance (distance x_d y_d x2 y2)
                                                      :name {:fi (i18n/localize :fi :municipality municipality)
@@ -277,15 +277,17 @@
     (resp/json result)))
 
 ;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
-(defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
-  (let [municipality (trim municipality)]
+(defn plan-urls-by-point-proxy [{{:keys [x y municipality type]} :params}]
+  (let [municipality (trim municipality)
+        type (if (ss/blank? type) "plan-info" type)]
     (if (and (coord/valid-x? x) (coord/valid-y? y) (or (= "liiteri" (ss/lower-case municipality)) (ss/numeric? municipality)))
-      (let [response (wfs/plan-info-by-point x y municipality)
+      (let [response (wfs/plan-info-by-point x y municipality type)
             k (keyword municipality)
-            gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+            t (keyword type)
+            gfi-mapper (if-let [f-name (env/value t k :gfi-mapper)]
                          (resolve (symbol f-name))
                          wfs/gfi-to-features-sito)
-            feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+            feature-mapper (if-let [f-name (env/value t k :feature-mapper)]
                              (resolve (symbol f-name))
                              wfs/feature-to-feature-info-sito)]
         (if response

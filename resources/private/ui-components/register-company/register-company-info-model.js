@@ -6,16 +6,11 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
 
   var service = lupapisteApp.services.companyRegistrationService;
 
-  self.loggedIn = lupapisteApp.models.currentUser.id();
-
-  self.userCell = self.loggedIn ? "span" : "text";
+  self.loggedIn = lupapisteApp.models.currentUser.id;
 
   self.field = function( fieldName, cell ) {
-    var opts = _.defaults( service.field( fieldName),
+    return _.defaults( service.field( fieldName),
                            {cell: cell || "text"});
-    return opts.required && cell === "span"
-         ? _.set( opts, "required", false )
-         : opts;
   };
 
   self.languageField = function() {
@@ -23,5 +18,44 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
                         {cell: "select",
                          options: loc.getSupportedLanguages(),
                          optionsText: loc });
+  };
+  self.userInfo = self.disposedPureComputed( function() {
+    var reg = service.registration;
+    return sprintf( "%s %s, %s", reg.firstName(), reg.lastName(), reg.email());
+  });
+
+  var emailWarning = service.field( "email" ).warning;
+
+  self.showLogin = self.disposedComputed( function() {
+    return  !self.loggedIn() && emailWarning() === "email-in-use";
+  });
+
+
+  self.loginCallback = function() {
+    pageutil.showAjaxWait();
+    var user = lupapisteApp.models.currentUser;
+    var isAuth = user.isAuthority();
+    var isCom = user.company.id();
+    var redirectFn = function() {
+      window.location =
+        sprintf( "/app/%s/%s#!/%s",
+                 user.language(),
+                 isAuth ? "authority" : "applicant",
+                 (isAuth || isCom) ? "applications" : "register-company-account-type");
+    };
+    if( isAuth || isCom ) {
+      hub.subscribe( "dialog-close", redirectFn, true);
+      hub.send( "show-dialog",
+                {ltitle: "register.company.dialog-title",
+                 size: "small",
+                 component: "ok-dialog",
+                 componentParams: {
+                   ltext: sprintf( "register.company.existing-user-is-%s",
+                                 isAuth ? "authority" : "company")
+                 }});
+    } else {
+      service.save();
+      redirectFn();
+    }
   };
 };

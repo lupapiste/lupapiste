@@ -41,6 +41,9 @@
        (fact "Pricing must be consistent: small teams cannot be pricier than bigger teams"
              (camp/good-campaign {:data (assoc good :account5 10)})
              => (err :error.campaign-pricing))
+       (fact "No negative prices"
+             (camp/good-campaign {:data (assoc good :account5 -1)})
+             => (err :error.campaign-pricing))
         (fact "Code must be in the correct format"
              (camp/good-campaign {:data (assoc good :code "no spaces")})
              => (err :error.invalid-campaign))

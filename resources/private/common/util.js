@@ -432,6 +432,10 @@ var util = (function($) {
     return !isOdd(number);
   }
 
+  function isValidBSONObjectId( s ) {
+    return s && s.match(/^[0-9a-fA-F]{24}$/) !== null;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -441,6 +445,7 @@ var util = (function($) {
     isValidY:            isValidY,
     isValidOVT:          isValidOVT,
     isValidPersonId:     isValidPersonId,
+    isValidBSONObjectId: isValidBSONObjectId,
     lowerCase: function(s) {return _.isString(s) ? s.toLowerCase() : s;},
     upperCase: function(s) {return _.isString(s) ? s.toUpperCase() : s;},
     prop: {

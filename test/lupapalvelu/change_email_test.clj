@@ -80,6 +80,56 @@
     (provided (#'lupapalvelu.change-email/update-email-in-invite-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
     (provided (notifications/notify! :email-changed {:user {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "user"}}, :data {:new-email ..new-email..}}) => 1))
 
+  (fact "company admin - first change"
+    (change-email ..token-id.. ..stamp..) => {:ok true}
+
+    (provided (token/get-token ..token-id..) => {:id ..token-id..
+                                                 :token-type :change-email
+                                                 :user-id ..user-id..
+                                                 :data {:new-email ..new-email..}})
+    (provided (usr/get-user-by-id! ..user-id..) => {:id       ..user-id..
+                                                    :username ..username..
+                                                    :email    ..old-email..
+                                                    :company {:role "admin"}})
+    (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})
+    (provided (usr/get-user-by-email ..new-email..) => {:id ..dummy-id..
+                                                        :role "dummy"})
+
+    (provided (usr/update-user-by-email ..old-email.. {:personId nil} {$set {:username ..new-email.. :email ..new-email.. :personId ..hetu..}}) => 1)
+    (provided (token/get-token ..token-id.. :consume true) => 1)
+    (provided (#'lupapalvelu.change-email/remove-dummy-auths-where-user-already-has-auth ..user-id.. ..new-email.. ) => 1)
+    (provided (#'lupapalvelu.change-email/change-auths-dummy-id-to-user-id {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "admin"}} ..dummy-id.. ) => 1)
+    (provided (usr/remove-dummy-user ..dummy-id..) => 1)
+    (provided (#'lupapalvelu.change-email/update-email-in-application-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
+    (provided (#'lupapalvelu.change-email/update-email-in-invite-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
+    (provided (notifications/notify! :email-changed {:user {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "admin"}}, :data {:new-email ..new-email..}}) => 1))
+
+  (fact "company admin - later change"
+    (change-email ..token-id.. ..stamp..) => {:ok true}
+
+    (provided (token/get-token ..token-id..) => {:id ..token-id..
+                                                 :token-type :change-email
+                                                 :user-id ..user-id..
+                                                 :data {:new-email ..new-email..}})
+    (provided (usr/get-user-by-id! ..user-id..) => {:id       ..user-id..
+                                                    :username ..username..
+                                                    :email    ..old-email..
+                                                    :personId ..hetu..
+                                                    :company {:role "admin"}})
+    (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})
+    (provided (usr/get-user-by-email ..new-email..) => {:id ..dummy-id..
+                                                        :role "dummy"})
+
+    (provided (usr/update-user-by-email ..old-email.. {:personId ..hetu..} {$set {:username ..new-email.. :email ..new-email..}}) => 1)
+    (provided (vetuma/consume-user ..stamp..) => 1)
+    (provided (token/get-token ..token-id.. :consume true) => 1)
+    (provided (#'lupapalvelu.change-email/remove-dummy-auths-where-user-already-has-auth ..user-id.. ..new-email.. ) => 1)
+    (provided (#'lupapalvelu.change-email/change-auths-dummy-id-to-user-id {:id ..user-id.. :username ..username.. :email ..old-email.. :personId ..hetu.. :company {:role "admin"}} ..dummy-id.. ) => 1)
+    (provided (usr/remove-dummy-user ..dummy-id..) => 1)
+    (provided (#'lupapalvelu.change-email/update-email-in-application-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
+    (provided (#'lupapalvelu.change-email/update-email-in-invite-auth! ..user-id.. ..old-email.. ..new-email..) => 0)
+    (provided (notifications/notify! :email-changed {:user {:id ..user-id.. :username ..username.. :email ..old-email.. :personId ..hetu.. :company {:role "admin"}}, :data {:new-email ..new-email..}}) => 1))
+
   (fact "normal user - vetumadata does not match"
     (try+
      (change-email ..token-id.. ..stamp..)
@@ -93,6 +143,22 @@
                                                     :username ..username..
                                                     :email    ..old-email..
                                                     :personId ..hetu..})
+    (provided (vetuma/get-user ..stamp..) => {:userid ..another-hetu..}))
+
+  (fact "company admin - later chaange - vetumadata does not match"
+    (try+
+     (change-email ..token-id.. ..stamp..)
+     (catch [:sade.core/type :sade.core/fail] e (:text e))) => "error.personid-mismatch"
+
+    (provided (token/get-token ..token-id..) => {:id ..token-id..
+                                                 :token-type :change-email
+                                                 :user-id ..user-id..
+                                                 :data {:new-email ..new-email..}})
+    (provided (usr/get-user-by-id! ..user-id..) => {:id       ..user-id..
+                                                    :username ..username..
+                                                    :email    ..old-email..
+                                                    :personId ..hetu..
+                                                    :company {:role "admin"}})
     (provided (vetuma/get-user ..stamp..) => {:userid ..another-hetu..}))
 
   (fact "no person id nor company role"
