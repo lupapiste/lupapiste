@@ -3,9 +3,9 @@
             [clj-time.coerce :refer [to-date]]
             [clj-time.core :as time]
             [clojure.set :as set]
+            [clojure.test.check.generators :as gen]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.combinators :refer [pred->validator]]
             [lupapalvelu.organization :as org]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
@@ -14,6 +14,7 @@
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
@@ -48,24 +49,69 @@
 
 (def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
+(def biased-nat
+  "generator that generates numbers of length 3 to 5,
+   biased towards shorter ones"
+  (let [nat-3 (gen/choose 100 1000)
+        nat-4 (gen/choose 1000 10000)
+        nat-5 (gen/choose 10000 100000)]
+    (gen/frequency [[4 nat-3]
+                    [1 (gen/frequency [[4 nat-4]
+                                       [1 nat-5]])]])))
+
+(def org-id-generator
+  (gen/let [number-part biased-nat
+            suffix (gen/elements ["R" "YA" "YMP"])]
+    (keyword (str number-part "-" suffix))))
+
+(def all-authz
+  ["approver"
+   "archivist"
+   "authority"
+   "authorityAdmin"
+   "commenter"
+   "reader"
+   "tos-editor"
+   "tos-publisher"])
+
+(def authz-generator
+  (gen/elements all-authz))
+
+(def org-authz-generator
+  (gen/map org-id-generator
+           (gen/vector-distinct authz-generator
+                                {:min-elements 0
+                                 :max-elements (count all-authz)})))
+
+(def all-roles ["applicant"
+                "authority"
+                "oirAuthority"
+                "authorityAdmin"
+                "admin"
+                "dummy"
+                "rest-api"
+                "trusted-etl"])
+(defschema Role (apply sc/enum all-roles))
+
+(def OrgId sc/Keyword)
+(def Authz sc/Str)
+(def OrgAuthz {OrgId [Authz]})
+
+(ssg/register-generator OrgId org-id-generator)
+(ssg/register-generator Authz authz-generator)
+(ssg/register-generator OrgAuthz org-authz-generator)
+
 (defschema User
           {:id                                    Id
            :firstName                             (ssc/max-length-string 255)
            :lastName                              (ssc/max-length-string 255)
-           :role                                  (sc/enum "applicant"
-                                                           "authority"
-                                                           "oirAuthority"
-                                                           "authorityAdmin"
-                                                           "admin"
-                                                           "dummy"
-                                                           "rest-api"
-                                                           "trusted-etl")
+           :role                                  Role
            :email                                 ssc/Email
            :username                              ssc/Username
            :enabled                               sc/Bool
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
-           (sc/optional-key :orgAuthz)            {sc/Keyword [sc/Str]}
+           (sc/optional-key :orgAuthz)            OrgAuthz
            (sc/optional-key :personId)            (sc/maybe ssc/Hetu)
            (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
@@ -262,8 +308,7 @@
                             :id)]
     (when (not (user-is-authority-in-organization? user organization-id))
       (fail! :error.unauthorized
-             :desc
-             "user is not an authority in applications organization"))))
+             :desc "user is not an authority in applications organization"))))
 
 
 (defn org-authz-match [organization-ids & [role]]

@@ -8,7 +8,12 @@
             [lupapalvelu.user :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.activation :as activation]))
+            [lupapalvelu.activation :as activation]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
+            [clojure.test :refer [is]]
+            [sade.schema-generators :as ssg]))
 
 ;;
 ;; ==============================================================================
@@ -78,6 +83,63 @@
   (same-user? {:id "foo"} {:id "foo"}) => truthy
   (same-user? {:id "foo"} {:id "bar"}) => falsey)
 
+(def role-keyword-generator
+  (gen/fmap keyword (ssg/generator Role)))
+
+(def role-set-generator
+  (gen/set role-keyword-generator
+           {:max-elements (count all-roles)
+            :min-elements 0}))
+
+(defspec organization-ids-by-role-spec
+  (prop/for-all [user (gen/fmap with-org-auth
+                                (ssg/generator User))
+                 roles role-set-generator]
+    (let [result (organization-ids-by-roles user roles)
+          valid? (fn [[org org-roles]]
+                   (let [in-both (clojure.set/intersection roles (set org-roles))]
+                     (= (boolean (not-empty in-both))
+                        (contains? result (name org)))))]
+      (every? valid? (:orgAuthz user)))))
+
+(fact organization-ids-by-roles
+  (organization-ids-by-roles {:orgAuthz {:102-R #{}}} #{:authority}))
+
+(def user-and-organization-id-generator
+  ;; Oispa monadisyntaksi ;_;
+  (gen/bind
+    (gen/fmap with-org-auth
+              (ssg/generator User))
+    (fn [user]
+      (gen/fmap
+        (fn [org-id] [user org-id])
+        (let [org-authz (:orgAuthz user)
+              plain-id-gen (ssg/generator OrgId)]
+          (if (empty? org-authz)
+            plain-id-gen
+            (gen/frequency [[1 plain-id-gen]
+                            [9 (gen/elements (keys org-authz))]])))))))
+
+(defspec user-is-authority-in-organization?-spec
+  (prop/for-all [[user organization-id] user-and-organization-id-generator]
+    (let [users-roles-in-organization (set (get-in user [:orgAuthz organization-id]))
+          organization-id (name organization-id)]
+      (if (contains? users-roles-in-organization :authority)
+        (user-is-authority-in-organization? user organization-id)
+        (not (user-is-authority-in-organization? user organization-id))))))
+
+(defspec validate-authority-in-organization-spec
+  (prop/for-all [[user org-id] user-and-organization-id-generator]
+    (let [org-id (name org-id)
+          command {:user user
+                   :organization (future {:id org-id})}
+          compute (fn [] (validate-authority-in-organization command))]
+      (if (user-is-authority-in-organization? user org-id)
+        (nil? (compute))
+        (is (try+
+              (compute)
+              (catch [:text "error.unauthorized"] _
+                true)))))))
 
 ;;
 ;; ==============================================================================
