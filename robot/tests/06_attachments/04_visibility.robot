@@ -28,9 +28,8 @@ Mikko sets CV to be visible only to himself and authorities
   Wait Until  Tab should be visible  attachments
 
 Mikko uploads attachment to placeholder asemapiirros
-  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
-  Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}  Asemapiirros
+  Click by test id  batch-ready
   Wait Until  Tab should be visible  attachments
 
 Mikko invites Teppo and Pena
@@ -56,7 +55,6 @@ Teppo sets asemapiirros to only-authority visibility
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
   Select From List By Value  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  viranomainen
   Positive indicator icon should be visible
-
   Logout
 
 Pena logs in, doesn't see Mikko's CV, nor asemapiirros

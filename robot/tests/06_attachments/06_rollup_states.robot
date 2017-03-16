@@ -106,7 +106,7 @@ Hiding not needed again does not affect states
 Sonja adds and approves Väestonsuojasuunnitelma
   Scroll and click test id  notNeeded-filter-label
   Click not needed  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
-  Add attachment file  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']  ${PNG_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']  ${PNG_TESTFILE_PATH}  VSS1234
   Return to application
 
 Operation rollups are now approved

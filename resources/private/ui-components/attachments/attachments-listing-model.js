@@ -49,7 +49,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
                                             readOnly: self.disposedPureComputed(function() {
                                               return !self.authModel.ok( "upload-attachment");
                                             }),
-                                            badFileHandler: _.noop} );
+                                            badFileHandler: _.noop,
+                                            batchMode: true} );
 
   function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
