@@ -75,7 +75,7 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
   }
 
   self.assignments = self.disposedPureComputed(function() {
-    var attachmentIds = _.map(self.attachments, function(att) { return util.getIn(att, ["id"]); });
+    var attachmentIds = _.map(ko.unwrap(self.attachments), function(att) { return util.getIn(att, ["id"]); });
     if (assignmentService) {
       return  _(assignmentService.assignments())
         .filter(_.partial(isAssignmentShownInTable, attachmentIds))

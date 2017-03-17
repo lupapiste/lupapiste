@@ -14988,6 +14988,7 @@ span.icon_clear:before {
   min-height: 280px;
   width: 80px;
   min-width: 768px;
+  padding-bottom: 1em;
 }
 
 #application-tasks-tab i.lupicon-circle-check,

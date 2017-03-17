@@ -249,6 +249,8 @@ Unselects filters
 
 Add shelter file and approve it
   Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}  ${shelter}
+  Click by test id  batch-ready
+  Open attachment details  ${shelter}
   Attachment is  approved
   Return to application
 
@@ -264,9 +266,9 @@ Hide RAM attachments
   Checkbox wrapper not selected by test id  ram-filter-checkbox
 
 Rollup states
-  Rollup rejected  Pääpiirustukset
-  Rollup approved  Muut suunnitelmat
-  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+  Rollup rejected  PÄÄPIIRUSTUKSET
+  Rollup approved  MUUT SUUNNITELMAT
+  Rollup rejected  ASUINKERROSTALON TAI RIVITALON RAKENTAMINEN
 
 Sonja removes asemapiirros
   Remove row  tr[data-test-type='paapiirustus.asemapiirros']
@@ -275,15 +277,15 @@ Sonja approves RAM
   Scroll and click test id  ram-filter-label
   Checkbox wrapper selected by test id  ram-filter-checkbox
   Approve row  tr[data-test-type='${type}']:last
-  Rollup approved  Pääpiirustukset
-  Rollup approved  Muut suunnitelmat
-  Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
+  Rollup approved  PÄÄPIIRUSTUKSET
+  Rollup approved  MUUT SUUNNITELMAT
+  Rollup approved  ASUINKERROSTALON TAI RIVITALON RAKENTAMINEN
 
 Sonja rejects shelter
   Reject row  tr[data-test-type='${shelter}']
-  Rollup approved  Pääpiirustukset
-  Rollup rejected  Muut suunnitelmat
-  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+  Rollup approved  PÄÄPIIRUSTUKSET
+  Rollup rejected  MUUT SUUNNITELMAT
+  Rollup rejected  ASUINKERROSTALON TAI RIVITALON RAKENTAMINEN
 
 Sonja adds CV. It does not support RAMs
   Upload attachment  ${PNG_TESTFILE_PATH}  CV  CV  Osapuolet

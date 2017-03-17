@@ -19,6 +19,8 @@
        :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
        :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection")
        :handler-change (i18n/localize lang "caseFile.handlerChange")
+       :handler-added (i18n/localize lang "caseFile.handlerAdded")
+       :handler-removed (i18n/localize lang "caseFile.handlerRemoved")
        "")
      ": "
      (cond

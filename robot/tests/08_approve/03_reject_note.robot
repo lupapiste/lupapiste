@@ -68,13 +68,13 @@ Sonja rejects kaytto with note
 Sonja rejects attachment
   Open tab  attachments
   Tab indicator is  2
-  Reject attachment with note  jquery=tr[data-test-state=requires_authority_action] button.reject  muut-muu  Bad attachment
+  Reject attachment with note  jquery=tr[data-test-state=requires_authority_action][data-test-type='muut.muu'] button.reject  muut-muu  Bad attachment
 
 Clicking reject button again is supported
-  Reject attachment with note  jquery=tr[data-test-state=requires_user_action] button.negative  muut-muu  Worse attachment
+  Reject attachment with note  jquery=tr[data-test-state=requires_user_action][data-test-type='muut.muu'] button.negative  muut-muu  Worse attachment
 
 Sonja rejects again but cancels
-  Reject with note but cancel  jquery=tr[data-test-state=requires_user_action] button.negative  muut-muu  All righty then  False
+  Reject with note but cancel  jquery=tr[data-test-state=requires_user_action][data-test-type='muut.muu'] button.negative  muut-muu  All righty then  False
 
 Sonja opens attachment details
   Open attachment details  muut.muu
