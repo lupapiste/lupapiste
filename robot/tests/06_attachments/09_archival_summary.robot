@@ -187,7 +187,6 @@ Julkisivu is marked as will publish
 
 Edit application document metadata
   Toggle additional controls  archived-application-documents  application-documents  application-document
-  Toggle additional controls  archived-application-documents  application-documents  application-document
   Fill in archival metadata
 
 Application document group is changed

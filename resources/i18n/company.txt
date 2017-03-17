@@ -472,7 +472,7 @@
 "register.company.success.subtitle" "fi" "Sopimuksen allekirjoitus ja yritystilin rekisteröinti onnistui"
 "register.company.success.info" "fi" "Antamaasi sähköpostiosoitteeseen on lähetetty tilin aktivointilinkki, jota napsauttamalla pääset asettamaan henkilökohtaisen salasanan sisäänkirjautumista varten sekä vahvistamaan yritystilin."
 "register.company.confirm-account" "fi" "Vahvista yritystili"
-"register.company.existing-user-sign-in" "fi" "Antamallasi sähköpostiosoitteella on jo käyttäjätili. Jos haluat muuttaa sen käyttäjätilin yrityksen ylläpitäjätiliksi, kirjaudu sisään ja jatka yritystilin rekisteröintiä. Muussa tapauksessa anna toinen sähköpostiosoite, josta tulee yrityksen ylläpitäjä."
+"register.company.existing-user-sign-in" "fi" "Antamallasi sähköpostiosoitteella on jo rekisteröity henkilötili Lupapisteeseen. Jos haluat rekisteröidä samalla sähköpostiosoitteella Yritystilin, kirjaudu sisään ja jatka sitten Yritystilin rekisteröintiä. Muussa tapauksessa anna toinen sähköpostiosoite."
 "register.company.existing-user-is-authority" "fi" "Viranomaiskäyttäjä ei voi rekisteröidä Yritystiliä. Sinut ohjataan Hankkeet-sivulle."
 "register.company.existing-user-is-company" "fi" "Olet jo Yritystilin käyttäjä. Sinut ohjataan Hankkeet-sivulle."
 "register.company.dialog-title" "fi" "Yritystilin rekisteröinti"
