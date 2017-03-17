@@ -5,6 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        assignments_common.robot
+Resource        ../06_attachments/attachment_resource.robot
 Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -19,6 +20,11 @@ Pena logs in, creates and submits application
 Pena uploads an application for which there is an automatic assignment trigger in Sipoo
   Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${TXT_TESTFILE_PATH}  oma piirustus
   Scroll and click test id  batch-ready
+
+Pena doesn't see filters 'Ei tehtäviä' and 'Aita ja asema'
+  Wait until  Element should be visible  xpath=//label[@data-test-id='other-filter-label']
+  Wait until  Element should not be visible  xpath=//label[@data-test-id='assignment-not-targeted-filter-label']
+  Wait until  Element should not be visible  xpath=//label[@data-test-id='assignment-dead1111111111111112beef-filter-label']
   Logout
 
 Sonja logs in and opens application
@@ -28,6 +34,13 @@ Sonja logs in and opens application
 
 Automatic assignment with the attachment as the target has been created
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  Aita ja asema, 1
+
+Sonja sees filters 'Ei tehtäviä' and 'Aita ja asema'
+  Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
+  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter-checkbox
+  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Total attachments row count is  1
+  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
 
 Sonja adds handler to application
   Click by test id  edit-handlers
@@ -72,8 +85,15 @@ Pena uploads two more applications belonging in different automatic assignment t
   Upload attachment  ${TXT_TESTFILE_PATH}  ELY:n tai kunnan poikkeamapäätös  poikkeamapäätös  Yleisesti hankkeeseen
   Logout
 
-Sonja have two assignments
+Sonja opens attachments tab and sees 'ELY ja naapuri' filter
   As Sonja
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
+  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111111beef-filter-checkbox
+
+Sonja has two assignments
   Open assignments search
   Open search tab  all
   Click by test id  toggle-advanced-filters
