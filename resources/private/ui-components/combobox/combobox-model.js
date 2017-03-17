@@ -5,7 +5,7 @@
 //   immediately reflected in the combobox.
 //   list: predefined value list. Can be either array or observable
 //   array.
-//   [testId: Text input test id (combobox-input)]
+//   [testId]: Text input test id (combobox-input)
 //   Combobox editable state is calculated from enable and disable
 //   params (default editable). See EnableComponentModel for details.
 LUPAPISTE.ComboboxModel = function( params ) {
@@ -26,13 +26,26 @@ LUPAPISTE.ComboboxModel = function( params ) {
   var hadFocus = false;
   self.disposedSubscribe( self.hasFocus, function( flag ) {
     if( hadFocus && !flag ) {
-      params.value( self.textInput());
+      outsideValue( self.textInput());
     }
     hadFocus = flag;
   });
 
   self.disposedSubscribe( outsideValue, function( value ) {
     self.textInput( value );
+  });
+
+  function updateAfterDelay( text ) {
+    // No changes during delay
+    if( text === self.textInput() ) {
+      outsideValue( self.textInput());
+    }
+  }
+
+  // Mostly for robots' sake, we update outsideValue after delay even
+  // if the combobox still has focus.
+  self.disposedSubscribe( self.textInput, function( value ) {
+    _.delay( updateAfterDelay, 1000, value );
   });
 
   // Linger is true if the user can still interact with the list even

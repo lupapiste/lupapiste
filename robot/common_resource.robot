@@ -436,7 +436,7 @@ Quote
   [Return]  ${quoted}
 
 Input text with jQuery
-  [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
+  [Arguments]  ${selector}  ${value}  ${leaveFocus}=False
   Wait until  Element should be visible  jquery=${selector}
   Wait until  Element should be enabled  jquery=${selector}
   ${q}=  Quote  ${selector}
@@ -445,7 +445,7 @@ Input text with jQuery
   Run Keyword Unless  ${leaveFocus}  Execute Javascript  $(${q}).blur();
 
 Input text by test id
-  [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
+  [Arguments]  ${id}  ${value}  ${leaveFocus}=False
   ${q}=  Quote  ${id}
   Input text with jQuery  [data-test-id=${q}]:visible  ${value}  ${leaveFocus}
 
@@ -862,8 +862,7 @@ Add attachment file
   Scroll to  ${row} label[data-test-id=add-attachment-file-label]
   Upload with hidden input  ${row} input[data-test-id=add-attachment-file-input]  ${path}
   Wait Until  Element should not be visible  jquery=${row} label[data-test-id=add-attachment-file-label]
-  Fill test id   batch-contents-0  ${contents}
-  Execute javascript  $("[data-test-id='batch-contents-0']").blur();
+  Fill test id  batch-contents-0  ${contents}
   Wait Until  Test id enabled  batch-ready
 
 Attachment is

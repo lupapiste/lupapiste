@@ -29,6 +29,7 @@ Mikko sets CV to be visible only to himself and authorities
 
 Mikko uploads attachment to placeholder asemapiirros
   Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}  Asemapiirros
+  debug
   Click by test id  batch-ready
   Wait Until  Tab should be visible  attachments
 
