@@ -13,11 +13,12 @@ Pena logs in, creates and submits application
   Set Suite Variable  ${appname}  To Do
   Set Suite Variable  ${propertyid}  753-416-88-88
   Pena logs in
-  Create application with state  ${appname}  ${propertyid}  pientalo  submitted
+  Create application with state  ${appname}  ${propertyid}  kerrostalo-rivitalo  submitted
   Open tab  attachments
 
 Pena uploads an application for which there is an automatic assignment trigger in Sipoo
-  Upload attachment  ${TXT_TESTFILE_PATH}  Asemapiirros  oma piirustus  Yleisesti hankkeeseen
+  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${TXT_TESTFILE_PATH}  oma piirustus
+  Scroll and click test id  batch-ready
   Logout
 
 Sonja logs in and opens application
