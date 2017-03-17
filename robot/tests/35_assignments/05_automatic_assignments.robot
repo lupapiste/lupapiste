@@ -33,7 +33,8 @@ Sonja logs in and opens application
   Open tab  attachments
 
 Automatic assignment with the attachment as the target has been created
-  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  Aita ja asema, 1
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  käsittelemätön päivitys
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
 
 Sonja sees filters 'Ei tehtäviä' and 'Aita ja asema'
   Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
@@ -70,7 +71,8 @@ Sonja can see that there are more attachments in the same assignment
   Open applications search
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
-  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  Aita ja asema, 3
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  3 käsittelemätöntä päivitystä
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
 
 Sonja completes the automatic assignment
   Click by test id  mark-assignment-complete
@@ -106,8 +108,10 @@ Sonja can see two automatic assignments
   Open applications search
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
-  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  Aita ja asema, 1
-  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-1']//div[@data-test-id='assignment-text']  ELY ja naapuri, 1
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  käsittelemätön päivitys
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-1']//div[@data-test-id='assignment-text']  käsittelemätön päivitys
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-1']//div[@data-test-id='assignment-text']//a  ELY ja naapuri
 
 Sonja deletes ELY:n tai kunnan poikkeamapäätös attachment, and the associated automatic assignment is deleted
   Wait Until  Delete attachment  ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos

@@ -11,13 +11,12 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
     return (assignment.recipient ?
               assignment.recipient.firstName + " " + assignment.recipient.lastName + ": " :
             "")
-      + loc("application.assignment.automatic.target.attachment.message") + ": ";
+      + loc("application.assignment.automatic.target.attachment.message" + (assignment.targets.length === 1 ? "" : ".plural"),
+            assignment.targets.length) + ": ";
   };
 
   self.assignmentLinkText = function(assignment) {
-    return assignment.description + ", "
-      + assignment.targets.length + " "
-      + loc("application.assignment.automatic.target.attachment." + (assignment.targets.length === 1 ? "singular" : "plural"));
+    return assignment.description;
   };
 
   self.selectTriggerFilter = function(assignment) {
