@@ -102,3 +102,13 @@
                   ..app-id2.. {}
                   ..app-id3.. {:group31 [{:id ..target-id31.. :type-key ..type31..} {:id ..target-id32.. :type-key ..type32..}]
                                :group32 [{:id ..target-id32.. :type-key ..type32..}]}})))
+
+(fact targeting-assignments
+  (let [assignment1 {:targets [{:id "attachment1"}]}
+        assignment2 {:targets [{:id "attachment2"}]}
+        assignment3 {:targets [{:id "attachment1"} {:id "attachment2"}]}
+        assignments [assignment1 assignment2 assignment3]
+        attachment1 {:id "attachment1"}
+        attachment2 {:id "attachment2"}]
+    (targeting-assignments assignments attachment1) => (just [assignment1 assignment3] :in-any-order)
+    (targeting-assignments assignments attachment2) => (just [assignment2 assignment3] :in-any-order)))
