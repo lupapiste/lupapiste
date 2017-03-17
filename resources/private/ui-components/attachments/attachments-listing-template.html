@@ -10,7 +10,9 @@
   <automatic-assignments data-test-id="automatic-assignments-component"
                          params="authModel : authModel,
                                  assignments: lupapisteApp.services.assignmentService.automaticAssignments,
-                                 applicationId: applicationId">
+                                 applicationId: applicationId,
+                                 pageName: $data.pageName,
+                                 getFilters: lupapisteApp.services.attachmentsService.getFilters">
   </automatic-assignments>
   <!-- /ko -->
   <!-- ko if: authModel.ok("create-assignment") && upload.batchListHidden() -->

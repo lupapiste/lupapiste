@@ -12,6 +12,8 @@
   <i class="lupicon-circle-attention primary"></i>
   <div class="assignment-text" data-test-id="assignment-text">
     <span data-bind="text: $parent.assignmentText($data)"></span>
+    <a data-bind="text: $parent.assignmentLinkText($data),
+                  click: _.partial($parent.selectTriggerFilter, $data)"></a>
   </div>
   <div class="no-wrap-whitespace">
     <button data-bind="click: $parent.markComplete,
