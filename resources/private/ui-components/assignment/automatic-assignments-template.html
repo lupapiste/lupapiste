@@ -13,7 +13,8 @@
   <div class="assignment-text" data-test-id="assignment-text">
     <span data-bind="text: $parent.assignmentText($data)"></span>
     <a data-bind="text: $parent.assignmentLinkText($data),
-                  click: _.partial($parent.selectTriggerFilter, $data)"></a>
+                  click: _.partial($parent.selectTriggerFilter, $data),
+                  attr: {'data-test-id': 'filter-link-' + $data.trigger }"></a>
   </div>
   <div class="no-wrap-whitespace">
     <button data-bind="click: $parent.markComplete,

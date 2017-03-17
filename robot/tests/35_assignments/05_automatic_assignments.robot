@@ -39,9 +39,21 @@ Automatic assignment with the attachment as the target has been created
 Sonja sees filters 'Ei tehtäviä' and 'Aita ja asema'
   Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
   Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Total attachments row count is  4
   Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
   Wait until  Total attachments row count is  1
   Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
+  Scroll and click test id  assignment-not-targeted-filter-checkbox
+  Wait until  Total attachments row count is  3
+  Scroll and click test id  assignment-not-targeted-filter-checkbox
+
+Sonja opens the attachments targeted by the automatic assignment
+  Wait until  Total attachments row count is  4
+  Click by test id  filter-link-dead1111111111111112beef
+  Wait until  Checkbox wrapper selected by test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Total attachments row count is  1
+  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Total attachments row count is  4
 
 Sonja adds handler to application
   Click by test id  edit-handlers
@@ -94,6 +106,14 @@ Sonja opens attachments tab and sees 'ELY ja naapuri' filter
   Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
   Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter-checkbox
   Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111111beef-filter-checkbox
+  Wait until  Total attachments row count is  8
+  Click by test id  filter-link-dead1111111111111112beef
+  Wait until  Total attachments row count is  1
+  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
+  Click by test id  filter-link-dead1111111111111111beef
+  Wait until  Total attachments row count is  1
+  Scroll and click test id  assignment-dead1111111111111111beef-filter-checkbox
+  Wait until  Total attachments row count is  8
 
 Sonja has two assignments
   Open assignments search
