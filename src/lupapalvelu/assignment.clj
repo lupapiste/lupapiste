@@ -458,8 +458,8 @@
                            " and application " (:id application) ": " (.getMessage e)))))))))
 
 (defn run-assignment-triggers [response-fn]
-  (fn [response]
-    (let [{:keys [user organization application targets assignment-group timestamp]} (response-fn response)
+  (fn [& response]
+    (let [{:keys [user organization application targets assignment-group timestamp]} (apply response-fn response)
           org-id   (:id organization)
           triggers (:assignment-triggers organization)]
       (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]

@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -187,6 +188,16 @@
   [{application :application}]
   (ok :attachmentTypes (att-type/get-attachment-types-for-application application)))
 
+(defn- on-set-attachment-type-success [{:keys [application user data organization created]} result]
+  (when (:ok result)
+    (let [{:keys [attachmentId attachmentType]} data]
+      {:user             user
+       :organization     @organization
+       :application      application
+       :targets          [{:id attachmentId :trigger-type attachmentType}]
+       :assignment-group "attachments"
+       :timestamp        created})))
+
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
    :categories #{:attachments}
@@ -199,7 +210,8 @@
                 att/edit-allowed-by-target
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
-                att/attachment-matches-application]}
+                att/attachment-matches-application]
+   :on-success [(assignment/run-assignment-triggers on-set-attachment-type-success)]}
   [{:keys [application user created] :as command}]
 
   (let [attachment (att/get-attachment-info application attachmentId)
