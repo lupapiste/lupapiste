@@ -137,21 +137,53 @@ Sonja deletes ELY:n tai kunnan poikkeamapäätös attachment, and the associated
   Wait Until  Delete attachment  ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos
   Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment-1']
 
+Sonja completes the Aita ja asema assignment
+  Click by test id  mark-assignment-complete
+  Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment-1']
+  Logout
+
+Pena logs in and changes the type of aitapiirros to aitapiirustus
+  As Pena
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Open attachment details  paapiirustus.asemapiirros
+  Click enabled by test id  change-attachment-type
+  Select from list  attachment-type-select  paapiirustus.aitapiirustus
+  Wait Until  Element Should Not Be Visible  attachment-type-select-loader
+  Click enabled by test id  confirm-yes
+  Positive indicator should be visible
+  Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
+  Scroll to test id  back-to-application-from-attachment
+  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Wait Until  Tab should be visible  attachments
+  Logout
+
+Sonja opens the application and sees that changing the type has created a new automatic assignment
+  As Sonja
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']  käsittelemätön päivitys
+  Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
+
+The assignment targets the 'Aitapiirustus' attachment
+  Click by test id  filter-link-dead1111111111111112beef
+  Wait until  Total attachments row count is  1
+  Wait until  Element should be visible  xpath=//tr[@data-test-type='paapiirustus.aitapiirustus']
+
 Sonja changes handler
   Click by test id  edit-handlers
   Wait test id visible  add-handler
   Click by test id  add-handler
   Edit handler  0  Sibbo Ronja  Käsittelijä
 
-Sonja have only completed assignment
+Sonja has no open assignments
   Open assignments search
   Click by test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
   Logout
 
-Ronja have one assignment
+Ronja has one assignment
   As Ronja
   Open assignments search
   Open search tab  all
