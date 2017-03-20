@@ -23,6 +23,7 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
     var filterSet = self.params.getFilters(self.params.pageName);
     filterSet.toggleAll(false);
     filterSet.getFilterValue("assignment-" + assignment.trigger)(true);
+    $("#attachments-accordions")[0].scrollIntoView(true);
   };
 
   self.markComplete = function(assignment) {

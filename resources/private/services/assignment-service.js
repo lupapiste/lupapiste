@@ -129,10 +129,20 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     return _.map(_.flatten(_.map(assignments, "targets")), "id");
   }
 
+  function attachmentIsTargetedByAutomaticAssignments(event) {
+    return _.includes(assignmentTargetIds(self.automaticAssignments()), _.get(event, "attachmentId"));
+  }
+
   // When attachment is removed, reload assignments if the assignment was a target for an automatic assignment
   hub.subscribe("attachmentsService::remove", function(event) {
     if (event.ok === true &&
-        _.includes(assignmentTargetIds(self.automaticAssignments()), _.get(event, "attachmentId"))) {
+        attachmentIsTargetedByAutomaticAssignments(event)) {
+      assignmentsForApplication(_.get(event, "id"));
+    }
+  });
+  hub.subscribe("attachmentsService::update", function(event) {
+    if (event.ok === true &&
+        event.commandName === "set-attachment-type") {
       assignmentsForApplication(_.get(event, "id"));
     }
   });
