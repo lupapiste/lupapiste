@@ -10908,13 +10908,21 @@ div.attachments-table-container table.attachments-table .attachments-table--wide
   width: 80%;
 }
 
+div.attachments-table-container table.attachments-table span.attachment-drawing-number {
+  display: block;
+  min-width: 4em;
+  max-width: 7em;
+  overflow-wrap: break-word;
+  margin-right: -1px;
+}
+
 .attachment-state-icons {
   white-space: nowrap;
 }
 
 .attachment-state-icons i {
   margin-left: 1px;
-  magint-right: 1px;
+  margin-right: 1px;
 }
 
 table.suti-admin-table {
