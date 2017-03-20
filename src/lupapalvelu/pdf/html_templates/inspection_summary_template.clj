@@ -2,13 +2,17 @@
   (:require [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.html-template-common :as common]
             [lupapalvelu.pdf.html-templates.application-info-template :as app-info]))
 
 (def inspection-summary-template
-  [[:h3#inspection-summary-title]
-   [:table#inspection-summary
+  [:div#inspection-summary
+   [:h3#inspection-summary-title]
+   [:div [:b#inspection-summary-name]]
+   [:div#inspection-summary-operation]
+   [:table#inspection-summary-targets
     [:thead ; Is repeated in every page when the table is splitted into multiple pages in pdf
      [:tr#target-header
       [:th#name]
@@ -29,17 +33,20 @@
        (map (comp vector :filename :latestVersion))))
 
 (defn inspection-summary-transformation [application lang summary-id]
-  (let [summary (util/find-by-id summary-id (:inspection-summaries application))]
+  (let [summary   (util/find-by-id summary-id (:inspection-summaries application))
+        operation (util/find-by-id (get-in summary [:op :id]) (app/get-operations application))]
     (enlive/transformation
-     [:#inspection-summary-title] (enlive/content (i18n/localize lang "inspection-summary.tab.title"))
-     [:#inspection-summary :#target-header]
+     [:#inspection-summary-title]      (enlive/content (i18n/localize lang "inspection-summary.tab.title"))
+     [:#inspection-summary-name]       (enlive/content (:name summary))
+     [:#inspection-summary-operation]  (enlive/content (app-info/get-operation-info application lang operation))
+     [:#inspection-summary-targets :#target-header]
      (enlive/transformation
       [:#name]          (enlive/content (i18n/localize lang "inspection-summary.targets.table.target-name"))
       [:#attachments]   (enlive/content (i18n/localize lang "inspection-summary.targets.table.attachments"))
       [:#finished]      (enlive/content (i18n/localize lang "inspection-summary.targets.table.finished"))
       [:#finished-date] (enlive/content (i18n/localize lang "inspection-summary.targets.table.date"))
       [:#finished-by]   (enlive/content (i18n/localize lang "inspection-summary.targets.table.marked-by")))
-     [:#inspection-summary :#target-data]
+     [:#inspection-summary-targets :#target-data]
      (enlive/clone-for [{:keys [target-name finished finished-date finished-by] :as target} (:targets summary)]
                        [:#name]          (enlive/content target-name)
                        [:#attachments]   (enlive/content (->> (target-attachments application target) (common/wrap-map :div)))
@@ -49,8 +56,8 @@
 
 (def inspection-summary-page-template
   (common/html-page nil
-                       (common/page-content [app-info/application-info-template
-                                                inspection-summary-template])))
+                    (common/page-content [app-info/application-info-template
+                                          inspection-summary-template])))
 
 (enlive/deftemplate inspection-summary (enlive/html inspection-summary-page-template) [application lang summary-id]
   [:head :style] (enlive/content (common/styles))

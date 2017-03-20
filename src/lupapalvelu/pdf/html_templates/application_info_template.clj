@@ -29,7 +29,7 @@
 (defn- get-handlers [{handlers :handlers :as application} lang]
   (map #(format "%s: %s %s" (get-in % [:name (keyword lang)]) (:firstName %) (:lastName %)) handlers))
 
-(defn- get-operation-info [{documents :documents} lang {op-name :name op-id :id op-desc :description}]
+(defn get-operation-info [{documents :documents} lang {op-name :name op-id :id op-desc :description}]
   (let [doc  (util/find-first (comp #{op-id} :id :op :schema-info) documents)
         desc (->> [(get-in doc [:data :tunnus :value]) op-desc]
                   (remove ss/blank?)
