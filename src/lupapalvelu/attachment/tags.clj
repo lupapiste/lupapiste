@@ -130,7 +130,7 @@
 
 (defn- assignment-trigger-filters [{:keys [attachments]} assignments]
   (->> attachments
-       (mapcat (partial targeting-assignments assignments))
+       (mapcat (partial targeting-assignments (remove assignment/completed? assignments)))
        (map #(select-keys % [:trigger :description]))
        (distinct-by :trigger)
        (map (fn [{:keys [trigger description]}]
