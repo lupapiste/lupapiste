@@ -2,7 +2,6 @@ body {
   max-width: 960px;
   margin: auto;
   font-family: "Open Sans", "Arial";
-  zoom: 0.5;
 }
 
 tr {
@@ -14,7 +13,7 @@ h3 {
 }
 
 .page-content {
-  padding: 100px 0px;
+  padding: 0px;
 }
 
 .page-content table {
@@ -34,18 +33,9 @@ h3 {
 }
 
 .page-header, .page-footer {
-  position: fixed;
   display: table;
   width: 100%;
   max-width: 960px;
-}
-
-.page-header {
-  top: 0px;
-}
-
-.page-footer {
-  bottom: 0px;
 }
 
 .page-header img {
@@ -58,13 +48,17 @@ h3 {
   display: table-cell;
   vertical-align: middle;
   min-height: 35px;
-  min-width: 240px;
+  width: 50%;
 }
 
 .page-header > span {
-  padding: 20px 0px 30px;
+  padding: 20px 0px 40px;
 }
 
-.page-footer > span {
+.page-footer {
   padding: 30px 0px 20px;
+}
+
+.align-content-right {
+  text-align: right;
 }

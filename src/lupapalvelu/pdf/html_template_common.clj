@@ -10,6 +10,8 @@
 
 (def styles-path "private/pdf/style/")
 
+(def wkhtmltopdf-page-numbering-script-path "private/pdf/js/wkhtmltopdf-page-numbering.js")
+
 (def lupa-img-path "public/lp-static/img/lupapiste-logo.png")
 
 (defn styles
@@ -17,10 +19,15 @@
   ([files] (-> (ss/join " " (map slurp files))
                (ss/replace #"\s+" " "))))
 
+(defn wkhtmltopdf-page-numbering-script
+  ([] (-> wkhtmltopdf-page-numbering-script-path
+          io/resource
+          io/file
+          slurp)))
+
 (defn image-src [file mime-type]
   (with-open [in (io/input-stream file)]
     (let [byte-arr (byte-array (.length file))]
-      (println (.length file))
       (.read in byte-arr)
       (->> (String. (base64/encode byte-arr) "utf-8")
            (str "data:" mime-type ";base64,")))))
@@ -40,14 +47,18 @@
 
 (def footer-tag :div.page-footer)
 
-(def application-footer-template [footer-tag [:span#application-id] " - " [:span#host-address] [:span#page-number]])
+(def application-footer-template [[footer-tag
+                                    [:span [:span#application-id] " - " [:span#host-address]]
+                                    [:span.align-content-right [:span#page-number] "/" [:span#number-of-pages]]]
+                                  [:script#page-numbering {:type "text/javascript"}]])
 
 (defn common-content-transformation [application lang]
   (enlive/transformation
    [:#lupa-img]       (enlive/content (enlive/html [:img {:src (image-src (io/file (io/resource lupa-img-path)) "img/png")}]))
    [:#print-date]     (enlive/content (util/to-local-date (now)))
    [:#application-id] (enlive/content (:id application))
-   [:#host-address]   (enlive/content (env/value :host))))
+   [:#host-address]   (enlive/content (env/value :host))
+   [:script#page-numbering] (enlive/content (wkhtmltopdf-page-numbering-script))))
 
 (defn- flat-rows
   "Recursively flattens hiccup-style html template rows"
@@ -69,13 +80,17 @@
    (apply vector :body
           (flat-rows body-rows))])
 
+(defn apply-page [enlive-template & args]
+  (->> (apply enlive-template args)
+       (apply str "<!DOCTYPE html>")))
+
 (enlive/deftemplate basic-header (enlive/html (html-page nil header-template)) [application lang]
   [:head :style] (enlive/content (styles))
-  [header-tag] (common-content-transformation application lang))
+  [:body]        (common-content-transformation application lang))
 
 (enlive/deftemplate basic-footer (enlive/html (html-page nil application-footer-template)) [application lang]
   [:head :style] (enlive/content (styles))
-  [footer-tag]   (common-content-transformation application lang))
+  [:body]        (common-content-transformation application lang))
 
 
 

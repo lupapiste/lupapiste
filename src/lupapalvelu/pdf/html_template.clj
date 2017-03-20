@@ -11,9 +11,9 @@
             [lupapalvelu.pdf.html-templates.inspection-summary-template :as inspection-summary-template]))
 
 (defn create-inspection-summary-pdf [application lang summary-id]
-  (let [content (apply str (inspection-summary-template/inspection-summary application lang summary-id))
-        header  (apply str (common/basic-header application lang))
-        footer  (apply str (common/basic-footer application lang))
+  (let [content (common/apply-page inspection-summary-template/inspection-summary application lang summary-id)
+        header  (common/apply-page common/basic-header application lang)
+        footer  (common/apply-page common/basic-footer application lang)
         file-id (mongo/create-id)
         resp    (muuntaja/convert-html-to-pdf (:id application) "inspection-summary" content header footer)]
     (if (:ok resp)
