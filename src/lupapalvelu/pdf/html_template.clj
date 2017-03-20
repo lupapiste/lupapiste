@@ -15,44 +15,10 @@
         header  (common/apply-page common/basic-header application lang)
         footer  (common/apply-page common/basic-footer application lang)
         file-id (mongo/create-id)
+        file-name (str (:id application) "_inspection-summary_" summary-id \_ (now) ".pdf")
         resp    (muuntaja/convert-html-to-pdf (:id application) "inspection-summary" content header footer)]
     (if (:ok resp)
       (with-open [stream (:pdf-file-stream resp)]
-        (mongo/upload file-id (str (:id application) "_inspection-summary_" summary-id \_ (now) ".pdf") "application/pdf" stream)
+        (mongo/upload file-id file-name "application/pdf" stream)
         file-id)
       resp)))
-
-(comment
-
-  (create-inspection-summary-pdf application lang summary-id)
-
-  (i18n/with-lang lang
-    (spit (io/file (io/resource "t2.html")) (apply str (page-content application lang summary-id))))
-
-  (i18n/with-lang lang
-    (spit (io/file (io/resource "page.html")) (apply str (page application lang summary-id))))
-
-  (i18n/with-lang lang
-    (spit (io/file (io/resource "page.html")) (apply str (lupapalvelu.pdf.html-templates.inspection-summary-template/inspection-summary application lang summary-id))))
-
-  (spit (io/file (io/resource "header.html")) (apply str (header)))
-
-  (spit (io/file (io/resource "footer.html")) (apply str (footer)))
-
-
-  (lupapalvelu.mongo/connect!)
-
-  (def application (lupapalvelu.domain/get-application-no-access-checking "LP-753-2017-90006"))
-  (def application (update-in application [:inspection-summaries 0 :targets] (partial map-indexed #(update %2 :target-name str "__" %1))))
-
-  (def lang "fi")
-
-  (def summary-id (-> application :inspection-summaries first :id))
-
-  (lupapalvelu.pdf.html-templates.inspection-summary-template/inspection-summary application lang summary-id)
-
-  (lupapalvelu.pdf.html-templates.inspection-summary-template/inspection-summary application lang summary-id)
-
-  (hiccup/html [:style (-> page-style slurp (ss/replace #"\s+" " "))])
-
-    )

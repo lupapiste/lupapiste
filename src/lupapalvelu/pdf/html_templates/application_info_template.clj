@@ -67,18 +67,3 @@
     [:#applicant-value]    (enlive/content (common/wrap-map :div (:_applicantIndex application)))
     [:#operations-title]   (enlive/content (i18n/localize lang "operations"))
     [:#operations-value]   (enlive/content (common/wrap-map :div (get-operations application lang))))))
-
-(comment
-
-  (lupapalvelu.mongo/connect!)
-
-  (def application (lupapalvelu.domain/get-application-no-access-checking "LP-753-2017-90006"))
-  (def application (update-in application [:inspection-summaries 0 :targets] (partial map-indexed #(update %2 :target-name str "__" %1))))
-
-  (def lang "fi")
-
-
-  (app-info application lang)
-
-
-)
