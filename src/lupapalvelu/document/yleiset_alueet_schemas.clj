@@ -49,7 +49,7 @@
   (body
     {:name "tyoaika-alkaa-pvm" :type :date :hidden true} ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date :hidden true}
-    {:name "tyoaika-alkaa-ms" :type :msDate :required true}
+    {:name "tyoaika-alkaa-ms" :type :msDate  :required true}
     {:name "tyoaika-paattyy-ms" :type :msDate :required true}))
 
 (def tyo-aika-for-jatkoaika
@@ -60,6 +60,9 @@
 (def hankkeen-kuvaus-jatkoaika
   (body
     {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}))
+
+(def work-period-fields [{:type :date :path ["tyoaika-alkaa-ms"]}
+                         {:type :date :path ["tyoaika-paattyy-ms"]}])
 
 (defschemas
   1
@@ -96,7 +99,9 @@
            :removable false
            :repeating false
            :approvable true
-           :order 63}
+           :order 63
+           :accordion-fields work-period-fields
+           }
     :body tyo-aika}
    {:info {:name "tyo-aika-for-jatkoaika"                                  ;; (alkuPvm /) loppuPvm
            :type :group

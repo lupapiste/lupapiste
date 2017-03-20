@@ -82,7 +82,9 @@
       (-> data
           (assoc-in [:info :name] schema-name)
           (assoc-in [:info :version] version)
-          (update :body accordion-field-emitters (get-in data [:info :accordion-fields]))))))
+          (update :body accordion-field-emitters
+                  (map #(if (:type %) (:path %) %)
+                       (get-in data [:info :accordion-fields])))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]

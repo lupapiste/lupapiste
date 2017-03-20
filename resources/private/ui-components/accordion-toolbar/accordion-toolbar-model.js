@@ -79,7 +79,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   // Optional accordion header text.
   // Consists of optional properties: identifier field, operation description, and accordion paths (from schema)
   self.headerDescription = ko.pureComputed(function() {
-    // if identifier exists, subscribing to it's "value" observable
+    // if identifier exists, subscribing to its "value" observable
     var identifier = self.identifierField && self.identifierField.value();
     var operation  = self.operationDescription();
     var accordionText = self.accordionText();

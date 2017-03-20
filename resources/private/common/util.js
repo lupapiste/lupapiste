@@ -436,6 +436,11 @@ var util = (function($) {
     return s && s.match(/^[0-9a-fA-F]{24}$/) !== null;
   }
 
+  // Timestampe is milliseconds from Unix epoch.
+  function finnishDate( timestamp ) {
+    return moment( _.toInteger( timestamp ) ).format( "D.M.YYYY" );
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -486,7 +491,8 @@ var util = (function($) {
     arrayToObject: arrayToObject,
     isSubObject: isSubObject,
     isOdd: isOdd,
-    isEven: isEven
+    isEven: isEven,
+    finnishDate: finnishDate
   };
 
 })(jQuery);

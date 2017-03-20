@@ -618,19 +618,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return date.getTime();
   }
 
-  function parseMsToDateString(ms) {
-    var options = { year: "numeric", month: "2-digit", day: "2-digit" };
-    var lang = loc.getCurrentLanguage();
-    return new Date(Number(ms)).toLocaleString(lang, options);
-  }
-
   function buildMsDate(subSchema, model, path) {
     var lang = loc.getCurrentLanguage();
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
     var value;
     if (getModelValue(model, subSchema.name)) {
-      value = parseMsToDateString(getModelValue(model, subSchema.name));
+      value = util.finnishDate(getModelValue(model, subSchema.name));
     }
 
     var span = makeEntrySpan(subSchema, myPath, validationResult);
@@ -647,6 +641,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
+      "data-docgen-path": myPath,
       name: self.docId + "." + myPath,
       type: "text",
       "class": className,
@@ -666,7 +661,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var ms = parseDateStringToMs(input.val());
         e.target.value =  ms;
         saveValue(e, ms);
-        e.target.value = parseMsToDateString(e.target.value);
+        emit( e.target, subSchema );
+        e.target.value = util.finnishDate(e.target.value);
+
       });
     }
     input.appendTo(span);

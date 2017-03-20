@@ -22,13 +22,27 @@ LUPAPISTE.AccordionService = function() {
   self.documents = ko.observableArray();
   self.identifierFields = ko.observableArray([]);
 
+  var fieldTypeFuns = {date: util.finnishDate};
+
+  self.accordionFieldText = function( field, data ){
+    var value = util.getIn( data, field.path || field );
+    return _.get( fieldTypeFuns, field.type, _.identity)( value );
+  };
 
   function createDocumentModel(doc) {
     var fields = doc.schema.info["accordion-fields"];
-    var data = _.reduce(fields, function(result, path) {
-      return _.set(result, path.join("."), ko.observable(util.getIn(doc.data, path.concat("value"))));
+    var data = _.reduce(fields, function(result, field) {
+      var path = _.get( field, "path", field );
+      var pathValue = util.getIn(doc.data, path.concat("value"));
+      return _.set(result,
+                   path.join("."),
+                   ko.observable( pathValue ));
     }, {});
-    return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: data, accordionPaths: fields};
+    return {docId: doc.id,
+            operation: ko.mapping.fromJS(doc["schema-info"].op),
+            schema: doc.schema,
+            data: data,
+            accordionPaths: fields };
   }
 
   function createDocumentIdentifierModel(doc) {

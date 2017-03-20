@@ -7,20 +7,26 @@ var docutils = (function () {
 
   function buildAccordionText(paths, data) {
     return _(paths)
-      .map(function(path) {
-        return ko.unwrap(_.get(data, path));
+      .map( function( path ) {
+        return lupapisteApp.services.accordionService.accordionFieldText( path, data );
       })
       .reject(_.isEmpty)
       .value()
       .join(" ");
   }
 
+  function specialSelected( paths, data ) {
+    var first = _.get( paths, "0.0");
+    return first === SELECT_ONE_OF_GROUP_KEY
+         ? ko.unwrap(_.get( data, first ))
+         : null;
+  }
+
   // resolve values from given paths
   function accordionText(paths, data) {
     if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
-      var firstPathValue = paths[0][0];
       // are we dealing with _selected special case
-      var selectedValue = firstPathValue === SELECT_ONE_OF_GROUP_KEY ? _.get(data, firstPathValue)() : false;
+      var selectedValue = specialSelected( paths, data );
       if (selectedValue) {
         var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
           return path[0] === selectedValue;
