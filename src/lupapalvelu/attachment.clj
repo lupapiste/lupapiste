@@ -886,6 +886,29 @@
 (assignment/register-assignment-target! :attachments describe-assignment-targets)
 
 ;;
+;; Enriching attachment
+;;
+
+(defn- assignment-trigger-tags [assignments attachment]
+  (or (not-empty (->> (assignment/targeting-assignments assignments attachment)
+                      (remove assignment/completed?)
+                      (map #(assignment/assignment-tag (:trigger %)))
+                      distinct))
+      [(assignment/assignment-tag "not-targeted")]))
+
+(defn- enrich-attachment-and-add-trigger-tags
+  [assignments attachment]
+  (update (enrich-attachment attachment) :tags
+          #(concat % (assignment-trigger-tags assignments attachment))))
+
+(defn enrich-attachment-with-trigger-tags [assignments attachment]
+  (if assignments
+    (enrich-attachment-and-add-trigger-tags assignments
+                                            attachment)
+    (enrich-attachment attachment)))
+
+
+;;
 ;; Pre-checks
 ;;
 

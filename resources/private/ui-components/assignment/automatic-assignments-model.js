@@ -11,10 +11,18 @@ LUPAPISTE.AutomaticAssignmentsModel = function(params) {
     return (assignment.recipient ?
               assignment.recipient.firstName + " " + assignment.recipient.lastName + ": " :
             "")
-      + loc("application.assignment.automatic.target.attachment.message") + ": "
-      + assignment.description + ", "
-      + assignment.targets.length + " "
-      + loc("application.assignment.automatic.target.attachment." + (assignment.targets.length === 1 ? "singular" : "plural"));
+      + loc("application.assignment.automatic.target.attachment.message" + (assignment.targets.length === 1 ? "" : ".plural"),
+            assignment.targets.length) + ": ";
+  };
+
+  self.assignmentLinkText = function(assignment) {
+    return assignment.description;
+  };
+
+  self.selectTriggerFilter = function(assignment) {
+    var filterSet = self.params.getFilters(self.params.pageName);
+    filterSet.toggleAll(false);
+    filterSet.getFilterValue("assignment-" + assignment.trigger)(true);
   };
 
   self.markComplete = function(assignment) {

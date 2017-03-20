@@ -10,7 +10,9 @@
   <automatic-assignments data-test-id="automatic-assignments-component"
                          params="authModel : authModel,
                                  assignments: lupapisteApp.services.assignmentService.automaticAssignments,
-                                 applicationId: applicationId">
+                                 applicationId: applicationId,
+                                 pageName: $data.pageName,
+                                 getFilters: lupapisteApp.services.attachmentsService.getFilters">
   </automatic-assignments>
   <!-- /ko -->
   <!-- ko if: authModel.ok("create-assignment") && upload.batchListHidden() -->
@@ -31,7 +33,8 @@
     <suti-display></suti-display>
 
     <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilters() -->
-    <filters params="pageName: $data.pageName"></filters>
+    <filters params="pageName: $data.pageName,
+                     customDescriptions: true"></filters>
     <!-- /ko -->
 
     <!-- ko if: $data.hasFilteredAttachments() -->
