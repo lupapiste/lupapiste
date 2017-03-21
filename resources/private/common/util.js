@@ -35,8 +35,9 @@ var util = (function($) {
     return "excellent";
   }
 
+  // See http://emailregex.com/
   function isValidEmailAddress(val) {
-    return /\S+@\S+\.\S+/.test(val);
+    return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val);
   }
 
   var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
@@ -431,6 +432,10 @@ var util = (function($) {
     return !isOdd(number);
   }
 
+  function isValidBSONObjectId( s ) {
+    return s && s.match(/^[0-9a-fA-F]{24}$/) !== null;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -440,6 +445,7 @@ var util = (function($) {
     isValidY:            isValidY,
     isValidOVT:          isValidOVT,
     isValidPersonId:     isValidPersonId,
+    isValidBSONObjectId: isValidBSONObjectId,
     lowerCase: function(s) {return _.isString(s) ? s.toLowerCase() : s;},
     upperCase: function(s) {return _.isString(s) ? s.toUpperCase() : s;},
     prop: {

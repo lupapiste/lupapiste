@@ -115,6 +115,7 @@
     self.sendToArchive = ko.observable(false);
     self.archived = ko.observable(false);
 
+    self.showConversionLog = ko.observable(false);
     self.convertableToPdfA = self.disposedPureComputed(function() {
       return self.authModel.ok("convert-to-pdfa");
     });

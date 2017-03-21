@@ -56,7 +56,7 @@
     (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
     (att/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     (att/cleanup-temp-file (:result conversion-data))
-    linked-version))
+    (assoc linked-version :type (or (:type linked-version) (:type attachment)))))
 
 (defn- bind-attachments! [command file-infos job-id]
   (reduce
@@ -68,12 +68,12 @@
           (conj results {:original-file-id fileId
                          :fileId (:fileId result)
                          :attachment-id (:id result)
-                         :type type
+                         :type (or type (:type result))
                          :status :done}))
         (do
           (warnf "no file with file-id %s in mongo" fileId)
           (job/update job-id assoc fileId {:status :error :fileId fileId})
-          {:fileId fileId :type type :status :error})))
+          (conj results {:fileId fileId :type type :status :error}))))
     []
     file-infos))
 
@@ -94,7 +94,7 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
-  ([command file-infos]
+  ([command file-infos trigger-assignments-fn]
    (make-bind-job command file-infos nil))
   ([command file-infos future-response]
    (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
@@ -102,6 +102,7 @@
                  (job/start bind-job-status))]
      (util/future*
       (if (or (not (future? future-response)) (ok? @future-response))
-        (bind-attachments! command coerced-file-infos (:id job))
+        (-> (bind-attachments! command coerced-file-infos (:id job))
+            (trigger-assignments-fn))
         @future-response))
      job)))

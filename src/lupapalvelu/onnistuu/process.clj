@@ -13,6 +13,8 @@
             [sade.schemas :refer [max-length-string]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [sade.validators :refer [valid-email? valid-hetu?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
@@ -136,9 +138,13 @@
         (debug "sign:fetch-document:download-from-mongo")
         [content-type ((:content pdf))])
       (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
-            account-type (get-in process [:company :accountType])
+            account-type (keyword (get-in process [:company :accountType]))
             account {:type  (i18n/localize "fi" :register :company account-type :title)
-                     :price (i18n/localize "fi" :register :company account-type :price)}
+                     :price (i18n/localize-and-fill "fi"
+                                                    [:register :company :price]
+                                                    (:price (util/find-by-key :name
+                                                                              account-type
+                                                                              c/account-types)))}
             pdf (docx/yritystilisopimus (:company process) (:signer process) account ts)
             sha256 (pandect/sha256 pdf)]
         (debug "sign:fetch-document:upload-to-mongo")
@@ -152,6 +158,10 @@
 ;
 
 (notifications/defemail :onnistuu-success
+  {:model-fn  (fn [command conf recipient] command)
+   :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
+
+(notifications/defemail :onnistuu-success-campaign
   {:model-fn  (fn [command conf recipient] command)
    :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
 
@@ -171,7 +181,7 @@
         {:keys [type identifier name timestamp uuid]} (first signatures)
         resp-assert! (fn [result expected message]
                       (when-not (= result expected)
-                        (errorf "sing:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
+                        (errorf "sign:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
                         (process-update! process :error ts)
                         (fail! :bad-request)))]
     (resp-assert! (:stamp process)          stamp              "wrong stamp")
@@ -199,7 +209,10 @@
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
                (:currentUser signer)))
-      (notifications/notify! :onnistuu-success mail-model))
+      (notifications/notify! (if (-> mail-model :company :campaign ss/not-blank?)
+                               :onnistuu-success-campaign
+                               :onnistuu-success)
+                             mail-model))
     process))
 
 ;

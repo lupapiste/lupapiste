@@ -63,20 +63,20 @@
 
 (facts enrich-assignment-target
   (fact "one target"
-    (enrich-assignment-target {:group1 [{:id ..target-id.. :type-key ..type..}]} {:target {:id ..target-id.. :group "group1"}})
-    => {:target {:id ..target-id.. :group "group1" :type-key ..type..}})
+    (enrich-assignment-target {:group1 [{:id ..target-id.. :type-key ..type..}]} {:targets [{:id ..target-id.. :group "group1"}]})
+    => {:targets [{:id ..target-id.. :group "group1" :type-key ..type..}]})
 
   (fact "many targets"
     (enrich-assignment-target {:group1 [{:id ..target-id1.. :type-key ..type1..} {:id ..target-id2.. :type-key ..type2..}]
                                :group2 [{:id ..target-id3.. :type-key ..type3..}]}
-                              {:target {:id ..target-id2.. :group "group1"}})
-    => {:target {:id ..target-id2.. :group "group1" :type-key ..type2..}})
+                              {:targets [{:id ..target-id2.. :group "group1"}]})
+    => {:targets [{:id ..target-id2.. :group "group1" :type-key ..type2..}]})
 
   (fact "target not found - assignment is returned unenriched"
     (enrich-assignment-target {:group1 [{:id ..target-id1.. :type-key ..type..} {:id ..target-id2.. :type-key ..type..}]
                                :group2 [{:id ..target-id2.. :type-key ..type..}]}
-                              {:target {:id ..not-found-target-id.. :group "group1"}})
-    => {:target {:id ..not-found-target-id.. :group "group1"}}))
+                              {:targets [{:id ..not-found-target-id.. :group "group1"}]})
+    => {:targets [{:id ..not-found-target-id.. :group "group1"}]}))
 
 (facts enrich-targets
   (fact "one assignment"
@@ -90,15 +90,25 @@
               => {:application {:id ..app-id1..} :target {:id ..target-id.. :type-key ..type..}}))
 
   (fact "many assignments"
-    (enrich-targets [{:application {:id ..app-id1..} :target {:id ..target-id12.. :group "group11"}}
-                     {:application {:id ..app-id2..} :target {:id ..target-id20.. :group "group20"}}
-                     {:application {:id ..app-id3..} :target {:id ..target-id32.. :group "group32"}}])
-    => [{:application {:id ..app-id1..} :target {:id ..target-id12.. :group "group11" :type-key ..type12..}}
-        {:application {:id ..app-id2..} :target {:id ..target-id20.. :group "group20"}}
-        {:application {:id ..app-id3..} :target {:id ..target-id32.. :group "group32" :type-key ..type32..}}]
+    (enrich-targets [{:application {:id ..app-id1..} :targets [{:id ..target-id12.. :group "group11"}]}
+                     {:application {:id ..app-id2..} :targets [{:id ..target-id20.. :group "group20"}]}
+                     {:application {:id ..app-id3..} :targets [{:id ..target-id32.. :group "group32"}]}])
+    => [{:application {:id ..app-id1..} :targets [{:id ..target-id12.. :group "group11" :type-key ..type12..}]}
+        {:application {:id ..app-id2..} :targets [{:id ..target-id20.. :group "group20"}]}
+        {:application {:id ..app-id3..} :targets [{:id ..target-id32.. :group "group32" :type-key ..type32..}]}]
 
     (provided (#'lupapalvelu.assignment/get-targets-for-applications [..app-id1.. ..app-id2.. ..app-id3..])
               => {..app-id1.. {:group11 [{:id ..target-id11.. :type-key ..type11..} {:id ..target-id12.. :type-key ..type12..}]}
                   ..app-id2.. {}
                   ..app-id3.. {:group31 [{:id ..target-id31.. :type-key ..type31..} {:id ..target-id32.. :type-key ..type32..}]
                                :group32 [{:id ..target-id32.. :type-key ..type32..}]}})))
+
+(fact targeting-assignments
+  (let [assignment1 {:targets [{:id "attachment1"}]}
+        assignment2 {:targets [{:id "attachment2"}]}
+        assignment3 {:targets [{:id "attachment1"} {:id "attachment2"}]}
+        assignments [assignment1 assignment2 assignment3]
+        attachment1 {:id "attachment1"}
+        attachment2 {:id "attachment2"}]
+    (targeting-assignments assignments attachment1) => (just [assignment1 assignment3] :in-any-order)
+    (targeting-assignments assignments attachment2) => (just [assignment2 assignment3] :in-any-order)))

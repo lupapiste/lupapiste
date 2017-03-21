@@ -11,6 +11,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
@@ -2766,6 +2767,14 @@
   (->> (mongo/select :applications {:modified {$gt 1486588980000} :handlers {$exists true}} [:handlers])
        (run! handler-map-to-array)))
 
+(defmigration assignment-target-to-targets
+  {:apply-when (pos? (mongo/count :assignments {$or [{:target {$exists true}}
+                                                     {:targets {$exists false}}]}))}
+  (reduce + 0
+          (for [assignment (mongo/select :assignments {} {:target 1})]
+            (let [target (:target assignment)]
+              (mongo/update-n :assignments {:_id (:id assignment)} {$set {:targets [target]}
+                                                                    $unset {:target ""}})))))
 (defn- add-empty-handler-array [collection {handlers :handlers id :id :as application}]
   (when-not handlers
     (mongo/update-by-id collection id {$set {:handlers []}})))
@@ -2781,6 +2790,26 @@
 
 (defmigration attachment-op-to-array
   (update-applications-array :attachments ensure-op-is-not-object {:attachments.op {$type 3}}))
+
+(defmigration add-assignment-trigger
+  {:apply-when (pos? (mongo/count :assignments {:trigger {$exists false}}))}
+  (mongo/update-n :assignments
+                  {:trigger {$exists false}}
+                  {$set {:trigger assignment/user-created-trigger}}
+                  :multi true))
+
+(defmigration add-assignment-target-timestamps
+  {:apply-when (pos? (mongo/count :assignments {:targets.timestamp {$exists false}}))}
+  (reduce + 0
+          (for [assignment (mongo/select :assignments
+                                         {:targets.timestamp {$exists false}}
+                                         {:targets true, :states true})]
+            (let [targets           (:targets assignment)
+                  created-timestamp (-> assignment :states (get 0) :timestamp)]
+              (mongo/update-n :assignments {:_id (:id assignment)}
+                              {$set {:targets (map (fn [target]
+                                                     (assoc target :timestamp created-timestamp))
+                                                   targets)}})))))
 
 (defn migrate-rakennusJaPurkujate
   "1) Other selection to vaarallisetJatteet 2) Other selection to
@@ -2888,6 +2917,43 @@
     (mongo/update-by-query :applications
                            {:auth.id malformed-user-id}
                            {$pull {:auth {:id malformed-user-id}}})))
+
+(def ya-katulupa-types
+  #{:ya-katulupa-vesi-ja-viemarityot
+    :ya-katulupa-maalampotyot
+    :ya-katulupa-kaukolampotyot
+    :ya-katulupa-kaapelityot
+    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat})
+
+(defn- op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update [documents]
+  (letfn [(find-doc-index [schema-name]
+            (first (util/positions #(= (get-in % [:schema-info :name]) schema-name) documents)))]
+    (let [source-doc-index (find-doc-index "tyomaastaVastaava")
+          target-doc-index (find-doc-index "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+          op-ref           (get-in documents [source-doc-index :schema-info :op])]
+      (if (and source-doc-index target-doc-index op-ref)
+        {$unset {(util/kw-path :documents source-doc-index :schema-info :op) 1}
+         $set   {(util/kw-path :documents target-doc-index :schema-info :op) op-ref}}))))
+
+(defn- do-fix-katulupa-op-documents [collection]
+  (let [applications (mongo/select collection
+                                   {:documents
+                                    {$elemMatch {:schema-info.name    "tyomaastaVastaava"
+                                                 :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}})]
+    (doseq [{:keys [id documents]} applications]
+      (mongo/update-by-id collection id
+                          (op-ref-from-tyomaastaVastaava-to-hankkeen-kuvaus-update documents)))
+    (count applications)))
+
+(defmigration fix-katulupa-op-documents
+  {:apply-when (pos? (mongo/count :applications
+                                  {:documents
+                                   {$elemMatch {:schema-info.name    "tyomaastaVastaava"
+                                                :schema-info.op.name {$in (->> ya-katulupa-types vec (map name))}}}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (do-fix-katulupa-op-documents collection))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

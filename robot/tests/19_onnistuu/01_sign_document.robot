@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   A new user signs company agreement
+Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -9,20 +10,35 @@ Setup
   Go to  ${LAST EMAIL URL}
   Go to  ${LOGIN URL}
 
-Bob decides to register his company, but then cancels his mind
+Bob decides to register his company (he will change his mind later)
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Test id disabled  register-company-continue
   Select account type  account5
-  Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Enabled   xpath=//*[@data-test-id='register-company-cancel']
-  Click Element  xpath=//*[@data-test-id='register-company-cancel']
+  Click by test id  register-company-continue
+
+Bob checks that input validation works
+  Validate input  register-company-y  foobar  2341528-4
+  Validate input  register-company-zip  22  22222
+  Validate input  register-company-personId  foobar  290735-9501
+  Validate input  register-company-email  bob  bob@example.org
+
+Existing user email cannot be used
+  Validate input  register-company-email  pena@example.com  bob@example.org
+
+Bobo cancels his mind
+  Click by test id  register-company-cancel
+  Test id enabled  register-company-continue
+  Click by test id  register-company-cancel
+  Test id enabled  register-company-continue
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
 Bob decides to register his company after all, but still chickens out
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Account type not selected
   Select account type  account5
-  Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
+  Click enabled by test id  register-company-continue
+  Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-continue']
   Input text by test id  register-company-name        Peten rakennus Oy
   Input text by test id  register-company-y           2341528-4
   Input text by test id  register-company-firstName   Pete
@@ -32,25 +48,27 @@ Bob decides to register his company after all, but still chickens out
   Input text by test id  register-company-po          Kunta
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
   Input text by test id  register-company-netbill     yinhang
-  Input text by test id  register-company-ovt         0037123456710007
   Input text by test id  register-company-personId    131052-308T
   Test id select is  register-company-language  fi
-  Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
-  Click enabled by test id  register-company-submit
-  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-start-sign']
-  Checkbox Should Not Be Selected  termsAccepted
-  Select Checkbox  termsAccepted
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
-  Click Element  xpath=//*[@data-test-id='register-company-cancel-sign']
+  Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
+  Click enabled by test id  register-company-continue
+  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
+  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Toggle not Selected  register-company-agree
+  Toggle toggle  register-company-agree
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-sign']
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Click by test id  register-company-cancel
+  Test id select is  register-company-language  fi
+  Click by test id  register-company-cancel
+  Account type selected  account5
+  Click by test id  register-company-cancel
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
 Bob decides to register his company after all, and this time he means it
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Select account type  account5
-  Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
+  Click by test id  register-company-continue
   Input text by test id  register-company-name        Peten rakennus Oy
   Input text by test id  register-company-y           2341528-4
   Input text by test id  register-company-firstName   Pete
@@ -60,18 +78,16 @@ Bob decides to register his company after all, and this time he means it
   Input text by test id  register-company-zip         00001
   Input text by test id  register-company-po          Kunta
   Input text by test id  register-company-netbill     yinhang
-  Input text by test id  register-company-ovt         0037123456710007
   Input text by test id  register-company-personId    131052-308T
   Select from test id  register-company-language  sv
-  Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
-  Click enabled by test id  register-company-submit
-  Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
-  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-start-sign']
-  Select Checkbox  termsAccepted
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
-  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
-  Click Element  xpath=//*[@data-test-id='register-company-start-sign']
+  Select From test id  register-company-pop  Basware Oyj (BAWCFI22)
+  Click enabled by test id  register-company-continue
+  Wait until    Element Should Be Disabled  xpath=//*[@data-test-id='register-company-sign']
+  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Toggle toggle  register-company-agree
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-sign']
+  Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel']
+  Click Element  xpath=//*[@data-test-id='register-company-sign']
 
   Wait until  Element should be visible  xpath=//span[@data-test-id='onnistuu-dummy-status']
   Wait until  Element text should be  xpath=//span[@data-test-id='onnistuu-dummy-status']  ready
@@ -90,6 +106,24 @@ Second link in email should lead to password reset
   Wait Until  Element should be visible  new-company-user
   Wait Until  Page should contain  2341528-4
   Page should contain  puuha.pete@pete-rakennus.fi
+
+Password messages and warnings
+  No such test id  password1-warning
+  No such test id  password1-message
+  No such test id  password2-warning
+  Input text by test id  password1  bad
+  Wait test id visible  password1-warning
+  Input text by test id  password1  1234567
+  Wait test id visible  password1-warning
+  Input text by test id  password1  12345678
+  No such test id  password1-warning
+  Wait test id visible  password1-message
+  Input text by test id  password2  different
+  Wait test id visible  password2-warning
+  Input text by test id  password2  12345678
+  No such test id  password2-warning
+
+Finally fill in proper password
   Fill in new company password  new-company-user  company123
 
 Login with the new password
@@ -107,13 +141,13 @@ Company details include company name, identifier and PDF link
 
 Company info page has the registered information
   Click by test id  company-edit-info
+  Test id select text is  company-account-select  Företagskonto 5 (59 €/månad)
   Test id input is  edit-company-name        Peten rakennus Oy
   Test id input is  edit-company-y           2341528-4
   Test id input is  edit-company-address1    Katukatu
   Test id input is  edit-company-zip         00001
   Test id input is  edit-company-po          Kunta
   Test id input is  edit-company-netbill     yinhang
-  Test id input is  edit-company-ovt         0037123456710007
   List selection should be  jquery=div[data-test-id=company-pop] select  Basware Oyj (BAWCFI22)
   [Teardown]  logout
 
@@ -122,4 +156,18 @@ Company info page has the registered information
 Select account type
   [Arguments]  ${type}
   Wait Until  Click Element  xpath=//*[@data-test-id='account-type-${type}']
-  Wait Until  Click Element  xpath=//*[@data-test-id='account-type-submit']
+
+Account type selected
+  [Arguments]  ${type}
+  Wait Until  Element should be visible  jquery=div.account-type-box[data-test-id=account-type-${type}].selected
+
+Account type not selected
+  Wait Until  Element should not be visible  jquery=div.account-type-box.selected
+
+Validate input
+  [Arguments]  ${tid}  ${bad}  ${good}
+  No such test id  ${tid}-warning
+  Input text by test id  ${tid}  ${bad}
+  Wait test id visible  ${tid}-warning
+  Input text by test id  ${tid}  ${good}
+  No such test id  ${tid}-warning

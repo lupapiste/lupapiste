@@ -58,7 +58,9 @@ Assignee has changed
 
 Viewing attachment should not reset the assignee select
   Open tab  attachments
-  Add attachment file  tr[data-test-type='hakija.valtakirja']  ${PDF_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='hakija.valtakirja']  ${PDF_TESTFILE_PATH}  Valtakirja
+  Scroll and click test id  batch-ready
+  Open attachment details  hakija.valtakirja
   Return to application
   General handler is  Sibbo Sonja
   Open tab  parties

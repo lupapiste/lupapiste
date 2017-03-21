@@ -253,7 +253,7 @@ Mikko checks that review attachments are correctly listed
   Open tab  attachments
   Javascript?  $("tr[data-test-type='muut.muu']").length === 2
   Has review attachment  muut.muu  /robot.*pdf/
-  Has review attachment  muut.muu  /robot.*png/  1
+  Has review attachment  muut.muu  /robot.*png/
 
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}

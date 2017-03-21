@@ -6,6 +6,15 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
+  <!-- ko if: authModel.ok("assignments-for-application") && lupapisteApp.services.assignmentService.automaticAssignments().length > 0 -->
+  <automatic-assignments data-test-id="automatic-assignments-component"
+                         params="authModel : authModel,
+                                 assignments: lupapisteApp.services.assignmentService.automaticAssignments,
+                                 applicationId: applicationId,
+                                 pageName: $data.pageName,
+                                 getFilters: lupapisteApp.services.attachmentsService.getFilters">
+  </automatic-assignments>
+  <!-- /ko -->
   <!-- ko if: authModel.ok("create-assignment") && upload.batchListHidden() -->
   <create-assignment data-test-id="create-assignment-component"
                      params="authorities: $root.authorities,
@@ -24,7 +33,8 @@
     <suti-display></suti-display>
 
     <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilters() -->
-    <filters params="pageName: $data.pageName"></filters>
+    <filters params="pageName: $data.pageName,
+                     customDescriptions: true"></filters>
     <!-- /ko -->
 
     <!-- ko if: $data.hasFilteredAttachments() -->
@@ -32,7 +42,8 @@
                          lbutton: 'attachment.legend.help'"></help-toggle>
 
     <div data-bind="component: { name: 'attachments-accordions',
-                                 params: { pageName: $data.pageName} }"></div>
+                                 params: { pageName: $data.pageName,
+                                           upload: upload } }"></div>
     <!-- /ko -->
 
     <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->

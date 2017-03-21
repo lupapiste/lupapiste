@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [slingshot.slingshot :refer [try+]]
-            [monger.operators :refer [$set $push $pull]]
+            [monger.operators :refer [$set $push $pull $ne]]
             [schema.core :as sc]
             [sade.env :as env]
             [sade.util :as util]
@@ -42,6 +42,13 @@
 ;;
 ;; some utils
 ;;
+
+(defn not-pre-check
+  "Pre-check fails if given pre-check succeeds."
+  [pre-check]
+  (fn [command]
+    (when-not (pre-check command)
+      (fail :error.pre-check))))
 
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
@@ -406,8 +413,15 @@
       (let [application (get-application command)
             ^{:doc "Organization as delay"} organization (when application
                                                            (delay (org/get-organization (:organization application))))
+            ^{:doc "Application assignments as delay"} assignments (when application
+                                                                     (delay (mongo/select :assignments {:application.id (:id application)
+                                                                                                        :status {$ne "canceled"}})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
-            command (assoc command :application application :organization organization :user-organizations user-organizations)]
+            command (assoc command
+                           :application application
+                           :organization organization
+                           :user-organizations user-organizations
+                           :application-assignments assignments)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)

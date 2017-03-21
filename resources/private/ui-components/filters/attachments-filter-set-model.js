@@ -78,7 +78,7 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
   };
 
   self.getFilterValue = function(tag) {
-    return _.get(filtersByTag, tag, "active");
+    return _.get(filtersByTag, [tag, "active"]);
   };
 
   self.toggleAll = function(value) {

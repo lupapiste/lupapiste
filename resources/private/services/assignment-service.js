@@ -9,7 +9,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   var _data = ko.observableArray([]);
 
   function targetTab(assignment) {
-    switch (assignment.target.group) {
+    switch (assignment.targets[0].group) {
       case "parties":
         return "parties";
       case "attachments":
@@ -33,12 +33,26 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     return _.filter(assignments, function(a) { return _.get(a, "currentState.type") !== "completed"; });
   }
 
-  self.assignments = ko.pureComputed(function() {
+  // both user generated and automatic assignments
+  var allAssignments = ko.pureComputed(function() {
     return _.map(_data(), enrichAssignment);
+  });
+
+  self.assignments = ko.pureComputed(function() {
+    return _.filter(allAssignments(), function(a) {
+      return a.trigger === "user-created";
+    });
   });
 
   self.incompleteAssignments = ko.pureComputed(function() {
     return filterIncompleteAssignments(self.assignments());
+  });
+
+  self.automaticAssignments = ko.pureComputed(function() {
+    return _.filter(allAssignments(), function(a) {
+      return a.trigger !== "user-created" &&
+        _.get(a, "currentState.type") !== "completed";
+    });
   });
 
   /*
@@ -111,5 +125,44 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     }
   });
 
+  function assignmentTargetIds(assignments) {
+    return _.map(_.flatten(_.map(assignments, "targets")), "id");
+  }
+
+  function attachmentIsTargetedByAutomaticAssignments(event) {
+    return _.includes(assignmentTargetIds(self.automaticAssignments()), _.get(event, "attachmentId"));
+  }
+
+  // When attachment is removed, reload assignments if the assignment was a target for an automatic assignment
+  hub.subscribe("attachmentsService::remove", function(event) {
+    if (event.ok === true &&
+        attachmentIsTargetedByAutomaticAssignments(event)) {
+      assignmentsForApplication(_.get(event, "id"));
+    }
+  });
+  hub.subscribe("attachmentsService::update", function(event) {
+    if (event.ok === true &&
+        event.commandName === "set-attachment-type") {
+      assignmentsForApplication(_.get(event, "id"));
+    }
+  });
+  hub.subscribe("attachment-upload::finished", function(event) {
+    if (event.ok === true &&
+        _.get(event, "id")) {
+      assignmentsForApplication(ko.unwrap(_.get(event, "id")));
+    }
+  });
+
+  var debounceAssignmentsForApplication = _.debounce(function(id) {
+      assignmentsForApplication(id);
+    },
+    500);
+
+  hub.subscribe("attachmentsService::bind-attachments-status", function(event) {
+    if (event.status === "done" &&
+        _.get(event, "applicationId")) {
+      debounceAssignmentsForApplication(ko.unwrap(_.get(event, "applicationId")));
+    }
+  });
 
 };

@@ -152,6 +152,9 @@
   (->> (group-by :type-group attachment-types)
        (map (juxt key (fn->> val (map :type-id))))))
 
+(defn get-all-attachment-types-for-permit-type [permit-type]
+  (attachment-types-by-permit-type permit-type))
+
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
     (let [[type-group type-id] (->> match (drop 1) (map keyword))]

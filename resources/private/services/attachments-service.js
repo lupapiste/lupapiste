@@ -329,7 +329,8 @@ LUPAPISTE.AttachmentsService = function() {
           hub.send(self.serviceName + "::bind-attachments-status",
                    {fileId: fileData.fileId,
                     status: fileData.status,
-                    jobStatus: job.status});
+                    jobStatus: job.status,
+                    applicationId: self.applicationId});
         }
       });
       if ( job.status === self.JOB_RUNNING ) {

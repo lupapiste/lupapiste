@@ -282,6 +282,10 @@
       (response/status 500 "removing vetuma session failed"))
     (response/status 404 (str "no vetuma session for session id: " (session-id)))))
 
+(defn session-pre-check [_]
+  (when (empty? (vetuma-session))
+    (fail :error.user-not-vetuma-authenticated)))
+
 ;;
 ;; public local api
 ;;

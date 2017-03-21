@@ -64,7 +64,7 @@
     self.selectedPrevPermitOrganization = ko.observable(null);
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
-    self.authoriseApplicants = ko.observable(false);
+    self.authorizeApplicants = ko.observable(true);
     self.creatingAppWithPrevPermitOk = ko.pureComputed(function() {
       return !self.processing() && !self.pending() &&
              !_.isBlank(self.kuntalupatunnusFromPrevPermit()) &&
@@ -326,7 +326,7 @@
       params.lang = loc.getCurrentLanguage();
       params.organizationId = self.selectedPrevPermitOrganization();
       params.kuntalupatunnus = kuntalupatunnus;
-      params.authoriseApplicants = self.authoriseApplicants();
+      params.authorizeApplicants = self.authorizeApplicants();
 
       ajax.command("create-application-from-previous-permit", params)
         .processing(self.processing)

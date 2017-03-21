@@ -1,5 +1,5 @@
 (ns lupapalvelu.assignment-api
-  (:require [lupapalvelu.action :as action :refer [defcommand defquery parameters-matching-schema]]
+  (:require [lupapalvelu.action :as action :refer [defcommand defquery disallow-impersonation parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
@@ -25,7 +25,8 @@
     (fail :error.invalid-assignment-receiver)))
 
 (defn- validate-assignment-id [{{:keys [assignmentId]} :data}]
-  (when-not (pos? (assignment/count-for-assignment-id assignmentId))
+  (when (and (not (ss/empty? assignmentId))
+             (not (pos? (assignment/count-for-assignment-id assignmentId))))
     (fail :error.invalid-assignment-id)))
 
 (defn- assignments-enabled [{orgs :user-organizations}]
@@ -102,21 +103,23 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
-   :parameters       [id recipientId target description]
+   :parameters       [id recipientId targets description]
    :input-validators [(partial action/non-blank-parameters [:description])
-                      (partial action/map-parameters [:target])]
+                      (partial action/vector-parameters [:targets])]
    :pre-checks       [validate-receiver
-                      assignments-enabled-for-application]
+                      assignments-enabled-for-application
+                      disallow-impersonation]
    :states           states/all-application-states-but-draft-or-terminal}
   [{user         :user
     created      :created
     application  :application}]
-  (ok :id (assignment/insert-assignment {:application    (select-keys application
-                                                                      [:id :organization :address :municipality])
-                                         :state          (assignment/new-state "created" (usr/summary user) created)
-                                         :recipient      (userid->summary recipientId)
-                                         :target         target
-                                         :description    description})))
+  (ok :id (assignment/insert-assignment (assignment/new-assignment (usr/summary user)
+                                                                   (userid->summary recipientId)
+                                                                   application
+                                                                   assignment/user-created-trigger
+                                                                   created
+                                                                   description
+                                                                   targets))))
 
 (defcommand update-assignment
   {:description      "Updates an assignment"
@@ -125,7 +128,8 @@
    :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :pre-checks       [validate-receiver
-                      validate-assignment-id]
+                      validate-assignment-id
+                      disallow-impersonation]
    :states           states/all-application-states-but-draft-or-terminal}
   [_]
   (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
@@ -135,7 +139,8 @@
   {:description "Complete an assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
-   :pre-checks [assignments-enabled]
+   :pre-checks [assignments-enabled
+                disallow-impersonation]
    :input-validators [(partial action/non-blank-parameters [:assignmentId])]
    :categories #{:documents}}
   [{user    :user

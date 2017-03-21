@@ -1,4 +1,4 @@
-LUPAPISTE.AttachmentsTableModel = function(attachments) {
+LUPAPISTE.AttachmentsTableModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -11,7 +11,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
-  self.attachments = attachments;
+  self.attachments = params.attachments;
+  self.upload = params.upload;
 
   var idPrefix = _.uniqueId("at-input-");
 
@@ -66,16 +67,19 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   self.authorities = accordionService.authorities;
 
+  function isAssignmentShownInTable(attachmentIds, assignment) {
+    return assignment.targets.length === 1
+      && assignment.targets[0].group === "attachments"
+      && _.includes(attachmentIds, assignment.targets[0].id)
+      && assignment.currentState.type !== "completed";
+  }
+
   self.assignments = self.disposedPureComputed(function() {
-    var attachmentIds = _.map(attachments, function(att) { return util.getIn(att, ["id"]); });
+    var attachmentIds = _.map(ko.unwrap(self.attachments), function(att) { return util.getIn(att, ["id"]); });
     if (assignmentService) {
       return  _(assignmentService.assignments())
-        .filter(function(assignment) {
-          return assignment.target.group === "attachments"
-            && _.includes(attachmentIds, assignment.target.id)
-            && assignment.currentState.type !== "completed";
-        })
-        .groupBy("target.id")
+        .filter(_.partial(isAssignmentShownInTable, attachmentIds))
+        .groupBy("targets[0].id")
         .value();
     } else {
       return {};

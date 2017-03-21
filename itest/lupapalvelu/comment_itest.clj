@@ -38,17 +38,14 @@
       (command sonja :can-target-comment-to-authority :id id) => ok?
       sonja => (allowed? :add-comment :id id :to sonja-id))
 
-    (fact "when sonja adds comment, both pena and ronja will receive email"
+    (fact "when sonja adds comment, only ronja will receive email"
       (comment-application sonja id false ronja-id) => ok?
       (let [emails (sent-emails)
             ronja-email (email-for "ronja")
             pena-email  (email-for "pena")
-            to1 (:to (first emails))
-            to2 (:to (last emails))]
-        (count emails) => 2
-        (or
-          (and (.contains to1 ronja-email) (.contains to2 pena-email))
-          (and (.contains to2 ronja-email) (.contains to1 pena-email))) => true))
+            to (:to (first emails))]
+        (count emails) => 1
+        (and (.contains to ronja-email) (not (.contains to pena-email))) => true))
 
     (fact "kosti can comment application with commenter role"
       (command kosti :can-target-comment-to-authority :id id) => ok?

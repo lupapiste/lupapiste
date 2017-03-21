@@ -122,7 +122,9 @@
                             (filter #(ss/starts-with % (str (name i18n/default-lang) "-")))) ; when writing default is "fi"
         excluded-templates (set/union ajanvaraus-templates
                                       #{"en-onnistuu-success.md" ; Onnistuu internal mail
-                                        "sv-onnistuu-success.md"})]
+                                        "sv-onnistuu-success.md"
+                                        "en-onnistuu-success-campaign.md"
+                                        "sv-onnistuu-success-campaign.md"})]
     (doseq [lang (disj (set i18n/supported-langs) :fi)
             template-name template-names
             :let [template-suffix (last (re-find  #"\w+\-(.+)" template-name))

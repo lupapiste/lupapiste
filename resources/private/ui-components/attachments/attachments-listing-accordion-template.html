@@ -19,6 +19,7 @@
                data-bind="component: { name: 'attachments-listing-accordion',
                                        params: { pageName: $parents[1].pageName,
                                                  path: $data.path,
+                                                 upload: $parents[1].upload,
                                                  level: $parents[1].level + 1 } }">
           </div>
         </div>
@@ -26,7 +27,8 @@
         <!-- ko if: util.isEmpty( $parent, "groups" ) -->
         <div class="rollup-accordion-content-part">
           <div data-bind="component: { name: 'attachments-table',
-                                       params: $parent.filteredAttachments }"></div>
+                                       params: { attachments: $parent.filteredAttachments,
+                                                 upload: $parent.upload }}"></div>
         </div>
         <!-- /ko -->
         <button data-bind="click: $parent.downloadAll,

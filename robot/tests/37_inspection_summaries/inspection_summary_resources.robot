@@ -50,7 +50,7 @@ Template bubble OK is disabled
 Edit target name on an existing inspection summary
   [Arguments]  ${index}  ${newName}
   Click by test id  edit-link-${index}
-  Wait test id hidden  new-target-button
+  Wait Until  Test id disabled  new-target-button
   Input text  xpath=//input[@data-test-id="edit-target-field-${index}"]  ${newName}
   Execute javascript  $("[data-test-id='edit-target-field-${index}']").blur();
   Positive indicator should be visible

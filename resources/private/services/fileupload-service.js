@@ -34,7 +34,6 @@ LUPAPISTE.FileuploadService = function() {
   self.bindFileInput = function( options, pluginOptions ) {
 
     options = _.defaults( options, {
-      maximumUploadSize: 15000000, // 15 MB
       id: util.randomElementId("fileupload-input"),
       allowMultiple: true
     });
@@ -77,9 +76,10 @@ LUPAPISTE.FileuploadService = function() {
     }
 
     var $dropZone = prepareDropZone( options.dropZone );
-    var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
-    var apiUrl = applicationId ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
+    var isAuthenticated = Boolean(util.getIn(lupapisteApp, ["models","currentUser","username"]));
+    var apiUrl = isAuthenticated ? "/api/raw/upload-file-authenticated" : "/api/raw/upload-file";
     var formData = [ { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") } ];
+    var applicationId = util.getIn(lupapisteApp, ["models", "application", "id"]);
     if (applicationId) {
       formData.push({ name: "id", value: applicationId });
     }
@@ -92,22 +92,20 @@ LUPAPISTE.FileuploadService = function() {
       dropZone: $dropZone,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
+        var maximumUploadSize = isAuthenticated ? LUPAPISTE.config.loggedInUploadMaxSize : LUPAPISTE.config.anonymousUploadMaxSize;
         // if allowMultiple is false, accept only first of the given files (in case of drag and dropping multiple files)
         if (options.allowMultiple || _.indexOf(data.originalFiles, file) === 0) {
           var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
                                         getFileExtension(file.name));
           // IE9 doesn't have size, submit data and check files in server
           var size = file.size || 0;
-          if(acceptedFile && size <= options.maximumUploadSize) {
+          if (!acceptedFile) {
+            hubSend( "badFile", {message: loc("error.file-upload.illegal-file-type"), file: file});
+          } else if (size > maximumUploadSize) {
+            hubSend( "badFile", {message: loc("error.file-upload.illegal-upload-size", maximumUploadSize/1000000), file: file});
+          } else {
             hubSend( "fileAdded", {file: file});
             connections.push( data.submit() );
-          } else {
-            hubSend( "badFile",
-                     {message: loc(acceptedFile
-                                   ? "error.file-upload.illegal-upload-size"
-                                   : "error.file-upload.illegal-file-type"),
-                      file: file}
-                   );
           }
         }
       },

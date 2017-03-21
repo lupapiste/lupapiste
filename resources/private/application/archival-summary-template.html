@@ -198,19 +198,46 @@
                                                      application: $root.application}}"></div>
             </div>
           </div>
-          <div class="left" data-bind="if: !_.isEmpty($data.latestVersion)">
+          <!-- ko if: !_.isEmpty($data.latestVersion) -->
+          <div class="left" data-bind="with: $data.latestVersion">
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
-                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + util.getIn($data, ['latestVersion','fileId'])}" target="_blank">
-                  <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + util.getIn($data, ['latestVersion','fileId'])}">
+                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + util.getIn($data, ['fileId'])}" target="_blank">
+                  <img data-bind="attr: {src: '/api/raw/preview-attachment?attachment-id=' + util.getIn($data, ['fileId'])}">
                 </a>
               </div>
             </div>
-            <div data-bind="if: $data.convertableToPdfA">
-              <button class="btn-primary" data-bind="click: $component.convertToPdfA, ltext: 'Konvertoi PDF/A-muotoon'"></button>
+            <div data-bind="if: $parent.convertableToPdfA">
+              <button class="btn-primary" data-bind="click: _.partial($component.convertToPdfA, $parent), ltext: 'Konvertoi PDF/A-muotoon'"></button>
             </div>
+            <!-- ko ifnot: _.isUndefined($data.archivabilityError) -->
+            <div class="additional-data-container archival-summary-conversion-log">
+              <div class="header" data-bind="ltext: 'archivalSummary.previousConversionResult'"></div>
+              <div class="contents">
+                <span data-bind="ltext: archivabilityError"></span>
+                <div data-bind="if: !_.isEmpty($data.conversionLog)">
+                  <button class="btn" data-bind="toggleClick: $parent.showConversionLog">
+                    <i data-bind="css: {'lupicon-chevron-small-right': !ko.unwrap($parent.showConversionLog),
+                                        'lupicon-chevron-small-down': $parent.showConversionLog}"></i>
+                    <span data-bind="ltext: 'attachment.showConversionLog'"></span>
+                  </button>
+
+                  <div data-bind="slider: $parent.showConversionLog">
+                    <table class="table">
+                      <tbody data-bind="foreach: $data.conversionLog">
+                      <tr>
+                        <td data-bind="text: $data"></td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /ko -->
           </div>
+          <!-- /ko -->
         </div>
 
       </div>

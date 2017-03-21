@@ -102,7 +102,7 @@
                       (partial action/vector-parameters [:roles])]
    :notified   true
    :on-success [(fn [{data :data :as command} _]
-                  (when-not (ss/blank? (:text data))
+                  (when-not (or (ss/blank? (:text data)) (some? (:to data)))
                     (notifications/notify! :new-comment command))
                   (when-let [to-user (and (:to data) (usr/get-user-by-id (:to data)))]
                     ;; LUPA-407

@@ -29,7 +29,9 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.authorization :as auth])
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.archiving-util :as archiving-util])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -117,7 +119,8 @@
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum conversion/archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
-   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)})
+   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)
+   (sc/optional-key :conversionLog)      (sc/maybe [sc/Str])})
 
 (defschema Type
   "Attachment type"
@@ -214,6 +217,23 @@
         (get-application-no-access-checking $ {:attachments true})
         (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
+(defn sorted-attachments
+  "Sorted attachments for command:
+    1. Localized type info ascending (using lang in command)
+    2. Latest version timestamp descending."
+  [{{attachments :attachments} :application lang :lang}]
+  (letfn [(type-text [{{:keys [type-id type-group]} :type}]
+            (i18n/localize lang (format "attachmentType.%s.%s" type-group type-id)))
+          (filestamp [attachment]
+            (-> attachment :latestVersion :created))]
+    (sort (fn [att1 att2]
+            (let [txt1        (type-text att1)
+                  txt2        (type-text att2)
+                  txt-compare (compare txt1 txt2)]
+              (if (zero? txt-compare)
+                (compare (filestamp att2) (filestamp att1))
+                txt-compare)))
+          attachments)))
 ;;
 ;; Api
 ;;
@@ -414,7 +434,7 @@
 
 (defn make-version
   [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
-                           stamped archivable archivabilityError missing-fonts autoConversion]}]
+                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
@@ -436,7 +456,8 @@
          :archivable     (boolean archivable)}
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
-        :autoConversion autoConversion))))
+        :autoConversion autoConversion
+        :conversionLog conversionLog))))
 
 (defn- ->approval [state user timestamp]
   (sc/validate Approval
@@ -583,12 +604,14 @@
   (when (seq attachment-ids)
     (let [ids-str (pr-str attachment-ids)]
       (info "1/4 deleting assignments regarding attachments" ids-str)
-      (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+      (run! (partial assignment/remove-target-from-assignments (:id application)) attachment-ids)
       (info "2/4 deleting files of attachments" ids-str)
       (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
       (info "3/4 deleted files of attachments" ids-str)
       (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
-      (info "4/4 deleted meta-data of attachments" ids-str))))
+      (info "4/4 deleted meta-data of attachments" ids-str)))
+  (when (org/some-organization-has-archive-enabled? #{(:organization application)})
+    (archiving-util/mark-application-archived-if-done application (now))))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
@@ -861,6 +884,29 @@
          (map attachment-assignment-info))))
 
 (assignment/register-assignment-target! :attachments describe-assignment-targets)
+
+;;
+;; Enriching attachment
+;;
+
+(defn- assignment-trigger-tags [assignments attachment]
+  (or (not-empty (->> (assignment/targeting-assignments assignments attachment)
+                      (remove assignment/completed?)
+                      (map #(assignment/assignment-tag (:trigger %)))
+                      distinct))
+      [(assignment/assignment-tag "not-targeted")]))
+
+(defn- enrich-attachment-and-add-trigger-tags
+  [assignments attachment]
+  (update (enrich-attachment attachment) :tags
+          #(concat % (assignment-trigger-tags assignments attachment))))
+
+(defn enrich-attachment-with-trigger-tags [assignments attachment]
+  (if assignments
+    (enrich-attachment-and-add-trigger-tags assignments
+                                            attachment)
+    (enrich-attachment attachment)))
+
 
 ;;
 ;; Pre-checks

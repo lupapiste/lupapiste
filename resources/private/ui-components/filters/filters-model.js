@@ -11,6 +11,8 @@ LUPAPISTE.FiltersModel = function(params) {
     return _.flatten(filterSet.filters());
   });
 
+  self.customDescriptions = params.customDescriptions;
+
   self.id = function( index ) {
     return prefix + "-" + index;
   };
