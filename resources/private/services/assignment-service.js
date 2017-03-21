@@ -75,7 +75,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   }
 
   function assignmentsForApplication(id) {
-    if (applicationAuthModel.ok("assignments-for-application")) {
+    if (id && applicationAuthModel.ok("assignments-for-application")) {
       ajax.query("assignments-for-application", {id: id})
         .success(function(resp) {
           _data(resp.assignments);
@@ -134,23 +134,26 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   }
 
   // When attachment is removed, reload assignments if the assignment was a target for an automatic assignment
-  hub.subscribe("attachmentsService::remove", function(event) {
-    if (event.ok === true &&
-        attachmentIsTargetedByAutomaticAssignments(event)) {
+  hub.subscribe({
+    eventType: "attachmentsService::remove",
+    ok:        true
+  }, function(event) {
+    if (attachmentIsTargetedByAutomaticAssignments(event)) {
       assignmentsForApplication(_.get(event, "id"));
     }
   });
-  hub.subscribe("attachmentsService::update", function(event) {
-    if (event.ok === true &&
-        event.commandName === "set-attachment-type") {
-      assignmentsForApplication(_.get(event, "id"));
-    }
+  hub.subscribe({
+    eventType:   "attachmentsService::update",
+    ok:          true,
+    commandName: "set-attachment-type"
+  }, function(event) {
+    assignmentsForApplication(_.get(event, "id"));
   });
-  hub.subscribe("attachment-upload::finished", function(event) {
-    if (event.ok === true &&
-        _.get(event, "id")) {
-      assignmentsForApplication(ko.unwrap(_.get(event, "id")));
-    }
+  hub.subscribe({
+    eventType: "attachment-upload::finished",
+    ok:        true
+  }, function(event) {
+    assignmentsForApplication(ko.unwrap(_.get(event, "id")));
   });
 
   var debounceAssignmentsForApplication = _.debounce(function(id) {
@@ -158,11 +161,10 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     },
     500);
 
-  hub.subscribe("attachmentsService::bind-attachments-status", function(event) {
-    if (event.status === "done" &&
-        _.get(event, "applicationId")) {
-      debounceAssignmentsForApplication(ko.unwrap(_.get(event, "applicationId")));
-    }
+  hub.subscribe({
+    eventType: "attachmentsService::bind-attachments-status",
+    status:    "done"
+  }, function(event) {
+    debounceAssignmentsForApplication(ko.unwrap(_.get(event, "applicationId")));
   });
-
 };
