@@ -263,5 +263,5 @@
                     :type   (summary-attachment-type-for-application application)
                     :group  nil
                     :source {:type "inspection-summary" :id summary-id}}]
-      (att-bind/make-bind-job command filedata (:generation-response pdf-data)))
+      (att-bind/make-bind-job command filedata identity (:generation-response pdf-data)))
     (delete-summary-attachment application summary-id)))

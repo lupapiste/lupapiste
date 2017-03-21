@@ -95,8 +95,8 @@
 
 (defn make-bind-job
   ([command file-infos trigger-assignments-fn]
-   (make-bind-job command file-infos nil))
-  ([command file-infos future-response]
+   (make-bind-job command file-infos trigger-assignments-fn nil))
+  ([command file-infos trigger-assignments-fn future-response]
    (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
          job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
                  (job/start bind-job-status))]
