@@ -334,10 +334,11 @@
   "Accordion fields semantics are interpreted in the accordion service.
   Note: changes also affect lupapalvelu.document.schemas.defschema."
   (sc/conditional
-   :type      {:type (sc/enum :workPeriod :selected :text)
-               :paths [[sc/Str]]
-               (opt :format)  sc/Str}
-   :else      [sc/Str])) ;; Shortcut for :type :text, no :format.
+   :type      {:type                (sc/enum :workPeriod :selected :text)
+               :paths               [[sc/Str]]
+               (opt :format)         sc/Str
+               (opt :localizeFormat) sc/Str}
+   :else      [sc/Str])) ;; Shortcut for :type :text, no optional keys.
 
 (defschema Doc
   {:info {:name                              sc/Str     ;;

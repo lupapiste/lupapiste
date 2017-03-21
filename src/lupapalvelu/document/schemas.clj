@@ -1239,21 +1239,27 @@
 
 (def designer-accordion-paths
   "Data from paths are visible in accordion header"
-  [["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [{:type :text
+    :paths [["henkilotiedot" "etunimi"]
+            ["henkilotiedot" "sukunimi"]]
+    :format "- %s %s"}
+   {:type :text
+    :paths [["kuntaRoolikoodi"]]
+    :format "- %s"}
+   {:type :text
+    :paths [["suunnittelutehtavanVaativuusluokka"]]
+    :localizeFormat "osapuoli.suunnittelutehtavanVaativuusluokka.%s"
+    :format "(%s)"}])
 
-(def hakijan-asiamies-accordion-paths
-  "Data from paths are visible in accordion header"
-  [[select-one-of-key]
-   ["henkilo" "henkilotiedot" "etunimi"]
-   ["henkilo" "henkilotiedot" "sukunimi"]
-   ["yritys" "yritysnimi"]])
+(def hakijan-asiamies-accordion-paths hakija-accordion-paths)
 
 (def foreman-accordion-paths
   "Data from paths are visible in accordion header"
-  [["kuntaRoolikoodi"]
-   ["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [{:type :text
+    :paths [["kuntaRoolikoodi"]
+            ["henkilotiedot" "etunimi"]
+            ["henkilotiedot" "sukunimi"]]
+    :format "- %s %s %s"}])
 
 (def buildingid-accordion-paths
   [[national-building-id]])

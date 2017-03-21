@@ -32,6 +32,11 @@ LUPAPISTE.AccordionService = function() {
   function formatField( field, values ) {
     var result = "";
     if( _.some( values ) ) {
+      if( field.localizeFormat ) {
+        values = _.map( values, function( v ) {
+          return loc( sprintf( field.localizeFormat, v ), v);
+        });
+      }
       result = field.format
              ? vsprintf( field.format,
                          _.concat( values,
@@ -42,27 +47,29 @@ LUPAPISTE.AccordionService = function() {
     return result;
   }
 
-  var fieldTypeFuns = {workPeriod: function( field, data ) {
-    return formatField( field,
-                        _.map( fieldValues( field, data ),
-                               function( v ) {
-                                 return _.isBlank( v )
-                                      ? null
-                                      : util.finnishDate( v );
-                               }));
-  },
-                       selected: function( field, data ) {
-                         var selected = util.getIn( data, [docutils.SELECT_ONE_OF_GROUP_KEY]);
-                         var paths = _.filter( field.paths,
-                                               function( p ) {
-                                                 return _.first( p ) === selected;
-                                               });
-                         var ff = _.set( _.clone(field), "paths", paths );
-                         return formatField( ff, fieldValues( ff, data ));
-                       },
-                       text: function( field, data ) {
-                         return formatField( field, fieldValues( field, data ));
-                       }};
+  var fieldTypeFuns = {
+    workPeriod: function( field, data ) {
+      return formatField( field,
+                          _.map( fieldValues( field, data ),
+                                 function( v ) {
+                                   return _.isBlank( v )
+                                        ? null
+                                        : util.finnishDate( v );
+                                 }));
+    },
+    selected: function( field, data ) {
+      var selected = util.getIn( data, [docutils.SELECT_ONE_OF_GROUP_KEY]);
+      var paths = _.filter( field.paths,
+                            function( p ) {
+                              return _.first( p ) === selected;
+                            });
+      var ff = _.set( _.clone(field), "paths", paths );
+      return formatField( ff, fieldValues( ff, data ));
+    },
+    text: function( field, data ) {
+      return formatField( field, fieldValues( field, data ));
+    }
+  };
 
   self.accordionFieldText = function( field, data ){
     return fieldTypeFuns[field.type || "text"]( field, data );
