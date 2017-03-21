@@ -55,9 +55,10 @@
                        [:#finished-by]   (enlive/content (->> ((juxt :firstName :lastName) finished-by) (remove nil?) (ss/join " ")))))))
 
 (def inspection-summary-page-template
-  (common/html-page nil
-                    (common/page-content [app-info/application-info-template
-                                          inspection-summary-template])))
+  (->> [app-info/application-info-template
+        inspection-summary-template]
+       (common/page-content)
+       (common/html-page nil)))
 
 (enlive/deftemplate inspection-summary (enlive/html inspection-summary-page-template) [application lang summary-id]
   [:head :style] (enlive/content (common/styles))

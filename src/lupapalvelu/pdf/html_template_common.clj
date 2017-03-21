@@ -47,12 +47,17 @@
 
 (def footer-tag :div.page-footer)
 
+(def footer-template [[footer-tag
+                       [:span#host-address]
+                       [:span.align-content-right [:span#page-number] "/" [:span#number-of-pages]]]
+                      [:script#page-numbering {:type "text/javascript"}]])
+
 (def application-footer-template [[footer-tag
-                                    [:span [:span#application-id] " - " [:span#host-address]]
-                                    [:span.align-content-right [:span#page-number] "/" [:span#number-of-pages]]]
+                                   [:span [:span#application-id] " - " [:span#host-address]]
+                                   [:span.align-content-right [:span#page-number] "/" [:span#number-of-pages]]]
                                   [:script#page-numbering {:type "text/javascript"}]])
 
-(defn common-content-transformation [application lang]
+(defn common-content-transformation [application]
   (enlive/transformation
    [:#lupa-img]       (enlive/content (enlive/html [:img {:src (image-src (io/file (io/resource lupa-img-path)) "img/png")}]))
    [:#print-date]     (enlive/content (util/to-local-date (now)))
@@ -61,12 +66,11 @@
    [:script#page-numbering] (enlive/content (wkhtmltopdf-page-numbering-script))))
 
 (defn- flat-rows
-  "Recursively flattens hiccup-style html template rows"
+  "Recursively flattens hiccup-style html template rows into a list of valid hiccup html.
+  (flat-rows [[[:row1 [:inner-tag]] [[:row2]]] [[[[:row3]]]]]) => ([:row1 [:inner-tag]] [:row2] [:row3])"
   [rows]
   (if (sequential? (first rows))
-    (reduce (fn [result row]
-              (concat result (flat-rows row)))
-            [] rows)
+    (reduce (fn [result row] (concat result (flat-rows row))) [] rows)
     [rows]))
 
 (defn page-content [rows]
@@ -82,12 +86,16 @@
 
 (defn apply-page [enlive-template & args]
   (->> (apply enlive-template args)
-       (apply str "<!DOCTYPE html>")))
+       (apply str "<!DOCTYPE html>"))) ;; wkhtmltopdf requires DOCTYPE tag in html files.
 
-(enlive/deftemplate basic-header (enlive/html (html-page nil header-template)) [application lang]
+(enlive/deftemplate basic-header (enlive/html (html-page nil header-template)) []
   [:head :style] (enlive/content (styles))
-  [:body]        (common-content-transformation application lang))
+  [:body]        (common-content-transformation nil))
 
-(enlive/deftemplate basic-footer (enlive/html (html-page nil application-footer-template)) [application lang]
+(enlive/deftemplate basic-footer (enlive/html (html-page nil footer-template)) []
+  [:head :style] (enlive/content (styles [(str styles)]))
+  [:body]        (common-content-transformation nil))
+
+(enlive/deftemplate basic-application-footer (enlive/html (html-page nil application-footer-template)) [application]
   [:head :style] (enlive/content (styles))
-  [:body]        (common-content-transformation application lang))
+  [:body]        (common-content-transformation application))
