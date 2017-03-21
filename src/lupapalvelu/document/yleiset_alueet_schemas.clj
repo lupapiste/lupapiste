@@ -61,8 +61,10 @@
   (body
     {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}))
 
-(def work-period-fields [{:type :date :path ["tyoaika-alkaa-ms"]}
-                         {:type :date :path ["tyoaika-paattyy-ms"]}])
+(def work-period-fields [{:type :workPeriod
+                          :paths [["tyoaika-alkaa-ms"]
+                                  ["tyoaika-paattyy-ms"]]
+                          :format "%s \u2013 %s"}])
 
 (defschemas
   1
@@ -100,8 +102,7 @@
            :repeating false
            :approvable true
            :order 63
-           :accordion-fields work-period-fields
-           }
+           :accordion-fields work-period-fields}
     :body tyo-aika}
    {:info {:name "tyo-aika-for-jatkoaika"                                  ;; (alkuPvm /) loppuPvm
            :type :group

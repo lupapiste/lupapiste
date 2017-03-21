@@ -22,14 +22,14 @@
     body))
 
 (defn accordion-field-emitters
-  "Adds :accordionUpdate emitters to paths defined by accordion-fields"
-  [body accordion-fields]
-  (if (seq accordion-fields)
+  "Adds :accordionUpdate emitters to paths"
+  [body paths]
+  (if (seq paths)
     (reduce
       (fn [body field-path]
         (update-in-body body field-path :emit #(conj % :accordionUpdate)))
       body
-      accordion-fields)
+      paths)
     body))
 
 
@@ -71,6 +71,8 @@
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
 
+(def select-one-of-key "_selected")
+
 (defn defschema [version data]
   (let [schema-name       (name (get-in data [:info :name]))
         validation-result (schema-validation/validate-doc-schema data)]
@@ -83,8 +85,15 @@
           (assoc-in [:info :name] schema-name)
           (assoc-in [:info :version] version)
           (update :body accordion-field-emitters
-                  (map #(if (:type %) (:path %) %)
-                       (get-in data [:info :accordion-fields])))))))
+                  (->> data
+                      :info
+                      :accordion-fields
+                      (reduce (fn [acc {:keys [type paths] :as field}]
+                                (cond-> acc
+                                  (= type :selected)  (conj [select-one-of-key])
+                                  paths               (concat paths)
+                                  (sequential? field) (concat [field])))
+                              [])))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]
@@ -115,8 +124,6 @@
   (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
     (update document :schema-info merge current-info)))
 
-
-(def select-one-of-key "_selected")
 
 (defn select-one-of-schema? [{schema-name :name :as schema}]
   (= select-one-of-key (name schema-name)))
@@ -1224,10 +1231,11 @@
 
 (def hakija-accordion-paths
   "Data from paths are visible in accordion header"
-  [[select-one-of-key]
-   ["henkilo" "henkilotiedot" "etunimi"]
-   ["henkilo" "henkilotiedot" "sukunimi"]
-   ["yritys" "yritysnimi"]])
+  [{:type :selected
+    :paths [["henkilo" "henkilotiedot" "etunimi"]
+            ["henkilo" "henkilotiedot" "sukunimi"]
+            ["yritys" "yritysnimi"]]
+    :format "- %s %s"}])
 
 (def designer-accordion-paths
   "Data from paths are visible in accordion header"

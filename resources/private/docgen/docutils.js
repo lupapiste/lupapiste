@@ -5,39 +5,39 @@ var docutils = (function () {
   // user can select only one of the schemas named in "_selected" group
   var SELECT_ONE_OF_GROUP_KEY = "_selected";
 
-  function buildAccordionText(paths, data) {
-    return _(paths)
-      .map( function( path ) {
-        return lupapisteApp.services.accordionService.accordionFieldText( path, data );
+  function accordionText(fields, data) {
+    return _(fields)
+      .map( function( field ) {
+        return lupapisteApp.services.accordionService.accordionFieldText( field, data );
       })
       .reject(_.isEmpty)
       .value()
       .join(" ");
   }
 
-  function specialSelected( paths, data ) {
-    var first = _.get( paths, "0.0");
-    return first === SELECT_ONE_OF_GROUP_KEY
-         ? ko.unwrap(_.get( data, first ))
-         : null;
-  }
+  // function specialSelected( paths, data ) {
+  //   var first = _.get( paths, "0.0");
+  //   return first === SELECT_ONE_OF_GROUP_KEY
+  //        ? ko.unwrap(_.get( data, first ))
+  //        : null;
+  // }
 
-  // resolve values from given paths
-  function accordionText(paths, data) {
-    if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
-      // are we dealing with _selected special case
-      var selectedValue = specialSelected( paths, data );
-      if (selectedValue) {
-        var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
-          return path[0] === selectedValue;
-        });
-        return buildAccordionText(selectedPaths, data);
+  // // resolve values from given paths
+  // function accordionText(paths, data) {
+  //   if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
+  //     // are we dealing with _selected special case
+  //     var selectedValue = specialSelected( paths, data );
+  //     if (selectedValue) {
+  //       var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
+  //         return path[0] === selectedValue;
+  //       });
+  //       return buildAccordionText(selectedPaths, data);
 
-      } else { // no _selected, use paths as is
-        return buildAccordionText(paths, data);
-      }
-    }
-  }
+  //     } else { // no _selected, use paths as is
+  //       return buildAccordionText(paths, data);
+  //     }
+  //   }
+  // }
 
   /**
    * Form an optional header descpription
@@ -48,12 +48,13 @@ var docutils = (function () {
   function headerDescription(identifierText, operationText, accordionText) {
     var isEmpty = !identifierText && !operationText && !accordionText;
     if (!isEmpty) {
+      // accordionText handles its init string (and other separators)
+      // with accordion-fields in schema.
       var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
       var identifierAndOperation = _.filter([identifierText, operationText]).join(": ");
-      var withAccordionField = identifierAndOperation
-                               ? _.filter([identifierAndOperation, accordionText]).join(" - ")
-                               : accordionText;
-      return initStr + withAccordionField;
+      return identifierAndOperation
+           ? initStr + _.filter([identifierAndOperation, accordionText]).join("")
+           : accordionText;
     } else {
       return "";
     }

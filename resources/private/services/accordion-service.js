@@ -22,21 +22,69 @@ LUPAPISTE.AccordionService = function() {
   self.documents = ko.observableArray();
   self.identifierFields = ko.observableArray([]);
 
-  var fieldTypeFuns = {date: util.finnishDate};
+  function fieldValues( field, data ) {
+    return _.map( field.paths || [field],
+                  function( path ) {
+                    return util.getIn( data, path );
+                  });
+  }
+
+  function formatField( field, values ) {
+    var result = "";
+    if( _.some( values ) ) {
+      result = field.format
+             ? vsprintf( field.format,
+                         _.concat( values,
+                                   // "Padding" just in case
+                                   _.fill( Array( 20 ), "")) )
+             : values.join( " " );
+    }
+    return result;
+  }
+
+  var fieldTypeFuns = {workPeriod: function( field, data ) {
+    return formatField( field,
+                        _.map( fieldValues( field, data ),
+                               function( v ) {
+                                 return _.isBlank( v )
+                                      ? null
+                                      : util.finnishDate( v );
+                               }));
+  },
+                       selected: function( field, data ) {
+                         var selected = util.getIn( data, [docutils.SELECT_ONE_OF_GROUP_KEY]);
+                         var paths = _.filter( field.paths,
+                                               function( p ) {
+                                                 return _.first( p ) === selected;
+                                               });
+                         var ff = _.set( _.clone(field), "paths", paths );
+                         return formatField( ff, fieldValues( ff, data ));
+                       },
+                       text: function( field, data ) {
+                         return formatField( field, fieldValues( field, data ));
+                       }};
 
   self.accordionFieldText = function( field, data ){
-    var value = util.getIn( data, field.path || field );
-    return _.get( fieldTypeFuns, field.type, _.identity)( value );
+    return fieldTypeFuns[field.type || "text"]( field, data );
   };
+
+  function setPathObservable( obj, doc, path ) {
+    return _.set( obj,
+                  path.join( "." ),
+                  ko.observable( util.getIn( doc.data,
+                                             path.concat( "value"))));
+  }
 
   function createDocumentModel(doc) {
     var fields = doc.schema.info["accordion-fields"];
     var data = _.reduce(fields, function(result, field) {
-      var path = _.get( field, "path", field );
-      var pathValue = util.getIn(doc.data, path.concat("value"));
-      return _.set(result,
-                   path.join("."),
-                   ko.observable( pathValue ));
+      if( field.type === "selected" ) {
+        setPathObservable( result, doc, [docutils.SELECT_ONE_OF_GROUP_KEY] );
+      }
+      _.each( field.paths || [field], _.partial( setPathObservable,
+                                                 result,
+                                                 doc ) );
+      return result;
     }, {});
     return {docId: doc.id,
             operation: ko.mapping.fromJS(doc["schema-info"].op),

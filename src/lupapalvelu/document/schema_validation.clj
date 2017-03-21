@@ -330,6 +330,15 @@
                   (type-pred :calculation) Calculation
                   :else              Input))
 
+(defschema AccordionField
+  "Accordion fields semantics are interpreted in the accordion service.
+  Note: changes also affect lupapalvelu.document.schemas.defschema."
+  (sc/conditional
+   :type      {:type (sc/enum :workPeriod :selected :text)
+               :paths [[sc/Str]]
+               (opt :format)  sc/Str}
+   :else      [sc/Str])) ;; Shortcut for :type :text, no :format.
+
 (defschema Doc
   {:info {:name                              sc/Str     ;;
           (opt :version)                     sc/Int     ;;
@@ -353,12 +362,10 @@
           (opt :editable-in-states)          #{sc/Keyword} ;;
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
-          (opt :accordion-fields)           [(sc/cond-pre {:type sc/Keyword
-                                                           :path [sc/Str]}  ;; Interpreted in the accordion service
-                                                          [sc/Str])]            ;; Path to display in accordion summary.
           (opt :order)                       sc/Int
           ;; Blacklist only works for :neighbor blacklisting. See neighbors API for details.
           (opt :blacklist)                   [sc/Keyword]
+          (opt :accordion-fields)            [AccordionField]
           }
    (opt :rows) [(sc/cond-pre {sc/Keyword sc/Str} [sc/Str])]
    (opt :template) sc/Str
