@@ -146,4 +146,23 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
       assignmentsForApplication(_.get(event, "id"));
     }
   });
+  hub.subscribe("attachment-upload::finished", function(event) {
+    if (event.ok === true &&
+        _.get(event, "id")) {
+      assignmentsForApplication(ko.unwrap(_.get(event, "id")));
+    }
+  });
+
+  var debounceAssignmentsForApplication = _.debounce(function(id) {
+      assignmentsForApplication(id);
+    },
+    500);
+
+  hub.subscribe("attachmentsService::bind-attachments-status", function(event) {
+    if (event.status === "done" &&
+        _.get(event, "applicationId")) {
+      debounceAssignmentsForApplication(ko.unwrap(_.get(event, "applicationId")));
+    }
+  });
+
 };
