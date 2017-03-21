@@ -11,7 +11,9 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
             [schema.core :as sc :refer [defschema]]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.pdf.html-template :as pdf-html]
+            [lupapalvelu.attachment.bind :as att-bind]))
 
 (defschema InspectionSummaryTargets
            {:target-name sc/Str   ;Tarkastuskohde
@@ -223,12 +225,32 @@
                                   (when (seq unset-updates)
                                     {$unset unset-updates})))))
 
-(defn delete-summary [app summaryId]
-  (mongo/update-by-query :applications
-                         {:_id (:id app)}
-                         {$pull {:inspection-summaries {:id summaryId}}}))
+(defn delete-summary-attachment-updates [summary-id]
+  {$pull {:attachments {:source.id summary-id} :type "inspection-summary"}})
 
-(defn toggle-summary-locking [{app-id :id summaries :inspection-summaries} summary-id locked?]
+(defn delete-summary [app summaryId]
+  (->> (delete-summary-attachment-updates summaryId)
+       (util/deep-merge {$pull {:inspection-summaries {:id summaryId}}})
+       (mongo/update-by-id :applications (:id app))))
+
+(defn- summary-attachment-type-for-application [{permit-type :permitType}]
+  (if (#{:R :P} (keyword permit-type))
+    {:type-group :katselmukset_ja_tarkastukset :type-id :tarkastusasiakirjan_yhteeveto}
+    {:type-group :muut :type-id :muu}))
+
+(defn delete-summary-attachment [application summary-id]
+  (->> (delete-summary-attachment-updates summary-id)
+       (mongo/update-by-id :application (:id application))))
+
+(defn toggle-summary-locking [{{app-id :id summaries :inspection-summaries :as application} :application lang :lang :as command} summary-id locked?]
   (mongo/update-by-query :applications
                          {:_id app-id :inspection-summaries {$elemMatch {:id summary-id}}}
-                         {$set {:inspection-summaries.$.locked locked?}}))
+                         {$set {:inspection-summaries.$.locked locked?}})
+  (if locked?
+    (let [pdf-data (pdf-html/create-inspection-summary-pdf application lang summary-id)
+          filedata {:fileId (:file-id pdf-data)
+                    :type   (summary-attachment-type-for-application application)
+                    :group  nil
+                    :source {:type "inspection-summary" :id summary-id}}]
+      (att-bind/make-bind-job command filedata (:generation-response pdf-data)))
+    (delete-summary-attachment application summary-id)))

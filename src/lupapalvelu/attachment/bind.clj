@@ -94,9 +94,14 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
-  [command file-infos]
-  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
-        job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
-                (job/start bind-job-status))]
-    (util/future* (bind-attachments! command coerced-file-infos (:id job)))
-    job))
+  ([command file-infos]
+   (make-bind-job command file-infos nil))
+  ([command file-infos future-response]
+   (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
+         job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
+                 (job/start bind-job-status))]
+     (util/future*
+      (if (or (not (future? future-response)) (ok? @future-response))
+        (bind-attachments! command coerced-file-infos (:id job))
+        @future-response))
+     job)))
