@@ -97,6 +97,11 @@
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
+(defquery enable-accordions
+  {:description "Pseudo-query for checking if accordions should be open or
+                 closed"
+   :user-roles auth/all-authenticated-user-roles})
+
 (defquery party-document-names
   {:parameters [:id]
    :user-roles #{:applicant :authority}

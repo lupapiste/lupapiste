@@ -365,7 +365,10 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
+  (and id
+       user
+       (or application
+           (domain/get-application-as id user :include-canceled-apps? true))))
 
 (defn- user-authz? [command-meta-data application user]
   (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
@@ -613,11 +616,21 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-(defn foreach-action [{:keys [user data] :as command}]
-  (map
-    #(when-let [{type :type categories :categories} (get-meta %)]
-       (merge command (action % :type type :data data :user user) {:categories categories}))
-   (remove nil? (keys @actions))))
+(defn action->command [{:keys [user data] :as skeleton} action-name]
+  (let [meta (get-meta action-name)]
+    (when meta
+      (merge skeleton
+             (action action-name
+                     :type (:type meta)
+                     :data data
+                     :user user)
+             {:categories (:categories meta)}))))
+
+(defn foreach-action [command-skeleton]
+  (for [action-name (remove nil? (keys @actions))
+        :let [result (action->command command-skeleton action-name)]
+        :when result]
+    result))
 
 (defn- validated [command]
   {(:action command) (validate command)})

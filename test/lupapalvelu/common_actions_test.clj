@@ -3,13 +3,73 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [clojure.test :refer [is]]
+            [sade.schema-generators :as ssg]
+            [slingshot.slingshot :refer [try+]]
+            [lupapalvelu.user :as user]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.actions-api :as ca]
             ;; ensure all actions are registered by requiring server ns
-            [lupapalvelu.server]))
+            [lupapalvelu.server]
+            [lupapalvelu.action :as action]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
+
+(def user-is-allowed-to-access?
+  (complement user-is-not-allowed-to-access?))
+
+(def permit-type-generator
+  (-> (lupapalvelu.permit/permit-types)
+      keys
+      gen/elements))
+
+(defn silly-application-generator
+  [organization-id-generator]
+  ;;TODO: generoi hakemukseen organization
+  ;; userin org-authzin sallitut arvot:
+  ;;  authorization/all-org-authz-roles
+  (gen/let [permit-type permit-type-generator
+            org-id organization-id-generator]
+    (merge lupapalvelu.domain/application-skeleton
+           {:permitType permit-type
+            :organization org-id})))
+
+(def user-and-application-generator
+  (gen/let [org-ids (gen/vector-distinct (ssg/generator user/OrgId))
+            org-id-generator (gen/return (gen/elements org-ids))
+            str-org-id-generator (gen/fmap name org-id-generator)
+            user (ssg/generator user/User
+                                {user/OrgId org-id-generator})
+            application-org-id str-org-id-generator
+            permit-type permit-type-generator]))
+
+(defn test-with-input [user application]
+  (let [command (action->command
+                  {:user user
+                   :data {:id "100"}
+                   :application application}
+                  "enable-accordions")]
+    (validate command)))
+
+(defspec user-is-allowed-to-access?-spec
+  (prop/for-all [user (ssg/generator user/User)
+                 application silly-application-generator]
+    (let [command (action->command
+                    {:user user
+                     :data {:id "100"}
+                     :application application}
+                    "enable-accordions")
+          result (test-with-input user application)]
+      (if (and (user/authority? user)
+               ;; käyttäjällä on org-authz hakemuksen organisaatiossa
+               (= "YA"
+                  (:permitType application)))
+        (is (nil? result))
+        (is (false? (:ok result)))))))
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
