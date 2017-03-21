@@ -463,7 +463,7 @@
 "register.company.sign.info2" "en" "Please have your personal bank login details to hand, so you can sign the contract."
 "register.company.sign.info2" "fi" "Varaa saataville henkilökohtaiset pankkitunnuksesi, joilla allekirjoitat sopimuksen."
 "register.company.sign.info2" "sv" "Håll dina personliga bankkoder tillgängliga så att du kan underteckna avtalet."
-"register.company.sign.par1" "en" "You will next be directed to the Visma Sign service, where you can sign your agreement for Lupapiste by obtaining authentication as instructed."
+"register.company.sign.par1" "en" "Next you will be directed to the Visma Sign service, where you can sign your agreement for Lupapiste by obtaining authentication as instructed."
 "register.company.sign.par1" "fi" "Sinut ohjataan seuraavaksi Visma Sign -palveluun, jossa tunnistautumalla allekirjoitetaan sopimus Lupapisteen käytöstä."
 "register.company.sign.par1" "sv" "Du styrs nu vidare till Visma Sign -tjänsten. Identifiera dig i tjänsten och signera Lupapiste avtalet."
 "register.company.sign.par2" "en" "The signatory will be the administrator of a corporate account."
