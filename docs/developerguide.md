@@ -110,6 +110,62 @@ Tällöin selainpään karttakutsut lähetetään ko. karttapalvelimelle.
 
 Palvelun käyttämiä kiinteistö- ja osoitetietorajapintoja ei ole saatavina avoimina palveluina, lisätietoa rajapinnoista [Maanmittauslaitoksen](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut) sivuilta.
 
+## MongoDB-kannan ja tunnusten luominen
+
+Käynnistä `mongo`-shell
+
+    mongo
+
+Luo halutessasi admin-tunnukset. Siirry ensin admin-kantaan:
+
+    > use admin
+
+Luo uusi käyttäjätunnus:
+
+    > db.createUser(
+          {
+              user: "tähän-haluamasi-admin-tunnus",
+              pwd: "tähän-adminin-salasana",
+              roles: ["userAdminAnyDatabase"]
+          });
+
+Siirry nyt `lupapiste`-kantaan:
+
+    > use lupapiste
+
+Luo tunnukset lupapisteelle (käytä samaa kannan nimeä, käyttäjän nimeä ja käyttäjän salasanaa kuin `user.properties`-tiedostossa):
+
+    > db.createUser(
+        {
+            user: "lupapiste-user",
+            pwd: "lupapiste-password",
+            roles: [ { role: "readWrite", db: "lupapiste" } ]
+        });
+
+## MongoDB Dockerissa
+
+Vaihtoehtoisesti voit ajaa Mongoa Dockerissa. Luo ensin uusi mongo-kontti:
+
+    $ docker run --name lupapiste-mongo -p 27018:27017 -d mongo:3.2 --auth
+
+edellisellä komennolla ajettuna kontin mongon portti 27017 ohjataan oman koneen porttiin 27018. Jos portti 27017 on vapaana, voit hyvin ohjata myös siihen tai vaihtoehtoisesti johonkin toiseen porttiin. Käytetty oman koneen portti pitää päivittää `user.properties`-tiedostoon.
+
+Luodaan seuraavaksi `lupapiste-mongo`-kontin mongoon admin-tunnukset
+
+    docker exec -i lupapiste-mongo mongo admin --eval 'db.createUser( { user: "admin-tunnus", pwd: "admin-salasana", roles: [ { role: "userAdminAnyDatabase", db: "admin" } ] } );'
+
+Nyt pääset käsiksi kontissa pyörivään mongo-shelliin adminina seuraavasti:
+
+    docker exec -it lupapiste-mongo mongo -u admin-tunnus -p admin-salasana admin
+
+Luodaan vielä lupapisteelle tietokanta ja käyttäjätunnukset:
+
+    echo  'use lupapiste;
+    db.createUser({user: "lupapiste-user", pwd: "lupapiste-password", roles: [{role: "readWrite", db: "lupapiste"}]});' | docker exec -i lupapiste-mongo mongo -u admin-tunnus -p admin-salasana admin
+    
+Nyt seuraavalla komennolla pitäisi päästä `lupapiste`-kantaan käyttäjänä `lupapiste-user`:
+
+    docker exec -it lupapiste-mongo mongo -u lupapiste-user -p lupapiste-password lupapiste
 
 ## Palvelun käynnistys
 
