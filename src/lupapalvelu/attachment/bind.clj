@@ -24,6 +24,7 @@
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
                                                                                   (sc/optional-key :name) sc/Str}]})
    (sc/optional-key :target)           (sc/maybe att/Target)
+   (sc/optional-key :source)           att/Source
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -38,7 +39,7 @@
         attachment         (or
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
-                                                     (assoc (select-keys filedata [:group :contents :target])
+                                                     (assoc (select-keys filedata [:group :contents :target :source])
                                                             :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
