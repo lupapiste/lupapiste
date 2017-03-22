@@ -15,9 +15,9 @@
                      :secondaryOperations [{:id op2}
                                            {:id op3}
                                            {:id op4}]
-                     :documents [{:schema-info {:op {:id op1}}
+                     :documents [{:schema-info {:op {:id op1} :name "kerrostalo-rivitalo"}
                                   :data {:tunnus {:value "A"}}}
-                                 {:schema-info {:op {:id op2}}
+                                 {:schema-info {:op {:id op2} :name "kerrostalo-rivitalo"}
                                   :data {:valtakunnallinenNumero {:value "B"}}}]
                      :buildings [{:operationId op3
                                   :nationalId "C"}

@@ -12,10 +12,11 @@
 (def all-group-tags (cons general-group-tag attachment-groups))
 
 (defn- enrich-op-with-accordion-fields [documents {op-id :id :as op}]
-  (let [op-doc (util/find-first #(= (get-in % [:schema-info :op :id]) op-id) documents)]
-    (println (schemas/resolve-identifier op-doc) (schemas/resolve-accordion-field-values op-doc))
-    (assoc op :accordionFields (or (schemas/resolve-identifier op-doc)
-                                   (schemas/resolve-accordion-field-values op-doc)))))
+  (if-let [op-doc (util/find-first #(= (get-in % [:schema-info :op :id]) op-id) documents)]
+    (let [value (or (schemas/resolve-identifier op-doc)
+                    (schemas/resolve-accordion-field-values op-doc))]
+      (cond-> op value (assoc :accordionFields value)))
+    op))
 
 (defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
 
