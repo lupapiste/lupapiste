@@ -3,20 +3,29 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.assignment :as assignment]
-            [lupapalvelu.operations :as op]))
+            [lupapalvelu.operations :as op]
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.util :as util]))
 
 (def attachment-groups [:parties :building-site :reports :technical-reports :operation])
 (def general-group-tag :general)
 (def all-group-tags (cons general-group-tag attachment-groups))
+
+(defn- enrich-op-with-accordion-fields [documents {op-id :id :as op}]
+  (let [op-doc (util/find-first #(= (get-in % [:schema-info :op :id]) op-id) documents)]
+    (println (schemas/resolve-identifier op-doc) (schemas/resolve-accordion-field-values op-doc))
+    (assoc op :accordionFields (or (schemas/resolve-identifier op-doc)
+                                   (schemas/resolve-accordion-field-values op-doc)))))
 
 (defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
 
 (defmethod groups-for-attachment-group-type :default [_ group-type]
   [{:groupType group-type}])
 
-(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations} _]
+(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations documents :documents} _]
   (->> (cons primary-op secondary-ops)
        (remove empty?)
+       (map (partial enrich-op-with-accordion-fields documents))
        (map (partial merge {:groupType :operation}))))
 
 (defn attachment-groups-for-application [application]

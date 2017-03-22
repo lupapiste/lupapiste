@@ -102,6 +102,10 @@
 (defn find-identifier-field-from [schema-name]
   (util/find-by-key :identifier true (:body (get-schema {:name schema-name}))))
 
+(defn resolve-identifier [document]
+  (if-let [{identifier-field :name} (find-identifier-field-from (-> document :schema-info :name))]
+    (get-in document [:data (keyword identifier-field) :value])))
+
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 

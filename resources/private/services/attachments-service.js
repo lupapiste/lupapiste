@@ -255,6 +255,9 @@ LUPAPISTE.AttachmentsService = function() {
       hub.subscribe("application-model-updated", function() {
         self.attachmentTypes.reset();
       }, true);
+      hub.subscribe("accordionService::saveIdentifier", function() {
+        self.attachmentTypes.reset();
+      }, true);
     }
   };
 

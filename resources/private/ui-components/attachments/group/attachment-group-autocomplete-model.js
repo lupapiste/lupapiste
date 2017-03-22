@@ -10,7 +10,8 @@ LUPAPISTE.AttachmentGroupAutocompleteModel = function(params) {
 
   function getGroupOptionsText(item) {
     if (_.get(item, "groupType") === "operation") {
-      return _.filter([loc([item.name, "_group_label"]), item.description]).join(" - ");
+      var accordionFieldOrDescription = _.first(_.filter([item.accordionFields, item.description]));
+      return _.filter([accordionFieldOrDescription, loc([item.name, "_group_label"])]).join(" - ");
     } else if (_.get(item, "groupType")) {
       return loc([item.groupType, "_group_label"]);
     }
