@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment.bind
   (:require [taoensso.timbre :refer [info warnf]]
             [sade.core :refer :all]
-            [sade.util :as util]
+            [sade.util :refer [fn->] :as util]
             [schema.core :as sc]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -81,6 +81,10 @@
 (defn- bind-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
+(defn- cancel-job [file-infos job-id]
+  (run! #(job/update job-id assoc (:fileId %) {:status :error :fileId (:fileId %)}) file-infos)
+  (map (fn-> (select-keys [:fileId :type]) (assoc :status :error))) file-infos)
+
 (defn- coerce-bindable-file
   "Coerces bindable file data"
   [file]
@@ -105,5 +109,5 @@
       (if (or (not (future? future-response)) (ok? @future-response))
         (-> (bind-attachments! command coerced-file-infos (:id job))
             (trigger-assignments-fn))
-        @future-response))
+        (cancel-job coerced-file-infos (:id job))))
      job)))
