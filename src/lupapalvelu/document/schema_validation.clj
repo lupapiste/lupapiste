@@ -336,7 +336,10 @@
   (sc/conditional
    :type      {:type                (sc/enum :workPeriod :selected :text)
                :paths               [[sc/Str]]
+               ;; vsprintf-type format for the whole path value list.
                (opt :format)         sc/Str
+               ;; Loc format or key for an individual path value.
+               ;; Both %s and {0} are supported.
                (opt :localizeFormat) sc/Str}
    :else      [sc/Str])) ;; Shortcut for :type :text, no optional keys.
 

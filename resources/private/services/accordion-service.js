@@ -181,7 +181,8 @@ LUPAPISTE.AccordionService = function() {
 
   hub.subscribe("accordionUpdate", function(event) {
     var eventPath = event.path;
-    var value = event.value;
+    // locName is used by selects
+    var value = event.locName || event.value;
     var docId = event.docId;
 
     var documentData = self.getDocumentData(docId);

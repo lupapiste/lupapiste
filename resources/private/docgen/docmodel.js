@@ -320,7 +320,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }
         save(e, function() {
           if (subSchema) {
-           emit(getEvent(e).target, subSchema);
+            emit(getEvent(e).target, {subSchema: subSchema});
           }
         });
       };
@@ -661,7 +661,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var ms = parseDateStringToMs(input.val());
         e.target.value =  ms;
         saveValue(e, ms);
-        emit( e.target, subSchema );
+        emit( e.target, {subSchema: subSchema});
         e.target.value = util.finnishDate(e.target.value);
 
       });
@@ -766,6 +766,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.appendChild(option);
     }
 
+    function selectEmit( target, sendLater ) {
+      emit( target, _.defaults( {sendLater: Boolean( sendLater ),
+                                 subSchema: subSchema},
+                                _.find( options, {name: target.value})));
+    }
+
     var locSelectedOption = _.find(options, function(e) {
       return e.name === sourceValue;
     });
@@ -778,13 +784,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.onchange = function(e) {
         sourceValueChanged(select, select.value, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
         save(e);
-        emit(getEvent(e).target, subSchema);
+        selectEmit( e.target );
       };
     }
 
     listen(subSchema, myPath, select);
 
-    emitLater(select, subSchema);
+    selectEmit(select, true);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
@@ -1687,40 +1693,40 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
   }
 
+  // Typical options are value, path, subSchema and sendLater.
+  // Other options are passed as well.
   var emitters = {
-    filterByCode: function(event, value, path, subSchema, sendLater) {
-      var schemaValue = _.find(subSchema.body, {name: value});
+    filterByCode: function(event, opts) {
+      var schemaValue = _.find(opts.subSchema.body, {name: opts.value});
       var code = schemaValue ? schemaValue.code : "";
-      if (sendLater) {
+      if (opts.sendLater) {
         self.events.push({name: event, data: {code: code}});
       } else {
         hub.send(event, {code: code});
       }
     },
-    hetuChanged: function(event, value) {
-      hub.send(event, {value: value});
+    hetuChanged: function(event, opts) {
+      hub.send(event, opts);
     },
     emitUnknown: function(event) {
       error("Unknown emitter event:", event);
     },
-    accordionUpdate: function(event, value, path) {
-      hub.send(event, {path: path, value: value, docId: self.docId, applicationId: self.appId});
+    accordionUpdate: function(event,  opts) {
+      hub.send(event, _.defaults({docId: self.docId, applicationId: self.appId},
+                                 opts));
     }
   };
 
-  function emit(target, subSchema, sendLater) {
-    if (subSchema.emit) {
-      var value = target.value;
-      var path = $(target).attr("data-docgen-path");
-      _.forEach(subSchema.emit, function(event) {
+  // Mandatory option: subSchema
+  function emit(target, opts) {
+    if (opts.subSchema.emit) {
+      _.forEach(opts.subSchema.emit, function(event) {
         var emitter = emitters[event] || emitters.emitUnknown;
-        emitter(event, value, path, subSchema, sendLater);
+        emitter(event, _.defaults({value: target.value,
+                                   path: $(target).attr("data-docgen-path")},
+                                  opts));
       });
     }
-  }
-
-  function emitLater(target, subSchema) {
-    emit(target, subSchema, true);
   }
 
   function buildSection() {

@@ -1248,7 +1248,6 @@
     :format "- %s"}
    {:type :text
     :paths [["suunnittelutehtavanVaativuusluokka"]]
-    :localizeFormat "osapuoli.suunnittelutehtavanVaativuusluokka.%s"
     :format "(%s)"}])
 
 (def hakijan-asiamies-accordion-paths hakija-accordion-paths)
@@ -1262,7 +1261,9 @@
     :format "- %s %s %s"}])
 
 (def buildingid-accordion-paths
-  [[national-building-id]])
+  [{:type :text
+    :paths [[national-building-id]]
+    :format " - %s"}])
 
 ;;
 ;; schemas
