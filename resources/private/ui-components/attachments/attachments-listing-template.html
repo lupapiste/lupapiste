@@ -6,7 +6,7 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
-  <!-- ko if: authModel.ok("assignments-for-application") && lupapisteApp.services.assignmentService.automaticAssignments().length > 0 -->
+  <!-- ko if: authModel.ok("assignments-for-application") && lupapisteApp.services.assignmentService.automaticAssignments().length > 0  && upload.batchListHidden() -->
   <automatic-assignments data-test-id="automatic-assignments-component"
                          params="authModel : authModel,
                                  assignments: lupapisteApp.services.assignmentService.automaticAssignments,
