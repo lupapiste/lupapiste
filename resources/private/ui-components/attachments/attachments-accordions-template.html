@@ -10,11 +10,12 @@
       <span data-bind="ltext: 'accordions.toggle-all'"></span>
     </button>
 
-    <div class="attachments-accordions"
+    <div id="attachments-accordions" class="attachments-accordions"
          data-bind="foreach: $data.groups ">
       <div data-bind="component: { name: 'attachments-listing-accordion',
                                    params: { pageName: $parent.pageName,
                                              path: $data.path,
+                                             upload: $parent.upload,
                                              level: 0 } }"></div>
     </div>
     <!-- ko if: hasFile -->
@@ -27,5 +28,3 @@
     <!-- /ko -->
   </div>
 </script>
-
-                       

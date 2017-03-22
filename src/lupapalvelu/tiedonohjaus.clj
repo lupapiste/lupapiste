@@ -184,12 +184,39 @@
                            :category (if correction :tos-function-correction :tos-function-change)
                            :user (full-name user)})))))
 
-(defn- handler-changes-from-history [history]
+(defn- handler-name-and-role [handler handler-roles lang]
+  (let [role (->> (filter #(= (:roleId handler) (:id %)) handler-roles))]
+    (str (full-name handler) " ("(get-in (first role) [:name (keyword lang)])")")))
+
+(defn- handler-with-role [handler user handler-roles lang category]
+    {:text (handler-name-and-role handler handler-roles lang)
+     :category category
+     :user (full-name user)})
+
+(defn- handler-remove [handler-id history user handler-roles lang]
+  (let [handler (:handler (last (->> (filter :handler history)
+                                     (filter #(= handler-id (get-in % [:handler :id])))
+                                     (filter #(not (contains? (:handler %) :removed))))))]
+    (handler-with-role handler user handler-roles lang :handler-removed)))
+
+(defn- handler-change [handler history handler-roles lang user]
+  (let [old-handler (:handler (last (->> (filter :handler history)
+                                         (filter #(= (:roleId handler) (get-in % [:handler :roleId])))
+                                         (filter #(= (:id handler) (get-in % [:handler :id])))
+                                         (filter #(not= (:userId handler) (get-in % [:handler :userId])))
+                                         (sort-by :ts))))]
+  {:text (str (full-name old-handler) " -> " (handler-name-and-role handler handler-roles lang))
+   :category :handler-change
+   :user (full-name user)}))
+
+(defn- handler-changes-from-history [history organization-id lang]
+  (let [handler-roles (:handler-roles (o/get-organization organization-id))]
   (->> (filter :handler history)
        (map (fn [{:keys [handler user] :as item}]
-              (merge item {:text (str (:lastName handler) " " (:firstName handler))
-                           :category :handler-change
-                           :user (full-name user)})))))
+              (merge item (cond
+                            (:new-entry handler) (handler-with-role handler user handler-roles lang :handler-added)
+                            (:removed handler) (handler-remove (:id handler) history user handler-roles lang)
+                            :else (handler-change handler history handler-roles lang user))))))))
 
 (defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
@@ -199,7 +226,7 @@
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         tos-fn-changes (tos-function-changes-from-history history lang)
-        handler-changes (handler-changes-from-history history)
+        handler-changes (handler-changes-from-history history organization lang)
         all-docs (sort-by :ts (concat handler-changes tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
         state-changes (filter :state history)]
     (doall
@@ -364,7 +391,9 @@
                 :review (i18n/localize lang "caseFile.operation.review")
                 :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
                 :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection")
-                :handler-change (i18n/localize lang "caseFile.handlerChange"))
+                :handler-change (i18n/localize lang "caseFile.handlerChange")
+                :handler-added (i18n/localize lang "caseFile.handlerAdded")
+                :handler-removed (i18n/localize lang "caseFile.handlerRemoved"))
         description (str title ": " text)
         event (ActionEvent.)]
     (when-not (s/blank? user)

@@ -168,12 +168,12 @@ Set attachment back to needed
 
 Upload new version for muut.muu (attachment page opens)
   [Tags]  attachments
-  Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}
-  # Not needed not visible when file is present
-  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
+  Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}  Muu liite
+  Scroll and click test id  batch-ready
 
 Mikko deletes attachment
   [Tags]  attachments
+  Open attachment details  muut.muu
   Click enabled by test id  delete-attachment
   Confirm yes no dialog
   Wait Until Page Contains  ${propertyId}

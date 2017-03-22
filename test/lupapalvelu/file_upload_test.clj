@@ -15,9 +15,9 @@
                      :secondaryOperations [{:id op2}
                                            {:id op3}
                                            {:id op4}]
-                     :documents [{:schema-info {:op {:id op1}}
+                     :documents [{:schema-info {:op {:id op1} :name "kerrostalo-rivitalo"}
                                   :data {:tunnus {:value "A"}}}
-                                 {:schema-info {:op {:id op2}}
+                                 {:schema-info {:op {:id op2} :name "kerrostalo-rivitalo"}
                                   :data {:valtakunnallinenNumero {:value "B"}}}]
                      :buildings [{:operationId op3
                                   :nationalId "C"}
@@ -152,5 +152,63 @@
                                                                   :type-group :osapuolet
                                                                   :type-id :cv}
                                                            :metadata {:linked false, :sessionId "abc"}
-                                                           :group {:groupType :parties}}])))
+                                                           :group {:groupType :parties}}]))
+
+      (against-background
+        [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
+                                                                           :filename "foobar1.pdf"
+                                                                           :localizedType "Pohjapiirustus"
+                                                                           :contents contents
+                                                                           :drawingNumber "1"
+                                                                           :operation "A"}
+                                                                          {:uri "/path/to/foobar.pdf"
+                                                                           :filename "foobar4.pdf"
+                                                                           :localizedType "Asemapiirros"
+                                                                           :contents contents
+                                                                           :drawingNumber "4"}
+                                                                          {:uri "/path/to/foobar.pdf"
+                                                                           :filename "foobar5.pdf"
+                                                                           :localizedType "CV"
+                                                                           :contents contents}]}
+         (muuntaja/download-file "/path/to/foobar.pdf") => (io/input-stream content)]
+
+        (fact "attachment collection zip is parsed and stored as files - without application"
+          (env/enable-feature! :unzip-attachments)
+          (save-files nil [file2] session-id) => [{:filename "foobar1.pdf"
+                                                   :contentType "application/pdf"
+                                                   :contents contents
+                                                   :drawingNumber "1"
+                                                   :fileId file-id
+                                                   :size length
+                                                   :type {:metadata {:grouping :operation}
+                                                          :type-group :paapiirustus
+                                                          :type-id :pohjapiirustus}
+                                                   :metadata {:linked false, :sessionId "abc"}
+                                                   :group {:groupType :operation
+                                                           :operations []}}
+                                                  {:filename "foobar4.pdf"
+                                                   :contentType "application/pdf"
+                                                   :contents contents
+                                                   :drawingNumber "4"
+                                                   :fileId file-id
+                                                   :size length
+                                                   :type {:metadata {:grouping :operation
+                                                                     :multioperation true}
+                                                          :type-group :paapiirustus
+                                                          :type-id :asemapiirros}
+                                                   :metadata {:linked false, :sessionId "abc"}
+                                                   :group {:groupType :operation
+                                                           :operations []}}
+                                                  {:filename "foobar5.pdf"
+                                                   :contentType "application/pdf"
+                                                   :contents contents
+                                                   :fileId file-id
+                                                   :size length
+                                                   :drawingNumber nil
+                                                   :type {:metadata {:grouping :parties
+                                                                     :for-operations #{:tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen}}
+                                                          :type-group :osapuolet
+                                                          :type-id :cv}
+                                                   :metadata {:linked false, :sessionId "abc"}
+                                                   :group {:groupType :parties}}])))
     (env/set-feature! feature-status [:unzip-attachments])))

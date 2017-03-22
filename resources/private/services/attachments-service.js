@@ -255,6 +255,9 @@ LUPAPISTE.AttachmentsService = function() {
       hub.subscribe("application-model-updated", function() {
         self.attachmentTypes.reset();
       }, true);
+      hub.subscribe("accordionService::saveIdentifier", function() {
+        self.attachmentTypes.reset();
+      }, true);
     }
   };
 
@@ -329,7 +332,8 @@ LUPAPISTE.AttachmentsService = function() {
           hub.send(self.serviceName + "::bind-attachments-status",
                    {fileId: fileData.fileId,
                     status: fileData.status,
-                    jobStatus: job.status});
+                    jobStatus: job.status,
+                    applicationId: self.applicationId});
         }
       });
       if ( job.status === self.JOB_RUNNING ) {
@@ -651,4 +655,7 @@ LUPAPISTE.AttachmentsService = function() {
     return extractMissingAttachments( self.attachments());
   });
 
+  hub.subscribe("assignmentService::assignmentCompleted", function() {
+    self.queryTagGroupsAndFilters();
+  });
 };

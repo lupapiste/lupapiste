@@ -1,20 +1,32 @@
 (ns lupapalvelu.attachment.tags
-  (:require [sade.util :refer [fn->>]]
+  (:require [sade.util :refer [fn->> find-first distinct-by]]
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.operations :as op]))
+            [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.operations :as op]
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.util :as util]))
 
 (def attachment-groups [:parties :building-site :reports :technical-reports :operation])
 (def general-group-tag :general)
 (def all-group-tags (cons general-group-tag attachment-groups))
+
+(defn- enrich-op-with-accordion-fields [documents {op-id :id :as op}]
+  (if-let [op-doc (util/find-first #(= (get-in % [:schema-info :op :id]) op-id) documents)]
+    (let [value (or (schemas/resolve-identifier op-doc)
+                    (schemas/resolve-accordion-field-values op-doc))]
+      (cond-> op value (assoc :accordionFields value)))
+    op))
 
 (defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
 
 (defmethod groups-for-attachment-group-type :default [_ group-type]
   [{:groupType group-type}])
 
-(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations} _]
+(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations documents :documents} _]
   (->> (cons primary-op secondary-ops)
+       (remove empty?)
+       (map (partial enrich-op-with-accordion-fields documents))
        (map (partial merge {:groupType :operation}))))
 
 (defn attachment-groups-for-application [application]
@@ -113,9 +125,37 @@
       [{:tag :needed    :default true}
        {:tag :notNeeded :default false}])))
 
+(defn- targeting-assignments [assignments attachments]
+  (or (not-empty (assignment/targeting-assignments assignments attachments))
+      [{:trigger "not-targeted"}]))
+
+(defn- sort-filters [filters]
+  (sort (fn [a b]
+          (if-let [user-created (first (filter #(= (:tag %) (assignment/assignment-tag "user-created")) [a b]))]
+            (if (= user-created a) -1 1)
+            (if-let [not-targeted (first (filter #(= (:tag %) (assignment/assignment-tag "not-targeted")) [a b]))]
+              (if (= not-targeted a) -1 1)
+              (compare (:description a) (:description b)))))
+        filters))
+
+(defn- assignment-trigger-filters [{:keys [attachments]} assignments]
+  (->> attachments
+       (mapcat (partial targeting-assignments (remove assignment/completed? assignments)))
+       (map #(select-keys % [:trigger :description]))
+       (distinct-by :trigger)
+       (map (fn [{:keys [trigger description]}]
+              (merge {:tag (assignment/assignment-tag trigger)
+                      :default false}
+                     (when (and description
+                                (not= "user-created" trigger))
+                       {:description description}))))
+       sort-filters))
+
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [application]
-  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+  [application & [assignments]]
+  (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+             (when assignments
+               (assignment-trigger-filters application assignments)))
        (remove nil?)
        (filter (fn->> count (< 1)))))

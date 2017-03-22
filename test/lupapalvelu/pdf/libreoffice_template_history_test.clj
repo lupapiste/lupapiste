@@ -9,9 +9,16 @@
             [lupapalvelu.pdf.libreoffice-template :refer :all]
             [lupapalvelu.pdf.libreoffice-template-history :as history]
             [lupapalvelu.tiedonohjaus :refer :all]
-            [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]))
+            [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]
+            [lupapalvelu.organization :as o]))
 
 (def build-history-rows #'lupapalvelu.pdf.libreoffice-template-history/build-history-rows)
+
+(def handler-roles [{:id "58933955cbc214d39ae9688c", :name {:fi "K\u00e4sittelij\u00e4", :sv "Handl\u00e4ggare", :en "Handler"}, :general true}
+                    {:id "58a1ae0a9f5d940c0647d25a", :name {:fi "Testi-rooli", :sv "Test Role", :en "Test Role"}}
+                    {:id "58aab772a20112dee7662c92", :name {:fi "Rooli", :sv "Role", :en "Role"}}
+                    {:id "58b581558a73e50b5cd2e2fb", :name {:fi "KVV-K\u00e4sittelij\u00e4", :sv "KVV-Handl\u00e4ggare", :en "KVV-Handler"}}
+                    {:id "58b7e9254cee47962aea4df4", :name {:fi "Uusi", :sv "Ny", :en "New"}, :disabled true}])
 
 (defn build-xml-history [application lang]
   (s/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))
@@ -23,7 +30,8 @@
 
        (background
          (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
-         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})
+         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"}
+         (o/get-organization "753-R") => {:handler-roles handler-roles})
 
        (fact {:midje/description (str "history rows")}
              (build-history-rows application1 :fi) => [["Valmisteilla" "" "01.01.2016" "Testaaja Testi"] ["" "Asiakirja lis\u00e4tty: Asemapiirros, Great attachment, v. 1.0" "02.01.2016" "Testaaja Testi"] ["" "Lausuntopyynt\u00f6 tehty: Pelastusviranomainen" "02.01.2016" ""] ["" "Naapurin kuuleminen tehty: Joku naapurin nimi" "02.01.2016" " "] ["" "Vaatimus lis\u00e4tty: rakennuksen paikan tarkastaminen" "02.01.2016" "Suku Etu"] ["K\u00e4sittelyss\u00e4" "" "30.01.2016" "Testaaja Testi"] ["" "Asiakirja lis\u00e4tty: Asemapiirros, Great attachment, v. 2.0" "01.02.2016" "Testaaja Testi"] ["" "Asiakirja lis\u00e4tty: P\u00e4\u00e4t\u00f6sote" "01.03.2016" "Testaaja Testi"] ["" "Lausuntopyynt\u00f6 tehty: Rakennussuunnittelu" "01.03.2016" ""]])

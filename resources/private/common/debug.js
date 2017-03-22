@@ -161,41 +161,4 @@ jQuery(function($) {
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
 
-  // Help registering company:
-
-  $("<div>")
-    .css("padding", "8px")
-    .css("margin-top", "20px")
-    .append($("<button>")
-      .addClass("btn btn-decline")
-      .html("DEBUG: Auto fill")
-      .click(function() {
-        var form = $("#register-company .form-group"),
-            fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); },
-            fillAll = function(f) { _.each(f, function(value, id) { fill(id, value); }); };
-
-        var formData = {
-          name:      "Oy FooBar Ab",
-          y:         "1234567-1",
-          reference: "Kansantanhu osasto",
-          address1:  "Latokuja 1",
-          po:        "Sipoo",
-          zip:       "12345",
-          country:   "SUAMI",
-          ovt:       "0037123456710007",
-          pop:       "003776543212",
-          firstName: "fo",
-          lastName:  "ba",
-          email:     "fo@ba.com",
-          personId:  "131052-308T"
-        };
-        if (lupapisteApp.models.currentUser) {
-          delete formData.firstName;
-          delete formData.lastName;
-          delete formData.email;
-        }
-        fillAll(formData);
-      }))
-    .appendTo("#register-company .content");
-
 });

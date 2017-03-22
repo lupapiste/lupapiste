@@ -240,7 +240,7 @@ New attachment is not yet visible
 
 New attachment is a post-verdict attachment and automatically approved
   Click label by test id  postVerdict-filter-label
-  Rollup approved  Rakennuspaikan liitteet
+  Rollup approved  RAKENNUSPAIKAN LIITTEET
 
 Check the attachment details just in case
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta

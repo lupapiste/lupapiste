@@ -128,7 +128,7 @@ jQuery(document).ready(function() {
     {name: "verdict-appeal-bubble"},
     {name: "file-upload"},
     {name: "form-cell"},
-    {name: "cell-text", model: "cell-model"},
+    {name: "cell-text"},
     {name: "cell-span"},
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
@@ -179,7 +179,16 @@ jQuery(document).ready(function() {
     {name: "link-permit-autocomplete"},
     {name: "handler-list"},
     {name: "card"},
-    {name: "edit-handlers"}
+    {name: "edit-handlers"},
+    {name: "register-company-steps"},
+    {name: "register-company-buttons"},
+    {name: "register-company-account-type"},
+    {name: "register-company-info"},
+    {name: "cell-invoice-operator"},
+    {name: "register-company-sign"},
+    {name: "set-password"},
+    {name: "login"},
+    {name: "campaign-editor"}
 ];
 
   ko.registerLupapisteComponents(components);

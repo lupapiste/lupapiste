@@ -154,6 +154,25 @@
              loc (localizer ~lang)]
      ~@body))
 
+(defn localize-and-fill
+  "Fills {n} markers in the loc-string with values. For example, if
+  English loc-string for a term 'hello' would be 'Hi there {0}!',
+  then (localize-and-fill :en :hello 'Bob' ) => 'Hi there Bob!'.
+    lang: keyword or string.
+    term: string, keyword or sequence of string/keywords.
+    values: Sequence of subsitute values (keyword/string/number)."
+  [lang term & values]
+  (let [s (localize lang (if (sequential? term)
+                           term
+                           (ss/split (name term) #"\.")))]
+    (reduce (fn [acc i]
+              (ss/replace acc
+                          (format "{%s}" i)
+                          (ss/->plain-string (nth values i))))
+            s
+            (range (count values)))))
+
+
 (defn lang-middleware [handler]
   (fn [request]
     (let [lang (or (get-in request [:params :lang])

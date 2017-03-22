@@ -1,4 +1,4 @@
-LUPAPISTE.AttachmentsTableModel = function(attachments) {
+LUPAPISTE.AttachmentsTableModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -11,7 +11,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
-  self.attachments = attachments;
+  self.attachments = params.attachments;
+  self.upload = params.upload;
 
   var idPrefix = _.uniqueId("at-input-");
 
@@ -74,7 +75,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   }
 
   self.assignments = self.disposedPureComputed(function() {
-    var attachmentIds = _.map(attachments, function(att) { return util.getIn(att, ["id"]); });
+    var attachmentIds = _.map(ko.unwrap(self.attachments), function(att) { return util.getIn(att, ["id"]); });
     if (assignmentService) {
       return  _(assignmentService.assignments())
         .filter(_.partial(isAssignmentShownInTable, attachmentIds))

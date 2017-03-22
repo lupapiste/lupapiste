@@ -737,7 +737,9 @@
   "Upload file to raw upload-file endpoint."
   [apikey filename & {:keys [cookie-store]}]
   (let [uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/raw/upload-file")]
+        uri         (str (server-address) (if apikey
+                                            "/api/raw/upload-file-authenticated"
+                                            "/api/raw/upload-file"))]
     (:body
       (decode-response
         (http-post uri

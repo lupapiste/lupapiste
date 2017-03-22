@@ -476,6 +476,7 @@ $preamble-min-height: 280px; // at least the size of the map container
   min-height: $preamble-min-height;
   width: 80px;
   min-width: $minimum-breakpoint;
+  padding-bottom: 1em;
 }
 
 @mixin icon-colorizer( $id ) {

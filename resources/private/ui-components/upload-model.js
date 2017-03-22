@@ -37,6 +37,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   self.waiting = ko.observable();
   self.readOnly = params.readOnly;
   self.allowMultiple = params.allowMultiple;
+  self.batchMode = params.batchMode;
 
   self.batchListHidden = self.disposedPureComputed(_.flow(self.files, _.isEmpty));
 
@@ -62,8 +63,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   }
 
   function bindToService() {
-    service.bindFileInput({maximumUploadSize: 100000000, // 100 MB
-                           id: self.fileInputId,
+    service.bindFileInput({id: self.fileInputId,
                            dropZone: params.dropZone,
                            allowMultiple: params.allowMultiple});
     self.listenService( "filesUploaded", function( event ) {
@@ -87,7 +87,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
     self.listenService( "badFile", params.badFileHandler || indicatorError);
   }
 
-  // Removes file from files but from server.
+  // Removes file from files but not from server.
   self.clearFile = function( fileId ) {
     if (!_.isEmpty( self.files.remove( function( file ) {
       return file.fileId === fileId;

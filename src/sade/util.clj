@@ -587,3 +587,23 @@
 
 (defn read-edn-resource [file-path]
   (->> file-path io/resource slurp edn/read-string))
+
+(defn distinct-by
+  "Given a function comparable-fn and collection coll, builds a new
+  collection by keeping elements e for which the result of
+  (comparable-fn e) is distinct from the results of previous elements.
+
+  (distinct-by :id [{:id 1 :val :a} {:id 2 :val :b} {:id 1 :val :c}])
+  ; => ({:id 1 :val :a} {:id 2 :val :b)"
+  [comparable-fn coll]
+  (if (empty? coll)
+    '()
+    (-> (reduce (fn [[coll comparable-results] x]
+                  (let [x-comparable (comparable-fn x)]
+                         (if (contains? comparable-results x-comparable)
+                           [coll comparable-results]
+                           [(conj coll x) (conj comparable-results x-comparable)])))
+                [[] #{}]
+                coll)
+        first
+        seq)))

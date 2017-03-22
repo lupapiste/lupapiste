@@ -377,8 +377,11 @@
 
 (defn wms-get
   "WMS query with error handling. Returns response body or nil."
-  [url query-params]
-  (let [{:keys [status body]} (http/get url {:query-params query-params :quiet true :throw-exceptions false})
+  [url query-params user passwd]
+  (let [credentials (when-not (ss/blank? user) {:basic-auth [user passwd]})
+         options     (merge {:query-params query-params :quiet true :throw-exceptions false}
+                       credentials)
+        {:keys [status body]} (http/get url options)
         error (when (ss/contains? body "ServiceException")
                 (-> body ss/trim
                   (->features startparse-sax-non-validating "UTF-8")
@@ -540,15 +543,18 @@
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
 
-(defn- plan-info-config [municipality]
-  (let [k (keyword municipality)]
-    {:url    (or (env/value :plan-info k :url) wms-url)
-     :layers (or (env/value :plan-info k :layers) (str municipality "_asemakaavaindeksi"))
-     :format (or (env/value :plan-info k :format) "application/vnd.ogc.gml")}))
+(defn- plan-info-config [municipality type]
+  (let [k (keyword municipality)
+        t (keyword type)]
+    {:url    (or (env/value t k :url) wms-url)
+     :layers (or (env/value t k :layers) (str municipality "_asemakaavaindeksi"))
+     :format (or (env/value t k :format) "application/vnd.ogc.gml")
+     :user (env/value t k :user)
+     :passwd (env/value t k :passwd)}))
 
-(defn plan-info-by-point [x y municipality]
+(defn plan-info-by-point [x y municipality type]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
-        {:keys [url layers format]} (plan-info-config municipality)
+        {:keys [url layers format user passwd]} (plan-info-config municipality type)
         query {"REQUEST" "GetFeatureInfo"
                "EXCEPTIONS" "application/vnd.ogc.se_xml"
                "SERVICE" "WMS"
@@ -565,10 +571,10 @@
                "x" "128"
                "y" "128"
                "BBOX" (s/join "," bbox)}]
-    (wms-get url query)))
+    (wms-get url query user passwd)))
 
 ;;; Mikkeli is special because it was done first and they use Bentley WMS
-(defn gfi-to-features-mikkeli [gfi _]
+(defn gfi-to-features-bentley [gfi _]
   (when gfi
     (xml-> (->features gfi startparse-sax-non-validating) :FeatureKeysInLevel :FeatureInfo :FeatureKey)))
 
@@ -579,6 +585,21 @@
      :kaavalaji (first (xml-> feature :property (attr= :name "Kaavalaji") text))
      :kasitt_pvm (first (xml-> feature :property (attr= :name "Kasitt_pvm") text))
      :linkki (first (xml-> feature :property (attr= :name "Linkki") text))
+     :type "bentley"}))
+
+;;; Valkeakoski is almost same as Mikkeli
+(defn feature-to-feature-info-valkeakoski-plan-info  [feature]
+  (when feature
+    {:id (first (xml-> feature :property (attr= :name "IDPR_RENDITION_ID") text))
+     :kaavanro (first (xml-> feature :property (attr= :name "kaavatunnus") text))
+     :linkki (first (xml-> feature :property (attr= :name "Linkki2") text))
+     :type "bentley"}))
+
+(defn feature-to-feature-info-valkeakoski-rakennustapaohje  [feature]
+  (when feature
+    {:id (first (xml-> feature :property (attr= :name "IDPR_RENDITION_ID") text))
+     :kaavanro (first (xml-> feature :property (attr= :name "kaavatunnus") text))
+     :linkki (first (xml-> feature :property (attr= :name "linkki2") text))
      :type "bentley"}))
 
 (defn gfi-to-features-sito [gfi municipality]
@@ -622,7 +643,7 @@
                "x" "128"
                "y" "128"
                "BBOX" (s/join "," bbox)}]
-    (wms-get wms-url query)))
+    (wms-get wms-url query nil nil)))
 
 (defn gfi-to-general-plan-features [gfi]
   (when gfi

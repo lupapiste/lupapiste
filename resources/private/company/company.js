@@ -280,7 +280,6 @@
       po:           ko.observable().extend(required),
       zip:          ko.observable().extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable().extend(notRequired),
-      ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
       netbill:      ko.observable().extend(notRequired),
       pop:          ko.observable().extend(notRequired)
     });
@@ -292,7 +291,6 @@
       po: undefined,
       zip: undefined,
       country: undefined,
-      ovt: undefined,
       netbill: undefined,
       pop: undefined,
       accountType: undefined,
@@ -312,11 +310,13 @@
   };
 
   CompanyInfo.prototype.updateAccountTypes = function(company) {
+    var serviceAccountTypes = lupapisteApp.services.companyRegistrationService.accountTypes();
     var accountType = this.accountType; // take correct observable to var, 'this' context differs in _.map's function
     accountType(_.find(LUPAPISTE.config.accountTypes, {name: company.accountType}));
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
       type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
-      type.displayName = loc("register.company." + type.name + ".title") + " (" + loc("register.company." + type.name + ".price") + ")";
+      var serviceAccountType = _.find( serviceAccountTypes, {id: type.name});
+      type.displayName = sprintf( "%s (%s)", serviceAccountType.title, serviceAccountType.price );
       return type;
     });
     this.accountTypes([]);
