@@ -652,4 +652,7 @@ LUPAPISTE.AttachmentsService = function() {
     return extractMissingAttachments( self.attachments());
   });
 
+  hub.subscribe("assignmentService::assignmentCompleted", function(event) {
+    self.queryTagGroupsAndFilters();
+  });
 };
