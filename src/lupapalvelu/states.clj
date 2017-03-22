@@ -45,6 +45,14 @@
 (def ^{:doc "See default-application-state-graph"}
   tj-hakemus-state-graph common-states/tj-hakemus-state-graph)
 
+;; New YA states
+
+(def ya-kayttolupa-state-graph common-states/ya-kayttolupa-state-graph)
+(def ya-sijoituslupa-state-graph common-states/ya-sijoittaminen-permit-state-graph)
+(def ya-sijoitussopimus-state-graph common-states/ya-sijoittaminen-agreement-state-graph)
+(def ya-jatkoaika-state-graph common-states/ya-jatkoaika-state-graph)
+(def ya-tyolupa-state-graph default-application-state-graph)
+
 ; TODO draft versions this forward
 
 (def
