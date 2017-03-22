@@ -258,10 +258,11 @@
                          {:_id app-id :inspection-summaries {$elemMatch {:id summary-id}}}
                          {$set {:inspection-summaries.$.locked locked?}})
   (if locked?
-    (let [pdf-data (pdf-html/create-inspection-summary-pdf application lang summary-id)
-          filedata {:fileId (:file-id pdf-data)
+    (let [file-id  (mongo/create-id)
+          filedata {:fileId file-id
                     :type   (summary-attachment-type-for-application application)
                     :group  nil
                     :source {:type "inspection-summary" :id summary-id}}]
-      (att-bind/make-bind-job command filedata identity (:generation-response pdf-data)))
+      (->> (util/future* (pdf-html/create-inspection-summary-pdf application lang summary-id :file-id file-id))
+           (att-bind/make-bind-job command [filedata] :preprocess-ref)))
     (delete-summary-attachment application summary-id)))

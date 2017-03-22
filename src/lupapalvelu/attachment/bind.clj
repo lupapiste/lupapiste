@@ -81,9 +81,9 @@
 (defn- bind-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
-(defn- cancel-job [file-infos job-id]
-  (job/update job-id #(util/map-values (fn [{file-id :fileId}] {:fileId file-id :status :error}) %))
-  (map (fn [{file-id :fileId type :type}] {:fileId file-id :type type :status :error}) file-infos))
+(defn- cancel-job [job-id {:keys [status text]}]
+  (warnf "canceling bind job %s due '%s'" job-id text)
+  (job/update job-id #(util/map-values (fn [{file-id :fileId}] {:fileId file-id :status status :text text}) %)))
 
 (defn- coerce-bindable-file
   "Coerces bindable file data"
@@ -99,15 +99,15 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
-  ([command file-infos trigger-assignments-fn]
-   (make-bind-job command file-infos trigger-assignments-fn nil))
-  ([command file-infos trigger-assignments-fn future-response]
-   (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
-         job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
-                 (job/start bind-job-status))]
-     (util/future*
-      (if (or (not (future? future-response)) (ok? @future-response))
-        (-> (bind-attachments! command coerced-file-infos (:id job))
-            (trigger-assignments-fn))
-        (cancel-job coerced-file-infos (:id job))))
-     job)))
+  [command file-infos & {:keys [preprocess-ref postprocess-fn]
+                         :or   {preprocess-ref (delay (ok))
+                                postprocess-fn identity}}]
+  (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
+        job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
+                (job/start bind-job-status))]
+    (util/future*
+     (if (ok? @preprocess-ref)
+       (-> (bind-attachments! command coerced-file-infos (:id job))
+           (postprocess-fn))
+       (cancel-job (:id job) (assoc @preprocess-ref :status :error))))
+    job))

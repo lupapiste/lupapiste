@@ -17,13 +17,10 @@
            (ok :file-id file-id :mongo-file)))
     resp))
 
-(defn create-inspection-summary-pdf [application lang summary-id]
+(defn create-inspection-summary-pdf [application lang summary-id & {:keys [file-id] :or {file-id (mongo/create-id)}}]
   (let [content (common/apply-page inspection-summary-template/inspection-summary application lang summary-id)
         header  (common/apply-page common/basic-header)
         footer  (common/apply-page common/basic-application-footer application)
-        file-id (mongo/create-id)
         file-name (str (:id application) "_inspection-summary_" summary-id \_ (now) ".pdf")]
     (->> (muuntaja/convert-html-to-pdf (:id application) "inspection-summary" content header footer)
-         (store-file file-id file-name)
-         (util/future*)
-         (assoc {:file-id file-id} :generation-response))))
+         (store-file file-id file-name))))

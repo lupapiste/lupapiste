@@ -66,7 +66,7 @@
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}]
-                               (assignment/run-assignment-triggers (partial job-response-fn command)))))
+                               :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
 
 (defn filedatas-precheck
   "Executes given pre-check against each individual :filedatas from command"
@@ -91,7 +91,7 @@
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command filedatas
-                               (assignment/run-assignment-triggers (partial job-response-fn command)))))
+                               :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
 
 (defquery bind-attachments-job
   {:parameters [jobId version]
