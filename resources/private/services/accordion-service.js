@@ -53,7 +53,7 @@ LUPAPISTE.AccordionService = function() {
                           _.map( fieldValues( field, data ),
                                  function( v ) {
                                    return _.isBlank( v )
-                                        ? null
+                                        ? ""
                                         : util.finnishDate( v );
                                  }));
     },

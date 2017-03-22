@@ -438,7 +438,9 @@ var util = (function($) {
 
   // Timestampe is milliseconds from Unix epoch.
   function finnishDate( timestamp ) {
-    return moment( _.toInteger( timestamp ) ).format( "D.M.YYYY" );
+    return _.trim( timestamp )
+         ? moment( _.toInteger( timestamp ) ).format( "D.M.YYYY" )
+         : "";
   }
 
   return {

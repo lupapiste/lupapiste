@@ -609,13 +609,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  // L10n date formats only used when parsing.
+  // Date is always displayed in the Finnish format.
+  var dateFormats = {fi: "D.M.YYYY",
+                     sv: "D.M.YYYY",
+                     en: "M/D/YYYY"};
+
   function parseDateStringToMs(dateString) {
-    var day = dateString.slice(0, 2);
-    var month = dateString.slice(3,5)      ;
-    var year = dateString.slice(6, 10);
-    var date = new Date();
-    date.setUTCFullYear(year, month-1, day);
-    return date.getTime();
+    var m = moment( dateString, dateFormats[loc.getCurrentLanguage()], true);
+    return m.isValid() ? m.valueOf() : null;
   }
 
   function buildMsDate(subSchema, model, path) {

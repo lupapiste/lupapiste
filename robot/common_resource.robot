@@ -1628,7 +1628,7 @@ There are no frontend errors
 #
 
 Fill tyoaika fields
-  [Arguments]  ${startDate}=01.05.2014  ${endDate}=02.05.2014
+  [Arguments]  ${startDate}=1.5.2014  ${endDate}=2.5.2014
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
 
