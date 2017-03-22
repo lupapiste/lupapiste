@@ -635,9 +635,9 @@
      :body ((:content attachment))
      :headers {"Content-Type" (:contentType attachment)
                "Content-Length" (str (:size attachment))
-               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}
+               "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:filename attachment)))}}
     {:status 404
-     :body (str "can't file attachment: id=" attachment-id)}))
+     :body (str "Attachment not found: id=" attachment-id)}))
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]
