@@ -799,7 +799,8 @@
   {:description "Set and update automated assignment trigger"
    :parameters [targets]
    :optional-parameters [triggerId description handler]
-   :input-validators [(partial vector-parameters [:targets])]
+   :input-validators [(partial vector-parameters [:targets])
+                      (partial non-blank-parameters [:description])]
    :user-roles #{:authorityAdmin}}
    [{user :user user-orgs :user-organizations}]
    (let [trigger (org/create-trigger triggerId targets handler description)
