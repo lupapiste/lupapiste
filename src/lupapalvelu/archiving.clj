@@ -22,7 +22,8 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
-            [lupapiste-commons.schema-utils :as su])
+            [lupapiste-commons.schema-utils :as su]
+            [lupapalvelu.states :as states])
   (:import [java.util.concurrent ThreadFactory Executors]
            [java.io InputStream]))
 
@@ -141,6 +142,10 @@
        (remove nil?)
        (first)))
 
+(defn valid-ya-state? [application]
+  (and (= "YA" (:permitType application))
+       (contains? states/verdict-given-states (keyword (:state application)))))
+
 (defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
                 (map (fn [{:keys [paatokset]}]
@@ -238,7 +243,9 @@
         (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
-  (if (or (get-paatospvm application) (foreman/foreman-app? application))
+  (if (or (get-paatospvm application)
+          (foreman/foreman-app? application)
+          (valid-ya-state? application))
     (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                          (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                        attachments)
