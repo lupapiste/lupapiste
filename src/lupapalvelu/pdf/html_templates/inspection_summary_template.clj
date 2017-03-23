@@ -30,7 +30,7 @@
 
 (defn- target-attachments [{attachments :attachments :as application} {target-id :id}]
   (->> (filter (comp #{target-id} :id :target) attachments)
-       (map (comp vector :filename :latestVersion))))
+       (map (comp :filename :latestVersion))))
 
 (defn inspection-summary-transformation [application lang summary-id]
   (let [summary   (util/find-by-id summary-id (:inspection-summaries application))
