@@ -43,6 +43,7 @@ Authority adds trigger
   Click enabled by test id  add-trigger
   Select from autocomplete by test id  triggers-target-component  Aitapiirustus
   Select From List by test id  triggers-handler-select  Käsittelijä robotti
+  Test id disabled  save-trigger-dialog-ok
   Input text by test id  triggers-description-input  Description
   Click enabled by test id  save-trigger-dialog-ok
   Wait until  Positive indicator should be visible

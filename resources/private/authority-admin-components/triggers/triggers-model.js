@@ -44,7 +44,7 @@ LUPAPISTE.TriggersModel = function( params ) {
 
     dd.isGood = ko.pureComputed( function() {
       var selectedType = ko.unwrap(lupapisteApp.services.triggersTargetService.selected);
-      return (selectedType !== undefined);
+      return (selectedType !== undefined) && dd.description();
     });
 
     dd.saveTrigger = function() {

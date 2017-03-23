@@ -66,7 +66,8 @@
                 <label data-bind="ltext: 'triggers.label.description'"></label>
                 <input data-test-id="triggers-description-input"
                        class="form-input long grid-style-input"
-                       data-bind="value: dialogData.description"
+                       data-bind="value: dialogData.description,
+                                  valueUpdate: 'keyup'"
                        id="triggers.add.description"
                        type="text"/>
              </div>
