@@ -65,6 +65,10 @@
                           :paths [["tyoaika-alkaa-ms"]
                                   ["tyoaika-paattyy-ms"]]
                           :format "%s \u2013 %s"}])
+(def continuation-fields [{:type :text
+                           :paths [["tyoaika-alkaa-pvm"]
+                                   ["tyoaika-paattyy-pvm"]]
+                           :format "%s \u2013 %s"}])
 
 (defschemas
   1
@@ -109,7 +113,8 @@
            :removable false
            :repeating false
            :approvable true
-           :order 63}
+           :order 63
+           :accordion-fields continuation-fields}
     :body tyo-aika-for-jatkoaika}
    {:info {:name "hankkeen-kuvaus-jatkoaika"
            :subtype :hankkeen-kuvaus

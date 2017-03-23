@@ -565,69 +565,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildDate(subSchema, model, path) {
+  function buildDate(subSchema, model, path, transform) {
+    transform = _.merge( {toDate: _.identity, fromDate: _.identity },
+                         transform );
     var lang = loc.getCurrentLanguage();
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
-    var value = getModelValue(model, subSchema.name);
-
-    var span = makeEntrySpan(subSchema, myPath, validationResult);
-
-    if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "date", myPath, validationResult));
-    }
-
-    var className = "form-input text form-date";
-    if (validationResult && validationResult[0]) {
-      var level = validationResult[0];
-      className += " " + level;
-    }
-    // date
-    var input = $("<input>", {
-      id: pathStrToID(myPath),
-      name: self.docId + "." + myPath,
-      type: "text",
-      "class": className,
-      value: value
-    });
-
-    var sourceValue = getModelSourceValue(model, subSchema.name);
-    var source = getModelSource(model, subSchema.name);
-
-    sourceValueChanged(input.get(0), value, sourceValue, source);
-
-    if (isInputReadOnly(doc, subSchema, model)) {
-      input.attr("readonly", true);
-    } else {
-      input.datepicker($.datepicker.regional[lang]).change(function(e) {
-        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
-        save(e);
-      });
-    }
-    input.appendTo(span);
-
-    return span;
-  }
-
-  // L10n date formats only used when parsing.
-  // Date is always displayed in the Finnish format.
-  var dateFormats = {fi: "D.M.YYYY",
-                     sv: "D.M.YYYY",
-                     en: "M/D/YYYY"};
-
-  function parseDateStringToMs(dateString) {
-    var m = moment( dateString, dateFormats[loc.getCurrentLanguage()], true);
-    return m.isValid() ? m.valueOf() : null;
-  }
-
-  function buildMsDate(subSchema, model, path) {
-    var lang = loc.getCurrentLanguage();
-    var myPath = path.join(".");
-    var validationResult = getValidationResult(model, subSchema.name);
-    var value;
-    if (getModelValue(model, subSchema.name)) {
-      value = util.finnishDate(getModelValue(model, subSchema.name));
-    }
+    var value = transform.toDate(getModelValue(model, subSchema.name));
 
     var span = makeEntrySpan(subSchema, myPath, validationResult);
 
@@ -659,18 +603,33 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.attr("readonly", true);
     } else {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
-        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
-        var ms = parseDateStringToMs(input.val());
-        e.target.value =  ms;
-        saveValue(e, ms);
-        emit( e.target, {subSchema: subSchema});
-        e.target.value = util.finnishDate(e.target.value);
-
+        var date = util.finnishDate(input.val(),
+                                    loc.getCurrentLanguage());
+        // The date field is always shown in the Finnish format.
+        input.val( date );
+        sourceValueChanged(input.get(0), date, sourceValue, source);
+        var value = transform.fromDate( date );
+        saveValue(e, value);
+        emit( e.target, {subSchema: subSchema,
+                         value: value});
       });
     }
     input.appendTo(span);
 
     return span;
+  }
+
+  function parseDateStringToMs(dateString) {
+    // The date has been converted to the Finnish format before
+    // transform.
+    var m = util.toMoment( dateString, "fi");
+    return m && m.valueOf();
+  }
+
+  function buildMsDate(subSchema, model, path) {
+    return buildDate( subSchema, model, path,
+                    {fromDate: parseDateStringToMs,
+                     toDate: util.finnishDate});
   }
 
   function buildTime(subSchema, model, path) {
@@ -1654,27 +1613,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // That would prevent moving to the next field with tab key in IE8.
   }
 
-  function save(e, callback) {
-    var event = getEvent(e);
-    var target = event.target;
-    var indicator = docutils.createIndicator(target);
-
-    var path = target.name;
-    var loader = docutils.loaderImg();
-
-    var value = target.value;
-    if (target.type === "checkbox") {
-      value = target.checked;
-    }
-
-    var label = document.getElementById(pathStrToLabelID(path));
-    if (label) {
-      label.appendChild(loader);
-    }
-
-    saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
-  }
-
   function saveValue(e, value, callback) {
     var event = getEvent(e);
     var target = event.target;
@@ -1688,6 +1626,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       label.appendChild(loader);
     }
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
+  function save(e, callback) {
+    saveValue( e,
+               e.target.type === "checkbox"
+                 ? e.target.checked
+                 : e.target.value,
+               callback );
   }
 
   function saveMany(target, updates, callback) {
@@ -1724,9 +1670,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (opts.subSchema.emit) {
       _.forEach(opts.subSchema.emit, function(event) {
         var emitter = emitters[event] || emitters.emitUnknown;
-        emitter(event, _.defaults({value: target.value,
-                                   path: $(target).attr("data-docgen-path")},
-                                  opts));
+        emitter(event, _.defaults(_.clone( opts ),
+                                  {value: target.value,
+                                   path: $(target).attr("data-docgen-path")}));
       });
     }
   }
