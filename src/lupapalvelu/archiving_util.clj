@@ -13,7 +13,6 @@
 
 (defn mark-application-archived-if-done [{:keys [id] :as application} now]
   ; If these queries return 0 results, we mark the corresponding phase as archived
-  (println "!!!")
   (let [attachment-or-app-md (metadata-query "metadata")
         pre-verdict-query {:_id id
                            ; Look for pre-verdict attachments that have versions, are not yet archived, but need to be
@@ -41,7 +40,6 @@
         {$set {:archived.application now}}))
 
     (when (zero? (mongo/count :applications post-verdict-query))
-      (println "!!!")
       (action/update-application
         (action/application->command application)
         {$set {:archived.completed now}}))))
