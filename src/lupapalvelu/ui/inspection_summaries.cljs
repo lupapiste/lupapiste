@@ -79,7 +79,7 @@
                          (vals (:fileStatuses @component-state)))]
     (when (every? #(= "done" (:status %)) statuses)
       (doseq [hub-id (distinct (map :subs-id statuses))]
-        (.unsubscribe js/hub hub-id))
+        (hub/unsubscribe hub-id))
       (refresh))))
 
 (defn bind-attachment-callback [target-id event]
@@ -139,7 +139,7 @@
                   "inspection-summary.targets.remove-confirm.title"
                   "inspection-summary.targets.remove-confirm.message"
                   (fn [] (command :remove-target-from-inspection-summary
-                                  (fn [_] (.send js/hub "attachmentsService::updateAll") (refresh))
+                                  (fn [_] (hub/send "attachmentsService::updateAll") (refresh))
                                   :id        (:applicationId @component-state)
                                   :summaryId (:id @selected-summary)
                                   :targetId  target-id))))

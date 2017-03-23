@@ -1,5 +1,6 @@
  (ns lupapalvelu.ui.rum-util
-   (:require [rum.core :as rum]))
+   (:require [rum.core :as rum]
+             [lupapalvelu.ui.hub :as hub]))
 
 (defonce unique-id (atom 0))
 (defn derived-atom
@@ -17,7 +18,6 @@
               (update state
                       :hubscriptions
                       conj
-                      (.subscribe js/hub
-                                  (clj->js (assoc result :eventType eventName))
-                                  (partial callback state)))))
-    :will-unmount (fn [state] (doseq [subscription (:hubscriptions state)] (.unsubscribe js/hub subscription)))})
+                      (hub/subscribe (assoc result :eventType eventName)
+                                     (partial callback state)))))
+    :will-unmount (fn [state] (doseq [subscription (:hubscriptions state)] (hub/unsubscribe subscription)))})
