@@ -10,7 +10,7 @@
 (def html2pdf-path "/api/html2pdf")
 
 (defn convert-html-to-pdf [target-name template-name html-content header-content footer-content]
-  (timbre/info "Sending '" template-name "' template for " target-name " to muuntaja for processing")
+  (timbre/infof "Sending '%s' template for %s to muuntaja for processing" template-name target-name)
   (try
     (let [request-opts {:as           :stream
                         :content-type :json
@@ -24,12 +24,12 @@
       (cond
         (and (= (:status resp) 200) (:body resp))
         (do
-          (timbre/info "Successfully converted '" template-name "' template for " target-name)
+          (timbre/infof "Successfully converted '%s' template for %s" template-name  target-name)
           (ok :pdf-file-stream (:body resp)))
         :else
 
         (do
-          (timbre/warn "Muuntaja reported an error when trying to convert '" template-name"' template for " target-name":" (:error resp))
+          (timbre/warnf "Unable to convert '%s' template for %s: %s" template-name target-name (:error resp))
           (fail (:error resp)))))
 
     (catch Exception ex
