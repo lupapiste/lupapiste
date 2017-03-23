@@ -7,6 +7,7 @@
             [lupapalvelu.ui.common :refer [query command] :as common]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.util :as jsutil]
+            [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
             [cljs-time.coerce :as tc]
             [cljs-time.format :as tf]))
@@ -114,7 +115,11 @@
 
 (defn- toggle-summary-locking [locked?]
  (command :toggle-inspection-summary-locking
-          refresh
+          (fn [{job :job}]
+            (if locked?
+              (hub/send "attachmentsService::bindJobInitialized" job)
+              (hub/send "attachmentsService::updateAll"))
+            (refresh))
           :id         (:applicationId @component-state)
           :summaryId  (:id @selected-summary)
           :isLocked   locked?))
