@@ -48,8 +48,7 @@
 ;; New YA states
 
 (def ya-kayttolupa-state-graph common-states/ya-kayttolupa-state-graph)
-(def ya-sijoituslupa-state-graph common-states/ya-sijoittaminen-permit-state-graph)
-(def ya-sijoitussopimus-state-graph common-states/ya-sijoittaminen-agreement-state-graph)
+(def ya-sijoittaminen-state-graph common-states/ya-sijoittaminen-state-graph)
 (def ya-jatkoaika-state-graph common-states/ya-jatkoaika-state-graph)
 (def ya-tyolupa-state-graph default-application-state-graph)
 
@@ -125,7 +124,10 @@
       :else (into (conj results start)
               (apply union (map #(all-next-states graph % (conj results start)) transitions))))))
 
-(def verdict-given-states #{:verdictGiven :foremanVerdictGiven :acknowledged})
+(def verdict-given-states #{:verdictGiven                   ; R + others
+                            :foremanVerdictGiven :acknowledged ; foreman applications
+                            :finished :agreementSigned      ; YA cases
+                            })
 
 (def post-verdict-states
  (let [graphs (filter (comp (partial some verdict-given-states) keys) all-graphs)]
