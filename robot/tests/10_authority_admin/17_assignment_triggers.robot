@@ -51,6 +51,13 @@ Authority adds trigger
   Wait until  Element text should be  xpath=//span[@id="trigger-target"]  Aitapiirustus,
   Wait until  Element text should be  xpath=//span[@id="trigger-handler"]  Käsittelijä robotti
 
+Authority starts adding another, but doesn't remember the target
+  Click enabled by test id  add-trigger
+  Select From List by test id  triggers-handler-select  Käsittelijä robotti
+  Input text by test id  triggers-description-input  Description
+  Test id disabled  save-trigger-dialog-ok
+  Click element  xpath=//div[@id='dialog-add-trigger']//p[contains(@class, 'dialog-close')]
+
 Authority should be able to edit trigger
   Click by test id  edit-trigger
   Select from autocomplete by test id  triggers-target-component  Johtokartta

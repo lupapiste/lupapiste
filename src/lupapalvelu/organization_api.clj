@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
@@ -799,7 +799,7 @@
   {:description "Set and update automated assignment trigger"
    :parameters [targets]
    :optional-parameters [triggerId description handler]
-   :input-validators [(partial vector-parameters [:targets])
+   :input-validators [(partial vector-parameters-with-at-least-n-non-blank-items 1 [:targets])
                       (partial non-blank-parameters [:description])]
    :user-roles #{:authorityAdmin}}
    [{user :user user-orgs :user-organizations}]
