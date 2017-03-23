@@ -34,12 +34,14 @@
         desc (->> [(get-in doc [:data :tunnus :value]) op-desc]
                   (remove ss/blank?)
                   (ss/join ": "))]
-    (->> (concat [(i18n/localize lang "operations" op-name) desc] (schemas/resolve-accordion-field-values doc))
-         (remove ss/blank?)
-         (ss/join " - "))))
+    (when doc
+      (->> (concat [(i18n/localize lang "operations" op-name) desc] (schemas/resolve-accordion-field-values doc))
+           (remove ss/blank?)
+           (ss/join " - ")))))
 
 (defn- get-operations [{:keys [primaryOperation secondaryOperations] :as application} lang]
   (->> (cons primaryOperation secondaryOperations)
+       (remove nil?)
        (map (partial get-operation-info application lang))))
 
 (defn application-info-transformation [application lang]
