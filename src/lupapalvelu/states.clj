@@ -48,7 +48,8 @@
 ;; New YA states
 
 (def ya-kayttolupa-state-graph common-states/ya-kayttolupa-state-graph)
-(def ya-sijoittaminen-state-graph common-states/ya-sijoittaminen-state-graph)
+(def ya-sijoituslupa-state-graph common-states/ya-sijoituslupa-state-graph)
+(def ya-sijoitussopimus-state-graph common-states/ya-sijoitussopimus-state-graph)
 (def ya-jatkoaika-state-graph common-states/ya-jatkoaika-state-graph)
 (def ya-tyolupa-state-graph default-application-state-graph)
 
