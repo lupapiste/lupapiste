@@ -444,7 +444,7 @@
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type]
-  (let [eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})]
+  (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
     (mongo/select :applications {:state {$in eligible-application-states}
                                  :permitType permit-type
                                  :organization organization-id

@@ -1481,8 +1481,8 @@
            :type :party
            :subtype :suunnittelija
            :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
-                                         (set/difference states/post-verdict-states states/terminal-states))
-           :editable-in-states (set/union states/update-doc-states (set/difference states/post-verdict-states states/terminal-states))
+                                         states/post-verdict-but-terminal)
+           :editable-in-states (set/union states/update-doc-states states/post-verdict-but-terminal)
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 
