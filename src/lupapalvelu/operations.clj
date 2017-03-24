@@ -246,6 +246,7 @@
 
 (def- ya-katulupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                            :permit-type permit/YA
+                           :subtypes [:tyolupa]
                            :applicant-doc-schema applicant-doc-schema-name-YA
                            :required (conj common-yleiset-alueet-schemas
                                        "tyomaastaVastaava"
@@ -258,6 +259,7 @@
 
 (def- ya-kayttolupa-general {:schema "tyoaika"
                              :permit-type permit/YA
+                             :subtypes [:kayttolupa]
                              :applicant-doc-schema applicant-doc-schema-name-YA
                              :required (conj common-yleiset-alueet-schemas
                                          "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
@@ -272,6 +274,7 @@
 
 (def- ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                :permit-type permit/YA
+                               :subtypes [:sijoituslupa :sijoitussopimus]
                                :applicant-doc-schema applicant-doc-schema-name-YA
                                :required common-yleiset-alueet-schemas
                                :attachments []
@@ -290,6 +293,7 @@
    :ya-kayttolupa-muu-kayttolupa                                      ya-kayttolupa-general
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type permit/YA
+                                           :subtypes [:kayttolupa]
                                            :applicant-doc-schema applicant-doc-schema-name-YA
                                            :required common-yleiset-alueet-schemas
                                            :attachments []
