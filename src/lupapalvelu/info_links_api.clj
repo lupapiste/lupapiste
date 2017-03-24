@@ -7,10 +7,10 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.info-links :as info-links]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.i18n :as i18n]))
 
@@ -81,8 +81,8 @@
   {:description      "Return a list of application-specific info-links"
    :parameters       [id]
    :user-roles       #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states}
   [command]
   (let [app (:application command)]
@@ -93,8 +93,8 @@
    :parameters       [id lang]
    :input-validators [i18n/valid-language]
    :user-roles       #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states}
   [{:keys [application user]}]
   (ok :links (info-links/organization-links (:organization application)
@@ -105,8 +105,8 @@
   {:description      "The user has seen the application's organization links."
    :user-roles       #{:authority :applicant}
    :parameters       [id]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states
    :pre-checks       [app/validate-authority-in-drafts]}
   [{:keys [application user created]}]

@@ -2,11 +2,11 @@
   (:require [taoensso.timbre :refer [error]]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.application :as application]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [sade.core :refer :all]
@@ -42,7 +42,7 @@
 
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states     states/all-states
    :parameters [:id foremanHetu]
    :input-validators [(partial action/string-parameters [:foremanHetu])]
@@ -83,8 +83,8 @@
    just non-redundant highlights."
    :user-roles       #{:authority}
    :states           states/all-states
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [:id all]
    :input-validators [(partial action/non-blank-parameters [:all])]
    :pre-checks       [foreman-app-check]}
@@ -102,8 +102,8 @@
 (defquery foreman-applications
   {:user-roles #{:applicant :authority :oirAuthority}
    :states           states/all-states
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]}
   [{application :application user :user :as command}]
   (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})

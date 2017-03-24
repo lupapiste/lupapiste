@@ -9,9 +9,9 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]))
 
 ;;
@@ -67,7 +67,7 @@
    More specific set recipients can be defined by user roles."
   [{:keys [auth]} included-roles excluded-roles]
   {:post [(every? map? %)]}
-  (let [recipient-roles (set/difference (set (or (seq included-roles) auth/all-authz-roles))
+  (let [recipient-roles (set/difference (set (or (seq included-roles) roles/all-authz-roles))
                                         (set excluded-roles))]
     (->> (filter (comp recipient-roles keyword :role) auth)
          (remove :invite)
@@ -105,7 +105,7 @@
 (defn comment-recipients-fn
   "Recipients roles for comments are same user roles that can view and add comments."
   [{:keys [application]}]
-  (get-email-recipients-for-application application auth/comment-user-authz-roles [:statementGiver]))
+  (get-email-recipients-for-application application roles/comment-user-authz-roles [:statementGiver]))
 
 
 ;;

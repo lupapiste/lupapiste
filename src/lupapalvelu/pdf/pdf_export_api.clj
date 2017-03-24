@@ -3,16 +3,15 @@
             [ring.util.response :as response]
             [clojure.java.io :as io]
             [sade.files :as files]
-            [lupapalvelu.action :refer [defraw]]
+            [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.application :as a]
-            [lupapalvelu.authorization :as auth]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.states :as states]
             [lupapalvelu.application-bulletins-api :as bulletins-api]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.states :as states]))
 
 (defn ok [body]
   {:status  200
@@ -27,8 +26,8 @@
 (defraw pdf-export
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/all-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/all-org-authz-roles
    :states     states/all-states}
   [{:keys [user application lang]}]
   (if application
@@ -38,8 +37,8 @@
 (defraw submitted-application-pdf-export
   {:parameters       [:id]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/all-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/all-org-authz-roles
    :states           states/all-states}
   [{:keys [user application lang]}]
   (if-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
@@ -59,8 +58,8 @@
 (defraw pdfa-casefile
   {:parameters       [:id]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/all-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/all-org-authz-roles
    :input-validators [(partial action/non-blank-parameters [:lang])]
    :states           states/all-states}
   [{:keys [user application lang]}]

@@ -22,18 +22,18 @@
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.authorization :as auth]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.wfs :as wfs]))
 ;;
 ;; local api
 ;;
@@ -618,7 +618,7 @@
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles auth/reader-org-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -632,7 +632,7 @@
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles  auth/reader-org-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :user-roles       #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)

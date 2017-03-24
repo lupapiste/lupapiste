@@ -4,7 +4,6 @@
             [lupapalvelu.activation :as activation]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.calendar :as cal]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.mime :as mime]
@@ -12,6 +11,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
             [lupapalvelu.token :as token]
@@ -49,7 +49,7 @@
   {:on-success (fn [_ {user :user}]
                  (when (:firstLogin user)
                    (mongo/update-by-id :users (:id user) {$unset {:firstLogin true}})))
-   :user-roles auth/all-authenticated-user-roles}
+   :user-roles roles/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
     (ok :user (assoc full-user :virtual (usr/virtual-user? user)))
@@ -281,7 +281,7 @@
     (mongo/update-by-id :users user-id update)))
 
 (defquery saved-application-filters
-  {:user-roles auth/all-authenticated-user-roles
+  {:user-roles roles/all-authenticated-user-roles
    :description "Returns search filters for external services. The same data is provided by user query."}
   [{user :user}]
   (if-let [full-user (get-user user)]
@@ -475,7 +475,7 @@
         (fail :error.login)))))
 
 (defquery redirect-after-login
-  {:user-roles auth/all-authenticated-user-roles}
+  {:user-roles roles/all-authenticated-user-roles}
   [{session :session}]
   (ok :url (get session :redirect-after-login "")))
 
@@ -672,7 +672,7 @@
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
@@ -723,7 +723,7 @@
 
 (defquery enable-foreman-search
   {:user-roles #{:authority}
-   :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
+   :org-authz-roles (disj roles/all-org-authz-roles :tos-editor :tos-publisher)
    :pre-checks [(fn [{:keys [user application]}]
                   (let [org-ids (usr/organization-ids user)]
                     (if-not application

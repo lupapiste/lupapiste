@@ -4,7 +4,7 @@
             [sade.core :refer :all]
             [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.action :refer [defquery] :as action]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.roles :as roles]))
 
 ;;
 ;; Default actions
@@ -17,8 +17,8 @@
 
 (defquery allowed-actions
   {:user-roles       #{:anonymous}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [command]
   (ok :actions (->> (action/foreach-action command)
                     (action/validate-actions))))
@@ -26,8 +26,8 @@
 (defquery allowed-actions-for-category
   {:description      "Returns map of allowed actions for a category (attachments, tasks, etc.)"
    :user-roles       #{:anonymous}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [command]
   (if-let [actions-by-id (action/allowed-actions-for-category command)]
     (ok :actionsById actions-by-id)

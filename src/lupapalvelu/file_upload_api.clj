@@ -3,16 +3,17 @@
             [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
             [sade.env :as env]
-            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.action :refer [defcommand defraw]]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.vetuma :as vetuma]))
 
 (defn- file-size-legal [{{files :files} :data {role :role} :user}]
-  (let [max-size (env/value :file-upload :max-size (if (auth/all-authenticated-user-roles (keyword role)) :logged-in :anonymous))]
+  (let [max-size (env/value :file-upload :max-size (if (contains? roles/all-authenticated-user-roles (keyword role)) :logged-in :anonymous))]
     (when-not (every? #(<= % max-size) (map :size files))
       (fail :error.file-upload.illegal-upload-size :errorParams (/ max-size 1000 1000)))))
 
@@ -35,7 +36,7 @@
 
 (defraw upload-file-authenticated
   {:user-roles       #{:authority :applicant}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman :statementGiver)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman :statementGiver)
    :parameters       [files]
    :optional-parameters [id]
    :input-validators [file-mime-type-accepted

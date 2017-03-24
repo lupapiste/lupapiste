@@ -7,17 +7,18 @@
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
             [sade.util :as util]
-            [lupapalvelu.authorization-messages] ; notification definitions
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.authorization-messages] ; notification definitions
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]))
 
 ;;
 ;; Invites
@@ -86,7 +87,7 @@
 (defcommand approve-invite
   {:parameters [id]
    :user-roles #{:applicant}
-   :user-authz-roles auth/default-authz-reader-roles
+   :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
@@ -131,7 +132,7 @@
 (defcommand decline-invitation
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :user-authz-roles auth/default-authz-reader-roles
+   :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states}
   [command]
   (do-remove-auth command (get-in command [:user :username])))
@@ -192,7 +193,7 @@
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
-   :user-authz-roles auth/default-authz-reader-roles
+   :user-authz-roles roles/default-authz-reader-roles
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
@@ -202,7 +203,7 @@
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
-   :user-authz-roles auth/default-authz-reader-roles
+   :user-authz-roles roles/default-authz-reader-roles
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
