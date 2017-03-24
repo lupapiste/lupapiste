@@ -579,6 +579,9 @@
      :constructionStarted :started
      :acknowledged :acknowledged
      :foremanVerdictGiven nil
+     :agreementPrepared :agreementPrepared
+     :agreementSigned   :agreementSigned
+     :finished :finished
      :closed :closed
      :canceled :canceled}
     ; New states, timestamps to be determined

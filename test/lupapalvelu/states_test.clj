@@ -9,7 +9,14 @@
   (initial-state default-inforequest-state-graph) => :info)
 
 (fact "all-next-states"
-  (all-next-states full-application-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled :extinct :inUse :onHold :appealed})
+  (all-next-states full-application-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled :extinct :inUse :onHold :appealed}
+  (all-next-states full-application-state-graph :unknown) => empty?
+  (facts "YA"
+    (all-next-states ya-kayttolupa-state-graph :verdictGiven) => #{:verdictGiven :canceled :extinct :finished :appealed}
+    (all-next-states ya-tyolupa-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled :extinct :appealed}
+    (all-next-states ya-sijoituslupa-state-graph :verdictGiven) => #{:verdictGiven :extinct :finished :appealed}
+    (all-next-states ya-sijoitussopimus-state-graph :agreementPrepared) => #{:agreementPrepared :agreementSigned :canceled}
+    (all-next-states ya-sijoitussopimus-state-graph :verdictGiven) => empty?))
 
 (fact "post-submitted-states"
   post-submitted-states => (contains #{:submitted :sent :complementNeeded :verdictGiven :constructionStarted :closed})
@@ -28,18 +35,12 @@
 
   all-application-states => #{:draft :open :submitted :sent :complementNeeded
                               :verdictGiven :constructionStarted :closed :canceled
-                              :extinct :inUse :onHold
+                              :extinct :inUse :onHold :finished
                               :acknowledged :foremanVerdictGiven
                               :hearing :proposal :proposalApproved
                               :survey :sessionProposal :sessionHeld :registered
+                              :agreementSigned :agreementPrepared ; YA sijoitussopimus
                               :appealed :final})
 
 (fact "terminal states"
-  terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged})
-
-(fact "all with acknowledged but not draft or terminal"
-      all-with-acknowledged-but-not-draft-or-terminal => #{:acknowledged :appealed :complementNeeded
-                                                           :constructionStarted :foremanVerdictGiven :hearing
-                                                           :inUse :info :onHold :open :proposal :proposalApproved
-                                                           :sent :sessionHeld :sessionProposal :submitted
-                                                           :survey :verdictGiven})
+  terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged :agreementSigned :finished})

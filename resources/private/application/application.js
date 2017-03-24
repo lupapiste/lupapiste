@@ -122,7 +122,7 @@
       .processing(applicationModel.processing)
       .call();
     }
-  });    
+  });
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);

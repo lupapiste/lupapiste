@@ -247,6 +247,7 @@
 (def- ya-katulupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                            :permit-type permit/YA
                            :subtypes [:tyolupa]
+                           :state-graph-resolver (constantly states/ya-tyolupa-state-graph)
                            :applicant-doc-schema applicant-doc-schema-name-YA
                            :required (conj common-yleiset-alueet-schemas
                                        "tyomaastaVastaava"
@@ -260,6 +261,7 @@
 (def- ya-kayttolupa-general {:schema "tyoaika"
                              :permit-type permit/YA
                              :subtypes [:kayttolupa]
+                             :state-graph-resolver (constantly states/ya-kayttolupa-state-graph)
                              :applicant-doc-schema applicant-doc-schema-name-YA
                              :required (conj common-yleiset-alueet-schemas
                                          "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
@@ -272,9 +274,15 @@
 (def- ya-kayttolupa-with-tyomaastavastaava
   (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
 
+(defn- sijoittaminen-state-resolver [{:keys [permitSubtype]}]
+  (if (= :sijoitussopimus (keyword permitSubtype))
+    states/ya-sijoitussopimus-state-graph
+    states/ya-sijoituslupa-state-graph))
+
 (def- ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                :permit-type permit/YA
                                :subtypes [:sijoituslupa :sijoitussopimus]
+                               :state-graph-resolver sijoittaminen-state-resolver
                                :applicant-doc-schema applicant-doc-schema-name-YA
                                :required common-yleiset-alueet-schemas
                                :attachments []
@@ -294,6 +302,7 @@
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type permit/YA
                                            :subtypes [:kayttolupa]
+                                           :state-graph-resolver (constantly states/ya-kayttolupa-state-graph)
                                            :applicant-doc-schema applicant-doc-schema-name-YA
                                            :required common-yleiset-alueet-schemas
                                            :attachments []
@@ -326,6 +335,7 @@
    :ya-sijoituslupa-muu-sijoituslupa                                  ya-sijoituslupa-general
    :ya-jatkoaika                          {:schema "hankkeen-kuvaus-jatkoaika"
                                            :permit-type permit/YA
+                                           :state-graph-resolver (constantly states/ya-jatkoaika-state-graph)
                                            :applicant-doc-schema applicant-doc-schema-name-YA
                                            :required (conj common-yleiset-alueet-schemas
                                                        "tyo-aika-for-jatkoaika")

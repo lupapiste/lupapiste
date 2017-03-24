@@ -115,11 +115,13 @@
                        graph)))))
 
 (defn all-next-states
-  "Returns a set of states that are after the start state in graph, including start state itself."
+  "Returns a set of states that are after the start state in graph, including start state itself.
+   If start is not part of the graph, empty set will be returned."
   [graph start & [results]]
   (let [results (set results)
         transitions (get graph start)]
     (cond
+      (not (contains? graph start)) #{}
       (empty? transitions) #{start} ; terminal state
       (results start) results ; loop!
       :else (into (conj results start)
@@ -127,7 +129,7 @@
 
 (def verdict-given-states #{:verdictGiven                   ; R + others
                             :foremanVerdictGiven :acknowledged ; foreman applications
-                            :finished :agreementSigned      ; YA cases
+                            :finished :agreementPrepared :agreementSigned  ; YA cases
                             })
 
 (def post-verdict-states
@@ -193,8 +195,6 @@
 (defn all-inforequest-states-but [& drop-states]
   (difference all-inforequest-states (drop-state-set drop-states)))
 
-(def all-with-acknowledged-but-not-draft-or-terminal
-  (conj all-but-draft-or-terminal :acknowledged))
 
 (comment
   (require ['rhizome.viz :as 'viz])
