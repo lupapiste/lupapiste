@@ -22,6 +22,21 @@ LUPAPISTE.AccordionService = function() {
   self.documents = ko.observableArray();
   self.identifierFields = ko.observableArray([]);
 
+  // Note on how accordion-fields definitions from a schema is show on
+  // the accordion.
+  //
+  // 1. Accordion-fields is defined in the schema (see
+  // schema_validation.clj)
+  //
+  // 2. When a schema is "instantiated" it is enriched with emitter
+  // information (schemas.clj)
+  //
+  // 3. Based on the (enriched) document schema, the docModel
+  // components corresponding to the accordion-fields paths
+  // information will "emit" the changed values. Emit means simple
+  // sending accordionUpdated event to hub (docmodel.js)
+  //
+  // 4. During initialization
   function fieldValues( field, data ) {
     return _.map( field.paths || [field],
                   function( path ) {

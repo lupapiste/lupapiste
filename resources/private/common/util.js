@@ -463,9 +463,10 @@ var util = (function($) {
   // Params: [optional]
   //  dateArg:  dateString, timestamp (ms from Unix epoch) or moment.
   //  [lang]: fi/sv/en Language for dateArg (if dateString)
-  // Returns invalid dates unchanged. More
+  // Returns invalid dates unchanged. If you want to discard bad
+  // dates, call toMoment first.
   function finnishDate( dateArg, lang ) {
-    var m = toMoment( dateArg, lang );
+    var m = moment.isMoment( dateArg) ? dateArg : toMoment( dateArg, lang );
     return m ? m.format( dateFormats.fi ) : dateArg;
   }
 
