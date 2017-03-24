@@ -3,11 +3,17 @@
             [clj-http.client :as http]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [sade.env :as env])
+            [sade.env :as env]
+            [sade.util :as util]
+            [cheshire.core :as json]
+            [clojure.walk :as walk])
   (:refer-clojure :exclude [get]))
 
 (def no-cache-headers {"Cache-Control" "no-cache, no-store"
                        "Pragma" "no-cache"})
+
+(defn decode-response [resp]
+  (update-in resp [:body] (comp walk/keywordize-keys json/decode)))
 
 (defn- merge-to-defaults [& options]
   (let [fst-opt     (first options)
