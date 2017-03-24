@@ -26,7 +26,8 @@
             [sade.dummy-email-server]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [clj-time.coerce :as c])
+            [clj-time.coerce :as c]
+            [sade.http :as http])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -36,6 +37,10 @@
   (let [owner (auth/get-auths-by-role application :owner)]
     (user/get-user-by-id (-> owner first :id))))
 
+(defn system-not-in-lockdown? []
+  (-> (http/get "http://127.0.0.1:8000/system/status")
+      http/decode-response
+      :body :data :not-in-lockdown :data))
 
 ;; Email definition for the "open info request reminder"
 
@@ -326,6 +331,9 @@
           apps))))
 
 (defn check-for-verdicts [& args]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic verdict checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
   (mongo/connect!)
   (fetch-verdicts))
 
@@ -366,6 +374,9 @@
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
 (defn check-for-asianhallinta-verdicts [& args]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
   (mongo/connect!)
   (fetch-asianhallinta-verdicts))
 
@@ -480,18 +491,27 @@
          (run! (partial apply save-reviews-for-application eraajo-user)))))
 
 (defn check-for-reviews [& args]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
   (logging/log-event :info {:run-by "Automatic review checking" :event "Started"})
   (mongo/connect!)
   (poll-verdicts-for-reviews)
   (logging/log-event :info {:run-by "Automatic review checking" :event "Finished"}))
 
 (defn check-reviews-for-orgs [& args]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
   (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :organizations args})
   (mongo/connect!)
   (poll-verdicts-for-reviews :organization-ids args)
   (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :organizations args}))
 
 (defn check-reviews-for-ids [& args]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
   (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :applications args})
   (mongo/connect!)
   (poll-verdicts-for-reviews :application-ids args)

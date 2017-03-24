@@ -6,7 +6,8 @@
             [noir.response :as response]
             [sade.env :as env]
             [sade.http :as http]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [sade.status :refer [defstatus]]))
 
 (defmacro defcontrol [path params & body]
   `(defpage ~path ~params
@@ -40,6 +41,8 @@
       (some #(re-matches % (:uri request)) allowed-paths-in-lockdown)))
 
 (defn lockdown? [] @lockdown)
+
+(defstatus :not-in-lockdown (not (lockdown?)))
 
 (defn lockdown-middleware
   "Ring middleware. Allow only GET and HEAD methods and POST requests to

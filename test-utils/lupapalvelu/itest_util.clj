@@ -113,7 +113,7 @@
 (def get-files-from-sftp-server? dev-env?)
 
 (defn decode-response [resp]
-  (update-in resp [:body] (comp keywordize-keys json/decode)))
+  (http/decode-response resp))
 
 (defn printed [x] (println x) x)
 
