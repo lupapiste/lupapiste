@@ -100,7 +100,8 @@
 (defquery enable-accordions
   {:description "Pseudo-query for checking if accordions should be open or
                  closed"
-   :user-roles auth/all-authenticated-user-roles})
+   :user-roles roles/all-authenticated-user-roles
+   })
 
 (defquery party-document-names
   {:parameters [:id]
