@@ -100,6 +100,7 @@
                               <div>
                                 <p class="form-label" data-bind="text: loc('application.permitSubtypes') + ':', css: {tip:permitSubtypeMandatory}"></p>
                                 <span class="application_summary_text">
+                                  <!-- ko if: permitSubtypes().length > 1 -->
                                   <select class="dropdown"
                                           data-bind="options: permitSubtypes, value: permitSubtype,
                                                      enable: $root.authorization.ok('change-permit-sub-type'),
@@ -107,6 +108,10 @@
                                                      optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                           id="permitSubtypeSelect">
                                   </select>
+                                  <!-- /ko -->
+                                  <!-- ko if: permitSubtypes().length == 1 -->
+                                  <span class="permit-subtype-text" data-bind="text: loc('permitSubtype.'+permitSubtype())"></span>
+                                  <!-- /ko -->
                                   <!-- ko if: permitSubtypeHelp() -->
                                   <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
                                   <!-- /ko -->
