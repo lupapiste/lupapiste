@@ -6,14 +6,14 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as user]))
 
 (def task-schemas-version 1)
 

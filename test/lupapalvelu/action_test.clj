@@ -5,12 +5,12 @@
             [monger.operators :refer :all]
             [sade.env :as env]
             [sade.core :refer :all]
-            [lupapalvelu.server]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]
             [lupapalvelu.action :refer :all]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.server]
             [lupapalvelu.states :as states]
-            [lupapalvelu.authorization :as auth])
+            [lupapalvelu.user :as user])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])
@@ -118,7 +118,7 @@
                                              :user-roles       #{:authority}
                                              :org-authz-roles  #{:authority}
                                              :states           states/all-states
-                                             :user-authz-roles auth/default-authz-writer-roles}}
+                                             :user-authz-roles roles/default-authz-writer-roles}}
       (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "999-R"
                                                                                                                                                                   :state "submitted"
                                                                                                                                                                   :auth [{:id "user123" :role "someRole"}]}

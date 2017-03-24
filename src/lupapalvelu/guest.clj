@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]  ;; usr works better with code completion.
             [lupapalvelu.user-utils :as uu]
             [monger.operators :refer :all]
@@ -78,7 +79,7 @@
   [{{email :email} :data application :application}]
   (when email
    (let [guest (usr/get-user-by-email email)]
-     (when (auth/user-authz? auth/all-authz-roles application guest)
+     (when (auth/user-authz? roles/all-authz-roles application guest)
        (fail :error.already-has-access)))))
 
 (defn known-guest-authority

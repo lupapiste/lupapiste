@@ -2,7 +2,7 @@
   (:require [schema.core :refer [defschema] :as sc]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.roles :as roles]))
 
 (def opt sc/optional-key)
 
@@ -347,7 +347,7 @@
           (opt :post-verdict-party)          sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
-          (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
+          (opt :user-authz-roles)            #{(apply sc/enum roles/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
           (opt :addable-in-states)           #{sc/Keyword} ;; States where document can be added
           (opt :editable-in-states)          #{sc/Keyword} ;;

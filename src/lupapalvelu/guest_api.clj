@@ -6,9 +6,9 @@
   Guests are invited by the applicant (or similar role)."
   (:require [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.guest :as guest]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 
@@ -53,7 +53,7 @@
   guestAuthority) access. Guest 'authorization' does not need to be
   explicitly acknowledged by the invitee."
    :user-roles          #{:applicant :authority}
-   :user-authz-roles    (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles    (conj roles/default-authz-writer-roles :foreman)
    :parameters          [:id :email :role]
    :optional-parameters [:text]
    :pre-checks          [foreman/allow-foreman-only-in-foreman-app
@@ -70,8 +70,8 @@
 (defquery application-guests
   {:description "List of application guests and guest authorities."
    :user-roles #{:applicant :authority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :parameters [:id]
    :states states/all-application-states}
   [command]
@@ -93,7 +93,7 @@
 (defcommand delete-guest-application
   {:description "Cancels the guest access from application."
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:username])]
    :pre-checks [guest/auth-modification-check

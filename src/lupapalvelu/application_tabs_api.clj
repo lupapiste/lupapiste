@@ -2,19 +2,19 @@
   "Pseudo queries to handle application's tabs' visibility in UI"
   (:require [sade.core :refer :all]
             [sade.util :refer [fn->]]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :as action :refer [defquery]]
             [lupapalvelu.application :as app]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.ya-extension :as yax]))
 
 (defquery tasks-tab-visible
   {:parameters       [id]
    :states           states/post-verdict-states
-   :org-authz-roles  auth/reader-org-authz-roles
-   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :user-roles       #{:authority :applicant}
    :pre-checks       [(fn [{:keys [application]}]
                         (cond
@@ -35,8 +35,8 @@
   {:parameters [id]
    :states states/all-application-states
    :user-roles #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :pre-checks [(fn-> state-before-last-canceled
                       states/pre-verdict-states
                       (when-not (fail :error.tabs.no-application-info)))]}
@@ -46,8 +46,8 @@
   {:parameters [id]
    :states states/all-application-states
    :user-roles #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :pre-checks [(fn-> state-before-last-canceled
                       states/post-verdict-states
                       (when-not (fail :error.tabs.no-application-summary)))]}
@@ -57,8 +57,8 @@
   {:parameters [id]
    :states states/all-application-states
    :user-roles #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :pre-checks [(fn [{:keys [application]}]
                         (when (yax/ya-extension-app? application)
                           (fail :error.ya-extension.no-verdict)))]}
