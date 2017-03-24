@@ -43,7 +43,7 @@
   [{permit-type :permitType op :primaryOperation}]
   (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)]
-    (concat op-subtypes permit-subtypes)))
+    (distinct (concat op-subtypes permit-subtypes))))
 
 (defn history-entry [to-state timestamp user]
   {:state to-state, :ts timestamp, :user (usr/summary user)})
