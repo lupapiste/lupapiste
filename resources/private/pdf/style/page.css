@@ -35,7 +35,6 @@ h3 {
 .page-header, .page-footer {
   display: table;
   width: 100%;
-  max-width: 960px;
 }
 
 .page-header img {
