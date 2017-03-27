@@ -7,7 +7,7 @@
             [sade.strings :as ss])
     (:import [java.io InputStream]))
 
-(def html2pdf-path "/api/html2pdf")
+(def html2pdf-path "/api/wkhtml2pdf")
 
 (defn convert-html-to-pdf [target-name template-name html-content header-content footer-content]
   (timbre/infof "Sending '%s' template for %s to muuntaja for processing" template-name target-name)
