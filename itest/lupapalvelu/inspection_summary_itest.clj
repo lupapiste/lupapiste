@@ -175,6 +175,7 @@
         _                 (command sipoo :set-inspection-summary-template-for-operation :operationId :kerrostalo-rivitalo :templateId template-id) => ok?
         _                 (give-verdict sonja (:id app) :verdictId "3323") => ok?
         {summaries :summaries :as result} (query sonja :inspection-summaries-for-application :id (:id app))
+        {attachments :attachments :as result} (query sonja :attachments :id (:id app))
         {summary-id :id}  (first summaries)
         {target-id :id}   (command sonja :add-target-to-inspection-summary :id (:id app) :summaryId summary-id :targetName "some name")]
 
@@ -189,10 +190,36 @@
       (command pena :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked true) => unauthorized?)
 
     (fact "Authority can toggle inspection summary locking"
-      (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked true) => ok?)
+      (let [{job :job :as resp} (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked true)]
+        resp => ok?
+
+        (fact "Job id is returned"
+          (:id job) => truthy)
+
+        (when-not (= "done" (:status job))
+          (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)))
 
     (fact "Inspection summary is now locked"
       (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => true)
+
+    (facts "Attachment is generated"
+      (let [{updated-attachments :attachments} (query sonja :attachments :id (:id app))
+            inspection-summary-attachment (util/find-first (comp #{summary-id} :id :source) updated-attachments)
+            latest-version (:latestVersion inspection-summary-attachment)]
+
+        (fact "One attachment added"
+          (-> updated-attachments count (= (inc (count attachments)))))
+
+        (fact "inspection summary attachment exists"
+          inspection-summary-attachment => not-empty)
+
+        (fact "Attachment has a version"
+          latest-version => not-empty)
+
+        (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:fileId latest-version))]
+
+          (fact "content type"
+            (get headers "Content-Type") => "application/pdf"))))
 
     (facts "Restricted actions for locked inspection summary"
       (fact "delete-inspection-summary"
