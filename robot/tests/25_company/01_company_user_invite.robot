@@ -2,6 +2,7 @@
 
 Documentation   Users are added to company
 Resource        ../../common_resource.robot
+Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Default Tags    company
 
@@ -177,6 +178,38 @@ Pena logs in and sees the non-admin view of the company
   No such test id  company-user-delete-1
   [Teardown]  Logout
 
+Ulla logs in and changes her username
+  Go to page  login
+  Applicant logs in  user2@solita.fi  pitka123  Ulla Ser
+  Click Element  user-name
+  Fill test id  newEmail  ulla.ser@solita.fi
+  Click by test id  change-email
+  Wait for jquery
+  Open last email
+  Click link  xpath=//a
+  Wait test id visible  vetuma-init
+  Click by test id  vetuma-init
+  Wait test id visible  submit-button
+  Click by test id  submit-button
+  Wait test id visible  login-new-email
+  Click by test id  login-new-email
+
+Subsequent username changes must use the same person id.
+  Applicant logs in  ulla.ser@solita.fi  pitka123  Ulla Ser
+  Click Element  user-name
+  Fill test id  newEmail  res.allu@solita.fi
+  Click by test id  change-email
+  Wait for jquery
+  Open last email
+  Click link  xpath=//a
+  Wait test id visible  vetuma-init
+  Click by test id  vetuma-init
+  Wait test id visible  submit-button
+  Fill test id  dummy-login-userid  240441-937H
+  Click by test id  submit-button
+  Wait until  Element should be visible  jquery=section#change-email p.error-message
+  [Teardown]  Logout
+
 Kaino logs in and removes Ulla's admin rights
   # This is needed to make sure that only Kaino receives the
   # invitation mail from the next case.
@@ -187,7 +220,7 @@ Kaino logs in and removes Ulla's admin rights
   Edit company user  1  user  Kyllä
   Click by test id  company-user-save-1
   Confirm  dynamic-yes-no-confirm-dialog
-  Check company user  1  user2@solita.fi  Ser  Ulla  Käyttäjä  Kyllä
+  Check company user  1  ulla.ser@solita.fi  Ser  Ulla  Käyttäjä  Kyllä
   [Teardown]  Logout
 
 Mikko logs in, creates application and invites Solita
