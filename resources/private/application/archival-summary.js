@@ -6,7 +6,6 @@
 
   function operationDescription(operationId) {
     var doc = accordionService && accordionService.getDocumentByOpId(operationId);
-    console.log(doc);
     if (util.getIn(doc, ["operation"])) {
       var identifier = util.getIn(accordionService.getIdentifier(doc.docId), ["value"]);
       var opDescription = util.getIn(doc, ["operation", "description"]);
