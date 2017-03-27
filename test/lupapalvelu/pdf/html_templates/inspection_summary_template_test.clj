@@ -2,6 +2,9 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as enlive]
+            [sade.schemas :as ssc]
+            [lupapalvelu.test-util :refer [replace-in-schema MidjeMetaconstant]]
+            [lupapalvelu.inspection-summary :refer [InspectionSummary]]
             [lupapalvelu.pdf.html-template-common :as common]
             [lupapalvelu.pdf.html-templates.inspection-summary-template :refer :all]))
 
@@ -34,52 +37,53 @@
                                                 [:#inspection-summary] (inspection-summary-transformation application lang summary-id)))
 
 (facts inspection-summary-transformation
-  (let [html (inspection-summary-snippet
-              {:primaryOperation     {:id ..op-id.., :name "pientalo-laaj", :description nil}
-               :documents            [{:id ..doc-id..,
-                                       :schema-info {:op {:id ..op-id.., :name "pientalo-laaj", :description nil},
-                                                     :name "rakennuksen-laajentaminen",
-                                                     :accordion-fields [ [ "valtakunnallinenNumero" ] ],
-                                                     :version 1},
-                                       :data {:valtakunnallinenNumero { :value "bld_123456" } } }]
-               :attachments          [{:id ..attachment-id..,
-                                       :groupType "operation",
-                                       :type { :type-id :tarkastusasiakirja, :type-group :katselmukset_ja_tarkastukset },
-                                       :op [ { :id ..op-id.., :name "pientalo-laaj" } ],
-                                       :contents nil,
-                                       :target { :id ..target-id-3.., :type "inspection-summary-item" },
-                                       :versions [{:filename "liite.pdf",
-                                                   :originalFileId ..file-id..,
-                                                   :contentType "application/pdf",
-                                                   :fileId ..file-id.. }],
-                                       :latestVersion  {:filename "liite.pdf",
-                                                        :originalFileId ..file-id..,
-                                                        :contentType "application/pdf",
-                                                        :fileId ..file-id.. }}]
-               :inspection-summaries [{:name "Some inspection summary"
-                                       :id ..summary-id..,
-                                       :op {:id ..op-id..
-                                            :name "pientalo-laaj"
-                                            :description nil },
-                                       :targets [{:finished false,
-                                                  :id ..target-id-1..,
-                                                  :target-name "first target"},
-                                                 {:finished true,
-                                                  :id ..target-id-2..,
-                                                  :target-name "second target",
-                                                  :finished-date 1488528634011,
-                                                  :finished-by {:id ..user-id..
-                                                                :username  "pena"
-                                                                :firstName "Pena"
-                                                                :lastName "Banaani"
-                                                                :role "authority"}},
-                                                 {:finished false,
-                                                  :id ..target-id-3..,
-                                                  :target-name "third target" },
-                                                 {:finished false,
-                                                  :id ..target-id-4..
-                                                  :target-name "fourth target"}]}]}
-              "fi" ..summary-id..)]
+  (let [app  {:primaryOperation     {:id ..op-id.., :name "pientalo-laaj", :description nil}
+              :documents            [{:id ..doc-id..,
+                                      :schema-info {:op {:id ..op-id.., :name "pientalo-laaj", :description nil},
+                                                    :name "rakennuksen-laajentaminen",
+                                                    :accordion-fields [ [ "valtakunnallinenNumero" ] ],
+                                                    :version 1},
+                                      :data {:valtakunnallinenNumero { :value "bld_123456" } } }]
+              :attachments          [{:id ..attachment-id..,
+                                      :groupType "operation",
+                                      :type { :type-id :tarkastusasiakirja, :type-group :katselmukset_ja_tarkastukset },
+                                      :op [ { :id ..op-id.., :name "pientalo-laaj" } ],
+                                      :contents nil,
+                                      :target { :id ..target-id-3.., :type "inspection-summary-item" },
+                                      :versions [{:filename "liite.pdf",
+                                                  :originalFileId ..file-id..,
+                                                  :contentType "application/pdf",
+                                                  :fileId ..file-id.. }],
+                                      :latestVersion  {:filename "liite.pdf",
+                                                       :originalFileId ..file-id..,
+                                                       :contentType "application/pdf",
+                                                       :fileId ..file-id.. }}]
+              :inspection-summaries [{:name "Some inspection summary"
+                                      :id ..summary-id..,
+                                      :op {:id ..op-id..
+                                           :name "pientalo-laaj"
+                                           :description "" },
+                                      :targets [{:finished false,
+                                                 :id ..target-id-1..,
+                                                 :target-name "first target"},
+                                                {:finished true,
+                                                 :id ..target-id-2..,
+                                                 :target-name "second target",
+                                                 :finished-date 1488528634011,
+                                                 :finished-by {:id "..user-id.."
+                                                               :username  "pena"
+                                                               :firstName "Pena"
+                                                               :lastName "Banaani"
+                                                               :role "authority"}},
+                                                {:finished false,
+                                                 :id ..target-id-3..,
+                                                 :target-name "third target"},
+                                                {:finished false,
+                                                 :id ..target-id-4..
+                                                 :target-name "fourth target"}]}]}
+        html (inspection-summary-snippet app "fi" ..summary-id..)]
+    (fact "inspection summary test data matches schema"
+      (sc/check [(replace-in-schema InspectionSummary ssc/ObjectIdStr MidjeMetaconstant)] (:inspection-summaries app)) => nil)
     (fact "summary name"
       (->> [:#inspection-summary-name] (enlive/select html) (map :content)) => [["Some inspection summary"]])
     (fact "summary operation"

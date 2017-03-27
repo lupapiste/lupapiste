@@ -17,12 +17,12 @@
             [lupapalvelu.operations :as operations]))
 
 (defschema InspectionSummaryTargets
-           {:target-name sc/Str   ;Tarkastuskohde
-            :id          ssc/ObjectIdStr
-            :finished    sc/Bool
-            :finished-by usr/SummaryUser
-            :finished-date ssc/Timestamp
-            sc/Keyword   sc/Any})
+  {:target-name                     sc/Str   ;Tarkastuskohde
+   :id                              ssc/ObjectIdStr
+   :finished                        sc/Bool
+   (sc/optional-key :finished-by)   usr/SummaryUser
+   (sc/optional-key :finished-date) ssc/Timestamp
+   sc/Keyword                       sc/Any})
 
 (defschema InspectionSummary
   {:id ssc/ObjectIdStr
