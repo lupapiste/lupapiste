@@ -597,7 +597,10 @@
        :proposalApproved
        :sessionProposal
        :inUse
-       :onHold]
+       :onHold
+       :agreementPrepared
+       :finished
+       :agreementSigned]
       (repeat nil))))
 
 (assert (= states/all-application-states (set (keys timestamp-key))))

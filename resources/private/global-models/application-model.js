@@ -878,4 +878,12 @@ LUPAPISTE.ApplicationModel = function() {
                              componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                yesFn: doDelete}});
   };
+
+  self.verdictPostfix = function () {
+    if (this.permitSubtype() === "sijoitussopimus") {
+      return ".sijoitussopimus"
+    } else {
+      return "";
+    }
+  };
 };

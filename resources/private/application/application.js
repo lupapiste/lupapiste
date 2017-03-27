@@ -425,6 +425,10 @@
     }
   }
 
+  function localizationPostfix() {
+   return "postfixi";
+  }
+
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
   hub.onPageUnload( "application", function() {
