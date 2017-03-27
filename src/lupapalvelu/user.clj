@@ -64,18 +64,14 @@
             suffix (gen/elements ["R" "YA" "YMP"])]
     (keyword (str number-part "-" suffix))))
 
-(def all-authz
-  ["approver"
-   "archivist"
-   "authority"
-   "authorityAdmin"
-   "commenter"
-   "reader"
-   "tos-editor"
-   "tos-publisher"])
+(def keyword-authz-generator
+  (let [default-roles (gen/elements roles/default-org-authz-roles)
+        all-roles (gen/elements roles/all-authz-roles)]
+    (gen/frequency [[1 default-roles]
+                    [1 all-roles]])))
 
 (def authz-generator
-  (gen/elements all-authz))
+  (gen/fmap name keyword-authz-generator))
 
 (def org-authz-generator
   (gen/map org-id-generator
@@ -93,9 +89,9 @@
                 "trusted-etl"])
 (defschema Role (apply sc/enum all-roles))
 
-(def OrgId sc/Keyword)
-(def Authz sc/Str)
-(def OrgAuthz {OrgId [Authz]})
+(defschema OrgId (sc/pred keyword? "Organization ID"))
+(defschema Authz (sc/pred string? "Authz access right"))
+(defschema OrgAuthz {OrgId [Authz]})
 
 (ssg/register-generator OrgId org-id-generator)
 (ssg/register-generator Authz authz-generator)
