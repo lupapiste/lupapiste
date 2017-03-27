@@ -3,14 +3,17 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
             [slingshot.slingshot :refer [try+]]
+            [lupapalvelu.generators.user :as user-gen]
             [lupapalvelu.user :as user]
             [lupapalvelu.itest-util :refer [unauthorized?]]
+            [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.actions-api :as ca]
             ;; ensure all actions are registered by requiring server ns
@@ -30,26 +33,35 @@
 (defn silly-application-generator
   [organization-id-generator]
   ;;TODO: generoi hakemukseen organization
-  ;; userin org-authzin sallitut arvot:
-  ;;  authorization/all-org-authz-roles
   (gen/let [permit-type permit-type-generator
             org-id organization-id-generator]
     (merge lupapalvelu.domain/application-skeleton
            {:permitType permit-type
             :organization org-id})))
 
+(defn set-of? [member-check]
+  (fn [x]
+    (and (set? x)
+         (every? member-check x))))
+
 (defn user-and-application-generator
-  [org-id-generator]
-  (let [str-org-id-generator (gen/fmap name org-id-generator)]
+  [org-id-set]
+  {:pre [(set-of? keyword?)]}
+  (let [org-id-generator (gen/elements org-id-set)
+        str-org-id-generator (gen/fmap name org-id-generator)]
     (gen/let [user (ssg/generator user/User
                                   {user/OrgId org-id-generator})
               application (silly-application-generator str-org-id-generator)]
-      [user application])))
+      {:user user
+       :application application})))
 
-(def with-limited-org-id-pool
-  (let [org-ids (gen/sample (ssg/generator user/OrgId) 10)
-        org-id-generator (gen/elements org-ids)]
-    (user-and-application-generator org-id-generator)))
+(def org-ids-atom (atom nil))
+
+(defn with-limited-org-id-pool
+  []
+  (let [org-id-set (gen/sample (ssg/generator user/OrgId) 10)]
+    (reset! org-ids-atom org-id-set)
+    (user-and-application-generator org-id-set)))
 
 (defn test-with-input [user application]
   (let [command (action->command
@@ -59,21 +71,33 @@
                   "enable-accordions")]
     (validate command)))
 
-#_(defspec user-is-allowed-to-access?-spec
-  (prop/for-all [user (ssg/generator user/User)
-                 application silly-application-generator]
+(def user-is-allowed-to-access?-prop
+  (prop/for-all [{:keys [user application]} (with-limited-org-id-pool)]
     (let [command (action->command
                     {:user user
-                     :data {:id "100"}
+                     :data {:id ""}
                      :application application}
                     "enable-accordions")
-          result (test-with-input user application)]
-      (if (and (user/authority? user)
-               ;; kayttajalla on org-authz hakemuksen organisaatiossa
-               (= "YA"
-                  (:permitType application)))
-        (is (nil? result))
-        (is (false? (:ok result)))))))
+          applications-org (-> application :organization keyword)
+          result (catch-all (test-with-input user application))]
+      (cond (and (user/authority? user)
+                 (user/user-is-authority-in-organization? user applications-org)
+                 (= "YA" (:permitType application)))
+            (nil? result)
+
+            (user/authority? user)
+            (fail? result)
+
+            (user/user-is-authority-in-organization? user applications-org)
+            (fail? result)
+
+            :else
+            (fail? result)))))
+
+(fact user-is-allowed-to-access?-spec
+  (tc/quick-check 200
+    user-is-allowed-to-access?-prop :max-size 50)
+  => passing-quick-check)
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement

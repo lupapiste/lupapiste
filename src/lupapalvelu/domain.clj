@@ -7,7 +7,6 @@
             [sade.util :as util]
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.combinators :refer [pred->validator]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.roles :as roles]
