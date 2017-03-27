@@ -607,12 +607,22 @@
 (defn add-assignment-trigger [{org-id :id} trigger]
   (update-organization org-id {$push {:assignment-triggers trigger}}))
 
+(defn- update-assignment-descriptions [trigger-id description]
+  (mongo/update-by-query :assignments
+                         {:trigger trigger-id}
+                         {$set {:description description}}))
+
 (defn update-assignment-trigger [{org-id :id} trigger triggerId]
   (let [query (assoc {:assignment-triggers {$elemMatch {:id triggerId}}} :_id org-id)
         changes {$set {:assignment-triggers.$.targets (:targets trigger)
                        :assignment-triggers.$.handlerRole (:handlerRole trigger)
-                       :assignment-triggers.$.description (:description trigger)}}]
-    (mongo/update-by-query :organizations query changes)))
+                       :assignment-triggers.$.description (:description trigger)}}
+        num-updated (mongo/update-by-query :organizations query changes)]
+    ; it is assumed that triggers are not updated very often, so this
+    ; description synchronization is done to avoid unnecessary
+    ; organization queries elsewhere
+    (update-assignment-descriptions triggerId (:description trigger))
+    num-updated))
 
 (defn remove-assignment-trigger [{org-id :id} trigger-id]
   (update-organization org-id {$pull {:assignment-triggers {:id trigger-id}}}))
