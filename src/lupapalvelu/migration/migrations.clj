@@ -1,14 +1,12 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [clojure.walk :as walk]
             [clojure.set :refer [rename-keys] :as set]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as v]
-            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.assignment :as assignment]
@@ -29,7 +27,6 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
             [lupapalvelu.tasks :refer [task-doc-validation]]
-            [sade.env :as env]
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]
             [lupapalvelu.drawing :as draw])
@@ -2953,6 +2950,25 @@
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
       (do-fix-katulupa-op-documents collection))))
+
+(doseq [ya-subtype (->> (map (comp first :subtypes) (vals op/ya-operations)) ; kayttolupa :tyolupa :sijoituslupa
+                        (remove nil?)
+                        (distinct))
+        :let [operations (filter (fn [[_ op-data]]
+                                   (some (partial = ya-subtype) (:subtypes op-data)))
+                                 op/ya-operations)]]
+  (assert (not= :sijoitussopimus ya-subtype) "Sijoitussopimus should not be first of subtypes. It should be only sijoituslupa")
+  (mongo/update-by-query :applications
+                         {:permitType "YA" :permitSubtype {$not {$type 2}}
+                          :primaryOperation.name {$in (map first operations)}}
+                         {$set {:permitSubtype ya-subtype}}))
+
+
+#_(defmigration set-YA-subtypes
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :permitSubtype {$not {$type 2}}}))}
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]]
+            (reduce + 0 ))))
 
 ;;
 ;; ****** NOTE! ******
