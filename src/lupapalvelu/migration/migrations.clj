@@ -2954,6 +2954,24 @@
     (for [collection [:applications :submitted-applications]]
       (do-fix-katulupa-op-documents collection))))
 
+(defn- trigger-description [organization trigger-id]
+  (->> organization
+       :assignment-triggers
+       (util/find-first #(= (:id %) trigger-id))
+       :description))
+
+(defmigration fix-automatic-assignment-empty-descriptions
+  {:apply-when (pos? (mongo/count :assignments
+                                  {:trigger    {$ne "user-created"}
+                                   :description ""}))}
+  (let [assignments (mongo/select :assignments {:trigger {$ne "user-created"}, :description ""})]
+    (doseq [{:keys [id application trigger] :as assignment} assignments]
+      (let [organization (mongo/select-one :organizations {:_id (:organization application)})]
+        (mongo/update-by-id :assignments
+                            id
+                            {$set {:description (trigger-description organization trigger)}})))
+    (count assignments)))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

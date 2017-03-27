@@ -819,6 +819,6 @@
    :input-validators [(partial non-blank-parameters [:triggerId])]
    :user-roles #{:authorityAdmin}}
    [{user :user user-orgs :user-organizations}]
-   (do (-> (usr/authority-admins-organization-id user)
-           (util/find-by-id user-orgs)
-           (org/remove-assignment-trigger triggerId))))
+   (-> (usr/authority-admins-organization-id user)
+       (util/find-by-id user-orgs)
+       (org/remove-assignment-trigger triggerId)))
