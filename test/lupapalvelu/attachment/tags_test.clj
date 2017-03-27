@@ -10,7 +10,8 @@
 (testable-privates lupapalvelu.attachment.tags
                    application-state-filters
                    group-and-type-filters
-                   not-needed-filters)
+                   not-needed-filters
+                   assignment-trigger-filters)
 
 (testable-privates lupapalvelu.attachment.tag-groups
                    add-operation-tag-groups
@@ -261,6 +262,22 @@
         (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
         (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "othertype"}))) => :other))))
 
+  (facts "assignment trigger"
+    (fact "no assignments"
+      (let [application {:attachments [{:id "assignment1"}]}
+            assignments [{:targets ["not-assignment1"]}]]
+        (assignment-trigger-filters application assignments) => [{:tag "assignment-not-targeted" :default false}]))
+
+    (fact "assignments created by user"
+      (let [application {:attachments [{:id "assignment1"}]}
+            assignments [{:targets [{:id "assignment1"}] :trigger "user-created"}]]
+        (assignment-trigger-filters application assignments) => [{:tag "assignment-user-created" :default false}]))
+    (fact "trigger assignments"
+          (let [application {:attachments [{:id "assignment1"}]}
+                assignments [{:targets [{:id "assignment1"}] :trigger "trigger1" :description "Description"}]]
+            (assignment-trigger-filters application assignments)
+              => [{:tag "assignment-trigger1" :description "Description" :default false}])))
+
   (facts "not needed"
     (fact "one attachment - not needed true"
       (let [attachments [{:notNeeded true :type {:type-group "somegroup" :type-id "sometype"}}]
@@ -283,24 +300,32 @@
                                              {:tag :notNeeded :default false}])))
 
   (fact "all filters"
-    (let [attachments  [{:applicationState "verdictGiven"}
-                        {:groupType "parties"}
+    (let [attachments  [{:id "a1" :applicationState "verdictGiven"}
+                        {:id "a2" :groupType "parties"}
                         {:groupType "unknown"}
                         {:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
                         {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
                         {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}
                         {:notNeeded true}]
-          application {:attachments attachments :state "submitted"}]
+          application {:attachments attachments :state "submitted"}
+          assignments [{:targets [{:id "a1"}] :trigger "user-created" :description "Created by user"}
+                       {:targets [{:id "a1"}] :trigger "user-created" :description "Another by user"}
+                       {:targets [{:id "a1"} {:id "a2"} {:id "a1"}] :trigger "custom-trigger"
+                        :description "Custom"}]]
 
-      (attachments-filters application) =>   [[{:tag :preVerdict :default true}
-                                               {:tag :postVerdict :default false}]
-                                              [{:tag :general :default false}
-                                               {:tag :parties :default false}
-                                               {:tag :paapiirustus :default false}
-                                               {:tag :iv_suunnitelma :default false}
-                                               {:tag :other :default false}]
-                                              [{:tag :needed :default true}
-                                               {:tag :notNeeded :default false}]]
+      (attachments-filters application assignments)
+        => [[{:tag :preVerdict :default true}
+             {:tag :postVerdict :default false}]
+            [{:tag :general :default false}
+             {:tag :parties :default false}
+             {:tag :paapiirustus :default false}
+             {:tag :iv_suunnitelma :default false}
+             {:tag :other :default false}]
+            [{:tag :needed :default true}
+             {:tag :notNeeded :default false}]
+            [{:tag "assignment-user-created" :default false}
+             {:tag "assignment-not-targeted" :default false}
+             {:tag "assignment-custom-trigger" :description "Custom" :default false}]]
 
       ;; Correct type group tag names must be used, since function ensures the order of the tags by names
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)

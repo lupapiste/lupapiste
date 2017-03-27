@@ -41,9 +41,9 @@
                                        :contact {:firstName "", :lastName ""}
                                        :account {:type "", :price ""}})
 
-(defmulti yritystilisopimus (fn [company & _]
-                              (when (-> company :campaign ss/not-blank?)
-                                :campaign)))
+(defmulti ^InputStream yritystilisopimus (fn [company & _]
+                                           (when (-> company :campaign ss/not-blank?)
+                                             :campaign)))
 
 (defmethod ^InputStream yritystilisopimus :default
   [company contact account timestamp]

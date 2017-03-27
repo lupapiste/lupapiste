@@ -43,12 +43,20 @@ Authority adds trigger
   Click enabled by test id  add-trigger
   Select from autocomplete by test id  triggers-target-component  Aitapiirustus
   Select From List by test id  triggers-handler-select  Käsittelijä robotti
+  Test id disabled  save-trigger-dialog-ok
   Input text by test id  triggers-description-input  Description
   Click enabled by test id  save-trigger-dialog-ok
   Wait until  Positive indicator should be visible
   Wait Until  Xpath Should Match X Times  //div[@id='triggers-table']//table/tbody/tr  1
   Wait until  Element text should be  xpath=//span[@id="trigger-target"]  Aitapiirustus,
   Wait until  Element text should be  xpath=//span[@id="trigger-handler"]  Käsittelijä robotti
+
+Authority starts adding another, but doesn't remember the target
+  Click enabled by test id  add-trigger
+  Select From List by test id  triggers-handler-select  Käsittelijä robotti
+  Input text by test id  triggers-description-input  Description
+  Test id disabled  save-trigger-dialog-ok
+  Click element  xpath=//div[@id='dialog-add-trigger']//p[contains(@class, 'dialog-close')]
 
 Authority should be able to edit trigger
   Click by test id  edit-trigger

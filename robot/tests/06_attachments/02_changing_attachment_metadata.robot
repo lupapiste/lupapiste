@@ -37,7 +37,7 @@ Mikko edits operation B description
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Open tab  attachments
-  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu liite  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu liite  Talo A - Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
 
 Mikko opens attachment details
@@ -57,7 +57,7 @@ Mikko can change related operation
   Select from autocomplete  [data-test-id=attachment-group-autocomplete]  Rakennuspaikka
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
-  Select from autocomplete  [data-test-id=attachment-group-autocomplete]  Muun rakennuksen rakentaminen - Talo B
+  Select from autocomplete  [data-test-id=attachment-group-autocomplete]  Talo B - Muun rakennuksen rakentaminen
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
 
@@ -82,7 +82,7 @@ Mikko sees that attachments are grouped by operations
   Wait Until  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  3
 
 Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Talo B" operation
-  Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"])[last()]//span[@class="rollup-status__text"]  MUUN RAKENNUKSEN RAKENTAMINEN - TALO B
+  Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"])[last()]//span[@class="rollup-status__text"]  MUUN RAKENNUKSEN RAKENTAMINEN - Talo B
 
 Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu

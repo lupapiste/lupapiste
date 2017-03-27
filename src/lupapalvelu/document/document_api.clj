@@ -9,14 +9,15 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]
             [lupapalvelu.document.document :refer :all]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]))
 
 
 ;; Action category: documents & tasks
@@ -74,7 +75,7 @@
         schema (some-> application (domain/get-document-by-id doc-id) model/get-document-schema)]
     (when (and doc-id (not (auth/application-authority? application user)))
       (if schema
-        (-> (get-in schema [:info :user-authz-roles] auth/default-authz-writer-roles)
+        (-> (get-in schema [:info :user-authz-roles] roles/default-authz-writer-roles)
             (domain/validate-access command))
         (fail :error.document-not-found)))))
 
@@ -88,8 +89,8 @@
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application user]}]
   (if-let [document (doc-persistence/by-id application collection doc)]
     (ok :document (application/process-document-or-task user application document))
@@ -169,7 +170,7 @@
   {:parameters [id doc updates]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
    :pre-checks [(document-in-application-validator :doc)
@@ -198,7 +199,7 @@
   {:parameters       [id doc path collection]
    :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [(document-in-application-validator :doc)
                       (editable-by-state? :doc #{:draft :answered :open :submitted :complementNeeded})
@@ -218,8 +219,8 @@
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application]}]
   (let [document (doc-persistence/by-id application collection doc)]
     (when-not document (fail! :error.document-not-found))
@@ -228,8 +229,8 @@
 (defquery fetch-validation-errors
   {:parameters       [:id]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states}
   [{app :application}]
   (ok :results (application/pertinent-validation-errors app)))
@@ -285,7 +286,7 @@
   {:parameters [id documentId userId path]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(document-in-application-validator :documentId)
                 (editable-by-state? :documentId states/update-doc-states)
@@ -300,7 +301,7 @@
   {:parameters [id documentId path]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(document-in-application-validator :documentId)
                 (editable-by-state? :documentId states/update-doc-states)
@@ -315,7 +316,7 @@
   {:parameters [id documentId companyId path]
    :categories #{:documents}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(document-in-application-validator :documentId)
                 (editable-by-state? :documentId states/update-doc-states)

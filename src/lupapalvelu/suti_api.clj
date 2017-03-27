@@ -4,9 +4,9 @@
             [sade.strings :as ss]
             [monger.operators :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
             [lupapalvelu.suti :as suti]))
@@ -56,8 +56,8 @@
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application organization :organization}]
   (ok :data (suti/application-data application @organization)))
@@ -67,8 +67,8 @@
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application organization :organization}]
   (ok :data (suti/application-products application @organization)))

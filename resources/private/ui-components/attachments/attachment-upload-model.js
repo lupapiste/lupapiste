@@ -53,7 +53,8 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
             self.upload.clearFile( fileId );
             self.unsubscribe(statusSubscription);
             self.sendEvent("attachment-upload", "finished", { ok: ko.unwrap(status) === service.JOB_DONE,
-                                                              attachmentId: self.id });
+                                                              attachmentId: self.id,
+                                                              id: service.applicationId});
           }
         });
       }

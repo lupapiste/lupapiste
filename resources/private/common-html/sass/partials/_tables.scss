@@ -383,6 +383,13 @@ div.attachments-table-container {
     .attachments-table--widest {
       width: 80%;
     }
+    span.attachment-drawing-number {
+      display: block;
+      min-width: 4em;
+      max-width: 7em;
+      overflow-wrap: break-word;
+      margin-right: -1px;
+    }
   }
 }
 
@@ -390,7 +397,7 @@ div.attachments-table-container {
   white-space: nowrap;
   i {
     margin-left: 1px;
-    magint-right: 1px;
+    margin-right: 1px;
   }
 }
 

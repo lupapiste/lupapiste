@@ -2,8 +2,9 @@ LUPAPISTE.TriggersModel = function( params ) {
   "use strict";
   var self = this;
 
-  var triggerService = lupapisteApp.services.triggerService;
-  var handlerService = lupapisteApp.services.handlerService;
+  var triggerService        = lupapisteApp.services.triggerService;
+  var handlerService        = lupapisteApp.services.handlerService;
+  var triggersTargetService = lupapisteApp.services.triggersTargetService;
 
   self.triggers = triggerService.organizationAssignmentTriggers( params.organization );
   self.roles = handlerService.organizationHandlerRoles( params.organization );
@@ -26,7 +27,7 @@ LUPAPISTE.TriggersModel = function( params ) {
 
     dd.reset = function() {
       dd.id = null;
-      lupapisteApp.services.triggersTargetService.selected([]);
+      triggersTargetService.selected([]);
       dd.handler("");
       dd.description("");
     };
@@ -44,7 +45,7 @@ LUPAPISTE.TriggersModel = function( params ) {
 
     dd.isGood = ko.pureComputed( function() {
       var selectedType = ko.unwrap(lupapisteApp.services.triggersTargetService.selected);
-      return (selectedType !== undefined);
+      return (selectedType !== undefined) && dd.description() && triggersTargetService.selected().length > 0;
     });
 
     dd.saveTrigger = function() {

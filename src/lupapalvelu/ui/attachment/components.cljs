@@ -9,9 +9,12 @@
   (.unsubscribe js/hub (::fileupload-subscription-id state))
   true)
 
-(rum/defcs upload-link < {:did-mount     (fn [state]
-                                           (let [[callback input-id] (:rum/args state)
-                                                 input-id (or input-id (jsutil/unique-elem-id "upload-link"))]
+(rum/defcs upload-link < {:will-mount    (fn [state]
+                                           (assoc state ::input-id (jsutil/unique-elem-id "upload-link")))
+
+                          :did-mount     (fn [state]
+                                           (let [[callback] (:rum/args state)
+                                                 input-id (::input-id state)]
                                              (upload/bindToElem (js-obj "id" (::input-id state)))
                                              (assoc state
                                                     ::input-id input-id
@@ -35,6 +38,7 @@
 
                           :will-unmount  (fn [state]
                                            (destroy-file-upload-subscription state)
+                                           (dissoc state ::input-id)
                                            state)}
   "Handles file upload with fileupload-service.
   First param must be callback function, which receives filedata event via hub.

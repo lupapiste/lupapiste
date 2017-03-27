@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -27,6 +28,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as op]
@@ -110,37 +112,42 @@
 ;; Attachments
 ;;
 
+(defn- maybe-assignments [assignments-delay user]
+  (and (usr/authority? user)
+       assignments-delay
+       @assignments-delay))
+
 (defquery attachments
   {:description "Get all attachments in application filtered by user visibility"
    :parameters [:id]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [command]
-  (ok :attachments (map att/enrich-attachment
+  [{user :user assignments :application-assignments :as command}]
+  (ok :attachments (map (partial att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user))
                         (att/sorted-attachments command))))
 
 (defquery attachment
   {:description "Get single attachment"
    :parameters [id attachmentId]
    :categories #{:attachments}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application :as command}]
+  [{{attachments :attachments :as application} :application user :user assignments :application-assignments :as command}]
   (let [attachment (att/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (att/enrich-attachment attachment))
+      (ok :attachment (att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user) attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"
    :parameters [:id]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
@@ -149,18 +156,22 @@
 (defquery attachments-filters
   {:description "Get all attachments filters for application"
    :parameters [:id]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{application :application}]
-  (ok :attachmentsFilters (att-tags/attachments-filters application)))
+  [{application :application user :user assignments :application-assignments}]
+  (ok :attachmentsFilters
+      (att-tags/attachments-filters application
+                                    (and (usr/authority? user)
+                                         assignments
+                                         @assignments))))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."
    :parameters [:id]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{application :application}]
@@ -172,25 +183,36 @@
 
 (defquery attachment-types
   {:parameters [:id]
-   :user-authz-roles auth/all-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{application :application}]
   (ok :attachmentTypes (att-type/get-attachment-types-for-application application)))
+
+(defn- on-set-attachment-type-success [{:keys [application user data organization created]} result]
+  (when (:ok result)
+    (let [{:keys [attachmentId attachmentType]} data]
+      {:user             user
+       :organization     @organization
+       :application      application
+       :targets          [{:id attachmentId :trigger-type attachmentType}]
+       :assignment-group "attachments"
+       :timestamp        created})))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
    :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :states     (states/all-states-but :answered :sent)
    :pre-checks [app/validate-authority-in-drafts
                 att/foreman-must-be-uploader
                 att/edit-allowed-by-target
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
-                att/attachment-matches-application]}
+                att/attachment-matches-application]
+   :on-success [(assignment/run-assignment-triggers on-set-attachment-type-success)]}
   [{:keys [application user created] :as command}]
 
   (let [attachment (att/get-attachment-info application attachmentId)
@@ -212,8 +234,8 @@
   {:parameters [id attachmentId]
    :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{{attachments :attachments} :application}]
@@ -227,7 +249,7 @@
 
 (defquery attachment-operations
   {:parameters [:id]
-   :user-authz-roles auth/all-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
@@ -310,7 +332,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :notified         true
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states           (difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
@@ -330,7 +352,7 @@
    :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :states      (states/all-states-but (conj states/terminal-states :answered))
    :pre-checks  [app/validate-authority-in-drafts
                  att/foreman-must-be-uploader
@@ -353,7 +375,7 @@
    :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [app/validate-authority-in-drafts
                  att/foreman-must-be-uploader
@@ -380,8 +402,8 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
 
@@ -390,8 +412,8 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id false (partial att/get-attachment-file-as! user)))
 
@@ -401,8 +423,8 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles}
   [{{:keys [fileId]} :data session :session}]
   (att/output-file fileId (:id session)))
 
@@ -411,8 +433,8 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
 
@@ -422,8 +444,8 @@
    :optional-parameters [:download]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [{{:keys [attachment-id download]} :data user :user}]
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id) (= download "true")))
 
@@ -439,8 +461,8 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
@@ -457,9 +479,9 @@
   {:parameters [:id ids]
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
-   :user-authz-roles auth/all-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :input-validators [(partial action/non-blank-parameters [:ids])]
-   :org-authz-roles auth/reader-org-authz-roles}
+   :org-authz-roles roles/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (let [attachments (:attachments application)
         ids (ss/split ids #",")
@@ -477,7 +499,7 @@
   {:parameters [id attachmentId attachmentType group filename tempfile size]
    :categories #{:attachments}
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :pre-checks [att/attachment-matches-application
                 att/attachment-not-locked
                 att/attachment-not-readOnly
@@ -521,7 +543,7 @@
   {:parameters  [id attachmentId rotation]
    :categories  #{:attachments}
    :user-roles  #{:applicant :authority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  [(partial att/if-not-authority-state-must-not-be #{:sent})
@@ -621,7 +643,7 @@
 (defquery set-attachment-group-enabled
   {:description "Pseudo-query for checking that attachment group can selected for application."
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :pre-checks       [att/validate-group-is-selectable]
    :states           (states/all-application-states-but states/terminal-states)
    :categories       #{:attachments}})
@@ -670,7 +692,7 @@
   {:parameters [id attachmentId meta]
    :categories #{:attachments}
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :states     (states/all-states-but :answered :sent)
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size]
@@ -691,7 +713,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [app/validate-authority-in-drafts
                 att/foreman-must-be-uploader
@@ -745,7 +767,7 @@
   {:parameters       [id attachmentId value]
    :categories       #{:attachments}
    :user-roles       #{:authority :applicant}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]

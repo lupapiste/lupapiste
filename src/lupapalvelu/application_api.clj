@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof
+                                                warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [monger.operators :refer :all]
@@ -9,10 +10,12 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.property :as prop]
-            [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defraw defquery defcommand
+                                        update-application notify] :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.combinators :refer [validator-or]]
             [lupapalvelu.comment :as comment]
@@ -30,12 +33,13 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.assignment :as assignment]))
+            ))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -69,8 +73,8 @@
   {:parameters       [:id]
    :states           states/all-states
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application user] :as command}]
   (if application
     (ok :application (app/post-process-app command)
@@ -125,8 +129,8 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles  ;; For info-links
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles  ;; For info-links
    :states           states/all-states
    :pre-checks       [app/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
@@ -215,7 +219,7 @@
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
@@ -240,7 +244,7 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:authority :applicant}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app/last-history-item application)))
@@ -321,7 +325,7 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states           #{:draft :open}
    :notified         true
    :on-success       [(notify :application-state-change)
@@ -512,7 +516,7 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states     states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks [app/validate-has-subtypes
@@ -686,7 +690,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-linking
                       app/validate-authority-in-drafts]
@@ -907,7 +911,7 @@
 
 (defquery application-handlers
   {:parameters       [id]
-   :user-authz-roles auth/all-authz-roles
+   :user-authz-roles roles/all-authz-roles
    :user-roles       #{:authority :applicant :oirAuthority}
    :states           states/all-states}
   [{:keys [application lang organization]}]

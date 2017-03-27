@@ -7,11 +7,11 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 
@@ -70,7 +70,7 @@
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
-   :org-authz-roles auth/commenter-org-authz-roles
+   :org-authz-roles roles/commenter-org-authz-roles
    :states      (disj commenting-states :draft)})
 
 (defcommand can-mark-answered
@@ -81,8 +81,8 @@
 (defquery comments
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/comment-user-authz-roles
-   :org-authz-roles auth/commenter-org-authz-roles
+   :user-authz-roles roles/comment-user-authz-roles
+   :org-authz-roles roles/commenter-org-authz-roles
    :states states/all-states}
   [{{app-id :id :as application} :application}]
   (ok {:id app-id :comments (comment/enrich-comments application)}))
@@ -92,8 +92,8 @@
    :optional-parameters [to mark-answered openApplication]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
-   :user-authz-roles auth/comment-user-authz-roles
-   :org-authz-roles auth/commenter-org-authz-roles
+   :user-authz-roles roles/comment-user-authz-roles
+   :org-authz-roles roles/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
                 foreman/allow-foreman-only-in-foreman-app
                 application/validate-authority-in-drafts]
@@ -102,7 +102,7 @@
                       (partial action/vector-parameters [:roles])]
    :notified   true
    :on-success [(fn [{data :data :as command} _]
-                  (when-not (ss/blank? (:text data))
+                  (when-not (or (ss/blank? (:text data)) (some? (:to data)))
                     (notifications/notify! :new-comment command))
                   (when-let [to-user (and (:to data) (usr/get-user-by-id (:to data)))]
                     ;; LUPA-407

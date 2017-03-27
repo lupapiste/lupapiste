@@ -269,15 +269,21 @@
   (fact "Auhtority Sonja can't upload user attachment"
     (query sonja :add-user-attachment-allowed) => unauthorized?)
 
-  (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))]
+  (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))
+        filename      "test-attachment.txt"]
 
     ; Now Pena has attachment
-    (get (:attachments (query pena "user-attachments")) 0) => (contains {:attachment-id attachment-id :attachment-type {:type-group "osapuolet", :type-id "tutkintotodistus"}})
+    (get (:attachments (query pena "user-attachments")) 0)
+    => (contains {:attachment-id attachment-id
+                  :attachment-type {:type-group "osapuolet"
+                                    :type-id "tutkintotodistus"}
+                  :file-name filename})
 
     ; Attachment is in GridFS
 
     (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id) => http200?]
-      (:body resp) => "This is test file for file upload in itest.")
+      (:body resp) => "This is test file for file upload in itest."
+      (-> resp :headers :content-disposition) => (format "attachment;filename=\"%s\"" filename))
 
     (fact "Sonja can not get attachment"
       (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?)

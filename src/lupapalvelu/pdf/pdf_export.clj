@@ -138,10 +138,16 @@
                          :groups (filter-subschemas-by-data doc group-schema % groups)) paths)
          (zipmap paths))))
 
+(defn- subschemas-order-comparator
+  [x y]
+  (let [x-key (sade.util/->int (last x))
+        y-key (sade.util/->int (last y))]
+    (. clojure.lang.Util (compare x-key y-key))))
+
 (defn- collect-single-group
   "Build a map from the data of a single group. Groups can be in document root or inside other groups"
   [doc group-schema path i18npath]
-  (let [subschemas (get-subschemas doc group-schema path)]
+  (let [subschemas (into (sorted-map-by subschemas-order-comparator) (get-subschemas doc group-schema path))]
 
     (array-map :title  (loc (or (:i18nkey group-schema)
                                 (:i18name group-schema)

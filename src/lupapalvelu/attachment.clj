@@ -11,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :refer [=as-kw not=as-kw fn->] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -19,19 +20,18 @@
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.attachment.preview :as preview]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.operations :as op]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.archiving-util :as archiving-util])
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.user :as usr])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -884,6 +884,29 @@
          (map attachment-assignment-info))))
 
 (assignment/register-assignment-target! :attachments describe-assignment-targets)
+
+;;
+;; Enriching attachment
+;;
+
+(defn- assignment-trigger-tags [assignments attachment]
+  (or (not-empty (->> (assignment/targeting-assignments assignments attachment)
+                      (remove assignment/completed?)
+                      (map #(assignment/assignment-tag (:trigger %)))
+                      distinct))
+      [(assignment/assignment-tag "not-targeted")]))
+
+(defn- enrich-attachment-and-add-trigger-tags
+  [assignments attachment]
+  (update (enrich-attachment attachment) :tags
+          #(concat % (assignment-trigger-tags assignments attachment))))
+
+(defn enrich-attachment-with-trigger-tags [assignments attachment]
+  (if assignments
+    (enrich-attachment-and-add-trigger-tags assignments
+                                            attachment)
+    (enrich-attachment attachment)))
+
 
 ;;
 ;; Pre-checks

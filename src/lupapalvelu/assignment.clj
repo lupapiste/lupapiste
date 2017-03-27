@@ -2,7 +2,7 @@
   (:require [clojure.set :refer [rename-keys]]
             [monger.operators :refer [$and $each $setOnInsert $in $ne $nin $options $or $regex $set $pull $push]]
             [monger.collection :as collection]
-            [taoensso.timbre :as timbre :refer [errorf]]
+            [taoensso.timbre :as timbre :refer [error errorf]]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
@@ -35,6 +35,15 @@
 
 ;; Helpers and schemas
 
+(defn targeting-assignments
+  "Given assignments and attachment, retuns assignments that target attachment"
+  [assignments attachment]
+  (->> assignments
+       (filter #((set (map :id (:targets %))) (:id attachment)))))
+
+(defn assignment-tag [tag-id]
+  (str "assignment-" tag-id))
+
 (defn- assignment-in-user-organization-query [user]
   {:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}})
 
@@ -53,6 +62,8 @@
    :user usr/SummaryUser
    :timestamp ssc/Timestamp})
 
+(defn completed? [assignment]
+  (= "completed" (-> (:states assignment) last :type)))
 
 (def user-created-trigger "user-created")
 
@@ -418,8 +429,6 @@
 
 (defn- upsert-assignment-targets
   [user application trigger timestamp assignment-group targets]
-  ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
-  ; https://jira.mongodb.org/browse/SERVER-10711
   (let [query {:application.id (:id application)
                :status "active"
                :states.type {$nin ["completed"]}
@@ -430,6 +439,8 @@
                                           user
                                           timestamp)}
                 $set {:recipient (recipient trigger application)}}]
+    ; As of Mongo 3.4, the below cannot be implemented using $setOnInsert due to write conflicts.
+    ; https://jira.mongodb.org/browse/SERVER-10711
     (when (not (pos? (mongo/update-n :assignments query update)))
       (try (insert-assignment (new-assignment (usr/summary user)
                                               (recipient trigger application)
@@ -439,12 +450,16 @@
                                               (:description trigger)
                                               (map (partial ->target assignment-group)
                                                    targets)))
+           ; Try again in case the assignment was inserted between the previous update and insert call attempts
            (catch Exception e
-             (mongo/update-n :assignments query update))))))
+             (try (mongo/update-n :assignments query update)
+                  (catch Exception e
+                    (error "could not upsert assignment targets for trigger " (:id trigger)
+                           " and application " (:id application) ": " (.getMessage e)))))))))
 
 (defn run-assignment-triggers [response-fn]
-  (fn [response]
-    (let [{:keys [user organization application targets assignment-group timestamp]} (response-fn response)
+  (fn [& response]
+    (let [{:keys [user organization application targets assignment-group timestamp]} (apply response-fn response)
           org-id   (:id organization)
           triggers (:assignment-triggers organization)]
       (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]

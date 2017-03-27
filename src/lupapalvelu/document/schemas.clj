@@ -1,10 +1,10 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
             [sade.util :as util]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]))
 
@@ -101,6 +101,10 @@
 
 (defn find-identifier-field-from [schema-name]
   (util/find-by-key :identifier true (:body (get-schema {:name schema-name}))))
+
+(defn resolve-identifier [document]
+  (if-let [{identifier-field :name} (find-identifier-field-from (-> document :schema-info :name))]
+    (get-in document [:data (keyword identifier-field) :value])))
 
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
@@ -1501,7 +1505,7 @@
            :repeating false
            :approvable true
            :type :party
-           :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+           :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
            :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
            :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}

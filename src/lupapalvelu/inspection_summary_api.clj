@@ -72,11 +72,10 @@
     (inspection-summary/set-default-template-for-operation organizationId operationId templateId)))
 
 (defn- map-operation-to-frontend [app op]
-  (let [document (domain/get-document-by-operation app op)
-        {identifier-field :name} (schemas/find-identifier-field-from (get-in document [:schema-info :name]))]
+  (let [document (domain/get-document-by-operation app op)]
     (assoc (select-keys op [:id :name :description])
-      :op-identifier (or (get-in document [:data (keyword identifier-field) :value])
-                         (get-in document [:data :valtakunnallinenNumero :value])))))
+      :op-identifier (or (schemas/resolve-identifier document)
+                         (first (schemas/resolve-accordion-field-values document))))))
 
 (defquery inspection-summaries-for-application
   {:pre-checks [(action/some-pre-check

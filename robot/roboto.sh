@@ -407,7 +407,7 @@ show_finished() {
    local STATUS=$(grep "tests total" $1 | tail -n 1)
    local COLOR=$GREEN
    local ATTEMPTS=$(grep "pybot exited with" "$1" | sed -e 's/.*round //')
-   echo "$STATUS" | grep -q "0 failed" || COLOR=$RED
+   echo "$STATUS" | grep -q "[^0-9]0 failed" || COLOR=$RED
    echo -e "$COLOR - $1 done: $STATUS, $ATTEMPTS runs"
    grep -E "FAIL" "$1" | head -n 1 | sed -e 's/^/      /'
    echo -n -e "$DEFAULT"

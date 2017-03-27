@@ -5,6 +5,7 @@
       <thead>
         <tr>
           <th data-bind="ltext:'application.attachmentState'"></th>
+          <th data-bind="ltext: 'attachment.th-drawing-number'"></th>
           <th data-bind="ltext: 'attachment.th-type'"
               class="attachments-table--widest"></th>
           <th data-bind="ltext: 'application.attachmentFile'"></th>
@@ -27,6 +28,11 @@
                        'row--rejected':  $parent.isRejected( $data )}">
           <td>
             <state-icons params="attachment: $data"></state-icons>
+          </td>
+          <td>
+            <!-- ko if: $data.drawingNumber -->
+            <span data-bind="text: $data.drawingNumber" class="attachment-drawing-number"></span>
+            <!-- /ko -->
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>

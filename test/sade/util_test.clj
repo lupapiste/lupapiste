@@ -497,3 +497,9 @@
                    [[:hoo
                      [[:hei :hou] [:hip :hup]]]]]]]
                 [:baz :quu]]) => [:quu :biz :rap :hou :hup]))
+
+(fact distinct-by
+  (distinct-by identity []) => '()
+  (distinct-by even? [1 2 3 4 5 6]) => '(1 2)
+  (distinct-by identity [1 1 2 3 2]) => '(1 2 3)
+  (distinct-by :foo [{:foo 1 :bar :a} {:foo 1 :bar :b}]) => '({:foo 1 :bar :a}))
