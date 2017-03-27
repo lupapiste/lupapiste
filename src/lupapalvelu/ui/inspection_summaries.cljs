@@ -336,11 +336,9 @@
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
-      [:label (js/loc "inspection-summary.tab.intro.1")]
-      [:br]
-      [:label (js/loc "inspection-summary.tab.intro.2")]
-      [:br]
-      [:label (js/loc "inspection-summary.tab.intro.3")]]
+      [:p (string/join " " [(js/loc "inspection-summary.tab.intro.1")
+                            (js/loc "inspection-summary.tab.intro.2")
+                            (js/loc "inspection-summary.tab.intro.3")])]]
      [:div.form-grid.no-top-border.no-padding
 
       [:div.row
@@ -384,8 +382,8 @@
 
       (when (and (auth/ok? auth-model :toggle-inspection-summary-locking) (not (:locked summary)))
         [:div.row
-         [:label (js/loc "inspection-summary.locking.info")]
-         [:label (js/loc "inspection-summary.locking-archive.info")]])
+         [:p (string/join " " [(js/loc "inspection-summary.locking.info")
+                               (js/loc "inspection-summary.locking-archive.info")])]])
 
       (when (auth/ok? auth-model :toggle-inspection-summary-locking)
         [:div.row
