@@ -9,31 +9,70 @@ ${appname}     Roadcrew
 ${propertyid}  753-416-88-88
 ${ext1}        Extension yi
 ${ext2}        Extension er
-${ext3}        Extension san    
+${ext3}        Extension san
 ${kryspstart}  4.10.2016
 ${kryspend}    22.11.2016
 ${reason}      Jatkoajan perustelu
-${ext4}        Extension si      
+${ext4}        Extension si
 
 *** Test Cases ***
 
 Pena logs in creates the main YA application
   Pena logs in
-  Create application with state  ${appname}  ${propertyid}  ya-katulupa-vesi-ja-viemarityot  verdictGiven
+  Create application with state  ${appname}  ${propertyid}  ya-katulupa-vesi-ja-viemarityot  submitted
+
+Pena sets work start date
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-alkaa-ms]  27.3.2017
+  Check accordion text  tyoaika  LUPA-AIKA  27.3.2017 \u2013
+
+Bad input is not shown on the accordion
+  Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-paattyy-ms]  1234568
+  Check accordion text  tyoaika  LUPA-AIKA  27.3.2017 \u2013
+  Element should be visible  jquery=input.hasDatepicker.tip[data-docgen-path=tyoaika-paattyy-ms]
+
+Proper work period
+  Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-paattyy-ms]  5.4.2017
+  Check accordion text  tyoaika  LUPA-AIKA  27.3.2017 \u2013 5.4.2017
+  [Teardown]  Logout
+
+Sonja logs in and fetches verdict
+  Sonja logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  verdict
+  Fetch YA verdict
+  [Teardown]  Logout
+
+Pena logs back in
+  Pena logs in
+  Open application  ${appname}  ${propertyid}
 
 Extensions table is not visible
   Open tab  tasks
   No such test id  extensions-table
 
 Pena requests first extension
-  Create extension  ${ext1}  20.09.2016  10.10.2016
+  Create extension  ${ext1}  ${EMPTY}  ${EMPTY}  False
+  Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  ${EMPTY}
+  Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-paattyy-pvm]  10.10.2016
+  Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  \u2013 10.10.2016
+
+Bad date is error and not show on the accordion
+  Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-alkaa-pvm]  1234567
+  Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  \u2013 10.10.2016
+  Element should be visible  jquery=input.hasDatepicker.warn[data-docgen-path=tyoaika-alkaa-pvm]
+
+Pena inputs proper extension dates returns to the original application
+  Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-alkaa-pvm]  20.09.2016
+  Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  20.9.2016 \u2013 10.10.2016
+  Follow link permit
 
 Pena now sees extensions table
   Open tab  tasks
-  Check row  0  20.9.2016  10.10.2016  Luonnos  
+  Check row  0  20.9.2016  10.10.2016  Luonnos
 
 Pena creates second extension
-  Create extension  ${ext2}  1.8.2016  9.9.2016  
+  Create extension  ${ext2}  1.8.2016  9.9.2016
 
 Pena creates third extension
   Create extension  ${ext3}  11.11.2016  12.12.2016
@@ -41,17 +80,17 @@ Pena creates third extension
 The extensions are listed according to the start date
   Open tab  tasks
   Check row  0  1.8.2016  9.9.2016  Luonnos
-  Check row  1  20.9.2016  10.10.2016  Luonnos  
+  Check row  1  20.9.2016  10.10.2016  Luonnos
   Check row  2  11.11.2016  12.12.2016  Luonnos
 
 Second link leads to the first extension
   Scroll and click test id  state-link-1
   Test id text is  application-title  EXTENSION YI
- 
+
 Pena submits extension
   Submit application
   [Teardown]  Logout
-  
+
 Sonja cannot approve application but extension
   Sonja logs in
   Open application  ${ext1}  ${propertyid}
@@ -60,7 +99,7 @@ Sonja cannot approve application but extension
   Deny  dynamic-yes-no-confirm-dialog
 
 The same is true in the required field summary tab
-  Open tab  requiredFieldSummary  
+  Open tab  requiredFieldSummary
   No such test id  approve-application-summaryTab
   Scroll and click test id  approve-extension-summaryTab
   Deny  dynamic-yes-no-confirm-dialog
@@ -118,17 +157,18 @@ Verdict tab is not visible
 *** Keywords ***
 
 Create extension
-  [Arguments]  ${address}  ${start}  ${end}
+  [Arguments]  ${address}  ${start}  ${end}  ${follow}=True
   Scroll and click test id  continuation-period-create-btn
   Confirm  dynamic-yes-no-confirm-dialog
   Change address  ${address}
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Set dates  ${start}  ${end}
-  Follow link permit
-  
+  Run keyword if  ${follow}  Follow link permit
+
 
 Follow link permit
   Scroll and click test id  test-application-link-permit-lupapistetunnus
-  
+
 Change address
   [Arguments]  ${address}
   Click by test id  change-location-link

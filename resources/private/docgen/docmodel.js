@@ -610,8 +610,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         sourceValueChanged(input.get(0), date, sourceValue, source);
         var value = transform.fromDate( date );
         saveValue(e, value);
+        // We only emit valid or empty dates.
         emit( e.target, {subSchema: subSchema,
-                         value: value});
+                         value: util.toMoment( date, "fi") ? value : ""});
       });
     }
     input.appendTo(span);

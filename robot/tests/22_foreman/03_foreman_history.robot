@@ -20,6 +20,16 @@ Sonja creates applications
 Foreman sets his information to several applications
   Foreman logs in
   Foreman sets role and difficulty to foreman application  0  KVV-työnjohtaja  B
+
+Foreman sees his information reflected by the accordion
+  Check party accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
+
+Accordion information is localized
+  Language to  SV
+  Check accordion text  tyonjohtaja-v2  UTNÄMNING AV ARBETSLEDARE  - Fastighets vatten- och avloppsarbetsledare Teppo Nieminen
+  Language to  FI
+
+Foreman continues filling his info
   Foreman sets role and difficulty to foreman application  1  KVV-työnjohtaja  B
   Foreman sets role and difficulty to foreman application  2  KVV-työnjohtaja  A
   Foreman sets role and difficulty to foreman application  3  IV-työnjohtaja   B
@@ -104,5 +114,3 @@ There is no reduced history for this application
   Wait until  Foreman history should have text X times  Sipoo  3
   No such test id  foreman-history-show-all-label
   [Teardown]  Logout
-  
-  

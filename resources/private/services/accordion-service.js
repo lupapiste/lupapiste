@@ -22,7 +22,7 @@ LUPAPISTE.AccordionService = function() {
   self.documents = ko.observableArray();
   self.identifierFields = ko.observableArray([]);
 
-  // Note on how accordion-fields definitions from a schema is show on
+  // Note on how accordion-fields definitions from a schema is shown on
   // the accordion.
   //
   // 1. Accordion-fields is defined in the schema (see
@@ -36,11 +36,16 @@ LUPAPISTE.AccordionService = function() {
   // information will "emit" the changed values. Emit means simple
   // sending accordionUpdated event to hub (docmodel.js)
   //
-  // 4. During initialization
+  // 4. During initialization (application.js) the setDocuments is
+  // called, which in turn creates accordion field observables via
+  // createDocumentModel.
+  //
+  // 5. Finally, everything is bound together with docutils functions
+  // accordionText and headerDescription (docutils.js)
   function fieldValues( field, data ) {
     return _.map( field.paths || [field],
                   function( path ) {
-                    return util.getIn( data, path );
+                    return util.getIn( data, path, "" );
                   });
   }
 
