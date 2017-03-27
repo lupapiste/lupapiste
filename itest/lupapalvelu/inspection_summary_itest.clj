@@ -241,6 +241,16 @@
       (command sonja :toggle-inspection-summary-locking :id (:id app) :summaryId summary-id :isLocked false) => ok?
       (-> (query sonja :inspection-summaries-for-application :id (:id app)) :summaries first :locked) => false)
 
+    (facts "Summary attachment is removed"
+      (let [{updated-attachments :attachments} (query sonja :attachments :id (:id app))
+            inspection-summary-attachment (util/find-first (comp #{summary-id} :id :source) updated-attachments)]
+
+        (fact "attachment count is same before locking"
+          (-> updated-attachments count (= (count attachments))))
+
+        (fact "inspection summary attachment does not exist"
+          inspection-summary-attachment => nil)))
+
     (fact "Setting status is allowed for unlocked inspection summary"
       (command pena :set-target-status :id (:id app) :summaryId summary-id :targetId target-id :status true) => ok?)
 
