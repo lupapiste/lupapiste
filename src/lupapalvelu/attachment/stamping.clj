@@ -20,24 +20,27 @@
         re-stamp?  (:stamped (first versions))
         source     (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
+           :signature (util/find-by-key :fileId (:fileId (first versions)) (:signatures attachment))
            :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
            :operation-ids (set (att/get-operation-ids attachment))
            :attachment-id (:id attachment)
            :attachment-type (:type attachment))))
 
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
-  (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
+  (let [{:keys [attachment-id fileId filename stamped-original-file-id signature]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])]
     (files/with-temp-file file
       (with-open [out (io/output-stream file)]
         (stamper/stamp stamp fileId out options))
       (debug "uploading stamped file: " (.getAbsolutePath file))
-      (let [result (att/upload-and-attach! {:application application :user user}
+      (let [result (att/upload-and-attach!
+                     {:application application :user user}
                      {:attachment-id attachment-id
                       :replaceable-original-file-id stamped-original-file-id
                       :comment-text nil :created created
                       :stamped true :comment? false
-                      :state :ok}
+                      :state :ok
+                      :signature signature}
                      {:filename filename :content file
                       :size (.length file)})]
         (tos/mark-attachment-final! application created attachment-id)

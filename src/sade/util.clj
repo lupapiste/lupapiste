@@ -157,10 +157,15 @@
   [pred coll]
   (for [[idx elt] (indexed coll) :when (pred elt)] idx))
 
+(defn position-by-key
+  "Returns item index by key"
+  [key val coll]
+  (first (positions (comp #{val} (keyword key)) coll)))
+
 (defn position-by-id
   "Returns item index by id"
   [id coll]
-  (first (positions (comp #{id} :id) coll)))
+  (position-by-key :id id coll))
 
 ; From clojure.contrib/map-utils)
 (defn deep-merge-with
