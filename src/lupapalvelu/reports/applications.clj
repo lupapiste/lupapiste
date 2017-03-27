@@ -1,6 +1,7 @@
 (ns lupapalvelu.reports.applications
   (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application :as app]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -28,15 +29,27 @@
                        :submitted {$gte startTs
                                    $lte (if (< now endTs) now endTs)}
                        :infoRequest false}
-                      excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
-    (mongo/select :applications
-                  query
-                  [:_id :submitted :modified :state :authority.firstName :authority.lastName
-                   :primaryOperation :secondaryOperations]
-                  {:submitted 1})))
+                excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
+    (->> (mongo/select :applications
+                       query
+                       [:_id :submitted :modified :state :handlers
+                        :primaryOperation :secondaryOperations]
+                       {:submitted 1})
+         (map #(app/enrich-application-handlers % (mongo/select-one :organizations {:_id orgId} [:handler-roles]))))))
 
 (defn- authority [app]
-  (->> app :authority ((juxt :firstName :lastName)) (ss/join " ")))
+  (->> app
+       :handlers
+       (util/find-first :general)
+       ((juxt :firstName :lastName))
+       (ss/join " ")))
+
+(defn- other-handlers [lang app]
+  (->> app
+       :handlers
+       (remove :general)
+       (map #(format "%s %s (%s)" (:firstName %) (:lastName %) (get-in % [:name (keyword lang)])))
+       (ss/join ", ")))
 
 (defn- localized-state [lang app]
   (i18n/localize lang (get app :state)))
@@ -79,6 +92,7 @@
                                 (util/to-local-date (now)))
         header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
                                                               "applications.authority"
+                                                              "application.handlers.other"
                                                               "applications.status"
                                                               "applications.opened"
                                                               "applications.submitted"
@@ -87,6 +101,7 @@
                                                               "application.operations.secondary"])
         row-fn (juxt :id
                      authority
+                     (partial other-handlers lang)
                      (partial localized-state lang)
                      (partial date-value :opened)
                      (partial date-value :submitted)
@@ -102,16 +117,17 @@
                                 (util/to-local-date (now)))
         header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
                                                               "applications.authority"
+                                                              "application.handlers.other"
                                                               "applications.status"
                                                               "applications.submitted"
                                                               "operations.primary"
                                                               "application.operations.secondary"])
         row-fn (juxt :id
                      authority
+                     (partial other-handlers lang)
                      (partial localized-state lang)
                      (partial date-value :submitted)
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
 
     (xlsx-stream data sheet-name header-row-content row-fn)))
-
