@@ -11,7 +11,7 @@
   ([event listener-fn]
    (subscribe event listener-fn false))
   ([event listener-fn one-shot]
-   (.subscribe js/hub (clj->js event) one-shot)))
+   (.subscribe js/hub (clj->js event) listener-fn one-shot)))
 
 (defn unsubscribe [hub-id]
   (.unsubscribe js/hub hub-id))
