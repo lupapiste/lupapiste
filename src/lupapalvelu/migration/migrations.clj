@@ -29,7 +29,8 @@
             [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]
-            [lupapalvelu.drawing :as draw])
+            [lupapalvelu.drawing :as draw]
+            [lupapalvelu.user :as usr])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3007,6 +3008,48 @@
       (+ (mongo/update-by-query coll {:permitType "YA" :permitSubtype "sijoituslupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})
          (mongo/update-by-query coll {:permitType "YA" :permitSubtype "kayttolupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})
          (mongo/update-by-query coll {:permitType "YA" :primaryOperation.name "ya-jatkoaika" :state {$in ["verdictGiven" "closed" "constructionStarted"]}} {$set {:state "finished"}})))))
+
+
+(def ya-post-verdict-states #{:finished :agreementPrepared :agreementSigned})
+
+; jatkoaika -> verdictGiven -> finished
+; kayttolupa -> verdictGiven kopioidaan finished
+; tyolupa ei muutoksia
+; sijoituslupa -> lisätään finished
+; sijoitussopimus -> verdictGiven kopioidaan agreementSigned/agreementPrepared
+(defmigration ya-history-and-timestamp-updates
+  {:apply-when (or (pos? (mongo/count :applications {:permitType "YA"
+                                                     :state {$in ya-post-verdict-states}
+                                                     :history.state {$ne "finished"}
+                                                     :permitSubtype "sijoituslupa"}))
+                   (pos? (mongo/count :applications {:permitType "YA"
+                                                     :state {$in ya-post-verdict-states}
+                                                     :history.state {$nin ["agreementPrepared" "agreementSigned"]}
+                                                     :permitSubtype "sijoitussopimus"}))
+                   (pos? (mongo/count :applications {:permitType "YA"
+                                                     :state {$in ya-post-verdict-states}
+                                                     :history.state {$ne "finished"}
+                                                     :permitSubtype "kayttolupa"}))
+                   (pos? (mongo/count :applications {:permitType "YA"
+                                                     :state {$in ya-post-verdict-states}
+                                                     :history.state {$ne "finished"}
+                                                     :primaryOperation.name "ya-jatkoaika"})))}
+  (reduce + 0
+    (for [coll [:submitted-applications :applications]
+          app (mongo/select coll
+                            {:permitType "YA"
+                             :state {$in ya-post-verdict-states}
+                             :history {$elemMatch {:state {$nin ["agreementPrepared" "agreementSigned" "finished"]}}}}
+                            [:state :permitSubtype :permitType :primaryOperation :history])
+          :let [verdict-state   (sm/verdict-given-state app)
+                state-history   (app/state-history-entries (:history app))
+                verdict-history (util/find-first #(= "verdictGiven" (:state %)) state-history)
+                verdict-ts      (:ts verdict-history)]
+          :when (not (contains? (->> state-history (map (comp keyword :state)) set) verdict-state))]
+      (mongo/update-n coll {:_id (:id app)} {$push {:history {:state verdict-state
+                                                              :ts verdict-ts
+                                                              :user usr/migration-user-summary}}
+                                             $set {(get app/timestamp-key (keyword verdict-state)) verdict-ts}}))))
 
 ;;
 ;; ****** NOTE! ******
