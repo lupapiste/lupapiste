@@ -28,7 +28,8 @@
                    default-metadata-for-attachment-type
                    make-ram-attachment
                    attachment-assignment-info
-                   version-approval-path)
+                   version-approval-path
+                   signature-updates)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -424,3 +425,36 @@
          (fact "Swedish"
                (map :id (sorted-attachments {:application {:attachments attachments} :lang :sv}))
                => ["empty" "yhtiojarjestys" "rasitesopimus2" "rasitesopimus" "rasitesopimus3"])))
+
+(facts signature-updates
+
+  (fact "no original-signature provided -> create new"
+    (signature-updates {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..}} ..user.. ..ts.. nil [])
+    => {$push {:attachments.$.signatures {:fileId ..file-id.. :version {:major ..major.. :minor ..minor..} :created ..ts.. :user ..user-summary..}}}
+    (provided (lupapalvelu.user/summary ..user..) => ..user-summary..))
+
+  (fact "New version is added and signature is copied from existing version"
+    (signature-updates {:fileId ..file-id.. :version ..version..}
+                       ..user..
+                       ..ts..
+                       {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
+                       [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
+    => {$push {:attachments.$.signatures {:fileId ..file-id.. :version ..version.. :created ..orig-created.. :user ..orig-user..}}})
+
+  (fact "Updating existing attachment version signature"
+    (signature-updates {:fileId ..file-id.. :version ..version..}
+                       ..user..
+                       ..ts..
+                       nil
+                       [{:version ..old-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}
+                        {:version ..version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
+    => {$set {:attachments.$.signatures.1 {:fileId ..file-id.. :version ..version.. :created ..ts.. :user ..user-summary..}}}
+    (provided (lupapalvelu.user/summary ..user..) => ..user-summary..))
+
+  (fact "Updating existing attachment version signature with timestamp and user copied from existing signature"
+    (signature-updates {:fileId ..file-id.. :version ..orig-version..}
+                       ..user..
+                       ..ts..
+                       {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
+                       [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
+    => {$set {:attachments.$.signatures.0 {:fileId ..file-id.. :version ..orig-version.. :created ..orig-created.. :user ..orig-user..}}}))

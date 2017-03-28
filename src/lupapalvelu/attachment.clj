@@ -396,11 +396,14 @@
     {$set   {:attachments.$.applicationState originalApplicationState}
      $unset {:attachments.$.originalApplicationState true}}))
 
-(defn- signature-updates [{:keys [fileId version]} user ts original-signature]
-  {$push {:attachments.$.signatures {:user    (or (:user original-signature) (usr/summary user))
-                                     :created (or (:created original-signature) ts (now))
-                                     :version version
-                                     :fileId fileId}}})
+(defn- signature-updates [{:keys [fileId version]} user ts original-signature attachment-signatures]
+  (let [signature {:user   (or (:user original-signature) (usr/summary user))
+                   :created (or (:created original-signature) ts (now))
+                   :version version
+                   :fileId fileId}]
+    (if-let [orig-index (util/position-by-key :version version attachment-signatures)]
+      {$set  {(util/kw-path :attachments.$.signatures orig-index) signature}}
+      {$push {:attachments.$.signatures signature}})))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -530,7 +533,7 @@
                                           (when (:constructionTime options)
                                             (construction-time-state-updates attachment true))
                                           (when (or (:sign options) (:signature options))
-                                            (signature-updates version-model user (:created options) (:signature options)))
+                                            (signature-updates version-model user (:created options) (:signature options) (:signatures attachment)))
                                           (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
