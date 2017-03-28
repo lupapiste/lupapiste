@@ -2971,9 +2971,26 @@
   (update-ya-subtypes-for-applications :submitted-applications)
   (reduce + 0 (update-ya-subtypes-for-applications :applications)))
 
-#_(defmigration set-sijoitussopimus-subtypes
-  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :verdicts.sopimus true :permitSubtype {$ne "sijoitussopimus"}}))}
-  ())
+(defn get-state-for-sijoitussopimus [{:keys [verdicts state]}]
+  (when-not (= "canceled" state)
+    (let [sopimus-verdict (->> verdicts
+                               (remove :draft)
+                               (util/find-first :sopimus))]
+      (if (not-empty (:signatures sopimus-verdict))
+        "agreementSigned"
+        "agreementPrepared"))))
+
+(defn update-sijoitslupa-to-sopimus [coll]
+  (for [app (mongo/select coll {:permitType "YA" :verdicts {$elemMatch {"sopimus" true "draft" false}} :permitSubtype "sijoituslupa"})
+        :let [non-draft-verdicts (remove :draft (:verdicts app))]
+        :when (-> non-draft-verdicts first :sopimus)]
+    (mongo/update-n coll {:_id (:id app)} {$set (util/assoc-when {:permitSubtype "sijoitussopimus"}
+                                                                 :state (get-state-for-sijoitussopimus app))})))
+
+(defmigration set-sijoitussopimus-subtypes
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :verdicts.0.sopimus true :permitSubtype {$ne "sijoitussopimus"}}))}
+  (update-sijoituslupa-to-sopimus :submitted-applications)
+  (reduce + 0 (update-sijoitslupa-to-sopimus :applications)))
 
 ;;
 ;; ****** NOTE! ******
