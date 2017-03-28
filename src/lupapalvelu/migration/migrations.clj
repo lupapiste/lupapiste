@@ -2967,7 +2967,9 @@
 
 
 (defmigration set-YA-subtypes
-  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :permitSubtype {$not {$type 2}}}))}
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :permitSubtype {$not {$type 2}}
+                                                 :primaryOperation.name {$ne "ya-jatkoaika"}}))}
   (update-ya-subtypes-for-applications :submitted-applications)
   (reduce + 0 (update-ya-subtypes-for-applications :applications)))
 
@@ -2980,7 +2982,7 @@
         "agreementSigned"
         "agreementPrepared"))))
 
-(defn update-sijoitslupa-to-sopimus [coll]
+(defn update-sijoituslupa-to-sopimus [coll]
   (for [app (mongo/select coll {:permitType "YA" :verdicts {$elemMatch {"sopimus" true "draft" false}} :permitSubtype "sijoituslupa"})
         :let [non-draft-verdicts (remove :draft (:verdicts app))]
         :when (-> non-draft-verdicts first :sopimus)]
@@ -2988,9 +2990,11 @@
                                                                  :state (get-state-for-sijoitussopimus app))})))
 
 (defmigration set-sijoitussopimus-subtypes
-  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :verdicts.0.sopimus true :permitSubtype {$ne "sijoitussopimus"}}))}
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :verdicts {$elemMatch {:sopimus true :draft false}}
+                                                 :permitSubtype "sijoituslupa"}))}
   (update-sijoituslupa-to-sopimus :submitted-applications)
-  (reduce + 0 (update-sijoitslupa-to-sopimus :applications)))
+  (reduce + 0 (update-sijoituslupa-to-sopimus :applications)))
 
 ; Tyolupa is same as default application graph. Sijoitussopimus is migrated in set-sijoitussopimus-subtypes.
 ;(= lupapalvelu.states/ya-tyolupa-state-graph lupapalvelu.states/default-application-state-graph)
