@@ -86,6 +86,14 @@ LUPAPISTE.AccordionService = function() {
       var ff = _.set( _.clone(field), "paths", paths );
       return formatField( ff, fieldValues( ff, data ));
     },
+    date: function( field, data ){
+      return formatField( field,
+                          _.map( fieldValues( field, data ),
+                                 function( v ) {
+                                   var m = util.toMoment( v, "fi" );
+                                   return m ? util.finnishDate( m ) : "";
+                                 }));
+    },
     text: function( field, data ) {
       return formatField( field, fieldValues( field, data ));
     }

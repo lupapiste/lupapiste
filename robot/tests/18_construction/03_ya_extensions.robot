@@ -62,6 +62,11 @@ Bad date is error and not show on the accordion
   Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  \u2013 10.10.2016
   Element should be visible  jquery=input.hasDatepicker.warn[data-docgen-path=tyoaika-alkaa-pvm]
 
+Even after reload the bad date is hidden on the accordion
+  Reload page
+  Wait until  Element should be visible  jquery=input.hasDatepicker.warn[data-docgen-path=tyoaika-alkaa-pvm]
+  Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  \u2013 10.10.2016
+
 Pena inputs proper extension dates returns to the original application
   Input text with jQuery  input.hasDatepicker[data-docgen-path=tyoaika-alkaa-pvm]  20.09.2016
   Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  20.9.2016 \u2013 10.10.2016

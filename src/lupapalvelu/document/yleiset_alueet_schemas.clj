@@ -65,7 +65,7 @@
                           :paths [["tyoaika-alkaa-ms"]
                                   ["tyoaika-paattyy-ms"]]
                           :format "%s \u2013 %s"}])
-(def continuation-fields [{:type :text
+(def continuation-fields [{:type :date
                            :paths [["tyoaika-alkaa-pvm"]
                                    ["tyoaika-paattyy-pvm"]]
                            :format "%s \u2013 %s"}])

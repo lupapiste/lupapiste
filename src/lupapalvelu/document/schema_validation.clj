@@ -334,7 +334,7 @@
   "Accordion fields semantics are interpreted in the accordion service.
   Note: changes also affect lupapalvelu.document.schemas.defschema."
   (sc/conditional
-   :type      {:type                (sc/enum :workPeriod :selected :text)
+   :type      {:type                (sc/enum :workPeriod :selected :date :text)
                :paths               [[sc/Str]]
                ;; vsprintf-type format for the whole path value list.
                (opt :format)         sc/Str
