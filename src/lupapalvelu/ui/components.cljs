@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.components
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [lupapalvelu.ui.hub :as hub]))
 
 (rum/defc select [change-fn data-test-id value options]
   [:select.form-entry.is-middle
@@ -24,9 +25,7 @@
              :data-test-id  data-test-id}]))
 
 (defn confirm-dialog [titleKey messageKey callback]
-  (.send js/hub
-         "show-dialog"
-         #js
+  (hub/send "show-dialog"
            {:ltitle titleKey
             :size   "medium"
             :component "yes-no-dialog"

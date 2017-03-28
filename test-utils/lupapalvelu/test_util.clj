@@ -1,5 +1,7 @@
 (ns lupapalvelu.test-util
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.walk :as walk]
+            [schema.core :as sc]
+            [midje.sweet :refer :all]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [clojure.test :refer [is]]
@@ -7,7 +9,13 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n])
   (:import [clojure.lang ExceptionInfo]
-           [java.lang AssertionError]))
+           [java.lang AssertionError]
+           [midje.data.metaconstant Metaconstant]))
+
+(sc/defschema MidjeMetaconstant (sc/pred (comp #{Metaconstant} type) "Midje metaconstant"))
+
+(defn replace-in-schema [schema replaceable replacing]
+  (walk/postwalk (fn [subschema] (if (= replaceable subschema) replacing subschema)) schema))
 
 (defn xml-datetime-is-roughly? [^String date1 ^String date2 & interval]
   "Check if two xml datetimes are roughly the same. Default interval 60 000ms (1 min)."

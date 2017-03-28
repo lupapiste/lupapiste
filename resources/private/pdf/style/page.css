@@ -1,0 +1,63 @@
+body {
+  max-width: 960px;
+  margin: auto;
+  font-family: "Open Sans", "Arial";
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+h3 {
+  margin-top: 40px;
+}
+
+.page-content {
+  padding: 0px;
+}
+
+.page-content table {
+  width: 100%;
+}
+
+.page-content tr:nth-child(even) {
+  background: #EEE;
+}
+
+.page-content tr:nth-child(odd) {
+  background: #FFF;
+}
+
+.page-content td {
+  padding: 2px 6px 0px;
+}
+
+.page-header, .page-footer {
+  display: table;
+  width: 100%;
+}
+
+.page-header img {
+  vertical-align: middle;
+  height: 35px;
+}
+
+.page-header > span, .page-footer > span {
+  background-color: #FFF;
+  display: table-cell;
+  vertical-align: middle;
+  min-height: 35px;
+  width: 50%;
+}
+
+.page-header > span {
+  padding: 20px 0px 40px;
+}
+
+.page-footer {
+  padding: 30px 0px 20px;
+}
+
+.align-content-right {
+  text-align: right;
+}
