@@ -87,14 +87,14 @@
     (fact "summary name"
       (->> [:#inspection-summary-name] (enlive/select html) (map :content)) => [["Some inspection summary"]])
     (fact "summary operation"
-      (->> [:#inspection-summary-operation] (enlive/select html) (map :content)) => [["Asuinpientalon laajentaminen (enintään kaksiasuntoinen erillispientalo) - bld_123456"]])
+      (->> [:#inspection-summary-operation] (enlive/select html) (map :content)) => [["Asuinpientalon laajentaminen (enint\u00e4\u00e4n kaksiasuntoinen erillispientalo) - bld_123456"]])
     (fact "name column"
       (->> [:#name] (enlive/select html) (map :content))          => [["Tarkastuskohde"] ["first target"] ["second target"] ["third target"] ["fourth target"]])
     (fact "attachments column"
       (->> [:#attachments] (enlive/select html) (map :content))   => [["Liitteet"] [] [] [{:tag :div :attrs {} :content ["liite.pdf"]}] []])
     (fact "finished column"
-      (->> [:#finished] (enlive/select html) (map :content))      => [["Merkitty tehdyksi"] [] ["Kyllä"] [] []])
+      (->> [:#finished] (enlive/select html) (map :content))      => [["Merkitty tehdyksi"] [] ["Kyll\u00e4"] [] []])
     (fact "finished date column"
-      (->> [:#finished-date] (enlive/select html) (map :content)) => [["Päivämäärä"] [] ["03.03.2017"] [] []])
+      (->> [:#finished-date] (enlive/select html) (map :content)) => [["P\u00e4iv\u00e4m\u00e4\u00e4r\u00e4"] [] ["03.03.2017"] [] []])
     (fact "finished by column"
-      (->> [:#finished-by] (enlive/select html) (map :content))   => [["Merkitsijä"] [""] ["Pena Banaani"] [""] [""]])))
+      (->> [:#finished-by] (enlive/select html) (map :content))   => [["Merkitsij\u00e4"] [""] ["Pena Banaani"] [""] [""]])))
