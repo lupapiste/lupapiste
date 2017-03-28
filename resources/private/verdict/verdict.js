@@ -26,7 +26,7 @@ LUPAPISTE.verdictPageController = (function($) {
     self.official = ko.observable();
 
     self.taskGroups = ko.observable();
-
+    self.signatureTitle = ko.observable("verdict.agreement");
 
     self.refresh = function(application, verdictId) {
       self.refreshing = true;
@@ -35,6 +35,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
       if (application.permitType === "YA") {
         self.statuses([1,2,21,37]);
+        self.signatureTitle("verdict.create.agreement");
       }
 
       var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
