@@ -2992,6 +2992,16 @@
   (update-sijoituslupa-to-sopimus :submitted-applications)
   (reduce + 0 (update-sijoitslupa-to-sopimus :applications)))
 
+; Tyolupa is same as default application graph. Sijoitussopimus is migrated in set-sijoitussopimus-subtypes.
+;(= lupapalvelu.states/ya-tyolupa-state-graph lupapalvelu.states/default-application-state-graph)
+; => true
+; Sijoituslupa and kayttolupa doesn't have closed or constructionStarted states anymore
+(defmigration update-ya-states
+  (second
+    (for [coll [:submitted-applications :applications]]
+      (+ (mongo/update-by-query coll {:permitType "YA" :permitSubtype "sijoituslupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})
+         (mongo/update-by-query coll {:permitType "YA" :permitSubtype "kayttolupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
