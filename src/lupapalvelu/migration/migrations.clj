@@ -2951,24 +2951,29 @@
     (for [collection [:applications :submitted-applications]]
       (do-fix-katulupa-op-documents collection))))
 
-(doseq [ya-subtype (->> (map (comp first :subtypes) (vals op/ya-operations)) ; kayttolupa :tyolupa :sijoituslupa
+(defn update-ya-subtypes-for-applications [coll]
+  (for [ya-subtype (->> (map (comp first :subtypes) (vals op/ya-operations)) ; kayttolupa :tyolupa :sijoituslupa
                         (remove nil?)
                         (distinct))
         :let [operations (filter (fn [[_ op-data]]
                                    (some (partial = ya-subtype) (:subtypes op-data)))
-                                 op/ya-operations)]]
-  (assert (not= :sijoitussopimus ya-subtype) "Sijoitussopimus should not be first of subtypes. It should be only sijoituslupa")
-  (mongo/update-by-query :applications
-                         {:permitType "YA" :permitSubtype {$not {$type 2}}
-                          :primaryOperation.name {$in (map first operations)}}
-                         {$set {:permitSubtype ya-subtype}}))
+                                 op/ya-operations)]
+        :when (not= :sijoitussopimus ya-subtype)]
+    (mongo/update-by-query coll
+                           {:permitType "YA" :permitSubtype {$not {$type 2}}
+                            :primaryOperation.name {$in (map first operations)}}
+                           {$set {:permitSubtype ya-subtype}})))
 
 
-#_(defmigration set-YA-subtypes
+
+(defmigration set-YA-subtypes
   {:apply-when (pos? (mongo/count :applications {:permitType "YA" :permitSubtype {$not {$type 2}}}))}
-  (reduce + 0
-          (for [collection [:applications :submitted-applications]]
-            (reduce + 0 ))))
+  (update-ya-subtypes-for-applications :submitted-applications)
+  (reduce + 0 (update-ya-subtypes-for-applications :applications)))
+
+#_(defmigration set-sijoitussopimus-subtypes
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :verdicts.sopimus true :permitSubtype {$ne "sijoitussopimus"}}))}
+  ())
 
 ;;
 ;; ****** NOTE! ******
