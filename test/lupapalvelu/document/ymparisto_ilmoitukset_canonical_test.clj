@@ -76,7 +76,9 @@
                                :_comments-seen-by {},
                                :propertyId "63844900010004",
                                :verdicts [],
-                               :documents [ctc/henkiloilmoittaja
+                               :documents [(update-in ctc/henkiloilmoittaja
+                                                      [:data :henkilo :kytkimet :suoramarkkinointilupa :value]
+                                                      (constantly true))
                                            meluilmo
                                            kesto],
                                :_statements-seen-by {},
@@ -222,7 +224,8 @@
         (:etunimi ilmoittaja) => "Pekka"
         (:sukunimi ilmoittaja) => "Borga"
         (:sahkopostiosoite ilmoittaja) => "pekka.borga@porvoo.fi"
-        (:puhelinnumero ilmoittaja) => "121212"))
+        (:puhelinnumero ilmoittaja) => "121212"
+        (:suoramarkkinointikielto ilmoittaja) => false))
 
     (fact "toiminnan kesto"
       (:alkuPvm toiminnanKesto) => "2014-02-03"
@@ -262,5 +265,6 @@
                                                           :valtioSuomeksi "Suomi"
                                                           :valtioKansainvalinen "FIN" }}
                                    :puhelinnumero "060222155"
-                                   :sahkopostiosoite "tew@gjr.fi"})
+                                   :sahkopostiosoite "tew@gjr.fi"
+                                   :suoramarkkinointikielto true})
     ))
