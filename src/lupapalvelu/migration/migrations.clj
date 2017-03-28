@@ -2972,7 +2972,7 @@
   (reduce + 0 (update-ya-subtypes-for-applications :applications)))
 
 (defn get-state-for-sijoitussopimus [{:keys [verdicts state]}]
-  (when-not (= "canceled" state)
+  (when-not (contains? #{"canceled" "complementNeeded" "sent" "submitted" "draft" "open"} state) ; could be pre-verdict state event if verdicts exist
     (let [sopimus-verdict (->> verdicts
                                (remove :draft)
                                (util/find-first :sopimus))]
