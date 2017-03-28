@@ -209,7 +209,7 @@
 (apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)
 
 (defn validate-ya-subtypes [{:keys [primaryOperation permitType permitSubtype]}]
-  (when (= "YA" permitType)
+  (when (and (= "YA" permitType) (not= "ya-jatkoaika" (:name primaryOperation)))
     (when (or (ss/blank? permitSubtype)
               (->> (get op/operations (keyword (:name primaryOperation)))
                    :subtypes
