@@ -37,7 +37,9 @@
                               ctc/henkilohakija
                               (select-keys ctc/henkilohakija [:schema-info])
                               ctc/yrityshakija
-                              ctc/henkilomaksaja]
+                              (update-in ctc/henkilomaksaja
+                                         [:data :henkilo :kytkimet :suoramarkkinointilupa :value]
+                                         (constantly true))]
                   :drawings []
                   :infoRequest false
                   :linkPermitData [{:id "LP-638-2013-00099" :type "lupapistetunnus"} {:id "kuntalupa-123" :type "kuntalupatunnus"}]
@@ -128,7 +130,8 @@
                                                   :valtioSuomeksi "Suomi"
                                                   :valtioKansainvalinen "FIN"}}
                            :puhelinnumero "060222155"
-                           :sahkopostiosoite "tew@gjr.fi"})
+                           :sahkopostiosoite "tew@gjr.fi"
+                           :suoramarkkinointikielto true})
 
     (fact "kiinteistotunnus"
       (get-in ymparistolupa [:laitoksentiedot :Laitos :kiinttun]) => (:propertyId application)
@@ -163,8 +166,8 @@
         (:henkilotunnus maksaja) => "210354-947E"
         (:sahkopostiosoite maksaja) => "pappa@example.com"
         (:puhelinnumero maksaja) => "0400-123456"
-        (:laskuviite maksaja) => "1686343528523"))
-    ))
+        (:laskuviite maksaja) => "1686343528523"
+        (:suoramarkkinointikielto maksaja) => false))))
 
 (def application-yritysmaksaja
   (merge application {:documents [kuvaus

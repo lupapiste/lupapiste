@@ -712,7 +712,10 @@
           :yhteyshenkilonNimi (when-not (ss/blank? yhteyshenkilon-nimi) yhteyshenkilon-nimi)
           :osoitetieto (when (seq osoite) {:Osoite osoite})
           :puhelinnumero puhelin
-          :sahkopostiosoite email)))
+          :sahkopostiosoite email
+          ;; Only explicit check allows direct marketing
+          :suoramarkkinointikielto (-> yhteyshenkilo :kytkimet :suoramarkkinointilupa true? not)
+)))
     (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
       (let [{:keys [henkilotiedot yhteystiedot]} henkilo
             osoite (get-simple-osoite (:osoite henkilo))]
@@ -723,7 +726,10 @@
             :etunimi (:etunimi henkilotiedot)
             :osoitetieto (when (seq osoite) {:Osoite osoite})
             :puhelinnumero (:puhelin yhteystiedot)
-            :sahkopostiosoite (:email yhteystiedot))))
+            :sahkopostiosoite (:email yhteystiedot)
+            ;; Only explicit check allows direct marketing
+            :suoramarkkinointikielto (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
+            )))
       )))
 
 (defn get-maksajatiedot [unwrapped-party-doc]

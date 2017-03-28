@@ -28,7 +28,9 @@
                               :username "pekka"}
                   :address "Londb\u00f6lentie 97"
                   :created 1391415025497
-                  :documents [ctc/yrityshakija
+                  :documents [(update-in ctc/yrityshakija
+                                         [:data :yritys :yhteyshenkilo :kytkimet :suoramarkkinointilupa :value]
+                                         (constantly true))
                               maa-aineslupa-kuvaus
                               maksaja]
                   :drawings ctc/drawings
@@ -104,7 +106,8 @@
                                                            :valtioSuomeksi "Suomi"
                                                            :valtioKansainvalinen "FIN"}}
                                     :puhelinnumero "060222155"
-                                    :sahkopostiosoite "tew@gjr.fi"})
+                                    :sahkopostiosoite "tew@gjr.fi"
+                                    :suoramarkkinointikielto false})
 
     (facts "maksaja"
       (let [maksaja (get-in maa-aineslupa [:maksajatieto :Maksaja]) => truthy
@@ -119,7 +122,8 @@
         (:henkilotunnus maksaja) => "210281-9988"
         (:sahkopostiosoite maksaja) => "pekka.borga@porvoo.fi"
         (:puhelinnumero maksaja) => "121212"
-        (:laskuviite maksaja) => nil))
+        (:laskuviite maksaja) => nil
+        (:suoramarkkinointikielto maksaja) => true))
 
     (facts "sijainti"
       (fact "osoite"
