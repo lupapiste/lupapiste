@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as enlive]
+            [schema.core :as sc]
             [sade.schemas :as ssc]
             [lupapalvelu.test-util :refer [replace-in-schema MidjeMetaconstant]]
             [lupapalvelu.inspection-summary :refer [InspectionSummary]]
