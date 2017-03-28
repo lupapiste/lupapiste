@@ -396,9 +396,9 @@
     {$set   {:attachments.$.applicationState originalApplicationState}
      $unset {:attachments.$.originalApplicationState true}}))
 
-(defn signature-updates [{:keys [fileId version]} user ts original-signature]
-  {$push {:attachments.$.signatures {:user    (or (get-in options [:signature :user]) (usr/summary user))
-                                     :created (or (get-in options [:signature :created]) (:created options) (now))
+(defn- signature-updates [{:keys [fileId version]} user ts original-signature]
+  {$push {:attachments.$.signatures {:user    (or (:user original-signature) (usr/summary user))
+                                     :created (or (:created original-signature) ts (now))
                                      :version version
                                      :fileId fileId}}})
 
@@ -530,7 +530,7 @@
                                           (when (:constructionTime options)
                                             (construction-time-state-updates attachment true))
                                           (when (or (:sign options) (:signature options))
-                                            (signature-updates version-model user ts (:signature options)))
+                                            (signature-updates version-model user (:created options) (:signature options)))
                                           (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
