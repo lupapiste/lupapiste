@@ -2999,12 +2999,14 @@
 ; Tyolupa is same as default application graph. Sijoitussopimus is migrated in set-sijoitussopimus-subtypes.
 ;(= lupapalvelu.states/ya-tyolupa-state-graph lupapalvelu.states/default-application-state-graph)
 ; => true
-; Sijoituslupa and kayttolupa doesn't have closed or constructionStarted states anymore
+; Sijoituslupa and kayttolupa doesn't have closed or constructionStarted states anymore.
+; Jatkoaika doesn't have verdictGiven, constructionStarted nor closed state.
 (defmigration update-ya-states
   (second
     (for [coll [:submitted-applications :applications]]
       (+ (mongo/update-by-query coll {:permitType "YA" :permitSubtype "sijoituslupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})
-         (mongo/update-by-query coll {:permitType "YA" :permitSubtype "kayttolupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})))))
+         (mongo/update-by-query coll {:permitType "YA" :permitSubtype "kayttolupa" :state {$in ["closed" "constructionStarted"]}} {$set {:state "finished"}})
+         (mongo/update-by-query coll {:permitType "YA" :primaryOperation.name "ya-jatkoaika" :state {$in ["verdictGiven" "closed" "constructionStarted"]}} {$set {:state "finished"}})))))
 
 ;;
 ;; ****** NOTE! ******
