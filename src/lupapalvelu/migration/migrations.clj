@@ -3041,15 +3041,19 @@
                              :state {$in ya-post-verdict-states}
                              :history {$elemMatch {:state {$nin ["agreementPrepared" "agreementSigned" "finished"]}}}}
                             [:state :permitSubtype :permitType :primaryOperation :history])
-          :let [verdict-state   (sm/verdict-given-state app)
-                state-history   (app/state-history-entries (:history app))
-                verdict-history (util/find-first #(= "verdictGiven" (:state %)) state-history)
-                verdict-ts      (:ts verdict-history)]
-          :when (not (contains? (->> state-history (map (comp keyword :state)) set) verdict-state))]
-      (mongo/update-n coll {:_id (:id app)} {$push {:history {:state verdict-state
+          :let [verdict-state       (sm/verdict-given-state app)
+                state-history       (app/state-history-entries (:history app))
+                history-states-set  (->> state-history (map (comp keyword :state)) set)
+                verdict-history     (util/find-first #(= "verdictGiven" (:state %)) state-history)
+                verdict-ts          (:ts verdict-history)
+                verdict-state-in-history? (contains? history-states-set verdict-state)
+                migration-target-state (if verdict-state-in-history? (:state app) verdict-state)]
+          :when (or (not verdict-state-in-history?)
+                    (not= verdict-state (keyword (:state app))))]
+      (mongo/update-n coll {:_id (:id app)} {$push {:history {:state migration-target-state
                                                               :ts verdict-ts
                                                               :user usr/migration-user-summary}}
-                                             $set {(get app/timestamp-key (keyword verdict-state)) verdict-ts}}))))
+                                             $set {(get app/timestamp-key (keyword migration-target-state)) verdict-ts}}))))
 
 ;;
 ;; ****** NOTE! ******
