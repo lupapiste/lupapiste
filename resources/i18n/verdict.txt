@@ -74,7 +74,7 @@
 "verdict.agreement" "fi" "Vaatii hakijan allekirjoituksen"
 "verdict.agreement" "sv" "Kräver sökandens underskrift"
 "verdict.create.agreement" "en" ""
-"verdict.create.agreement" "fi" "Tee sopimus päätöksen sijaan"
+"verdict.create.agreement" "fi" "Laadi sopimus päätöksen sijaan"
 "verdict.create.agreement" "sv" ""
 "verdict.aloitettava" "en" "To be started"
 "verdict.aloitettava" "fi" "Aloitettava"
