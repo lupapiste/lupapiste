@@ -38,7 +38,8 @@
     (update-assignment-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole ..handlerRole... :description ..description..} ..trigger-id..) => "done"
     (provided (mongo/update-by-query :organizations
                                      {:assignment-triggers {"$elemMatch" {:id ..trigger-id..}}, :_id ..org-id..}
-                                     {"$set" {:assignment-triggers.$.targets ..targets.., :assignment-triggers.$.handlerRole ..handlerRole..., :assignment-triggers.$.description ..description..}}) => "done")))
+                                     {"$set" {:assignment-triggers.$.targets ..targets.., :assignment-triggers.$.handlerRole ..handlerRole..., :assignment-triggers.$.description ..description..}}) => "done")
+    (provided (mongo/update-by-query :assignments {:trigger ..trigger-id..} {$set {:description ..description..}}) => "this is also called, function return value is not used")))
 
 (facts create-trigger
   (fact "create trigger with handler"
