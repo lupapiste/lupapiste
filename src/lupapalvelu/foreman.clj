@@ -3,19 +3,21 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
+            [lupapalvelu.copy-application :as copy-app]
+            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.minimal]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notif]
-            [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
 (defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data {:keys [tasks]} :application}]
@@ -189,16 +191,13 @@
         (validate-foreman-submittable application link-permit)))))
 
 (defn new-foreman-application [{:keys [created user application] :as command}]
-  (-> (app/do-create-application
-        (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                              :x (-> application :location first)
-                              :y (-> application :location second)
-                              :address (:address application)
-                              :propertyId (:propertyId application)
-                              :municipality (:municipality application)
-                              :infoRequest false
-                              :messages []}))
-    (assoc :opened (if (util/pos? (:opened application)) created nil))))
+  (copy-app/new-application-copy application user created
+                                 [:location :address :propertyId]
+                                 {:operation   "tyonjohtajan-nimeaminen-v2"
+                                  :infoRequest false
+                                  :messages    []
+                                  :opened      (if (util/pos? (:opened application))
+                                                 created nil)}))
 
 
 (defn- cleanup-hakija-doc [{info :schema-info :as doc}]

@@ -482,8 +482,9 @@
                          {:attachments attachments
                           :documents   (make-documents user created organization op application manual-schema-datas)}))))
 
+(def do-create-application-data-fields #{:operation :x :y :address :propertyId :infoRequest :messages})
 (defn do-create-application
-  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
   (let [municipality      (prop/municipality-id-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
