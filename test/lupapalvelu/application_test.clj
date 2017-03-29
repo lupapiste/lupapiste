@@ -23,7 +23,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user validate-link-agreements-state validate-link-agreements-signature)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -403,3 +403,18 @@
                                                                                                      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
     => {:schema-info {:name "maksaja"}
         :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}}))
+
+(facts "Validate digging permits linked agreement"
+  (fact "Linked agreement have to be post verdict state"
+    (validate-link-agreements-state {:state "submitted"}) => {:ok false, :text "error.link-permit-app-not-in-post-verdict-state"}
+    (validate-link-agreements-state {:state "agreementPrepared"}) => nil
+    (validate-link-agreements-state {:state "finished"}) => nil
+    (validate-link-agreements-state {:state "verdictGiven"}) => nil)
+
+  (fact "Linked agreement have to be signed"
+    (validate-link-agreements-signature {:verdicts []}) => {:ok false, :text "error.link-permit-app-not-signed"}
+    (validate-link-agreements-signature {:verdicts [{:signatures [:created "1490772437443" :user []]}]}) => nil)
+
+  (fact "Is enought that only one agreements have signature"
+    (validate-link-agreements-signature {:verdicts [{:id "123456789" :signatures [:created "1490772437443" :user []]},
+                                                    {:id "987654321"}]}) => nil))
