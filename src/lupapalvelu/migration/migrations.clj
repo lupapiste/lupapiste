@@ -2974,7 +2974,9 @@
   (update-ya-subtypes-for-applications :submitted-applications)
   (reduce + 0 (update-ya-subtypes-for-applications :applications)))
 
-(defn get-state-for-sijoitussopimus [{:keys [verdicts state]}]
+(defn get-state-for-sijoitussopimus
+  "Changes old sijoitussopimus post-verdict states (verdictGiven, constructionStarted, closed) to new state."
+  [{:keys [verdicts state]}]
   (when-not (contains? #{"canceled" "complementNeeded" "sent" "submitted" "draft" "open"} state) ; could be pre-verdict state event if verdicts exist
     (let [sopimus-verdict (->> verdicts
                                (remove :draft)
