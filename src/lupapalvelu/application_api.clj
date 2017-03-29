@@ -300,6 +300,7 @@
                      (foreman/validate-application application)
                      (app/validate-link-permits application)
                      (app/validate-fully-formed application)
+                     (app/validate-digging-permit application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
                      (suti/suti-submit-validation command))))
