@@ -15,7 +15,10 @@
 (def lupa-img-path "public/lp-static/img/lupapiste-logo.png")
 
 (defn styles
-  ([] (-> styles-path io/resource io/file .listFiles styles))
+  ([] (let [this-path (util/this-jar lupapalvelu.main)]
+        (if (ss/ends-with this-path ".jar") ; running jar?
+          (->> styles-path (util/list-jar this-path) styles)
+          (->> styles-path io/resource io/file .listFiles styles))))
   ([files] (-> (ss/join " " (map slurp files))
                (ss/replace #"\s+" " "))))
 
