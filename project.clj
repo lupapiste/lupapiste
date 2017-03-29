@@ -163,7 +163,8 @@
                               :test-paths []}
                    :sass {:output-style :expanded
                           :source-map   true}
-                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                                  :timeout 200000}
                    :cljsbuild {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
                                                          :on-jsload lupapalvelu.ui.inspection-summaries/reload-hook}
                                               :compiler {:output-dir "resources/public/lp-static/js/out"

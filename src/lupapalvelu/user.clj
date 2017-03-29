@@ -7,6 +7,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
@@ -73,15 +74,6 @@
 (def authz-generator
   (gen/fmap name keyword-authz-generator))
 
-(def org-authz-generator
-  (gen/map org-id-generator
-           ;; There's a code smell here, you have to carry around the
-           ;; all-authz-roles both in the authz-generator and using it in
-           ;; vector-distinct
-           (gen/vector-distinct authz-generator
-                                {:min-elements 0
-                                 :max-elements (count roles/all-authz-roles)})))
-
 (def all-roles ["applicant"
                 "authority"
                 "oirAuthority"
@@ -92,20 +84,20 @@
                 "trusted-etl"])
 (defschema Role (apply sc/enum all-roles))
 
-(defn cheat-sc-pred
-  "Allows defining new schemas with pritimite type predicates like string? or
-   keyword?"
-  [a-pred & rest]
-  (let [wrapped-pred (comp identity a-pred)]
-    (apply sc/pred wrapped-pred rest)))
-
-(defschema OrgId (cheat-sc-pred keyword? "Organization ID"))
-(defschema Authz (cheat-sc-pred string? "Authz access right"))
+(defschema OrgId (sc/pred keyword? "Organization ID"))
+(defschema Authz (sc/pred string? "Authz access right"))
 (defschema OrgAuthz {OrgId [Authz]})
 
 (ssg/register-generator OrgId org-id-generator)
 (ssg/register-generator Authz authz-generator)
-(ssg/register-generator OrgAuthz org-authz-generator)
+
+(def distinct-authz-generator
+  (let [authz-gen (ssg/generator Authz)]
+    (gen/vector-distinct authz-gen
+                         {:min-elements 0
+                          :max-elements (count roles/all-authz-roles)})))
+
+(ssg/register-generator [Authz] distinct-authz-generator)
 
 (defschema User
           {:id                                    Id
