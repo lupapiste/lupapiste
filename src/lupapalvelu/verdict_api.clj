@@ -140,14 +140,15 @@
   {:parameters [id verdictId lang]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId :lang])]
    :states     give-verdict-states
-   :pre-checks [application-has-verdict-given-state]
+   :pre-checks [application-has-verdict-given-state
+                ya/check-ya-sijoitussopimus-subtype
+                ya/check-ya-sijoituslupa-subtype]
    :notified   true
    :on-success (notify :application-state-change)
    :user-roles #{:authority}}
   [{:keys [application] :as command}]
   (if-let [verdict (find-verdict application verdictId)]
-    (-> (ya/update-ya-sijoitus-subtype! command verdict)
-        (publish-verdict verdict))
+    (publish-verdict command verdict)
     (fail :error.unknown)))
 
 (defcommand delete-verdict
