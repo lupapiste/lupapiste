@@ -1,5 +1,7 @@
 (ns lupapalvelu.test-util
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.walk :as walk]
+            [schema.core :as sc]
+            [midje.sweet :refer :all]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [clojure.test :refer [is]]
@@ -8,7 +10,13 @@
             [lupapalvelu.i18n :as i18n]
             [slingshot.slingshot :refer [try+]])
   (:import [clojure.lang ExceptionInfo]
-           [java.lang AssertionError]))
+           [java.lang AssertionError]
+           [midje.data.metaconstant Metaconstant]))
+
+(sc/defschema MidjeMetaconstant (sc/pred (comp #{Metaconstant} type) "Midje metaconstant"))
+
+(defn replace-in-schema [schema replaceable replacing]
+  (walk/postwalk (fn [subschema] (if (= replaceable subschema) replacing subschema)) schema))
 
 (defn- any? [x] true)
 

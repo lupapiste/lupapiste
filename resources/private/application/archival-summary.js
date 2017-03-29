@@ -2,6 +2,20 @@
   "use strict";
 
   var attachmentsService = lupapisteApp.services.attachmentsService;
+  var accordionService = lupapisteApp.services.accordionService;
+
+  function operationDescription(operationId) {
+    var doc = accordionService && accordionService.getDocumentByOpId(operationId);
+    if (util.getIn(doc, ["operation"])) {
+      var identifier = util.getIn(accordionService.getIdentifier(doc.docId), ["value"]);
+      var opDescription = util.getIn(doc, ["operation", "description"]);
+      var accordionFields = docutils.accordionText(doc.accordionPaths, doc.data);
+      return _.first(_.filter([accordionFields, identifier, opDescription]));
+    } else {
+      return "";
+    }
+  }
+
 
   function GroupModel(groupName, groupDesc, attachments, building) {
     var self = this;
@@ -48,11 +62,9 @@
 
     function getGroup(groupList, attachments, group) {
       if (!groupList.initializedGroups[group]) {
-        var op = util.getIn(attachments, [0, "op"]);
-        if (_.isArray(op)) {
-          op = op[0];
-        }
-        var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, op.description, attachments, buildings[op.id]);
+        var op = _.first(util.getIn(attachments, [0, "op"]));
+        var opDescription = op ? operationDescription(op.id) : "";
+        var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, opDescription, attachments, buildings[op.id]);
         groupList.initializedGroups[group] = groupModel;
       } else {
         groupList.initializedGroups[group].attachments(attachments);

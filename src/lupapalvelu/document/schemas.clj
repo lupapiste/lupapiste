@@ -22,14 +22,14 @@
     body))
 
 (defn accordion-field-emitters
-  "Adds :accordionUpdate emitters to paths defined by accordion-fields"
-  [body accordion-fields]
-  (if (seq accordion-fields)
+  "Adds :accordionUpdate emitters to paths"
+  [body paths]
+  (if (seq paths)
     (reduce
       (fn [body field-path]
         (update-in-body body field-path :emit #(conj % :accordionUpdate)))
       body
-      accordion-fields)
+      paths)
     body))
 
 
@@ -71,6 +71,8 @@
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
 
+(def select-one-of-key "_selected")
+
 (defn defschema [version data]
   (let [schema-name       (name (get-in data [:info :name]))
         validation-result (schema-validation/validate-doc-schema data)]
@@ -82,7 +84,16 @@
       (-> data
           (assoc-in [:info :name] schema-name)
           (assoc-in [:info :version] version)
-          (update :body accordion-field-emitters (get-in data [:info :accordion-fields]))))))
+          (update :body accordion-field-emitters
+                  (->> data
+                      :info
+                      :accordion-fields
+                      (reduce (fn [acc {:keys [type paths] :as field}]
+                                (cond-> acc
+                                  (= type :selected)  (conj [select-one-of-key])
+                                  paths               (concat paths)
+                                  (sequential? field) (concat [field])))
+                              [])))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]
@@ -114,8 +125,6 @@
     (update document :schema-info merge current-info)))
 
 
-(def select-one-of-key "_selected")
-
 (defn select-one-of-schema? [{schema-name :name :as schema}]
   (= select-one-of-key (name schema-name)))
 
@@ -135,16 +144,21 @@
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 (defn resolve-accordion-field-values
-  "Returns collection of document values from paths defined by schema's :accordion-fields"
+  "Returns collection of document values from paths defined by
+  schema's :accordion-fields"
   [document]
   (when-let [fields (get-in document [:schema-info :accordion-fields])]
-    (let [doc-data (:data document)
-          selected-value (when (= (ffirst fields) select-one-of-key)
-                          (get-in doc-data [(keyword select-one-of-key) :value]))
-          interesting-fields (if selected-value
-                               (filter #(= (first %) selected-value) fields)
-                               fields)]
-      (->> interesting-fields
+    (let [doc-data (:data document)]
+      (->> fields
+           (map (fn [{:keys [type paths] :as field}]
+                  (cond
+                    (= type :selected) (let [selected (get-in doc-data
+                                                              [(keyword select-one-of-key)
+                                                               :value])]
+                                         (filter #(= selected (first %)) paths))
+                    paths              paths
+                    :else              field)))
+           (apply concat)
            (map (fn [path] (get-in doc-data (conj (mapv keyword path) :value))))
            (remove util/empty-or-nil?)))))
 
@@ -1222,31 +1236,39 @@
 
 (def hakija-accordion-paths
   "Data from paths are visible in accordion header"
-  [[select-one-of-key]
-   ["henkilo" "henkilotiedot" "etunimi"]
-   ["henkilo" "henkilotiedot" "sukunimi"]
-   ["yritys" "yritysnimi"]])
+  [{:type :selected
+    :paths [["henkilo" "henkilotiedot" "etunimi"]
+            ["henkilo" "henkilotiedot" "sukunimi"]
+            ["yritys" "yritysnimi"]]
+    :format "- %s %s"}])
 
 (def designer-accordion-paths
   "Data from paths are visible in accordion header"
-  [["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [{:type :text
+    :paths [["henkilotiedot" "etunimi"]
+            ["henkilotiedot" "sukunimi"]]
+    :format "- %s %s"}
+   {:type :text
+    :paths [["kuntaRoolikoodi"]]
+    :format "- %s"}
+   {:type :text
+    :paths [["suunnittelutehtavanVaativuusluokka"]]
+    :format "(%s)"}])
 
-(def hakijan-asiamies-accordion-paths
-  "Data from paths are visible in accordion header"
-  [[select-one-of-key]
-   ["henkilo" "henkilotiedot" "etunimi"]
-   ["henkilo" "henkilotiedot" "sukunimi"]
-   ["yritys" "yritysnimi"]])
+(def hakijan-asiamies-accordion-paths hakija-accordion-paths)
 
 (def foreman-accordion-paths
   "Data from paths are visible in accordion header"
-  [["kuntaRoolikoodi"]
-   ["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [{:type :text
+    :paths [["kuntaRoolikoodi"]
+            ["henkilotiedot" "etunimi"]
+            ["henkilotiedot" "sukunimi"]]
+    :format "- %s %s %s"}])
 
 (def buildingid-accordion-paths
-  [[national-building-id]])
+  [{:type :text
+    :paths [[national-building-id]]
+    :format " - %s"}])
 
 ;;
 ;; schemas

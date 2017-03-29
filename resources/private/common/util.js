@@ -436,6 +436,40 @@ var util = (function($) {
     return s && s.match(/^[0-9a-fA-F]{24}$/) !== null;
   }
 
+  // L10n date formats only used when parsing.
+  // Date is always displayed in the Finnish format.
+  var dateFormats = {fi: "D.M.YYYY",
+                     sv: "D.M.YYYY",
+                     en: "M/D/YYYY"};
+
+  // Converts date to moment. The first argument is considered
+  // timestamp (string or int), if it can be converted to positive
+  // integer and lang is not given. Returns valid moment or null.
+  function toMoment( dateOrTimestamp, lang ) {
+    var arg = _.trim( dateOrTimestamp );
+    var m = null;
+    if( arg ) {
+      if( lang ) {
+        m = moment( arg, dateFormats[lang], true );
+      } else {
+        var ts = _.toInteger( arg );
+        m = ts > 0 ? moment( ts ) : null;
+      }
+    }
+    return m && m.isValid() ? m : null;
+  }
+
+  // Converts/enforces Finnish date representation.
+  // Params: [optional]
+  //  dateArg:  dateString, timestamp (ms from Unix epoch) or moment.
+  //  [lang]: fi/sv/en Language for dateArg (if dateString)
+  // Returns invalid dates unchanged. If you want to discard bad
+  // dates, call toMoment first.
+  function finnishDate( dateArg, lang ) {
+    var m = moment.isMoment( dateArg) ? dateArg : toMoment( dateArg, lang );
+    return m ? m.format( dateFormats.fi ) : dateArg;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -486,7 +520,9 @@ var util = (function($) {
     arrayToObject: arrayToObject,
     isSubObject: isSubObject,
     isOdd: isOdd,
-    isEven: isEven
+    isEven: isEven,
+    finnishDate: finnishDate,
+    toMoment: toMoment
   };
 
 })(jQuery);

@@ -223,6 +223,16 @@ Open docgen accordion
   ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=(//section[@data-doc-type="${doctype}"])[${xpathIndex}]//div[contains(@class,'accordion-toggle')]/button[contains(@class, 'toggled')]
   Run keyword If  ${accordionIsClosed}  Execute Javascript  $("section[data-doc-type='${doctype}']:eq(${idx}) div.accordion-toggle button:first-child").click();
 
+Check accordion text
+  [Arguments]  ${id}  ${title}  ${text}
+  Test id text is  ${id}-accordion-title-text  ${title}
+  Test id text is  ${id}-accordion-description-text  ${text}
+
+Edit party name
+  [Arguments]  ${party}  ${firstname}  ${lastname}
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.etunimi']  ${firstname}
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.sukunimi']  ${lastname}
+
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
@@ -1628,7 +1638,7 @@ There are no frontend errors
 #
 
 Fill tyoaika fields
-  [Arguments]  ${startDate}=01.05.2014  ${endDate}=02.05.2014
+  [Arguments]  ${startDate}=1.5.2014  ${endDate}=2.5.2014
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
 

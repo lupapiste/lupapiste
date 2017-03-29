@@ -76,6 +76,11 @@
     (fact "foreman does not have access to applicant doc"
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
 
+(def selected-accordion-fields [{:type :selected
+                                 :paths [["henkilo" "henkilotiedot" "etunimi"]
+                                         ["henkilo" "henkilotiedot" "sukunimi"]
+                                         ["yritys" "yritysnimi"]]}])
+
 (facts document-assignment-info
   (fact "yritys"
     (document-assignment-info nil
@@ -83,10 +88,7 @@
                                :schema-info {:name "hakija-r",
                                              :i18name "osapuoli",
                                              :type "party",
-                                             :accordion-fields [["_selected"]
-                                                                ["henkilo" "henkilotiedot" "etunimi"]
-                                                                ["henkilo" "henkilotiedot" "sukunimi"]
-                                                                ["yritys" "yritysnimi"]],
+                                             :accordion-fields selected-accordion-fields
                                              :subtype "hakija"}
                                :data {:_selected {:value "yritys"},
                                       :henkilo {:userId {:value nil},
@@ -102,10 +104,7 @@
                                :schema-info {:name "hakija-r",
                                              :i18name "osapuoli",
                                              :type "party",
-                                             :accordion-fields [["_selected"]
-                                                                ["henkilo" "henkilotiedot" "etunimi"]
-                                                                ["henkilo" "henkilotiedot" "sukunimi"]
-                                                                ["yritys" "yritysnimi"]],
+                                             :accordion-fields selected-accordion-fields
                                              :subtype "hakija"}
                                :data {:_selected {:value "henkilo"},
                                       :henkilo {:userId {:value nil},
@@ -158,7 +157,7 @@
                                              :removable true,
                                              :name "uusiRakennus",
                                              :approvable true,
-                                             :accordion-fields [["valtakunnallinenNumero"]],
+                                             :accordion-fields [[["valtakunnallinenNumero"]]],
                                              :version 1},
                                :created 1478259237586,
                                :data {:valtakunnallinenNumero {:value "1234"}}})
@@ -170,10 +169,7 @@
                                :i18name "osapuoli",
                                :type "party",
                                :order 1
-                               :accordion-fields [["_selected"]
-                                                  ["henkilo" "henkilotiedot" "etunimi"]
-                                                  ["henkilo" "henkilotiedot" "sukunimi"]
-                                                  ["yritys" "yritysnimi"]],
+                               :accordion-fields selected-accordion-fields
                                :subtype "hakija"}
                  :data {:_selected {:value "yritys"},
                         :henkilo {:userId {:value nil},
@@ -185,10 +181,7 @@
                  :schema-info {:name "hakija-r",
                                :i18name "osapuoli",
                                :type "party",
-                               :accordion-fields [["_selected"]
-                                                  ["henkilo" "henkilotiedot" "etunimi"]
-                                                  ["henkilo" "henkilotiedot" "sukunimi"]
-                                                  ["yritys" "yritysnimi"]],
+                               :accordion-fields selected-accordion-fields
                                :subtype "hakija"}
                  :data {:_selected {:value "yritys"},
                         :henkilo {:userId {:value nil},
@@ -201,10 +194,7 @@
                                :i18name "osapuoli",
                                :type "party",
                                :order 3
-                               :accordion-fields [["_selected"]
-                                                  ["henkilo" "henkilotiedot" "etunimi"]
-                                                  ["henkilo" "henkilotiedot" "sukunimi"]
-                                                  ["yritys" "yritysnimi"]],
+                               :accordion-fields selected-accordion-fields
                                :subtype "hakija"}
                  :data {:_selected {:value "yritys"},
                         :henkilo {:userId {:value nil},

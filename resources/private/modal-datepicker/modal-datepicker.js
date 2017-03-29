@@ -14,20 +14,20 @@ LUPAPISTE.ModalDatepickerModel = function() {
   self.dialogHelpParagraph = ko.observable("");
   self.dialogButtonSend = ko.observable("");
   self.areYouSureMessage = ko.observable("");
-
-
-  self.ok = ko.computed( function() { return self.dateObservable() !== null; });
+  self.isInvalid = ko.observable();
 
   self.onError = function(resp) {
     self.errorMessage(resp.text);
-    hub.send("indicator", {style: "negative", message: resp.text, html: true});
+    LUPAPISTE.showIntegrationError("integration.title",
+                                   resp.text,
+                                   resp.details);
   };
 
   self.reset = function(app) {
     self.appId = app.id();
     self.dateObservable(null);
     self.errorMessage(null);
-
+    self.isInvalid( true );
     self.dialogHeader(self.config.dialogHeader);
     self.dateSelectorLabel(self.config.dateSelectorLabel);
     self.dialogHelpParagraph(self.config.dialogHelpParagraph);

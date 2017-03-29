@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.schemas-test
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.document.schemas :refer [repeatable update-in-body]]))
+            [lupapalvelu.document.schemas :refer [repeatable update-in-body
+                                                  resolve-accordion-field-values]]))
 
 (facts "repeatable"
   (fact (repeatable "beers" {:name :beer
@@ -36,3 +37,33 @@
                                                                             :body [{:name "baz"}]}
                                                                            "faa"]}))
 
+(facts "Resolve accordion field values"
+       (let [doc {:schema-info {:accordion-fields [{:type  :selected
+                                                    :paths [["foo" "first"]
+                                                            ["foo" "second"]
+                                                            ["bar" "third"]]}
+                                                   {:type  :text
+                                                    :paths [["text" "tax"]]}
+                                                   [["str1" "s1"]
+                                                    ["str2" "s2"]
+                                                    ["not" "available" "in" "data"]]]}
+                  :data        {:foo  {:first  {:value "First"}
+                                       :second {:value "Second"}}
+                                :bar  {:third {:value "Third"}}
+                                :text {:hii {:value "blaah"}
+                                       :tax {:value "Tax"}}
+                                :str1 {:s1 {:value "String1"}}
+                                :str2 {:s2 {:value "String2"}}}}]
+         (fact "None selected"
+               (resolve-accordion-field-values doc)
+               => ["Tax" "String1" "String2"])
+         (fact "Foo selected"
+               (resolve-accordion-field-values (update-in doc
+                                                          [:data :_selected :value]
+                                                          (constantly "foo")))
+               => ["First" "Second" "Tax" "String1" "String2"])
+         (fact "Bar selected"
+               (resolve-accordion-field-values (update-in doc
+                                                          [:data :_selected :value]
+                                                          (constantly "bar")))
+               => ["Third" "Tax" "String1" "String2"])))

@@ -66,25 +66,41 @@ LUPAPISTE.StateIconsModel = function( params ) {
     return _.get( attachment, "metadata.nakyvyys", "julkinen") !== "julkinen";
   }
 
+  function signer(attachment) {
+    var signature = _.find(attachment.signatures, function(s) {
+      return versionString(s) === versionString(attachment.latestVersion);
+    });
+    return signature && [signature.user.firstName, signature.user.lastName].join(" ");
+  }
+
   self.stateIcons = function() {
     return _( [[approved,                {css: "lupicon-circle-check positive",
-                                          icon: "approved"}],
+                                          icon: "approved",
+                                          title: ""}],
                [needsAttention,          {css: "lupicon-circle-attention negative",
-                                          icon: "rejected"}],
+                                          icon: "rejected",
+                                          title: ""}],
                [signed,                  {css: "lupicon-circle-pen positive",
-                                          icon: "signed"}],
+                                          icon: "signed",
+                                          title: signer(attachment)}],
                [requiresAuthorityAction, {css: "lupicon-circle-star primary",
-                                          icon: "state"}],
+                                          icon: "state",
+                                          title: ""}],
                [stamped,                 {css: "lupicon-circle-stamp positive",
-                                          icon: "stamped"}],
+                                          icon: "stamped",
+                                          title: ""}],
                [sent,                    {css: "lupicon-circle-arrow-up positive",
-                                          icon: "sent"}],
+                                          icon: "sent",
+                                          title: ""}],
                [sentToCaseManagement,    {css: "lupicon-circle-arrow-up positive",
-                                          icon: "sent-to-case-management"}],
+                                          icon: "sent-to-case-management",
+                                          title: ""}],
                [forPrinting,             {css: "lupicon-circle-section-sign positive",
-                                          icon: "for-printing"}],
+                                          icon: "for-printing",
+                                          title: ""}],
                [notPublic,               {css: "lupicon-lock primary",
-                                          icon: "not-public"}]] )
+                                          icon: "not-public",
+                                          title: ""}]] )
       .filter(function(icon) { return _.first(icon)(attachment); })
       .map(_.last)
       .value();

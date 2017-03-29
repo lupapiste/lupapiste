@@ -24,6 +24,7 @@
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
                                                                                   (sc/optional-key :name) sc/Str}]})
    (sc/optional-key :target)           (sc/maybe att/Target)
+   (sc/optional-key :source)           att/Source
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -38,7 +39,7 @@
         attachment         (or
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
-                                                     (assoc (select-keys filedata [:group :contents :target])
+                                                     (assoc (select-keys filedata [:group :contents :target :source])
                                                             :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
@@ -80,6 +81,10 @@
 (defn- bind-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
+(defn- cancel-job [job-id {:keys [status text]}]
+  (warnf "canceling bind job %s due '%s'" job-id text)
+  (job/update job-id #(util/map-values (fn [{file-id :fileId}] {:fileId file-id :status status :text text}) %)))
+
 (defn- coerce-bindable-file
   "Coerces bindable file data"
   [file]
@@ -94,10 +99,15 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
-  [command file-infos trigger-assignments-fn]
+  [command file-infos & {:keys [preprocess-ref postprocess-fn]
+                         :or   {preprocess-ref (delay (ok))
+                                postprocess-fn identity}}]
   (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
         job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
                 (job/start bind-job-status))]
-    (util/future* (-> (bind-attachments! command coerced-file-infos (:id job))
-                      (trigger-assignments-fn)))
+    (util/future*
+     (if (ok? @preprocess-ref)
+       (-> (bind-attachments! command coerced-file-infos (:id job))
+           (postprocess-fn))
+       (cancel-job (:id job) (assoc @preprocess-ref :status :error))))
     job))

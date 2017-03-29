@@ -47,8 +47,8 @@
       results)))
 
 (defn- validate-state [{state :state :as application}]
-  (when (ss/blank? state)
-    {:result "Missing state"}))
+  (when (or (ss/blank? state) (not (sm/valid-state? application state)))
+    {:result (format "Missing or invalid state (%s)" state)}))
 
 ;; Every document is valid.
 (mongocheck :applications (partial validate-documents []) :documents :state :auth)
@@ -59,7 +59,7 @@
 (mongocheck :applications (partial validate-tasks []) :tasks :state :auth)
 
 ;; All applications have state
-(mongocheck :applications validate-state :state)
+(mongocheck :applications validate-state :state :infoRequest :primaryOperation :permitSubtype :permitType)
 
 (def coerce-auth (ssc/json-coercer auth/Auth))
 

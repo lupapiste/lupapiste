@@ -182,6 +182,69 @@
            (keys (:attachmentTypes resp)) => [:YA]
            (-> resp :attachmentTypes :YA) => truthy)))
 
+(facts assignment-triggers
+  (fact "must have targets"
+    (command sipoo :upsert-assignment-trigger
+             :description "no targets"
+             :handler nil) => (partial expected-failure? :error.missing-parameters))
+  (fact "must have description"
+    (command sipoo :upsert-assignment-trigger
+             :targets ["ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos"]
+             :description ""
+             :handler nil) => (partial expected-failure? :error.missing-parameters))
+  (fact "correct data is inserted"
+    (let [trigger {:targets ["ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos"]
+                   :description "ely"}
+          trigger-resp (:trigger (apply command sipoo :upsert-assignment-trigger
+                                        (mapcat seq trigger)))]
+      (:id trigger-resp) => string?
+      (dissoc trigger-resp :id) => trigger))
+
+  (facts updates
+    (let [trigger (:trigger (command sipoo :upsert-assignment-trigger
+                                     :targets ["paapiirustus.leikkauspiirustus"]
+                                     :description "ely"))
+          updated-trigger (:trigger (command sipoo :upsert-assignment-trigger
+                                             :triggerId (:id trigger)
+                                             :targets ["paapiirustus.muu_paapiirustus"]
+                                             :description "ely v2"))]
+      (fact "correct data is updated"
+        (:targets updated-trigger) => ["paapiirustus.muu_paapiirustus"]
+        (:description updated-trigger) => "ely v2")
+
+      (let [{application-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
+            resp1 (upload-file pena "dev-resources/test-attachment.txt") => ok?
+            file-id-1 (get-in resp1 [:files 0 :fileId])
+            _ (command sonja :create-attachments
+                       :id application-id
+                       :attachmenttypes [{:type-group :paapiirustus :type-id :muu_paapiirustus}]
+                       :group nil)
+            {job :job :as job-resp} (command pena :bind-attachments
+                                             :id application-id
+                                             :filedatas [{:fileId file-id-1
+                                                          :type {:type-group "paapiirustus"
+                                                                 :type-id "muu_paapiirustus"}
+                                                          :contents "eka"}]) => ok?]
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?
+        (Thread/sleep 1000)
+        (fact "trigger assignment is created"
+          (let [assignments-for-trigger (->> (query sonja :assignments-for-application :id application-id)
+                                            :assignments
+                                            (filter #(= (:trigger %) (:id trigger))))]
+            (count assignments-for-trigger) => 1
+            (-> assignments-for-trigger first :trigger) => (:id trigger)
+            (-> assignments-for-trigger first :description) => "ely v2"))
+
+        (fact "trigger assignment descriptions are synchronized with trigger description"
+          (command sipoo :upsert-assignment-trigger
+                   :triggerId (:id trigger)
+                   :targets ["paapiirustus.muu_paapiirustus"]
+                   :description "ely v3"))
+          (->> (query sonja :assignments-for-application :id application-id)
+               :assignments
+               (filter #(= (:trigger %) (:id trigger)))
+               first
+               :description) => "ely v3"))))
 
 (facts "Selected operations"
 
