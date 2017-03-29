@@ -15,7 +15,10 @@
                 :submitted (* 3 day)
                 :sent (* 4 day)
                 :started (* 5 day)
-                :closed (* 6 day))
+                :closed (* 6 day)
+                :finished (* 6 day)
+                :agreementPrepared (* 6 day)
+                :agreementSigned (* 7 day))
               (update-in [:verdicts] conj {:timestamp (* 7 day)}))]
 
    (fact "complementNeeded" (state-timestamp (assoc app :state "complementNeeded")) => (* 2 day))
@@ -24,6 +27,7 @@
    (fact "constructionStarted" (state-timestamp (assoc app :state "constructionStarted")) => (* 5 day))
    (fact "closed" (state-timestamp (assoc app :state "closed")) => (* 6 day))
    (fact "verdictGiven" (state-timestamp (assoc app :state "verdictGiven")) => (* 7 day))
+   (fact "agreementSigned" (state-timestamp (assoc app :state "agreementSigned")) => (* 7 day))
 
    (all-state-timestamps app) => {:complementNeeded (* 2 day)
                                   :submitted (* 3 day)
@@ -31,7 +35,10 @@
                                   :constructionStarted (* 5 day)
                                   :closed (* 6 day)
                                   :verdictGiven (* 7 day)
-                                  :foremanVerdictGiven (* 7 day)}
+                                  :foremanVerdictGiven (* 7 day)
+                                  :finished (* 6 day)
+                                  :agreementPrepared (* 6 day)
+                                  :agreementSigned (* 7 day)}
 
    (all-state-timestamps (dissoc app :closed :verdicts :started :complementNeeded)) => {:complementNeeded nil
                                                                                         :submitted (* 3 day)
@@ -39,7 +46,10 @@
                                                                                         :constructionStarted nil
                                                                                         :closed nil
                                                                                         :verdictGiven nil
-                                                                                        :foremanVerdictGiven nil}
+                                                                                        :foremanVerdictGiven nil
+                                                                                        :finished (* 6 day)
+                                                                                        :agreementPrepared (* 6 day)
+                                                                                        :agreementSigned (* 7 day)}
 
    ))
 
