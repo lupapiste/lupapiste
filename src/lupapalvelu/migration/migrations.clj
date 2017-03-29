@@ -3017,7 +3017,7 @@
 ; jatkoaika -> verdictGiven -> finished
 ; kayttolupa -> verdictGiven kopioidaan finished
 ; tyolupa ei muutoksia
-; sijoituslupa -> lisätään finished
+; sijoituslupa -> lisataan finished
 ; sijoitussopimus -> verdictGiven kopioidaan agreementSigned/agreementPrepared
 (defmigration ya-history-and-timestamp-updates
   {:apply-when (or (pos? (mongo/count :applications {:permitType "YA"
