@@ -279,9 +279,11 @@
     states/ya-sijoitussopimus-state-graph
     states/ya-sijoituslupa-state-graph))
 
+(def ya-sijoituslupa-subtypes [:sijoituslupa :sijoitussopimus])
+
 (def- ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                :permit-type permit/YA
-                               :subtypes [:sijoituslupa :sijoitussopimus]
+                               :subtypes ya-sijoituslupa-subtypes
                                :state-graph-resolver sijoittaminen-state-resolver
                                :applicant-doc-schema applicant-doc-schema-name-YA
                                :required common-yleiset-alueet-schemas
