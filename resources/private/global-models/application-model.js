@@ -40,8 +40,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
   self.warrantyStart = ko.observable();
+  self.showWarrantyStart = ko.observable();
   self.warrantyEnd = ko.observable();
-
+  self.showWarrantyEnd = ko.observable();
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();

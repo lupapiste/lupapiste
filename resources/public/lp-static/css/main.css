@@ -6948,6 +6948,10 @@ drop-zone .drop-zone-placeholder > i {
   color: #fbc732;
 }
 
+input.date-validator--invalid {
+  border: 1px solid #df3215;
+}
+
 legend {
   font-size: 21.6px;
   font-family: "Source Sans Pro", sans-serif;

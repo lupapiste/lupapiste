@@ -965,7 +965,7 @@
                                     </tr>
 
                                     <!-- Takuu alkaa -->
-                                    <tr data-bind="if: warrantyStart">
+                                    <tr data-bind="if: showWarrantyStart">
                                         <td><span data-bind="ltext: 'application.warranty.start'"></span></td>
                                         <td>
                                             <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
@@ -973,7 +973,9 @@
                                                   data-test-id="warranty-start-date-text"></span>
                                             <!-- /ko -->
                                             <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-                                            <input type="text" data-bind="datepicker: warrantyStart" class="form-input"
+                                            <input type="text" data-bind="datepicker: warrantyStart,
+                                                                          dateInvalidClass: ''"
+                                                   class="form-input"
                                                    data-test-id="warranty-start-date-edit">
                                             <!-- /ko -->
                                         </td>
@@ -982,7 +984,7 @@
                                     </tr>
 
                                     <!-- Takuu loppuu -->
-                                    <tr data-bind="if: warrantyEnd">
+                                    <tr data-bind="if: showWarrantyEnd">
                                         <td><span data-bind="ltext: 'application.warranty.end'"></span></td>
                                         <td>
                                             <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
