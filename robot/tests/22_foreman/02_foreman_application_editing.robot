@@ -27,7 +27,7 @@ Sonja inits applications
 Foreman fills personal information
   Foreman logs in
   Foreman applies personal information to the foreman application  0
-  Check party accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - Teppo Nieminen
+  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - Teppo Nieminen
 
 Foreman can not fill applicant information
   # No inputs that are missing a readoly attribute. In other words, all inputs are read only.

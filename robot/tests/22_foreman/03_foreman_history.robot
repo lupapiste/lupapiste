@@ -22,7 +22,7 @@ Foreman sets his information to several applications
   Foreman sets role and difficulty to foreman application  0  KVV-työnjohtaja  B
 
 Foreman sees his information reflected by the accordion
-  Check party accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
+  Check accordion text  tyonjohtaja-v2  TYÖNJOHTAJAN NIMEÄMINEN  - KVV-työnjohtaja Teppo Nieminen
 
 Accordion information is localized
   Language to  SV
