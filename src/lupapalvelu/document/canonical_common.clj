@@ -55,6 +55,9 @@
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :foremanVerdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started
+   :agreementPrepared :agreementPrepared
+   :agreementSigned :agreementSigned
+   :finished :finished
    :closed :closed})
 
 (defn state-timestamp [{state :state :as application}]
