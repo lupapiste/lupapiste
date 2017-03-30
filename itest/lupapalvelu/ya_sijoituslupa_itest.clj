@@ -1,8 +1,9 @@
 (ns lupapalvelu.ya-sijoituslupa-itest
   (:require [midje.sweet :refer :all]
             [sade.core :refer [now]]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
-            [sade.util :as util]))
+            [lupapalvelu.states :as states]))
 
 (apply-remote-minimal)
 
@@ -68,7 +69,13 @@
     (fact "Creating verdict draft in sijoitussopimus suggestes 'sopimus' by default"
       (let [verdict-id2 (:verdictId (command jussi :new-verdict-draft :id id))
             verdict (util/find-by-id verdict-id2 (:verdicts (query-application jussi id)))]
-        (:sopimus verdict) => true))))
+        (:sopimus verdict) => true))
+
+    (fact "signing agreement"
+      (command pena :sign-verdict :id id :verdictId verdict-id :password "pena" :lang "fi") => ok?
+      (fact "state changed"
+        (-> (query-application pena id) :state) => "agreementSigned")
+      (states/terminal-state? states/ya-sijoitussopimus-state-graph :agreementSigned) => true)))
 
 (facts "YA Sijoitussopimus errors"
   (let [{:keys [id]} (create-and-submit-application pena

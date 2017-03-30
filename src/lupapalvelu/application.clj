@@ -611,6 +611,7 @@
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp application user]
+  {:pre [(sm/valid-state? application to-state)]}
   (let [ts-key (timestamp-key to-state)]
     {$set (merge {:state to-state, :modified timestamp}
                  (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
