@@ -38,7 +38,9 @@
 
     <attachment-batch params="upload: upload"></attachment-batch>
 
-    <attachment-upload params="ltext: 'attachment.add-multiple', upload: upload"
+    <attachment-upload params="ltext: 'attachment.add-multiple',
+                               upload: upload,
+                               target: target"
                        data-bind="visible: canAdd"></attachment-upload>
   </div>
 </script>

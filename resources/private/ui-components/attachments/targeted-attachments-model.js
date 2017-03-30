@@ -11,6 +11,7 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
 
   self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:true,
                                                  dropZone: "section#" + params.dropZoneSectionId,
+                                                 target: self.target(),
                                                  batchMode: true});
 
   var service = lupapisteApp.services.attachmentsService;
