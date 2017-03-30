@@ -59,6 +59,7 @@ var taskPageController = (function() {
   var attachmentsModel = {target: ko.observable( {type: "task"} ),
                           type: ko.observable( "muut.muu"),
                           typeSelector: true,
+                          dropZoneSectionId: "task",
                           canAdd: ko.pureComputed( function() {
                             return "sent" !== _.get(task(), "state");
                           })};

@@ -36,16 +36,9 @@
       <i data-bind="ltext: 'no-attachments'"></i>
     </div>
 
-    <!-- ko if: canAdd -->
-    <button
-       class="positive"
-       data-bind="visible: canUpload,
-                  enabled: canUpload,
-                  click: newAttachment"
-       data-test-id="add-targetted-attachment">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.attachmentsAdd'"></span>
-    </button>
-    <!-- /ko -->
+    <attachment-batch params="upload: upload"></attachment-batch>
+
+    <attachment-upload params="ltext: 'attachment.add-multiple', upload: upload"
+                       data-bind="visible: canAdd"></attachment-upload>
   </div>
 </script>

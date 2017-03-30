@@ -9,6 +9,10 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
   self.typeSelector = params.typeSelector;
   self.canAdd = params.canAdd || true;
 
+  self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:true,
+                                                 dropZone: "section#" + params.dropZoneSectionId,
+                                                 batchMode: true});
+
   var service = lupapisteApp.services.attachmentsService;
 
   function dataView( target ) {
@@ -27,15 +31,4 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
     return service.authModel.ok( "upload-attachment");
   });
 
-  self.newAttachment = function() {
-    attachment.initFileUpload({
-      applicationId: lupapisteApp.models.application.id(),
-      attachmentId: null,
-      attachmentType: self.attachmentType(),
-      typeSelector: self.typeSelector,
-      target: self.target(),
-      locked: lupapisteApp.models.currentUser.isAuthority()
-    });
-    LUPAPISTE.ModalDialog.open("#upload-dialog");
-  };
 };
