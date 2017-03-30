@@ -166,7 +166,7 @@
 (defn with-org-auth [user]
   (update-in user [:orgAuthz] coerce-org-authz))
 
-(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz :language])
 
 (defschema SessionSummaryUser
   (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
