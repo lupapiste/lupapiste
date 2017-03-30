@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [sade.core :refer [fail?]]
             [schema.core :as sc]
+            [lupapalvelu.generators.user :as gen-user]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.test-util :refer [catch-all passing-quick-check]]
             [lupapalvelu.user :refer :all]

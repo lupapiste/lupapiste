@@ -3,7 +3,6 @@
             [clj-time.coerce :refer [to-date]]
             [clj-time.core :as time]
             [clojure.set :as set]
-            [clojure.test.check.generators :as gen]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -15,7 +14,6 @@
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.schemas :as ssc]
-            [sade.schema-generators :as ssg]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
@@ -50,54 +48,21 @@
 
 (def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
-(def biased-nat
-  "generator that generates numbers of length 3 to 5,
-   biased towards shorter ones"
-  (let [nat-3 (gen/choose 100 1000)
-        nat-4 (gen/choose 1000 10000)
-        nat-5 (gen/choose 10000 100000)]
-    (gen/frequency [[4 nat-3]
-                    [1 (gen/frequency [[4 nat-4]
-                                       [1 nat-5]])]])))
+(def all-roles
+  "vector of role strings that can be used in User's :role field"
+  ["applicant"
+   "authority"
+   "oirAuthority"
+   "authorityAdmin"
+   "admin"
+   "dummy"
+   "rest-api"
+   "trusted-etl"])
 
-(def org-id-generator
-  (gen/let [number-part biased-nat
-            suffix (gen/elements ["R" "YA" "YMP"])]
-    (keyword (str number-part "-" suffix))))
-
-(def keyword-authz-generator
-  (let [default-roles (gen/elements roles/default-org-authz-roles)
-        all-roles (gen/elements roles/all-authz-roles)]
-    (gen/frequency [[1 default-roles]
-                    [1 all-roles]])))
-
-(def authz-generator
-  (gen/fmap name keyword-authz-generator))
-
-(def all-roles ["applicant"
-                "authority"
-                "oirAuthority"
-                "authorityAdmin"
-                "admin"
-                "dummy"
-                "rest-api"
-                "trusted-etl"])
 (defschema Role (apply sc/enum all-roles))
-
 (defschema OrgId (sc/pred keyword? "Organization ID"))
 (defschema Authz (sc/pred string? "Authz access right"))
 (defschema OrgAuthz {OrgId [Authz]})
-
-(ssg/register-generator OrgId org-id-generator)
-(ssg/register-generator Authz authz-generator)
-
-(def distinct-authz-generator
-  (let [authz-gen (ssg/generator Authz)]
-    (gen/vector-distinct authz-gen
-                         {:min-elements 0
-                          :max-elements (count roles/all-authz-roles)})))
-
-(ssg/register-generator [Authz] distinct-authz-generator)
 
 (defschema User
           {:id                                    Id
