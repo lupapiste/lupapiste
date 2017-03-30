@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Sonja can't submit application
+Suite Setup  Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables       ../06_attachments/variables.py

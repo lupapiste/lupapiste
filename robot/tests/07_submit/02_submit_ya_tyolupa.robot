@@ -1,8 +1,5 @@
 *** Settings ***
 
-Resource            ../CommonResource.robot
-Force Tags          MyTag
-
 Documentation   Can't submit tyolupa application when linked agreement not finished or not signed
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
