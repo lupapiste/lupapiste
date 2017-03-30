@@ -400,9 +400,11 @@
             (validate-document document info)))))))
 
 (defn validate-pertinent
-  "Like validate but weeds out the results with :ignore flag."
+  "Like validate but weeds out the results with :ignore flag. Also,
+  disabled documents are always valid."
   [application document]
-  (remove :ignore (validate application document)))
+  (when-not (:disabled document)
+    (remove :ignore (validate application document))))
 
 (defn has-errors?
   [results]
