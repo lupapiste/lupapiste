@@ -98,7 +98,7 @@
                       (fail :error.verdict.not-draft))))]}
   [{:keys [application created data] :as command}]
   (let [paatos-id (-> (find-verdict application verdictId) :paatokset first :id)
-        ya-agreement? (and agreement (ya/sijoitus? application))
+        ya-agreement? (and agreement (ya/sijoittaminen? application))
         verdict (domain/->paatos
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
