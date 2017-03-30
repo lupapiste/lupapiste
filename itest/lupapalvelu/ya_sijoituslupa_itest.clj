@@ -74,13 +74,16 @@
   (let [{:keys [id]} (create-and-submit-application pena
                                                     :propertyId tampere-property-id
                                                     :operation "ya-sijoituslupa-ilmajohtojen-sijoittaminen")
-        subtype-resp (command pena :change-permit-sub-type :id id :permitSubtype "sijoitussopimus")
+        pena-subtype (command pena :change-permit-sub-type :id id :permitSubtype "sijoitussopimus")
+        jussi-subtype (command jussi :change-permit-sub-type :id id :permitSubtype "sijoitussopimus")
         verdict-id (:verdictId (command jussi :new-verdict-draft :id id))
         now-ts     (now)
         app        (query-application jussi id)
         verdicts   (:verdicts app)]
-    subtype-resp => ok?
+    pena-subtype => (partial expected-failure? :error.ya-subtype-change-authority-only)
+    jussi-subtype => ok?
     (:permitSubtype app) => "sijoitussopimus"
+
     (count verdicts) => 1
     (fact "For sijoitussopimus, verdict is by default 'sopimus'"
       (-> verdicts first :sopimus) => true)
@@ -96,7 +99,7 @@
                :official now-ts
                :text "noup"
                :agreement true :section "" :lang "fi") => ok?
-      (command pena :change-permit-sub-type :id id :permitSubtype "sijoituslupa") => ok? ; Bad Pena!
+      (command jussi :change-permit-sub-type :id id :permitSubtype "sijoituslupa") => ok?
       (command jussi :publish-verdict :id id :verdictId verdict-id :lang "fi") => (partial expected-failure? :error.ya-sijoituslupa-invalid-subtype))
 
     (command jussi :change-permit-sub-type :id id :permitSubtype "sijoitussopimus") => ok?

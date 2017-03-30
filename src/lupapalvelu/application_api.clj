@@ -13,6 +13,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
@@ -22,7 +23,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -34,7 +34,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.assignment :as assignment]))
+            [lupapalvelu.ya :as ya]))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -507,15 +507,16 @@
     (ok)))
 
 (defcommand change-permit-sub-type
-  {:parameters [id permitSubtype]
-   :user-roles #{:applicant :authority}
+  {:parameters       [id permitSubtype]
+   :user-roles       #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
-   :states     states/pre-sent-application-states
+   :states           states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
-   :pre-checks [app/validate-has-subtypes
-                app/pre-check-permit-subtype
-                foreman/allow-foreman-only-in-foreman-app
-                app/validate-authority-in-drafts]}
+   :pre-checks       [app/validate-has-subtypes
+                      app/pre-check-permit-subtype
+                      foreman/allow-foreman-only-in-foreman-app
+                      ya/authority-only
+                      app/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
   (ok))
