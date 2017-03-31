@@ -260,6 +260,13 @@
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
+(def migration-user-summary
+  {:id "-"
+   :username "migraatio@lupapiste.fi"
+   :lastName "Migraatio"
+   :firstName "Lupapiste"
+   :role "authority"})
+
 (def batchrun-user-data
   {:id "-"
    :username "eraajo@lupapiste.fi"

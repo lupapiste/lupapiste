@@ -7,6 +7,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.rest.applications-data :as rest-application-data]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
             [lupapalvelu.state-machine :as sm]
@@ -206,3 +207,14 @@
          (sc/check HakemusTiedot))))
 
 (apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)
+
+(defn validate-ya-subtypes [{:keys [primaryOperation permitType permitSubtype]}]
+  (when (and (= "YA" permitType) (not= "ya-jatkoaika" (:name primaryOperation)))
+    (when (or (ss/blank? permitSubtype)
+              (->> (get op/operations (keyword (:name primaryOperation)))
+                   :subtypes
+                   (some (partial = (keyword permitSubtype)))
+                   nil?))
+      (format "Invalid YA subtype %s for operation %s" permitSubtype (:name primaryOperation)))))
+
+(mongocheck :applications validate-ya-subtypes :primaryOperation :permitType :permitSubtype)
