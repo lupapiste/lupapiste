@@ -14,7 +14,7 @@
             [lupapalvelu.application-api]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.attachment.type :as att-type]))
+            [lupapalvelu.ya :as ya]))
 
 (fact "update-document"
   (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
@@ -23,7 +23,8 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user validate-link-agreements-state validate-link-agreements-signature)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
+(testable-privates lupapalvelu.ya validate-link-agreement-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
