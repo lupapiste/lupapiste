@@ -112,6 +112,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       } else {
         if (_.isObject(file.type)) {
           file.type.title = loc(["attachmentType", file.type["type-group"], file.type["type-id"]].join("."));
+          file.contents = file.contents || _.get(service.contentsData(file.type), "defaultValue");
         }
         newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group, file.target);
       }
