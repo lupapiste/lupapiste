@@ -29,6 +29,7 @@
                data-bind="event: $parent.fillEvents( $data, 'type'),
                           testId: 'batch-type-' + $index()">
             <attachment-type-autocomplete params="selectedType: $parent.cell( $data, 'type').value,
+                                                  typeGroups: $component.typeGroups,
                                                   disabled: $data.attachmentId"
                                           data-bind="css: {'no-events': $parent.rowDisabled( $data )}">
             </attachment-type-autocomplete>

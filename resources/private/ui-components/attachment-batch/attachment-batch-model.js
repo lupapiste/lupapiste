@@ -11,6 +11,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   var service = lupapisteApp.services.attachmentsService;
 
   self.upload = params.upload;
+  self.typeGroups = params.typeGroups;
 
   self.password = ko.observable();
 

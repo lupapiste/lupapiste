@@ -56,9 +56,10 @@ var taskPageController = (function() {
     return authorizationModel.ok("review-done") && _.isEmpty(validationErrors());
   });
 
+  var isKatselmus = String(_.get(task(), "schema-info.name")).indexOf("katselmus") > -1;
+
   var attachmentsModel = {target: ko.observable( {type: "task"} ),
-                          type: ko.observable( "muut.muu"),
-                          typeSelector: true,
+                          typeGroups: isKatselmus ? ["katselmukset_ja_tarkastukset"] : ["suunnitelmat", "erityissuunnitelmat"],
                           dropZoneSectionId: "task",
                           canAdd: ko.pureComputed( function() {
                             return "sent" !== _.get(task(), "state");
