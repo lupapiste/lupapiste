@@ -846,7 +846,7 @@
   [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]
   (update-application command
                       (util/deep-merge
-                       (app/state-transition-update :open created app user)
+                       (app/state-transition-update :open created (assoc app :infoRequest false) user)
                        {$set  {:infoRequest            false
                                :openInfoRequest        false
                                :convertedToApplication created
