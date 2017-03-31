@@ -5,6 +5,7 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   self.target = params.target;
+  self.type = params.type;
   self.typeGroups = params.typeGroups;
   self.canAdd = params.canAdd || true;
 
