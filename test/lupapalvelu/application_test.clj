@@ -24,7 +24,7 @@
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
 (testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
-(testable-privates lupapalvelu.ya validate-link-agreement-signature validate-link-agreements-state)
+(testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123

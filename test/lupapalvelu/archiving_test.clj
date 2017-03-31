@@ -9,7 +9,9 @@
     (valid-ya-state? {:id "LP-XXX-2017-00002" :permitType "YA" :state "finished"}) => true
     (valid-ya-state? {:id "LP-XXX-2017-00003" :permitType "YA" :state "extinct"}) => true
     (valid-ya-state? {:id "LP-XXX-2017-00004" :permitType "YA" :state "appealed"}) => true
-    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "closed"}) => true)
+    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "closed"}) => true
+    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "agreementSigned"}) => true
+    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "agreementPrepared"}) => true)
   (fact "Valid YA application with invalid state - should not be archived"
     (valid-ya-state? {:id "LP-XXX-2017-00006" :permitType "YA" :state "open"}) => false
     (valid-ya-state? {:id "LP-XXX-2017-00007" :permitType "YA" :state "submitted"}) => false
