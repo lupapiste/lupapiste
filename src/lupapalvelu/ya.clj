@@ -4,12 +4,20 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as op]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as usr]))
 
 (defn sijoittaminen? [{:keys [permitSubtype permitType]}]
   (and (= permit/YA permitType) (true? (some #(= (keyword permitSubtype) %) op/ya-sijoituslupa-subtypes))))
+
+(defn- digging-permit? [{:keys [permitType primaryOperation]}]
+  (and (= permit/YA permitType)
+       (->> (op/get-operation-metadata (:name primaryOperation) :subtypes)
+            (some #(= :tyolupa %))
+            (true?))))
 
 (def agreement-subtype "sijoitussopimus")
 (defn agreement-subtype? [app] (= (:permitSubtype app) agreement-subtype))
@@ -30,3 +38,21 @@
   (when (and (= (:permitType app) permit/YA)
              (not (usr/user-is-authority-in-organization? user (:organization app))))
     (fail :error.ya-subtype-change-authority-only)))
+
+(defn- validate-link-agreements-state [link-permit]
+  (when-not (app/verdict-given? link-permit)
+    (fail :error.link-permit-app-not-in-post-verdict-state)))
+
+(defn- validate-link-agreements-signature [{:keys [verdicts]}]
+  (when (empty? (filter #(:signatures %) verdicts))
+    (fail :error.link-permit-app-not-signed)))
+
+(defn validate-digging-permit [application]
+  (when (digging-permit? application)
+    (let [link        (some #(when (= (:type %) "lupapistetunnus") %) (:linkPermitData application))
+          link-permit (when link
+                        (domain/get-application-no-access-checking {:_id (:id link)} {:state 1 :verdicts 1}))]
+      (when link-permit
+        (or
+          (validate-link-agreements-state link-permit)
+          (validate-link-agreements-signature link-permit))))))
