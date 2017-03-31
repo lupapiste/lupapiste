@@ -17,6 +17,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.link-permit :as link-permit]
@@ -112,6 +113,9 @@
 
 (defn submitted? [{:keys [state]}]
   (boolean (states/post-submitted-states (keyword state))))
+
+(defn verdict-given? [{:keys [state]}]
+  (boolean (states/post-verdict-states (keyword state))))
 
 (defn- contains-primary-operation? [application op-set]
   {:pre [(set? op-set)]}
@@ -241,6 +245,27 @@
                          (and required (not notNeeded) (empty? versions)))
                        (:attachments application))))
     (fail :application.requiredDataDesc)))
+
+(defn- digging-permit? [application]
+  (= ((keyword (get-in application [:primaryOperation :name])) canonical-common/ya-operation-type-to-schema-name-key) :Tyolupa))
+
+(defn- validate-link-agreements-state [link-permit]
+  (when-not (verdict-given? link-permit)
+    (fail :error.link-permit-app-not-in-post-verdict-state)))
+
+(defn- validate-link-agreements-signature [{:keys [verdicts]}]
+  (when (empty? (filter #(:signatures %) verdicts))
+    (fail :error.link-permit-app-not-signed)))
+
+(defn validate-digging-permit [application]
+  (when (digging-permit? application)
+    (let [link        (some #(when (= (:type %) "lupapistetunnus") %) (:linkPermitData application))
+          link-permit (when link
+                        (mongo/select-one :applications {:_id (:id link)} {:state 1 :verdicts 1}))]
+      (when link-permit
+        (or
+          (validate-link-agreements-state link-permit)
+          (validate-link-agreements-signature link-permit))))))
 
 (defn- validate [application document]
   (let [all-results   (model/validate-pertinent application document)
