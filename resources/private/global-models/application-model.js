@@ -882,7 +882,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.verdictPostfix = function () {
     if (this.permitSubtype() === "sijoitussopimus") {
-      return ".sijoitussopimus"
+      return ".sijoitussopimus";
     } else {
       return "";
     }
