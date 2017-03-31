@@ -10,14 +10,14 @@
     (valid-ya-state? {:id "LP-XXX-2017-00003" :permitType "YA" :state "extinct"}) => true
     (valid-ya-state? {:id "LP-XXX-2017-00004" :permitType "YA" :state "appealed"}) => true
     (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "closed"}) => true
-    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "agreementSigned"}) => true
-    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "agreementPrepared"}) => true)
+    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "agreementSigned"}) => true)
   (fact "Valid YA application with invalid state - should not be archived"
     (valid-ya-state? {:id "LP-XXX-2017-00006" :permitType "YA" :state "open"}) => false
     (valid-ya-state? {:id "LP-XXX-2017-00007" :permitType "YA" :state "submitted"}) => false
     (valid-ya-state? {:id "LP-XXX-2017-00008" :permitType "YA" :state "sent"}) => false
     (valid-ya-state? {:id "LP-XXX-2017-00009" :permitType "YA" :state "draft"}) => false
-    (valid-ya-state? {:id "LP-XXX-2017-00010" :permitType "YA" :state "complementNeeded"}) => false)
+    (valid-ya-state? {:id "LP-XXX-2017-00010" :permitType "YA" :state "complementNeeded"}) => false
+    (valid-ya-state? {:id "LP-XXX-2017-00005" :permitType "YA" :state "agreementPrepared"}) => false)
   (fact "Valid R application with valid R state - should not be in valid YA state"
     (valid-ya-state? {:id "LP-XXX-2017-00011" :permitType "R" :state "verdictGiven"}) => false
     (valid-ya-state? {:id "LP-XXX-2017-00012" :permitType "R" :state "closed"}) => false

@@ -140,6 +140,9 @@
      ; ymp-application-state-graph loops back to pre verdict states
      pre-verdict-states)))
 
+(def ya-post-verdict-states
+  (disj post-verdict-states :agreementPrepared))
+
 (def post-submitted-states
   "Submitted state and all states after. Cancelled omitted."
   (let [graphs (filter :submitted all-graphs)]

@@ -144,7 +144,7 @@
 
 (defn valid-ya-state? [application]
   (and (= "YA" (:permitType application))
-       (contains? states/post-verdict-states (keyword (:state application)))))
+       (contains? states/ya-post-verdict-states (keyword (:state application)))))
 
 (defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
