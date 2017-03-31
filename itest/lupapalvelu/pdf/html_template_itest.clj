@@ -10,6 +10,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [replace-in-schema]]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.inspection-summary :refer [InspectionSummary]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.html-template :refer :all]))
@@ -27,7 +28,7 @@
                 :documents            [{:id "..doc-id..",
                                         :schema-info {:op {:id "..op-id..", :name "pientalo-laaj", :description nil},
                                                       :name "rakennuksen-laajentaminen",
-                                                      :accordion-fields [["valtakunnallinenNumero"]],
+                                                      :accordion-fields schemas/buildingid-accordion-paths
                                                       :version 1},
                                         :data {:valtakunnallinenNumero {:value "bld_123456" }}}]
                 :attachments          [{:id "..attachment-id..",

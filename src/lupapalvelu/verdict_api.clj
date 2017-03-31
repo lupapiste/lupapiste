@@ -4,22 +4,21 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
-            [lupapalvelu.application :as application]
-            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.appeal-common :as appeal-common]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]
-            [sade.env :as env]
-            [lupapalvelu.inspection-summary :as inspection-summary]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.ya :as ya]))
 
 ;;
 ;; KRYSP verdicts
@@ -73,6 +72,7 @@
         tosFunction (get application :tosFunction)
         metadata (when (seq tosFunction) (t/metadata-for-document organization tosFunction "p\u00e4\u00e4t\u00f6s"))
         blank-verdict (cond-> (domain/->paatos {:draft true})
+                              (sm/valid-state? application :agreementPrepared) (assoc :sopimus true)
                               (seq metadata) (assoc :metadata metadata))]
     (update-application command {$push {:verdicts blank-verdict}})
     (ok :verdictId (:id blank-verdict))))
@@ -81,7 +81,7 @@
   (some #(when (= id (:id %)) %) verdicts))
 
 (defcommand save-verdict-draft
-  {:parameters [:id verdictId :backendId #_:status :name :section :agreement :text :given :official]
+  {:parameters [:id verdictId :backendId #_:status :name :section agreement :text :given :official]
    :description  "backendId = Kuntalupatunnus, status = poytakirjat[] / paatoskoodi,
                   name = poytakirjat[] / paatoksentekija, section = poytakirjat[] / pykala
                   agreement = (sopimus), text =  poytakirjat[] / paatos
@@ -98,29 +98,32 @@
                       (fail :error.verdict.not-draft))))]}
   [{:keys [application created data] :as command}]
   (let [paatos-id (-> (find-verdict application verdictId) :paatokset first :id)
+        ya-agreement? (and agreement (ya/sijoittaminen? application))
         verdict (domain/->paatos
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
                     {:timestamp created, :draft true, :paatos-id paatos-id}))]
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
-      {$set {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)
-             "verdicts.$.draft" true
-             "verdicts.$.timestamp" created
-             "verdicts.$.sopimus" (:sopimus verdict)
-             "verdicts.$.paatokset" (:paatokset verdict)}})))
+      {$set (util/assoc-when
+              {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)
+               "verdicts.$.draft" true
+               "verdicts.$.timestamp" created
+               "verdicts.$.sopimus" (:sopimus verdict)
+               "verdicts.$.paatokset" (:paatokset verdict)}
+              :permitSubtype (when ya-agreement? ya/agreement-subtype))})))
 
 (defn- create-verdict-pdfa! [user application verdict-id lang]
   (let [application (domain/get-application-no-access-checking (:id application))]
     (when (> 1 (count (:paatokset (first (filter #(= verdict-id (:id %)) (:verdicts application)))))) (error "Too many paatokset in verdict( " verdict-id ") in application: " (:id application)))
     (child-to-attachment/create-attachment-from-children user application :verdicts verdict-id lang)))
 
-(defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus sopimus]}]
+(defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus]}]
   (if-not (ss/blank? kuntalupatunnus)
     (when-let [next-state (sm/verdict-given-state application)]
       (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)
             verdict-updates (util/deep-merge
-                              (application/state-transition-update next-state timestamp application user)
+                              (app/state-transition-update next-state timestamp application user)
                               {$set {:verdicts.$.draft false}})]
         (update-application command {:verdicts {$elemMatch {:id id}}} verdict-updates)
         (inspection-summary/process-verdict-given application)
@@ -137,7 +140,9 @@
   {:parameters [id verdictId lang]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId :lang])]
    :states     give-verdict-states
-   :pre-checks [application-has-verdict-given-state]
+   :pre-checks [application-has-verdict-given-state
+                ya/check-ya-sijoitussopimus-subtype
+                ya/check-ya-sijoituslupa-subtype]
    :notified   true
    :on-success (notify :application-state-change)
    :user-roles #{:authority}}
@@ -180,15 +185,19 @@
    :states     states/post-verdict-states
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}
-  [{:keys [application created user] :as command}]
-  (if (user/get-user-with-password (:username user) password)
-    (when (find-verdict application verdictId)
+  [{:keys [application created user created] :as command}]
+  (if (usr/get-user-with-password (:username user) password)
+    (when-let [verdict (find-verdict application verdictId)]
       (let [result (update-application command
                           {:verdicts {$elemMatch {:id verdictId}}}
-                          {$set  {:modified              created}
-                           $push {:verdicts.$.signatures {:created created
-                                                          :user (user/summary user)}}
-                          })]
+                          (util/deep-merge
+                            {$set  {:modified              created}
+                             $push {:verdicts.$.signatures {:created created
+                                                            :user (usr/summary user)}}}
+                            (when (and (ya/sijoittaminen? application)
+                                       (:sopimus verdict)
+                                       (not= (:state application) "agreementSigned"))
+                              (app/state-transition-update :agreementSigned created application user))))]
           (create-verdict-pdfa! user application verdictId lang)
           result))
     (do

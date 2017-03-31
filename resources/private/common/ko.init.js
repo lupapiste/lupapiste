@@ -438,11 +438,42 @@
       }
 
       var current = $(element).datepicker("getDate");
-
       if (value - current !== 0) {
         $(element).datepicker("setDate", value);
       }
     }
+  };
+
+  // Binding value is an object or string observable.
+  // Properties: [optional]
+  // [cls]: Invalid value CSS class (default date-validator--invalid).
+  // [isInvalid]: Observable that reflects the validation state.
+  // If the value is just string it is interpreted as cls value.
+
+  function dateInvalidParams( valueAccessor ) {
+    var params = ko.unwrap( valueAccessor());
+    params = _.isString( params )
+         ? {cls: params}
+         : params;
+    params.cls = params.cls || "date-validator--invalid";
+    params.isInvalid = params.isInvalid || ko.observable();
+    return params;
+  }
+
+  function dateInvalidToggler( element, params) {
+    params.isInvalid( !util.toMoment( $(element).val(), "fi" ) );
+    $(element).toggleClass( params.cls, params.isInvalid() );
+  }
+
+  ko.bindingHandlers.dateInvalidClass = {
+    init: function(element, valueAccessor) {
+      var params = dateInvalidParams( valueAccessor );
+      $(element).change( _.partial( dateInvalidToggler, element, params) );
+    },
+    update: function( element, valueAccessor ) {
+      dateInvalidToggler( element, dateInvalidParams( valueAccessor ));
+    }
+
   };
 
   ko.bindingHandlers.saveIndicator = {

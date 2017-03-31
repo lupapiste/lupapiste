@@ -40,8 +40,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
   self.warrantyStart = ko.observable();
+  self.showWarrantyStart = ko.observable();
   self.warrantyEnd = ko.observable();
-
+  self.showWarrantyEnd = ko.observable();
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
@@ -877,5 +878,13 @@ LUPAPISTE.ApplicationModel = function() {
                              component: "yes-no-dialog",
                              componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                yesFn: doDelete}});
+  };
+
+  self.verdictPostfix = function () {
+    if (this.permitSubtype() === "sijoitussopimus") {
+      return ".sijoitussopimus";
+    } else {
+      return "";
+    }
   };
 };

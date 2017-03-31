@@ -12,17 +12,17 @@
    [:h3#application-info-title]
    [:table#application-info-content
     [:tr
-     [:td [:div [:b#municipality-title]] [:div#municipality-value]]
-     [:td [:div [:b#state-title]] [:div#state-value]]]
+     [:td [:div [:b#id-title]] [:div#id-value]]
+     [:td [:div [:b#address-title]] [:div#address-value]]]
     [:tr
      [:td [:div [:b#property-title]] [:div#property-value]]
-     [:td [:div [:b#submitted-title]] [:div#submitted-value]]]
+     [:td [:div [:b#municipality-title]] [:div#municipality-value]]]
     [:tr
-     [:td [:div [:b#id-title]] [:div#id-value]]
+     [:td [:div [:b#submitted-title]] [:div#submitted-value]]
+     [:td [:div [:b#state-title]] [:div#state-value]]]
+    [:tr
+     [:td [:div [:b#applicant-title]] [:div#applicant-value]]
      [:td [:div [:b#handlers-title]] [:div#handlers-value]]]
-    [:tr
-     [:td [:div [:b#address-title]] [:div#address-value]]
-     [:td [:div [:b#applicant-title]] [:div#applicant-value]]]
     [:tr
      [:td {:colspan "2"} [:div [:b#operations-title]] [:div#operations-value]]]]])
 

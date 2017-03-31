@@ -346,7 +346,13 @@
                           all => (contains [(contains {:ignore true
                                                        :path [:henkilo :henkilotiedot :hetu]})]))
                     (fact "Pertinent does not contain hetu"
-                          pertinent =not=> (contains [(contains {:path [:henkilo :henkilotiedot :hetu]})])))))))
+                          pertinent =not=> (contains [(contains {:path [:henkilo :henkilotiedot :hetu]})]))))
+           (facts "Pertinent validation skips disabled documents"
+                  (fact "enabled"
+                        (validate-pertinent {} document) => (contains [(contains {:path [:henkilo :henkilotiedot :hetu]})]))
+                  (fact "disabled"
+                        (validate-pertinent {} (assoc document :disabled true))
+                        => nil)))))
 
 (facts "Rakennuksen omistaja: omistajalaji"
   (with-timestamp some-time

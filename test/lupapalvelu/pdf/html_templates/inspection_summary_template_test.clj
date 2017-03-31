@@ -42,7 +42,7 @@
               :documents            [{:id ..doc-id..,
                                       :schema-info {:op {:id ..op-id.., :name "pientalo-laaj", :description nil},
                                                     :name "rakennuksen-laajentaminen",
-                                                    :accordion-fields [ [ "valtakunnallinenNumero" ] ],
+                                                    :accordion-fields [[[ "valtakunnallinenNumero" ]]],
                                                     :version 1},
                                       :data {:valtakunnallinenNumero { :value "bld_123456" } } }]
               :attachments          [{:id ..attachment-id..,

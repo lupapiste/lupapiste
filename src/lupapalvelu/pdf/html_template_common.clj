@@ -15,22 +15,25 @@
 (def lupa-img-path "public/lp-static/img/lupapiste-logo.png")
 
 (defn styles
-  ([] (-> styles-path io/resource io/file .listFiles styles))
+  ([] (let [this-path (util/this-jar lupapalvelu.main)]
+        (if (ss/ends-with this-path ".jar") ; running jar?
+          (->> styles-path (util/list-jar this-path) (remove ss/blank?) (map (util/fn->> (str styles-path) io/resource)) styles)
+          (->> styles-path io/resource io/file .listFiles styles))))
   ([files] (-> (ss/join " " (map slurp files))
                (ss/replace #"\s+" " "))))
 
 (defn wkhtmltopdf-page-numbering-script
   ([] (-> wkhtmltopdf-page-numbering-script-path
           io/resource
-          io/file
           slurp)))
 
-(defn image-src [file mime-type]
-  (with-open [in (io/input-stream file)]
-    (let [byte-arr (byte-array (.length file))]
-      (.read in byte-arr)
-      (->> (String. (base64/encode byte-arr) "utf-8")
-           (str "data:" mime-type ";base64,")))))
+(defn image-src [resource mime-type]
+  (with-open [in (io/input-stream resource)]
+    (let [byte-arr (byte-array 6144)] ; buffer size must be multiple of 3 to avoid incorrect padding
+      (loop [result []]
+        (if (pos? (.read in byte-arr))
+          (recur (conj result (String. (base64/encode byte-arr) "utf-8")))
+          (str "data:" mime-type ";base64," (apply str result)))))))
 
 (defn wrap-map [element coll]
   (enlive/html (map (partial vector element) coll)))
@@ -59,7 +62,7 @@
 
 (defn common-content-transformation [application]
   (enlive/transformation
-   [:#lupa-img]       (enlive/content (enlive/html [:img {:src (image-src (io/file (io/resource lupa-img-path)) "img/png")}]))
+   [:#lupa-img]       (enlive/content (enlive/html [:img {:src (image-src (io/resource lupa-img-path) "img/png")}]))
    [:#print-date]     (enlive/content (util/to-local-date (now)))
    [:#application-id] (enlive/content (:id application))
    [:#host-address]   (enlive/content (env/value :host))

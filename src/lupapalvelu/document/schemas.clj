@@ -144,16 +144,21 @@
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 (defn resolve-accordion-field-values
-  "Returns collection of document values from paths defined by schema's :accordion-fields"
+  "Returns collection of document values from paths defined by
+  schema's :accordion-fields"
   [document]
   (when-let [fields (get-in document [:schema-info :accordion-fields])]
-    (let [doc-data (:data document)
-          selected-value (when (= (ffirst fields) select-one-of-key)
-                          (get-in doc-data [(keyword select-one-of-key) :value]))
-          interesting-fields (if selected-value
-                               (filter #(= (first %) selected-value) fields)
-                               fields)]
-      (->> interesting-fields
+    (let [doc-data (:data document)]
+      (->> fields
+           (map (fn [{:keys [type paths] :as field}]
+                  (cond
+                    (= type :selected) (let [selected (get-in doc-data
+                                                              [(keyword select-one-of-key)
+                                                               :value])]
+                                         (filter #(= selected (first %)) paths))
+                    paths              paths
+                    :else              field)))
+           (apply concat)
            (map (fn [path] (get-in doc-data (conj (mapv keyword path) :value))))
            (remove util/empty-or-nil?)))))
 
@@ -1498,8 +1503,8 @@
            :type :party
            :subtype :suunnittelija
            :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
-                                         (set/difference states/post-verdict-states states/terminal-states))
-           :editable-in-states (set/union states/update-doc-states (set/difference states/post-verdict-states states/terminal-states))
+                                         states/post-verdict-but-terminal)
+           :editable-in-states (set/union states/update-doc-states states/post-verdict-but-terminal)
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 

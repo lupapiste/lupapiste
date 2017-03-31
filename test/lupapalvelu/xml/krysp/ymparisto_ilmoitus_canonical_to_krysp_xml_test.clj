@@ -46,7 +46,9 @@
       (let [ilmoittaja (xml/select lp-xml_221 [:Melutarina :ilmoittaja])]
         (xml/get-text ilmoittaja [:yTunnus]) => "1060155-5"
         (fact "maa"
-          (xml/get-text ilmoittaja [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
+              (xml/get-text ilmoittaja [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")
+        (fact "direct marketing"
+              (xml/get-text ilmoittaja [:suoramarkkinointikielto]) => "true")))
     ))
 
 

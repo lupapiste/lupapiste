@@ -1,5 +1,8 @@
 (ns lupapalvelu.ui.common)
 
+(defn get-current-language []
+  (.getCurrentLanguage js/loc))
+
 (defn query [query-name success-fn & kvs]
   (-> (js/ajax.query (clj->js query-name) (-> (apply hash-map kvs) clj->js))
       (.success (fn [js-result]

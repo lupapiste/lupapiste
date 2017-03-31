@@ -29,10 +29,12 @@
           verdict     (first (:verdicts application))
           paatos      (first (:paatokset verdict))
           poytakirja  (first (:poytakirjat paatos))]
+      (:permitSubtype application) => falsey
       (count (:verdicts application)) => 1
       (count (:paatokset verdict)) => 1
       (count (:poytakirjat paatos)) => 1
 
+      (:sopimus verdict) => false
       (:kuntalupatunnus verdict) => "aaa"
       (:status poytakirja) => 42
       (:paatoksentekija poytakirja) => "Paatoksen antaja"
@@ -74,8 +76,11 @@
       (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id :lang :fi) => ok?)
 
       (let [application (query-application sonja application-id)
+            verdict     (first (:verdicts application))
             first-attachment (get-in application [:attachments 0])]
-
+        (fact "verdict data"
+          (:draft verdict) => false
+          (:sopimus verdict) => false)
         (fact "verdict is given"
           (:state application) => "verdictGiven"
           (-> application :history last :state) => "verdictGiven")

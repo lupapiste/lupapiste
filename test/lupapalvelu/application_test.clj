@@ -14,7 +14,7 @@
             [lupapalvelu.application-api]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.attachment.type :as att-type]))
+            [lupapalvelu.ya :as ya]))
 
 (fact "update-document"
   (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
@@ -24,6 +24,7 @@
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
 (testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
+(testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -102,15 +103,15 @@
 (facts "State transitions"
   (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
     (fact "update"
-      (state-transition-update :open 1 {:created 0} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-      (state-transition-update :open 1 {:opened nil} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-      (state-transition-update :submitted 2 {:created 0 :opened 1} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
-      (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
+      (state-transition-update :open 1 {:created 0 :permitType "R"} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :open 1 {:opened nil  :permitType "R"} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :submitted 2 {:created 0 :opened 1  :permitType "R"} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
+      (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2  :permitType "R"} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
 
     (fact "re-update"
-      (state-transition-update :open 4 {:opened 3} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
-      (state-transition-update :submitted 5 {:submitted 4} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
-      (state-transition-update :constructionStarted 6 {:started 5} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})))
+      (state-transition-update :open 4 {:opened 3  :permitType "R"} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
+      (state-transition-update :submitted 5 {:submitted 4 :permitType "R"} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
+      (state-transition-update :constructionStarted 6 {:started 5 :permitType "R"} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})))
 
 (fact "Valid permit types pre-checker"
       (let [error {:ok false :text "error.unsupported-permit-type"}
@@ -403,3 +404,18 @@
                                                                                                      :data {:henkilo {:henkilotiedot {:hetu {:value "010101-5522"}}}}})
     => {:schema-info {:name "maksaja"}
         :data {:henkilo {:henkilotiedot {:hetu {:value "******-****"}}}}}))
+
+(facts "Validate digging permits linked agreement"
+  (fact "Linked agreement have to be post verdict state"
+    (validate-link-agreements-state {:state "submitted"}) => {:ok false, :text "error.link-permit-app-not-in-post-verdict-state"}
+    (validate-link-agreements-state {:state "agreementPrepared"}) => nil
+    (validate-link-agreements-state {:state "finished"}) => nil
+    (validate-link-agreements-state {:state "verdictGiven"}) => nil)
+
+  (fact "Linked agreement have to be signed"
+    (validate-link-agreements-signature {:verdicts []}) => {:ok false, :text "error.link-permit-app-not-signed"}
+    (validate-link-agreements-signature {:verdicts [{:signatures [:created "1490772437443" :user []]}]}) => nil)
+
+  (fact "Is enought that only one agreements have signature"
+    (validate-link-agreements-signature {:verdicts [{:id "123456789" :signatures [:created "1490772437443" :user []]},
+                                                    {:id "987654321"}]}) => nil))

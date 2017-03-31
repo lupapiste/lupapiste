@@ -45,6 +45,14 @@
 (def ^{:doc "See default-application-state-graph"}
   tj-hakemus-state-graph common-states/tj-hakemus-state-graph)
 
+;; New YA states
+
+(def ya-kayttolupa-state-graph common-states/ya-kayttolupa-state-graph)
+(def ya-sijoituslupa-state-graph common-states/ya-sijoituslupa-state-graph)
+(def ya-sijoitussopimus-state-graph common-states/ya-sijoitussopimus-state-graph)
+(def ya-jatkoaika-state-graph common-states/ya-jatkoaika-state-graph)
+(def ya-tyolupa-state-graph default-application-state-graph)
+
 ; TODO draft versions this forward
 
 (def
@@ -107,17 +115,22 @@
                        graph)))))
 
 (defn all-next-states
-  "Returns a set of states that are after the start state in graph, including start state itself."
+  "Returns a set of states that are after the start state in graph, including start state itself.
+   If start is not part of the graph, empty set will be returned."
   [graph start & [results]]
   (let [results (set results)
         transitions (get graph start)]
     (cond
+      (not (contains? graph start)) #{}
       (empty? transitions) #{start} ; terminal state
       (results start) results ; loop!
       :else (into (conj results start)
               (apply union (map #(all-next-states graph % (conj results start)) transitions))))))
 
-(def verdict-given-states #{:verdictGiven :foremanVerdictGiven :acknowledged})
+(def verdict-given-states #{:verdictGiven                   ; R + others
+                            :foremanVerdictGiven :acknowledged ; foreman applications
+                            :finished :agreementPrepared :agreementSigned  ; YA cases
+                            })
 
 (def post-verdict-states
  (let [graphs (filter (comp (partial some verdict-given-states) keys) all-graphs)]
@@ -126,6 +139,9 @@
      #{:canceled}
      ; ymp-application-state-graph loops back to pre verdict states
      pre-verdict-states)))
+
+(def ya-post-verdict-states
+  (disj post-verdict-states :agreementPrepared))
 
 (def post-submitted-states
   "Submitted state and all states after. Cancelled omitted."
@@ -165,6 +181,8 @@
 (def pre-verdict-but-draft (difference pre-verdict-states #{:draft}))
 (def all-but-draft (difference all-states #{:draft}))
 
+(def post-verdict-but-terminal (difference post-verdict-states terminal-states))
+
 (defn- drop-state-set [drop-states]
   (cond
     (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))
@@ -180,8 +198,6 @@
 (defn all-inforequest-states-but [& drop-states]
   (difference all-inforequest-states (drop-state-set drop-states)))
 
-(def all-with-acknowledged-but-not-draft-or-terminal
-  (conj all-but-draft-or-terminal :acknowledged))
 
 (comment
   (require ['rhizome.viz :as 'viz])

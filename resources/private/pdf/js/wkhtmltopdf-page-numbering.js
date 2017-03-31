@@ -10,7 +10,7 @@
   for (var i in x) {
     if (i) {
       var z = x[i].split("=",2);
-      pdfInfo[z[0]] = unescape(z[1]);
+      pdfInfo[z[0]] = decodeURIComponent(z[1]);
     }
   }
 
