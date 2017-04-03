@@ -107,4 +107,4 @@
   [{application :application user :user :as command}]
   (->> (foreman/get-linked-foreman-applications application)
        (sort-by :id)
-       (ok :applicatios)))
+       (ok :applications)))
