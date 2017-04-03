@@ -1645,7 +1645,7 @@
 "map.open-3d.wait" "sv" "Kartan öppnas..."
 "markatilan-laajentaminen._group_label" "en" "Modification or extension of the wet room"
 "markatilan-laajentaminen._group_label" "fi" "Märkätilan muuttaminen tai laajentaminen"
-"markatilan-laajentaminen._group_label" "sv" "Ändring eller utbyggnad av våtutrymme"
+"markatilan-laajentaminen._group_label" "sv" "Ändring eller tillbyggnad av våtutrymme"
 "masto-tms._group_label" "en" "Mast, barrel, tank, platform or similar construction"
 "masto-tms._group_label" "fi" "Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen"
 "masto-tms._group_label" "sv" "Byggande av en ny mast eller dylikt"
