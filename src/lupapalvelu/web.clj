@@ -802,4 +802,11 @@
                                                                             StandardCharsets/UTF_8)
                                                                  StandardCharsets/ISO_8859_1)
                                   "Server" "Microsoft-IIS/7.5"))
-         (resp/status 200))))
+         (resp/status 200)))
+
+  (letfn [(response [status] (resp/status (clojure.edn/read-string status)
+                                          (format "<FOO>Echo %s status</FOO>" status)))]
+    (defpage [:post "/dev/statusecho/:status"] {status :status}
+      (response status))
+    (defpage [:get "/dev/statusecho/:status"] {status :status}
+      (response status))))
