@@ -65,13 +65,30 @@
                                                   {:finished false,
                                                    :id "..target-id-3..",
                                                    :target-name "Last target"}]}]}
+          foreman-apps [{:documents [{:schema-info {:name "tyonjohtaja-v2"},
+                                      :data {:kuntaRoolikoodi {:value "erityisalojen ty\u00F6njohtaja"},
+                                             :yritys {:yritysnimi {:value ""},
+                                                      :liikeJaYhteisoTunnus {:value ""}},
+                                             :patevyys-tyonjohtaja {:koulutusvalinta {:value "rakennusmestari"},
+                                                                    :koulutus {:value ""},
+                                                                    :valmistumisvuosi {:value "1966"}, :kokemusvuodet {:value "50"}, :valvottavienKohteidenMaara {:value "13"}},
+                                             :henkilotiedot {:etunimi {:value "Pena"}, :sukunimi {:value "Panaani"}, :hetu {:value "010203-040A"}}, :patevyysvaatimusluokka {:value "A"}}}]}
+                        {:documents [{:schema-info {:name "tyonjohtaja-v2"},
+                                      :data {:kuntaRoolikoodi {:value "IV-ty\u00F6njohtaja"},
+                                             :yritys {:yritysnimi {:value ""},
+                                                      :liikeJaYhteisoTunnus {:value ""}},
+                                             :patevyys-tyonjohtaja {:koulutusvalinta {:value "rakennusmestari"},
+                                                                    :koulutus {:value ""},
+                                                                    :valmistumisvuosi {:value "1966"}, :kokemusvuodet {:value "50"}, :valvottavienKohteidenMaara {:value "13"}},
+                                             :henkilotiedot {:etunimi {:value "Ilkka"}, :sukunimi {:value "Ilmastoija"}, :hetu {:value "010266-010B"}}, :patevyysvaatimusluokka {:value "A"}}}]}]
           file-id (mongo/create-id)]
 
       (fact "inpection summary test data matches schema"
         (sc/check [(replace-in-schema InspectionSummary ssc/ObjectIdStr sc/Str)] (:inspection-sumamries app)) => nil)
 
       (fact "pdf creation succeeded"
-        (create-inspection-summary-pdf app "en" "..summary-id.." :file-id file-id) => ok?)
+        (create-inspection-summary-pdf app "en" "..summary-id.." :file-id file-id) => ok?
+        (provided (lupapalvelu.foreman/get-linked-foreman-applications app) => foreman-apps))
 
       (facts "pdf contents"
         (files/with-temp-file file
@@ -98,4 +115,10 @@
               (or (re-find #"First inspection target" contents) contents) => "First inspection target")
 
             (fact "attachment file name"
-              (or (re-find #"liite.pdf" contents) contents) => "liite.pdf")))))))
+              (or (re-find #"liite.pdf" contents) contents) => "liite.pdf")
+
+            (fact "pena as foreman"
+              (or (re-find #"Pena Panaani \(Supervisor of specialist fields\)" contents) contents) => "Pena Panaani (Supervisor of specialist fields)")
+
+            (fact "ilkka as foreman"
+              (or (re-find #"Ilkka Ilmastoija \(IV supervisor\)" contents) contents) => "Ilkka Ilmastoija (IV supervisor)")))))))
