@@ -98,7 +98,6 @@
               :all (= (count history-data) (count reduced-data))))))
     (fail :error.application-not-found)))
 
-
 (defquery foreman-applications
   {:user-roles #{:applicant :authority :oirAuthority}
    :states           states/all-states
@@ -106,12 +105,6 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]}
   [{application :application user :user :as command}]
-  (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})
-        apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
-        foreman-application-links (filter #(= "tyonjohtajan-nimeaminen-v2"
-                                              (get-in % [(keyword (first (:link %))) :apptype]))
-                                          apps-linking-to-us)
-        foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
-        applications (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents])
-        mapped-applications (map foreman/foreman-application-info applications)]
-    (ok :applications (sort-by :id mapped-applications))))
+  (->> (foreman/get-linked-foreman-applications application)
+       (sort-by :id)
+       (ok :applicatios)))

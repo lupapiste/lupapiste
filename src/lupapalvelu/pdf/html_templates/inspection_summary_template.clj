@@ -72,8 +72,8 @@
        (common/page-content)
        (common/html-page nil)))
 
-(enlive/deftemplate inspection-summary (enlive/html inspection-summary-page-template) [application lang summary-id]
+(enlive/deftemplate inspection-summary (enlive/html inspection-summary-page-template) [application foreman-apps lang summary-id]
   [:head :style] (enlive/content (common/styles))
-  [:body]        (enlive/do-> (app-info/application-info-transformation application lang)
+  [:body]        (enlive/do-> (app-info/application-info-transformation application foreman-apps lang)
                               (project-description-tranformation application lang)
                               (inspection-summary-transformation application lang summary-id)))
