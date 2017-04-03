@@ -52,14 +52,14 @@
    (i18n/with-lang lang
      [:div.document (convert-element data [] [(or i18name name)] (assoc schema :type :group))])))
 
-(defn- parse-18nkey [{:keys [i18nkey] :as schema}]
+(defn- parse-i18nkey [{:keys [i18nkey] :as schema}]
   (some->> (ss/split i18nkey #"\.") (mapv keyword)))
 
-(defn- get-in-schema-with-18n-path [{{name :name i18name :i18name} :info :as doc-schema} path]
+(defn- get-in-schema-with-i18n-path [{{name :name i18name :i18name} :info :as doc-schema} path]
   (->> (remove (comp number? read-string ss/->plain-string) path)
        (reduce (fn [{i18n-path ::i18n-path :as schema} subschema-name]
                  (as-> (schemas/get-subschema schema subschema-name) $
-                   (assoc $ ::i18n-path (or (parse-18nkey $)
+                   (assoc $ ::i18n-path (or (parse-i18nkey $)
                                             (conj i18n-path (keyword subschema-name))))))
                (assoc doc-schema ::i18n-path [(or i18name name)]))))
 
@@ -68,7 +68,7 @@
   ([{schema-info :schema-info data :data :as doc} lang path]
    (get-value-in (schemas/get-schema schema-info) data lang path))
   ([schema data lang path]
-   (let [elem-schema (get-in-schema-with-18n-path schema path)]
+   (let [elem-schema (get-in-schema-with-i18n-path schema path)]
      (i18n/with-lang lang
        (element-value data path (::i18n-path elem-schema) elem-schema)))))
 
@@ -109,7 +109,7 @@
     (convert-element doc-data path i18n-path (dissoc elem-schema :show-when))))
 
 (defmethod convert-element ::i18nkey [doc-data path i18n-path elem-schema]
-  (let [i18n-path (parse-18nkey elem-schema)]
+  (let [i18n-path (parse-i18nkey elem-schema)]
     (convert-element doc-data path i18n-path (dissoc elem-schema :i18nkey))))
 
 (defmethod convert-element ::repeating [doc-data path i18n-path elem-schema]
@@ -144,7 +144,7 @@
 (defn- get-i18n-path-for-selection [doc-data path i18n-path schema]
   (let [selected (->> (conj path :value) (map #(if (keyword? %) % (keyword (str %)))) (get-in doc-data))]
     (when selected
-      (or (parse-18nkey (schemas/get-subschema schema selected))
+      (or (parse-i18nkey (schemas/get-subschema schema selected))
           (conj i18n-path selected)))))
 
 (defmethod element-value :select [doc-data path i18n-path schema]
