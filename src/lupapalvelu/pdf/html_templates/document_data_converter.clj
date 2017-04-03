@@ -21,12 +21,12 @@
                       :read-only :read-only-after-sent :emit :listen
                       :required})
 
-(defn- elem-dispatch [_ _ _ {:keys [name] :as schema}]
+(defn- elem-dispatch [_ _ _ schema]
   ;;(assert (every? supported-keys (keys schema)) (format "Unsupported key(s) in '%s' schema: %s" name (remove supported-keys (keys schema))))
   (cond
+    (some (comp #{schemas/select-one-of-key} :name) (:body schema)) ::select-one-of
     (:exclude-from-pdf schema) ::exclude-from-pdf
     (:blacklist schema)  ::blacklist
-    (= name schemas/select-one-of-key) ::select-one-of
     (:i18nkey schema)    ::i18nkey
     (:i18nprefix schema) ::i18nprefix
     (:locPrefix schema)  ::locPrefix
@@ -61,7 +61,7 @@
                  (as-> (schemas/get-subschema schema subschema-name) $
                    (assoc $ ::i18n-path (or (parse-i18nkey $)
                                             (conj i18n-path (keyword subschema-name))))))
-               (assoc doc-schema ::i18n-path [(or i18name name)]))))
+               (assoc doc-schema ::i18n-path [(keyword (or i18name name))]))))
 
 (defn get-value-in
   "Get localized value for element inside document data."
@@ -114,7 +114,7 @@
 
 (defmethod convert-element ::repeating [doc-data path i18n-path elem-schema]
   (->> (range (count (get-in doc-data path)))
-       (map #(convert-element doc-data (conj path %) i18n-path (-> elem-schema (update :name str "-" %) (dissoc :repeating))))
+       (map #(convert-element doc-data (conj path (kw %)) i18n-path (-> elem-schema (update :name str "-" %) (dissoc :repeating))))
        (apply vector :div.repeating)))
 
 (defmethod convert-element ::layout [doc-data path i18n-path {:keys [layout] :as elem-schema}]
@@ -124,6 +124,7 @@
 (defmethod convert-element ::select-one-of [doc-data path i18n-path {elem-body :body :as elem-schema}]
   (let [selected (keyword (get-in doc-data (conj path (keyword schemas/select-one-of-key) :value)))
         selected-schema (util/find-first (comp #{selected} keyword :name) elem-body)]
+    ;; TODO: Might need group header
     (convert-element doc-data (conj path selected) (conj i18n-path selected) selected-schema)))
 
 (defmethod convert-element ::hidden [doc-data path i18n-path {elem-body :body :as elem-schema}]
@@ -136,6 +137,9 @@
   (leaf-element doc-data path i18n-path schema {}))
 
 (defmethod convert-element :text [doc-data path i18n-path schema]
+  (leaf-element doc-data path i18n-path schema {}))
+
+(defmethod convert-element :select [doc-data path i18n-path schema]
   (leaf-element doc-data path i18n-path schema {}))
 
 (defmethod element-value :checkbox [doc-data path i18n-path schema]

@@ -25,12 +25,15 @@
     (let [app  {:primaryOperation     {:id "..op-id..", :name "pientalo-laaj", :description nil}
                 :municipality         "300"
                 :state                "verdictGiven"
-                :documents            [{:id "..doc-id..",
-                                        :schema-info {:op {:id "..op-id..", :name "pientalo-laaj", :description nil},
+                :documents            [{:schema-info {:op {:id "..op-id..", :name "pientalo-laaj", :description nil},
                                                       :name "rakennuksen-laajentaminen",
-                                                      :accordion-fields schemas/buildingid-accordion-paths
-                                                      :version 1},
-                                        :data {:valtakunnallinenNumero {:value "bld_123456" }}}]
+                                                      :accordion-fields schemas/buildingid-accordion-paths},
+                                        :data {:valtakunnallinenNumero {:value "bld_123456" }}}
+                                       {:schema-info {:name "hankkeen-kuvaus-rakennuslupa"
+                                                      :subtype :hankkeen-kuvaus,}
+                                        :data {:kuvaus {:value "Some project description."}
+                                               :hankkeenVaativuus {:value "AA"}
+                                               :poikkeamat {:value "Some deviations and reasons for them."}}}]
                 :attachments          [{:id "..attachment-id..",
                                         :groupType "operation",
                                         :type {:type-id :tarkastusasiakirja, :type-group :katselmukset_ja_tarkastukset},
@@ -98,6 +101,15 @@
 
             (fact "no missing translations"
               (re-find #"\?\?\?" contents) => nil)
+
+            (fact "project description header"
+              (or (re-find #"Description of the project" contents) contents) => "Description of the project")
+
+            (fact "project description group content"
+              (or (re-find #"Some project description." contents) contents) => "Some project description.")
+
+            (fact "project description deviations content"
+              (or (re-find #"Some deviations and reasons for them." contents) contents) => "Some deviations and reasons for them.")
 
             (fact "municipality"
               (or (re-find #"Kuortane" contents) contents) => "Kuortane")

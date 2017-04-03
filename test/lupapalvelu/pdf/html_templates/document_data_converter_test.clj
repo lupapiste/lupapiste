@@ -112,3 +112,84 @@
                   "fi"
                   [:bar]) => "a-luokka"
     (provided (lupapalvelu.i18n/localize :fi :bim :bom "A") => "a-luokka")))
+
+(facts convert-element
+  (fact "string"
+    (convert-element {:foo {:value "fiz"}, :bar {:value "buz"}} [:foo] [:docu :foo] {:name "foo", :type :string})
+    => [:span#foo.leaf-string {} [:div.element-title [:b "foo-title"]] [:div.element-value "fiz"]]
+    (provided (lupapalvelu.i18n/loc :docu :foo) => "foo-title"))
+
+  (fact "select"
+    (convert-element {:foo {:value "fiz"}}
+                     [:foo]
+                     [:docu :foo]
+                     {:name "foo" :type :select
+                      :body [{:name "buz"}
+                             {:name "fiz"}
+                             {:name "quz"}]}) => [:span#foo.leaf-select {} [:div.element-title [:b "foo-title"]] [:div.element-value "fiz-value"]]
+    (provided (lupapalvelu.i18n/loc :docu :foo "fiz") => "fiz-value"
+              (lupapalvelu.i18n/loc :docu :foo) => "foo-title"))
+
+  (fact "group"
+    (convert-element {:foo {:baz {:value "bazibaa"} :fiz {:value "fizizizizii"} :quz {:value "quziquziquu"}}}
+                     [:foo]
+                     [:docu :foo]
+                     {:name "foo" :type :group
+                      :body [{:name "baz", :type :string}
+                             {:name "fiz", :type :string}
+                             {:name "quz", :type :string}]})
+    => [:div#foo.group [:h3.group-title "foo-title"]
+        [:span#baz.leaf-string {} [:div.element-title [:b "baz-title"]] [:div.element-value "bazibaa"]]
+        [:span#fiz.leaf-string {} [:div.element-title [:b "fiz-title"]] [:div.element-value "fizizizizii"]]
+        [:span#quz.leaf-string {} [:div.element-title [:b "quz-title"]] [:div.element-value "quziquziquu"]]]
+    (provided (lupapalvelu.i18n/loc :docu :foo "_group_label") => "foo-title"
+              (lupapalvelu.i18n/loc :docu :foo :baz) => "baz-title"
+              (lupapalvelu.i18n/loc :docu :foo :fiz) => "fiz-title"
+              (lupapalvelu.i18n/loc :docu :foo :quz) => "quz-title"))
+
+  (fact "::hide-when - hide"
+    (convert-element {:foo {:value "fiz"}, :bar {:value "buz"}} [:foo] [:docu :foo] {:name "foo", :type :string, :hide-when {:path "bar" :values #{"buz"}}}) => nil)
+
+  (fact "::hide-when - show"
+    (convert-element {:foo {:value "fiz"}, :bar {:value "buz"}} [:foo] [:docu :foo] {:name "foo", :type :string, :hide-when {:path "bar" :values #{"hii"}}})
+    => [:span#foo.leaf-string {} [:div.element-title [:b "foo-title"]] [:div.element-value "fiz"]]
+    (provided (lupapalvelu.i18n/loc :docu :foo) => "foo-title"))
+
+  (fact "::show-when - hide"
+    (convert-element {:foo {:value "fiz"}, :bar {:value "buz"}} [:foo] [:docu :foo] {:name "foo", :type :string, :show-when {:path "bar" :values #{"hii"}}}) => nil)
+
+  (fact "::show-when - show"
+    (convert-element {:foo {:value "fiz"}, :bar {:value "buz"}} [:foo] [:docu :foo] {:name "foo", :type :string, :show-when {:path "bar" :values #{"buz"}}})
+    => [:span#foo.leaf-string {} [:div.element-title [:b "foo-title"]] [:div.element-value "fiz"]]
+    (provided (lupapalvelu.i18n/loc :docu :foo) => "foo-title"))
+
+  (fact "::i18nkey"
+    (convert-element {:foo {:value "fiz"}} [:foo] [:docu :foo] {:name "foo", :type :string, :i18nkey "some.loc.key"})
+    => [:span#foo.leaf-string {} [:div.element-title [:b "some-loc-value"]] [:div.element-value "fiz"]]
+    (provided (lupapalvelu.i18n/loc :some :loc :key) => "some-loc-value"))
+
+  (fact "::repeating"
+    (convert-element {:foo {:0 {:value "fiz"} :1 {:value "buz"}}} [:foo] [:docu :foo] {:name "foo", :type :string, :repeating true})
+    => [:div.repeating
+        [:span#foo-0.leaf-string {} [:div.element-title [:b "foo-title"]] [:div.element-value "fiz"]]
+        [:span#foo-1.leaf-string {} [:div.element-title [:b "foo-title"]] [:div.element-value "buz"]]]
+    (provided (lupapalvelu.i18n/loc :docu :foo) => "foo-title"))
+
+  (fact "::layout"
+    (convert-element {:foo {:value "fiz"}} [:foo] [:docu :foo] {:name "foo", :type :string, :layout :special})
+    => [:span#foo.leaf-string.layout-special {} [:div.element-title [:b "foo-title"]] [:div.element-value "fiz"]]
+    (provided (lupapalvelu.i18n/loc :docu :foo) => "foo-title"))
+
+  (fact "::select-one-of"
+    (convert-element {:foo {:_selected {:value "fiz"} :fiz {:value "fizizizizii"} :quz {:value "quziquziquu"}}}
+                     [:foo]
+                     [:docu :foo]
+                     {:name "foo" :type :group
+                      :body [{:name "_selected", :type :radioGroup}
+                             {:name "fiz", :type :string}
+                             {:name "quz", :type :string}]})
+    => [:span#fiz.leaf-string {} [:div.element-title [:b "foo-title"]] [:div.element-value "fizizizizii"]]
+    (provided (lupapalvelu.i18n/loc :docu :foo :fiz) => "foo-title"))
+
+  (fact "::hidden"
+    (convert-element {:foo {:0 {:value "fiz"} :1 {:value "buz"}}} [:foo] [:docu :foo] {:name "foo", :type :string, :hidden true}) => nil))

@@ -60,10 +60,10 @@
 
 (defn project-description-tranformation [application lang]
   (enlive/transformation
-   [:#project-desc] (-> (util/find-first (comp #{:hankkeen-kuvaus} :subtype :schema-info) (:documents application))
-                        (doc-convert/doc->html lang)
-                        enlive/html
-                        enlive/content)))
+   [:#project-desc] (some-> (util/find-first (comp #{:hankkeen-kuvaus} :subtype :schema-info) (:documents application))
+                            (doc-convert/doc->html lang)
+                            enlive/html
+                            enlive/content)))
 
 (def inspection-summary-page-template
   (->> [app-info/application-info-template

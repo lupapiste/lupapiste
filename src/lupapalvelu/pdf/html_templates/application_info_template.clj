@@ -25,7 +25,7 @@
      [:td [:div [:b#applicant-title]] [:div#applicant-value]]
      [:td [:div [:b#handlers-title]] [:div#handlers-value]]]
     [:tr
-     [:td {:colspan "2"} [:div [:b#foremans-title]] [:div#foremans-value]]]
+     [:td {:colspan "2"} [:div [:b#foremen-title]] [:div#foremen-value]]]
     [:tr
      [:td {:colspan "2"} [:div [:b#operations-title]] [:div#operations-value]]]]])
 
@@ -82,7 +82,7 @@
     [:#address-value]      (enlive/content (:address application))
     [:#applicant-title]    (enlive/content (i18n/localize lang "applicant"))
     [:#applicant-value]    (enlive/content (common/wrap-map :div (:_applicantIndex application)))
-    [:#foremans-title]     (enlive/content (i18n/localize lang "foreman.allForemen"))
-    [:#foremans-value]     (enlive/content (common/wrap-map :div (get-foremen foreman-apps lang)))
+    [:#foremen-title]      (enlive/content (i18n/localize lang "foreman.allForemen"))
+    [:#foremen-value]      (enlive/content (common/wrap-map :div (get-foremen foreman-apps lang)))
     [:#operations-title]   (enlive/content (i18n/localize lang "operations"))
     [:#operations-value]   (enlive/content (common/wrap-map :div (get-operations application lang))))))
