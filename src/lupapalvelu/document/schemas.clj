@@ -1505,7 +1505,7 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
-           :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
+           :addable-in-states (set/union states/create-doc-states
                                          states/post-verdict-but-terminal)
            :editable-in-states (set/union states/update-doc-states states/post-verdict-but-terminal)
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
