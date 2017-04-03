@@ -121,6 +121,7 @@
               (hub/send "attachmentsService::updateAll"))
             (refresh))
           :id         (:applicationId @component-state)
+          :lang       (common/get-current-language)
           :summaryId  (:id @selected-summary)
           :isLocked   locked?))
 

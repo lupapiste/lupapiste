@@ -114,7 +114,8 @@ var LUPAPISTE = LUPAPISTE || {};
 
       if (self.currentHash === "") {
         if (_.isFunction(window.location.replace)) {
-          window.location.replace(startPageHref + "#!/" + self.startPage);
+          var hasHash = _.endsWith(startPageHref, "#");
+          window.location.replace(startPageHref + (hasHash ? "!/" : "#!/") + self.startPage);
         } else {
           pageutil.openPage(self.startPage);
         }

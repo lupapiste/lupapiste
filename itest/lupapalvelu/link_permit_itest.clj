@@ -46,7 +46,23 @@
                                     :propertyId property-id
                                     :address "Paatoskuja 15"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
-        test-application-id       (:id test-application)]
+        test-application-id       (:id test-application)
+
+        ;; YA Sijoitussopimus agreement
+        sijoitussopimus-application     (create-and-submit-application apikey
+                                          :propertyId property-id
+                                          :address "Sopimuskuja 1"
+                                          :operation "ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen") => truthy
+        sijoitussopimus-application-id  (:id sijoitussopimus-application)
+        _                               (generate-documents sijoitussopimus-application apikey)
+        _                               (command apikey :approve-application :id sijoitussopimus-application-id :lang "fi")
+
+        ;; YA Tyolupa application that gets link permit
+        tyolupa-application             (create-application apikey
+                                          :propertyId property-id
+                                          :address "Sopimuskuja 1"
+                                          :operation "ya-katulupa-kaapelityot") => truthy
+        tyolupa-application-id          (:id tyolupa-application)]
 
     (fact "New ya-jatkoaika requires link permit"
       (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika" :propertyId property-id) ]
@@ -76,10 +92,12 @@
     (fact "The jatkoaika application is not among the matches in the link permit dropdown selection"
       (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
             matches (:app-links matches-resp)]
-        (count matches) => 3
+        (count matches) => 5
         (every? #{approved-application-id
                   verdict-given-application-id
-                  submitted-application-id} (map :id matches)) => true?))
+                  submitted-application-id
+                  sijoitussopimus-application-id
+                  tyolupa-application-id} (map :id matches)) => true?))
 
     (fact "Can not insert invalid key"
       (command apikey :add-link-permit :id test-application-id :linkPermitId "foo.bar") => fail?
@@ -111,5 +129,21 @@
     (fact "Application matches for dropdown selection contents do not include the applications that have a link-permit relation to the current application"
       (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
             matches (:app-links matches-resp)]
-        (count matches) => 1
-        (-> matches first :id) => approved-application-id))))
+        (count matches) => 3
+        (-> matches first :id) => approved-application-id))
+
+    (fact "Sijoitussopimus is insert as linked agreement ot tyolupa application"
+      (command apikey :add-link-permit :id tyolupa-application-id :linkPermitId sijoitussopimus-application-id) => ok?)
+
+    (fact "Tyolupa cant be submitted before linked sijoitussopimus is post verdict state"
+      (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-in-post-verdict-state"))
+
+    (fact "Tyolupa cant be submitted before linked sijoitussopimus is signed"
+      (give-verdict apikey sijoitussopimus-application-id)
+      (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-signed"))
+
+    (fact "Tyolupa should be able to submit when linked sijoitussopimus is signed"
+      (let [linked-application (query-application apikey sijoitussopimus-application-id)
+            verdict-id (:id (first (:verdicts linked-application)))]
+      (command apikey :sign-verdict :id sijoitussopimus-application-id :verdictId verdict-id :password "sonja" :lang "fi") => ok?)
+      (command apikey :submit-application :id tyolupa-application-id) => ok?)))

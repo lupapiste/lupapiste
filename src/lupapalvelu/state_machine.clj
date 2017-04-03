@@ -53,7 +53,7 @@
     unauthorized))
 
 (defn verdict-given-state [application]
-  (util/find-first (partial valid-state? application) states/verdict-given-states))
+  (util/find-first (partial valid-state? application) (cons :verdictGiven states/verdict-given-states)))
 
 (defn state-seq [graph]
   (let [initial-state (states/initial-state graph)]

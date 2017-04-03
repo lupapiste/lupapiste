@@ -177,7 +177,7 @@ $preamble-min-height: 280px; // at least the size of the map container
       overflow: hidden;
       white-space: nowrap;
       height: 32px;
-      @mixin past-state{
+      @mixin hide-past-state {
         // The passed states are hidden in order to
         // make sure that the future steps are all visible.
         display: none;
@@ -189,6 +189,12 @@ $preamble-min-height: 280px; // at least the size of the map container
         &:after {
             border-left: 11px solid $green-dark;
           }
+      }
+
+      @mixin hide-pre-verdict-states {
+        .draft-box, .open-box, .submitted-box, .sent-box {
+          @include hide-past-state;
+        }
       }
 
       div {
@@ -210,7 +216,7 @@ $preamble-min-height: 280px; // at least the size of the map container
             width: 0;
             height: 0;
             top: -1px;
-            right: -10px;
+            right: -9px;
             border-top: 17px solid transparent;
             border-left: 11px solid $app-gray-light;
             border-bottom: 17px solid transparent;
@@ -218,7 +224,14 @@ $preamble-min-height: 280px; // at least the size of the map container
           }
         }
 
-        .constructionStarted-box, .inUse-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box, .extinct-box, .onHold-box, .appealed-box  {
+        .constructionStarted-box, .inUse-box,
+        .closed-box, .complementNeeded-box,
+        .verdictGiven-box, .foremanVerdictGiven-box,
+        .acknowledged-box, .canceled-box,
+        .final-box, .extinct-box,
+        .onHold-box, .appealed-box,
+        .agreementPrepared-box, .agreementSigned-box,
+        .finished-box  {
           display: none;
         }
         &.draft {
@@ -228,7 +241,7 @@ $preamble-min-height: 280px; // at least the size of the map container
         }
         &.open {
           .draft-box {
-            @include past-state;
+            @include hide-past-state;
           }
           .open-box {
             @include active-state;
@@ -239,7 +252,7 @@ $preamble-min-height: 280px; // at least the size of the map container
             @include active-state;
           }
           .draft-box, .open-box {
-            @include past-state;
+            @include hide-past-state;
           }
         }
         &.sent {
@@ -247,7 +260,7 @@ $preamble-min-height: 280px; // at least the size of the map container
             @include active-state;
           }
           .draft-box, .open-box, .submitted-box {
-            @include past-state;
+            @include hide-past-state;
           }
           .verdictGiven-box, .foremanVerdictGiven-box, .acknowledged-box  {
             display: inline-block;
@@ -258,16 +271,14 @@ $preamble-min-height: 280px; // at least the size of the map container
             @include active-state;
           }
           .draft-box, .open-box, .submitted-box {
-            @include past-state;
+            @include hide-past-state;
           }
         }
         &.verdictGiven {
           .verdictGiven-box {
             @include active-state;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box, .final-box {
             display: inline-block;
           }
@@ -276,9 +287,7 @@ $preamble-min-height: 280px; // at least the size of the map container
           .foremanVerdictGiven-box {
             @include active-state;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .foremanVerdictGiven-box  {
             display: inline-block;
           }
@@ -287,7 +296,8 @@ $preamble-min-height: 280px; // at least the size of the map container
           .constructionStarted-box {
             @include active-state;
           }
-          .verdictGiven-box, .draft-box, .open-box, .submitted-box, .sent-box   {
+          @include hide-pre-verdict-states;
+          .verdictGiven-box   {
             display: none;
           }
           .constructionStarted-box, .inUse-box, .closed-box  {
@@ -301,9 +311,7 @@ $preamble-min-height: 280px; // at least the size of the map container
           .verdictGiven-box, .constructionStarted-box {
             display: none;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .inUse-box, .closed-box  {
             display: inline-block;
           }
@@ -315,9 +323,7 @@ $preamble-min-height: 280px; // at least the size of the map container
           .verdictGiven-box, .constructionStarted-box, .inUse-box {
             display: none;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .closed-box  {
             display: inline-block;
           }
@@ -329,9 +335,7 @@ $preamble-min-height: 280px; // at least the size of the map container
           .verdictGiven-box {
             display: none;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .onHold-box  {
             display: inline-block;
           }
@@ -343,9 +347,7 @@ $preamble-min-height: 280px; // at least the size of the map container
           .verdictGiven-box {
             display: none;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .verdictGiven-box, .appealed-box  {
             display: inline-block;
           }
@@ -357,9 +359,7 @@ $preamble-min-height: 280px; // at least the size of the map container
           .verdictGiven-box {
             display: none;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
           .extinct-box  {
             display: inline-block;
           }
@@ -368,17 +368,13 @@ $preamble-min-height: 280px; // at least the size of the map container
           .acknowledged-box {
             @include active-state;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            @include past-state;
-          }
+          @include hide-pre-verdict-states;
         }
         &.canceled {
           .canceled-box {
             @include active-state;
           }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
-            display: none;
-          }
+          @include hide-pre-verdict-states;
         }
         &.proclaimed {
           .proclaimed-box {
@@ -388,10 +384,34 @@ $preamble-min-height: 280px; // at least the size of the map container
             display: inline-block;
           }
         }
+        &.agreementPrepared {
+          .agreementPrepared-box {
+            @include active-state;
+          }
+          .agreementSigned-box {
+            display: inline-block;
+          }
+          @include hide-pre-verdict-states;
+        }
+        &.agreementSigned {
+          .agreementSigned-box {
+            @include active-state;
+          }
+          @include hide-pre-verdict-states;
+          .agreementPrepared-box {
+            display: inline-block;
+          }
+        }
         &.final {
           .final-box {
             @include active-state;
           }
+        }
+        &.finished {
+          .finished-box {
+            @include active-state;
+          }
+          @include hide-pre-verdict-states;
         }
       }
     }

@@ -25,7 +25,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -38,7 +37,7 @@
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            ))
+            [lupapalvelu.ya :as ya]))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -304,6 +303,7 @@
                      (foreman/validate-application application)
                      (app/validate-link-permits application)
                      (app/validate-fully-formed application)
+                     (ya/validate-digging-permit application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
                      (suti/suti-submit-validation command))))
@@ -513,15 +513,16 @@
     (ok)))
 
 (defcommand change-permit-sub-type
-  {:parameters [id permitSubtype]
-   :user-roles #{:applicant :authority}
+  {:parameters       [id permitSubtype]
+   :user-roles       #{:applicant :authority}
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
-   :states     states/pre-sent-application-states
+   :states           states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
-   :pre-checks [app/validate-has-subtypes
-                app/pre-check-permit-subtype
-                foreman/allow-foreman-only-in-foreman-app
-                app/validate-authority-in-drafts]}
+   :pre-checks       [app/validate-has-subtypes
+                      app/pre-check-permit-subtype
+                      foreman/allow-foreman-only-in-foreman-app
+                      ya/authority-only
+                      app/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
   (ok))
@@ -850,7 +851,7 @@
   [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]
   (update-application command
                       (util/deep-merge
-                       (app/state-transition-update :open created app user)
+                       (app/state-transition-update :open created (assoc app :infoRequest false) user)
                        {$set  {:infoRequest            false
                                :openInfoRequest        false
                                :convertedToApplication created

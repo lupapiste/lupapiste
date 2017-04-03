@@ -89,6 +89,9 @@
 (def olli       (apikey-for "olli"))
 (def olli-id    (id-for "olli"))
 (def raktark-helsinki (apikey-for "rakennustarkastaja@hel.fi"))
+(def jussi      (apikey-for "jussi"))
+(def jussi--id  (id-for "jussi"))
+
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")

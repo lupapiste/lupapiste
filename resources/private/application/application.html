@@ -100,6 +100,7 @@
                               <div>
                                 <p class="form-label" data-bind="text: loc('application.permitSubtypes') + ':', css: {tip:permitSubtypeMandatory}"></p>
                                 <span class="application_summary_text">
+                                  <!-- ko if: permitSubtypes().length > 1 -->
                                   <select class="dropdown"
                                           data-bind="options: permitSubtypes, value: permitSubtype,
                                                      enable: $root.authorization.ok('change-permit-sub-type'),
@@ -107,6 +108,10 @@
                                                      optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                           id="permitSubtypeSelect">
                                   </select>
+                                  <!-- /ko -->
+                                  <!-- ko if: permitSubtypes().length == 1 -->
+                                  <span class="permit-subtype-text" data-bind="text: loc('permitSubtype.'+permitSubtype())"></span>
+                                  <!-- /ko -->
                                   <!-- ko if: permitSubtypeHelp() -->
                                   <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>
                                   <!-- /ko -->
@@ -276,7 +281,7 @@
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                                 <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
                                    class="link-btn">
-                                    <span data-bind="ltext: 'application.tabVerdict'"></span>
+                                    <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
                                     <span data-bind="if: unseenVerdicts">
                                         <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
@@ -472,10 +477,10 @@
 
                     <!-- ko if: selectedTabName() === 'verdict' -->
                     <div id="application-verdict-tab" class="tab-content">
-                        <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
+                        <h1 data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></h1>
                         <span data-bind="{component: {
                                          name: 'help-toggle',
-                                         params: {lhtml: 'help.' + $root.application.permitType() + '.verdictDesc' }
+                                         params: {lhtml: 'help.' + $root.application.permitType() + '.verdictDesc' + $root.application.verdictPostfix()}
                                          }}"></span>
 
                         <div data-bind="if: $root.verdictModel.verdicts()">
@@ -592,7 +597,7 @@
                                       <i class="lupicon-chevron-down"></i>
                                       <i class="lupicon-chevron-up toggle"></i>
                                       <span class="bar-text">
-                                          <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
+                                          <span data-bind="ltext: 'application.verdict.title' + $root.application.verdictPostfix()" style="margin-right: 0"></span>
                                           <span data-bind="text: $index() + 1"></span>
                                       </span>
                                   </button>
@@ -752,9 +757,9 @@
                                                   <table class="table table-striped tablesorter" id="application-verdict-details">
                                                       <thead>
                                                           <tr>
-                                                              <th data-bind="ltext: 'verdict.status'" colspan="2"></th>
+                                                              <th data-bind="ltext: 'verdict.status' + $root.application.verdictPostfix()" colspan="2"></th>
                                                               <th data-bind="ltext: 'verdict.pykala'"></th>
-                                                              <th data-bind="ltext: 'verdict.name'"></th>
+                                                              <th data-bind="ltext: 'verdict.name' + $root.application.verdictPostfix()"></th>
                                                               <th data-bind="ltext: 'verdict.paatospvm'"></th>
                                                               <th data-bind="ltext: 'verdict.attachments'"></th>
                                                           </tr>

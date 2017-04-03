@@ -176,7 +176,7 @@
 (defn with-org-auth [user]
   (update-in user [:orgAuthz] coerce-org-authz))
 
-(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz :language])
 
 (defschema SessionSummaryUser
   (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
@@ -283,6 +283,13 @@
 
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
+
+(def migration-user-summary
+  {:id "-"
+   :username "migraatio@lupapiste.fi"
+   :lastName "Migraatio"
+   :firstName "Lupapiste"
+   :role "authority"})
 
 (def batchrun-user-data
   {:id "-"
