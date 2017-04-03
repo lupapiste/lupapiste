@@ -234,17 +234,24 @@
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
-        _ (comment-application pena id)
-        authority-submit (command sonja :submit-application :id id)
+        _ (comment-application pena id true)
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
-
-    (fact "Authority is allowed to submit application for applicant"
-      (:state (query-application pena id)) => "submitted"
-      authority-submit => ok?)
-
     (:opened app1) => nil
     (:opened app2) => number?))
+
+(facts* "authority cannot submit application for applicant before it has been opened"
+  (let [{id :id :as app} (create-application pena)
+        resp (command sonja :submit-application :id id)]
+    (:state (query-application sonja id)) => "draft"
+    resp => fail?))
+
+(facts* "Authority can submit application for applicant after it has been opened"
+  (let [{id :id :as app} (create-application pena)
+        _ (comment-application pena id true)
+        resp (command sonja :submit-application :id id)]
+    (:state (query-application sonja id)) => "submitted"
+    resp => ok?))
 
 (facts* "cancel application authority"
   (last-email) ; Inbox zero

@@ -100,7 +100,7 @@
   (when (and (= :draft (keyword (:state application)))
              (usr/authority? user)
              (not (domain/owner-or-write-access? application (:id user))))
-    unauthorized))
+    (fail :error.unauthorized :source ::validate-authority-in-drafts)))
 
 (defn validate-has-subtypes [{application :application}]
   (when (empty? (resolve-valid-subtypes application))
