@@ -215,8 +215,9 @@ LUPAPISTE.AccordionService = function() {
 
     var documentData = self.getDocumentData(docId);
 
-    var accordionDataObservable = _.get(documentData.data, _.words(eventPath, "."));
-    accordionDataObservable(value);
-
+    if (documentData) { // ie in neighbor case could be that data is unavailable
+      var accordionDataObservable = _.get(documentData.data, _.words(eventPath, "."));
+      accordionDataObservable(value);
+    }
   });
 };
