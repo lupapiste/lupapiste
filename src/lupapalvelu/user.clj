@@ -270,13 +270,9 @@
 (defn validate-authority-in-organization
   "Validator: current user must be an authority. To be used in commands'
    :pre-check vectors."
-  [command]
-  (let [user (:user command)
-        organization-id (-> command
-                            :organization
-                            deref
-                            :id)]
-    (when (not (user-is-authority-in-organization? user organization-id))
+  [{:keys [user application]}]
+  (when-let [organization-id (:organization application)]
+    (when-not (user-is-authority-in-organization? user organization-id)
       (fail! :error.unauthorized
              :desc "user is not an authority in applications organization"))))
 
