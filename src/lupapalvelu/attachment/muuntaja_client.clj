@@ -7,6 +7,11 @@
   (:import [java.io File]))
 
 (def unzip-attachments-path "/api/unzip-attachments")
+(def alive-path "/api/alive")
+
+(defn alive-status []
+  (-> (http/get (str (env/value :muuntaja :url) alive-path) {:throw-exceptions false})
+      (select-keys [:status :request-time])))
 
 (def column-keyword-map
   {"tiedosto"          :filename
