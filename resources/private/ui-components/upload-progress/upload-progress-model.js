@@ -30,6 +30,15 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     updateTarget( event );
   });
 
+  upload.listenService( "filesUploaded", function ( event ) {
+    // zip files can return more than one file so targetCount is
+    // incremented accordingly
+    if (event.status === "success" &&
+        event.files.length > 1) {
+      targetCount.increment(event.files.length - 1);
+    }
+  });
+
   upload.listenService( "filesUploadingProgress", updateTarget);
 
   upload.listenService( "cancel", function() {

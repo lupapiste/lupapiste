@@ -118,7 +118,7 @@
   (fact "R-operations match"
     (let [lp-ops (set (keys r-operations))
           commons-ops (set commons-operations/r-operations)]
-      (set/difference lp-ops commons-ops) => #{:asuinrakennus}))
+      (set/difference lp-ops commons-ops) => #{}))
 
   (fact "YA-operations match"
     (let [lp-ops (set (keys ya-operations))

@@ -714,12 +714,12 @@
     }
   };
 
-  ko.observable.fn.increment = function () {
-    this(this() + 1);
+  ko.observable.fn.increment = function (value) {
+    this(this() + (value || 1));
   };
 
-  ko.observable.fn.decrement = function () {
-    this(this() - 1);
+  ko.observable.fn.decrement = function (value) {
+    this(this() - (value || 1));
   };
 
   ko.extenders.limited = function(target, optionObj) {
