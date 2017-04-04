@@ -929,3 +929,17 @@
    :states      states/all-states}
   [{:keys [organization]}]
   (ok :handlerRoles (:handler-roles @organization)))
+
+(defquery application-organization-archive-enabled
+  {:description "Permanent archive flag check as pseudo query. Depends
+  on the (delayed) organization parameter and thus implicitly from the
+  application id parameter as well."
+   :parameters [:id]
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-states
+   :pre-checks  [(fn [{organization :organization}]
+                   (when-not (some-> organization deref :permanent-archive-enabled)
+                     (fail :error.archive-not-enabled)))]}
+  [_])
