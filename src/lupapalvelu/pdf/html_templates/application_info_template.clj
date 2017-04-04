@@ -5,6 +5,7 @@
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.html-template-common :as common]
+            [lupapalvelu.pdf.html-templates.document-data-converter :as doc-convert]
             [lupapalvelu.document.schemas :as schemas]))
 
 (def application-info-template
@@ -24,10 +25,12 @@
      [:td [:div [:b#applicant-title]] [:div#applicant-value]]
      [:td [:div [:b#handlers-title]] [:div#handlers-value]]]
     [:tr
+     [:td {:colspan "2"} [:div [:b#foremen-title]] [:div#foremen-value]]]
+    [:tr
      [:td {:colspan "2"} [:div [:b#operations-title]] [:div#operations-value]]]]])
 
 (defn- get-handlers [{handlers :handlers :as application} lang]
-  (map #(format "%s: %s %s" (get-in % [:name (keyword lang)]) (:firstName %) (:lastName %)) handlers))
+  (map #(format "%s %s (%s)" (:firstName %) (:lastName %) (get-in % [:name (keyword lang)])) handlers))
 
 (defn get-operation-info [{documents :documents} lang {op-name :name op-id :id op-desc :description}]
   (let [doc  (util/find-first (comp #{op-id} :id :op :schema-info) documents)
@@ -44,7 +47,19 @@
        (remove nil?)
        (map (partial get-operation-info application lang))))
 
-(defn application-info-transformation [application lang]
+(defn- get-foreman-info [foreman-doc lang]
+  (format "%s %s (%s)"
+          (doc-convert/get-value-in foreman-doc lang [:henkilotiedot :etunimi])
+          (doc-convert/get-value-in foreman-doc lang [:henkilotiedot :sukunimi])
+          (doc-convert/get-value-in foreman-doc lang [:kuntaRoolikoodi])))
+
+(defn- get-foremen [foreman-apps lang]
+  (map (util/fn->> :documents
+                   (util/find-first (comp #{"tyonjohtaja-v2"} :name :schema-info))
+                   (#(get-foreman-info % lang)))
+       foreman-apps))
+
+(defn application-info-transformation [application foreman-apps lang]
   (enlive/transformation
    [:#application-info-title] (enlive/content (i18n/localize lang "application.basicInfo"))
    [:#application-info-content]
@@ -67,5 +82,7 @@
     [:#address-value]      (enlive/content (:address application))
     [:#applicant-title]    (enlive/content (i18n/localize lang "applicant"))
     [:#applicant-value]    (enlive/content (common/wrap-map :div (:_applicantIndex application)))
+    [:#foremen-title]      (enlive/content (i18n/localize lang "foreman.allForemen"))
+    [:#foremen-value]      (enlive/content (common/wrap-map :div (get-foremen foreman-apps lang)))
     [:#operations-title]   (enlive/content (i18n/localize lang "operations"))
     [:#operations-value]   (enlive/content (common/wrap-map :div (get-operations application lang))))))

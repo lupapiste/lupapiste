@@ -107,8 +107,11 @@
     {:pre [schema-version schema-name]}
     (get-in @registered-schemas [(long schema-version) (name schema-name)])))
 
+(defn get-subschema [schema subschema-name]
+  (util/find-by-key :name (name subschema-name) (:body schema)))
+
 (defn get-in-schemas [schema-name path]
-  (reduce #(util/find-by-key :name (name %2) (:body %1)) (get-schema {:name schema-name}) path))
+  (reduce get-subschema (get-schema {:name schema-name}) path))
 
 (defn find-identifier-field-from [schema-name]
   (util/find-by-key :identifier true (:body (get-schema {:name schema-name}))))
@@ -1502,7 +1505,7 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
-           :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
+           :addable-in-states (set/union states/create-doc-states
                                          states/post-verdict-but-terminal)
            :editable-in-states (set/union states/update-doc-states states/post-verdict-but-terminal)
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
