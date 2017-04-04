@@ -808,6 +808,15 @@
                                          :password "Xma8r8GMkPvibmg9PoclOA=="
                                          :crypto-iv "vOztjZQ8O2Szk8uI13844g=="}
                                 }
+                       :stamps [{:id "123456789012345678901234"
+                                 :name "default-stamp"
+                                 :position {:x 10 :y 200}
+                                 :background 0
+                                 :page "first"
+                                 :qr-code true
+                                 :rows [[{:name "custom-text" :text "Hyv\u00e4ksytty"} {:name "current-date"}]
+                                        [{:name "municipality-id"}]
+                                        [{:name "organization"}]]}]
                        }
 
                       ;; Sipoo YA
