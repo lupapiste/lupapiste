@@ -92,8 +92,7 @@
             (merge file-data
                    {:contents      contents
                     :drawingNumber drawingNumber
-                    :group         (when (and attachment-type application operation)
-                                     (resolve-attachment-grouping attachment-type application operation))
+                    :group         (resolve-attachment-grouping attachment-type application operation)
                     :type          attachment-type})))))
     attachments))
 
