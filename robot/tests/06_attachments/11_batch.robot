@@ -89,6 +89,7 @@ Contents have changed too
 
 Fill contents
   Set contents  1  New contents
+  Sleep  0.5s   # wait for "New" to reach it's observable
   Fill down  contents-1
   Contents is  0  CV
   Contents is  1  New contents
@@ -181,6 +182,7 @@ Make the first batch row to match an empty template
   Select type  0  Valtakirja
   Fill test id  batch-contents-0  My contents
   Click label by test id  batch-sign-0-label  # Not signed
+  Sleep  0.5s     # wait for "My contents" to reach it's observable
 
 Pena is ready
   Scroll and click test id  batch-ready
