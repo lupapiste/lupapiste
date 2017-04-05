@@ -109,7 +109,7 @@
                                           id="permitSubtypeSelect">
                                   </select>
                                   <!-- /ko -->
-                                  <!-- ko if: permitSubtypes().length == 1 -->
+                                  <!-- ko if: permitSubtype() && permitSubtypes().length == 1 -->
                                   <span class="permit-subtype-text" data-bind="text: loc('permitSubtype.'+permitSubtype())"></span>
                                   <!-- /ko -->
                                   <!-- ko if: permitSubtypeHelp() -->
