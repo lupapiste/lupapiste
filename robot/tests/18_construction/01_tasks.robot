@@ -214,6 +214,8 @@ Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
   Open task  Käyttöönottotarkastus
   Review checkboxes disabled
   Page Should Contain Element  xpath=//section[@id="task"]//input
+
+  # All but one input (add attachments) should be disabled
   ${inputCount} =  Get Matching Xpath Count  //section[@id="task"]//input
   ${inputCountInt} =  Convert to Integer  ${inputCount}
   Xpath Should Match X Times  //section[@id="task"]//input[@disabled]  ${inputCountInt-1}
@@ -227,12 +229,6 @@ Mikko can add attachments though
   Scroll to top
   Wait test id visible  upload-button-label
   Return from review
-
-Mikko checks that review attachments are correctly listed
-  Open tab  attachments
-  Javascript?  $("tr[data-test-type='muut.muu']").length === 2
-  Has review attachment  muut.muu  /robot.*pdf/
-  Has review attachment  muut.muu  /robot.*png/
 
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
