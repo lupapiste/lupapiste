@@ -769,16 +769,24 @@ Upload via button or link
   Upload with hidden input  input[data-test-id=${uploadContainer}-input]  ${path}
 
 Upload batch file
-  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
-  Expose file input  input[data-test-id=add-attachments-input]
-  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
-  Hide file input  input[data-test-id=add-attachments-input]
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}  ${testId}=add-attachments-input
+  Expose file input  input[data-test-id=${testId}]
+  Choose file  jquery=input[data-test-id=${testId}]  ${path}
+  Hide file input  input[data-test-id=${testId}]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
   Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
   Run keyword unless  ${group-is-selected} or '${grouping}' == 'Yleisesti hankkeeseen'  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
+
+Upload verdict or task attachment
+  [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
+  Test id visible  upload-button-label
+  Scroll to top
+  Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}  upload-button-input
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
