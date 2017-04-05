@@ -15642,6 +15642,11 @@ div.foreman-history-container {
   margin-bottom: 15px;
 }
 
+.map-select-info .warning-message {
+  color: #df3215;
+  margin-bottom: 15px;
+}
+
 .create-application-map {
   position: relative;
   background: white;

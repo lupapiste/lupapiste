@@ -18,6 +18,33 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
     }
   });
 
+  self.propertyIdForCreateApplication = ko.pureComputed({
+    read: self.propertyIdHumanReadable,
+    write: self.propertyId
+  });
+
+  var municipalityByPropertyId = ko.observable();
+  ko.computed(function() {
+    if (self.locationServiceUnavailable() && self.propertyIdOk()) {
+      ajax.query("municipality-for-property", {propertyId: self.propertyId()})
+        .success(function(resp) {
+          municipalityByPropertyId(resp.municipality);
+        }).call();
+    } else {
+      municipalityByPropertyId(null);
+    }
+  }).extend({ throttle: 200 });
+
+  self.propertyInMunicipality = ko.computed(function() {
+    return !self.locationServiceUnavailable() || municipalityByPropertyId() && self.municipalityCode() === municipalityByPropertyId();
+  });
+
+  self.propertyIdError = ko.computed(function() {
+    if (municipalityByPropertyId() && !self.propertyInMunicipality()) {
+      return loc("error.propertyId.municipality-mismatch");
+    }
+  });
+
   //
   // Search API
   //

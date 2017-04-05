@@ -850,3 +850,6 @@
 "file_not_linked_to_the_document" "en" "Attachment not found in application"
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" "Bilagan kan inte hittas i ansökan"
+"error.propertyId.municipality-mismatch" "en" "Property id and municipality do not match."
+"error.propertyId.municipality-mismatch" "fi" "Kiinteistötunnus ja kunta eivät täsmää."
+"error.propertyId.municipality-mismatch" "sv" ""

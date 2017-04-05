@@ -8,6 +8,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
   self.processingAddress = ko.observable(false);
+  self.locationServiceUnavailable = ko.observable(false);
 
   self.x = 0;
   self.y = 0;
@@ -23,7 +24,8 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     return {
       x: self.x, y: self.y,
       address: self.address(),
-      propertyId: util.prop.toDbFormat(self.propertyId())
+      propertyId: util.prop.toDbFormat(self.propertyId()),
+      propertyIdSource: self.locationServiceUnavailable() ? "user" : "locationService"
     };
   };
 
@@ -32,7 +34,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   });
 
   self.propertyIdHumanReadable = ko.pureComputed(function() {
-      return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
+    return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
   });
 
   self.propertyIdOk = ko.pureComputed(function() {
@@ -131,9 +133,13 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.searchPropertyId = function(x, y) {
     if (x && y) {
       locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
+        self.locationServiceUnavailable(false);
         self.propertyId(id);
         self.propertyIdValidated(true);
-      }, self.onError, self.processing);
+      }, function(err) {
+        self.locationServiceUnavailable(err.status === 503);
+        self.onError(err);
+      }, self.processing);
     }
     return self;
   };

@@ -3725,3 +3725,6 @@
 "Konvertoi PDF/A-muotoon" "en" "Convert to PDF/A format"
 "Konvertoi PDF/A-muotoon" "fi" "Konvertoi PDF/A-muotoon"
 "Konvertoi PDF/A-muotoon" "sv" "Konvertera till PDF/A-form"
+"create.location-service-unavailable.info" "en" ""
+"create.location-service-unavailable.info" "fi" "Paikkatietopalvelu ei ole käytössä. Syötä kiinteistötunnus käsin."
+"create.location-service-unavailable.info" "sv" ""
