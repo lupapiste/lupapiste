@@ -58,10 +58,11 @@ var taskPageController = (function() {
 
   var attachmentsModel = {target: ko.observable( {type: "task"} ),
                           typeGroups: ko.pureComputed( function() {
-                              var isKatselmus = String(_.get(task(), "schema-info.name")).indexOf("katselmus") > -1;
-                              return isKatselmus ?
-                                ["katselmukset_ja_tarkastukset"] :
-                                ["suunnitelmat", "erityissuunnitelmat", "yleiset-alueet"] }),
+                            var isKatselmus = String(_.get(task(), "schema-info.name")).indexOf("katselmus") > -1;
+                            return isKatselmus ?
+                              ["katselmukset_ja_tarkastukset"] :
+                              ["suunnitelmat", "erityissuunnitelmat", "yleiset-alueet"];
+                          }),
                           dropZoneSectionId: "task",
                           canAdd: ko.pureComputed( function() {
                             return "sent" !== _.get(task(), "state");
