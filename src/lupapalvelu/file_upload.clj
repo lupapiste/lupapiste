@@ -99,15 +99,20 @@
 (defn- is-zip-file? [filedata]
   (-> filedata :filename mime/sanitize-filename mime/mime-type (= "application/zip")))
 
+(defn- unzip? [files]
+  (and (empty? (rest files))
+       (env/feature? :unzip-attachments)
+       (is-zip-file? (first files))))
+
 (defn save-files [application files session-id]
-  (if-let [attachments (and (empty? (rest files))
-                            (env/feature? :unzip-attachments)
-                            (is-zip-file? (first files))
-                            (-> files first :tempfile muuntaja/unzip-attachment-collection :attachments seq))]
-    (download-and-save-files application attachments session-id)
-    (pmap
-      #(save-file % :sessionId session-id :linked false)
-      (map #(rename-keys % {:tempfile :content}) files))))
+  (if (unzip? files)
+    (let [muuntaja-resp (-> files first :tempfile muuntaja/unzip-attachment-collection)]
+      (if-let [attachments (:attachments muuntaja-resp)]
+        (download-and-save-files application (seq attachments) session-id)
+        (or (not-empty (select-keys muuntaja-resp [:error]))
+            {:error "unknown"})))
+    (pmap #(save-file % :sessionId session-id :linked false)
+          (map #(rename-keys % {:tempfile :content}) files))))
 
 (defn- two-hours-ago []
   ; Matches vetuma session TTL
