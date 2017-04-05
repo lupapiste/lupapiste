@@ -10973,6 +10973,11 @@ div.suti-admin-container .serversettings--wide {
   text-decoration: underline;
 }
 
+.view-with-download .archive-problem {
+  font-size: 15px;
+  margin-left: 2px;
+}
+
 th.full-width-column {
   width: 100%;
 }

@@ -11,6 +11,11 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
+  self.archiveProblem =  function( latestVersion ) {
+    return self.authModel.ok( "application-organization-archive-enabled")
+        && !latestVersion.archivable;
+  };
+
   self.attachments = params.attachments;
   self.upload = params.upload;
 

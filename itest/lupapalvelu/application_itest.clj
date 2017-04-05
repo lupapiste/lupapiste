@@ -817,3 +817,14 @@
   (fact "R operation - rakennelman rakentaminen"
     (:operations (query pena :all-operations-in :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
     => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok)))
+
+(facts "Application organization archive enabled"
+       (let [app-id (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)]
+         (fact "No archive"
+               (query pena :application-organization-archive-enabled :id app-id )
+               => {:ok false :text "error.archive-not-enabled"})
+         (fact "Enable archive in Sipoo"
+               (command admin :set-organization-permanent-archive-enabled :enabled true :organizationId "753-R"))
+         (fact "Archive enabled"
+               (query pena :application-organization-archive-enabled :id app-id )
+               => ok?)))
