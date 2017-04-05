@@ -1,8 +1,9 @@
 (ns lupapalvelu.application-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof
-                                                warn error errorf]]
+                                                warnf warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
+            [slingshot.slingshot :refer [try+]]
             [monger.operators :refer :all]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
@@ -25,6 +26,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -37,7 +39,8 @@
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.ya :as ya]))
+            [lupapalvelu.ya :as ya])
+  (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -437,16 +440,24 @@
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (app/do-create-application command)]
-    (app/insert-application created-application)
-    (when (boolean infoRequest)
-      ; Notify organization about new inforequest
-      (if (:openInfoRequest created-application)
-        (open-inforequest/new-open-inforequest! created-application)
-        (notifications/notify! :inforequest-invite {:application created-application})))
-    (try
-      (autofill-rakennuspaikka created-application created)
-      (catch Exception e (warn "Could not get KTJ data for the new application")))
-    (ok :id (:id created-application))))
+    (logging/with-logging-context {:applicationId (:id created-application)}
+      (app/insert-application created-application)
+      (when (boolean infoRequest)
+        ; Notify organization about new inforequest
+        (if (:openInfoRequest created-application)
+          (open-inforequest/new-open-inforequest! created-application)
+          (notifications/notify! :inforequest-invite {:application created-application})))
+      (try+
+        (autofill-rakennuspaikka created-application created)
+        (catch [:sade.core/type :sade.core/fail] {:keys [cause text] :as exp}
+          (warnf "Could not get KTJ data for the new application, cause: %s, text: %s. From %s:%s"
+                 cause
+                 text
+                 (:sade.core/file exp)
+                 (:sade.core/line exp)))
+        (catch SocketTimeoutException _
+          (warn "Socket timeout from KTJ when creating application")))
+      (ok :id (:id created-application)))))
 
 (defn- add-operation-allowed? [{application :application}]
   (let [op (-> application :primaryOperation :name keyword)
