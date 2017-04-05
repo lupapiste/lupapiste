@@ -61,7 +61,7 @@ var taskPageController = (function() {
                               var isKatselmus = String(_.get(task(), "schema-info.name")).indexOf("katselmus") > -1;
                               return isKatselmus ?
                                 ["katselmukset_ja_tarkastukset"] :
-                                ["suunnitelmat", "erityissuunnitelmat", "yleiset-alueet"] }),
+                                ["suunnitelmat", "erityissuunnitelmat", "yleiset-alueet"]; }),
                           dropZoneSectionId: "task",
                           canAdd: ko.pureComputed( function() {
                             return "sent" !== _.get(task(), "state");
