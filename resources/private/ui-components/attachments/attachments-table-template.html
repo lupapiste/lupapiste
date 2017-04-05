@@ -44,20 +44,14 @@
             <span data-bind="text: $data.contents() || ''"
                   data-test-id="attachment-contents"></span>
           </td>
-          <td data-test-id="file-info">
-            <!-- ko if: $parent.archiveProblem( latestVersion ) -->
-            <div class="view-with-download">
-              <a target="_blank"
-                 data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + encodeURIComponent(latestVersion.fileId)},
-                            text: latestVersion.filename"></a>
+          <td data-test-id="file-info"
+              class="view-with-download">
+              <a data-bind="fileLink: latestVersion"></a>
+              <!-- ko if: $parent.archiveProblem( latestVersion ) -->
               <i class="archive-problem lupicon-circle-info negative"
                  data-bind="ltitle: latestVersion.archivabilityError"></i>
+              <!-- /ko -->
               <div data-bind="downloadWithIcon: latestVersion"></div>
-            </div>
-            <!-- /ko -->
-            <!-- ko ifnot: $parent.archiveProblem( latestVersion ) -->
-            <div  data-bind="viewWithDownload: latestVersion"></div>
-            <!-- /ko -->
           </td>
           <td>
             <span data-bind="dateString: latestVersion.created"></span><br>

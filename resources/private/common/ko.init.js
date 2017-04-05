@@ -384,6 +384,22 @@
     }
   };
 
+  // Fills the A element with file view attributes and content.
+  // Note: works _only_ with A elements.
+  // Value must contain fileid and filename properties.
+  ko.bindingHandlers.fileLink = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        var data = ko.mapping.toJS( v );
+        $(element).attr( {target: "_blank",
+                          href: "/api/raw/view-attachment?attachment-id=" + data.fileId });
+        $(element).text( data.filename );
+      }
+    }
+  };
+
+
   var fileTemplate =
       _.template( "<a href='/api/raw/view-file?fileId"
                   + "=<%- fileId %>' target='_blank'><%- filename %></a><br>"
