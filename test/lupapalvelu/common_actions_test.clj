@@ -78,7 +78,8 @@
                           :application-info-tab-visible
                           :application-summary-tab-visible
                           :application-verdict-tab-visible
-                          :application-handlers}
+                          :application-handlers
+                          :application-organization-archive-enabled}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})
@@ -123,6 +124,7 @@
                            :mark-seen-organization-links :pdfa-casefile :suti-application-data :suti-application-products
                            :redirect-to-3d-map :ya-extensions
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
+                           :application-organization-archive-enabled
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
                            :view-file :pdf-export
