@@ -809,7 +809,7 @@
                                          :crypto-iv "vOztjZQ8O2Szk8uI13844g=="}
                                 }
                        :stamps [{:id "123456789012345678901234"
-                                 :name "default-stamp"
+                                 :name "Oletusleima"
                                  :position {:x 10 :y 200}
                                  :background 0
                                  :page "first"
