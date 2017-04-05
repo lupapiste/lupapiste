@@ -31,7 +31,7 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Sonja adds attachment to verdict
-  Upload verdict attachment  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote  Yleisesti hankkeeseen
+  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote  Yleisesti hankkeeseen
   Wait test id visible  targetted-attachments-table
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog

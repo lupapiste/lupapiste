@@ -164,7 +164,7 @@
           (count (:versions hakija)) => 1
           (count (:versions todistus)) => 1
           (fact "one new attachment was created"
-            (count attachments) => 5)
+            (count attachments) => 6)
           (fact "contents are set"
             (:contents hakija) => "hakija"
             (:contents todistus) => "todistus")
@@ -172,7 +172,7 @@
             (:groupType hakija) => "parties"
             (:groupType todistus) => nil)
           (fact "construction time"
-            (:originalApplicationState iv-suunnnitelma) => "draft"
+            (:originalApplicationState iv-suunnnitelma) => "submitted"
             (:applicationState iv-suunnnitelma) => "verdictGiven")
           (fact "requires authority action"
             (get-in hakija [:approvals (keyword file-id-1) :state]) => "requires_authority_action"
