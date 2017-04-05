@@ -130,7 +130,8 @@
         application-id (:id application)
         attachments    (:attachments application)
         file-id-1 (get-in (upload-file pena "dev-resources/test-attachment.txt") [:files 0 :fileId])
-        file-id-2 (get-in (upload-file pena "dev-resources/invalid-pdfa.pdf") [:files 0 :fileId])]
+        file-id-2 (get-in (upload-file pena "dev-resources/invalid-pdfa.pdf") [:files 0 :fileId])
+        file-id-3 (get-in (upload-file pena "dev-resources/test-pdf.pdf") [:files 0 :fileId])]
     (fact "attachment types - for clarity"
       (map :type attachments) => (just [{:type-group "paapiirustus", :type-id "asemapiirros"}
                                         {:type-group "paapiirustus", :type-id "pohjapiirustus"}
@@ -146,7 +147,10 @@
                                              :contents "hakija"}
                                             {:fileId file-id-2 :type {:type-group "osapuolet" :type-id "tutkintotodistus"}
                                              :group {:groupType nil}
-                                             :contents "todistus"}])]
+                                             :contents "todistus"}
+                                            {:fileId file-id-3 :type {:type-group "erityissuunnitelmat" :type-id "iv_suunnitelma"}
+                                             :group {:groupType nil}
+                                             :contents "Muu IV-suunnitelma"}])]
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
@@ -155,7 +159,8 @@
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))
               hakija      (util/find-first #(= "hakija" (-> % :type :type-group)) attachments)
-              todistus    (util/find-first #(= "osapuolet" (-> % :type :type-group)) attachments)]
+              todistus    (util/find-first #(= "osapuolet" (-> % :type :type-group)) attachments)
+              iv-suunnnitelma (util/find-first #(= "iv_suunnitelma" (-> % :type :type-id)) attachments)]
           (count (:versions hakija)) => 1
           (count (:versions todistus)) => 1
           (fact "one new attachment was created"
@@ -166,6 +171,9 @@
           (fact "groups are set"
             (:groupType hakija) => "parties"
             (:groupType todistus) => nil)
+          (fact "construction time"
+            (:originalApplicationState iv-suunnnitelma) => "draft"
+            (:applicationState iv-suunnnitelma) => "verdictGiven")
           (fact "requires authority action"
             (get-in hakija [:approvals (keyword file-id-1) :state]) => "requires_authority_action"
             (get-in todistus [:approvals (keyword file-id-2) :state]) => "requires_authority_action"))))

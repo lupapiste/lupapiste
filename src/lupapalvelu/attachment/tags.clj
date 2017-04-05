@@ -106,7 +106,7 @@
   (let [states (-> (map tag-by-applicationState attachments) set)]
     (->> [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
           (when (or (states/post-verdict-states (keyword state)) (:postVerdict states))
-            {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))})
+            {:tag :postVerdict :default true})
           (when (:ram states)
             {:tag :ram :default true})]
          (remove nil?))))
