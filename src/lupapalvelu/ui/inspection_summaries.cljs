@@ -7,6 +7,7 @@
             [lupapalvelu.ui.common :refer [query command] :as common]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.util :as jsutil]
+            [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
             [cljs-time.coerce :as tc]
             [cljs-time.format :as tf]))
@@ -78,7 +79,7 @@
                          (vals (:fileStatuses @component-state)))]
     (when (every? #(= "done" (:status %)) statuses)
       (doseq [hub-id (distinct (map :subs-id statuses))]
-        (.unsubscribe js/hub hub-id))
+        (hub/unsubscribe hub-id))
       (refresh))))
 
 (defn bind-attachment-callback [target-id event]
@@ -114,8 +115,13 @@
 
 (defn- toggle-summary-locking [locked?]
  (command :toggle-inspection-summary-locking
-          refresh
+          (fn [{job :job}]
+            (if locked?
+              (hub/send "attachmentsService::bindJobInitialized" job)
+              (hub/send "attachmentsService::updateAll"))
+            (refresh))
           :id         (:applicationId @component-state)
+          :lang       (common/get-current-language)
           :summaryId  (:id @selected-summary)
           :isLocked   locked?))
 
@@ -134,7 +140,7 @@
                   "inspection-summary.targets.remove-confirm.title"
                   "inspection-summary.targets.remove-confirm.message"
                   (fn [] (command :remove-target-from-inspection-summary
-                                  (fn [_] (.send js/hub "attachmentsService::updateAll") (refresh))
+                                  (fn [_] (hub/send "attachmentsService::updateAll") (refresh))
                                   :id        (:applicationId @component-state)
                                   :summaryId (:id @selected-summary)
                                   :targetId  target-id))))
@@ -331,11 +337,9 @@
     [:div
      [:h1 (js/loc "inspection-summary.tab.title")]
      [:div
-      [:label (js/loc "inspection-summary.tab.intro.1")]
-      [:br]
-      [:label (js/loc "inspection-summary.tab.intro.2")]
-      [:br]
-      [:label (js/loc "inspection-summary.tab.intro.3")]]
+      [:p (string/join " " [(js/loc "inspection-summary.tab.intro.1")
+                            (js/loc "inspection-summary.tab.intro.2")
+                            (js/loc "inspection-summary.tab.intro.3")])]]
      [:div.form-grid.no-top-border.no-padding
 
       [:div.row
@@ -379,8 +383,8 @@
 
       (when (and (auth/ok? auth-model :toggle-inspection-summary-locking) (not (:locked summary)))
         [:div.row
-         [:label (js/loc "inspection-summary.locking.info")]
-         [:label (js/loc "inspection-summary.locking-archive.info")]])
+         [:p (string/join " " [(js/loc "inspection-summary.locking.info")
+                               (js/loc "inspection-summary.locking-archive.info")])]])
 
       (when (auth/ok? auth-model :toggle-inspection-summary-locking)
         [:div.row

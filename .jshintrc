@@ -82,6 +82,7 @@
     "Waypoint":false,
     "lupapisteWindow" :true,
     "sprintf": false,
+    "vsprintf": false,
     "s": false
   },
   "exported": [

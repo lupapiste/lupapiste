@@ -88,13 +88,7 @@ Add attachment to Aloituskokous
   Test id disabled  review-done
   Review active
   Review checkboxes disabled
-  Scroll and click test id  add-targetted-attachment
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PDF_TESTFILE_PATH}
-  Execute Javascript  $('#test-save-new-attachment')[0].click();
-  Unselect Frame
-  Wait Until Page Contains  ${PDF_TESTFILE_NAME}
+  Upload verdict or task attachment  ${PDF_TESTFILE_PATH}  Aloituskokouksen pöytäkirja  Pöytäkirja  Yleisesti hankkeeseen
 
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
@@ -148,19 +142,8 @@ Add attachment to loppukatselmus
   Test id disabled  review-done
   Review active
   Review checkboxes disabled
-  Scroll and click test id  add-targetted-attachment
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Select from list by value  jquery=#attachmentType  muut.tutkimus
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PDF_TESTFILE_PATH}
-  Execute Javascript  $('#test-save-new-attachment')[0].click();
-  Unselect Frame
-  Wait Until Page Contains  ${PDF_TESTFILE_NAME}
+  Upload verdict or task attachment  ${PDF_TESTFILE_PATH}  Katselmuksen pöytäkirja  Pöytäkirja  Yleisesti hankkeeseen
   Return from review
-
-Check that loppukatselmus attachment is listed
-  Open tab  attachments
-  Has review attachment  muut.tutkimus  /robot.*pdf/
 
 Delete loppukatselmus
   Open tab  tasks
@@ -172,7 +155,7 @@ Delete loppukatselmus
 
 The attachment is gone too
   Open tab  attachments
-  Javascript?  $("tr#attachment-row-muut-tutkimus").length === 0
+  Javascript?  $("tr#attachment-row-katselmuksen_poytakirja").length === 0
 
 Listing contains one less task
   Open tab  tasks
@@ -231,8 +214,11 @@ Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
   Open task  Käyttöönottotarkastus
   Review checkboxes disabled
   Page Should Contain Element  xpath=//section[@id="task"]//input
+
+  # All but one input (add attachments) should be disabled
   ${inputCount} =  Get Matching Xpath Count  //section[@id="task"]//input
-  Xpath Should Match X Times  //section[@id="task"]//input[@disabled]  ${inputCount}
+  ${inputCountInt} =  Convert to Integer  ${inputCount}
+  Xpath Should Match X Times  //section[@id="task"]//input[@disabled]  ${inputCountInt-1}
 
   Page Should Contain Element  xpath=//section[@id="task"]//select
   ${selectCount} =  Get Matching Xpath Count  //section[@id="task"]//select
@@ -240,20 +226,9 @@ Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
   Review disabled for applicant
 
 Mikko can add attachments though
-  Scroll and click test id  add-targetted-attachment
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PNG_TESTFILE_PATH}
-  Execute Javascript  $('#test-save-new-attachment')[0].click();
-  Unselect Frame
-  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
+  Scroll to top
+  Wait test id visible  upload-button-label
   Return from review
-
-Mikko checks that review attachments are correctly listed
-  Open tab  attachments
-  Javascript?  $("tr[data-test-type='muut.muu']").length === 2
-  Has review attachment  muut.muu  /robot.*pdf/
-  Has review attachment  muut.muu  /robot.*png/
 
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
@@ -286,9 +261,7 @@ Deleting R verdict does not delete its done reviews
 
 Attachments have been updated
   Open tab  attachments
-  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.aloituskokouksen_poytakirja']").length === 3
-  Javascript?  $("tr[data-test-type='muut.muu']").length === 1
-  Has review attachment  muut.muu  /robot.*pdf/
+  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.aloituskokouksen_poytakirja']").length === 4
   [Teardown]  Logout
 
 

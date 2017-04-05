@@ -4,7 +4,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :as action :refer [defcommand]]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.ddd-map :as ddd]))
 
@@ -35,8 +35,8 @@
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles  auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states
    :pre-checks       [ddd/three-d-map-enabled]}
   [{:keys [application user organization]}]

@@ -89,6 +89,9 @@
 (def olli       (apikey-for "olli"))
 (def olli-id    (id-for "olli"))
 (def raktark-helsinki (apikey-for "rakennustarkastaja@hel.fi"))
+(def jussi      (apikey-for "jussi"))
+(def jussi--id  (id-for "jussi"))
+
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
@@ -751,11 +754,15 @@
 (defn- job-done? [resp]
   (= (get-in resp [:job :status]) "done"))
 
+(defn- timeout? [resp]
+  (= (get-in resp [:result]) "timeout"))
+
 (defn poll-job [apikey command id version limit]
   (loop [version version retries 0]
     (let [resp (query apikey (keyword command) :jobId id :version version)]
       (cond
         (job-done? resp)  resp
+        (timeout? resp)   (assoc resp :jobId id :ok false)
         (< limit retries) (merge resp {:ok false :desc "Retry limit exeeded"})
         :else (do (Thread/sleep 200)
                   (recur (get-in resp [:job :version]) (inc retries)))))))

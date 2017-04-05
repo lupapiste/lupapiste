@@ -22,13 +22,110 @@ LUPAPISTE.AccordionService = function() {
   self.documents = ko.observableArray();
   self.identifierFields = ko.observableArray([]);
 
+  // Note on how accordion-fields definitions from a schema is shown on
+  // the accordion.
+  //
+  // 1. Accordion-fields is defined in the schema (see
+  // schema_validation.clj)
+  //
+  // 2. When a schema is "instantiated" it is enriched with emitter
+  // information (schemas.clj)
+  //
+  // 3. Based on the (enriched) document schema, the docModel
+  // components corresponding to the accordion-fields paths
+  // information will "emit" the changed values. Emit means simple
+  // sending accordionUpdated event to hub (docmodel.js)
+  //
+  // 4. During initialization (application.js) the setDocuments is
+  // called, which in turn creates accordion field observables via
+  // createDocumentModel.
+  //
+  // 5. Finally, everything is bound together with docutils functions
+  // accordionText and headerDescription (docutils.js)
+  function fieldValues( field, data ) {
+    return _.map( field.paths || [field],
+                  function( path ) {
+                    return util.getIn( data, path, "" );
+                  });
+  }
+
+  function formatField( field, values ) {
+    var result = "";
+    if( _.some( values ) ) {
+      if( field.localizeFormat ) {
+        values = _.map( values, function( v ) {
+          return loc( sprintf( field.localizeFormat, v ), v);
+        });
+      }
+      result = field.format
+             ? vsprintf( field.format,
+                         _.concat( values,
+                                   // "Padding" just in case
+                                   _.fill( Array( 20 ), "")) )
+             : values.join( " " );
+    }
+    return result;
+  }
+
+  var fieldTypeFuns = {
+    workPeriod: function( field, data ) {
+      return formatField( field,
+                          _.map( fieldValues( field, data ),
+                                 function( v ) {
+                                   return _.isBlank( v )
+                                        ? ""
+                                        : util.finnishDate( v );
+                                 }));
+    },
+    selected: function( field, data ) {
+      var selected = util.getIn( data, [docutils.SELECT_ONE_OF_GROUP_KEY]);
+      var paths = _.filter( field.paths,
+                            function( p ) {
+                              return _.first( p ) === selected;
+                            });
+      var ff = _.set( _.clone(field), "paths", paths );
+      return formatField( ff, fieldValues( ff, data ));
+    },
+    date: function( field, data ){
+      return formatField( field,
+                          _.map( fieldValues( field, data ),
+                                 function( v ) {
+                                   var m = util.toMoment( v, "fi" );
+                                   return m ? util.finnishDate( m ) : "";
+                                 }));
+    },
+    text: function( field, data ) {
+      return formatField( field, fieldValues( field, data ));
+    }
+  };
+
+  self.accordionFieldText = function( field, data ){
+    return fieldTypeFuns[field.type || "text"]( field, data );
+  };
+
+  function setPathObservable( obj, doc, path ) {
+    return _.set( obj,
+                  path.join( "." ),
+                  ko.observable( util.getIn( doc.data,
+                                             path.concat( "value"))));
+  }
 
   function createDocumentModel(doc) {
     var fields = doc.schema.info["accordion-fields"];
-    var data = _.reduce(fields, function(result, path) {
-      return _.set(result, path.join("."), ko.observable(util.getIn(doc.data, path.concat("value"))));
+    var data = _.reduce(fields, function(result, field) {
+      if( field.type === "selected" ) {
+        setPathObservable( result, doc, [docutils.SELECT_ONE_OF_GROUP_KEY] );
+      }
+      _.each( field.paths || [field], _.partial( setPathObservable,
+                                                 result,
+                                                 doc ) );
+      return result;
     }, {});
-    return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: data, accordionPaths: fields};
+    return {docId: doc.id,
+            operation: ko.mapping.fromJS(doc["schema-info"].op),
+            schema: doc.schema,
+            data: data,
+            accordionPaths: fields };
   }
 
   function createDocumentIdentifierModel(doc) {
@@ -112,13 +209,15 @@ LUPAPISTE.AccordionService = function() {
 
   hub.subscribe("accordionUpdate", function(event) {
     var eventPath = event.path;
-    var value = event.value;
+    // locName is used by selects
+    var value = event.locName || event.value;
     var docId = event.docId;
 
     var documentData = self.getDocumentData(docId);
 
-    var accordionDataObservable = _.get(documentData.data, _.words(eventPath, "."));
-    accordionDataObservable(value);
-
+    if (documentData) { // ie in neighbor case could be that data is unavailable
+      var accordionDataObservable = _.get(documentData.data, _.words(eventPath, "."));
+      accordionDataObservable(value);
+    }
   });
 };

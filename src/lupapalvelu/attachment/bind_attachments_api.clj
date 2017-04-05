@@ -5,8 +5,8 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.job :as job]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -52,7 +52,7 @@
    :parameters          [id attachmentId fileId]
    :user-roles          #{:applicant :authority :oirAuthority}
    :categories          #{:attachments}
-   :user-authz-roles    (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles    (conj roles/all-authz-writer-roles :foreman)
    :pre-checks          [app/validate-authority-in-drafts
                          att/attachment-matches-application
                          att/upload-to-target-allowed
@@ -66,7 +66,7 @@
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}]
-                               (assignment/run-assignment-triggers (partial job-response-fn command)))))
+                               :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
 
 (defn filedatas-precheck
   "Executes given pre-check against each individual :filedatas from command"
@@ -80,7 +80,7 @@
    :optional-parameters [password]
    :input-validators    [(partial action/vector-parameters-with-map-items-with-required-keys [:filedatas] [:fileId])]
    :user-roles          #{:applicant :authority :oirAuthority}
-   :user-authz-roles    (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles    (conj roles/all-authz-writer-roles :foreman)
    :pre-checks          [app/validate-authority-in-drafts
                          att/allowed-only-for-authority-when-application-sent
                          att/foreman-must-be-uploader
@@ -91,7 +91,7 @@
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command filedatas
-                               (assignment/run-assignment-triggers (partial job-response-fn command)))))
+                               :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
 
 (defquery bind-attachments-job
   {:parameters [jobId version]

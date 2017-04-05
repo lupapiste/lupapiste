@@ -89,6 +89,7 @@ Contents have changed too
 
 Fill contents
   Set contents  1  New contents
+  Sleep  0.5s   # wait for "New" to reach it's observable
   Fill down  contents-1
   Contents is  0  CV
   Contents is  1  New contents
@@ -181,6 +182,7 @@ Make the first batch row to match an empty template
   Select type  0  Valtakirja
   Fill test id  batch-contents-0  My contents
   Click label by test id  batch-sign-0-label  # Not signed
+  Sleep  0.5s     # wait for "My contents" to reach it's observable
 
 Pena is ready
   Scroll and click test id  batch-ready
@@ -235,7 +237,9 @@ Sonja is readey
   Scroll and click test id  batch-ready
   Wait until  Element should not be visible  jquery=table.attachment-batch-table
 
-New attachment is not yet visible
+New attachment is not visible when post verdict filter is off
+  Click label by test id  postVerdict-filter-label
+  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
   Element should not be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta']
 
 New attachment is a post-verdict attachment and automatically approved

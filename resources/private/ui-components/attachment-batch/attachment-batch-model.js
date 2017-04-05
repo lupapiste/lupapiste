@@ -11,6 +11,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   var service = lupapisteApp.services.attachmentsService;
 
   self.upload = params.upload;
+  self.typeGroups = params.typeGroups;
 
   self.password = ko.observable();
 
@@ -74,7 +75,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
-  function newRow(initialType, initialContents, drawingNumber, group) {
+  function newRow(initialType, initialContents, drawingNumber, group, target) {
     var type = ko.observable(initialType);
     var grouping = ko.observable(group || {});
     var contentsValue = ko.observable(initialContents);
@@ -90,6 +91,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     contentsCell.list = contentsList;
     var row = { disabled: ko.observable(),
                 type: new Cell( type, true ),
+                target: target,
                 contents: contentsCell,
                 drawing: new Cell( ko.observable(drawingNumber)),
                 grouping: new Cell( grouping ),
@@ -110,8 +112,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       } else {
         if (_.isObject(file.type)) {
           file.type.title = loc(["attachmentType", file.type["type-group"], file.type["type-id"]].join("."));
+          file.contents = file.contents || _.get(service.contentsData(file.type), "defaultValue");
         }
-        newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group);
+        newRows[fileId] = newRow(file.type, file.contents, file.drawingNumber, file.group, file.target);
       }
     });
     rows( _.merge( keepRows, newRows ));
@@ -276,6 +279,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       return { fileId: fileId,
                type: _.pick( data.type.value(), ["type-group", "type-id"] ),
                group: groupParam(data.grouping.value() || {groupType: null} ),
+               target: data.target,
                contents: data.contents.value(),
                drawingNumber: data.drawing.value(),
                sign: data.sign.value(),

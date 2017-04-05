@@ -49,24 +49,26 @@ Sonja sets attachment as construction time
   [Tags]  attachments
   Select construction time checkbox
 
-Sonja goes to attachments tab and sees attachment is hidden by filter
+Sonja goes to attachments tab and sees attachment is visible as post verdict filter is on by default
   [Tags]  attachments
   Return to application
-  Wait until  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
   Checkbox wrapper selected by test id  preVerdict-filter-checkbox
-  Element should not be visible  jquery=tr[data-test-type='muut.muu']
+  Element should be visible  jquery=tr[data-test-type='muut.muu']
 
-Sonja sets post verdict filter on
+Sonja sets post verdict filter off
   [Tags]  attachments
   Click by test id  postVerdict-filter-label
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
 
-Attachment is visible
+Attachment is not visible
   [Tags]  attachments
-  Wait until  Element should be visible  jquery=tr[data-test-type='muut.muu']
+  Wait until  Element should not be visible  jquery=tr[data-test-type='muut.muu']
 
 Sonja opens the attachment and unsets construction time checkbox
   [Tags]  attachments
+  Click by test id  postVerdict-filter-label
+  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
   Open attachment details  muut.muu
   Wait until  Checkbox should be selected  ${construction-time-checkbox}
   Unselect construction time checkbox
@@ -93,7 +95,6 @@ Mikko logs in and goes to attachments table
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
-  Click by test id  postVerdict-filter-label
 
 Pre and post verdict filters are set
   Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox

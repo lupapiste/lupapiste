@@ -6,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.user-enums :as user-enums]
             [monger.operators :refer :all]
@@ -47,24 +48,33 @@
 
 (def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
+(def all-roles
+  "vector of role strings that can be used in User's :role field"
+  ["applicant"
+   "authority"
+   "oirAuthority"
+   "authorityAdmin"
+   "admin"
+   "dummy"
+   "rest-api"
+   "trusted-etl"])
+
+(defschema Role (apply sc/enum all-roles))
+(defschema OrgId (sc/pred keyword? "Organization ID"))
+(defschema Authz (sc/pred string? "Authz access right"))
+(defschema OrgAuthz {OrgId [Authz]})
+
 (defschema User
           {:id                                    Id
            :firstName                             (ssc/max-length-string 255)
            :lastName                              (ssc/max-length-string 255)
-           :role                                  (sc/enum "applicant"
-                                                           "authority"
-                                                           "oirAuthority"
-                                                           "authorityAdmin"
-                                                           "admin"
-                                                           "dummy"
-                                                           "rest-api"
-                                                           "trusted-etl")
+           :role                                  Role
            :email                                 ssc/Email
            :username                              ssc/Username
            :enabled                               sc/Bool
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
-           (sc/optional-key :orgAuthz)            {sc/Keyword [sc/Str]}
+           (sc/optional-key :orgAuthz)            OrgAuthz
            (sc/optional-key :personId)            (sc/maybe ssc/Hetu)
            (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
@@ -166,7 +176,7 @@
 (defn with-org-auth [user]
   (update-in user [:orgAuthz] coerce-org-authz))
 
-(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz :language])
 
 (defschema SessionSummaryUser
   (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
@@ -257,8 +267,25 @@
   (let [org-set (organization-ids-by-roles user #{:authority})]
     (contains? org-set organization-id)))
 
+(defn validate-authority-in-organization
+  "Validator: current user must be an authority. To be used in commands'
+   :pre-check vectors."
+  [{:keys [user application]}]
+  (when-let [organization-id (:organization application)]
+    (when-not (user-is-authority-in-organization? user organization-id)
+      (fail! :error.unauthorized
+             :desc "user is not an authority in applications organization"))))
+
+
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
+
+(def migration-user-summary
+  {:id "-"
+   :username "migraatio@lupapiste.fi"
+   :lastName "Migraatio"
+   :firstName "Lupapiste"
+   :role "authority"})
 
 (def batchrun-user-data
   {:id "-"

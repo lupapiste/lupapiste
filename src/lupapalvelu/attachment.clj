@@ -11,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :refer [=as-kw not=as-kw fn->] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -19,19 +20,18 @@
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.attachment.preview :as preview]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.operations :as op]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.archiving-util :as archiving-util])
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.user :as usr])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -396,11 +396,14 @@
     {$set   {:attachments.$.applicationState originalApplicationState}
      $unset {:attachments.$.originalApplicationState true}}))
 
-(defn signature-updates [{:keys [fileId version]} user ts]
-  {$push {:attachments.$.signatures {:user (usr/summary user)
-                                     :created (or ts (now))
-                                     :version version
-                                     :fileId fileId}}})
+(defn- signature-updates [{:keys [fileId version]} user ts original-signature attachment-signatures]
+  (let [signature {:user   (or (:user original-signature) (usr/summary user))
+                   :created (or (:created original-signature) ts (now))
+                   :version version
+                   :fileId fileId}]
+    (if-let [orig-index (util/position-by-key :version version attachment-signatures)]
+      {$set  {(util/kw-path :attachments.$.signatures orig-index) signature}}
+      {$push {:attachments.$.signatures signature}})))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -470,9 +473,8 @@
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
-        version-index            (or (-> (map :originalFileId (:versions attachment))
-                                         (zipmap (range))
-                                         (some [(or replaceable-original-file-id originalFileId)]))
+        version-index            (or (util/position-by-key :originalFileId (or replaceable-original-file-id originalFileId)
+                                                           (:versions attachment))
                                      (count (:versions attachment)))
         user-role                (if stamped :stamper :uploader)]
     (util/deep-merge
@@ -530,8 +532,8 @@
            mongo-updates (util/deep-merge (attachment-comment-updates application user attachment options)
                                           (when (:constructionTime options)
                                             (construction-time-state-updates attachment true))
-                                          (when (:sign options)
-                                            (signature-updates version-model user (:created options)))
+                                          (when (or (:sign options) (:signature options))
+                                            (signature-updates version-model user (:created options) (:signature options) (:signatures attachment)))
                                           (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 

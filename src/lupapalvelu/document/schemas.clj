@@ -1,10 +1,10 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
             [sade.util :as util]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]))
 
@@ -22,14 +22,14 @@
     body))
 
 (defn accordion-field-emitters
-  "Adds :accordionUpdate emitters to paths defined by accordion-fields"
-  [body accordion-fields]
-  (if (seq accordion-fields)
+  "Adds :accordionUpdate emitters to paths"
+  [body paths]
+  (if (seq paths)
     (reduce
       (fn [body field-path]
         (update-in-body body field-path :emit #(conj % :accordionUpdate)))
       body
-      accordion-fields)
+      paths)
     body))
 
 
@@ -71,6 +71,8 @@
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
 
+(def select-one-of-key "_selected")
+
 (defn defschema [version data]
   (let [schema-name       (name (get-in data [:info :name]))
         validation-result (schema-validation/validate-doc-schema data)]
@@ -82,7 +84,16 @@
       (-> data
           (assoc-in [:info :name] schema-name)
           (assoc-in [:info :version] version)
-          (update :body accordion-field-emitters (get-in data [:info :accordion-fields]))))))
+          (update :body accordion-field-emitters
+                  (->> data
+                      :info
+                      :accordion-fields
+                      (reduce (fn [acc {:keys [type paths] :as field}]
+                                (cond-> acc
+                                  (= type :selected)  (conj [select-one-of-key])
+                                  paths               (concat paths)
+                                  (sequential? field) (concat [field])))
+                              [])))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]
@@ -96,8 +107,11 @@
     {:pre [schema-version schema-name]}
     (get-in @registered-schemas [(long schema-version) (name schema-name)])))
 
+(defn get-subschema [schema subschema-name]
+  (util/find-by-key :name (name subschema-name) (:body schema)))
+
 (defn get-in-schemas [schema-name path]
-  (reduce #(util/find-by-key :name (name %2) (:body %1)) (get-schema {:name schema-name}) path))
+  (reduce get-subschema (get-schema {:name schema-name}) path))
 
 (defn find-identifier-field-from [schema-name]
   (util/find-by-key :identifier true (:body (get-schema {:name schema-name}))))
@@ -113,8 +127,6 @@
   (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
     (update document :schema-info merge current-info)))
 
-
-(def select-one-of-key "_selected")
 
 (defn select-one-of-schema? [{schema-name :name :as schema}]
   (= select-one-of-key (name schema-name)))
@@ -135,16 +147,21 @@
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
 
 (defn resolve-accordion-field-values
-  "Returns collection of document values from paths defined by schema's :accordion-fields"
+  "Returns collection of document values from paths defined by
+  schema's :accordion-fields"
   [document]
   (when-let [fields (get-in document [:schema-info :accordion-fields])]
-    (let [doc-data (:data document)
-          selected-value (when (= (ffirst fields) select-one-of-key)
-                          (get-in doc-data [(keyword select-one-of-key) :value]))
-          interesting-fields (if selected-value
-                               (filter #(= (first %) selected-value) fields)
-                               fields)]
-      (->> interesting-fields
+    (let [doc-data (:data document)]
+      (->> fields
+           (map (fn [{:keys [type paths] :as field}]
+                  (cond
+                    (= type :selected) (let [selected (get-in doc-data
+                                                              [(keyword select-one-of-key)
+                                                               :value])]
+                                         (filter #(= selected (first %)) paths))
+                    paths              paths
+                    :else              field)))
+           (apply concat)
            (map (fn [path] (get-in doc-data (conj (mapv keyword path) :value))))
            (remove util/empty-or-nil?)))))
 
@@ -1222,31 +1239,39 @@
 
 (def hakija-accordion-paths
   "Data from paths are visible in accordion header"
-  [[select-one-of-key]
-   ["henkilo" "henkilotiedot" "etunimi"]
-   ["henkilo" "henkilotiedot" "sukunimi"]
-   ["yritys" "yritysnimi"]])
+  [{:type :selected
+    :paths [["henkilo" "henkilotiedot" "etunimi"]
+            ["henkilo" "henkilotiedot" "sukunimi"]
+            ["yritys" "yritysnimi"]]
+    :format "- %s %s"}])
 
 (def designer-accordion-paths
   "Data from paths are visible in accordion header"
-  [["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [{:type :text
+    :paths [["henkilotiedot" "etunimi"]
+            ["henkilotiedot" "sukunimi"]]
+    :format "- %s %s"}
+   {:type :text
+    :paths [["kuntaRoolikoodi"]]
+    :format "- %s"}
+   {:type :text
+    :paths [["suunnittelutehtavanVaativuusluokka"]]
+    :format "(%s)"}])
 
-(def hakijan-asiamies-accordion-paths
-  "Data from paths are visible in accordion header"
-  [[select-one-of-key]
-   ["henkilo" "henkilotiedot" "etunimi"]
-   ["henkilo" "henkilotiedot" "sukunimi"]
-   ["yritys" "yritysnimi"]])
+(def hakijan-asiamies-accordion-paths hakija-accordion-paths)
 
 (def foreman-accordion-paths
   "Data from paths are visible in accordion header"
-  [["kuntaRoolikoodi"]
-   ["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [{:type :text
+    :paths [["kuntaRoolikoodi"]
+            ["henkilotiedot" "etunimi"]
+            ["henkilotiedot" "sukunimi"]]
+    :format "- %s %s %s"}])
 
 (def buildingid-accordion-paths
-  [[national-building-id]])
+  [{:type :text
+    :paths [[national-building-id]]
+    :format " - %s"}])
 
 ;;
 ;; schemas
@@ -1480,9 +1505,9 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
-           :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
-                                         (set/difference states/post-verdict-states states/terminal-states))
-           :editable-in-states (set/union states/update-doc-states (set/difference states/post-verdict-states states/terminal-states))
+           :addable-in-states (set/union states/create-doc-states
+                                         states/post-verdict-but-terminal)
+           :editable-in-states (set/union states/update-doc-states states/post-verdict-but-terminal)
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 
@@ -1505,7 +1530,7 @@
            :repeating false
            :approvable true
            :type :party
-           :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
+           :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
            :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
            :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}

@@ -30,7 +30,11 @@
    :foremanVerdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
    :appealed "p\u00e4\u00e4t\u00f6ksest\u00e4 valitettu, valitusprosessin tulosta ei ole"
-   :closed "valmis"})
+   :closed "valmis"
+   :finished "valmis"
+   :agreementPrepared "odottaa asiakkaan toimenpiteit\u00e4"
+   :agreementSigned "valmis"
+   :extinct "lupa rauennut"})
 
 (def ymp-application-state-to-krysp-state
   {:sent "1 Vireill\u00e4"
@@ -51,6 +55,9 @@
    :verdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :foremanVerdictGiven (fn [app] (->> (:verdicts app) (map :timestamp) sort first))
    :constructionStarted :started
+   :agreementPrepared :agreementPrepared
+   :agreementSigned :agreementSigned
+   :finished :finished
    :closed :closed})
 
 (defn state-timestamp [{state :state :as application}]
@@ -244,7 +251,7 @@
 
 (defn get-state [application]
   (let [state-timestamps (-<> (all-state-timestamps application)
-                           (dissoc :sent :closed) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
+                           (dissoc :sent :closed :finished :agreementSigned) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
                            util/strip-nils
                            (sort-by second <>))]
     (mapv
@@ -712,7 +719,10 @@
           :yhteyshenkilonNimi (when-not (ss/blank? yhteyshenkilon-nimi) yhteyshenkilon-nimi)
           :osoitetieto (when (seq osoite) {:Osoite osoite})
           :puhelinnumero puhelin
-          :sahkopostiosoite email)))
+          :sahkopostiosoite email
+          ;; Only explicit check allows direct marketing
+          :suoramarkkinointikielto (-> yhteyshenkilo :kytkimet :suoramarkkinointilupa true? not)
+)))
     (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
       (let [{:keys [henkilotiedot yhteystiedot]} henkilo
             osoite (get-simple-osoite (:osoite henkilo))]
@@ -723,7 +733,10 @@
             :etunimi (:etunimi henkilotiedot)
             :osoitetieto (when (seq osoite) {:Osoite osoite})
             :puhelinnumero (:puhelin yhteystiedot)
-            :sahkopostiosoite (:email yhteystiedot))))
+            :sahkopostiosoite (:email yhteystiedot)
+            ;; Only explicit check allows direct marketing
+            :suoramarkkinointikielto (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
+            )))
       )))
 
 (defn get-maksajatiedot [unwrapped-party-doc]

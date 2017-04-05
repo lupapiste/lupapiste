@@ -185,6 +185,10 @@ Mikko deletes auhtorzation from Unto
   Click by test id  remove-auth-unto@example.com
   Confirm yes no dialog
   Wait until  Invite count is  0
+  Logout
+
+Frontend errors check
+  There are no frontend errors
 
 *** Keywords ***
 

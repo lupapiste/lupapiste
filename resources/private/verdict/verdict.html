@@ -3,6 +3,7 @@
 <body>
   <section class="page container" id="verdict" data-bind="with: $root.verdictModel">
   <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'verdict' -->
+    <drop-zone></drop-zone>
     <div class="headerarea">
       <h1>
         <span data-bind="text: applicationTitle"></span>:
@@ -52,7 +53,7 @@
         <div>
           <label class="form-entry form-label">
             <input type="checkbox" data-bind="checked: agreement, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-agreement"/>
-            <span data-bind="ltext: 'verdict.agreement'"></span>
+            <span data-bind="ltext: signatureTitle"></span>
           </label>
         </div>
 

@@ -5,9 +5,14 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   self.target = params.target;
-  self.attachmentType = params.type;
-  self.typeSelector = params.typeSelector;
+  self.type = params.type;
+  self.typeGroups = params.typeGroups;
   self.canAdd = params.canAdd || true;
+
+  self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:true,
+                                                 dropZone: "section#" + params.dropZoneSectionId,
+                                                 target: self.target(),
+                                                 batchMode: true});
 
   var service = lupapisteApp.services.attachmentsService;
 
@@ -27,15 +32,4 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
     return service.authModel.ok( "upload-attachment");
   });
 
-  self.newAttachment = function() {
-    attachment.initFileUpload({
-      applicationId: lupapisteApp.models.application.id(),
-      attachmentId: null,
-      attachmentType: self.attachmentType(),
-      typeSelector: self.typeSelector,
-      target: self.target(),
-      locked: lupapisteApp.models.currentUser.isAuthority()
-    });
-    LUPAPISTE.ModalDialog.open("#upload-dialog");
-  };
 };

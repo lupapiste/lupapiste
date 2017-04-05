@@ -85,7 +85,7 @@
 (defn- download-and-save-files [application attachments session-id]
   (pmap
     (fn [{:keys [filename uri localizedType contents drawingNumber operation]}]
-      (when-let [attachment-type (lat/localisation->attachment-type :R localizedType)]
+      (let [attachment-type (lat/localisation->attachment-type :R localizedType)]
         (when-let [is (muuntaja/download-file uri)]
           (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)

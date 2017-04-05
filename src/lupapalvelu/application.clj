@@ -17,6 +17,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.link-permit :as link-permit]
@@ -43,7 +44,7 @@
   [{permit-type :permitType op :primaryOperation}]
   (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)]
-    (concat op-subtypes permit-subtypes)))
+    (distinct (concat op-subtypes permit-subtypes))))
 
 (defn history-entry [to-state timestamp user]
   {:state to-state, :ts timestamp, :user (usr/summary user)})
@@ -99,7 +100,7 @@
   (when (and (= :draft (keyword (:state application)))
              (usr/authority? user)
              (not (domain/owner-or-write-access? application (:id user))))
-    unauthorized))
+    (fail :error.unauthorized :source ::validate-authority-in-drafts)))
 
 (defn validate-has-subtypes [{application :application}]
   (when (empty? (resolve-valid-subtypes application))
@@ -112,6 +113,9 @@
 
 (defn submitted? [{:keys [state]}]
   (boolean (states/post-submitted-states (keyword state))))
+
+(defn verdict-given? [{:keys [state]}]
+  (boolean (states/post-verdict-states (keyword state))))
 
 (defn- contains-primary-operation? [application op-set]
   {:pre [(set? op-set)]}
@@ -579,6 +583,9 @@
      :constructionStarted :started
      :acknowledged :acknowledged
      :foremanVerdictGiven nil
+     :agreementPrepared :agreementPrepared
+     :agreementSigned   :agreementSigned
+     :finished :finished
      :closed :closed
      :canceled :canceled}
     ; New states, timestamps to be determined
@@ -608,6 +615,7 @@
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp application user]
+  {:pre [(sm/valid-state? application to-state)]}
   (let [ts-key (timestamp-key to-state)]
     {$set (merge {:state to-state, :modified timestamp}
                  (when (and ts-key (not (ts-key application))) {ts-key timestamp}))

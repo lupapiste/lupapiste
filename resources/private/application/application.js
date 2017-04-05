@@ -122,7 +122,7 @@
       .processing(applicationModel.processing)
       .call();
     }
-  });    
+  });
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);
@@ -159,10 +159,12 @@
   function initWarrantyDates(app) {
     if (app.warrantyEnd) {
       app.warrantyEnd = new Date(app.warrantyEnd);
+      app.showWarrantyEnd = true;
     }
 
     if (app.warrantyStart) {
       app.warrantyStart = new Date(app.warrantyStart);
+      app.showWarrantyStart = true;
     }
   }
 

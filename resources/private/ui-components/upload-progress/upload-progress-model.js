@@ -30,6 +30,15 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     updateTarget( event );
   });
 
+  upload.listenService( "filesUploaded", function ( event ) {
+    // zip files can return more than one file so targetCount is
+    // incremented accordingly
+    if (event.status === "success" &&
+        event.files.length > 1) {
+      targetCount.increment(event.files.length - 1);
+    }
+  });
+
   upload.listenService( "filesUploadingProgress", updateTarget);
 
   upload.listenService( "cancel", function() {
@@ -38,8 +47,7 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     targetCount( 0 );
   });
 
-  upload.listenService( "fileCleared",
-                        _.bind( targetCount.decrement, targetCount ));
+  upload.listenService( "fileCleared", _.bind( targetCount.decrement, targetCount , 1));
 
   self.isFinished = self.disposedPureComputed( function() {
     return _.includes( [100, Infinity], self.progress());

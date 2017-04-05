@@ -165,7 +165,7 @@
             application {:state "submitted"
                          :attachments attachments}]
         (application-state-filters application) =>  [{:tag :preVerdict :default true}
-                                                     {:tag :postVerdict :default false}]))
+                                                     {:tag :postVerdict :default true}]))
 
     (fact "post verdict"
       (let [attachments  [{:applicationState "submitted"}
@@ -315,7 +315,7 @@
 
       (attachments-filters application assignments)
         => [[{:tag :preVerdict :default true}
-             {:tag :postVerdict :default false}]
+             {:tag :postVerdict :default true}]
             [{:tag :general :default false}
              {:tag :parties :default false}
              {:tag :paapiirustus :default false}

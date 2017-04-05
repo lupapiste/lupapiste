@@ -7,6 +7,7 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
   self.selected = params.selectedType;
   self.disabled = params.disabled;
   var selectedGroup = params.selectedTypeGroup;
+  var typeGroups = params.typeGroups;
 
   var service = lupapisteApp.services.attachmentsService;
 
@@ -24,9 +25,15 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
     return type["type-group"] === group;
   }
 
+  function typeGroupIsIn(groups, type) {
+    return _.includes(groups, type["type-group"]);
+  }
+
   var options = self.disposedPureComputed(function() {
     if (ko.unwrap(selectedGroup)) {
       return _.filter(attachmentTypes(), _.partial(typeGroupIs, selectedGroup().value));
+    } else if (ko.unwrap(typeGroups)) {
+      return _.filter(attachmentTypes(), _.partial(typeGroupIsIn, ko.unwrap(typeGroups)));
     } else {
       return attachmentTypes();
     }

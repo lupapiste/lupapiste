@@ -223,6 +223,16 @@ Open docgen accordion
   ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=(//section[@data-doc-type="${doctype}"])[${xpathIndex}]//div[contains(@class,'accordion-toggle')]/button[contains(@class, 'toggled')]
   Run keyword If  ${accordionIsClosed}  Execute Javascript  $("section[data-doc-type='${doctype}']:eq(${idx}) div.accordion-toggle button:first-child").click();
 
+Check accordion text
+  [Arguments]  ${id}  ${title}  ${text}
+  Test id text is  ${id}-accordion-title-text  ${title}
+  Test id text is  ${id}-accordion-description-text  ${text}
+
+Edit party name
+  [Arguments]  ${party}  ${firstname}  ${lastname}
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.etunimi']  ${firstname}
+  Input text with jQuery  section[data-doc-type='${party}'] input[data-docgen-path='henkilotiedot.sukunimi']  ${lastname}
+
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
@@ -759,16 +769,24 @@ Upload via button or link
   Upload with hidden input  input[data-test-id=${uploadContainer}-input]  ${path}
 
 Upload batch file
-  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
-  Expose file input  input[data-test-id=add-attachments-input]
-  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
-  Hide file input  input[data-test-id=add-attachments-input]
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}  ${testId}=add-attachments-input
+  Expose file input  input[data-test-id=${testId}]
+  Choose file  jquery=input[data-test-id=${testId}]  ${path}
+  Hide file input  input[data-test-id=${testId}]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
   Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
   Run keyword unless  ${group-is-selected} or '${grouping}' == 'Yleisesti hankkeeseen'  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
+
+Upload verdict or task attachment
+  [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
+  Test id visible  upload-button-label
+  Scroll to top
+  Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}  upload-button-input
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
@@ -1620,15 +1638,15 @@ There are no frontend errors
   Go to  ${LOGIN URL}
   Logout
   # These test cases will fail if errors exist
-  Javascript?  ${FATAL_COUNT} === 0
-  Javascript?  ${ERR_COUNT} === 0
+  Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
+  Should be equal  ${ERR_COUNT}  0  Frontend errors
 
 #
 # YA
 #
 
 Fill tyoaika fields
-  [Arguments]  ${startDate}=01.05.2014  ${endDate}=02.05.2014
+  [Arguments]  ${startDate}=1.5.2014  ${endDate}=2.5.2014
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
 

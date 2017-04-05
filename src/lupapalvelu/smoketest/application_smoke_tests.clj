@@ -7,6 +7,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.rest.applications-data :as rest-application-data]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
             [lupapalvelu.state-machine :as sm]
@@ -47,8 +48,8 @@
       results)))
 
 (defn- validate-state [{state :state :as application}]
-  (when (ss/blank? state)
-    {:result "Missing state"}))
+  (when (or (ss/blank? state) (not (sm/valid-state? application state)))
+    {:result (format "Missing or invalid state (%s)" state)}))
 
 ;; Every document is valid.
 (mongocheck :applications (partial validate-documents []) :documents :state :auth)
@@ -59,7 +60,7 @@
 (mongocheck :applications (partial validate-tasks []) :tasks :state :auth)
 
 ;; All applications have state
-(mongocheck :applications validate-state :state)
+(mongocheck :applications validate-state :state :infoRequest :primaryOperation :permitSubtype :permitType)
 
 (def coerce-auth (ssc/json-coercer auth/Auth))
 
@@ -206,3 +207,14 @@
          (sc/check HakemusTiedot))))
 
 (apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)
+
+(defn validate-ya-subtypes [{:keys [primaryOperation permitType permitSubtype]}]
+  (when (and (= "YA" permitType) (not= "ya-jatkoaika" (:name primaryOperation)))
+    (when (or (ss/blank? permitSubtype)
+              (->> (get op/operations (keyword (:name primaryOperation)))
+                   :subtypes
+                   (some (partial = (keyword permitSubtype)))
+                   nil?))
+      (format "Invalid YA subtype %s for operation %s" permitSubtype (:name primaryOperation)))))
+
+(mongocheck :applications validate-ya-subtypes :primaryOperation :permitType :permitSubtype)

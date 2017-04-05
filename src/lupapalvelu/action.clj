@@ -4,19 +4,20 @@
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull $ne]]
             [schema.core :as sc]
-            [sade.env :as env]
-            [sade.util :as util]
-            [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [sade.validators :as v]
-            [lupapalvelu.control-api :as control]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.logging :as log]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.logging :as log]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 
 ;;
@@ -478,7 +479,7 @@
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
-   :user-roles (subset-of auth/all-user-roles)
+   :user-roles (subset-of roles/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
@@ -486,9 +487,9 @@
    ; Set of categories for use of allowed-actions-for-cateory
    (sc/optional-key :categories)   #{sc/Keyword}
    ; Set of application context role keywords.
-   (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
+   (sc/optional-key :user-authz-roles)  (subset-of roles/all-authz-roles)
    ; Set of application organization context role keywords
-   (sc/optional-key :org-authz-roles) (subset-of auth/all-org-authz-roles)
+   (sc/optional-key :org-authz-roles) (subset-of roles/all-org-authz-roles)
    ; Documentation string.
    (sc/optional-key :description) sc/Str
    ; Documents that the action will be sending (email) notifications.
@@ -552,10 +553,10 @@
        {:user-authz-roles (if (= #{:authority} user-roles)
                             ;; By default, authority gets authorization fron organization role
                             #{}
-                            (auth/default-user-authz action-type))
+                            (roles/default-user-authz action-type))
         :org-authz-roles (cond
-                           (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
-                           (user-roles :anonymous) auth/all-org-authz-roles)}
+                           (some user-roles [:authority :oirAuthority]) roles/default-org-authz-roles
+                           (user-roles :anonymous) roles/all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

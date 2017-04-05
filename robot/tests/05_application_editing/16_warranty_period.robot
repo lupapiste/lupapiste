@@ -20,7 +20,7 @@ Olli-ya submits the application, approves it and gives it a verdict
   Open tab  verdict
   Submit empty verdict  verdictGiven  1
 
-Olli-ya goes to the Rakentaminen tab and sets construction started and closed
+Olli-ya goes to the Rakentaminen
   Open tab  tasks
 
   Element should be visible  //*[@data-test-id='application-inform-construction-started-btn']
@@ -28,6 +28,32 @@ Olli-ya goes to the Rakentaminen tab and sets construction started and closed
   Element should not be visible  //*[@data-test-id='construction-state-change-info-started']
   Element should not be visible  //*[@data-test-id='construction-state-change-info-closed']
 
+Olli-ya checks date dialog error handling
+  Open date dialog  application-inform-construction-started-btn
+  Date invalid  modal-datepicker-date
+  Test id disabled  modal-datepicker-continue
+  Fill test id  modal-datepicker-date  29.3.2017
+  Date valid  modal-datepicker-date
+  Test id enabled  modal-datepicker-continue
+  Click link  jquery=#dialog-modal-datepicker a.cancel
+  Open date dialog  application-inform-construction-started-btn
+  Date invalid  modal-datepicker-date
+  Test id disabled  modal-datepicker-continue
+  Fill test id  modal-datepicker-date  30.3.2017
+  Date valid  modal-datepicker-date
+  Test id enabled  modal-datepicker-continue
+  Fill test id  modal-datepicker-date  30.3
+  Date invalid  modal-datepicker-date
+  Test id disabled  modal-datepicker-continue
+  Fill test id  modal-datepicker-date  1.4.2017
+  Date valid  modal-datepicker-date
+  Test id enabled  modal-datepicker-continue
+  Fill test id  modal-datepicker-date  ${EMPTY}
+  Date invalid  modal-datepicker-date
+  Test id disabled  modal-datepicker-continue
+  Click link  jquery=#dialog-modal-datepicker a.cancel
+
+Olli-ya sets construction started and closed
   Sets construction started/ready via modal datepicker dialog  application-inform-construction-started-btn  01.01.2018
   Wait until  Application state should be  constructionStarted
 
@@ -42,9 +68,17 @@ Olli-ya goes to the Rakentaminen tab and sets construction started and closed
   Warranty end date should be  01.02.2020
   Tab should be visible  tasks
 
-Olli-ya changes warranty period and logout
-  Tab should be visible  tasks
+Olli-ya checks warranty date field visibility and error handling
+  Fill test id  warranty-start-date-edit  ${EMPTY}
+  Date invalid  warranty-start-date-edit
+  Fill test id  warranty-start-date-edit  5.5.2017
+  Date valid  warranty-start-date-edit
+  Fill test id  warranty-start-date-edit  123
+  Date invalid  warranty-start-date-edit
+  Fill test id  warranty-start-date-edit  6.6.2017
+  Date valid  warranty-start-date-edit
 
+Olli-ya changes warranty period and logout
   Sets warranty start/end date  warranty-start-date-edit  01.03.2018
   Sets warranty start/end date  warranty-end-date-edit  01.03.2019
 
@@ -68,12 +102,24 @@ Olli-ya logs back in and open application
 
 *** Keywords ***
 
-Sets construction started/ready via modal datepicker dialog
-  [Arguments]  ${openDialogButtonId}  ${date}
+Date invalid
+  [Arguments]  ${tid}
+  Wait until  Element should be visible  jquery=input.date-validator--invalid[data-test-id=${tid}]
+
+Date valid
+  [Arguments]  ${tid}
+  Wait until  Element should not be visible  jquery=input.date-validator--invalid[data-test-id=${tid}]
+
+Open date dialog
+  [Arguments]  ${openDialogButtonId}
   Click enabled by test id  ${openDialogButtonId}
   Wait until  element should be visible  modal-datepicker-date
   Element Should Be Enabled  modal-datepicker-date
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
+
+Sets construction started/ready via modal datepicker dialog
+  [Arguments]  ${openDialogButtonId}  ${date}
+  Open date dialog  ${openDialogButtonId}
   Input text by test id  modal-datepicker-date  ${date}
   Click enabled by test id  modal-datepicker-continue
   Confirm  dynamic-yes-no-confirm-dialog

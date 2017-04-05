@@ -1,6 +1,5 @@
 (ns lupapalvelu.statement-api
   (:require [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
@@ -8,6 +7,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
@@ -80,8 +80,8 @@
   {:description "Provides the possible statement statuses according to the krysp version in use."
    :parameters [:id]
    :user-roles #{:authority :applicant}
-   :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles roles/all-authz-roles
+   :org-authz-roles roles/reader-org-authz-roles
    :states states/all-application-states}
   [{application :application}]
   (ok :data (statement/possible-statement-statuses application)))
@@ -89,7 +89,7 @@
 (defquery get-statement-givers
   {:parameters [:id]
    :user-roles #{:authority}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles roles/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application organization :organization}]
   (statement/fetch-organization-statement-givers @organization))
@@ -215,7 +215,7 @@
                       statement/statement-in-sent-state-allowed]
    :states           #{:open :submitted :complementNeeded :sent}
    :user-roles       #{:applicant}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles roles/default-authz-writer-roles
    :description      "save reply for the statement as draft"}
   [{application :application user :user {:keys [text nothing-to-add modify-id]} :data :as command}]
   (let [statement (-> (util/find-by-id statementId (:statements application))
@@ -232,7 +232,7 @@
                       statement/statement-in-sent-state-allowed]
    :states           #{:open :submitted :complementNeeded :sent}
    :user-roles       #{:applicant}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles roles/default-authz-writer-roles
    :description      "reply to statement"}
   [{application :application user :user {:keys [text nothing-to-add modify-id]} :data :as command}]
   (let [statement (-> (util/find-by-id statementId (:statements application))
@@ -247,7 +247,7 @@
    :parameters       [:id]
    :states           (states/all-application-states-but [:draft])
    :user-roles       #{:authority :applicant}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles roles/default-authz-writer-roles
    :pre-checks       [statement/replies-enabled]}
   [_])
 
@@ -256,7 +256,7 @@
    :parameters       [:id]
    :states           (states/all-application-states-but [:draft])
    :user-roles       #{:authority :applicant}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles roles/default-authz-writer-roles
    :pre-checks       [statement/reply-visible]}
   [_])
 
@@ -265,7 +265,7 @@
    :parameters       [:id]
    :states           (states/all-application-states-but [:draft])
    :user-roles       #{:authority}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles roles/default-authz-writer-roles
    :pre-checks       [statement/replies-enabled
                       statement/reply-not-visible]}
   [_])

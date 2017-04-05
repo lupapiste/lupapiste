@@ -320,7 +320,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }
         save(e, function() {
           if (subSchema) {
-           emit(getEvent(e).target, subSchema);
+            emit(getEvent(e).target, {subSchema: subSchema});
           }
         });
       };
@@ -565,11 +565,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildDate(subSchema, model, path) {
+  function buildDate(subSchema, model, path, transform) {
+    transform = _.merge( {toDate: _.identity, fromDate: _.identity },
+                         transform );
     var lang = loc.getCurrentLanguage();
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
-    var value = getModelValue(model, subSchema.name);
+    var value = transform.toDate(getModelValue(model, subSchema.name));
 
     var span = makeEntrySpan(subSchema, myPath, validationResult);
 
@@ -585,6 +587,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
+      "data-docgen-path": myPath,
       name: self.docId + "." + myPath,
       type: "text",
       "class": className,
@@ -600,8 +603,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.attr("readonly", true);
     } else {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
-        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
-        save(e);
+        var date = util.finnishDate(input.val(),
+                                    loc.getCurrentLanguage());
+        // The date field is always shown in the Finnish format.
+        input.val( date );
+        sourceValueChanged(input.get(0), date, sourceValue, source);
+        var value = transform.fromDate( date );
+        saveValue(e, value);
+        emit( e.target, {subSchema: subSchema,
+                         value: value });
       });
     }
     input.appendTo(span);
@@ -610,68 +620,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function parseDateStringToMs(dateString) {
-    var day = dateString.slice(0, 2);
-    var month = dateString.slice(3,5)      ;
-    var year = dateString.slice(6, 10);
-    var date = new Date();
-    date.setUTCFullYear(year, month-1, day);
-    return date.getTime();
-  }
-
-  function parseMsToDateString(ms) {
-    var options = { year: "numeric", month: "2-digit", day: "2-digit" };
-    var lang = loc.getCurrentLanguage();
-    return new Date(Number(ms)).toLocaleString(lang, options);
+    // The date has been converted to the Finnish format before
+    // transform.
+    var m = util.toMoment( dateString, "fi");
+    return m && m.valueOf();
   }
 
   function buildMsDate(subSchema, model, path) {
-    var lang = loc.getCurrentLanguage();
-    var myPath = path.join(".");
-    var validationResult = getValidationResult(model, subSchema.name);
-    var value;
-    if (getModelValue(model, subSchema.name)) {
-      value = parseMsToDateString(getModelValue(model, subSchema.name));
-    }
-
-    var span = makeEntrySpan(subSchema, myPath, validationResult);
-
-    if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "date", myPath, validationResult));
-    }
-
-    var className = "form-input text form-date";
-    if (validationResult && validationResult[0]) {
-      var level = validationResult[0];
-      className += " " + level;
-    }
-    // date
-    var input = $("<input>", {
-      id: pathStrToID(myPath),
-      name: self.docId + "." + myPath,
-      type: "text",
-      "class": className,
-      value: value
-    });
-
-    var sourceValue = getModelSourceValue(model, subSchema.name);
-    var source = getModelSource(model, subSchema.name);
-
-    sourceValueChanged(input.get(0), value, sourceValue, source);
-
-    if (isInputReadOnly(doc, subSchema, model)) {
-      input.attr("readonly", true);
-    } else {
-      input.datepicker($.datepicker.regional[lang]).change(function(e) {
-        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
-        var ms = parseDateStringToMs(input.val());
-        e.target.value =  ms;
-        saveValue(e, ms);
-        e.target.value = parseMsToDateString(e.target.value);
-      });
-    }
-    input.appendTo(span);
-
-    return span;
+    return buildDate( subSchema, model, path,
+                    {fromDate: parseDateStringToMs,
+                     toDate: util.finnishDate});
   }
 
   function buildTime(subSchema, model, path) {
@@ -769,6 +727,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.appendChild(option);
     }
 
+    function selectEmit( target, sendLater ) {
+      emit( target, _.defaults( {sendLater: Boolean( sendLater ),
+                                 subSchema: subSchema},
+                                _.find( options, {name: target.value})));
+    }
+
     var locSelectedOption = _.find(options, function(e) {
       return e.name === sourceValue;
     });
@@ -781,13 +745,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.onchange = function(e) {
         sourceValueChanged(select, select.value, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
         save(e);
-        emit(getEvent(e).target, subSchema);
+        selectEmit( e.target );
       };
     }
 
     listen(subSchema, myPath, select);
 
-    emitLater(select, subSchema);
+    selectEmit(select, true);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
@@ -1649,27 +1613,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     // That would prevent moving to the next field with tab key in IE8.
   }
 
-  function save(e, callback) {
-    var event = getEvent(e);
-    var target = event.target;
-    var indicator = docutils.createIndicator(target);
-
-    var path = target.name;
-    var loader = docutils.loaderImg();
-
-    var value = target.value;
-    if (target.type === "checkbox") {
-      value = target.checked;
-    }
-
-    var label = document.getElementById(pathStrToLabelID(path));
-    if (label) {
-      label.appendChild(loader);
-    }
-
-    saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
-  }
-
   function saveValue(e, value, callback) {
     var event = getEvent(e);
     var target = event.target;
@@ -1685,45 +1628,53 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 
+  function save(e, callback) {
+    saveValue( e,
+               e.target.type === "checkbox"
+                 ? e.target.checked
+                 : e.target.value,
+               callback );
+  }
+
   function saveMany(target, updates, callback) {
     var indicator = docutils.createIndicator(target);
     saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
   }
 
+  // Typical options are value, path, subSchema and sendLater.
+  // Other options are passed as well.
   var emitters = {
-    filterByCode: function(event, value, path, subSchema, sendLater) {
-      var schemaValue = _.find(subSchema.body, {name: value});
+    filterByCode: function(event, opts) {
+      var schemaValue = _.find(opts.subSchema.body, {name: opts.value});
       var code = schemaValue ? schemaValue.code : "";
-      if (sendLater) {
+      if (opts.sendLater) {
         self.events.push({name: event, data: {code: code}});
       } else {
         hub.send(event, {code: code});
       }
     },
-    hetuChanged: function(event, value) {
-      hub.send(event, {value: value});
+    hetuChanged: function(event, opts) {
+      hub.send(event, opts);
     },
     emitUnknown: function(event) {
       error("Unknown emitter event:", event);
     },
-    accordionUpdate: function(event, value, path) {
-      hub.send(event, {path: path, value: value, docId: self.docId, applicationId: self.appId});
+    accordionUpdate: function(event,  opts) {
+      hub.send(event, _.defaults({docId: self.docId, applicationId: self.appId},
+                                 opts));
     }
   };
 
-  function emit(target, subSchema, sendLater) {
-    if (subSchema.emit) {
-      var value = target.value;
-      var path = $(target).attr("data-docgen-path");
-      _.forEach(subSchema.emit, function(event) {
+  // Mandatory option: subSchema
+  function emit(target, opts) {
+    if (opts.subSchema.emit) {
+      _.forEach(opts.subSchema.emit, function(event) {
         var emitter = emitters[event] || emitters.emitUnknown;
-        emitter(event, value, path, subSchema, sendLater);
+        emitter(event, _.defaults(_.clone( opts ),
+                                  {value: target.value,
+                                   path: $(target).attr("data-docgen-path")}));
       });
     }
-  }
-
-  function emitLater(target, subSchema) {
-    emit(target, subSchema, true);
   }
 
   function buildSection() {

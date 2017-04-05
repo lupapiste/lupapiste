@@ -2,6 +2,7 @@
 
 Documentation   Users are added to company
 Resource        ../../common_resource.robot
+Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Default Tags    company
 
@@ -158,7 +159,7 @@ Ulla sees herself as company admin
 Ulla invites Pena into company
   Invite existing user  pena@example.com  Pena  Panaani  false  false
   Check invitation  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei
-  [Teardown]  Logout
+  Logout
 
 Pena accepts invitation
   Open last email
@@ -175,7 +176,39 @@ Pena logs in and sees the non-admin view of the company
   No such test id  company-add-user
   No such test id  company-user-edit-1
   No such test id  company-user-delete-1
-  [Teardown]  Logout
+  Logout
+
+Ulla logs in and changes her username
+  Go to page  login
+  Applicant logs in  user2@solita.fi  pitka123  Ulla Ser
+  Click Element  user-name
+  Fill test id  newEmail  ulla.ser@solita.fi
+  Click by test id  change-email
+  Wait for jquery
+  Open last email
+  Click link  xpath=//a
+  Wait test id visible  vetuma-init
+  Click by test id  vetuma-init
+  Wait test id visible  submit-button
+  Click by test id  submit-button
+  Wait test id visible  login-new-email
+  Click by test id  login-new-email
+
+Subsequent username changes must use the same person id.
+  Applicant logs in  ulla.ser@solita.fi  pitka123  Ulla Ser
+  Click Element  user-name
+  Fill test id  newEmail  res.allu@solita.fi
+  Click by test id  change-email
+  Wait for jquery
+  Open last email
+  Click link  xpath=//a
+  Wait test id visible  vetuma-init
+  Click by test id  vetuma-init
+  Wait test id visible  submit-button
+  Fill test id  dummy-login-userid  240441-937H
+  Click by test id  submit-button
+  Wait until  Element should be visible  jquery=section#change-email p.error-message
+  Logout
 
 Kaino logs in and removes Ulla's admin rights
   # This is needed to make sure that only Kaino receives the
@@ -187,8 +220,8 @@ Kaino logs in and removes Ulla's admin rights
   Edit company user  1  user  Kyllä
   Click by test id  company-user-save-1
   Confirm  dynamic-yes-no-confirm-dialog
-  Check company user  1  user2@solita.fi  Ser  Ulla  Käyttäjä  Kyllä
-  [Teardown]  Logout
+  Check company user  1  ulla.ser@solita.fi  Ser  Ulla  Käyttäjä  Kyllä
+  Logout
 
 Mikko logs in, creates application and invites Solita
   Mikko logs in
@@ -197,21 +230,21 @@ Mikko logs in, creates application and invites Solita
   Set Suite Variable  ${propertyId}  753-416-5-5
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Invite company to application  Solita Oy
-  [Teardown]  Logout
+  Logout
 
 Solita accepts invite
   Open last email
   Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
   Click Element  xpath=(//a[contains(., 'accept-company-invitation')])
   Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
-  [Teardown]  Go to login page
+  Go to login page
 
 Kaino logs in and could submit application
   Login  kaino@solita.fi  kaino123
   Open application  ${appname}  ${propertyId}
   Open tab  requiredFieldSummary
   Wait until  Test id enabled  application-submit-btn
-  [Teardown]  Logout
+  Logout
 
 Pena logs in and could not submit application
   Pena logs in
@@ -219,13 +252,13 @@ Pena logs in and could not submit application
   Open tab  requiredFieldSummary
   Test id disabled  application-submit-btn
   Submit application errors count is  1
-  [Teardown]  Logout
+  Logout
 
 Mikko logs in and invites Pena directly
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Invite pena@example.com to application
-  [Teardown]  Logout
+  Logout
 
 Pena logs in, accepts invitation and still cannot submit application
   Pena logs in
@@ -233,7 +266,7 @@ Pena logs in, accepts invitation and still cannot submit application
   Confirm yes no dialog
   Open tab  requiredFieldSummary
   Test id disabled  application-submit-btn
-  [Teardown]  Logout
+  Logout
 
 # Custom account
 
@@ -260,6 +293,9 @@ Kaino wants to invite new users, but can't because account limit is reached
   Open company user listing
   Element should be disabled  xpath=//button[@data-test-id="company-add-user"]
   Element should be visible  xpath=//span[@class="user-limit-reached"]
+
+No frontend errors
+  There are no frontend errors
 
 *** Keywords ***
 

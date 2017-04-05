@@ -10,6 +10,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
+            [lupapiste-commons.attachment-types :as att-types]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
 
@@ -24,6 +25,7 @@
                                                   (sc/optional-key :operations) [{(sc/optional-key :id)   ssc/ObjectIdStr
                                                                                   (sc/optional-key :name) sc/Str}]})
    (sc/optional-key :target)           (sc/maybe att/Target)
+   (sc/optional-key :source)           att/Source
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
@@ -31,14 +33,21 @@
 
 (sc/defschema BindableFile (sc/if :attachmentId NewVersion NewAttachment))
 
+(defn- file-is-to-be-marked-construction-time [{:keys [permitType]} {{typeGroup :type-group typeId :type-id} :type}]
+  (let [type-config (att-types/types-marked-being-construction-time-attachments-by-permit-type (keyword permitType))
+        config-by-group (get type-config (keyword typeGroup))]
+    (util/contains-value? config-by-group (keyword typeId))))
+
 (defn bind-single-attachment! [{:keys [application user created]} mongo-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
   (let [conversion-data    (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
+        is-authority       (usr/user-is-authority-in-organization? user (:organization application))
+
         placeholder-id     (or attachmentId
                                (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
         attachment         (or
                              (att/get-attachment-info application placeholder-id)
                              (att/create-attachment! application
-                                                     (assoc (select-keys filedata [:group :contents :target])
+                                                     (assoc (select-keys filedata [:group :contents :target :source])
                                                             :requested-by-authority (boolean (auth/application-authority? application user))
                                                        :created         created
                                                        :attachment-type type)))
@@ -48,8 +57,11 @@
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
                                            :comment-text contents
-                                           :state (when (usr/user-is-authority-in-organization? user (:organization application))
-                                                    :ok))
+                                           :state (when is-authority
+                                                    :ok)
+                                           :constructionTime (when (and (not is-authority)
+                                                                        (file-is-to-be-marked-construction-time application filedata))
+                                                               true))
                           (:result conversion-data)
                           (:file conversion-data))
         linked-version (att/set-attachment-version! application user attachment version-options)]
@@ -80,6 +92,10 @@
 (defn- bind-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
+(defn- cancel-job [job-id {:keys [status text]}]
+  (warnf "canceling bind job %s due '%s'" job-id text)
+  (job/update job-id #(util/map-values (fn [{file-id :fileId}] {:fileId file-id :status status :text text}) %)))
+
 (defn- coerce-bindable-file
   "Coerces bindable file data"
   [file]
@@ -94,10 +110,15 @@
                                           :operations (and operations (map att/->attachment-operation operations))))))))
 
 (defn make-bind-job
-  [command file-infos trigger-assignments-fn]
+  [command file-infos & {:keys [preprocess-ref postprocess-fn]
+                         :or   {preprocess-ref (delay (ok))
+                                postprocess-fn identity}}]
   (let [coerced-file-infos (->> (map coerce-bindable-file file-infos) (sc/validate [BindableFile]))
         job (-> (zipmap (map :fileId coerced-file-infos) (map #(assoc % :status :pending) coerced-file-infos))
                 (job/start bind-job-status))]
-    (util/future* (-> (bind-attachments! command coerced-file-infos (:id job))
-                      (trigger-assignments-fn)))
+    (util/future*
+     (if (ok? @preprocess-ref)
+       (-> (bind-attachments! command coerced-file-infos (:id job))
+           (postprocess-fn))
+       (cancel-job (:id job) (assoc @preprocess-ref :status :error))))
     job))

@@ -176,7 +176,7 @@
 (defn lang-middleware [handler]
   (fn [request]
     (let [lang (or (get-in request [:params :lang])
-                   (get-in request [:user :lang])
+                   (get-in request [:user :language])
                    (name default-lang))]
       (with-lang lang
         (handler request)))))

@@ -84,7 +84,8 @@ var pageutil = (function($) {
   }
 
   function buildPageHash(page /* & suffix arguments */) {
-    return "#" + buildPagePath(page, _.tail(arguments).join("/"));
+    var pagePath = buildPagePath(page, _.tail(arguments).join("/"));
+    return _.startsWith(pagePath, "#") ? pagePath : "#" + pagePath;
   }
 
   function openPage(page, suffix) {

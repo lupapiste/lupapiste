@@ -2,11 +2,12 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.util :as jsutil]
             [lupapalvelu.ui.rum-util :as rum-util]
-            [lupapalvelu.ui.attachment.file-upload :as upload]))
+            [lupapalvelu.ui.attachment.file-upload :as upload]
+            [lupapalvelu.ui.hub :as hub]))
 
 (defn- destroy-file-upload-subscription [state]
-  (.send js/hub "fileuploadService::destroy" (js-obj "input" (::input-id state)))
-  (.unsubscribe js/hub (::fileupload-subscription-id state))
+  (hub/send "fileuploadService::destroy" {:input (::input-id state)})
+  (hub/unsubscribe (::fileupload-subscription-id state))
   true)
 
 (rum/defcs upload-link < {:will-mount    (fn [state]
@@ -92,15 +93,14 @@
   [attachment _]
   (letfn [(remove-attachment   [_] (.removeAttachment js/lupapisteApp.services.attachmentsService (:id attachment)))
           (delete-confirmation [_]
-            (.send js/hub
-                   "show-dialog"
-                   #js {:ltitle          "attachment.delete.header"
+            (hub/send  "show-dialog"
+                       {:ltitle          "attachment.delete.header"
                         :size            "medium"
                         :component       "yes-no-dialog"
-                        :componentParams #js {:ltext (if (or (not-empty (:versions attachment)) (:latestVersion attachment))
-                                                       "attachment.delete.message"
-                                                       "attachment.delete.message.no-versions")
-                                              :yesFn remove-attachment}}))]
+                        :componentParams {:ltext (if (or (not-empty (:versions attachment)) (:latestVersion attachment))
+                                                   "attachment.delete.message"
+                                                   "attachment.delete.message.no-versions")
+                                          :yesFn remove-attachment}}))]
     [:div.inline.right
      [:a {:on-click delete-confirmation
           :data-test-id "delete-attachment-link"}

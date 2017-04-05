@@ -2,13 +2,14 @@
   (:require [clojure.set :refer [difference]]
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
-            [sade.core :refer [unauthorized]]
+            [sade.core :refer [unauthorized fail?]]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [clj-time.core :as t]
@@ -108,8 +109,8 @@
   (select-keys statement [:id :person :requested :given :state]))
 
 (defn- can-read-comments? [app user]
-  (or (auth/user-authz? auth/comment-user-authz-roles app user)
-      (auth/has-organization-authz-roles? auth/commenter-org-authz-roles app user)
+  (or (auth/user-authz? roles/comment-user-authz-roles app user)
+      (auth/has-organization-authz-roles? roles/commenter-org-authz-roles app user)
       (auth/has-auth? app (get-in user [:company :id]))))
 
 (defn filter-application-content-for [application user]

@@ -6948,6 +6948,10 @@ drop-zone .drop-zone-placeholder > i {
   color: #fbc732;
 }
 
+input.date-validator--invalid {
+  border: 1px solid #df3215;
+}
+
 legend {
   font-size: 21.6px;
   font-family: "Source Sans Pro", sans-serif;
@@ -10969,6 +10973,11 @@ div.suti-admin-container .serversettings--wide {
   text-decoration: underline;
 }
 
+.view-with-download .archive-problem {
+  font-size: 15px;
+  margin-left: 2px;
+}
+
 th.full-width-column {
   width: 100%;
 }
@@ -14615,14 +14624,21 @@ span.icon_clear:before {
   width: 0;
   height: 0;
   top: -1px;
-  right: -10px;
+  right: -9px;
   border-top: 17px solid transparent;
   border-left: 11px solid #f6f6f6;
   border-bottom: 17px solid transparent;
   z-index: 1;
 }
 
-.application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .inUse-box, .application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complementNeeded-box, .application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div acknowledged-box, .application_summary .application_summary_info .state-indication div .canceled-box, .application_summary .application_summary_info .state-indication div .final-box, .application_summary .application_summary_info .state-indication div .extinct-box, .application_summary .application_summary_info .state-indication div .onHold-box, .application_summary .application_summary_info .state-indication div .appealed-box {
+.application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .inUse-box,
+.application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complementNeeded-box,
+.application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .foremanVerdictGiven-box,
+.application_summary .application_summary_info .state-indication div .acknowledged-box, .application_summary .application_summary_info .state-indication div .canceled-box,
+.application_summary .application_summary_info .state-indication div .final-box, .application_summary .application_summary_info .state-indication div .extinct-box,
+.application_summary .application_summary_info .state-indication div .onHold-box, .application_summary .application_summary_info .state-indication div .appealed-box,
+.application_summary .application_summary_info .state-indication div .agreementPrepared-box, .application_summary .application_summary_info .state-indication div .agreementSigned-box,
+.application_summary .application_summary_info .state-indication div .finished-box {
   display: none;
 }
 
@@ -14742,7 +14758,11 @@ span.icon_clear:before {
   border-left: 11px solid #2ca92c;
 }
 
-.application_summary .application_summary_info .state-indication div.constructionStarted .verdictGiven-box, .application_summary .application_summary_info .state-indication div.constructionStarted .draft-box, .application_summary .application_summary_info .state-indication div.constructionStarted .open-box, .application_summary .application_summary_info .state-indication div.constructionStarted .submitted-box, .application_summary .application_summary_info .state-indication div.constructionStarted .sent-box {
+.application_summary .application_summary_info .state-indication div.constructionStarted .draft-box, .application_summary .application_summary_info .state-indication div.constructionStarted .open-box, .application_summary .application_summary_info .state-indication div.constructionStarted .submitted-box, .application_summary .application_summary_info .state-indication div.constructionStarted .sent-box {
+  display: none;
+}
+
+.application_summary .application_summary_info .state-indication div.constructionStarted .verdictGiven-box {
   display: none;
 }
 
@@ -14902,6 +14922,42 @@ span.icon_clear:before {
   display: inline-block;
 }
 
+.application_summary .application_summary_info .state-indication div.agreementPrepared .agreementPrepared-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementPrepared .agreementPrepared-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementPrepared .agreementSigned-box {
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementPrepared .draft-box, .application_summary .application_summary_info .state-indication div.agreementPrepared .open-box, .application_summary .application_summary_info .state-indication div.agreementPrepared .submitted-box, .application_summary .application_summary_info .state-indication div.agreementPrepared .sent-box {
+  display: none;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementSigned .agreementSigned-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementSigned .agreementSigned-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementSigned .draft-box, .application_summary .application_summary_info .state-indication div.agreementSigned .open-box, .application_summary .application_summary_info .state-indication div.agreementSigned .submitted-box, .application_summary .application_summary_info .state-indication div.agreementSigned .sent-box {
+  display: none;
+}
+
+.application_summary .application_summary_info .state-indication div.agreementSigned .agreementPrepared-box {
+  display: inline-block;
+}
+
 .application_summary .application_summary_info .state-indication div.final .final-box {
   color: white;
   background-color: #2ca92c;
@@ -14910,6 +14966,20 @@ span.icon_clear:before {
 
 .application_summary .application_summary_info .state-indication div.final .final-box:after {
   border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.finished .finished-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.finished .finished-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.finished .draft-box, .application_summary .application_summary_info .state-indication div.finished .open-box, .application_summary .application_summary_info .state-indication div.finished .submitted-box, .application_summary .application_summary_info .state-indication div.finished .sent-box {
+  display: none;
 }
 
 .application_summary .application_actions {

@@ -29,6 +29,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.attachment.muuntaja-client :as muuntaja]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
@@ -124,6 +125,7 @@
 (status/defstatus :system-properties (remove-sensitive-keys (System/getProperties)))
 (status/defstatus :sade-env (remove-sensitive-keys (env/get-config)))
 (status/defstatus :proxy-headers (-> (request/ring-request) :headers (select-keys ["host" "x-real-ip" "x-forwarded-for" "x-forwarded-proto"])))
+(status/defstatus :muuntaja (remove-sensitive-keys (muuntaja/alive-status)))
 
 ;;
 ;; Commands
@@ -802,4 +804,11 @@
                                                                             StandardCharsets/UTF_8)
                                                                  StandardCharsets/ISO_8859_1)
                                   "Server" "Microsoft-IIS/7.5"))
-         (resp/status 200))))
+         (resp/status 200)))
+
+  (letfn [(response [status] (resp/status (clojure.edn/read-string status)
+                                          (format "<FOO>Echo %s status</FOO>" status)))]
+    (defpage [:post "/dev/statusecho/:status"] {status :status}
+      (response status))
+    (defpage [:get "/dev/statusecho/:status"] {status :status}
+      (response status))))

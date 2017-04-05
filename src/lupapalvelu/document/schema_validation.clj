@@ -2,7 +2,7 @@
   (:require [schema.core :refer [defschema] :as sc]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.roles :as roles]))
 
 (def opt sc/optional-key)
 
@@ -330,6 +330,19 @@
                   (type-pred :calculation) Calculation
                   :else              Input))
 
+(defschema AccordionField
+  "Accordion fields semantics are interpreted in the accordion service.
+  Note: changes also affect lupapalvelu.document.schemas.defschema."
+  (sc/conditional
+   :type      {:type                (sc/enum :workPeriod :selected :date :text)
+               :paths               [[sc/Str]]
+               ;; vsprintf-type format for the whole path value list.
+               (opt :format)         sc/Str
+               ;; Loc format or key for an individual path value.
+               ;; Both %s and {0} are supported.
+               (opt :localizeFormat) sc/Str}
+   :else      [sc/Str])) ;; Shortcut for :type :text, no optional keys.
+
 (defschema Doc
   {:info {:name                              sc/Str     ;;
           (opt :version)                     sc/Int     ;;
@@ -347,16 +360,16 @@
           (opt :post-verdict-party)          sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
-          (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
+          (opt :user-authz-roles)            #{(apply sc/enum roles/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
           (opt :addable-in-states)           #{sc/Keyword} ;; States where document can be added
           (opt :editable-in-states)          #{sc/Keyword} ;;
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
-          (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
           (opt :order)                       sc/Int
           ;; Blacklist only works for :neighbor blacklisting. See neighbors API for details.
           (opt :blacklist)                   [sc/Keyword]
+          (opt :accordion-fields)            [AccordionField]
           }
    (opt :rows) [(sc/cond-pre {sc/Keyword sc/Str} [sc/Str])]
    (opt :template) sc/Str

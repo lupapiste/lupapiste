@@ -68,6 +68,16 @@ hub.onPageLoad = function() {};
 hub.onPageUnload = function() {};
 
 var loc = function() {};
+loc.getCurrentLanguage = function() {};
+loc.currentLanguage = function() {};
+loc.setTerms = function() {};
+loc.hasTerm = function() {};
+loc.getErrorMessages = function() {};
+loc.getSupportedLanguages = function() {};
+loc.getNameByCurrentLanguage = function() {};
+loc.supported = [];
+loc.terms = {};
+loc.defaultLanguage = "fi";
 
 var lupapisteApp = {};
 lupapisteApp.services = {};
