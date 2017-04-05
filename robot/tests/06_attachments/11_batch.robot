@@ -237,7 +237,9 @@ Sonja is readey
   Scroll and click test id  batch-ready
   Wait until  Element should not be visible  jquery=table.attachment-batch-table
 
-New attachment is not yet visible
+New attachment is not visible when post verdict filter is off
+  Click label by test id  postVerdict-filter-label
+  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
   Element should not be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta']
 
 New attachment is a post-verdict attachment and automatically approved

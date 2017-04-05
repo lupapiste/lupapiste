@@ -54,14 +54,15 @@ Main application documents are not archived
 Main application documents contains one row
   Group row count is  archived-application-documents  application-documents  1
 
-Pre verdict attachments group contains two sub groups
-  Section group count is  archived-pre-groups  2
+Pre and post verdict attachments group contain one subgroup each
+  Section group count is  archived-pre-groups  1
+  Section group count is  archived-post-groups  1
 
 No archived pre verdict attachments
   Section group count is  not-archived-pre-groups  0
 
-Pre verdict general attachments are in not archived group
-  Group header is  archived-pre-groups  attachments.general  Yleiset hankkeen liitteet
+Post verdict general attachments are in not archived group
+  Group header is  archived-post-groups  attachments.general  Yleiset hankkeen liitteet
 
 Pre verdict operation attachments are in not archived group
   Group header is  archived-pre-groups  masto-tms  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen tai muun erillislaitteen sijoittaminen (esim. markiisi, aurinkokeräin)
@@ -69,8 +70,8 @@ Pre verdict operation attachments are in not archived group
 Julkisivupiirustus contents is visible
   Attachment content is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Julkisivupiirustus
 
-Pre verdict general group contains one attachment
-  Group row count is  archived-pre-groups  attachments.general  1
+Post verdict general group contains one attachment
+  Group row count is  archived-post-groups  attachments.general  1
 
 Pre verdict operation group contains one attachment
   Group row count is  archived-pre-groups  masto-tms  1

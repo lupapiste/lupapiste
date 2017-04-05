@@ -95,7 +95,6 @@ Mikko logs in and goes to attachments table
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
-  Click by test id  postVerdict-filter-label
 
 Pre and post verdict filters are set
   Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
