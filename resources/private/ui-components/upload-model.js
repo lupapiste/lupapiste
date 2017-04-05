@@ -12,6 +12,9 @@
 //  [badFileHandler]. Function to be called on bad files (size,
 //  type). If not given, errors are displayed with indicators. Event
 //  argument contains (localized) message and file.
+//  [batchMode]. Operating on batch upload mode (true/false),
+//  uploaded files are handed over to a higher level (batch) upload
+//  model to be bound to their contexts.
 //  [errorHandler]. Function to be called on server errors. If not
 //  given, the errors are displayed with indicators. The event
 //  argument contains generic localized message.
