@@ -1638,8 +1638,8 @@ There are no frontend errors
   Go to  ${LOGIN URL}
   Logout
   # These test cases will fail if errors exist
-  Javascript?  ${FATAL_COUNT} === 0
-  Javascript?  ${ERR_COUNT} === 0
+  Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
+  Should be equal  ${ERR_COUNT}  0  Frontend errors
 
 #
 # YA
