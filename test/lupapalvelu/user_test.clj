@@ -132,7 +132,7 @@
   (prop/for-all [{:keys [user organization-id]} user-and-organization-id-generator]
     (let [org-id (name organization-id)
           command {:user user
-                   :organization (future {:id org-id})}
+                   :application {:organization org-id}}
           result (catch-all (validate-authority-in-organization command))]
       (if (user-is-authority-in-organization? user org-id)
         (nil? result)
