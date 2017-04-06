@@ -7,7 +7,6 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
-            [lupapalvelu.copy-application :as copy-app]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -190,15 +189,17 @@
         (validate-notice-submittable application link-permit)
         (validate-foreman-submittable application link-permit)))))
 
-(defn new-foreman-application [{:keys [created user application] :as command}]
-  (copy-app/new-application-copy application user created
-                                 [:location :address :propertyId]
-                                 {:operation   "tyonjohtajan-nimeaminen-v2"
-                                  :infoRequest false
-                                  :messages    []
-                                  :opened      (if (util/pos? (:opened application))
-                                                 created nil)}))
-
+(defn new-foreman-application [{:keys [created user application organization] :as command}]
+  (-> (app/do-create-application
+       (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
+                             :x (-> application :location first)
+                             :y (-> application :location second)
+                             :address (:address application)
+                             :propertyId (:propertyId application)
+                             :municipality (:municipality application)
+                             :infoRequest false
+                             :messages []}))
+      (assoc :opened (if (util/pos? (:opened application)) created nil))))
 
 (defn- cleanup-hakija-doc [{info :schema-info :as doc}]
   (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)]

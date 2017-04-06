@@ -445,9 +445,9 @@
     :else :draft))
 
 (defn application-history-map [{:keys [auth created organization state tosFunction]}]
-  {:pre [(pos? created) (string? organization) (keyword? state) (find-by-key :role :owner auth)]}
+  {:pre [(pos? created) (string? organization) (keyword? state) (util/find-by-key :role :owner auth)]}
   (let [tos-function-map (tos/tos-function-with-name tosFunction organization)
-        user (find-by-key :role :owner auth)]
+        user (util/find-by-key :role :owner auth)]
     {:history (cond->> [(history-entry state created user)]
                 tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
 
@@ -492,26 +492,33 @@
   {:opened   (when (#{:open :info} state) created)
    :modified created})
 
+(defn location-map [location]
+  {:pre [(number? (first location)) (number? (second location))]}
+  {:location       location
+   :location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 location)})
+
+(defn tos-function [organization operation-name]
+  (get-in organization [:operations-tos-functions (keyword operation-name)]))
+
 (defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [application (merge domain/application-skeleton
-                      (permit-type-and-operation-map operation-name created)
-                      {:id                  id
-                       :created             created
-                       :infoRequest         info-request?
-                       :openInfoRequest     open-inforequest?
-                       :state               (application-state user (:id organization) info-request?)
-                       :municipality        municipality
-                       :location            (->location x y)
-                       :location-wgs84      (coord/convert "EPSG:3067" "WGS84" 5 (->location x y))
-                       :organization        (:id organization)
-                       :address             address
-                       :propertyId          property-id
-                       :title               address
-                       :auth                (application-auth user operation-name)
-                       :comments            (application-comments user messages open-inforequest? created)
-                       :schema-version      (schemas/get-latest-schema-version)
-                       :tosFunction         (get-in organization [:operations-tos-functions (keyword operation-name)])})]
+                           (permit-type-and-operation-map operation-name created)
+                           (location-map (->location x y))
+                           {:address             address
+                            :auth                (application-auth user operation-name)
+                            :comments            (application-comments user messages open-inforequest? created)
+                            :created             created
+                            :id                  id
+                            :infoRequest         info-request?
+                            :municipality        municipality
+                            :openInfoRequest     open-inforequest?
+                            :organization        (:id organization)
+                            :propertyId          property-id
+                            :schema-version      (schemas/get-latest-schema-version)
+                            :state               (application-state user (:id organization) info-request?)
+                            :title               address
+                            :tosFunction         (tos-function organization operation-name)})]
     (-> application
         (merge-in application-timestamp-map)
         (merge-in application-history-map)
