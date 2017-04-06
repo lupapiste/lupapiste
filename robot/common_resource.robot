@@ -1359,6 +1359,15 @@ Verdict is given
   Wait until  Element should be visible  application-verdict-details
   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
+Sign verdict
+  [Arguments]  ${password}  ${idx}=0
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
+
+
 
 # User management
 
