@@ -550,7 +550,8 @@
                                  :address    (ss/trim address)
                                  :propertyId propertyId
                                  :title      (ss/trim address)
-                                 :modified   created}})
+                                 :modified   created}
+                           $unset {:propertyIdSource true}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed"))))
     (fail :error.property-in-other-muinicipality)))
