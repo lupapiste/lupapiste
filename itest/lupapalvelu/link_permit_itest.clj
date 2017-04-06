@@ -74,11 +74,11 @@
       (fact "so a link permit is no longer required"
         (query apikey :link-permit-required :id jatkoaika-application-id) => fail?))
 
-    (fact "approving ya-jatkoaika leads to closed state"
+    (fact "approving ya-jatkoaika leads to finished state"
       (command apikey :submit-application :id jatkoaika-application-id) => ok?
       (generate-documents jatkoaika-application apikey)
       (command apikey :approve-application :id jatkoaika-application-id :lang "fi") => ok?
-      (:state (query-application apikey jatkoaika-application-id)) => "closed")
+      (:state (query-application apikey jatkoaika-application-id)) => "finished")
 
 
     ;;
