@@ -4,17 +4,20 @@
             [monger.operators :refer [$set $push]]
             [swiss.arrows :refer :all]
             [sade.core :refer [now]]
-            [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.operations :as op]
+            [lupapalvelu.application-api]
+            [lupapalvelu.company :as com]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application-api]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.ya :as ya]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.test-util :refer :all]
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.ya :as ya]
+            ))
 
 (fact "update-document"
   (update-application {:application ..application.. :data {:id ..id..}} ..changes..) => nil
@@ -419,3 +422,79 @@
   (fact "Is enought that only one agreements have signature"
     (validate-link-agreements-signature {:verdicts [{:id "123456789" :signatures [:created "1490772437443" :user []]},
                                                     {:id "987654321"}]}) => nil))
+
+(facts "Making new application"
+  (let [user {:id        ..user-id..
+              :firstName ..first-name..
+              :lastName  ..last-name..
+              :role      ..user-role..}
+        created 12345]
+    (fact application-auth
+      (application-auth user "kerrostalo-rivitalo")
+      => [(assoc (usr/summary user) :role :owner :type :owner :unsubscribed false)]
+
+      (application-auth user "aiemmalla-luvalla-hakeminen")
+      => [(assoc (usr/summary user) :role :owner :type :owner :unsubscribed true)]
+
+      (application-auth ..company-user.. "kerrostalo-rivitalo")
+      => [(assoc (usr/summary ..company-user..) :role :owner :type :owner :unsubscribed false) ..company-auth..]
+
+      (against-background
+       ..company.. =contains=> {:id ..company-id..
+                                :name ..company-name..
+                                :y ..company-y..}
+       (com/company->auth ..company..) => ..company-auth..
+       ..company-user.. =contains=> {:id ..company-user-id..
+                                     :firstName ..company-first-name..
+                                     :lastName ..company-last-name..
+                                     :role ..company-user-role..
+                                     :company {:id ..company-id..
+                                               :name ..company-name..
+                                               :y ..company-y..}}
+       (com/find-company-by-id ..company-id..) => ..company..))
+
+    (fact application-comments
+      (application-comments user ["message"] true created)
+      => [{:created 12345, :roles [:applicant :authority :oirAuthority], :target {:type "application"}, :text "message", :to nil, :type ..user-role.., :user user}]
+
+      (application-comments user ["message1" "message2"] false created)
+      => [{:created 12345, :roles [:applicant :authority], :target {:type "application"}, :text "message1", :to nil, :type ..user-role.., :user user}
+          {:created 12345, :roles [:applicant :authority], :target {:type "application"}, :text "message2", :to nil, :type ..user-role.., :user user}])
+
+    (fact application-state
+      (application-state ..any-user.. ..organization-id.. true) => :info
+
+      (application-state ..user.. ..organization-id.. false) => :open
+      (provided (usr/user-is-authority-in-organization? ..user.. ..organization-id..) => true)
+
+      (application-state ..user.. ..organization-id.. false) => :draft
+      (provided (usr/user-is-authority-in-organization? ..user.. ..organization-id..) => false
+                (usr/rest-user? ..user..) => false))
+
+    (fact permit-type-and-operation-map
+      (permit-type-and-operation-map "poikkeamis" created)
+      => {:permitSubtype :poikkeamislupa, :permitType "P", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "poikkeamis"}}
+
+      (permit-type-and-operation-map "kerrostalo-rivitalo" created)
+      => {:permitSubtype nil, :permitType "R", :primaryOperation {:created created, :description nil, :id "mongo-id", :name "kerrostalo-rivitalo"}})
+
+    (fact application-timestamp-map
+      (application-timestamp-map {:state :open, :created created})  => {:opened created, :modified created}
+      (application-timestamp-map {:state :info, :created created})  => {:opened created, :modified created}
+      (application-timestamp-map {:state :draft, :created created}) => {:opened nil,     :modified created})
+
+    (fact application-history-map
+     ; TODO
+          )
+
+    (fact application-documents-map
+      (let [application {:created created
+                         :primaryOperation (make-op "kerrostalo-rivitalo" created)
+                         :auth (application-auth user "kerrostalo-rivitalo")
+                         :schema-version 1}
+            documents-map (application-documents-map application {} {})]
+        (keys documents-map) => [:documents]
+        (:documents documents-map) => seq?
+        (map :created (:documents documents-map)) => (has every? #(= created %))
+        (map :id (:documents documents-map)) => (has every? #(= "mongo-id" %)))))
+  (against-background (mongo/create-id) => "mongo-id"))
