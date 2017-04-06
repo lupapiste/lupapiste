@@ -31,6 +31,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.municipality = ko.observable();
   self.permitType = ko.observable("R");
   self.propertyId = ko.observable();
+  self.propertyIdSource = ko.observable();
   self.title = ko.observable();
   self.created = ko.observable();
   self.modified = ko.observable();
