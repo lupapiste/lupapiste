@@ -112,14 +112,14 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
 
 Sonja can toggle selection of attachments by group/all/none
-  # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
-  # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
-  # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
-  # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
-  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
+  Scroll and click  div#stamping-container div[data-test-id='pre-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  2
+  Scroll and click  div#stamping-container div[data-test-id='post-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
+  Scroll and click  div#stamping-container div[data-test-id='pre-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
+  Scroll and click  div#stamping-container div[data-test-id='post-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
