@@ -1685,3 +1685,10 @@ Fill required fields for the parties
   Wait until  Element should be visible  //div[@id='application-parties-tab']//section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
   Fill in yritys info  hakija-ya
   Fill in yritys info  yleiset-alueet-maksaja
+
+Permit subtype is
+  [Arguments]  ${localizedPermitSubtype}
+  ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
+  Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
+  Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
+
