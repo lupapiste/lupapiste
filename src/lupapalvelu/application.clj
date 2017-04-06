@@ -626,8 +626,9 @@
   [{:keys [state] :as application}]
   (let [state (keyword state)
         graph (sm/state-graph application)
-        verdict-state (sm/verdict-given-state application)]
-    (set (cons verdict-state (remove #{:canceled} (states/all-next-states graph state))))))
+        verdict-state (sm/verdict-given-state application)
+        target (if (= state :appealed) :appealed verdict-state)]
+    (set (cons state (remove #{:canceled} (target graph))))))
 
 (defn valid-new-state
   "Pre-check for change-application-state command."
