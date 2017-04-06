@@ -437,7 +437,7 @@
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
-(defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+(defn make-application [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [permit-type (op/permit-type-of-operation operation-name)
         owner (merge (usr/user-in-role user :owner :type :owner)
@@ -481,13 +481,15 @@
                        :schema-version      (schemas/get-latest-schema-version)
                        :tosFunction         tos-function
                        :metadata            metadata
-                       :processMetadata     process-metadata})]
+                       :processMetadata     process-metadata}
+                      (when-not (#{:location-service nil} (keyword property-id-source))
+                        {:propertyIdSource property-id-source}))]
     (merge application (when-not info-request?
                          {:attachments attachments
                           :documents   (make-documents user created organization op application manual-schema-datas)}))))
 
 (defn do-create-application
-  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  [{{:keys [operation x y address propertyId propertyIdSource infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
   (let [municipality      (prop/municipality-id-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
@@ -505,7 +507,7 @@
         (fail! :error.new-applications-disabled)))
 
     (let [id (make-application-id municipality)]
-      (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
+      (make-application id operation x y address propertyId propertyIdSource municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
 ;;
 ;; Link permit
