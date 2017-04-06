@@ -315,10 +315,10 @@
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-with-tyomaastavastaava
-   :ya-kayttolupa-muu-liikennealuetyo                                 ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-with-tyomaastavastaava
+   :ya-katulupa-muu-liikennealuetyo                                   ya-katulupa-general
    :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
    :ya-katulupa-maalampotyot                                          ya-katulupa-general
    :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
