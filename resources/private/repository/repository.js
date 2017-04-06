@@ -80,6 +80,8 @@ var repository = (function() {
 
           application.tosFunction = application.tosFunction === undefined ? null : application.tosFunction;
 
+          application.propertyIdSource = application.propertyIdSource || "";
+
           hub.send("application-loaded", {applicationDetails: loading, lightLoad: isLightLoad});
           if (_.isFunction(callback)) {
             callback(application);
