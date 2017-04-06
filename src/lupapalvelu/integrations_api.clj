@@ -96,9 +96,9 @@
   [{:keys [application created user organization] :as command}]
   (let [current-state  (:state application)
         next-state   (if (yax/ya-extension-app? application)
-                       :closed ; FIXME create a state machine for :ya-jatkoaika
+                       (sm/verdict-given-state application)
                        (sm/next-state application))
-        _           (assert next-state)
+        _           (assert (sm/valid-state? application next-state))
 
         timestamps  (zipmap [:modified next-state] (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
