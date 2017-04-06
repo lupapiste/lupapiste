@@ -444,8 +444,8 @@
         (usr/rest-user? user)) :open
     :else :draft))
 
-(defn application-history-map [{:keys [created organization state tosFunction auth]}]
-  {:pre [(pos? created) (string? organization) (keyword? state)]}
+(defn application-history-map [{:keys [auth created organization state tosFunction]}]
+  {:pre [(pos? created) (string? organization) (keyword? state) (find-by-key :role :owner auth)]}
   (let [tos-function-map (tos/tos-function-with-name tosFunction organization)
         user (find-by-key :role :owner auth)]
     {:history (cond->> [(history-entry state created user)]
@@ -478,7 +478,7 @@
 (defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} organization manual-schema-datas]
   {:pre [(pos? created) (map? primaryOperation)]}
   {:documents (if-not infoRequest
-                (make-documents (find-by-key :role :owner auth) created organization primaryOperation application manual-schema-datas)
+                (make-documents (util/find-by-key :role :owner auth) created organization primaryOperation application manual-schema-datas)
                 [])})
 
 (defn application-metadata-map [{:keys [attachments organization tosFunction]}]
@@ -500,7 +500,6 @@
                        :created             created
                        :infoRequest         info-request?
                        :openInfoRequest     open-inforequest?
-                       :secondaryOperations []
                        :state               (application-state user (:id organization) info-request?)
                        :municipality        municipality
                        :location            (->location x y)
