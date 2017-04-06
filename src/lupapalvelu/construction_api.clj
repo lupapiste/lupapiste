@@ -6,8 +6,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.state-machine :as state-machine]
             [sade.core :refer :all]
             [sade.util :as util]))
 
@@ -30,7 +30,8 @@
    :states           #{:verdictGiven}
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [(permit/validate-permit-type-is permit/YA)]
+   :pre-checks       [(permit/validate-permit-type-is permit/YA)
+                      (partial sm/validate-state-transition :constructionStarted)]
    :input-validators [(partial action/non-blank-parameters [:startedTimestampStr])]}
   [{:keys [user created application organization] :as command}]
   (let [timestamp   (util/to-millis-from-local-date-string startedTimestampStr)
@@ -48,7 +49,7 @@
    :states           #{:constructionStarted}
    :on-success       (notify :application-state-change)
    :pre-checks       [(permit/validate-permit-type-is permit/YA)
-                      (partial state-machine/validate-state-transition :closed)]
+                      (partial sm/validate-state-transition :closed)]
    :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
   [{user :user created :created orig-app :application org :organization :as command}]
   (let [timestamp   (util/to-millis-from-local-date-string readyTimestampStr)
