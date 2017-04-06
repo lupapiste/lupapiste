@@ -25,7 +25,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
       x: self.x, y: self.y,
       address: self.address(),
       propertyId: util.prop.toDbFormat(self.propertyId()),
-      propertyIdSource: self.locationServiceUnavailable() ? "user" : "locationService"
+      propertyIdSource: self.locationServiceUnavailable() ? "user" : "location-service"
     };
   };
 
