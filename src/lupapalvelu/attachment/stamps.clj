@@ -20,25 +20,26 @@
        (some :kuntalupatunnus)))
 
 (defn- tag-content [tag context]
-  (case (:name tag)
-    "current-date"    (sutil/to-local-date score/now)
-    "verdict-date"    (get-verdict-date (:application context))
-    "backend-id"      (get-backend-id (get-in context [:application :verdicts]))
-    "username"        (user/full-name (:user context))
-    "organization"    (get-in context [:organization :name :fi])
-    "agreement-id"    (get-in context [:application :id])
-    "building-id"     (building/building-ids (:application context))
+  (println (sutil/to-local-date (score/now)))
+  (case (:type tag)
+    :current-date    (sutil/to-local-date (score/now))
+    :verdict-date    (get-verdict-date (:application context))
+    :backend-id      (get-backend-id (get-in context [:application :verdicts]))
+    :username        (user/full-name (:user context))
+    :organization    (get-in context [:organization :name :fi])
+    :agreement-id    (get-in context [:application :id])
+    :building-id     (building/building-ids (:application context))
     (:text tag)))
 
 (defn- fill-row [row context]
   (let [filled-row (map (fn [tag] (tag-content tag context)) row)]
     filled-row))
 
-(defn- fill-stamp [stamp context]
+(defn- rows [stamp context]
   (map (fn [row] (fill-row row context)) (:rows stamp)))
 
 (defn- fill-stamp-tags [stamps context]
-  (let [filled-stamps (map (fn [stamp] (fill-stamp stamp context)) stamps)]
+  (let [filled-stamps (map (fn [stamp] (rows stamp context)) stamps)]
     filled-stamps))
 
 (defn stamps [organization application user]

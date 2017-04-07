@@ -3,7 +3,9 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment.stamps :refer :all]))
 
-(testable-privates lupapalvelu.attachment.stamps tag-content)
+(testable-privates lupapalvelu.attachment.stamps
+                   tag-content
+                   rows)
 
 (def application
   {:id "LP-753-2017-90001"
@@ -36,9 +38,9 @@
              :background 0
              :page       "first"
              :qr-code    true
-             :rows       [[{:name "custom-text" :text "Hyv\u00e4ksytty"} {:name "current-date"}]
-                          [{:name "municipality-id"}]
-                          [{:name "organization"}]]}]})
+             :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type :current-date}]
+                          [{:type :backend-id}]
+                          [{:type :organization}]]}]})
 
 (def sonja
   {:role "authority"
@@ -54,18 +56,24 @@
    :lastName "Sibbo"})
 
 (facts tag-content
-  (tag-content {:name "custom-text" :text "Custom text"} {:organization organization :application application :user sonja}) => "Custom text"
-  (tag-content {:name "extra-text" :text "Extra text"} {:organization organization :application application :user sonja}) => "Extra text"
-  (tag-content {:name "current-date"} {:organization organization :application application :user sonja}) => (sade.util/to-local-date (sade.core/now))
-  (tag-content {:name "verdict-date"} {:organization organization :application application :user sonja}) => "06.04.2017"
-  (tag-content {:name "backend-id"} {:organization organization :application application :user sonja}) => "17-0753-R"
-  (tag-content {:name "username"} {:organization organization :application application :user sonja}) => "Sonja Sibbo"
-  (tag-content {:name "organization"} {:organization organization :application application :user sonja}) => "Sipoon rakennusvalvonta"
-  (tag-content {:name "agreement-id"} {:organization organization :application application :user sonja}) => "LP-753-2017-90001"
-  (tag-content {:name "building-id"} {:organization organization :application application :user sonja}) => [{:national-id "100840657D"
+  (tag-content {:type :custom-text :text "Custom text"} {:organization organization :application application :user sonja}) => "Custom text"
+  (tag-content {:type :extra-tex :text "Extra text"} {:organization organization :application application :user sonja}) => "Extra text"
+  (tag-content {:type :current-date} {:organization organization :application application :user sonja}) => (sade.util/to-local-date (sade.core/now))
+  (tag-content {:type :verdict-date} {:organization organization :application application :user sonja}) => "06.04.2017"
+  (tag-content {:type :backend-id} {:organization organization :application application :user sonja}) => "17-0753-R"
+  (tag-content {:type :username} {:organization organization :application application :user sonja}) => "Sonja Sibbo"
+  (tag-content {:type :organization} {:organization organization :application application :user sonja}) => "Sipoon rakennusvalvonta"
+  (tag-content {:type :agreement-id} {:organization organization :application application :user sonja}) => "LP-753-2017-90001"
+  (tag-content {:type :building-id} {:organization organization :application application :user sonja}) => [{:national-id "100840657D"
                                                                                                              :operation-id "57603a99edf02d7047774554"
                                                                                                              :short-id "100840657D"}]
-  (tag-content {:name "section" :text "Section"} {:organization organization :application application :user sonja}) => "Section")
+  (tag-content {:type :section :text "Section"} {:organization organization :application application :user sonja}) => "Section")
 
-;(facts "Stamp is filled with application data"
-;       (stamps organization application) => ())
+(facts "Stamp rows should be formed correctly"
+  (rows (first (:stamps organization)) {:organization organization
+                                        :application application
+                                        :user sonja})               => [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
+                                                                        ["17-0753-R"]
+                                                                        ["Sipoon rakennusvalvonta"]])
+
+

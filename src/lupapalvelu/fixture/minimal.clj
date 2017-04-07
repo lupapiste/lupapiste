@@ -814,9 +814,9 @@
                                  :background 0
                                  :page "first"
                                  :qr-code true
-                                 :rows [[{:name "custom-text" :text "Hyv\u00e4ksytty"} {:name "current-date"}]
-                                        [{:name "municipality-id"}]
-                                        [{:name "organization"}]]}]
+                                 :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:name "current-date"}]
+                                        [{:type :backend-id}]
+                                        [{:type :organization}]]}]
                        }
 
                       ;; Sipoo YA
