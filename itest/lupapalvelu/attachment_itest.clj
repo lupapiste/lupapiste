@@ -986,6 +986,14 @@
     (facts "set construction time attachment which is added in post verdict"
       (fact "Give verdict"
         (command sonja :check-for-verdict :id application-id) => ok?)
+      (facts "Applicant adds ventilation plan - does not get manually set as construction time"
+        (let [resp (command pena :create-attachments :id application-id :attachmentTypes [{:type-group "erityissuunnitelmat" :type-id "iv_suunnitelma"}] :group nil)
+              attachment-id (-> resp :attachmentIds first)
+              attachment (:attachment (query pena :attachment :id application-id :attachmentId attachment-id))]
+             (fact "applicationState"
+                   (:applicationState attachment) => "verdictGiven")
+             (fact "originalApplicationState"
+                   (:originalApplicationState attachment) => nil))
       (facts "add attachment"
         (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}] :group nil)
               post-verdict-attachment-id (-> resp :attachmentIds first)
