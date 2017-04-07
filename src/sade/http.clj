@@ -26,6 +26,23 @@
   (when-not (:quiet options)
     (error "error.integration -" message)))
 
+(defn wrap-location
+  "Sanitizes redirect location field. Some backend systems may
+  introduce non-latin1 gargabe into urls."
+  [client]
+  (letfn [(encode-location [resp]
+            (if (-> resp :headers :location)
+              (update-in resp
+                         [:headers :location]
+                         #(new String (.getBytes % "ISO-8859-1")))
+              resp))]
+    (fn
+     ([req]
+      (encode-location (client req)))
+     ([req respond raise]
+      (client req
+              #(respond (encode-location %)) raise)))))
+
 (defn- logged-call [f uri {:keys [throw-fail! throw-exceptions] :as options}]
   (let [http-client-opts (update options :throw-exceptions (fn [t?] (if throw-fail! false t?)))
         connection-error (or (:connection-error options) :error.integration.connection)
@@ -45,7 +62,11 @@
           :else                     (throw e))))))
 
 (defn get [uri & options]
-  (logged-call http/get uri (apply merge-to-defaults options)))
+  (http/with-additional-middleware [wrap-location]
+    (logged-call http/get uri (assoc (apply merge-to-defaults
+                                            options)
+                                     ;; Use wrap-redirects middleware
+                                     :redirect-strategy :none))))
 
 (defn post [uri & options]
   (logged-call http/post uri (apply merge-to-defaults options)))
