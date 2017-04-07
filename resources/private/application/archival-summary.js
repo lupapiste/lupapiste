@@ -363,12 +363,11 @@
       });
     };
 
-    var pollChangedState = function(documentIds) {
+    var pollChangedState = function() {
       ajax
         .query("document-states",
           {
-            id: ko.unwrap(params.application.id),
-            documentIds: JSON.stringify(documentIds)
+            id: ko.unwrap(params.application.id)
           })
         .success(function(data) {
           updateState(mainDocuments(), data.state);
@@ -379,7 +378,7 @@
     };
 
     var pollArchiveStatus = function() {
-      pollChangedState(self.archivingInProgressIds());
+      pollChangedState();
       if (!_.isEmpty(self.archivingInProgressIds())) {
         window.setTimeout(pollArchiveStatus, 2000);
       } else {
@@ -395,7 +394,7 @@
     var allIds = _.map(self.attachments().concat(mainDocuments()), getId);
 
     if (ko.unwrap(params.application.id)) {
-      pollChangedState(allIds);
+      pollChangedState();
     }
 
     self.archiveSelected = function() {
