@@ -2,7 +2,7 @@
   (:require [clojure.set :refer [difference]]
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
-            [sade.core :refer [unauthorized]]
+            [sade.core :refer [unauthorized fail?]]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.attachment.accessibility :as attachment-access]
@@ -380,6 +380,9 @@
    :schema-version           nil ; Long
    :sent                     nil ; timestamp
    :started                  nil ; construction started
+   :agreementPrepared        nil                            ; agreement prepared YA
+   :agreementSigned          nil            ; Agreemetn signed YA, terminal
+   :finished                 nil                   ; Finished  YA
    :startedBy                {}
    :state                    ""
    :statements               []

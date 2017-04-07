@@ -119,7 +119,7 @@ Review active
   Test id editable  katselmus.huomautukset.maaraAika
   Test id editable  katselmus.huomautukset.toteaja
   Test id editable  katselmus.huomautukset.toteamisHetki
-  Wait test id visible  add-targetted-attachment
+  Wait test id visible  upload-button-label
 
 Review disabled for applicant
   Wait until  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
@@ -136,7 +136,7 @@ Review disabled for applicant
   Test id disabled  'katselmus.huomautukset.maaraAika'
   Test id disabled  'katselmus.huomautukset.toteaja'
   Test id disabled  'katselmus.huomautukset.toteamisHetki'
-  Wait test id visible  add-targetted-attachment
+  Wait test id visible  upload-button-label
   No such test id  review-done
   No such test id  delete-task
 

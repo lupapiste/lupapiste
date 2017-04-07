@@ -54,23 +54,21 @@ Main application documents are not archived
 Main application documents contains one row
   Group row count is  archived-application-documents  application-documents  1
 
-Pre verdict attachments group contains two sub groups
-  Section group count is  archived-pre-groups  2
+Pre and post verdict attachments group contain one subgroup each
+  Section group count is  archived-pre-groups  1
+  Section group count is  archived-post-groups  1
 
 No archived pre verdict attachments
   Section group count is  not-archived-pre-groups  0
 
-Pre verdict general attachments are in not archived group
-  Group header is  archived-pre-groups  attachments.general  Yleiset hankkeen liitteet
+Post verdict general attachments are in not archived group
+  Group header is  archived-post-groups  attachments.general  Yleiset hankkeen liitteet
 
 Pre verdict operation attachments are in not archived group
   Group header is  archived-pre-groups  masto-tms  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen tai muun erillislaitteen sijoittaminen (esim. markiisi, aurinkokeräin)
 
 Julkisivupiirustus contents is visible
   Attachment content is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Julkisivupiirustus
-
-Pre verdict general group contains one attachment
-  Group row count is  archived-pre-groups  attachments.general  1
 
 Pre verdict operation group contains one attachment
   Group row count is  archived-pre-groups  masto-tms  1
@@ -84,8 +82,9 @@ Post verdict attachments group contains one sub group
 Post verdict not archived group header
   Group header is  archived-post-groups  attachments.general  Yleiset hankkeen liitteet
 
-Post verdict general group contains one attachment
-  Group row count is  archived-post-groups  attachments.general  1
+Post verdict general group contains two attachments
+  # Hulevesisuunnitelma + paatos
+  Group row count is  archived-post-groups  attachments.general  2
 
 There is 4 attachments visible
   Total document count is  4
@@ -101,7 +100,8 @@ Hannu goes back to archival tab and sees added attachment there
 
 Added attachment is in archived post verdict general attachments group
   Section group count is  archived-post-groups  1
-  Group row count is  archived-post-groups  attachments.general  1
+  # Hulevesisuunnitelma + paatos
+  Group row count is  archived-post-groups  attachments.general  2
 
 
 Hannu removes hulevesisuunnitelma file
@@ -114,6 +114,7 @@ Hannu goes back to archival tab and does not see removed file anymore
   Return to application
   Open tab  archival
   Total document count is  4
+  Group row count is  archived-post-groups  attachments.general  1
 
 Not archived general attachments group is hidden
   Section group count is  not-archived-pre-groups  0
@@ -196,6 +197,8 @@ Application document group is changed
 Close application document additional controls
   Toggle additional controls  archived-application-documents  application-documents  application-document
 
+Frontend errors check
+  There are no frontend errors
 
 
 *** Keywords ***
@@ -215,7 +218,7 @@ Total document count is
 
 Group row count is
   [Arguments]  ${section}  ${group}  ${count}
-  Javascript?  $("div[data-test-id=${section}] div.attachment-row[data-test-group='${group}']").length === ${count}
+  Xpath Should Match X Times  //div[@data-test-id='${section}']//div[@data-test-group='${group}' and contains(@class, 'attachment-row')]  ${count}
 
 Toggle additional controls
   [Arguments]  ${section}  ${group}  ${type}

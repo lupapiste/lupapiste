@@ -5,6 +5,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.html-template-common :as common]
+            [lupapalvelu.pdf.html-templates.document-data-converter :as doc-convert]
             [lupapalvelu.pdf.html-templates.application-info-template :as app-info]))
 
 (def inspection-summary-template
@@ -54,13 +55,25 @@
                        [:#finished-date] (enlive/content (util/to-local-date finished-date))
                        [:#finished-by]   (enlive/content (->> ((juxt :firstName :lastName) finished-by) (remove nil?) (ss/join " ")))))))
 
+(def project-description-template
+  [:div#project-desc])
+
+(defn project-description-tranformation [application lang]
+  (enlive/transformation
+   [:#project-desc] (some-> (util/find-first (comp #{:hankkeen-kuvaus} :subtype :schema-info) (:documents application))
+                            (doc-convert/doc->html lang)
+                            enlive/html
+                            enlive/content)))
+
 (def inspection-summary-page-template
   (->> [app-info/application-info-template
+        project-description-template
         inspection-summary-template]
        (common/page-content)
        (common/html-page nil)))
 
-(enlive/deftemplate inspection-summary (enlive/html inspection-summary-page-template) [application lang summary-id]
+(enlive/deftemplate inspection-summary (enlive/html inspection-summary-page-template) [application foreman-apps lang summary-id]
   [:head :style] (enlive/content (common/styles))
-  [:body]        (enlive/do-> (app-info/application-info-transformation application lang)
+  [:body]        (enlive/do-> (app-info/application-info-transformation application foreman-apps lang)
+                              (project-description-tranformation application lang)
                               (inspection-summary-transformation application lang summary-id)))

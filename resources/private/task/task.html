@@ -2,6 +2,7 @@
 <html >
 <body>
   <section class="page container" id="task" data-bind="with: task">
+    <drop-zone></drop-zone>
     <h1><span data-bind="attr: {'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span><span data-bind="text: displayName"></span></h1>
     <div class="clear-fix inner-margins">
       <a class="btn secondary"

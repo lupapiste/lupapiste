@@ -234,16 +234,24 @@
 
 (facts* "Application has opened when submitted from draft"
   (let [{id :id :as app1} (create-application pena) => truthy
-        _ (comment-application pena id)
-        authority-submit (command sonja :submit-application :id id)
+        _ (comment-application pena id true)
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
-
-    (fact "Authority is not allowed to submit application for applicant"
-      authority-submit => (partial expected-failure? :error.unauthorized))
-
     (:opened app1) => nil
     (:opened app2) => number?))
+
+(facts* "authority cannot submit application for applicant before it has been opened"
+  (let [{id :id :as app} (create-application pena)
+        resp (command sonja :submit-application :id id)]
+    (:state (query-application sonja id)) => "draft"
+    resp => fail?))
+
+(facts* "Authority can submit application for applicant after it has been opened"
+  (let [{id :id :as app} (create-application pena)
+        _ (comment-application pena id true)
+        resp (command sonja :submit-application :id id)]
+    (:state (query-application sonja id)) => "submitted"
+    resp => ok?))
 
 (facts* "cancel application authority"
   (last-email) ; Inbox zero
@@ -809,3 +817,14 @@
   (fact "R operation - rakennelman rakentaminen"
     (:operations (query pena :all-operations-in :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
     => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok)))
+
+(facts "Application organization archive enabled"
+       (let [app-id (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)]
+         (fact "No archive"
+               (query pena :application-organization-archive-enabled :id app-id )
+               => {:ok false :text "error.archive-not-enabled"})
+         (fact "Enable archive in Sipoo"
+               (command admin :set-organization-permanent-archive-enabled :enabled true :organizationId "753-R"))
+         (fact "Archive enabled"
+               (query pena :application-organization-archive-enabled :id app-id )
+               => ok?)))

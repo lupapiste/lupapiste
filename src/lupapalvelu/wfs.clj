@@ -33,7 +33,6 @@
 ;;
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs-2015/wfs")
-
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
@@ -358,18 +357,15 @@
         nil))))
 
 (defn exec
-  [& args]
-  (let [[_ url & _] args
-        data  (apply exec-raw args)
-        xml (if (= url nearestfeature)
-              (parse-features-as-latin1 data)
-              (->features data sxml/startparse-sax-no-doctype))
-        member-list (xml-> xml :gml:featureMember)]
-    ; Differences in WFS implementations:
-    ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
-    (if (seq member-list)
-      member-list
-      (xml-> xml :gml:featureMembers))))
+  [method url & args]
+  (when-let [data (apply exec-raw method url args)]
+    (let [xml (if (= url nearestfeature)
+                (parse-features-as-latin1 data)
+                (->features data sxml/startparse-sax-no-doctype))]
+      ;; Differences in WFS implementations:
+      ;; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+      (or (seq (xml-> xml :gml:featureMember))
+          (xml-> xml :gml:featureMembers)))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -710,7 +706,7 @@
   (if (env/feature? :disable-ktj-on-create)
     (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
     (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
-          options {:http-error :error.integration.ktj-down, :connection-error :error.integration.ktj-down}
+          options {:http-error :error.integration.ktj-down, :connection-error :error.integration.ktj-down :conn-timeout 15000 :socket-timeout 15000}
           ktj-xml (reader/get-xml url options (get auth ktjkii) false)
           features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
       (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))

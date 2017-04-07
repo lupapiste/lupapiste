@@ -121,11 +121,11 @@
                        (query sonja :approve-ya-extension :id ext-id) => ok?)
                  (fact "Approve application"
                        (command sonja :approve-application :id ext-id :lang :fi) => ok?)
-                 (facts "Application state is closed with matching history"
+                 (facts "Application state is finished with matching history"
                        (let [{:keys [state history]} (query-application sonja ext-id)]
-                         (fact "State is closed" state => "closed")
+                         (fact "State is finished" state => "finished")
                          (fact "History is correct"
-                               (map :state history) => ["draft" "open" "submitted" "closed"])))))))
+                               (map :state history) => ["draft" "open" "submitted" "finished"])))))))
 
 (def local-db-name (str "test_ya_extension_itest_" (sade/now)))
 

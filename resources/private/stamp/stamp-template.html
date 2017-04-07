@@ -122,11 +122,11 @@
         <div class="clear">
             <div data-bind="if: postFiles().length > 0">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: postFiles()}"></div>
+              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: postFiles()}" data-test-id="post-verdict-files"></div>
             </div>
             <div data-bind="if: preFiles().length > 0">
               <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: preFiles()}"></div>
+              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: preFiles()}" data-test-id="pre-verdict-files"></div>
             </div>
           <div class="right">
             <!-- ko ifnot: allSelected -->

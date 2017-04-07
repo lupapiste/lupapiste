@@ -100,7 +100,7 @@
   (when (and (= :draft (keyword (:state application)))
              (usr/authority? user)
              (not (domain/owner-or-write-access? application (:id user))))
-    unauthorized))
+    (fail :error.unauthorized :source ::validate-authority-in-drafts)))
 
 (defn validate-has-subtypes [{application :application}]
   (when (empty? (resolve-valid-subtypes application))
@@ -667,7 +667,7 @@
   [{:keys [state] :as application}]
   (let [state (keyword state)
         graph (sm/state-graph application)
-        [verdict-state] (filter #{:foremanVerdictGiven :verdictGiven} (keys graph))
+        verdict-state (sm/verdict-given-state application)
         target (if (= state :appealed) :appealed verdict-state)]
     (set (cons state (remove #{:canceled} (target graph))))))
 

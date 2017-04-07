@@ -57,7 +57,7 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
     if (value) {
       if (value === OTHER) {
         var accordionFields = _.get(documentDataService.findDocumentById(params.documentId), "schema.accordion-fields");
-        var updates = _.map(accordionFields, function(path) { return [path, ""]; });
+        var updates = _.map(accordionFields, function(field) { return [_.get(field, "paths", field), ""]; });
         documentDataService.updateDoc(params.documentId, updates, emitAccordionUpdates(updates));
       } else {
         LUPAPISTE.ModalDialog.showDynamicYesNo(

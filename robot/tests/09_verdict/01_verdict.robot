@@ -56,7 +56,7 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Sonja adds attachment to verdict
-  Add attachment  verdict  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}
+  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätösote  Päätösote  Yleisesti hankkeeseen
   Wait test id visible  targetted-attachments-table
 
 Add katselmus

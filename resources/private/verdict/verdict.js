@@ -165,7 +165,9 @@ LUPAPISTE.verdictPageController = (function($) {
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
   var targeted = {target: ko.observable(),
                   type: ko.observable(),
-                  typeSelector: null};
+                  typeGroups: ko.observableArray(),
+                  typeSelector: null,
+                  dropZoneSectionId: "verdict"};
   var createTaskController = LUPAPISTE.createTaskController;
 
   function refresh(application, verdictId) {
@@ -181,9 +183,9 @@ LUPAPISTE.verdictPageController = (function($) {
     ajax
       .query("verdict-attachment-type", {id: currentApplicationId})
       .success(function(result) {
-        var type = [result.attachmentType["type-group"], result.attachmentType["type-id"]].join(".");
         targeted.target( target );
-        targeted.type( type );
+        targeted.type( result.attachmentType );
+        targeted.typeGroups( [result.attachmentType["type-group"]] );
       })
       .call();
 

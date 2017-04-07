@@ -51,7 +51,7 @@ Velho gives a verdict
   Go to give new verdict
   Title Should Be  Raitotie 2 - Lupapiste
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
-  Add attachment  verdict  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}
+  Upload verdict or task attachment  ${TXT_TESTFILE_PATH}  Päätös  Päätösote  Yleisesti hankkeeseen
   Wait test id visible  targetted-attachments-table
 
 Velho publishes the verdict and creates a new verdict bulletin

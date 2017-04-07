@@ -188,7 +188,7 @@ Mail is sent
   Wait until  Element should contain  xpath=//dd[@data-test-id='to']  b@example.com
 
 Neighbor clicks on email link and sees application
-  Click element  xpath=//a
+  Click Element  xpath=(//a[contains(., 'neighbor')])
   Neighbor application address should be  ${appname}
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen

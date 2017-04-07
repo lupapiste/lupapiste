@@ -10,6 +10,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
+            [lupapiste-commons.attachment-types :as att-types]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
 
@@ -32,8 +33,15 @@
 
 (sc/defschema BindableFile (sc/if :attachmentId NewVersion NewAttachment))
 
+(defn- file-is-to-be-marked-construction-time [{:keys [permitType]} {{typeGroup :type-group typeId :type-id} :type}]
+  (let [type-config (att-types/types-marked-being-construction-time-attachments-by-permit-type (keyword permitType))
+        config-by-group (get type-config (keyword typeGroup))]
+    (util/contains-value? config-by-group (keyword typeId))))
+
 (defn bind-single-attachment! [{:keys [application user created]} mongo-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
   (let [conversion-data    (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
+        is-authority       (usr/user-is-authority-in-organization? user (:organization application))
+
         placeholder-id     (or attachmentId
                                (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
         attachment         (or
@@ -49,8 +57,11 @@
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
                                            :comment-text contents
-                                           :state (when (usr/user-is-authority-in-organization? user (:organization application))
-                                                    :ok))
+                                           :state (when is-authority
+                                                    :ok)
+                                           :constructionTime (when (and (not is-authority)
+                                                                        (file-is-to-be-marked-construction-time application filedata))
+                                                               true))
                           (:result conversion-data)
                           (:file conversion-data))
         linked-version (att/set-attachment-version! application user attachment version-options)]

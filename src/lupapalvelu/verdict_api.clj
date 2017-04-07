@@ -1,6 +1,7 @@
 (ns lupapalvelu.verdict-api
   (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [monger.operators :refer :all]
+            [clojure.set :as set]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
@@ -28,7 +29,8 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(def give-verdict-states (clojure.set/union #{:submitted :complementNeeded :sent} states/verdict-given-states))
+(def give-verdict-states (set/union #{:submitted :complementNeeded :sent}
+                                    (set/difference states/verdict-given-states states/terminal-states)))
 
 (defquery verdict-attachment-type
   {:parameters       [:id]

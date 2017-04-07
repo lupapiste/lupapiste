@@ -769,16 +769,24 @@ Upload via button or link
   Upload with hidden input  input[data-test-id=${uploadContainer}-input]  ${path}
 
 Upload batch file
-  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
-  Expose file input  input[data-test-id=add-attachments-input]
-  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
-  Hide file input  input[data-test-id=add-attachments-input]
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}  ${testId}=add-attachments-input
+  Expose file input  input[data-test-id=${testId}]
+  Choose file  jquery=input[data-test-id=${testId}]  ${path}
+  Hide file input  input[data-test-id=${testId}]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
   Run keyword unless  ${group-is-selected}  Clear autocomplete selections by test id  batch-grouping-${index}
   Run keyword unless  ${group-is-selected} or '${grouping}' == 'Yleisesti hankkeeseen'  Wait until  Select from autocomplete  [data-test-id=batch-grouping-${index}] [data-test-id=attachment-group-autocomplete]  ${grouping}
+
+Upload verdict or task attachment
+  [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
+  Test id visible  upload-button-label
+  Scroll to top
+  Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}  upload-button-input
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
@@ -1351,6 +1359,15 @@ Verdict is given
   Wait until  Element should be visible  application-verdict-details
   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
+Sign verdict
+  [Arguments]  ${password}  ${idx}=0
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
+
+
 
 # User management
 
@@ -1630,8 +1647,8 @@ There are no frontend errors
   Go to  ${LOGIN URL}
   Logout
   # These test cases will fail if errors exist
-  Javascript?  ${FATAL_COUNT} === 0
-  Javascript?  ${ERR_COUNT} === 0
+  Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
+  Should be equal  ${ERR_COUNT}  0  Frontend errors
 
 #
 # YA
@@ -1677,3 +1694,10 @@ Fill required fields for the parties
   Wait until  Element should be visible  //div[@id='application-parties-tab']//section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
   Fill in yritys info  hakija-ya
   Fill in yritys info  yleiset-alueet-maksaja
+
+Permit subtype is
+  [Arguments]  ${localizedPermitSubtype}
+  ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
+  Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
+  Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
+
