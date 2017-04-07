@@ -14,11 +14,9 @@
   [source-application copy-options]
   {:pre [(or (contains? copy-options :whitelist)
              (contains? copy-options :blacklist))]}
-  (let [copied (if (contains? copy-options :whitelist)
-                 (select-keys source-application (:whitelist copy-options))
-                 (apply dissoc source-application (:blacklist copy-options)))]
-    (clojure.pprint/pprint copied)
-    copied))
+  (if (contains? copy-options :whitelist)
+    (select-keys source-application (:whitelist copy-options))
+    (apply dissoc source-application (:blacklist copy-options))))
 
 (defn- new-app-id [application]
   {:id (app/make-application-id (:municipality application))})
@@ -65,8 +63,7 @@
 (defn- new-application-overrides
   [{:keys [address auth infoRequest location municipality organization primaryOperation schema-version state title tosFunction] :as application}
    {:keys [overrides]} user created]
-  {:pre [(or (-> overrides :primaryOperation) (not-empty primaryOperation))
-         ]}
+  {:pre [(or (-> overrides :primaryOperation) (not-empty primaryOperation))]}
   (let [info-request? (get overrides :infoRequest infoRequest)
         org-id (get overrides :organization organization)
         primary-operation (or (-> overrides :primaryOperation) primaryOperation)
@@ -77,7 +74,7 @@
                 :id               (or (:id overrides)             (app/make-application-id (get overrides :municipality municipality)))
                 :primaryOperation primary-operation
                 :schema-version   (or (:schema-version overrides) schema-version    (schemas/get-latest-schema-version))
-                :state            (or (:state overrides)          (not-empty state) (app/application-state user org-id info-request?))
+                :state            (or (:state overrides)          state             (app/application-state user org-id info-request?))
                 :title            (or (:title overrides)          (not-empty title) (:address overrides) address)
                 :tosFunction      (or (:tosFunction overrides)    tosFunction       (tos-function org-id op-name))}
                (app/location-map  (or (:location overrides) location))
@@ -85,7 +82,13 @@
         (merge-in app/application-timestamp-map)
         (merge-in app/application-history-map))))
 
+(def ^:private default-copy-options
+  {:blacklist [:comments :history :statements] ; copy everything except these
+   })
+
 (defn new-application-copy [source-application user created copy-options & [manual-schema-datas]]
-  (-> domain/application-skeleton
-      (merge (copied-keys source-application copy-options))
-      (merge-in new-application-overrides copy-options user created)))
+  (let [options (merge default-copy-options copy-options)]
+    (-> domain/application-skeleton
+        (merge (copied-keys source-application options))
+        (merge-in new-application-overrides options user created)
+        (merge-in updated-operation-and-document-ids source-application))))

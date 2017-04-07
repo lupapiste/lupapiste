@@ -496,5 +496,19 @@
         (keys documents-map) => [:documents]
         (:documents documents-map) => seq?
         (map :created (:documents documents-map)) => (has every? #(= created %))
-        (map :id (:documents documents-map)) => (has every? #(= "mongo-id" %)))))
+        (map :id (:documents documents-map)) => (has every? #(= "mongo-id" %))
+
+        (:documents (application-documents-map (assoc application :infoRequest true) {} {})) => []))
+
+    (fact application-attachments-map
+      (let [application {:created created
+                         :primaryOperation (make-op "kerrostalo-rivitalo" created)
+                         :state :open
+                         :schema-version 1}
+            attachments-map (application-attachments-map application {})]
+        (keys attachments-map) => [:attachments]
+        (:attachments attachments-map) => seq?
+        (map :created (:attachments attachments-map)) => (has every? #(= created %))
+        (map :id (:attachments attachments-map)) => (has every? #(= "mongo-id" %))
+        (:attachments (application-attachments-map (assoc application :infoRequest true) {})) => [])))
   (against-background (mongo/create-id) => "mongo-id"))
