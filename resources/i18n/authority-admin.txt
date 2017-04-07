@@ -394,3 +394,6 @@
 "triggers.title" "en" "Automated task"
 "triggers.title" "fi" "Automaattitehtävät"
 "triggers.title" "sv" "Automatuppgifter"
+"auth-admin.stamp-editor" "en" "Stamp editor"
+"auth-admin.stamp-editor" "fi" "Leimaeditori"
+"auth-admin.stamp-editor" "sv" ""
