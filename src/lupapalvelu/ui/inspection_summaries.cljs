@@ -399,6 +399,3 @@
 (defn ^:export start [domId componentParams]
   (swap! args assoc :app (aget componentParams "app") :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (mount-component))
-
-(defn reload-hook []
-  (mount-component))

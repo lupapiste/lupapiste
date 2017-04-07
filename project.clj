@@ -167,10 +167,10 @@
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
                                   :timeout 200000}
                    :cljsbuild {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
-                                                         :on-jsload lupapalvelu.ui.inspection-summaries/reload-hook}
+                                                         :on-jsload lupapalvelu.ui.ui-components/reload-hook}
                                               :compiler {:output-dir "resources/public/lp-static/js/out"
                                                          :output-to "resources/public/lp-static/js/rum-app.js"
-                                                         :main lupapalvelu.ui.inspection-summaries
+                                                         :main lupapalvelu.ui.ui-components
                                                          :source-map true
                                                          :asset-path "/lp-static/js/out"
                                                          :parallel-build true
