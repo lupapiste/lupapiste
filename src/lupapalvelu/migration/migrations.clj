@@ -3079,10 +3079,14 @@
 (defmigration clean-post-verdict-original-application-states
   {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:originalApplicationState
                                                                            {$in states/post-verdict-states}}}}))}
-  (update-applications-array :attachments
-                             (fn [a] (dissoc a :originalApplicationState))
-                             {:attachments {$elemMatch {:originalApplicationState
-                                                        {$in states/post-verdict-states}}}}))
+  (letfn [(do-cleanup [attachment]
+            (if (contains? states/post-verdict-states (keyword (:originalApplicationState attachment)))
+              (dissoc attachment :originalApplicationState)
+              attachment))]
+    (update-applications-array :attachments
+                               do-cleanup
+                               {:attachments {$elemMatch {:originalApplicationState
+                                                          {$in states/post-verdict-states}}}})))
 
 ;;
 ;; ****** NOTE! ******
