@@ -30,7 +30,8 @@
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]
             [lupapalvelu.drawing :as draw]
-            [lupapalvelu.user :as usr])
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.states :as states])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3074,6 +3075,18 @@
                                                               :ts verdict-ts
                                                               :user usr/migration-user-summary}}
                                              $set {(get app/timestamp-key (keyword migration-target-state)) verdict-ts}}))))
+
+(defmigration clean-post-verdict-original-application-states
+  {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:originalApplicationState
+                                                                           {$in states/post-verdict-states}}}}))}
+  (letfn [(do-cleanup [attachment]
+            (if (contains? states/post-verdict-states (keyword (:originalApplicationState attachment)))
+              (dissoc attachment :originalApplicationState)
+              attachment))]
+    (update-applications-array :attachments
+                               do-cleanup
+                               {:attachments {$elemMatch {:originalApplicationState
+                                                          {$in states/post-verdict-states}}}})))
 
 ;;
 ;; ****** NOTE! ******
