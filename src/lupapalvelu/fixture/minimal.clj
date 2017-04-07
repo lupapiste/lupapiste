@@ -812,7 +812,7 @@
                                  :name "Oletusleima"
                                  :position {:x 10 :y 200}
                                  :background 0
-                                 :page "first"
+                                 :page :first
                                  :qr-code true
                                  :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:name "current-date"}]
                                         [{:type :backend-id}]

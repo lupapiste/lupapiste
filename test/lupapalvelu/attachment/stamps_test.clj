@@ -36,7 +36,7 @@
              :name       "Oletusleima"
              :position   {:x 10 :y 200}
              :background 0
-             :page       "first"
+             :page       :first
              :qr-code    true
              :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type :current-date}]
                           [{:type :backend-id}]
@@ -56,24 +56,36 @@
    :lastName "Sibbo"})
 
 (facts tag-content
-  (tag-content {:type :custom-text :text "Custom text"} {:organization organization :application application :user sonja}) => "Custom text"
-  (tag-content {:type :extra-tex :text "Extra text"} {:organization organization :application application :user sonja}) => "Extra text"
-  (tag-content {:type :current-date} {:organization organization :application application :user sonja}) => (sade.util/to-local-date (sade.core/now))
-  (tag-content {:type :verdict-date} {:organization organization :application application :user sonja}) => "06.04.2017"
-  (tag-content {:type :backend-id} {:organization organization :application application :user sonja}) => "17-0753-R"
-  (tag-content {:type :username} {:organization organization :application application :user sonja}) => "Sonja Sibbo"
-  (tag-content {:type :organization} {:organization organization :application application :user sonja}) => "Sipoon rakennusvalvonta"
-  (tag-content {:type :agreement-id} {:organization organization :application application :user sonja}) => "LP-753-2017-90001"
-  (tag-content {:type :building-id} {:organization organization :application application :user sonja}) => [{:national-id "100840657D"
-                                                                                                             :operation-id "57603a99edf02d7047774554"
-                                                                                                             :short-id "100840657D"}]
-  (tag-content {:type :section :text "Section"} {:organization organization :application application :user sonja}) => "Section")
+  (let [context {:organization organization :application application :user sonja}]
+    (tag-content {:type :custom-text :text "Custom text"} context) => "Custom text"
+    (tag-content {:type :extra-tex :text "Extra text"} context) => "Extra text"
+    (tag-content {:type :current-date} context) => (sade.util/to-local-date (sade.core/now))
+    (tag-content {:type :verdict-date} context) => "06.04.2017"
+    (tag-content {:type :backend-id} context) => "17-0753-R"
+    (tag-content {:type :username} context) => "Sonja Sibbo"
+    (tag-content {:type :organization} context) => "Sipoon rakennusvalvonta"
+    (tag-content {:type :agreement-id} context) => "LP-753-2017-90001"
+    (tag-content {:type :building-id} context) => [{:national-id  "100840657D"
+                                                    :operation-id "57603a99edf02d7047774554"
+                                                    :short-id     "100840657D"}]
+    (tag-content {:type :section :text "Section"} context) => "Section"))
 
 (facts "Stamp rows should be formed correctly"
   (rows (first (:stamps organization)) {:organization organization
-                                        :application application
-                                        :user sonja})               => [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
-                                                                        ["17-0753-R"]
-                                                                        ["Sipoon rakennusvalvonta"]])
+                                        :application  application
+                                        :user         sonja}) => [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
+                                                                  ["17-0753-R"]
+                                                                  ["Sipoon rakennusvalvonta"]])
+
+(facts "Stamps should be formed correctly"
+  (stamps organization application sonja) => [{:id         "123456789012345678901234"
+                                               :name       "Oletusleima"
+                                               :position   {:x 10 :y 200}
+                                               :background 0
+                                               :page       :first
+                                               :qr-code    true
+                                               :rows       [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
+                                                            ["17-0753-R"]
+                                                            ["Sipoon rakennusvalvonta"]]}])
 
 
