@@ -26,21 +26,19 @@
     (ok)))
 
 (defquery document-states
-  {:parameters       [:id documentIds]
-   :input-validators [(partial non-blank-parameters [:id :documentIds])]
+  {:parameters       [:id]
+   :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :states           (states/all-application-states-but :draft)}
-  [{:keys [application] :as command}]
-  (let [id-set (set (json/parse-string documentIds))
-        app-doc-id (str (:id application) "-application")
+  [{:keys [application]}]
+  (let [app-doc-id (str (:id application) "-application")
         case-file-doc-id (str (:id application) "-case-file")
         attachment-map (->> (:attachments application)
-                            (filter #(id-set (:id %)))
                             (map (fn [{:keys [id metadata]}] [id (:tila metadata)]))
                             (into {}))
-        state-map (cond-> attachment-map
-                          (id-set app-doc-id) (assoc app-doc-id (get-in application [:metadata :tila]))
-                          (id-set case-file-doc-id) (assoc case-file-doc-id (get-in application [:processMetadata :tila])))]
+        state-map (assoc attachment-map
+                         app-doc-id (get-in application [:metadata :tila])
+                         case-file-doc-id (get-in application [:processMetadata :tila]))]
     (ok :state state-map)))
 
 (defcommand mark-pre-verdict-phase-archived
