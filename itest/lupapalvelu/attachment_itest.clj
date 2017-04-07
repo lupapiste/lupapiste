@@ -991,7 +991,7 @@
               attachment-id (-> resp :attachmentIds first)
               attachment (:attachment (query pena :attachment :id application-id :attachmentId attachment-id))]
              (fact "applicationState"
-                   (:applicationState attachment) => "verdictGiven")
+                   (:applicationState attachment) => nil)
              (fact "originalApplicationState"
                    (:originalApplicationState attachment) => nil)))
       (facts "add attachment"
