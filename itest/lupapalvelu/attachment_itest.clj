@@ -991,9 +991,9 @@
               attachment-id (-> resp :attachmentIds first)
               attachment (:attachment (query pena :attachment :id application-id :attachmentId attachment-id))]
              (fact "applicationState"
-                   (:applicationState attachment) => "verdictGiven")
+                   (:applicationState attachment) => nil)
              (fact "originalApplicationState"
-                   (:originalApplicationState attachment) => nil))
+                   (:originalApplicationState attachment) => nil)))
       (facts "add attachment"
         (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}] :group nil)
               post-verdict-attachment-id (-> resp :attachmentIds first)
