@@ -859,7 +859,7 @@
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))
-                (states/all-application-states (keyword orig-app-state)))))
+                ((conj states/all-application-states :info) (keyword orig-app-state)))))
 
 (defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
   (when-not (manually-set-construction-time (get-attachment-info application attachmentId))
