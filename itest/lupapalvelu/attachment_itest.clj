@@ -1011,7 +1011,7 @@
             (:manuallySetConstructionTime attachment) = false)
 
           (fact "set-attachment-as-construction-time"
-            (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
+            (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state))))))))
 
 (facts "Not needed..."
   (let [application (create-application pena :propertyId sipoo-property-id)
