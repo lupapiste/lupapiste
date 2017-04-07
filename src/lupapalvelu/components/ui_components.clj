@@ -63,7 +63,7 @@
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
-                 :build                 (:build-number env/buildinfo)
+                 :build                 env/build-number
                  :cookie                (env/value :cookie)
                  :wannaJoinUrl          (env/value :oir :wanna-join-url)
                  :rumURL                rum-app-url
