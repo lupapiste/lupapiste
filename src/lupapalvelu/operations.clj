@@ -95,7 +95,7 @@
        [["nostotyot" :ya-kayttolupa-nostotyot]
         ["vaihtolavat" :ya-kayttolupa-vaihtolavat]
         ["kattolumien-pudotustyot" :ya-kayttolupa-kattolumien-pudotustyot]
-        ["muu-liikennealuetyo" :ya-kayttolupa-muu-liikennealuetyo]]]
+        ["muu-liikennealuetyo" :ya-katulupa-muu-liikennealuetyo]]]
       ["yleisen-alueen-rajaaminen-tyomaakayttoon"
        [["talon-julkisivutyot" :ya-kayttolupa-talon-julkisivutyot]
         ["talon-rakennustyot" :ya-kayttolupa-talon-rakennustyot]
