@@ -55,6 +55,36 @@
    :id "777777777777777777000023"
    :lastName "Sibbo"})
 
+(def multiple-stamps
+  [{:id         "123456789012345678901234"
+    :name       "Oletusleima"
+    :position   {:x 10 :y 200}
+    :background 0
+    :page       :first
+    :qr-code    true
+    :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type :current-date}]
+                 [{:type :backend-id}]
+                 [{:type :organization}]]}
+   {:id         "112233445566778899004567"
+    :name       "KV-Leima"
+    :position   {:x 15 :y 250}
+    :background 10
+    :page       :last
+    :qr-code    false
+    :rows       [[{:type :custom-text :text "Verdict given"} {:type :verdict-date}]
+                 [{:type :backend-id} {:type :username}]
+                 [{:type :organization}]
+                 [{:type :agreement-id}]]}
+   {:id         "999999888887777722223300"
+    :name       "YA-Leima"
+    :position   {:x 50 :y 50}
+    :background 15
+    :page       :all
+    :qr-code    true
+    :rows       [[{:type :current-date} {:type :verdict-date}]
+                 [{:type :extra-tex :text "Some extra text"}]
+                 [{:type :agreement-id}]]}])
+
 (facts tag-content
   (let [context {:organization organization :application application :user sonja}]
     (tag-content {:type :custom-text :text "Custom text"} context) => "Custom text"
@@ -78,14 +108,44 @@
                                                                   ["Sipoon rakennusvalvonta"]])
 
 (facts "Stamps should be formed correctly"
-  (stamps organization application sonja) => [{:id         "123456789012345678901234"
-                                               :name       "Oletusleima"
-                                               :position   {:x 10 :y 200}
-                                               :background 0
-                                               :page       :first
-                                               :qr-code    true
-                                               :rows       [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
-                                                            ["17-0753-R"]
-                                                            ["Sipoon rakennusvalvonta"]]}])
+  (fact "Default stamp is formed ok"
+    (stamps organization application sonja) => [{:id         "123456789012345678901234"
+                                                 :name       "Oletusleima"
+                                                 :position   {:x 10 :y 200}
+                                                 :background 0
+                                                 :page       :first
+                                                 :qr-code    true
+                                                 :rows       [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
+                                                              ["17-0753-R"]
+                                                              ["Sipoon rakennusvalvonta"]]}])
+  (fact "Multiple stamps are formed ok"
+    (stamps (assoc organization :stamps multiple-stamps) application sonja) =>   [{:id         "123456789012345678901234"
+                                                                                   :name       "Oletusleima"
+                                                                                   :position   {:x 10 :y 200}
+                                                                                   :background 0
+                                                                                   :page       :first
+                                                                                   :qr-code    true
+                                                                                   :rows       [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
+                                                                                                ["17-0753-R"]
+                                                                                                ["Sipoon rakennusvalvonta"]]}
+                                                                                  {:id         "112233445566778899004567"
+                                                                                   :name       "KV-Leima"
+                                                                                   :position   {:x 15 :y 250}
+                                                                                   :background 10
+                                                                                   :page       :last
+                                                                                   :qr-code    false
+                                                                                   :rows       [["Verdict given" "06.04.2017"]
+                                                                                                ["17-0753-R" "Sonja Sibbo"]
+                                                                                                ["Sipoon rakennusvalvonta"]
+                                                                                                ["LP-753-2017-90001"]]}
+                                                                                  {:id         "999999888887777722223300"
+                                                                                   :name       "YA-Leima"
+                                                                                   :position   {:x 50 :y 50}
+                                                                                   :background 15
+                                                                                   :page       :all
+                                                                                   :qr-code    true
+                                                                                   :rows       [[(sade.util/to-local-date (sade.core/now)) "06.04.2017"]
+                                                                                                ["Some extra text"]
+                                                                                                ["LP-753-2017-90001"]]}]))
 
 
