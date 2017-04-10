@@ -79,8 +79,11 @@
    (sc/optional-key :handlerRole) HandlerRole
    :description sc/Str})
 
+(sc/defschema OrgId
+  (sc/pred string?))
+
 (sc/defschema Organization
-  {:id sc/Str
+  {:id OrgId
    :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str

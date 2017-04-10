@@ -10,7 +10,10 @@
             [clojure.test :refer [is]]
             [sade.schema-generators :as ssg]
             [slingshot.slingshot :refer [try+]]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.generators.user :as user-gen]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.user :as user]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
@@ -32,7 +35,6 @@
 
 (defn silly-application-generator
   [organization-id-generator]
-  ;;TODO: generoi hakemukseen organization
   (gen/let [permit-type permit-type-generator
             org-id organization-id-generator]
     (merge lupapalvelu.domain/application-skeleton
@@ -71,6 +73,75 @@
                   "enable-accordions")]
     (validate command)))
 
+(defn power-set [a-seq]
+  (if (empty? a-seq)
+    [#{}]
+    (let [fst (first a-seq)
+          rst (rest a-seq)
+          smaller-sets (power-set rst)
+          with-fst (for [a-set smaller-sets]
+                     (conj a-set fst))]
+      (concat smaller-sets with-fst))))
+
+(def asdf (atom []))
+
+(def asdf-2 (atom []))
+
+#_(facts "user-is-allowed-to-access?")
+
+(defn mock-get-org [orgs]
+  (let [org-map (group-by :id orgs)]
+    (fn [org-id]
+      (if (contains? org-map org-id)
+        (first (get bindings-map params))
+        (throw (IllegalArgumentException.
+                 "Invalid org id"))))))
+
+(defn runnn []
+  (with-redefs [lupapalvelu.organization/get-organization
+                (mock-get-org minimal/organizations)]
+    (let [user :sonja-sibbo-here
+          application (merge lupapalvelu.domain/application-skeleton
+                             {:permitType "YA"
+                              :organization :752-YA})
+          command (action->command
+                    {:user user
+                     :application application
+                     :data {:id ""}}
+                    "enable-accordions")]
+      (validate command))))
+
+
+(defn run-asdf []
+  (for [user-role lupapalvelu.roles/all-user-roles
+        authz-roles (power-set (map name lupapalvelu.roles/all-org-authz-roles))
+        permit-type (keys (lupapalvelu.permit/permit-types))
+        org-id ["100-YA" "200-R"]
+        :let [user {:role user-role
+                    :orgAuthz {:100-YA (vec authz-roles)}}
+              application (merge lupapalvelu.domain/application-skeleton
+                                 {:permitType permit-type
+                                  :organization org-id})
+              command (action->command
+                        {:user user
+                         :data {:id ""}
+                         :application application}
+                        "enable-accordions")
+              result (validate command)
+              user-is-authority (user/authority? user)
+              user-is-authority-in-org (user/user-is-authority-in-organization? user :100-YA)
+              application-is-YA (= "YA" (:permitType application))]]
+    (do  (swap! asdf conj {:user-is-authority user-is-authority
+                           :user-is-authority-in-organization user-is-authority-in-org
+                           :application-is-YA application-is-YA})
+         ()
+         (cond (and user-is-authority
+                    user-is-authority-in-org
+                    application-is-YA)
+               (fact result => nil?)
+
+               ))))
+
 (def user-is-allowed-to-access?-prop
   (prop/for-all [{:keys [user application]} (with-limited-org-id-pool)]
     (let [command (action->command
@@ -79,11 +150,11 @@
                      :application application}
                     "enable-accordions")
           applications-org (-> application :organization keyword)
-          result (catch-all (test-with-input user application))]
+          result (validate command)]
       (cond (and (user/authority? user)
                  (user/user-is-authority-in-organization? user applications-org)
                  (= "YA" (:permitType application)))
-            (nil? result)
+            (ok? result)
 
             (user/authority? user)
             (fail? result)
