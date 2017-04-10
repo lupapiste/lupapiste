@@ -484,7 +484,8 @@
   {:pre [(string? organization)]}
   (let [metadata (tos/metadata-for-document organization tosFunction "hakemus")]
     {:metadata        metadata
-     :processMetadata (tos/calculate-process-metadata (tos/metadata-for-process organization tosFunction) metadata attachments)}))
+     :processMetadata (-> (tos/metadata-for-process organization tosFunction)
+                          (tos/calculate-process-metadata metadata attachments))}))
 
 (defn application-timestamp-map [{:keys [state created]}]
   {:pre [(keyword? state) (pos? created)]}
