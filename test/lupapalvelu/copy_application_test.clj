@@ -60,6 +60,6 @@
           (fact "comments are not copied by default"
             (:comments new-app) => empty?)))
 
-           (against-background
-            (app/make-application-id anything) => "application-id-753"
-            (org/get-organization (:id organization)) => organization))))
+      (against-background
+       (app/make-application-id anything) => "application-id-753"
+       (org/get-organization (:id organization)) => organization))))

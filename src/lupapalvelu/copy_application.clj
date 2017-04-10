@@ -8,6 +8,8 @@
             [lupapalvelu.organization :as org]
             [sade.util :refer [merge-in]]))
 
+;;; Copying source application keys
+
 (defn- copied-keys
   "Copy keys from source application. The options must include either a
   whitelist of keys to copy, or a blacklist of keys to NOT copy"
@@ -17,6 +19,9 @@
   (if (contains? copy-options :whitelist)
     (select-keys source-application (:whitelist copy-options))
     (apply dissoc source-application (:blacklist copy-options))))
+
+
+;;; Updating ids
 
 (defn- new-app-id [application]
   {:id (app/make-application-id (:municipality application))})
@@ -56,6 +61,8 @@
           :else
             (error "documents were " (when (not documents-copied?) "not ")
                    "copied, but operations " (when operations-copied? "were" "were not")))))
+
+;;; Handling noncopied and nonoverridden keys similarly to creating new application
 
 (defn- tos-function [organization-id operation-name]
   (app/tos-function (org/get-organization organization-id) operation-name))
