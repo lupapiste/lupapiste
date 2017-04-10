@@ -13,8 +13,7 @@
   [k v col]
   (some (fn [m] (when (= v (get m k)) m)) col))
 
-(def empty-component-state {:organization-id ""
-                            :stamps []
+(def empty-component-state {:stamps []
                             :view {:bubble-visible false
                                    :selected-stamp-id nil}})
 
@@ -33,11 +32,10 @@
 (defn- refresh
   ([] (refresh nil))
   ([cb]
-   (query :stamps
+   (query :stamp-templates
           (fn [data]
             (swap! component-state assoc :stamps (:stamps data))
-            (when cb (cb data)))
-          :organization-id (-> @component-state :organization-id))))
+            (when cb (cb data))))))
 
 (rum/defc stamp-select [stamps selection]
   (uc/select update-stamp-view
@@ -48,25 +46,25 @@
 
 (defn init
   [init-state props]
-  (let [[org-id auth-model] (-> (aget props ":rum/initial-state") :rum/args)]
-    (swap! component-state assoc :organization-id org-id :auth-models {:global-auth-model auth-model})
-    (when (auth/ok? auth-model :stamps) (refresh))
+  (let [[auth-model] (-> (aget props ":rum/initial-state") :rum/args)]
+    (swap! component-state assoc :auth-models {:global-auth-model auth-model})
+    (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
 (rum/defc stamp-editor < rum/reactive
   {:init init
    :will-unmount (fn [& _] (reset! component-state empty-component-state))}
-  [org-id global-auth-model]
+  [global-auth-model]
   [:div
-   [:h1 (js/loc "stamp-editor.tab.title")]
+   [:h1 (loc "stamp-editor.tab.title")]
    [:div (stamp-select (rum/react (rum/cursor-in component-state [:stamps])) (rum/react (rum/cursor-in component-state [:view :selected-stamp-id])))]])
 
 (defonce args (atom {}))
 
 (defn mount-component []
-  (rum/mount (stamp-editor ((:org-id @args)) (:auth-model @args))
+  (rum/mount (stamp-editor (:auth-model @args))
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :org-id (aget componentParams "orgId") :auth-model (aget componentParams "authModel") :dom-id (name domId))
+  (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
   (mount-component))

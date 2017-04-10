@@ -109,10 +109,8 @@
         (fail :error.illegal-file-type)))))
 
 (defn- org-authz-validator [org-authz-roles]
-  (fn [{{org-authz :orgAuthz :as user} :user {app-org-id :organization} :application}]
-    (let [org-id (if (usr/authority-admin? user)
-                   (first (keys org-authz))
-                   app-org-id)]
+  (fn [{user :user {app-org-id :organization} :application}]
+    (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
       (when-not (auth/has-organization-authz-roles? org-authz-roles org-id user)
         (fail :error.unauthorized)))))
 
@@ -586,14 +584,11 @@
         (ok)))
     (fail :error.unknown)))
 
-(defquery stamps
-  {:input-validators [(partial action/non-blank-parameters [:organization-id])]
-   :pre-checks       [(org-authz-validator #{:authorityAdmin})]
+(defquery stamp-templates
+  {:pre-checks       [(org-authz-validator #{:authority :authorityAdmin})]
    :user-roles       #{:authority :authorityAdmin}}
-  [{{org-authz :orgAuthz :as user} :user {app-org-id :organization} :application}]
-  (let [org-id (if (usr/authority-admin? user)
-                 (first (keys org-authz))
-                 app-org-id)]
+  [{user :user {app-org-id :organization} :application}]
+  (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
     (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
 
 (defcommand stamp-attachments
