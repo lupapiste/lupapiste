@@ -386,11 +386,6 @@
       }
     };
 
-
-    var getId = function(doc) {
-      return ko.unwrap(doc.id);
-    };
-
     if (ko.unwrap(params.application.id)) {
       pollChangedState();
     }
