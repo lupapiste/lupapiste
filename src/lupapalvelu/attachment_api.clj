@@ -108,6 +108,12 @@
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
 
+(defn- org-authz-validator [org-authz-roles]
+  (fn [{user :user {app-org-id :organization} :application}]
+    (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
+      (when-not (auth/has-organization-authz-roles? org-authz-roles org-id user)
+        (fail :error.unauthorized)))))
+
 ;;
 ;; Attachments
 ;;
@@ -577,6 +583,13 @@
                                           :size (.length temp-pdf)}))
         (ok)))
     (fail :error.unknown)))
+
+(defquery stamp-templates
+  {:pre-checks       [(org-authz-validator #{:authority :authorityAdmin})]
+   :user-roles       #{:authority :authorityAdmin}}
+  [{user :user {app-org-id :organization} :application}]
+  (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
+    (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]
