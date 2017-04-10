@@ -100,7 +100,14 @@
   {:description "Pseudo-query for checking if accordions should be open or
                  closed"
    :user-roles roles/all-authenticated-user-roles
-   })
+   :pre-checks [(action/some-pre-check
+                  (action/and-pre-check
+                    (permit/validate-permit-type-is :YA)
+                    usr/validate-authority)
+                  (action/not-pre-check
+                    usr/validate-authority
+                    :error.unauthorized :source ::enable-accordions))]}
+  [_])
 
 (defquery party-document-names
   {:parameters [:id]

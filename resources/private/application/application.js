@@ -265,19 +265,22 @@
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+        var collapseAccordion = !lupapisteApp.models.applicationAuthModel.getData()["enable-accordions"].ok;
 
         // Parties are always visible
         docgen.displayDocuments("partiesDocgen",
                                 app,
                                 partyDocs,
-                                {dataTestSpecifiers: devMode});
+                                {dataTestSpecifiers: devMode,
+                                 accordionCollapsed: collapseAccordion});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
                                   app,
                                   applicationModel.summaryAvailable() ? [] : nonpartyDocs,
-                                  {dataTestSpecifiers: devMode});
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: collapseAccordion});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -287,7 +290,8 @@
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
               applicationModel.summaryAvailable() ? uneditableDocs : [],
-              {dataTestSpecifiers: devMode});
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: collapseAccordion});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
@@ -297,7 +301,8 @@
           docgen.displayDocuments("constructionTimeDocgen",
                                   app,
                                   editableDocs,
-                                  {dataTestSpecifiers: devMode});
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: collapseAccordion});
         } else {
           docgen.clear("constructionTimeDocgen");
         }

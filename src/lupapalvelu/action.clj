@@ -45,12 +45,30 @@
 ;; some utils
 ;;
 
+
+(defn and-pre-check
+  "Returns a pre-check that fails if any of the given pre-checks fail.
+   The returned pre-check return the first failing pre-checks failure,
+   or nil in case all succeed."
+  [& pre-checks]
+  (let [and-2-pre-check (fn [check1 check2]
+                          (fn [x]
+                            (let [result1 (check1 x)]
+                              (if (nil? result1)
+                                (check2 x)
+                                result1))))]
+    (reduce and-2-pre-check
+            (constantly nil)
+            pre-checks)))
+
 (defn not-pre-check
   "Pre-check fails if given pre-check succeeds."
-  [pre-check]
-  (fn [command]
-    (when-not (pre-check command)
-      (fail :error.pre-check))))
+  [pre-check & fail-args]
+  (let [fail-args (or fail-args
+                      [:error.pre-check])]
+    (fn [command]
+      (when-not (pre-check command)
+        (apply fail fail-args)))))
 
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
@@ -424,11 +442,14 @@
     (or
       (some #(% command) validators)
       (let [application (get-application command)
-            ^{:doc "Organization as delay"} organization (when application
-                                                           (delay (org/get-organization (:organization application))))
-            ^{:doc "Application assignments as delay"} assignments (when application
-                                                                     (delay (mongo/select :assignments {:application.id (:id application)
-                                                                                                        :status {$ne "canceled"}})))
+            ^{:doc "Organization as delay"}
+            organization (when application
+                           (delay (org/get-organization (:organization application))))
+            ^{:doc "Application assignments as delay"}
+            assignments (when application
+                          (delay (mongo/select :assignments
+                                               {:application.id (:id application)
+                                                :status {$ne "canceled"}})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             command (merge {:application application
                             :organization organization

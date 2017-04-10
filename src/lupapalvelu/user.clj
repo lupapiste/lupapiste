@@ -209,7 +209,7 @@
   [command]
   (if (authority? (:user command))
     nil
-    (fail! :error.unauthorized :desc "user is not an authority")))
+    (fail :error.unauthorized :desc "user is not an authority")))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
