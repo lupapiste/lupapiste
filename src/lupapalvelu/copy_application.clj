@@ -52,36 +52,30 @@
 
 (defn- copy-application-documents-map
   "If the application contains no documents, create new ones similarly
-  to a new application, unless documents are specifically overridden to
-  be empty"
-  [{:keys [documents] :as copied-application} overrides user organization manual-schema-datas]
-  (if (and (not= documents (:documents overrides))
-           (empty? documents))
+  to a new application"
+  [{:keys [documents] :as copied-application} user organization manual-schema-datas]
+  (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
 
 (defn- new-application-overrides
   [{:keys [address auth infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
-   {:keys [overrides]} user organization created manual-schema-datas]
-  {:pre [(or (-> overrides :primaryOperation) (not-empty primaryOperation))]}
-  (let [info-request? (get overrides :infoRequest infoRequest)
-        org-id (:id organization)
-        primary-operation (or (-> overrides :primaryOperation) primaryOperation)
-        op-name (:name primary-operation)]
+   user organization created manual-schema-datas]
+  {:pre [(not-empty primaryOperation) (not-empty location) municipality]}
+  (let [org-id (:id organization)
+        op-name (:name primaryOperation)]
     (-> (merge application
-               {:auth             (or (:auth overrides)           (not-empty auth)  (app/application-auth user op-name))
+               {:auth             (or (not-empty auth)  (app/application-auth user op-name))
                 :created          created
-                :id               (or (:id overrides)             (app/make-application-id (get overrides :municipality municipality)))
-                :primaryOperation primary-operation
-                :schema-version   (or (:schema-version overrides) schema-version    (schemas/get-latest-schema-version))
-                :state            (or (:state overrides)          state             (app/application-state user org-id info-request?))
-                :title            (or (:title overrides)          (not-empty title) (:address overrides) address)
-                :tosFunction      (or (:tosFunction overrides)    tosFunction       (tos-function org-id op-name))}
-               (app/location-map  (or (:location overrides) location))
-               overrides)
+                :id               (app/make-application-id municipality)
+                :schema-version   (or schema-version    (schemas/get-latest-schema-version))
+                :state            (or state             (app/application-state user org-id infoRequest))
+                :title            (or (not-empty title) address)
+                :tosFunction      (or tosFunction       (tos-function org-id op-name))}
+               (app/location-map  location))
         (merge-in app/application-timestamp-map)
         (merge-in app/application-history-map user)
         (merge-in app/application-attachments-map organization)
-        (merge-in copy-application-documents-map overrides user organization manual-schema-datas))))
+        (merge-in copy-application-documents-map user organization manual-schema-datas))))
 
 (def  default-copy-options
   {:blacklist [:comments :history :statements :attachments :auth] ; copy everything except these
@@ -91,5 +85,5 @@
   (let [options (merge default-copy-options copy-options)]
     (-> domain/application-skeleton
         (merge (copied-keys source-application options))
-        (merge-in new-application-overrides options user organization created manual-schema-datas)
+        (merge-in new-application-overrides user organization created manual-schema-datas)
         (merge-in updated-operation-and-document-ids source-application))))
