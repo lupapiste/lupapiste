@@ -397,3 +397,6 @@
 "auth-admin.stamp-editor" "en" "Stamp editor"
 "auth-admin.stamp-editor" "fi" "Leimaeditori"
 "auth-admin.stamp-editor" "sv" ""
+"stamp-editor.tab.title" "en" "Stamp editor"
+"stamp-editor.tab.title" "fi" "Leimaeditori"
+"stamp-editor.tab.title" "sv" ""
