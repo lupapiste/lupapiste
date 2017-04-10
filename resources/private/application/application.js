@@ -288,8 +288,8 @@
         // summary tab is visible in post-verdict and canceled states
         if (applicationModel.summaryAvailable()) {
           docgen.displayDocuments("applicationAndPartiesDocgen",
-              app,
-              applicationModel.summaryAvailable() ? uneditableDocs : [],
+                                  app,
+                                  applicationModel.summaryAvailable() ? uneditableDocs : [],
                                   {dataTestSpecifiers: devMode,
                                    accordionCollapsed: collapseAccordion});
         } else {
