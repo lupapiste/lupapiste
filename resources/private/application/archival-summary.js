@@ -391,8 +391,6 @@
       return ko.unwrap(doc.id);
     };
 
-    var allIds = _.map(self.attachments().concat(mainDocuments()), getId);
-
     if (ko.unwrap(params.application.id)) {
       pollChangedState();
     }
