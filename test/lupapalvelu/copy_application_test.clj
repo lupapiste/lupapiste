@@ -44,7 +44,8 @@
                        (assoc :attachments (attachment/make-attachments 999 :draft
                                                                         [{:type (ssg/generate attachment/Type)}
                                                                          {:type (ssg/generate attachment/Type)}]
-                                                                        nil false true true)))]
+                                                                        nil false true true))
+                       (update :documents conj {:id "extra-document"}))]
     (facts new-application-copy
       (facts "No options specified"
         (let [new-app (new-application-copy source-app user organization created {})
@@ -80,6 +81,13 @@
           (fact "user is the owner of the new application"
             (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)]
             (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)])))
+
+      (fact "If documents are not copied or overridden, those of normal new application are created"
+        (let [new-app (new-application-copy source-app user organization created
+                                            (update default-copy-options :blacklist
+                                                    conj :documents))]
+          (= (dissoc-ids-and-timestamps (:documents new-app))
+             (dissoc-ids-and-timestamps (:documents raw-new-app))) => true?))
 
       (against-background
        (app/make-application-id anything) => "application-id-753"

@@ -50,9 +50,18 @@
 (defn- tos-function [organization-id operation-name]
   (app/tos-function (org/get-organization organization-id) operation-name))
 
+(defn- copy-application-documents-map
+  "If the application contains no documents, create new ones similarly
+  to a new application, unless documents are specifically overridden to
+  be empty"
+  [{:keys [documents] :as copied-application} overrides user organization manual-schema-datas]
+  (if (and (not= documents (:documents overrides))
+           (empty? documents))
+    (app/application-documents-map copied-application user organization manual-schema-datas)))
+
 (defn- new-application-overrides
   [{:keys [address auth infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
-   {:keys [overrides]} user organization created]
+   {:keys [overrides]} user organization created manual-schema-datas]
   {:pre [(or (-> overrides :primaryOperation) (not-empty primaryOperation))]}
   (let [info-request? (get overrides :infoRequest infoRequest)
         org-id (:id organization)
@@ -71,9 +80,10 @@
                overrides)
         (merge-in app/application-timestamp-map)
         (merge-in app/application-history-map user)
-        (merge-in app/application-attachments-map organization))))
+        (merge-in app/application-attachments-map organization)
+        (merge-in copy-application-documents-map overrides user organization manual-schema-datas))))
 
-(def ^:private default-copy-options
+(def  default-copy-options
   {:blacklist [:comments :history :statements :attachments :auth] ; copy everything except these
    })
 
@@ -81,5 +91,5 @@
   (let [options (merge default-copy-options copy-options)]
     (-> domain/application-skeleton
         (merge (copied-keys source-application options))
-        (merge-in new-application-overrides options user organization created)
+        (merge-in new-application-overrides options user organization created manual-schema-datas)
         (merge-in updated-operation-and-document-ids source-application))))
