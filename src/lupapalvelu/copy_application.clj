@@ -68,11 +68,11 @@
   (app/tos-function (org/get-organization organization-id) operation-name))
 
 (defn- new-application-overrides
-  [{:keys [address auth infoRequest location municipality organization primaryOperation schema-version state title tosFunction] :as application}
-   {:keys [overrides]} user created]
+  [{:keys [address auth infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
+   {:keys [overrides]} user organization created]
   {:pre [(or (-> overrides :primaryOperation) (not-empty primaryOperation))]}
   (let [info-request? (get overrides :infoRequest infoRequest)
-        org-id (get overrides :organization organization)
+        org-id (:id organization)
         primary-operation (or (-> overrides :primaryOperation) primaryOperation)
         op-name (:name primary-operation)]
     (-> (merge application
@@ -87,15 +87,16 @@
                (app/location-map  (or (:location overrides) location))
                overrides)
         (merge-in app/application-timestamp-map)
-        (merge-in app/application-history-map))))
+        (merge-in app/application-history-map)
+        (merge-in app/application-attachments-map organization))))
 
 (def ^:private default-copy-options
-  {:blacklist [:comments :history :statements] ; copy everything except these
+  {:blacklist [:comments :history :statements :attachments] ; copy everything except these
    })
 
-(defn new-application-copy [source-application user created copy-options & [manual-schema-datas]]
+(defn new-application-copy [source-application user organization created copy-options & [manual-schema-datas]]
   (let [options (merge default-copy-options copy-options)]
     (-> domain/application-skeleton
         (merge (copied-keys source-application options))
-        (merge-in new-application-overrides options user created)
+        (merge-in new-application-overrides options user organization created)
         (merge-in updated-operation-and-document-ids source-application))))
