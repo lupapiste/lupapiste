@@ -53,10 +53,10 @@
           (fact "the application is copied almost verbatim"
             (let [[only-new only-old _] (diff (dissoc-ids-and-timestamps new-app)
                                               (dissoc-ids-and-timestamps source-app))]
-              (keys only-new) => (just [:comments :attachments] :in-any-order)
-              (keys only-old) => (just [:comments :attachments] :in-any-order))
+              (keys only-new)  ; gives the same result as (keys only-old)
+              => (just [:auth :attachments :comments :history] :in-any-order))
             (keys new) ; gives the same result as (keys old)
-            => (just [:attachments :comments :created :documents :id :modified :history :primaryOperation]
+            => (just [:auth :attachments :comments :created :documents :history :id :modified :primaryOperation]
                      :in-any-order))
 
           (fact "application is created and modified now"
@@ -75,7 +75,11 @@
 
           (fact "attachments are overridden with those of a normal new application"
             (= (dissoc-ids-and-timestamps (select-keys new-app [:attachments]))
-               (dissoc-ids-and-timestamps (select-keys raw-new-app [:attachments])))  => true?)))
+               (dissoc-ids-and-timestamps (select-keys raw-new-app [:attachments])))  => true?)
+
+          (fact "user is the owner of the new application"
+            (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)]
+            (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)])))
 
       (against-background
        (app/make-application-id anything) => "application-id-753"

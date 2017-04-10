@@ -45,23 +45,6 @@
                             doc)))
                       (:documents application))}))
 
-(defn- new-operation-and-document-ids
-  "give new ids to operations and documents if they were copied"
-  [application source-application]
-  (let [operations-copied? (and (= (:primaryOperation application)
-                                   (:primaryOperation source-application))
-                                (= (:secondaryOperations application)
-                                   (:secondaryOperations source-application)))
-        documents-copied? (= (:documents application)
-                             (:documents source-application))]
-    (cond (and operations-copied? documents-copied?)
-            (updated-operation-and-document-ids application)
-          (not (or operations-copied? documents-copied?))
-            nil
-          :else
-            (error "documents were " (when (not documents-copied?) "not ")
-                   "copied, but operations " (when operations-copied? "were" "were not")))))
-
 ;;; Handling noncopied and nonoverridden keys similarly to creating new application
 
 (defn- tos-function [organization-id operation-name]
@@ -87,11 +70,11 @@
                (app/location-map  (or (:location overrides) location))
                overrides)
         (merge-in app/application-timestamp-map)
-        (merge-in app/application-history-map)
+        (merge-in app/application-history-map user)
         (merge-in app/application-attachments-map organization))))
 
 (def ^:private default-copy-options
-  {:blacklist [:comments :history :statements :attachments] ; copy everything except these
+  {:blacklist [:comments :history :statements :attachments :auth] ; copy everything except these
    })
 
 (defn new-application-copy [source-application user organization created copy-options & [manual-schema-datas]]

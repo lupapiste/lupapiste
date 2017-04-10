@@ -484,21 +484,31 @@
       (application-timestamp-map {:state :draft, :created created}) => {:opened nil,     :modified created})
 
     (fact application-history-map
-     ; TODO
-          )
+      (let [application {:created created
+                         :organization "753-R"
+                         :state :draft
+                         :history [:old :history :is :irrelevant]}
+            user {:firstName "Creating"
+                  :lastName "User"
+                  :id "creating-user"
+                  :role "applicant"}
+            history-map (application-history-map application user)]
+        history-map => {:history [{:state (:state application)
+                                   :ts (:created application)
+                                   :user (usr/summary user)}]}))
 
     (fact application-documents-map
       (let [application {:created created
                          :primaryOperation (make-op "kerrostalo-rivitalo" created)
                          :auth (application-auth user "kerrostalo-rivitalo")
                          :schema-version 1}
-            documents-map (application-documents-map application {} {})]
+            documents-map (application-documents-map application {} {} {})]
         (keys documents-map) => [:documents]
         (:documents documents-map) => seq?
         (map :created (:documents documents-map)) => (has every? #(= created %))
         (map :id (:documents documents-map)) => (has every? #(= "mongo-id" %))
 
-        (:documents (application-documents-map (assoc application :infoRequest true) {} {})) => []))
+        (:documents (application-documents-map (assoc application :infoRequest true) {} {} {})) => []))
 
     (fact application-attachments-map
       (let [application {:created created

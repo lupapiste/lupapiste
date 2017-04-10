@@ -444,10 +444,9 @@
         (usr/rest-user? user)) :open
     :else :draft))
 
-(defn application-history-map [{:keys [auth created organization state tosFunction]}]
-  {:pre [(pos? created) (string? organization) (keyword? state) (util/find-by-key :role :owner auth)]}
-  (let [tos-function-map (tos/tos-function-with-name tosFunction organization)
-        user (util/find-by-key :role :owner auth)]
+(defn application-history-map [{:keys [created organization state tosFunction]} user]
+  {:pre [(pos? created) (string? organization) (keyword? state)]}
+  (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
     {:history (cond->> [(history-entry state created user)]
                 tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
 
@@ -475,10 +474,10 @@
                   (make-attachments created primaryOperation organization state tosFunction)
                   [])})
 
-(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} organization manual-schema-datas]
+(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} user organization manual-schema-datas]
   {:pre [(pos? created) (map? primaryOperation)]}
   {:documents (if-not infoRequest
-                (make-documents (util/find-by-key :role :owner auth) created organization primaryOperation application manual-schema-datas)
+                (make-documents user created organization primaryOperation application manual-schema-datas)
                 [])})
 
 (defn application-metadata-map [{:keys [attachments organization tosFunction]}]
@@ -521,9 +520,9 @@
                             :tosFunction         (tos-function organization operation-name)})]
     (-> application
         (merge-in application-timestamp-map)
-        (merge-in application-history-map)
+        (merge-in application-history-map user)
         (merge-in application-attachments-map organization)
-        (merge-in application-documents-map organization manual-schema-datas)
+        (merge-in application-documents-map user organization manual-schema-datas)
         (merge-in application-metadata-map))))
 
 (def do-create-application-data-fields #{:operation :x :y :address :propertyId :infoRequest :messages})
