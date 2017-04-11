@@ -7,6 +7,7 @@ var stamping = (function() {
     appModel: null,
     attachments: null,
     pending: ko.observable(false),
+    stamps: ko.observableArray([]),
     stampFields: {
       text: ko.observable(loc("stamp.verdict")),
       date: ko.observable(new Date()),
@@ -61,10 +62,44 @@ var stamping = (function() {
     }
   }
 
+  var dummyStamp  = {
+    id: 1,
+    name: "Dummy leima",
+    position: {x: 15, y: 250},
+    background: 10,
+    page: "last",
+    qrCode: false,
+    rows: [["Verdict given", "06.04.2017"],
+           ["17-0753-R", "Sonja Sibbo"],
+           ["Sipoon rakennusvalvonta"],
+           ["LP-753-2017-90001"]]
+  };
+
+  var dummyStamp2  = {
+    id: 2,
+    name: "Dummy leima 2",
+    position: {x: 15, y: 250},
+    background: 10,
+    page: "last",
+    qrCode: false,
+    rows: [["Verdict given", "06.04.2017"],
+      ["17-0753-R", "Sonja Sibbo"],
+      ["Sipoon rakennusvalvonta"],
+      ["LP-753-2017-90001"]]
+  };
+
+  function loadCustomStamps() {
+    model.stamps =  ko.observableArray([]);
+    model.stamps.push(dummyStamp);
+    model.stamps.push(dummyStamp2);
+  }
+
   function initStamp(appModel) {
     model.appModel = appModel;
     model.attachments = lupapisteApp.services.attachmentsService.attachments;
     model.authorization = lupapisteApp.models.applicationAuthModel;
+
+    loadCustomStamps();
 
     setStampFields();
     pageutil.openPage("stamping", model.appModel.id());
@@ -88,6 +123,8 @@ var stamping = (function() {
           model.appModel._js = application;
 
           model.attachments = lupapisteApp.services.attachmentsService.attachments;
+
+          loadCustomStamps();
 
           setStampFields();
 

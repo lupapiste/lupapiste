@@ -65,6 +65,10 @@ LUPAPISTE.StampModel = function(params) {
     });
   }
 
+  ko.computed(function() {
+    console.log("Komputoidaan");
+  });
+
 
                              // Start:  Cancel:  Ok:
   self.statusInit      = 0;  //   -       -       -
@@ -131,18 +135,25 @@ LUPAPISTE.StampModel = function(params) {
 
   // Stamping fields
   self.stampFields = params.stampFields;
+  self.stamps = params.stamps;
+  self.selectedStampsId = ko.observable();
+  self.selectedStamp = ko.observable();
 
-  self.text = self.stampFields.text;
-  self.date = self.stampFields.date;
-  self.organization = self.stampFields.organization;
-  self.xMargin = self.stampFields.xMargin;
-  self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
-  self.yMargin = self.stampFields.yMargin;
-  self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
-  self.page = self.stampFields.page;
-  self.extraInfo = self.stampFields.extraInfo;
-  self.kuntalupatunnus = self.stampFields.kuntalupatunnus;
-  self.section = self.stampFields.section;
+  console.log(self.selectedStamp.position);
+
+  self.text = self.selectedStamp.text;
+  self.date = self.selectedStamp.date;
+  self.organization = self.selectedStamp.organization;
+  if (self.selectedStamp.position) {
+    self.xMargin = self.selectedStamp.position[x];
+    self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
+    self.yMargin = self.selectedStamp.position[y];
+    self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
+  }
+  self.page = self.selectedStamp.page;
+  self.extraInfo = self.selectedStamp.extraInfo;
+  self.kuntalupatunnus = self.selectedStamp.kuntalupatunnus;
+  self.section = self.selectedStamp.section;
 
   var transparencies = _.map([0,20,40,60,80], function(v) {
     return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
@@ -161,6 +172,14 @@ LUPAPISTE.StampModel = function(params) {
   function getSection() {
     return self.section() === "\u00a7" ? "" : self.section();
   }
+
+  ko.computed(function() {
+    console.log(self.selectedStampsId());
+    self.selectedStamp = _.find(self.stamps(), function(stamp) {
+      return stamp.id === self.selectedStampsId();
+    });
+    console.log(self.selectedStamp);
+  });
 
   var doStart = function() {
     self.status(self.statusStarting);
