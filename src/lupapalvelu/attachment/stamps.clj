@@ -1,8 +1,53 @@
 (ns lupapalvelu.attachment.stamps
-  (:require [sade.util :as sutil]
-            [sade.core :as score]
+  (:require [sade.core :as score]
+            [sade.schemas :as ssc]
+            [sade.util :as sutil]
+            [schema.core :as sc]
             [lupapalvelu.building :as building]
             [lupapalvelu.user :as user]))
+
+(def simple-tag-types
+  #{:current-date
+    :verdict-date
+    :backend-id
+    :username
+    :organization
+    :agreement-id
+    :building-id})
+
+(sc/defschema SimpleTagType
+  (apply sc/enum simple-tag-types))
+
+(sc/defschema SimpleTag
+  {:type SimpleTagType})
+
+(sc/defschema TextTag
+  {:type :custom-text
+   :text sc/Str})
+
+(sc/defschema Tag
+  (sc/conditional #(contains? simple-tag-types
+                              (:type %))
+                  SimpleTag
+                  #(= :custom-text (:type %))
+                  TextTag))
+
+(sc/defschema StampTemplateRow
+  [Tag])
+
+(sc/defschema StampName (sc/pred string?))
+
+(sc/defschema StampTemplate
+  {:name       StampName
+   :id         ssc/ObjectIdStr
+   :position   {:x ssc/Nat
+                :y ssc/Nat}
+   :background ssc/Nat
+   :page       (sc/enum :first
+                        :last
+                        :all)
+   :qr-code    sc/Bool
+   :rows       [StampTemplateRow]})
 
 (defn- get-verdict-date [{:keys [verdicts]}]
   (let [ts (->> verdicts
