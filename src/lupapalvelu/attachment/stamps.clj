@@ -57,7 +57,7 @@
                             (first))))
                 (remove nil?)
                 (first))]
-  (sutil/to-local-date ts)))
+    (sutil/to-local-date ts)))
 
 (defn get-backend-id [verdicts]
   (->> verdicts
