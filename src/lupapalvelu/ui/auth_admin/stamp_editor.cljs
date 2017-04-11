@@ -37,12 +37,13 @@
             (swap! component-state assoc :stamps (:stamps data))
             (when cb (cb data))))))
 
-(rum/defc stamp-select [stamps selection]
+(rum/defc stamp-select < rum/reactive
+  [stamps selection]
   (uc/select update-stamp-view
              "stamp-select"
-             selection
+             (rum/react selection)
              (cons ["" (loc "choose")]
-                   (map (juxt :id :name) stamps))))
+                   (map (juxt :id :name) (rum/react stamps)))))
 
 (defn init
   [init-state props]
@@ -51,13 +52,21 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
+(rum/defc edit-stamp-bubble < rum/reactive
+  [visible?]
+  (when (rum/react visible?)
+    [:div.edit-stamp-bubble
+     ;; TODO: Editor here
+     ]))
+
 (rum/defc stamp-editor < rum/reactive
   {:init init
    :will-unmount (fn [& _] (reset! component-state empty-component-state))}
   [global-auth-model]
   [:div
    [:h1 (loc "stamp-editor.tab.title")]
-   [:div (stamp-select (rum/react (rum/cursor-in component-state [:stamps])) (rum/react (rum/cursor-in component-state [:view :selected-stamp-id])))]])
+   [:div (stamp-select (rum/cursor-in component-state [:stamps]) (rum/cursor-in component-state [:view :selected-stamp-id]))]
+   [:div.row.edit-stamp-bubble (edit-stamp-bubble (rum/cursor-in component-state [:view :bubble-visible]))]])
 
 (defonce args (atom {}))
 
