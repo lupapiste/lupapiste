@@ -32,6 +32,7 @@
             [lupapalvelu.company-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.control-api :refer [defcontrol] :as control]
+            [lupapalvelu.copy-application-api]
             [lupapalvelu.ddd-map-api]
             [lupapalvelu.document.document-api]
             [lupapalvelu.document.schema-repository-api]

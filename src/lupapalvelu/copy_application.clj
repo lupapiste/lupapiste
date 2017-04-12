@@ -87,3 +87,8 @@
         (merge (copied-keys source-application options))
         (merge-in new-application-overrides user organization created manual-schema-datas)
         (merge-in updated-operation-and-document-ids source-application))))
+
+(defn copy-application
+  [{{:keys [source-application-id x y address propertyId municipality]} :data :keys [user created]} & [manual-schema-datas]]
+  (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
+    source-application))
