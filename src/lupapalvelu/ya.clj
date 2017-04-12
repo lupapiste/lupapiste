@@ -43,8 +43,9 @@
   (when-not (app/verdict-given? link-permit)
     (fail :error.link-permit-app-not-in-post-verdict-state)))
 
-(defn- validate-link-agreements-signature [{:keys [verdicts]}]
-  (when (empty? (filter #(:signatures %) verdicts))
+(defn- validate-link-agreements-signature [{:keys [verdicts] :as app}]
+  (when (and (agreement-subtype? app)                       ; If agreement, signatures must exist
+             (empty? (filter #(:signatures %) verdicts)))
     (fail :error.link-permit-app-not-signed)))
 
 (defn validate-digging-permit [application]
