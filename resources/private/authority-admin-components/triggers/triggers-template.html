@@ -57,7 +57,7 @@
                 <label data-bind="ltext: 'triggers.label.handler'"></label>
                 <select class="dropdown dropdown--full-width"
                         data-test-id="triggers-handler-select"
-                        data-bind="options: roles,
+                        data-bind="options: selectableRoles,
                                    optionsText: function(item) { return _.get(item, 'name.' + loc.currentLanguage); },
                                    optionsCaption: loc('triggers.no.handler'),
                                    value: dialogData.handler"></select>
