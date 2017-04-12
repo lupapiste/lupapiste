@@ -7,7 +7,11 @@ LUPAPISTE.TriggersModel = function( params ) {
   var triggersTargetService = lupapisteApp.services.triggersTargetService;
 
   self.triggers = triggerService.organizationAssignmentTriggers( params.organization );
-  self.roles = handlerService.organizationHandlerRoles( params.organization );
+  var roles = handlerService.organizationHandlerRoles( params.organization );
+
+  self.selectableRoles = ko.pureComputed(function() {
+    return _.filter(roles(), _.negate(handlerService.isTemporaryRole));
+  });
 
   function wrapInObject(types) {
     return _.map(types, function(type) {
@@ -37,7 +41,7 @@ LUPAPISTE.TriggersModel = function( params ) {
       dd.target(trigger.targets);
       lupapisteApp.services.triggersTargetService.selected(wrapInObject(trigger.targets));
       if (trigger.handlerRole !== undefined && trigger.handlerRole !== null) {
-        var selectedRole = _.find(self.roles(), function(role) { return role.id() === trigger.handlerRole.id; });
+        var selectedRole = _.find(self.selectableRoles(), function(role) { return role.id() === trigger.handlerRole.id; });
         dd.handler(selectedRole);
       }
       dd.description(trigger.description);
