@@ -36,7 +36,7 @@
   (fact "PDF conversion - no archive => not-validated"
     (archivability-conversion nil {:filename "foo.pdf"
                                    :contentType "application/pdf"
-                                   :content (io/file "dev-resources/invalid-pdfa.pdf")}) => {:archivable false :archivabilityError :not-validated}
+                                   :content (io/file "dev-resources/invalid-pdfa.pdf")}) => {:archivable false :archivabilityError :permanent-archive-disabled}
     (provided
       (pdfa/pdf-a-required? anything) => false))
 
