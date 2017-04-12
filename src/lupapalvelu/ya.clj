@@ -52,7 +52,7 @@
   (when (digging-permit? application)
     (let [link        (some #(when (= (:type %) "lupapistetunnus") %) (:linkPermitData application))
           link-permit (when link
-                        (domain/get-application-no-access-checking {:_id (:id link)} {:state 1 :verdicts 1}))]
+                        (domain/get-application-no-access-checking (:id link) [:state :verdicts :permitType :permitSubtype :primaryOperation]))]
       (when link-permit
         (or
           (validate-link-agreements-state link-permit)
