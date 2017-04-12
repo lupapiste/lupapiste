@@ -56,7 +56,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.organization'"></label>
-                <input data-bind="textInput: organization, enable: status() === statusReady"
+                <input data-bind="value: organization, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-organization">
@@ -77,7 +77,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
-                <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
+                <input data-bind="value: kuntalupatunnus, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-kuntalupatunnus"/>
@@ -85,7 +85,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.section'"></label>
-                <input data-bind="textInput: section, enable: status() === statusReady"
+                <input data-bind="value: section, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-section">
@@ -98,17 +98,18 @@
 
               <div class="col-1">
                 <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
-                <input data-bind="textInput: xMargin,
+                <input data-bind="value: xMargin,
                             enable: status() === statusReady,
                             css: {'invalid-margin': !xMarginOk()}"
                        type="text"
-                       class="text"/
+                       class="form-input"
                        data-test-id="stamp-info-xmargin">
               </div>
 
               <div class="col-1">
                 <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
-                <input data-bind="textInput: yMargin,
+                <input data-bind="event: {onblur: $parent.saveta},
+                            value: yMargin,
                             enable: status() === statusReady,
                             css: {'invalid-margin': !yMarginOk()}"
                        type="text"

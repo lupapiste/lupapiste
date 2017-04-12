@@ -65,11 +65,6 @@ LUPAPISTE.StampModel = function(params) {
     });
   }
 
-  ko.computed(function() {
-    console.log("Komputoidaan");
-  });
-
-
                              // Start:  Cancel:  Ok:
   self.statusInit      = 0;  //   -       -       -
   self.statusReady     = 1;  //   +       +       -
@@ -132,28 +127,25 @@ LUPAPISTE.StampModel = function(params) {
 
   self.jobId = null;
   self.jobVersion = null;
+  self.update = true;
 
   // Stamping fields
   self.stampFields = params.stampFields;
   self.stamps = params.stamps;
   self.selectedStampsId = ko.observable();
-  self.selectedStamp = ko.observable();
+  self.selectedStamp = ko.observable(self.stamps()[0]);
 
-  console.log(self.selectedStamp.position);
-
-  self.text = self.selectedStamp.text;
-  self.date = self.selectedStamp.date;
-  self.organization = self.selectedStamp.organization;
-  if (self.selectedStamp.position) {
-    self.xMargin = self.selectedStamp.position[x];
-    self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
-    self.yMargin = self.selectedStamp.position[y];
-    self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
-  }
-  self.page = self.selectedStamp.page;
-  self.extraInfo = self.selectedStamp.extraInfo;
-  self.kuntalupatunnus = self.selectedStamp.kuntalupatunnus;
-  self.section = self.selectedStamp.section;
+  self.text = self.selectedStamp().text;
+  self.date = self.selectedStamp().date;
+  self.organization = self.selectedStamp().organization;
+  self.xMargin = ko.observable(self.selectedStamp().position.x);
+  self.xMarginOk = ko.computed(function() { return self.xMargin() >= 0; });
+  self.yMargin = ko.observable(self.selectedStamp().position.y);
+  self.yMarginOk = ko.computed(function() { return self.yMargin() >= 0; });
+  self.page = ko.observable(self.selectedStamp().page);
+  self.extraInfo = self.selectedStamp().extraInfo;
+  self.kuntalupatunnus = self.selectedStamp().kuntalupatunnus;
+  self.section = ko.observable(self.selectedStamp().name);
 
   var transparencies = _.map([0,20,40,60,80], function(v) {
     return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
@@ -164,8 +156,8 @@ LUPAPISTE.StampModel = function(params) {
     return {text: loc(["stamp.page", v]), value: v};
   });
 
-  self.transparency = self.stampFields.transparency;
-  if ( !self.transparency() ) {
+  self.transparency = ko.observable(self.selectedStamp().background);
+  if ( !self.selectedStamp().background ) {
     self.transparency(transparencies[0].value);
   }
 
@@ -173,13 +165,53 @@ LUPAPISTE.StampModel = function(params) {
     return self.section() === "\u00a7" ? "" : self.section();
   }
 
-  ko.computed(function() {
+  ko.computed(function () {
+    console.log("CompCOmp");
     console.log(self.selectedStampsId());
-    self.selectedStamp = _.find(self.stamps(), function(stamp) {
+    self.selectedStamp(_.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
-    });
-    console.log(self.selectedStamp);
+    }));
+    if (self.selectedStamp()) {
+      self.update = false;
+      self.page(self.selectedStamp().page);
+      self.xMargin(self.selectedStamp().position.x);
+      self.yMargin(self.selectedStamp().position.y);
+      self.transparency(self.selectedStamp().background);
+      self.section(self.selectedStamp().name);
+      self.update = true;
+    }
   });
+
+  self.save = function() {
+    console.log(self.selectedStampsId());
+    var stampit = self.stamps();
+    for (var i in stampit) {
+      if (stampit[i].id === self.selectedStampsId()) {
+        console.log("update stanmp with id:" +stampit[i].id);
+        self.stamps()[i].position.x = self.xMargin();
+        self.stamps()[i].position.y = self.yMargin();
+        self.stamps()[i].page = self.page();
+        self.stamps()[i].background = self.transparency();
+        console.log("Updated");
+        break;
+      }
+    }
+    self.update = true;
+  };
+
+  self.submit = function(newValue) {
+    console.log("Submit? " +newValue);
+    if (self.update) {
+      self.save();
+    }
+    return true;
+  };
+
+  _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section],
+    function(o) {
+      o.subscribe(self.submit);
+    }
+  );
 
   var doStart = function() {
     self.status(self.statusStarting);
