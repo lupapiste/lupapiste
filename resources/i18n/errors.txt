@@ -850,3 +850,6 @@
 "file_not_linked_to_the_document" "en" "Attachment not found in application"
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" "Bilagan kan inte hittas i ansökan"
+"permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
+"permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
+"permanent-archive-disabled" "sv" ""
