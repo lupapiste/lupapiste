@@ -10,7 +10,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   var data = attachmentData;
 
   // Attachment data fields that are mapped as observables
-  var observableFields = ["notNeeded", "contents", "drawingNumber", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
+  var observableFields = ["modified", "notNeeded", "contents", "drawingNumber", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
 
   self.authModel = authModel;
 

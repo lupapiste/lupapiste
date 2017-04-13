@@ -119,6 +119,11 @@
           </form>
         </div>
 
+        <!-- ko if: !$parent.pending() -->
+
+        <filters params="pageName: 'stamp-attachments',
+                         customDescriptions: true"></filters>
+
         <div class="clear">
             <div data-bind="if: postFiles().length > 0">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
@@ -137,6 +142,8 @@
             <!-- /ko -->
           </div>
         </div>
+        <!-- /ko -->
+
         <div class="stamp-status">
           <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
           <span class="ok icon" data-bind="visible: status() === statusDone"></span>
