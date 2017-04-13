@@ -445,7 +445,7 @@
     :else :draft))
 
 (defn application-history-map [{:keys [created organization state tosFunction]} user]
-  {:pre [(pos? created) (string? organization) (keyword? state)]}
+  {:pre [(pos? created) (string? organization) (states/all-states (keyword state))]}
   (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
     {:history (cond->> [(history-entry state created user)]
                 tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
@@ -469,7 +469,7 @@
     (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)))
 
 (defn application-attachments-map [{:keys [infoRequest created primaryOperation state tosFunction]} organization]
-  {:pre [(pos? created) (map? primaryOperation) (keyword? state)]}
+  {:pre [(pos? created) (map? primaryOperation) (states/all-states (keyword state))]}
   {:attachments (if-not infoRequest
                   (make-attachments created primaryOperation organization state tosFunction)
                   [])})
@@ -488,7 +488,7 @@
                           (tos/calculate-process-metadata metadata attachments))}))
 
 (defn application-timestamp-map [{:keys [state created]}]
-  {:pre [(keyword? state) (pos? created)]}
+  {:pre [(states/all-states (keyword state)) (pos? created)]}
   {:opened   (when (#{:open :info} state) created)
    :modified created})
 
