@@ -32,7 +32,7 @@
                          (user/get-or-create-user-by-email foremanEmail user))
         foreman-app    (-> (foreman/new-foreman-application command)
                            (foreman/update-foreman-docs application foremanRole)
-                           (foreman/copy-auths-from-linked-app foreman-user application user created)
+                           (foreman/copy-auths-from-linked-app application user created)
                            (foreman/add-foreman-invite-auth foreman-user user created))]
     (application/do-add-link-permit foreman-app (:id application))
     (application/insert-application foreman-app)

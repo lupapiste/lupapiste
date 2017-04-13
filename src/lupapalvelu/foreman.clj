@@ -278,7 +278,7 @@
     (let [invited (usr/get-or-create-user-by-email (:email inv) inviter)]
       (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
 
-(defn copy-auths-from-linked-app [foreman-app foreman-user linked-app user created]
+(defn copy-auths-from-linked-app [foreman-app linked-app user created]
   (->> (:auth linked-app)
        (applicant-invites (:documents foreman-app))
        (remove #(= (:email %) (:email user)))
