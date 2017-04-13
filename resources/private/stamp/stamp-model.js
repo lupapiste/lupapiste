@@ -166,8 +166,6 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   ko.computed(function () {
-    console.log("CompCOmp");
-    console.log(self.selectedStampsId());
     self.selectedStamp(_.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
     }));
@@ -183,24 +181,19 @@ LUPAPISTE.StampModel = function(params) {
   });
 
   self.save = function() {
-    console.log(self.selectedStampsId());
-    var stampit = self.stamps();
-    for (var i in stampit) {
-      if (stampit[i].id === self.selectedStampsId()) {
-        console.log("update stanmp with id:" +stampit[i].id);
+    for (var i in self.stamps()) {
+      if (self.stamps()[i].id === self.selectedStampsId()) {
         self.stamps()[i].position.x = self.xMargin();
         self.stamps()[i].position.y = self.yMargin();
         self.stamps()[i].page = self.page();
         self.stamps()[i].background = self.transparency();
-        console.log("Updated");
         break;
       }
     }
     self.update = true;
   };
 
-  self.submit = function(newValue) {
-    console.log("Submit? " +newValue);
+  self.submit = function() {
     if (self.update) {
       self.save();
     }
