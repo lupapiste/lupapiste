@@ -18,15 +18,13 @@ Mikko creates a kaivulupa
   Open to authorities  viesti
 
 Accordions are open for Mikko
-  Xpath Should Match X Times  //div[@id='application-info-tab']//section[contains(@class,'accordion')]//div[@data-accordion-state='closed']  0
-  Xpath Should Match X Times  //div[@id='application-info-tab']//section[contains(@class,'accordion')]//div[@data-accordion-state='open']  2
+  All visible accordions should be open
 
 Accordions are open for Sonja
   Logout
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Xpath Should Match X Times  //div[@id='application-info-tab']//section[contains(@class,'accordion')]//div[@data-accordion-state='closed']  0
-  Xpath Should Match X Times  //div[@id='application-info-tab']//section[contains(@class,'accordion')]//div[@data-accordion-state='open']  2
+  All visible accordions should be open
   Logout
   Mikko logs in
 
