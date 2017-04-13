@@ -444,6 +444,8 @@ LUPAPISTE.AttachmentsService = function() {
                                  params);
     ajax.command(commandName, commandParams)
       .success(function(response) {
+        var attachment = ko.unwrap(self.getAttachment(attachmentId));
+        if (attachment) { attachment.modified(new Date().getTime()); }
         self.authModel.refresh({id: self.applicationId()});
         sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
       })
