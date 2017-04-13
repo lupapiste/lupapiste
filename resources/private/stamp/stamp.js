@@ -6,6 +6,7 @@ var stamping = (function() {
     authorization: null,
     appModel: null,
     attachments: null,
+    pending: ko.observable(false),
     stampFields: {
       text: ko.observable(loc("stamp.verdict")),
       date: ko.observable(new Date()),
@@ -73,6 +74,7 @@ var stamping = (function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
+        model.pending(true);
         model.stampingMode(false);
 
         var appId = pageutil.subPage();
@@ -105,8 +107,13 @@ var stamping = (function() {
     model.stampingMode(false);
     model.appModel = null;
     model.attachments = null;
+    model.pending(true);
     lupapisteApp.services.attachmentsService.queryAll();
     model.authorization = null;
+  });
+
+  hub.subscribe({eventType: "attachmentsService::query", query: "attachments"}, function() {
+    model.pending(false);
   });
 
   hub.subscribe("start-stamping", function(param) {
