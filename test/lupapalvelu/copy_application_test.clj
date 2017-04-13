@@ -6,15 +6,13 @@
             [lupapalvelu.copy-application :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.test-util :refer [walk-dissoc-keys]]
             [midje.sweet :refer :all]
             [sade.coordinate :as coord]
             [sade.schema-generators :as ssg]))
 
 (defn dissoc-ids-and-timestamps [application]
-  (walk/postwalk #(if (map? %)
-                    (dissoc % :id :created :modified :ts)
-                    %)
-                 application))
+  (walk-dissoc-keys application :id :created :modified :ts))
 
 
 (with-redefs [coord/convert (fn [_ _ _ coords] (str "converted " coords))]
@@ -70,6 +68,10 @@
           (fact "id references are updated"
             (->> new :documents (map (comp :id :op :schema-info)) (remove nil?))
             => (has every? #(= % (-> new :primaryOperation :id))))
+
+          (fact "document creation time is the same as the application's"
+            (->> new-app :documents (map :created))
+            => (has every? #(= created %)))
 
           (fact "comments are not copied by default"
             (:comments new-app) => empty?)

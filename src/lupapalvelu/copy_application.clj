@@ -5,7 +5,10 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [sade.core :refer :all]
+            [sade.property :as prop]
             [sade.util :refer [merge-in]]))
 
 ;;; Copying source application keys
@@ -39,7 +42,9 @@
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
      :documents (mapv (fn [doc]
-                        (let [doc (assoc doc :id (mongo/create-id))]
+                        (let [doc (assoc doc
+                                         :id (mongo/create-id)
+                                         :created (:created application))]
                           (if (-> doc :schema-info :op)
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
@@ -91,4 +96,19 @@
 (defn copy-application
   [{{:keys [source-application-id x y address propertyId municipality]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    source-application))
+    (let [municipality (prop/municipality-id-by-property-id propertyId)
+          operation    (-> source-application :primaryOperation :name)
+          permit-type  (op/permit-type-of-operation operation)
+          organization (org/resolve-organization municipality permit-type)]
+      (when-not organization
+        (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+      (new-application-copy (assoc source-application
+                                   :state        :draft
+                                   :propertyId   propertyId
+                                   :location     (app/->location x y)
+                                   :municipality municipality
+                                   :organization (:id organization))
+                            user organization created
+                            default-copy-options
+                            manual-schema-datas))
+    (fail! :error.no-source-application :id source-application-id)))
