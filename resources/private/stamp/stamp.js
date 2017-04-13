@@ -105,6 +105,7 @@ var stamping = (function() {
     model.stampingMode(false);
     model.appModel = null;
     model.attachments = null;
+    lupapisteApp.services.attachmentsService.queryAll();
     model.authorization = null;
   });
 

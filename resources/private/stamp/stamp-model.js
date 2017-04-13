@@ -83,16 +83,13 @@ LUPAPISTE.StampModel = function(params) {
   self.attachmentsDict = {};
 
   self.disposedComputed( function() {
-    if( !_.size( self.attachments())) {
-      self.attachments( _.map( params.attachments(),
-                                function( obs ) {
-                                  return ko.observable( ko.unwrap( obs ));
-                                }));
-    }
+    self.attachments(_.map(params.attachments(), ko.unwrap));
   });
 
-  self.disposedComputed( function() {
-    var filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
+  var filterSet = lupapisteApp.services.attachmentsService.getFilters( "stamp-attachments" );
+
+  self.disposedComputed(function() {
+    var filteredFiles = _(filterSet.apply(ko.mapping.toJS(self.attachments))).filter(stampableAttachment).value();
 
     // group by post/pre verdict attachments
     var grouped = _.groupBy(filteredFiles, function(a) {
@@ -223,7 +220,6 @@ LUPAPISTE.StampModel = function(params) {
 
       if (update.status === "done") {
         _(self.selectedFiles()).map(function(f) { return f.stamped(true); }).value();
-        lupapisteApp.services.attachmentsService.queryAll();
         return self.status(self.statusDone);
       }
     }
@@ -236,7 +232,6 @@ LUPAPISTE.StampModel = function(params) {
       row.selected(!row.selected());
     }
   };
-
 
   function selectAllFiles(value) {
     if ( self.status() < self.statusStarting ) {
