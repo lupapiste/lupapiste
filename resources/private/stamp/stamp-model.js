@@ -82,8 +82,19 @@ LUPAPISTE.StampModel = function(params) {
   self.status = ko.observable();
   self.attachmentsDict = {};
 
-  self.disposedComputed( function() {
-    self.attachments(_.map(params.attachments(), ko.unwrap));
+  function typeLoc(att) {
+    return loc(["attachmentType", util.getIn(att, ["type", "type-group"]), util.getIn(att, ["type", "type-id"])]);
+  }
+
+  function modified(att) {
+    return -util.getIn(att, ["modified"]);
+  }
+
+  self.disposedComputed(function() {
+    self.attachments(_(params.attachments())
+                     .map(ko.unwrap)
+                     .sortBy([typeLoc, modified])
+                    .value());
   });
 
   var filterSet = lupapisteApp.services.attachmentsService.getFilters( "stamp-attachments" );
