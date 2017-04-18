@@ -10,32 +10,37 @@
             [lupapalvelu.action :refer [defraw]])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)))
 
+(defn handler-roles-org [org-id]
+  (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
+
 (defn open-applications-for-organization [organizationId excluded-operations]
-  (let [query (cond-> {:organization organizationId
-                       :state {$in ["submitted" "open" "draft"]}
-                       :infoRequest false}
-                excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
-    (mongo/select :applications
-                  query
-                  [:_id :created :opened :submitted :modified
-                   :state :authority.firstName :authority.lastName
-                   :primaryOperation :secondaryOperations]
-                  {:authority.lastName 1})))
+  (let [query     (cond-> {:organization organizationId
+                           :state {$in ["submitted" "open" "draft"]}
+                           :infoRequest false}
+                    excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))
+        roles-org (handler-roles-org organizationId)]
+    (map #(app/enrich-application-handlers % roles-org)
+         (mongo/select :applications
+                       query
+                       [:_id :created :opened :submitted :modified
+                        :state :handlers
+                        :primaryOperation :secondaryOperations]))))
 
 (defn submitted-applications-between [orgId startTs endTs excluded-operations]
-  (let [now (now)
-        query (cond-> {:organization orgId
-                       ;:state {$in ["submitted" "open" "draft"]
-                       :submitted {$gte startTs
-                                   $lte (if (< now endTs) now endTs)}
-                       :infoRequest false}
-                excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
-    (->> (mongo/select :applications
+  (let [now       (now)
+        query     (cond-> {:organization orgId
+                                        ;:state {$in ["submitted" "open" "draft"]
+                           :submitted {$gte startTs
+                                       $lte (if (< now endTs) now endTs)}
+                           :infoRequest false}
+                    excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))
+        roles-org (handler-roles-org orgId)]
+    (map #(app/enrich-application-handlers % roles-org)
+         (mongo/select :applications
                        query
                        [:_id :submitted :modified :state :handlers
                         :primaryOperation :secondaryOperations]
-                       {:submitted 1})
-         (map #(app/enrich-application-handlers % (mongo/select-one :organizations {:_id orgId} [:handler-roles]))))))
+                       {:submitted 1}))))
 
 (defn- authority [app]
   (->> app
