@@ -7,6 +7,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
+            [lupapalvelu.copy-application :as copy-app]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -229,58 +230,9 @@
          (remove nil?)
          (assoc foreman-app :documents))))
 
-(defn- applicant-user-auth [applicant path auth]
-  (when-let [applicant-user (some-> applicant
-                                    (get-in path)
-                                    ss/canonize-email
-                                    usr/get-user-by-email)]
-    ;; Create invite for applicant if authed
-    (when (some (partial usr/same-user? applicant-user) auth)
-      {:email (:email applicant-user)
-       :role "writer"})))
-
-(defn- henkilo-invite [applicant auth]
-  {:pre [(= "henkilo" (get-in applicant [:data :_selected]))
-         (sequential? auth)]}
-  (applicant-user-auth applicant [:data :henkilo :yhteystiedot :email] auth))
-
-(defn- yritys-invite [applicant auth]
-  {:pre [(= "yritys" (get-in applicant [:data :_selected]))
-         (sequential? auth)]}
-  (if-let [company-id (get-in applicant [:data :yritys :companyId])]
-    ;; invite the Company if it's authed
-    (some
-      #(when (= company-id (or (:id %) (get-in % [:invite :user :id])))
-         {:company-id company-id})
-      auth)
-    (applicant-user-auth applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email] auth)))
-
-(defn applicant-invites [documents auth]
-  (->> (domain/get-applicant-documents documents)
-       (tools/unwrapped)
-       (map #(case (-> % :data :_selected)
-               "henkilo" (henkilo-invite % auth)
-               "yritys"  (yritys-invite % auth)))
-       (remove nil?)))
-
-(defn create-company-auth [company-id]
-  (when-let [company (company/find-company-by-id company-id)]
-    (assoc
-      (company/company->auth company)
-      :id "" ; prevents access to application before accepting invite
-      :role "reader"
-      :invite {:user {:id company-id}})))
-
-
-(defn- invite->auth [inv app-id inviter timestamp]
-  (if (:company-id inv)
-    (create-company-auth (:company-id inv))
-    (let [invited (usr/get-or-create-user-by-email (:email inv) inviter)]
-      (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
-
 (defn copy-auths-from-linked-app [foreman-app linked-app user created]
   (->> (:auth linked-app)
-       (applicant-invites (:documents foreman-app))
+       (copy-app/applicant-invites (:documents foreman-app))
        (remove #(= (:email %) (:email user)))
        (mapv #(invite->auth % (:id foreman-app) user created))
        (update foreman-app :auth concat)))
