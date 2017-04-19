@@ -118,13 +118,13 @@ Sonja can toggle selection of attachments by group/all/none
   # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
   # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
   Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Status of stamping is ready
   Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
