@@ -65,15 +65,15 @@
        (some :kuntalupatunnus)))
 
 (defn- tag-content [tag context]
-  (let [value (case (:type tag)
-                    :current-date (sutil/to-local-date (score/now))
-                    :verdict-date (get-verdict-date (:application context))
-                    :backend-id (get-backend-id (get-in context [:application :verdicts]))
-                    :username (user/full-name (:user context))
-                    :organization (get-in context [:organization :name :fi])
-                    :agreement-id (get-in context [:application :id])
-                    :building-id (building/building-ids (:application context))
-                    (or (:text tag) ""))]
+  (let [value (case (keyword (:type tag))
+                :current-date (sutil/to-local-date (score/now))
+                :verdict-date (get-verdict-date (:application context))
+                :backend-id (get-backend-id (get-in context [:application :verdicts]))
+                :username (user/full-name (:user context))
+                :organization (get-in context [:organization :name :fi])
+                :agreement-id (get-in context [:application :id])
+                :building-id (building/building-ids (:application context))
+                (or (:text tag) ""))]
     {:type (:type tag) :value value}))
 
 (defn- rows [stamp context]

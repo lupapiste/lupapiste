@@ -35,7 +35,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as tos]))
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.attachment.stamps :as stamps]))
 
 ;; Action category: attachments
 
@@ -590,6 +591,17 @@
   [{user :user {app-org-id :organization} :application}]
   (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
     (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
+
+(defquery custom-stamps
+  {:parameters       [id]
+   :user-roles       #{:authority}
+   :states           states/all-application-states
+   :description      "Stamps based on organization stamp templates and filled with application data"}
+  [{user :user {app-org-id :organization} :application}]
+  (let [org-id (or (first (usr/organization-ids-by-roles user #{:authority})) app-org-id)
+        organization (organization/get-organization org-id)
+        application (mongo/by-id :applications id)]
+    (ok :stamps (stamps/stamps organization application user))))
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]

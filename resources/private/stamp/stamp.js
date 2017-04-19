@@ -68,11 +68,12 @@ var stamping = (function() {
     position: {x: 15, y: 250},
     background: 153,
     page: "last",
-    qrCode: false,
-    rows: [["Verdict given", "06.04.2017"],
-           ["17-0753-R", "Sonja Sibbo"],
-           ["Sipoon rakennusvalvonta"],
-           ["LP-753-2017-90001"]]
+    qrCode: true,
+    rows: [[{type: "custom-text", value:"Hyväksytty"}, {type: "verdict-date", value: "06.04.2017"}],
+           [{type: "username", value: "Sonja Sibbo"}],
+           [{type: "organization", value: "Sipoon rakennusvalvonta"}],
+           [{type: "agreement-id", value: "LP-753-2017-90001"}],
+           [{type: "extra-text", value: "Muokattava teksti"}]]
   };
 
   var dummyStamp2  = {
@@ -82,14 +83,23 @@ var stamping = (function() {
     background: 51,
     page: "all",
     qrCode: false,
-    rows: [["Verdict given", "06.04.2017"],
-      ["17-0753-R", "Sonja Sibbo"],
-      ["Sipoon rakennusvalvonta"],
-      ["LP-753-2017-90001"]]
+    rows: [[{type: "extra-text", value:"Verdict given"}, {type: "current-date", value: "06.04.2017"}],
+      [{type: "backend-id", value: "17-0753-R"}, {type: "username", value: "Sonja Sibbo"}],
+      [{type: "organization", value: "Sipoon rakennusvalvonta"}],
+      [{type: "custom-text", value: "Custom teksti"}, {type: "section", value: "Pykälä \u00a75"}],
+      [{type: "verdict-date", value: "10.02.2017"}, {type: "building-id", value: "123456"}],
+      [{type: "agreement-id", value: "LP-753-2017-90001"}]]
   };
 
-  function loadCustomStamps() {
+  function loadCustomStamps(appModel) {
     model.stamps =  ko.observableArray([]);
+    ajax.query("custom-stamps", {
+      id: appModel.id()})
+      .success(function (data) {
+        _.each(data.stamps, function (stamp) {
+          model.stamps.push(stamp);
+        });
+      }).call();
     model.stamps.push(dummyStamp);
     model.stamps.push(dummyStamp2);
   }
@@ -98,9 +108,7 @@ var stamping = (function() {
     model.appModel = appModel;
     model.attachments = lupapisteApp.services.attachmentsService.attachments;
     model.authorization = lupapisteApp.models.applicationAuthModel;
-
-    loadCustomStamps();
-
+    loadCustomStamps(appModel);
     setStampFields();
     pageutil.openPage("stamping", model.appModel.id());
   }
@@ -124,7 +132,7 @@ var stamping = (function() {
 
           model.attachments = lupapisteApp.services.attachmentsService.attachments;
 
-          loadCustomStamps();
+          loadCustomStamps(model.appModel);
 
           setStampFields();
 

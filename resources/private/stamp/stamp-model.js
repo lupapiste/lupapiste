@@ -116,13 +116,20 @@ LUPAPISTE.StampModel = function(params) {
     self.status(_.size(filteredFiles) > 0 ? self.statusReady : self.statusNoFiles);
   });
 
-
-
   self.selectedFiles = self.disposedComputed(function() {
     return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
   });
   self.allSelected = self.disposedComputed(function() {
     return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
+  });
+
+  var transparencies = _.map([0,20,40,60,80], function(v) {
+    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
+  });
+  self.transparencies = transparencies;
+
+  self.pages = _.map(["first", "last", "all"], function(v) {
+    return {text: loc(["stamp.page", v]), value: v};
   });
 
   self.jobId = null;
@@ -135,28 +142,70 @@ LUPAPISTE.StampModel = function(params) {
   self.selectedStampsId = ko.observable();
   self.selectedStamp = ko.observable(self.stamps()[0]);
 
-  self.text = self.selectedStamp().text;
-  self.date = self.selectedStamp().date;
-  self.organization = self.selectedStamp().organization;
+  function stringToDate(dateString) {
+    return new Date (moment(dateString, "DD.MM.YYYY"));
+  }
+
+  function ddmmyyyyDate(date) {
+    return moment(new Date(date)).format("DD.MM.YYYY");
+  }
+
+  function findRowData (type) {
+    var foundValue = null;
+    _.map(self.selectedStamp().rows,  function (row) {
+      _.map(row , function(object) {
+        if (object.type === type) {
+            foundValue = object.value;
+        };
+      });
+    });
+    return foundValue;
+  }
+
+  function updateRowData (type, value) {
+    return _.map(self.selectedStamp().rows,  function (row) {
+      return _.map(row , function(object) {
+        if (object.type === type) {
+          return {type: type, value: value}
+        }
+        return object;
+      });
+    });
+  }
+
+  function generatePreview() {
+    return _.map(self.selectedStamp().rows,  function (row) {
+      return _.map(row , function(object) {
+        if (object.type.endsWith("date")) {
+          return object.value;
+        }
+        return object.value;
+      }).join(" ");
+    }).join("\n") + "\nwww.lupapiste.fi";
+  }
+
+  // Stamp info
   self.xMargin = ko.observable(self.selectedStamp().position.x);
   self.xMarginOk = ko.computed(function() { return self.xMargin() >= 0; });
   self.yMargin = ko.observable(self.selectedStamp().position.y);
   self.yMarginOk = ko.computed(function() { return self.yMargin() >= 0; });
   self.page = ko.observable(self.selectedStamp().page);
-  self.extraInfo = self.selectedStamp().extraInfo;
-  self.kuntalupatunnus = self.selectedStamp().kuntalupatunnus;
-  self.section = ko.observable(self.selectedStamp().name);
-
-  var transparencies = _.map([0,20,40,60,80], function(v) {
-    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
-  });
-  self.transparencies = transparencies;
-
-  self.pages = _.map(["first", "last", "all"], function(v) {
-    return {text: loc(["stamp.page", v]), value: v};
-  });
-
   self.transparency = ko.observable(self.selectedStamp().background);
+  self.qrCode = ko.observable(self.selectedStamp().qrCode);
+
+  // Stamp rows
+  self.customText = ko.observable(findRowData("custom-text"));
+  self.extraText = ko.observable(findRowData("extra-text"));  //not editable
+  self.currentDate = ko.observable(stringToDate(findRowData("current-date")));
+  self.verdictDate = ko.observable(stringToDate(findRowData("verdict-date")));
+  self.backendId = ko.observable(findRowData("backend-id"));
+  self.userName = ko.observable(findRowData("username"));
+  self.organization = ko.observable(findRowData("organization"));
+  self.agreementId = ko.observable(findRowData("agreement-id"));
+  self.buildingId = ko.observable(findRowData("building-id"));
+  self.section = ko.observable(findRowData("section"));
+  self.preview = ko.observable(generatePreview());
+
   if ( !self.selectedStamp().background ) {
     self.transparency(transparencies[0].value);
   }
@@ -175,32 +224,53 @@ LUPAPISTE.StampModel = function(params) {
       self.xMargin(self.selectedStamp().position.x);
       self.yMargin(self.selectedStamp().position.y);
       self.transparency(self.selectedStamp().background);
-      self.section(self.selectedStamp().name);
+      self.qrCode(self.selectedStamp().qrCode);
+      self.customText(findRowData("custom-text"));
+      self.extraText(findRowData("extra-text"));
+      self.currentDate(stringToDate(findRowData("current-date")));
+      self.verdictDate(stringToDate(findRowData("verdict-date")));
+      self.backendId(findRowData("backend-id"));
+      self.userName(findRowData("username"));
+      self.organization(findRowData("organization"));
+      self.agreementId(findRowData("agreement-id"));
+      self.buildingId(findRowData("building-id"));
+      self.section(findRowData("section"));
+      self.preview(generatePreview());
       self.update = true;
     }
   });
 
-  self.save = function() {
-    for (var i in self.stamps()) {
-      if (self.stamps()[i].id === self.selectedStampsId()) {
-        self.stamps()[i].position.x = self.xMargin();
-        self.stamps()[i].position.y = self.yMargin();
-        self.stamps()[i].page = self.page();
-        self.stamps()[i].background = self.transparency();
-        break;
-      }
-    }
-    self.update = true;
-  };
-
   self.submit = function() {
     if (self.update) {
-      self.save();
+      for (var i in self.stamps()) {
+        if (self.stamps()[i].id === self.selectedStampsId()) {
+          self.stamps()[i].position.x = self.xMargin();
+          self.stamps()[i].position.y = self.yMargin();
+          self.stamps()[i].page = self.page();
+          self.stamps()[i].background = self.transparency();
+          self.stamps()[i].qrCode = self.qrCode();
+          self.stamps()[i].rows = (updateRowData("custom-text", self.customText()));
+          self.stamps()[i].rows = (updateRowData("extra-text", self.extraText()));
+          self.stamps()[i].rows = (updateRowData("current-date", ddmmyyyyDate(self.currentDate())));
+          self.stamps()[i].rows = (updateRowData("verdict-date", ddmmyyyyDate(self.verdictDate())));
+          self.stamps()[i].rows = (updateRowData("backend-id", self.backendId()));
+          self.stamps()[i].rows = (updateRowData("username", self.userName()));
+          self.stamps()[i].rows = (updateRowData("organization", self.organization()));
+          self.stamps()[i].rows = (updateRowData("agreement-id", self.agreementId()));
+          self.stamps()[i].rows = (updateRowData("building-id", self.buildingId()));
+          self.stamps()[i].rows = (updateRowData("section", self.section()));
+          self.preview(generatePreview());
+          break;
+        }
+      }
+      self.update = true;
     }
     return true;
   };
 
-  _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section],
+  _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section, self.organization, self.backendId,
+          self.customText, self.extraText, self.currentDate, self.verdictDate, self.buildingId, self.userName,
+          self.agreementId, self.qrCode],
     function(o) {
       o.subscribe(self.submit);
     }

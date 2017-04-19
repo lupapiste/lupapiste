@@ -21,9 +21,9 @@
         <div class="stamp-info-container form-grid">
           <form id="stamp-info">
             <div class="row">
-              <h3 data-bind="text: 'Leima'"></h3>
+              <h3 data-bind="ltext: 'stamp.title'"></h3>
               <div class="col-1">
-                <label data-bind="text: 'Leiman nimi:'"></label>
+                <label data-bind="ltext: 'stamp.name'"></label>
                 <select data-bind="options: stamps,
                                   optionsText: 'name',
                                   optionsValue: 'id',
@@ -31,13 +31,20 @@
                         class="dropdown"
                         data-test-id="stamp-selected"></select>
               </div>
+              <div class="col-2">
+               <label data-bind="ltext: 'stamp.preview'"></label>
+               <textarea data-bind="value: preview"
+                         style="text-align: center; resize: none;"
+                         rows="18"
+                         readonly="true"></textarea>
+              </div>
             </div>
             <div class="row">
               <h3 data-bind="ltext: 'stamp.information'"></h3>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.text'"></label>
-                <input data-bind="value: text, enable: status() === statusReady"
+                <input data-bind="value: customText, enable: false"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-text">
@@ -46,7 +53,7 @@
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.date'"></label>
                 <input data-bind="
-                            datepicker: date,
+                            datepicker: currentDate,
                             enable: status() === statusReady,
                             valueUpdate: 'afterkeydown'"
                        type="text"
@@ -56,7 +63,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.organization'"></label>
-                <input data-bind="value: organization, enable: status() === statusReady"
+                <input data-bind="value: organization, enable: status() === statusReady && organization() !== null"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-organization">
@@ -64,12 +71,49 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.text.extra'"></label>
-                <input data-bind="value: extraInfo, enable: status() === statusReady"
+                <input data-bind="value: extraText, enable: status() === statusReady && extraText() !== null"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-extratext">
               </div>
 
+              <div class="col-4"><br></div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.agreementid'"></label>
+                <input data-bind="value: agreementId, enable: status() === statusReady && agreementId() !== null"
+                       type="text"
+                       class="text"
+                       data-test-id="stamp-info-agreementId">
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.verdict.date'"></label>
+                <input data-bind="
+                            datepicker: verdictDate,
+                            enable: status() === statusReady,
+                            valueUpdate: 'afterkeydown'"
+                       type="text"
+                       class="text"
+                       data-test-id="stamp-info-verdict-date">
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.user'"></label>
+                <input data-bind="value: userName, enable: status() === statusReady && userName() !== null"
+                       type="text"
+                       class="text"
+                       data-test-id="stamp-info-user">
+              </div>
+
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.buildingid'"></label>
+                <input data-bind="value: buildingId, enable: status() === statusReady && buildingId() !== null"
+                       type="text"
+                       class="text"
+                       data-test-id="stamp-info-buildingid"
+                       disabled="true">
+              </div>
             </div>
 
             <div class="row">
@@ -77,7 +121,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
-                <input data-bind="value: kuntalupatunnus, enable: status() === statusReady"
+                <input data-bind="value: backendId, enable: status() === statusReady && backendId() !== null"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-kuntalupatunnus"/>
@@ -85,12 +129,18 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.section'"></label>
-                <input data-bind="value: section, enable: status() === statusReady"
+                <input data-bind="value: section, enable: status() === statusReady && section() !== null"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-section">
               </div>
+            </div>
 
+            <div class="row">
+              <div style="margin-left: 20px;">
+                <input type="checkbox" class="form-input" id="qr-code-enabled" data-test-id="qr-code-enabled" data-bind="checked: qrCode" />
+                <label data-bind="ltext: 'stamp.qrcode'" class="form-label"></label>
+              </div>
             </div>
 
             <div class="row">
