@@ -59,9 +59,10 @@
                                            :comment-text contents
                                            :state (when is-authority
                                                     :ok)
-                                           :constructionTime (when (and (not is-authority)
-                                                                        (file-is-to-be-marked-construction-time application filedata))
-                                                               true))
+                                           :constructionTime (boolean (and (not is-authority)
+                                                                           (:type filedata)
+                                                                           (file-is-to-be-marked-construction-time application
+                                                                                                                   filedata))))
                           (:result conversion-data)
                           (:file conversion-data))
         linked-version (att/set-attachment-version! application user attachment version-options)]
