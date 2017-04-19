@@ -1,27 +1,36 @@
 *** Settings ***
 
-Documentation  Stamping functionality for authority
+Documentation   Stamping functionality for authority
+Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
-Resource       ../../common_resource.robot
-Variables      variables.py
+Resource        ../../common_resource.robot
+Variables       variables.py
 
+*** Variables ***
+
+${STAMP_TEXT}              Hyvaksyn
+${STAMP_DATE}              12.12.2012
+${STAMP_ORGANIZATION}      LupaRobot
+${STAMP_XMARGIN}           12
+${STAMP_YMARGIN}           88
+${STAMP_TRANSPARENCY_IDX}  2
+${STAMP_EXTRATEXT}         Lisateksti
+${appname1}                Stamping One
+${appname2}                Stamping Two
 
 *** Test Cases ***
 
-Set stamping info variables
-  Set Suite Variable  ${STAMP_TEXT}  Hyvaksyn
-  Set Suite Variable  ${STAMP_DATE}  12.12.2012
-  Set Suite Variable  ${STAMP_ORGANIZATION}  LupaRobot
-  Set Suite Variable  ${STAMP_XMARGIN}  12
-  Set Suite Variable  ${STAMP_YMARGIN}  88
-  Set Suite Variable  ${STAMP_TRANSPARENCY_IDX}  2
-  Set Suite Variable  ${STAMP_EXTRATEXT}  Lisateksti
-
-Mikko creates & submits application and goes to empty attachments tab
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  stamping${secs}
+Mikko logs in, creates and submits first application
   Mikko logs in
-  Create application the fast way  ${appname}  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname1}  753-416-25-30  asuinrakennus
+  Submit application
+
+Add PDF attachment
+  Open tab  attachments
+  Upload attachment  ${PDF_TESTFILE_PATH1}  Muu liite  Muu  Uusi asuinrakennus
+
+Mikko creates & submits a second application and goes to empty attachments tab
+  Create application the fast way  ${appname2}  753-416-25-30  asuinrakennus
   Submit application
   Open tab  attachments
 
@@ -53,51 +62,39 @@ Sonja logs in
   Sonja logs in
 
 Sonja goes to attachments tab
-  Open application  ${appname}  753-416-25-30
+  Open application  ${appname2}  753-416-25-30
   Open tab  attachments
 
 Sonja sees that attachment is not stamped
   Attachment should not be stamped  muut.muu
 
-Mark attachment as verdict attachment
-  Open attachment details  muut.muu
-  Wait until  Element should be visible  xpath=//label[@data-test-id='is-verdict-attachment-label']
-  Scroll to test id  is-verdict-attachment-input
-  Select checkbox  xpath=//input[@data-test-id='is-verdict-attachment-input']
-  Positive indicator icon should be visible
-  Return to application
+Sonja marks attachment as verdict attachment
+  Mark attachment as verdict attachment
 
-Sonja sees stamping button
-  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=stamp-attachments]
+Sonja opens the first application
+  Open application  ${appname1}  753-416-25-30
+  Open tab  attachments
 
-Sonja clicks stamp button, stamping page opens
-  Open stamping page
+Sonja prepares for stamping
+  Mark attachment as verdict attachment
+  Open stamping page  ${appname1}
+  One attachment is selected
+  Stamping info fields visible
+  Input stamping info values
+  Test id input is  stamp-info-extratext  ${STAMP_EXTRATEXT}
 
-One attachment is selected
-  Javascript?  $("div.stampbox-wrapper input:checked").length === 1
+Sonja goes back to the second application
+  Open application  ${appname2}  753-416-25-30
+  Open tab  attachments
 
-Sonja sees stamping info fields
-  Element should be visible  stamp-info
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-transparency"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
+Sonja opens stamping page and sees info fields initialized
+  Open stamping page  ${appname2}
+  One attachment is selected
+  Stamping info fields visible
+  Test id input is  stamp-info-extratext  ${EMPTY}
 
-
-Sonja inputs new stamping info values
-  Input text by test id  stamp-info-text  ${STAMP_TEXT}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text by test id  stamp-info-date  ${STAMP_DATE}
-  Input text by test id  stamp-info-organization  ${STAMP_ORGANIZATION}
-  Input text by test id  stamp-info-xmargin  ${STAMP_XMARGIN}
-  Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}
-  Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
+Sonja inputs info values
+  Input stamping info values
 
 Sonja can go to attachments tab. When she returns, stamp info fields are persistent
   Wait until  Scroll and click test id  back-to-application-from-stamping
@@ -118,13 +115,13 @@ Sonja can toggle selection of attachments by group/all/none
   # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
   # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
   Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
-  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Status of stamping is ready
   Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
@@ -152,7 +149,7 @@ Attachment has stamped icon
   Wait until  Attachment should be stamped  muut.muu
 
 Sonja starts stamping again
-  Open stamping page
+  Open stamping page  ${appname2}
 
 No attachments are selected
   Javascript?  $("div.stampbox-wrapper input:checked").length === 0
@@ -177,6 +174,40 @@ Attachment should not be stamped
   Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] i[data-test-icon=stamped-icon]
 
 Open stamping page
+  [Arguments]  ${appname}
   Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
+
+Mark attachment as verdict attachment
+  Open attachment details  muut.muu
+  Wait until  Element should be visible  xpath=//label[@data-test-id='is-verdict-attachment-label']
+  Scroll to test id  is-verdict-attachment-input
+  Select checkbox  xpath=//input[@data-test-id='is-verdict-attachment-input']
+  Positive indicator icon should be visible
+  Return to application
+
+One attachment is selected
+  Javascript?  $("div.stampbox-wrapper input:checked").length === 1
+
+Stamping info fields visible
+  Element should be visible  stamp-info
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-transparency"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
+
+Input stamping info values
+  Input text by test id  stamp-info-text  ${STAMP_TEXT}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text by test id  stamp-info-date  ${STAMP_DATE}
+  Input text by test id  stamp-info-organization  ${STAMP_ORGANIZATION}
+  Input text by test id  stamp-info-xmargin  ${STAMP_XMARGIN}
+  Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}
+  Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
