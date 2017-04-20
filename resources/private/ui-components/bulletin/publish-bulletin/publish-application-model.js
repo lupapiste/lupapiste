@@ -1,6 +1,7 @@
 LUPAPISTE.PublishApplicationModel = function(params) {
   "use strict";
   var self = this;
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.authModel = params.authModel;
   self.appId     = params.appId;
@@ -46,5 +47,9 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.canNotPublishForAuthority = ko.pureComputed(function() {
     return !self.canMoveToProclaimed() && !self.canMoveToVerdictGiven() && !self.canMoveToFinal();
+  });
+
+  self.addHubListener({eventType:"publishBulletinService::publishProcessed", status: "success"}, function(event) {
+    self.authModel.refresh(self.appId());
   });
 };
