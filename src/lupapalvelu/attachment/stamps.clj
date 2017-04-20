@@ -15,6 +15,10 @@
     :agreement-id
     :building-id})
 
+(def text-tag-types
+  #{:custom-text
+    :extra-text})
+
 (sc/defschema SimpleTagType
   (apply sc/enum simple-tag-types))
 
@@ -22,18 +26,26 @@
   {:type SimpleTagType})
 
 (sc/defschema TextTag
-  {:type :custom-text
+  {:type sc/Keyword
    :text sc/Str})
 
 (sc/defschema Tag
   (sc/conditional #(contains? simple-tag-types
                               (:type %))
                   SimpleTag
-                  #(= :custom-text (:type %))
+                  #(contains? text-tag-types
+                              (:type %))
                   TextTag))
 
 (sc/defschema StampTemplateRow
   [Tag])
+
+(sc/defschema FilledTag
+  {:type  sc/Keyword
+   :value sc/Str})
+
+(sc/defschema StampRow
+  [FilledTag])
 
 (sc/defschema StampName (sc/pred string?))
 
@@ -48,6 +60,18 @@
                         :all)
    :qr-code    sc/Bool
    :rows       [StampTemplateRow]})
+
+(sc/defschema Stamp
+  {:name       StampName
+   :id         ssc/ObjectIdStr
+   :position   {:x ssc/Nat
+                :y ssc/Nat}
+   :background ssc/Nat
+   :page       (sc/enum :first
+                        :last
+                        :all)
+   :qr-code    sc/Bool
+   :rows       [StampRow]})
 
 (defn- get-verdict-date [{:keys [verdicts]}]
   (let [ts (->> verdicts
@@ -85,5 +109,10 @@
 
 (defn stamps [organization application user]
   (let [organization-stamp-templates (:stamps organization)
+        _ (sc/check StampTemplate organization-stamp-templates)
         context {:organization organization :application application :user user}]
     (map (fn [stamp] (fill-stamp-tags stamp context)) organization-stamp-templates)))
+
+(defn value-by-type [stamp type]
+  {:pre [(sc/validate Stamp stamp)]}
+  "")

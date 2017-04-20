@@ -60,12 +60,18 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
+(defn printteri [value]
+  (println "Printteri:")
+  (clojure.pprint/pprint value)
+  value)
+
 (defn- info-fields->stamp [{:keys [text stamp-created transparency lang]} fields]
   {:pre [text (pos? stamp-created)]}
   (->> (update fields :buildings (fn->> (map (partial building->str lang)) sort))
        ((juxt :backend-id :section :extra-info :buildings :organization))
        flatten
        (map (fn-> str (ss/limit 100)))
+       printteri
        (stamper/make-stamp (ss/limit text 100) stamp-created transparency)))
 
 (defn- make-stamp-without-buildings [context info-fields]
