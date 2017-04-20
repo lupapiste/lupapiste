@@ -34,11 +34,11 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.canMoveToVerdictGiven = ko.pureComputed(function() {
     // TODO bulletin state check in backend
-    return self.authModel.ok("move-to-verdict-given") && self.bulletinState() === "proclaimed";
+    return self.authModel.ok("move-to-verdict-given");
   });
 
   self.canMoveToFinal = ko.pureComputed(function() {
-    return self.authModel.ok("move-to-final") && self.bulletinState() === "verdictGiven";
+    return self.authModel.ok("move-to-final");
   });
 
   self.showBulletinState = ko.pureComputed(function() {

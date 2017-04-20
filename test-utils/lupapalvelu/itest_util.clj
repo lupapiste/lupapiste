@@ -435,8 +435,8 @@
             (:documents %)
             (:attachments %)
             (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
-    (let [{:keys [bulletin ok]} (f apikey :bulletin :bulletinId id)]
-      (assert ok)
+    (let [{:keys [bulletin ok text]} (f apikey :bulletin :bulletinId id)]
+      (assert ok (str "not ok: " text))
       bulletin)))
 
 (defn- test-application-create-successful [resp app-id]

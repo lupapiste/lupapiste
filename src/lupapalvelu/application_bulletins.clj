@@ -103,6 +103,12 @@
   ([bulletinId projection]
    (mongo/with-id (mongo/by-id :application-bulletins bulletinId projection))))
 
+(defn get-bulletin-by-query
+  ([query]
+    (get-bulletin-by-query query {}))
+  ([query projection]
+    (mongo/select-one :application-bulletins query projection)))
+
 (defn get-bulletin-attachment [attachment-id]
   (when-let [attachment-file (mongo/download attachment-id)]
     (when-let [bulletin (get-bulletin (:application attachment-file))]
@@ -168,3 +174,25 @@
       :proclaimed   (< proc-start now)
       :verdictGiven (< appeal-start now)
       :final        (< final-start now))))
+
+(defn verdict-given-bulletin-exists? [app-id]
+  (mongo/any? :application-bulletins {:_id app-id :versions {"$elemMatch" {:bulletinState "verdictGiven"}}}))
+
+(defn verdict-bulletin-should-not-exist [{{:keys [id]} :data}]
+  (when id
+    (when (verdict-given-bulletin-exists? id)
+      (fail :error.bulletin.verdict-given-bulletin-exists))))
+
+(defn validate-bulletin-verdict-state [{{:keys [id]} :data}]
+  (when id
+    (when-not (verdict-given-bulletin-exists? id)
+      (fail :error.bulletin.missing-verdict-given-bulletin))))
+
+(defn validate-official-at
+  "Official at date can't be before appealing period has ended"
+  [{{:keys [officialAt id]} :data}]
+  (when (and (number? officialAt) (string? id))
+    (when-let [bulletin (get-bulletin-by-query {:_id id :bulletinState :verdictGiven} [:versions])]
+      (when (< officialAt
+               (->> bulletin :versions (util/find-first #(= "verdictGiven" (:bulletinState %))) :appealPeriodEndsAt))
+        (fail :error.bulletin.official-before-appeal-period)))))

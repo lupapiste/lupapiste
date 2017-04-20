@@ -185,7 +185,8 @@
                       (partial bulletins/validate-input-dates :appealPeriodStartsAt :appealPeriodEndsAt)]
    :user-roles #{:authority}
    :states     #{:verdictGiven}
-   :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
+   :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
+                bulletins/verdict-bulletin-should-not-exist]}
   [{:keys [application created] :as command}]
   (let [updates (create-bulletin application created {:verdictGivenAt verdictGivenAt
                                                       :appealPeriodStartsAt appealPeriodStartsAt
@@ -200,7 +201,9 @@
                       (partial action/number-parameters [:officialAt])]
    :user-roles #{:authority}
    :states     #{:verdictGiven}
-   :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
+   :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
+                bulletins/validate-bulletin-verdict-state
+                bulletins/validate-official-at]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (create-bulletin application created {:officialAt officialAt
@@ -291,7 +294,8 @@
    :states     #{:sent :complementNeeded}
    :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId])
                       (partial bulletin-can-be-saved "proclaimed")
-                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]}
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])
+                      (partial bulletins/validate-input-dates :proclamationStartsAt :proclamationEndsAt)]}
   [{:keys [application created] :as command}]
   (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
                        "versions.$.proclamationStartsAt" proclamationStartsAt
@@ -306,7 +310,8 @@
    :states     #{:verdictGiven}
    :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId :verdictGivenText])
                       (partial bulletin-can-be-saved "verdictGiven")
-                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]}
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])
+                      (partial bulletins/validate-input-dates :appealPeriodStartsAt :appealPeriodEndsAt)]}
   [{:keys [application created] :as command}]
   (let [updates {$set {"versions.$.verdictGivenAt"       verdictGivenAt
                        "versions.$.appealPeriodEndsAt"   appealPeriodEndsAt
