@@ -49,7 +49,7 @@ LUPAPISTE.PublishApplicationModel = function(params) {
     return !self.canMoveToProclaimed() && !self.canMoveToVerdictGiven() && !self.canMoveToFinal();
   });
 
-  self.addHubListener({eventType:"publishBulletinService::publishProcessed", status: "success"}, function(event) {
+  self.addHubListener({eventType:"publishBulletinService::publishProcessed", status: "success"}, function() {
     self.authModel.refresh(self.appId());
   });
 };
