@@ -56,7 +56,7 @@
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     ssc/Timestamp
               (sc/optional-key :campaign)    sc/Str
-              })
+              (sc/optional-key :locked)      ssc/Timestamp})
 
 (def company-skeleton ; required keys
   {:name nil
@@ -148,9 +148,13 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies
-  "Returns all data off all companies"
-  []
-  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :netbill :reference :document] (array-map :name 1)))
+  "Makes a company query. If query is not given, returns every
+  company."
+  ([] (find-companies {}))
+  ([query]
+   (mongo/select :companies query [:name :y :address1 :zip :po :accountType
+                                   :customAccountLimit :created :pop :ovt
+                                   :netbill :reference :document :locked] (array-map :name 1))))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -262,9 +266,28 @@
                           (get-in target-user [:company :id]))))
       unauthorized)))
 
+(defn company-not-locked
+  "Pre-check that fails for a locked company."
+  [{{company :company} :data created :created}]
+  (when-let [{locked :locked} (find-company-by-id! company)]
+    (when (and locked (> created locked))
+      (fail :error.company-locked))))
+
+(defn user-company-is-locked
+  "Pre-check that fails the user-associated company _is not_ locked."
+  [{user :user created :created}]
+  (when-let [{locked :locked} (find-company-by-id! (some-> user :company :id))]
+    (when (or (nil? locked) (< created locked))
+      (fail :error.company-not-locked))))
+
 (defn delete-user!
   [user-id]
   (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}}))
+
+(defn delete-every-user! [company-id]
+  (mongo/update-by-query :users
+                         {:company.id company-id}
+                         {$set {:enabled false}, $unset {:company 1}}))
 
 (defn update-user! [user-id role submit]
   (mongo/update-by-id :users user-id {$set {:company.role role
