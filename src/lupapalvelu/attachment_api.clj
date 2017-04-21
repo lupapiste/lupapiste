@@ -604,11 +604,9 @@
     (ok :stamps (stamps/stamps organization application user))))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]
+  {:parameters [:id timestamp files lang stamp]
    :categories #{:attachments}
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
-                      (partial action/number-parameters [:xMargin :yMargin])
-                      (partial action/non-blank-parameters [:page])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
    :states     states/post-submitted-states
@@ -619,26 +617,23 @@
                            (ss/blank? timestamp) (:created command)
                            :else (util/->long timestamp))
         stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
-        org             (if-not (ss/blank? organization)
-                          organization
-                          (organization/get-organization-name @org))
-        job             (stamping/make-stamp-job
-                         (att/get-attachments-infos application files)
-                         {:application application
-                          :user (:user command)
-                          :lang lang
-                          :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-                          :stamp-created stamp-timestamp
-                          :created  (:created command)
-                          :x-margin (util/->long xMargin)
-                          :y-margin (util/->long yMargin)
-                          :page     (keyword page)
-                          :transparency (util/->long (or transparency 0))
-                          :info-fields  {:backend-id   kuntalupatunnus
-                                         :section      section
-                                         :extra-info   extraInfo
-                                         :organization org
-                                         :buildings    (building/building-ids application)}})]
+        ;org
+        ;(if-not (ss/blank? (stamps/row-value-by-type stamp :organization))
+        ;(stamps/row-value-by-type stamp :organization)
+        ;  (organization/get-organization-name @org))
+        job (stamping/make-stamp-job
+              (att/get-attachments-infos application files)
+              {:application   application
+               :user          (:user command)
+               :lang          lang
+               ;:text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+               :stamp-created stamp-timestamp
+               :created       (:created command)
+               :x-margin      (util/->long (get-in stamp [:position :x]))
+               :y-margin      (util/->long (get-in stamp [:position :y]))
+               :page          (keyword (:page stamp))
+               :transparency  (util/->long (or (:transparency stamp) 0))
+               :info-fields   (:rows stamp)})]
     (ok :job job)))
 
 (defquery stamp-attachments-job

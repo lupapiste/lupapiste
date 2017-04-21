@@ -3,7 +3,7 @@
             [sade.schemas :as ssc]
             [sade.util :as sutil]
             [schema.core :as sc]
-            [lupapalvelu.building :as building]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
             [clojure.set :as set]))
 
@@ -100,7 +100,7 @@
                 :username (user/full-name (:user context))
                 :organization (get-in context [:organization :name :fi])
                 :agreement-id (get-in context [:application :id])
-                :building-id (building/building-ids (:application context))
+                :building-id (i18n/with-lang (or (get-in context [:user :language]) :fi) (i18n/loc "stamp.buildingid"))
                 (or (:text tag) ""))]
     {:type (:type tag) :value value}))
 
@@ -124,3 +124,11 @@
        (flatten)
        (first)
        :value))
+
+(defn dissoc-tag-by-type [rows type]
+  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
+         (contains? all-tag-types type)]}
+  (->> rows
+       (mapv (fn [rows] (filterv #(not (= type (:type %))) rows)))
+       (remove empty?)
+       (into [])))

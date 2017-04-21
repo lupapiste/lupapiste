@@ -10,7 +10,8 @@
             [lupapalvelu.i18n :as i18n]
             [sade.files :as files]
             [sade.util :refer [future* fn-> fn->>] :as util]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.attachment.stamps :as stamps]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -65,17 +66,21 @@
   (clojure.pprint/pprint value)
   value)
 
-(defn- info-fields->stamp [{:keys [text stamp-created transparency lang]} fields]
-  {:pre [text (pos? stamp-created)]}
-  (->> (update fields :buildings (fn->> (map (partial building->str lang)) sort))
-       ((juxt :backend-id :section :extra-info :buildings :organization))
+(defn update-buildings [value]
+  ;(update fields :buildings (fn->> (map (partial building->str lang)) sort))
+  value)
+
+(defn- info-fields->stamp [{:keys [stamp-created transparency lang]} fields]
+  {:pre [(pos? stamp-created)]}
+  (->> (update-buildings fields)
        flatten
        (map (fn-> str (ss/limit 100)))
        printteri
-       (stamper/make-stamp (ss/limit text 100) stamp-created transparency)))
+       (stamper/make-stamp stamp-created transparency)))
 
 (defn- make-stamp-without-buildings [context info-fields]
-  (->> (dissoc info-fields :buildings)
+  (clojure.pprint/pprint info-fields)
+  (->> (stamps/dissoc-tag-by-type info-fields :building-id)
        (info-fields->stamp context)))
 
 (defn- make-operation-specific-stamps [context info-fields operation-id-sets]

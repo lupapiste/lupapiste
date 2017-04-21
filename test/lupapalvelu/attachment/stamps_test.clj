@@ -40,6 +40,7 @@
              :qr-code    true
              :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type :current-date}]
                           [{:type :backend-id}]
+                          [{:type :building-id}]
                           [{:type :organization}]]}]})
 
 (def sonja
@@ -95,9 +96,7 @@
     (tag-content {:type :username} context) => {:type :username :value "Sonja Sibbo"}
     (tag-content {:type :organization} context) => {:type :organization :value "Sipoon rakennusvalvonta"}
     (tag-content {:type :agreement-id} context) => {:type :agreement-id :value "LP-753-2017-90001"}
-    (tag-content {:type :building-id} context) => {:type :building-id :value [{:national-id  "100840657D"
-                                                                               :operation-id "57603a99edf02d7047774554"
-                                                                               :short-id     "100840657D"}]}
+    (tag-content {:type :building-id} context) => {:type :building-id :value "Rakennustunnus"}
     (tag-content {:type :section :text "Section"} context) => {:type :section :value "Section"}))
 
 (facts "Stamp rows should be formed correctly"
@@ -105,6 +104,7 @@
                                         :application  application
                                         :user         sonja}) => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
                                                                   [{:type :backend-id :value "17-0753-R"}]
+                                                                  [{:type :building-id :value "Rakennustunnus"}]
                                                                   [{:type :organization :value "Sipoon rakennusvalvonta"}]])
 
 (facts "Stamps should be formed correctly"
@@ -117,6 +117,7 @@
                                                  :qr-code    true
                                                  :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
                                                               [{:type :backend-id :value "17-0753-R"}]
+                                                              [{:type :building-id :value "Rakennustunnus"}]
                                                               [{:type :organization :value "Sipoon rakennusvalvonta"}]]}])
   (fact "Multiple stamps are formed ok"
     (stamps (assoc organization :stamps multiple-stamps) application sonja) =>   [{:id         "123456789012345678901234"
@@ -156,5 +157,14 @@
       (row-value-by-type stamp :extra-text) => nil
       (row-value-by-type stamp :unknown-key) => (throws AssertionError #"Assert failed")
       (row-value-by-type {} :custom-text) => (throws Exception #"Value does not match schema")))
+
+(facts "Should return rows without tag of given type"
+  (let [stamp (first (stamps organization application sonja))]
+    (dissoc-tag-by-type (:rows stamp) :building-id) => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                                                        [{:type :backend-id :value "17-0753-R"}]
+                                                        [{:type :organization :value "Sipoon rakennusvalvonta"}]]
+    (dissoc-tag-by-type (:rows stamp) :backend-id) => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                                                       [{:type :building-id :value "Rakennustunnus"}]
+                                                       [{:type :organization :value "Sipoon rakennusvalvonta"}]]))
 
 

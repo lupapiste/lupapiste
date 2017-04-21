@@ -280,19 +280,20 @@ LUPAPISTE.StampModel = function(params) {
     self.status(self.statusStarting);
     ajax
       .command("stamp-attachments", {
-        id: self.application.id(),
-        text: self.text(),
+        id: findRowData("agreement-id"),
+        //text: findRowData("custom-text"),
         lang: loc.getCurrentLanguage(),
-        timestamp: new Date(self.date()).getTime(),
-        organization: self.organization(),
+        timestamp: new Date(self.currentDate()).getTime(),
+        //organization: findRowData("organization"),
         files: _.map(self.selectedFiles(), "id"),
-        xMargin: _.parseInt(self.xMargin(), 10),
-        yMargin: _.parseInt(self.yMargin(), 10),
-        page: self.page(),
-        transparency: self.transparency(),
-        extraInfo: self.extraInfo(),
-        kuntalupatunnus: self.kuntalupatunnus(),
-        section: getSection()
+        stamp: self.selectedStamp()
+        //xMargin: _.parseInt(self.selectedStamp().position.x, 10),
+        //yMargin: _.parseInt(self.selectedStamp().position.y, 10),
+        //page: self.selectedStamp().page,
+        //transparency: self.selectedStamp().transparency,
+        //extraInfo: findRowData("extra-text"),
+        //kuntalupatunnus: findRowData("backend-id"),
+        //section: getSection()
       })
       .success(self.started)
       .call();

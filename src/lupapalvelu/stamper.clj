@@ -43,11 +43,10 @@
   (.draw text g x y))
 
 (defn make-stamp
-  [^String verdict ^Long created ^Integer transparency info-fields]
-  (let [fields (conj
-                 (vec
-                   (conj info-fields (str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))))
-                 "LUPAPISTE.fi")
+  [^Long created ^Integer transparency info-fields]
+  (let [fields (vec (conj info-fields (str "www.lupapiste.fi")))
+        _ (println "Fields type ::: " (clojure.core/type fields))
+        _ (clojure.pprint/pprint fields)
         font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (remove nil?
