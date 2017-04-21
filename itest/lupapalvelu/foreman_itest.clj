@@ -1,20 +1,20 @@
-(ns lupapalvelu.copy-invite-itest
+(ns lupapalvelu.foreman-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.core :refer [now]]
-            [lupapalvelu.copy-application]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.foreman :as f]))
 
-(def db-name (str "test_copy-invite-itest_" (now)))
+(def db-name (str "test_foreman-itest_" (now)))
 
-(testable-privates lupapalvelu.copy-application
+(testable-privates lupapalvelu.foreman
                    henkilo-invite
                    yritys-invite)
 
 (mongo/connect!)
 (mongo/with-db db-name (fixture/apply-fixture "minimal")
-  (facts "Copying invites from another application"
+  (facts "Creating invites for foreman application"
          (let [test-auths             [{:invite {:user {:id "C-123"}}}
                                        {:username "testi@example.com" :id "alsdkfjalsdjflsdf"}
                                        {:username "pena" :id "777777777777777777000020"}
