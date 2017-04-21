@@ -132,7 +132,7 @@
         (merge-in updated-operation-and-document-ids source-application))))
 
 (defn copy-application
-  [{{:keys [source-application-id x y address propertyId municipality]} :data :keys [user created]} & [manual-schema-datas]]
+  [{{:keys [source-application-id x y address propertyId municipality auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [municipality (prop/municipality-id-by-property-id propertyId)
           operation    (-> source-application :primaryOperation :name)
@@ -141,6 +141,8 @@
       (when-not organization
         (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
       (new-application-copy (assoc source-application
+                                   :auth         (filter #((set auth-invites) (:id %))
+                                                         (:auth source-application))
                                    :state        :draft
                                    :propertyId   propertyId
                                    :location     (app/->location x y)

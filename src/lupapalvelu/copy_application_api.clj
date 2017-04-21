@@ -12,6 +12,7 @@
    :user-roles #{:applicant :authority} ; TODO: only for company applicants
    :input-validators [(partial action/non-blank-parameters [:address :propertyId])
                       (partial action/property-id-parameters [:propertyId])
+                      (partial action/vector-parameters [:auth-invites])
                       coord/validate-x coord/validate-y]}
   [command]
   (let [copied-application (copy-app/copy-application command)]
