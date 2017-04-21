@@ -8,6 +8,7 @@
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
@@ -517,6 +518,20 @@
   (poll-verdicts-for-reviews :application-ids args)
   (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :applications args}))
 
+(defn extend-previous-permit [& args]
+  (mongo/connect!)
+  (if (= (count args) 1)
+    (if-let [application (domain/get-application-no-access-checking (first args))]
+      (do
+        (println (krysp-fetch/get-application-xml-by-application-id application true))
+        0)
+      (do
+        (println "Cannot find application")
+        2))
+    (do
+      (println "No application id given.")
+      1)))
+  
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"
