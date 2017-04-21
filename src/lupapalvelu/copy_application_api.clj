@@ -18,4 +18,5 @@
   (let [copied-application (copy-app/copy-application command)]
     (logging/with-logging-context {:applicationId (:id copied-application)}
       (app/insert-application copied-application)
+      (copy-app/send-invite-notifications! copied-application command)
       (ok :id (:id copied-application)))))

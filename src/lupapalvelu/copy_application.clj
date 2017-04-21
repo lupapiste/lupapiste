@@ -7,6 +7,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notif]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
@@ -75,18 +76,18 @@
        :role (:role old-company-auth)
        :invite {:user {:id company-id}}))))
 
-(defn create-user-auth [old-user-auth inviter application-id timestamp]
+(defn- create-user-auth [old-user-auth inviter application-id timestamp]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]
     (auth/create-invite-auth inviter user application-id
                              (:role old-user-auth)
                              timestamp)))
 
-(defn new-auth [old-auth inviter application-id timestamp]
+(defn- new-auth [old-auth inviter application-id timestamp]
   (if (= (:type old-auth) "company")
     (create-company-auth old-auth)
     (create-user-auth old-auth inviter application-id timestamp )))
 
-(defn new-auth-map [{auth            :auth
+(defn- new-auth-map [{auth           :auth
                      id              :id
                      {op-name :name} :primaryOperation
                      created          :created}
@@ -100,7 +101,7 @@
                       (mapv #(new-auth % inviter id created))))})
 
 
-(def  default-copy-options
+(def default-copy-options
   {:blacklist [:comments :history :statements :attachments] ; copy everything except these
    })
 
@@ -152,3 +153,47 @@
                             default-copy-options
                             manual-schema-datas))
     (fail! :error.no-source-application :id source-application-id)))
+
+;;; Sending invite notifications
+
+(defn- invited-as-foreman? [application user]
+  (->> application
+       :auth
+       (filter #(= (-> % :invite :role) "foreman"))
+       (map :id)
+       (some #(= (:id user) %))))
+
+(defn- foreman-in-foreman-app? [application user]
+  (and (invited-as-foreman? application user)
+       (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword))))
+
+(defn- notify-of-invite! [app command invite-type recipients]
+  (->> (map (fn [{{:keys [email user]} :invite}] (or (usr/get-user-by-email email) (assoc user :email email))) recipients)
+         (assoc command :application app :recipients)
+         (notif/notify! invite-type)))
+
+
+(defn- user-invite-notifications! [foreman-app command auths]
+  (let [[foremen others] ((juxt filter remove) (partial foreman-in-foreman-app?
+                                                        foreman-app)
+                                               auths)]
+    (notify-of-invite! foreman-app command :invite-foreman foremen)
+    (notify-of-invite! foreman-app command :invite others)))
+
+(defn- invite-company! [app {user :user} auth]
+  (let [company-id (get-in auth [:invite :user :id])
+        token-id   (company/company-invitation-token user company-id (:id app))]
+    (notif/notify! :accept-company-invitation {:admins      (company/find-company-admins company-id)
+                                               :inviter     user
+                                               :company     (company/find-company! {:id company-id})
+                                               :token-id    token-id
+                                               :application app})))
+
+
+(defn send-invite-notifications! [{:keys [auth] :as application} {:keys [user] :as command}]
+  (let [[users companies] ((juxt remove filter) (comp #{"company"} :type)
+                                                (remove (comp #{:owner} keyword :role) auth))]
+    ;; Non-company invites
+    (user-invite-notifications! application command users)
+    ;; Company invites
+    (run! (partial invite-company! application command) companies)))

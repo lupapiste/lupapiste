@@ -15,6 +15,7 @@
         _ (Thread/sleep 1000)
         x 444445.0 y 6666665.0
         property-id "75312312341234"
+        _ (sent-emails) ; reset sent emails
         {copy-app-id :id} (command sonja :copy-application
                                    :x x :y y
                                    :address "Testitie 1"
@@ -40,7 +41,11 @@
 
     (fact "Sonja is new owner, Pena (previous owner) is invited as writer"
       (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
-      (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [(:id pena-user) "writer"])
+      (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [(:id pena-user) "writer"]
+      (let [emails (sent-emails)]
+        (count emails) => 1
+        (-> emails first :body :html) => (contains "Sinut halutaan valtuuttaa kirjoitusoikeudella")
+        (-> emails first :to) => (contains "Pena Panaani")))
 
     (fact "Only auths with ids in auth-invites are copied from old app"
           (let [{copy-app-id :id} (command sonja :copy-application
