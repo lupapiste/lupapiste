@@ -4,9 +4,11 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.copy-application :refer :all]
+
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
+            [lupapalvelu.user :as usr]
             [midje.sweet :refer :all]
             [sade.coordinate :as coord]
             [sade.schema-generators :as ssg]))
@@ -14,16 +16,20 @@
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
 
+(def users
+  {"source-user" {:id        "source-user"
+                  :firstName "Source"
+                  :lastName  "User"
+                  :role      :applicant}
+   "copying-user" {:id        "copying-user"
+                   :firstName "New"
+                   :lastName  "User"
+                   :role      :applicant}})
 
-(with-redefs [coord/convert (fn [_ _ _ coords] (str "converted " coords))]
-  (let [source-user {:id        "source"
-                     :firstName "Source"
-                     :lastName  "User"
-                     :role      :applicant}
-        user {:id        "new"
-              :firstName "New"
-              :lastName  "User"
-              :role      :applicant}
+(with-redefs [coord/convert (fn [_ _ _ coords] (str "converted " coords))
+              usr/get-user-by-id (fn [id] (get users id))]
+  (let [source-user (get users "source-user")
+        user        (get users "copying-user")
         source-created 12345
         created 23456
         municipality "753"
@@ -80,9 +86,16 @@
             (= (dissoc-ids-and-timestamps (select-keys new-app [:attachments]))
                (dissoc-ids-and-timestamps (select-keys raw-new-app [:attachments])))  => true?)
 
-          (fact "user is the owner of the new application"
+          (fact "user is the owner of the new application, previous owner invited as writer"
             (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)]
-            (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)])))
+            (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)
+                                (assoc source-user
+                                       :role :reader
+                                       :invite {:created created
+                                                :email nil
+                                                :inviter user
+                                                :role :writer
+                                                :user source-user})])))
 
       (fact "If documents are not copied or overridden, those of normal new application are created"
         (let [new-app (new-application-copy source-app user organization created

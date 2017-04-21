@@ -2,11 +2,14 @@
   (:require [clojure.set :as set]
             [taoensso.timbre :refer [error]]
             [lupapalvelu.application :as app]
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.company :as company]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.property :as prop]
             [sade.util :refer [merge-in]]))
@@ -62,6 +65,45 @@
   (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
 
+(defn- create-company-auth [old-company-auth]
+  (when-let [company-id (or (not-empty (:id old-company-auth))
+                            (-> old-company-auth :invite :user :id))]
+    (when-let [company (company/find-company-by-id company-id)]
+      (assoc
+       (company/company->auth company)
+       :id "" ; prevents access to application before accepting invite
+       :role (:role old-company-auth)
+       :invite {:user {:id company-id}}))))
+
+(defn create-user-auth [old-user-auth inviter application-id timestamp]
+  (when-let [user (usr/get-user-by-id (:id old-user-auth))]
+    (auth/create-invite-auth inviter user application-id
+                             (:role old-user-auth)
+                             timestamp)))
+
+(defn new-auth [old-auth inviter application-id timestamp]
+  (if (= (:type old-auth) "company")
+    (create-company-auth old-auth)
+    (create-user-auth old-auth inviter application-id timestamp )))
+
+(defn new-auth-map [{auth            :auth
+                     id              :id
+                     {op-name :name} :primaryOperation
+                     created          :created}
+                    inviter]
+  {:auth (concat (app/application-auth inviter op-name)
+                 (->> auth
+                      (remove #(= (:id inviter) (:id %)))
+                      (map #(if (= (keyword (:role %)) :owner)
+                              (assoc % :role :writer)
+                              %))
+                      (mapv #(new-auth % inviter id created))))})
+
+
+(def  default-copy-options
+  {:blacklist [:comments :history :statements :attachments] ; copy everything except these
+   })
+
 (defn- new-application-overrides
   [{:keys [address auth infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
    user organization created manual-schema-datas]
@@ -69,22 +111,18 @@
   (let [org-id (:id organization)
         op-name (:name primaryOperation)]
     (-> (merge application
-               {:auth             (or (not-empty auth)  (app/application-auth user op-name))
-                :created          created
+               {:created          created
                 :id               (app/make-application-id municipality)
                 :schema-version   (or schema-version    (schemas/get-latest-schema-version))
                 :state            (or state             (app/application-state user org-id infoRequest))
                 :title            (or (not-empty title) address)
                 :tosFunction      (or tosFunction       (tos-function org-id op-name))}
                (app/location-map  location))
+        (merge-in new-auth-map user)
         (merge-in app/application-timestamp-map)
         (merge-in app/application-history-map user)
         (merge-in app/application-attachments-map organization)
         (merge-in copy-application-documents-map user organization manual-schema-datas))))
-
-(def  default-copy-options
-  {:blacklist [:comments :history :statements :attachments :auth] ; copy everything except these
-   })
 
 (defn new-application-copy [source-application user organization created copy-options & [manual-schema-datas]]
   (let [options (merge default-copy-options copy-options)]
