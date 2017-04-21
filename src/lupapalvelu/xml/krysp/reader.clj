@@ -288,6 +288,24 @@
               })))
   (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
+(def krysp-state-sorting
+  "Chronological ordering of application states from KuntaGML. Used when comparing states timestamped to same dates."
+  ["rakennustyöt aloitettu"
+   "rakennustyöt keskeytetty"
+   "jatkoaika myönnetty"
+   "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on käyttöönotettu"
+   "päätöksestä valitettu, valitusprosessin tulosta ei ole"
+   "lupa vanhentunut"
+   "lupa rauennut"
+   "luvalla ei loppukatselmusehtoa, lupa valmis"
+   "lopullinen loppukatselmus tehty"])
+
+(defn state-comparator [{pvm1 :pvm tila1 :tila} {pvm2 :pvm tila2 :tila}]
+  (if (not= pvm1 pvm2)
+    (compare pvm1 pvm2)                                     ; Compare by dates
+    (compare (.indexOf krysp-state-sorting tila1)           ; If same date, sorting by state precedence defined by domain
+             (.indexOf krysp-state-sorting tila2))))
+
 (def krysp-state->application-state
   {"rakennusty\u00f6t aloitettu"                 :constructionStarted
    "rakennusty\u00f6t keskeytetty"               :onHold
@@ -298,6 +316,10 @@
    "lupa vanhentunut"                            nil
    "lopullinen loppukatselmus tehty"             :closed
    "luvalla ei loppukatselmusehtoa, lupa valmis" :closed})
+
+(assert (= (set (keys krysp-state->application-state))
+           (set krysp-state-sorting))
+        "Ordering must be defined for state!")
 
 (defmulti application-state
   "Get application state from xml."
@@ -318,7 +340,7 @@
 (defn standard-application-state [xml-without-ns]
   (->> (select xml-without-ns [:kasittelynTilatieto :Tilamuutos])
        (map (fn-> cr/all-of (cr/convert-keys-to-timestamps [:pvm])))
-       (sort-by :pvm)
+       (sort state-comparator)
        last
        :tila
        ss/lower-case))
@@ -492,7 +514,7 @@
                            (apply build-osoitenumero (util/select-values osoite [:osoitenumero :osoitenumero2]))
                            (:porras osoite)
                            (apply build-huoneisto (util/select-values osoite [:huoneisto :jakokirjain :jakokirjain2]))]]
-    (clojure.string/join " " (remove nil? osoite-components))))
+    (ss/join " " (remove nil? osoite-components))))
 
 ;;
 ;; Information parsed from verdict xml message for application creation
