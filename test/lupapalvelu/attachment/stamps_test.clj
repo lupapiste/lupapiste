@@ -148,4 +148,13 @@
                                                                                                 [{:type :extra-text :value "Some extra text"}]
                                                                                                 [{:type :agreement-id :value "LP-753-2017-90001"}]]}]))
 
+(facts "Should get row value by type"
+    (let [stamp (first (stamps organization application sonja))]
+      (row-value-by-type stamp :custom-text) => "Hyv\u00e4ksytty"
+      (row-value-by-type stamp :backend-id) => "17-0753-R"
+      (row-value-by-type stamp :organization) => "Sipoon rakennusvalvonta"
+      (row-value-by-type stamp :extra-text) => nil
+      (row-value-by-type stamp :unknown-key) => (throws AssertionError #"Assert failed")
+      (row-value-by-type {} :custom-text) => (throws Exception #"Value does not match schema")))
+
 

@@ -4,7 +4,8 @@
             [sade.util :as sutil]
             [schema.core :as sc]
             [lupapalvelu.building :as building]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [clojure.set :as set]))
 
 (def simple-tag-types
   #{:current-date
@@ -18,6 +19,9 @@
 (def text-tag-types
   #{:custom-text
     :extra-text})
+
+(def all-tag-types
+  (set/union simple-tag-types text-tag-types))
 
 (sc/defschema SimpleTagType
   (apply sc/enum simple-tag-types))
@@ -41,7 +45,7 @@
   [Tag])
 
 (sc/defschema FilledTag
-  {:type  sc/Keyword
+  {:type  (apply sc/enum all-tag-types)
    :value sc/Str})
 
 (sc/defschema StampRow
@@ -109,10 +113,14 @@
 
 (defn stamps [organization application user]
   (let [organization-stamp-templates (:stamps organization)
-        _ (sc/check StampTemplate organization-stamp-templates)
         context {:organization organization :application application :user user}]
     (map (fn [stamp] (fill-stamp-tags stamp context)) organization-stamp-templates)))
 
-(defn value-by-type [stamp type]
-  {:pre [(sc/validate Stamp stamp)]}
-  "")
+(defn row-value-by-type [stamp type]
+  {:pre [(sc/validate Stamp stamp)
+         (contains? all-tag-types type)]}
+  (->> (:rows stamp)
+       (map (fn [row] (filter #(= type (:type %)) row)))
+       (flatten)
+       (first)
+       :value))
