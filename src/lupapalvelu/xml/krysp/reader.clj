@@ -290,11 +290,11 @@
 
 (def krysp-state-sorting
   "Chronological ordering of application states from KuntaGML. Used when comparing states timestamped to same dates."
-  ["rakennustyöt aloitettu"
-   "rakennustyöt keskeytetty"
-   "jatkoaika myönnetty"
-   "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on käyttöönotettu"
-   "päätöksestä valitettu, valitusprosessin tulosta ei ole"
+  ["rakennusty\u00f6t aloitettu"
+   "rakennusty\u00f6t keskeytetty"
+   "jatkoaika my\u00f6nnetty"
+   "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu"
+   "p\u00e4\u00e4t\u00f6ksest\u00e4 valitettu, valitusprosessin tulosta ei ole"
    "lupa vanhentunut"
    "lupa rauennut"
    "luvalla ei loppukatselmusehtoa, lupa valmis"
