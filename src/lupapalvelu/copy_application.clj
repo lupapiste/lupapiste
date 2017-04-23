@@ -66,9 +66,12 @@
   (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
 
+(defn- auth-id [auth-entry]
+  (or (not-empty (:id auth-entry))
+      (-> auth-entry :invite :user :id)))
+
 (defn- create-company-auth [old-company-auth]
-  (when-let [company-id (or (not-empty (:id old-company-auth))
-                            (-> old-company-auth :invite :user :id))]
+  (when-let [company-id (auth-id old-company-auth)]
     (when-let [company (company/find-company-by-id company-id)]
       (assoc
        (company/company->auth company)
@@ -142,7 +145,7 @@
       (when-not organization
         (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
       (new-application-copy (assoc source-application
-                                   :auth         (filter #((set auth-invites) (:id %))
+                                   :auth         (filter #((set auth-invites) (auth-id %))
                                                          (:auth source-application))
                                    :state        :draft
                                    :propertyId   propertyId

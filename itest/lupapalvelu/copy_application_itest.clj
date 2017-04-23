@@ -10,16 +10,21 @@
 (facts "copying application"
   (let [pena-user (find-user-from-minimal-by-apikey pena)
         sonja-user (find-user-from-minimal-by-apikey sonja)
+        solita-company (company-from-minimal-by-id "solita")
+        solita-company-admin (find-user-from-minimal-by-apikey kaino)
+
+        ; Pena creates, submits and invites company
         {app-id :id} (create-and-submit-application pena)
+        _ (command pena :company-invite :id app-id :company-id (:_id solita-company)) => ok?
+
         app (query-application sonja app-id)
-        _ (Thread/sleep 1000)
         x 444445.0 y 6666665.0
         property-id "75312312341234"
         _ (sent-emails) ; reset sent emails
         {copy-app-id :id} (command sonja :copy-application
                                    :x x :y y
                                    :address "Testitie 1"
-                                   :auth-invites [pena-id]
+                                   :auth-invites [pena-id (:_id solita-company)]
                                    :propertyId property-id
                                    :source-application-id app-id) => ok?
         copy-app (query-application sonja copy-app-id)]
@@ -40,12 +45,18 @@
       (:municipality copy-app) => (prop/municipality-id-by-property-id property-id))
 
     (fact "Sonja is new owner, Pena (previous owner) is invited as writer"
+      (count (:auth copy-app)) => 3
       (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
       (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [(:id pena-user) "writer"]
+      (-> copy-app :auth (get 2) ((juxt :name :type))) => [(:name solita-company) "company"]
       (let [emails (sent-emails)]
-        (count emails) => 1
+        (count emails) => 2
+
         (-> emails first :body :html) => (contains "Sinut halutaan valtuuttaa kirjoitusoikeudella")
-        (-> emails first :to) => (contains "Pena Panaani")))
+        (-> emails first :to) => (contains "Pena Panaani")
+
+        (-> emails second :body :html) => (contains "Sonja Sibbo haluaa valtuuttaa yrityksenne")
+        (-> emails second :to) => (contains (:email solita-company-admin))))
 
     (fact "Only auths with ids in auth-invites are copied from old app"
           (let [{copy-app-id :id} (command sonja :copy-application
