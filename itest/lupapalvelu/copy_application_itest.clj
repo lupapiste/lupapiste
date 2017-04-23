@@ -7,6 +7,14 @@
 
 (apply-remote-minimal)
 
+(defn copy-application [apikey app-id & {:keys [x y address auth-invites propertyId]}]
+  (command sonja :copy-application
+           :x (or x 444445.0) :y (or y 6666665.0)
+           :address (or address "Testitie 1")
+           :auth-invites (or auth-invites [])
+           :propertyId (or propertyId "75312312341234")
+           :source-application-id app-id))
+
 (facts "copying application"
   (let [pena-user (find-user-from-minimal-by-apikey pena)
         sonja-user (find-user-from-minimal-by-apikey sonja)
@@ -21,12 +29,11 @@
         x 444445.0 y 6666665.0
         property-id "75312312341234"
         _ (sent-emails) ; reset sent emails
-        {copy-app-id :id} (command sonja :copy-application
+        {copy-app-id :id} (copy-application sonja app-id
                                    :x x :y y
                                    :address "Testitie 1"
                                    :auth-invites [pena-id (:_id solita-company)]
-                                   :propertyId property-id
-                                   :source-application-id app-id) => ok?
+                                   :propertyId property-id) => ok?
         copy-app (query-application sonja copy-app-id)]
 
     (fact "primaryOperation is copied, but id is new"
@@ -47,7 +54,7 @@
     (fact "Sonja is new owner, Pena (previous owner) is invited as writer"
       (count (:auth copy-app)) => 3
       (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
-      (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [(:id pena-user) "writer"]
+      (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [pena-id "writer"]
       (-> copy-app :auth (get 2) ((juxt :name :type))) => [(:name solita-company) "company"]
       (let [emails (sent-emails)]
         (count emails) => 2
@@ -59,12 +66,11 @@
         (-> emails second :to) => (contains (:email solita-company-admin))))
 
     (fact "Only auths with ids in auth-invites are copied from old app"
-          (let [{copy-app-id :id} (command sonja :copy-application
-                                           :x x :y y
-                                           :address "Testitie 1"
-                                           :auth-invites []
-                                           :propertyId property-id
-                                           :source-application-id app-id) => ok?
+          (let [{copy-app-id :id} (copy-application sonja app-id
+                                           :auth-invites []) => ok?
                 copy-app (query-application sonja copy-app-id)]
             (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
-            (-> copy-app :auth count) => 1))))
+            (-> copy-app :auth count) => 1))
+    (fact "Copying fails if some of provided auth-invites don't exist in source application"
+          (copy-application sonja app-id :auth-invites ["nonexistent" pena-id])
+          => (partial expected-failure? "error.nonexistent-auths"))))

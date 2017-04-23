@@ -135,15 +135,24 @@
         (merge-in new-application-overrides user organization created manual-schema-datas)
         (merge-in updated-operation-and-document-ids source-application))))
 
+(defn- not-in-auth [auth]
+  (let [auth-id-set (set (map auth-id auth))]
+    (fn [id]
+      (not (get auth-id-set id)))))
+
 (defn copy-application
   [{{:keys [source-application-id x y address propertyId municipality auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [municipality (prop/municipality-id-by-property-id propertyId)
           operation    (-> source-application :primaryOperation :name)
           permit-type  (op/permit-type-of-operation operation)
-          organization (org/resolve-organization municipality permit-type)]
+          organization (org/resolve-organization municipality permit-type)
+          not-in-source-auths? (not-in-auth (:auth source-application))]
       (when-not organization
         (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+      (when (some not-in-source-auths? auth-invites)
+        (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))
+
       (new-application-copy (assoc source-application
                                    :auth         (filter #((set auth-invites) (auth-id %))
                                                          (:auth source-application))
