@@ -4,7 +4,8 @@
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
             [lupapalvelu.application :as app]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]))
 
 (defn validate-permanent-archive-enabled [{user-orgs :user-organizations app-org :organization app :application}]
   (when-not (if (:organization app)
@@ -53,9 +54,12 @@
   (ok))
 
 (defquery archiving-operations-enabled
-  {:user-roles #{:authority}
-   :org-authz-roles  #{:archivist}
-   :states     states/all-application-states}
+  {:user-roles      #{:authority}
+   :org-authz-roles #{:archivist}
+   :states          states/all-application-states
+   :pre-checks      [(fn [{:keys [user application]}]
+                       (when-not application                     ; If application, :org-authz-roles works as validator
+                         (usr/user-is-archivist? user nil)))]}
   (ok))
 
 (defquery permanent-archive-enabled
