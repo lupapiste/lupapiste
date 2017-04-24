@@ -535,7 +535,8 @@
                                          kuntalupatunnus)
 
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
-            hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
+            suunnittelijat (map cr/all-of (select asia [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]))
+            [hakijat muut-osapuolet] ((juxt filter remove) #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
         (-> (merge
               {:id                          (->lp-tunnus asia)
@@ -543,7 +544,9 @@
                :municipality                municipality
                :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
-               :hakijat                     hakijat}
+               :hakijat                     hakijat
+               :muutOsapuolet               muut-osapuolet
+               :suunnittelijat              suunnittelijat}
 
               (when (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
                 {:rakennuspaikka {:x          (first coord-array-Rakennuspaikka)

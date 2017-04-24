@@ -280,3 +280,9 @@
     (println "fixed" @fix-prev-permit-counter "applications")
     (finally
       (mongo/disconnect!))))
+
+(defn extend-prev-permit-with-all-parties
+  [application app-info]
+  (clojure.pprint/pprint (:hakijat app-info))
+  (clojure.pprint/pprint (:muutOsapuolet app-info))
+  (clojure.pprint/pprint (:suunnittelijat app-info)))

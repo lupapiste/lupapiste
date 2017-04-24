@@ -28,7 +28,9 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [clj-time.coerce :as c]
-            [sade.http :as http])
+            [sade.http :as http]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.prev-permit :as prev-permit])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -522,8 +524,10 @@
   (mongo/connect!)
   (if (= (count args) 1)
     (if-let [application (domain/get-application-no-access-checking (first args))]
-      (do
-        (println (krysp-fetch/get-application-xml-by-application-id application true))
+      (let [kuntalupatunnus (get-in application [:verdicts 0 :kuntalupatunnus])
+            app-xml  (krysp-fetch/get-application-xml-by-backend-id application kuntalupatunnus)
+            app-info (krysp-reader/get-app-info-from-message app-xml kuntalupatunnus)]
+        (prev-permit/extend-prev-permit-with-all-parties application app-info)
         0)
       (do
         (println "Cannot find application")
