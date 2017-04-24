@@ -307,7 +307,7 @@
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
     this.accountType   = ko.observable();
     this.accountTypes  = ko.observableArray();
-    this.isLocked      = ko.observable();
+    this.isLocked      = ko.computed(_.wrap( "user-company-locked", lupapisteApp.models.globalAuthModel.ok ));
   }
 
   CompanyInfo.prototype.setAccountTypeOptionDisable = function(option, item) {
@@ -330,7 +330,6 @@
 
   CompanyInfo.prototype.update = function(company) {
     this.updateAccountTypes(company);
-    this.isLocked( _.isNumber( company.locked ) && company.locked < moment().unix());
     ko.mapping.fromJS(_.merge(this.defaults, company), {
       ignore:["id"]
     }, this.model());

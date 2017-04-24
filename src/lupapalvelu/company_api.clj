@@ -78,12 +78,28 @@
 
 (defcommand company-user-delete-all
   {:description "Nuclear option for deleting every company user when
-  the company is locked."
+  the company is locked. Also cancels every pending invite."
    :user-roles #{:applicant}
    :pre-checks [(com/validate-has-company-role :admin)
                 com/user-company-is-locked]}
-  [{user :user}]
-  (ok :deleted (-> user :company :id com/delete-every-user!)))
+  [{user :user created :created}]
+  (let [company-id (-> user :company :id)]
+    (com/delete-every-user! company-id)
+    (mongo/update-by-query
+                   :token
+                   {:token-type "new-company-user"
+                    :data.company.id company-id
+                    :used {$type "null"}}
+                   {$set {:used created}})
+    (ok)))
+
+(defquery user-company-locked
+  {:description "Pseudo-query that succeeds if the user's company is
+  locked."
+   :user-roles #{:applicant}
+   :pre-checks [(com/validate-has-company-role :admin)
+                com/user-company-is-locked]}
+  [_])
 
 (defn- user-limit-not-exceeded [command]
   (let [company (com/find-company-by-id (get-in command [:user :company :id]))

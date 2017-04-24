@@ -5,7 +5,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [cheshire.core :as json]
-            [clojure.string :refer [index-of]]))
+            [clojure.string :refer [index-of]]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -274,9 +275,14 @@
 
 (def locked-err {:ok false :text "error.company-locked"})
 
+(fact "Company back to regular account"
+      (command admin :company-update :company "solita" :updates {:accountType "account5"}) => ok?)
+
 (facts "Company locking"
        (fact "Admin locks Solita"
              (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+       (fact "Locked pseudo-query succeeds"
+             (query kaino :user-company-locked) => ok?)
        (fact "Companies listing no longer includes Solita"
              (query pena :companies) => {:ok true :companies []})
        (fact "Company can be queried"
@@ -288,23 +294,27 @@
              (command kaino :company-add-user :firstName "Hii" :lastName "Hoo"
                       :email "hii.hoo@example.com" :admin true :submit true)
              => locked-err)
-       (fact "User details cannot be changed"
-             (command kaino :company-user-update
-                      :user-id teppo-id
-                      :role "admin"
-                      :submit false) => locked-err)
-       (fact "User can be deleted"
-             (command kaino :company-user-delete :user-id teppo-id))
+       (let [{solitans :users} (query kaino :company :company "solita" :users true)
+             {foo-id :id} (util/find-by-key :email "foo@example.com" solitans)]
+         (fact "User details cannot be changed"
+               (command kaino :company-user-update
+                        :user-id foo-id
+                        :role "admin"
+                        :submit false) => locked-err)
+         (fact "User can be deleted"
+               (command kaino :company-user-delete :user-id foo-id) => ok?))
        (fact "Unlock company"
              (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
+       (fact "Locked pseudo-query fails"
+             (query kaino :user-company-locked) => fail?)
        (fact "Company can now be updated"
-             (command kaino :company-update :company "solita" :updates {:po "Beijing"}) = ok?)
+             (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
        (fact "Nuking is not an option for unlocked company"
              (command kaino :company-user-delete-all) => (contains {:text "error.company-not-locked"}))
        (fact "Admin locks Solita in the future"
              (command admin :company-lock :company "solita" :timestamp (+ (now) 10000)) => ok?)
        (fact "Company can now also be updated"
-             (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) = ok?)
+             (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) => ok?)
        (fact "Admin locks Solita again"
              (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
        (fact "Kaino nukes locked company"
@@ -324,4 +334,6 @@
        (fact "Kaino can now login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
        (fact "Kaino is no longer Solitan"
-             (query kaino :company :company "solita" :users true) => unauthorized?))
+             (query kaino :company :company "solita" :users true) => unauthorized?)
+
+       )
