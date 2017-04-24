@@ -53,12 +53,15 @@
 
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
-  Pre-check returns result of the first argument in case of failure."
+  Pre-check returns nil if some succees, or result of the last error returning pre-check."
   [& pre-checks]
   (fn [command]
-    (when (or (empty? (rest pre-checks))
-              ((apply every-pred (rest pre-checks)) command))
-      ((first pre-checks) command))))
+    (reduce (fn [res check]
+              (if (nil? res)
+                (reduced nil)
+                (check command)))
+            ((first pre-checks) command)
+            (rest pre-checks))))
 
 (defn email-validator
   "Reads email key from action parameters and checks that it is valid email address.

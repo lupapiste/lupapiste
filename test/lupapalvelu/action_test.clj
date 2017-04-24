@@ -286,4 +286,14 @@
     (get-post-fns fail-status {:on-complete [...c1... ...c2...] :on-success [...s1... ...s2...] :on-fail ...f...})
       => [...c1... ...c2... ...f...]
     (get-post-fns fail-status {:on-complete [...c1... ...c2...] :on-success [...s1... ...s2...] :on-fail [...f1... ...f2...]})
-      => [...c1... ...c2... ...f1... ...f2...]))
+      => [...c1... ...c2... ...f1... ...f2...])
+
+
+  (facts "some-pre-check"
+    ((some-pre-check (constantly {:ok false :error "ok"}) (constantly nil)) {}) => nil?
+    ((some-pre-check (constantly nil) (constantly {:ok false :error "ok"})) {}) => nil?
+    ((some-pre-check (constantly {:ok false :error "ok"})
+                     (constantly nil)
+                     (constantly {:ok false :error "ok"})) {}) => nil?
+    ((some-pre-check (constantly {:ok false :error "fail1"}) (constantly {:ok false :error "fail2"})) {}) => (contains {:error "fail2"})
+    ((some-pre-check (constantly nil) (constantly nil)) {})=> nil?))
