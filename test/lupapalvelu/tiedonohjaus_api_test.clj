@@ -345,7 +345,6 @@
                                  :firstName     "Monni"
                                  :lastName      "Tiskaa"
                                  :orgAuthz      {:753-R #{:authority :archivist}}
-                                 :organizations ["753-R"]
                                  :role          :authority}
                    :action      "force-fix-tos-function-for-application"
                    :data        {:id       "ABC123"
@@ -353,7 +352,6 @@
                                  :reason "invalid procedure"}}]
       (execute command) => {:ok true}
       (provided
-        (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
         (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
         (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
         (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
