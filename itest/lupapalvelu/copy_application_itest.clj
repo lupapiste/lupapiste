@@ -3,6 +3,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
             [lupapalvelu.application :as app]
+            [lupapalvelu.domain :as domain]
             [sade.property :as prop]))
 
 (apply-remote-minimal)
@@ -15,14 +16,38 @@
            :propertyId (or propertyId "75312312341234")
            :source-application-id app-id))
 
-(facts "copying application"
-  (let [pena-user (find-user-from-minimal-by-apikey pena)
-        sonja-user (find-user-from-minimal-by-apikey sonja)
-        solita-company (company-from-minimal-by-id "solita")
-        solita-company-admin (find-user-from-minimal-by-apikey kaino)
+(def ^:private mikko-user (find-user-from-minimal-by-apikey mikko))
+(def ^:private pena-user (find-user-from-minimal-by-apikey pena))
+(def ^:private sonja-user (find-user-from-minimal-by-apikey sonja))
+(def ^:private solita-company (company-from-minimal-by-id "solita"))
+(def ^:private solita-company-admin (find-user-from-minimal-by-apikey kaino))
 
-        ; Pena creates, submits and invites company
-        {app-id :id} (create-and-submit-application pena)
+(facts "invite candidates"
+  (fact "fails if the given application does not exist"
+    (query sonja :copy-application-invite-candidates :source-application-id "nonexistent")
+    => (partial expected-failure? "error.no-source-application"))
+
+  (let [{app-id :id :as app}  (create-and-submit-application pena)
+        _                     (invite-company-and-accept-invitation pena app-id "solita")
+        _                     (command pena :invite-with-role :id app-id :email (email-for-key mikko)
+                                       :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
+        _                     (command mikko :approve-invite :id app-id) => ok?
+        hakija-doc-id         (:id (domain/get-applicant-document (:documents app)))
+        resp                  (command pena :update-doc :id app-id :doc hakija-doc-id  :collection "documents"
+                                       :updates [["henkilo.henkilotiedot.etunimi" (:firstName mikko-user)]
+                                                 ["henkilo.henkilotiedot.sukunimi" (:lastName mikko-user)]
+                                                 ["henkilo.userId" (:id mikko-user)]]) => ok?]
+    (fact "Pena, Mikko and Solita are candidates"
+      (:candidates (query sonja :copy-application-invite-candidates :source-application-id app-id))
+      => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner")
+                (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija") ; role from hakija document
+                (assoc {:firstName (:name solita-company)
+                        :lastName ""
+                        :id (:_id solita-company)} :email nil :role "writer")]
+               :in-any-order))))
+
+(facts "copying application"
+  (let [{app-id :id} (create-and-submit-application pena)
         _ (command pena :company-invite :id app-id :company-id (:_id solita-company)) => ok?
 
         app (query-application sonja app-id)

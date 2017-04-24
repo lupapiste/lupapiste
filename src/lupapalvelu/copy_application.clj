@@ -5,6 +5,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notif]
@@ -14,6 +15,50 @@
             [sade.core :refer :all]
             [sade.property :as prop]
             [sade.util :refer [merge-in]]))
+
+;;; Obtaining the parties to invite for the copied app
+
+(defn- party-info-from-document [document]
+  {:document-id (:id document)
+   :document-name (tools/doc-name document)
+   :id (tools/party-doc-user-id document)
+   :role (tools/party-doc->user-role document)})
+
+(def ^:private non-copyable-roles #{:tyonjohtaja})
+
+(defn- party-infos-from-documents [documents]
+  (->> documents
+       (filter #(= :party (tools/doc-type %)))
+       (map party-info-from-document)
+       (remove #(nil? (:id %)))
+       (map (comp (partial apply hash-map)
+                  (juxt :id vector)))
+       (apply merge-with concat)))
+
+(defn- auth-id [auth-entry]
+  (or (not-empty (:id auth-entry))
+      (-> auth-entry :invite :user :id)))
+
+(defn- invite-candidate-info [party-infos auth-entry]
+  (let [party-info (first (get party-infos (:id auth-entry)))]
+    {:id (auth-id auth-entry)
+     :firstName (:firstName auth-entry)
+     :lastName (:lastName auth-entry)
+     :email (-> auth-entry :invite :email) ; for cases where invitee is not a registered user and name is not known
+     :role (or (:role party-info)                      ; prefer role dictated by party document
+               (keyword (-> auth-entry :invite :role)) ; but fall back to role in auth
+               (keyword (-> auth-entry :role)))}))
+
+(defn- get-invite-candidates [auth documents]
+  (->> auth
+       (map (partial invite-candidate-info (party-infos-from-documents documents)))
+       (remove (comp non-copyable-roles :role))))
+
+(defn copy-application-invite-candidates [user source-application-id]
+  (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
+    (get-invite-candidates (:auth source-application)
+                           (:documents source-application))
+    (fail! :error.no-source-application :id source-application-id)))
 
 ;;; Copying source application keys
 
@@ -65,10 +110,6 @@
   [{:keys [documents] :as copied-application} user organization manual-schema-datas]
   (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
-
-(defn- auth-id [auth-entry]
-  (or (not-empty (:id auth-entry))
-      (-> auth-entry :invite :user :id)))
 
 (defn- create-company-auth [old-company-auth]
   (when-let [company-id (auth-id old-company-auth)]
