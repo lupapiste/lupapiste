@@ -13,8 +13,8 @@
   (when-not (usr/user-is-archivist? user organization)
     unauthorized))
 
-(defn validate-permanent-archive-enabled [{user-orgs :user-organization app-org :organization {app-org-id :organization} :application}]
-  (when-not (if app-org-id
+(defn validate-permanent-archive-enabled [{user-orgs :user-organizations app-org :organization app :application}]
+  (when-not (if (:organization app)
               (:permanent-archive-enabled @app-org)
               (some :permanent-archive-enabled user-orgs))
     unauthorized))
@@ -53,6 +53,7 @@
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
+   :org-authz-roles  #{:authority :reader :tos-editor :tos-publisher :archivist}
    :states           states/post-verdict-states
    :pre-checks       [check-user-is-archivist]}
   [{:keys [application created]}]
