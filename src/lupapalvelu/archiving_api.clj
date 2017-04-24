@@ -13,6 +13,12 @@
   (when-not (usr/user-is-archivist? user organization)
     unauthorized))
 
+(defn validate-permanent-archive-enabled [{user-orgs :user-organization app-org :organization {app-org-id :organization} :application}]
+  (when-not (if app-org-id
+              (:permanent-archive-enabled @app-org)
+              (some :permanent-archive-enabled user-orgs))
+    unauthorized))
+
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
    :input-validators [(partial non-blank-parameters [:id])]
@@ -62,10 +68,5 @@
 (defquery permanent-archive-enabled
   {:user-roles #{:applicant :authority}
    :categories #{:attachments}
-   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
-                  (let [org-set (if organization
-                                  #{organization}
-                                  (usr/organization-ids-by-roles user #{:authority :reader :tos-editor :tos-publisher :archivist}))]
-                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                      unauthorized)))]}
+   :pre-checks [validate-permanent-archive-enabled]}
   [_])
