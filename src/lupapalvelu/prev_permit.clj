@@ -20,7 +20,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.application :as app]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -282,7 +283,9 @@
       (mongo/disconnect!))))
 
 (defn extend-prev-permit-with-all-parties
-  [application app-info]
+  [{:keys [organization] :as application} app-info]
   (clojure.pprint/pprint (:hakijat app-info))
   (clojure.pprint/pprint (:muutOsapuolet app-info))
-  (clojure.pprint/pprint (:suunnittelijat app-info)))
+  (clojure.pprint/pprint (:suunnittelijat app-info))
+  (let [op (app/make-op :aiempi-lupa-rak-aik-toim (now))]
+    (clojure.pprint/pprint (app/make-documents nil (now) organization op application nil))))

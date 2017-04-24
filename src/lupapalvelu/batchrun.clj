@@ -525,7 +525,8 @@
   (if (= (count args) 1)
     (if-let [application (domain/get-application-no-access-checking (first args))]
       (let [kuntalupatunnus (get-in application [:verdicts 0 :kuntalupatunnus])
-            app-xml  (krysp-fetch/get-application-xml-by-backend-id application kuntalupatunnus)
+            app-xml  #_(krysp-fetch/get-application-xml-by-backend-id application kuntalupatunnus)
+                    (sade.xml/parse (slurp "verdict-r-extend-prev-permit.xml"))
             app-info (krysp-reader/get-app-info-from-message app-xml kuntalupatunnus)]
         (prev-permit/extend-prev-permit-with-all-parties application app-info)
         0)
