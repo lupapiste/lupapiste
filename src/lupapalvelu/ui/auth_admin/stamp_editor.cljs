@@ -20,7 +20,19 @@
 
 (def empty-component-state {:stamps []
                             :view {:bubble-visible false
-                                   :selected-stamp-id nil}})
+                                   :selected-stamp-id nil}
+                            :editor {:drag-element nil
+                                     :rows [{:row-number 1
+                                             :stamps ["Asian tunnus" "Kuntalupatunnus"]
+                                             :is-dragged-over false}
+                                            {:row-number 2
+                                             :stamps ["Hiphei, laitoin tähän tekstiä"
+                                                      "Kuluva pvm"
+                                                      "juupeli juu"]
+                                             :is-dragged-over false}
+                                            {:row-number 3
+                                             :stamps []
+                                             :is-dragged-over false}]}})
 
 (def component-state  (atom empty-component-state))
 
@@ -66,79 +78,126 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
-(rum/defc stamp-btn [text]
-  [:button.stamp-editor-btn {:draggable true}
-   [:i.lupicon-circle-plus]
-   [:span text]])
-
-(rum/defc stamp-container [& stamp-names]
-  [:div {:style {:margin-bottom "5px"}}
-   (map stamp-btn stamp-names)])
-
-(def add-here-placeholder
+(rum/defc add-here-placeholder < rum/reactive
+  [is-dragged-over]
   [:button.stamp-row-placeholder
-   [:span "Pudota tähän"]])
+   {:on-drag-enter (fn [e] (reset! is-dragged-over true))
+    :on-drag-leave (fn [e] (reset! is-dragged-over false))
+    :style {:border-style (if (rum/react is-dragged-over)
+                            :solid
+                            :dashed)}}
+   [:span {:style {:pointer-events :none}} "Pudota tähän"]])
 
 (rum/defc stamp-row-btn [text]
   [:button.stamp-row-btn
    [:span text]
    [:i.lupicon-circle-remove]])
 
-(rum/defc stamp-row [{:keys [row-number stamps]}]
-  (if (and row-number stamps)
-    (let [stamp-buttons (map stamp-row-btn stamps)]
+(rum/defc stamp-row < rum/reactive [cursor #_{:keys [row-number stamps]}]
+  (let [{:keys [row-number stamps]} (rum/react cursor)
+        stamp-buttons (map stamp-row-btn stamps)
+        is-dragged-over (rum/cursor-in cursor [:is-dragged-over])]
+    (if (and row-number stamps)
       [:div.stamp-row
-       [:button.stamp-row-label  [:span (str "Rivi " row-number)]]
+       [:button.stamp-row-label  [:span (str "Rivi "
+                                             row-number
+                                             #_(if (rum/react is-dragged-over)
+                                               "Current row"
+                                               ""))]]
        stamp-buttons
-       add-here-placeholder])
-    [:span "error: stamp-row"]))
+       (add-here-placeholder is-dragged-over)]
+      [:span "error: stamp-row"])))
 
 (rum/defc form-entry [label-string]
   [:span.form-entry
    [:label.form-label.form-label-string label-string]
    [:input.form-input.text]])
 
+(def stamp-templates
+  ;; TODO: use the enum from backend for keys
+  {:vapaa-teksti    {:text-content "Vapaa teksti"}
+   :kuluva-pvm      {:text-content "Kuluva pvm"}
+   :paatos-pvm      {:text-content "Päätös pvm"}
+   :kuntalupatunnus {:text-content "Kuntalupatunnus"}
+   :kayttaja        {:text-content "Käyttäjä"}
+   :organisaatio    {:text-content "Organisaatio"}
+   :lp-tunnus       {:text-content "LP-tunnus"}
+   :rakennustunnus  {:text-content "Rakennustunnus"}})
+
+;; TODO: check validity of parameters with spec
+(rum/defc stamp-btn [{:keys [key content drag-element]}]
+  [:button.stamp-editor-btn {:draggable true
+                             :on-drag-start (fn [e] (reset! drag-element {:type :new
+                                                                         :stamp-type key}))
+                             :on-drag-end (fn [e] (reset! drag-element nil))}
+   [:i.lupicon-circle-plus]
+   [:span content]])
+
+(rum/defc stamp-templates-component < rum/reactive
+  [drag-element]
+  [:div
+   (for [[a-key {content :text-content}] stamp-templates]
+     (stamp-btn {:key a-key
+                 :content content
+                 :drag-element drag-element}a-key content))])
+
+#_(rum/defc stamp-container [& stamp-names]
+  [:div {:style {:margin-bottom "5px"}}
+   (map stamp-btn stamp-names)])
+
+
 (rum/defc edit-stamp-bubble < rum/reactive
-  [visible?]
-  (when (rum/react visible?)
-    [:div.edit-stamp-bubble
-     [:div.group-buttons
-      {:style {:background-color "#f6f6f6"
-               :border "1px solid #dddddd"}}
-      ;;TODO: onks joku otsikkorivicontainer-luokka josta tulis toi oikee harmaa taustaväri ja muut tyylit niinku haitareissa?
-      (form-entry "Leiman nimi:")
-      [:button.secondary.is-right
-       [:i.lupicon-remove]
-       [:span "Poista"]]]
-     [:div.form-group {:style {:display :block}}
-      [:div.form-group {:style {:width "60%"
-                                :display :inline-block}}
-       [:label.form-label.form-label-group "Leiman sijainti"]
-       [:div
-        (form-entry "Oikeasta reunasta (mm)")
-        (form-entry "Alareunasta (mm)")]
-       [:div
-        (form-entry "Leiman tausta") ;;TODO: vaihda dropdowniin
-        (form-entry "Leimattava sivu")] ;;TODO: vaihda dropdowniin
-       ]
-      [:div.form-group {:style {:width "35%"
-                                :border "1px solid"
-                                :display :inline-block}}
-       [:div
-        "sisältöä"]]
-      [:div.form-group
-       [:label.form-label.form-label-group "Leiman sisältö"]
-       (stamp-container "Vapaa teksti" "Kuluva pvm" "Päätös pvm" "Kuntalupatunnus" "Käyttäjä" "Organisaatio" "LP-tunnus" "Rakennutunnus")
-       [:div "Raahaa ylläolevia leiman sisältökenttiä..."]
-       [:div ;;many rows
-        (stamp-row {:row-number 1
-                    :stamps ["Asian tunnus" "Kuntalupatunnus"]}1)
-        (stamp-row {:row-number 2
-                    :stamps ["Hiphei, laitoin tähän tekstiä" "Kuluva pvm" "juupeli juu"]})
-        (stamp-row {:row-number 3
-                    :stamps []})]]]
-     ;; TODO: Editor here
-     ]))
+  [visible? editor-state]
+  (let [drag-element (rum/cursor editor-state :drag-element)
+        rows (rum/cursor editor-state :rows)]
+    (when (rum/react visible?)
+      [:div.edit-stamp-bubble
+       [:div.group-buttons
+        {:style {:background-color "#f6f6f6"
+                 :border "1px solid #dddddd"}}
+        ;;TODO: onks joku otsikkorivicontainer-luokka josta tulis toi oikee harmaa taustaväri ja muut tyylit niinku haitareissa?
+        (form-entry "Leiman nimi:")
+        [:button.secondary.is-right
+         [:i.lupicon-remove]
+         [:span "Poista"]]]
+       [:div.form-group {:style {:display :block}}
+        [:div.form-group {:style {:width "60%"
+                                  :display :inline-block}}
+         [:label.form-label.form-label-group "Leiman sijainti"]
+         [:div
+          (form-entry "Oikeasta reunasta (mm)")
+          (form-entry "Alareunasta (mm)")]
+         [:div
+          (form-entry "Leiman tausta") ;;TODO: vaihda dropdowniin
+          (form-entry "Leimattava sivu")] ;;TODO: vaihda dropdowniin
+         ]
+        [:div.form-group {:style {:width "35%"
+                                  :border "1px solid"
+                                  :display :inline-block}}
+         [:div
+          "sisältöä"]]
+        [:div.form-group
+         [:label.form-label.form-label-group "Leiman sisältö"]
+         #_(stamp-container "Vapaa teksti" "Kuluva pvm" "Päätös pvm" "Kuntalupatunnus" "Käyttäjä" "Organisaatio" "LP-tunnus" "Rakennutunnus")
+         (stamp-templates-component drag-element)
+         [:div "Raahaa ylläolevia leiman sisältökenttiä..."]
+         [:div "raahattavana"
+          (pr-str (rum/react drag-element))]
+         [:div
+          "Rows:"
+          (for [row (rum/react rows)]
+            [:div (pr-str row)])]
+         [:div ;;many rows
+          (for [[row-index row] (map vector (range) (rum/react rows))]
+            (stamp-row (rum/cursor-in rows [row-index])))
+          #_(stamp-row {:row-number 1
+                      :stamps ["Asian tunnus" "Kuntalupatunnus"]})
+          #_(stamp-row {:row-number 2
+                      :stamps ["Hiphei, laitoin tähän tekstiä" "Kuluva pvm" "juupeli juu"]})
+          #_(stamp-row {:row-number 3
+                      :stamps []})]]]
+       ;; TODO: Editor here
+       ])))
 
 (rum/defc stamp-editor
   [global-auth-model]
@@ -146,13 +205,15 @@
    :will-unmount (fn [& _] (reset! component-state empty-component-state))}
   (let [stamps            (rum/cursor component-state :stamps)
         selected-stamp-id (rum/cursor-in component-state [:view :selected-stamp-id])
-        bubble-visible    (rum/cursor-in component-state [:view :bubble-visible])]
+        bubble-visible    (rum/cursor-in component-state [:view :bubble-visible])
+        editor-state      (rum/cursor-in component-state [:editor])]
     [:div
      [:h1 (loc "stamp-editor.tab.title")]
      [:div
       (stamp-select stamps selected-stamp-id)
       (new-stamp-button bubble-visible selected-stamp-id)]
-     [:div.row.edit-sta (edit-stamp-bubble bubble-visible)]]))
+     [:div.row.edit-sta (edit-stamp-bubble bubble-visible
+                                           editor-state)]]))
 
 (defonce args (atom {}))
 
