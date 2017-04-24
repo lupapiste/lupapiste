@@ -56,7 +56,8 @@
   Pre-check returns result of the first argument in case of failure."
   [& pre-checks]
   (fn [command]
-    (when ((apply every-pred pre-checks) command)
+    (when (or (empty? (rest pre-checks))
+              ((apply every-pred (rest pre-checks)) command))
       ((first pre-checks) command))))
 
 (defn email-validator
