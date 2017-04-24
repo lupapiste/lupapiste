@@ -50,13 +50,11 @@
   long, the locked property is removed from the company."
    :user-roles       #{:admin}
    :parameters       [company timestamp]
-   :input-validators [(partial action/non-blank-parameters [:company :timestamp])]}
+   :input-validators [(partial action/non-blank-parameters [:company])]}
   [{user :user}]
-  (let [ts (util/to-long timestamp)]
+  (let [ts (or (util/->long timestamp) 0)]
     (ok :company (com/update-company! company
-                                      (if (pos? ts)
-                                        {$set {:locked ts}}
-                                        {$unset {:locked true}})
+                                      {:locked (if (pos? ts) ts 0)}
                                       user))))
 
 (defcommand company-user-update

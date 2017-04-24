@@ -78,10 +78,10 @@
                  :allowDirectMarketing 1 :company.id 1}))
 
 (defn- company-map []
-  (reduce (fn [acc {:keys [id y name]}]
-            (assoc acc id {:y y :name name}))
+  (reduce (fn [acc {:keys [id y name locked]}]
+            (assoc acc id {:y y :name name :locked locked}))
           {}
-          (mongo/select :companies {} {:y 1 :name 1})))
+          (mongo/select :companies {} {:y 1 :name 1 :locked 1})))
 
 (defn- user-report-data [company allow professional]
   (let [users (user-list company allow professional)]
@@ -93,27 +93,36 @@
              users))
       users)))
 
+(defn- safe-local-date [timestamp]
+  (if-let [ts (util/->long timestamp)]
+    (util/to-local-date ts)
+    ""))
+
 (defn user-report-cell-def [row key]
-  (let [defs {:lastName "Sukunimi"
-              :firstName "Etunimi"
-              :email "Email"
-              :phone "Puhelin"
-              :companyName "Yritys"
-              :street "Katuosoite"
-              :zip "Postinumero"
-              :city "Kunta"
-              :architect "Ammattilainen"
-              :allowDirectMarketing "Suoramarkkinointilupa"
-              :company.name {:header "Yritystili"
-                             :path [:company :name]}
-              :company.y {:header "Y-tunnus"
-                          :path [:company :y]}}
+  (let [defs    {:lastName             "Sukunimi"
+                 :firstName            "Etunimi"
+                 :email                "Email"
+                 :phone                "Puhelin"
+                 :companyName          "Yritys"
+                 :street               "Katuosoite"
+                 :zip                  "Postinumero"
+                 :city                 "Kunta"
+                 :architect            "Ammattilainen"
+                 :allowDirectMarketing "Suoramarkkinointilupa"
+                 :company.name         {:header "Yritystili"
+                                        :path   [:company :name]}
+                 :company.y            {:header "Y-tunnus"
+                                        :path   [:company :y]}
+                 :company.locked       {:header "Yritystili suljettu"
+                                        :path   [:company :locked]
+                                        :fun    safe-local-date
+                                        }}
         key-def (get defs key)]
     (if (map? key-def)
       {:header (:header key-def)
-       :value (get-in row (:path key-def) "")}
+       :value  ((get key-def :fun identity) (get-in row (:path key-def) ""))}
       {:header key-def
-       :value (get row key "")})))
+       :value  (get row key "")})))
 
 
 
@@ -121,8 +130,8 @@
   (let [data    (user-report-data company allow professional)
         columns (concat [:lastName :firstName :email :phone :companyName
                          :street :zip :city :architect :allowDirectMarketing]
-                        (when (not= company :no)
-                          [:company.name :company.y]))
+                        (when-not (= company :no)
+                          [:company.name :company.y :company.locked]))
         headers (map #(:header (user-report-cell-def nil %)) columns)
         rows    (for [row data]
                   (map #(:value (user-report-cell-def row %)) columns))]

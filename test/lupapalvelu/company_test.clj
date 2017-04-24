@@ -3,6 +3,7 @@
             [lupapalvelu.company :as com]
             [lupapalvelu.mongo :as mongo]
             [sade.core :as core]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer [expected-failure?]]))
 
 (facts create-company
@@ -88,6 +89,10 @@
              (com/update-company! id {:accountType "custom" :customAccountLimit 2} admin-caller) => (assoc expected :customAccountLimit 2)
              (com/update-company! id {:accountType "custom" :customAccountLimit 3} admin-caller) => (assoc expected :customAccountLimit 3)))))
 
+(defn err [kw]
+  (fn [res]
+    (util/=as-kw kw (:text res))))
+
 (facts "Pre-checkers"
        (let [unauthorized (partial expected-failure? :error.unauthorized)]
          (fact "validate-has-company-role"
@@ -108,4 +113,38 @@
                (com/validate-belongs-to-company {:user {}
                                                  :data {:company "bar"}})=> unauthorized
                (com/validate-belongs-to-company {:user {:company {:id "foo"}}
-                                                 :data {}}) => unauthorized)))
+                                                 :data {}}) => unauthorized)
+         (facts "company-not-locked"
+                (fact "No locked property"
+                      (com/company-not-locked {:data {:company "foo"}
+                                               :created 12345}) => nil?
+                      (provided (com/find-company-by-id! "foo") =>  {}))
+                (fact "Locked property is zero"
+                      (com/company-not-locked {:data {:company "foo"}
+                                               :created 12345}) => nil?
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 0}))
+                (fact "Will be locked, but is not locked now."
+                      (com/company-not-locked {:data {:company "foo"}
+                                               :created 12345}) => nil?
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 23456}))
+                (fact "company is locked"
+                      (com/company-not-locked {:data {:company "foo"}
+                                               :created 12345}) => (err :error.company-locked)
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 11111})))
+         (facts "user-company-is-locked"
+                (fact "No locked property"
+                      (com/user-company-is-locked {:user {:company {:id "foo"}}
+                                                   :created 12345}) => (err :error.company-not-locked)
+                      (provided (com/find-company-by-id! "foo") =>  {}))
+                (fact "Locked property is zero"
+                      (com/user-company-is-locked {:user {:company {:id "foo"}}
+                                                   :created 12345}) => (err :error.company-not-locked)
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 0}))
+                (fact "Will be locked, but is not locked now."
+                      (com/user-company-is-locked {:user {:company {:id "foo"}}
+                                                   :created 12345}) => (err :error.company-not-locked)
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 23456}))
+                (fact "user company is locked"
+                      (com/user-company-is-locked {:user {:company {:id "foo"}}
+                                                   :created 12345}) => nil?
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 11111})))))

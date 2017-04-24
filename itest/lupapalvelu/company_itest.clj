@@ -1,5 +1,6 @@
 (ns lupapalvelu.company-itest
   (:require [midje.sweet  :refer :all]
+            [sade.core :refer [now]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
@@ -199,7 +200,7 @@
 
     (facts "Member can't update details but company admin and solita admin can"
       (fact "Teppo is member, denied"
-        (command teppo :company-update :company company-id :updates {:po "Pori"}) => unauthorized?)
+            (command teppo :company-update :company company-id :updates {:po "Pori"}) => unauthorized?)
       (fact "Kaino is admin, can upgrade account type, but can't use illegal values or downgrade"
         (command kaino :company-update :company company-id :updates {:accountType "account30"}) => ok?
         (command kaino :company-update :company company-id :updates {:accountType "account5"}) => (partial expected-failure? "company.account-type-not-downgradable")
@@ -238,10 +239,10 @@
     (fact "Dummy is in the company"
       (query kaino :company-search-user :email foo-email) => (result :already-in-company))
     (fact "Foo can set pw from email token"
-      (let [email (last-email)
-            token (token-from-email foo-email email)]
-        (:subject email) => (contains "Uusi salasana")
-        (http-token-call token {:password foo-pw}) => (contains {:status 200})))
+          (let [email (last-email)
+                token (token-from-email foo-email email)]
+            (:subject email) => (contains "Uusi salasana")
+            (http-token-call token {:password foo-pw}) => (contains {:status 200})))
 
     (let [store (atom {})
           params {:cookie-store (->cookie-store store)}
@@ -270,3 +271,57 @@
                                 params) [:body :invites])]
           (count invites) => 1
           (get-in (first invites) [:application :id]) => application-id)))))
+
+(def locked-err {:ok false :text "error.company-locked"})
+
+(facts "Company locking"
+       (fact "Admin locks Solita"
+             (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+       (fact "Companies listing no longer includes Solita"
+             (query pena :companies) => {:ok true :companies []})
+       (fact "Company can be queried"
+             (query kaino :company :company "solita" :users true) => ok?)
+       (fact "Company cannot be updated"
+             (command kaino :company-update :company "solita" :updates {:po "Beijing"})
+             => locked-err)
+       (fact "Users cannot be added to the company"
+             (command kaino :company-add-user :firstName "Hii" :lastName "Hoo"
+                      :email "hii.hoo@example.com" :admin true :submit true)
+             => locked-err)
+       (fact "User details cannot be changed"
+             (command kaino :company-user-update
+                      :user-id teppo-id
+                      :role "admin"
+                      :submit false) => locked-err)
+       (fact "User can be deleted"
+             (command kaino :company-user-delete :user-id teppo-id))
+       (fact "Unlock company"
+             (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
+       (fact "Company can now be updated"
+             (command kaino :company-update :company "solita" :updates {:po "Beijing"}) = ok?)
+       (fact "Nuking is not an option for unlocked company"
+             (command kaino :company-user-delete-all) => (contains {:text "error.company-not-locked"}))
+       (fact "Admin locks Solita in the future"
+             (command admin :company-lock :company "solita" :timestamp (+ (now) 10000)) => ok?)
+       (fact "Company can now also be updated"
+             (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) = ok?)
+       (fact "Admin locks Solita again"
+             (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+       (fact "Kaino nukes locked company"
+             (command kaino :company-user-delete-all) => ok?)
+       (fact "Kaino cannot login"
+             (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
+       (fact "Kaino resets password"
+             (http-post (str (server-address) "/api/reset-password")
+                        {:form-params      {:email "kaino@solita.fi"}
+                         :content-type     :json
+                         :follow-redirects false
+                         :throw-exceptions false}) => http200?)
+       (let [email (last-email)
+             token (token-from-email "kaino@solita.fi" email)]
+         (:subject email) => (contains "Uusi salasana")
+         (http-token-call token {:password "kaino456"}) => (contains {:status 200}))
+       (fact "Kaino can now login"
+             (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
+       (fact "Kaino is no longer Solitan"
+             (query kaino :company :company "solita" :users true) => unauthorized?))

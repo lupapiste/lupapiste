@@ -270,14 +270,14 @@
   "Pre-check that fails for a locked company."
   [{{company :company} :data created :created}]
   (when-let [{locked :locked} (find-company-by-id! company)]
-    (when (and locked (> created locked))
+    (when (and locked (> created locked 0))
       (fail :error.company-locked))))
 
 (defn user-company-is-locked
   "Pre-check that fails the user-associated company _is not_ locked."
   [{user :user created :created}]
   (when-let [{locked :locked} (find-company-by-id! (some-> user :company :id))]
-    (when (or (nil? locked) (< created locked))
+    (when-not (and locked (> created locked 0))
       (fail :error.company-not-locked))))
 
 (defn delete-user!
