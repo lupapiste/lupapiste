@@ -9,7 +9,7 @@
 (apply-remote-minimal)
 
 (defn copy-application [apikey app-id & {:keys [x y address auth-invites propertyId]}]
-  (command sonja :copy-application
+  (command apikey :copy-application
            :x (or x 444445.0) :y (or y 6666665.0)
            :address (or address "Testitie 1")
            :auth-invites (or auth-invites [])
@@ -37,6 +37,13 @@
                                        :updates [["henkilo.henkilotiedot.etunimi" (:firstName mikko-user)]
                                                  ["henkilo.henkilotiedot.sukunimi" (:lastName mikko-user)]
                                                  ["henkilo.userId" (:id mikko-user)]]) => ok?]
+
+    (fact "fails if caller is not authority or company user"
+      (query pena :copy-application-invite-candidates :source-application-id app-id)
+      => (partial expected-failure? "error.unauthorized")
+      (query kaino :copy-application-invite-candidates :source-application-id app-id) => ok?
+      (query sonja :copy-application-invite-candidates :source-application-id app-id) => ok?)
+
     (fact "Pena, Mikko and Solita are candidates"
       (:candidates (query sonja :copy-application-invite-candidates :source-application-id app-id))
       => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner")
@@ -47,9 +54,16 @@
                :in-any-order))))
 
 (facts "copying application"
-  (let [{app-id :id} (create-and-submit-application pena)
-        _ (command pena :company-invite :id app-id :company-id (:_id solita-company)) => ok?
 
+  (fact "fails if caller is not authority or company user"
+    (let [{app-id :id} (create-and-submit-application pena)]
+      (copy-application pena app-id) => (partial expected-failure? "error.unauthorized")
+      (copy-application kaino app-id) => (partial expected-failure? "error.no-source-application")
+      (invite-company-and-accept-invitation pena app-id "solita")
+      (copy-application kaino app-id) => ok?))
+
+  (let [{app-id :id} (create-and-submit-application pena)
+        _ (invite-company-and-accept-invitation pena app-id "solita")
         app (query-application sonja app-id)
         x 444445.0 y 6666665.0
         property-id "75312312341234"
