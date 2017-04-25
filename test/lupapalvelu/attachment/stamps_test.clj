@@ -167,4 +167,10 @@
                                                        [{:type :building-id :value "Rakennustunnus"}]
                                                        [{:type :organization :value "Sipoon rakennusvalvonta"}]]))
 
+(facts "Should get rows as strings"
+  (let [stamp (first (stamps organization application sonja))]
+    (row-values-as-string (:rows stamp)) => [["Hyväksytty" "21.04.2017"]
+                                             ["17-0753-R"]
+                                             ["Rakennustunnus"]
+                                             ["Sipoon rakennusvalvonta"]]))
 

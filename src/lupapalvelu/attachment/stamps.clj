@@ -132,3 +132,7 @@
        (mapv (fn [rows] (filterv #(not (= type (:type %))) rows)))
        (remove empty?)
        (into [])))
+
+(defn row-values-as-string [rows]
+  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)]}
+  (mapv (fn [row] (mapv :value row)) rows))

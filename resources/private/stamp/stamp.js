@@ -65,7 +65,7 @@ var stamping = (function() {
   var dummyStamp  = {
     id: 1,
     name: "Dummy leima",
-    position: {x: 15, y: 250},
+    position: {x: 15, y: 20},
     background: 153,
     page: "last",
     qrCode: true,
@@ -79,7 +79,7 @@ var stamping = (function() {
   var dummyStamp2  = {
     id: 2,
     name: "Dummy leima 2",
-    position: {x: 25, y: 150},
+    position: {x: 25, y: 10},
     background: 51,
     page: "all",
     qrCode: false,

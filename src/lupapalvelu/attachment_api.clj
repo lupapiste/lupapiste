@@ -617,16 +617,12 @@
                            (ss/blank? timestamp) (:created command)
                            :else (util/->long timestamp))
         stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
-        ;org
-        ;(if-not (ss/blank? (stamps/row-value-by-type stamp :organization))
-        ;(stamps/row-value-by-type stamp :organization)
-        ;  (organization/get-organization-name @org))
         job (stamping/make-stamp-job
               (att/get-attachments-infos application files)
               {:application   application
                :user          (:user command)
                :lang          lang
-               ;:text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+               :qr-code       (:qrCode stamp)
                :stamp-created stamp-timestamp
                :created       (:created command)
                :x-margin      (util/->long (get-in stamp [:position :x]))

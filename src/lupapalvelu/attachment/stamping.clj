@@ -70,16 +70,16 @@
   ;(update fields :buildings (fn->> (map (partial building->str lang)) sort))
   value)
 
-(defn- info-fields->stamp [{:keys [stamp-created transparency lang]} fields]
+(defn- info-fields->stamp [{:keys [stamp-created transparency lang qr-code]} fields]
   {:pre [(pos? stamp-created)]}
   (->> (update-buildings fields)
-       flatten
-       (map (fn-> str (ss/limit 100)))
-       printteri
-       (stamper/make-stamp stamp-created transparency)))
+       (stamps/row-values-as-string)
+       (map
+         (fn [field]
+           (ss/join " " (mapv (fn [text] (if (seq text) (ss/limit (str text) 100))) field))))
+       (stamper/make-stamp transparency qr-code)))
 
 (defn- make-stamp-without-buildings [context info-fields]
-  (clojure.pprint/pprint info-fields)
   (->> (stamps/dissoc-tag-by-type info-fields :building-id)
        (info-fields->stamp context)))
 
