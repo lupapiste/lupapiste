@@ -21,7 +21,9 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.document.schemas :as schemas]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -282,10 +284,31 @@
     (finally
       (mongo/disconnect!))))
 
+(def building-fields
+  (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (cons :valtakunnallinenNumero)))
+
+(defn- ->op-document [{:keys [schema-version] :as application} building]
+  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (lupapalvelu.document.model/map2updates [] (select-keys building building-fields))]
+    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
+(defn- suunnittelijaRoolikoodi->doc-schema [koodi]
+  (cond
+    (= koodi "p\u00e4\u00e4suunnittelija") "paasuunnittelija"
+    :default                               "suunnittelija"))
+
+(defn- suunnittelija->party-document [{:keys [schema-version] :as application} party]
+  (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
+    (let [doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
+          doc-updates (lupapalvelu.document.model/map2updates [] party)]
+      (lupapalvelu.document.model/apply-updates doc doc-updates))))
+
 (defn extend-prev-permit-with-all-parties
-  [{:keys [organization] :as application} app-info]
-  (clojure.pprint/pprint (:hakijat app-info))
-  (clojure.pprint/pprint (:muutOsapuolet app-info))
-  (clojure.pprint/pprint (:suunnittelijat app-info))
-  (let [op (app/make-op :aiempi-lupa-rak-aik-toim (now))]
-    (clojure.pprint/pprint (app/make-documents nil (now) organization op application nil))))
+  [application app-xml app-info]
+  (let [new-parties (map (partial suunnittelija->party-document application) (:suunnittelijat app-info))
+        buildings (building-reader/->buildings app-xml)]
+    (clojure.pprint/pprint
+      {:new-op-documents (map (partial ->op-document application) buildings)
+       :new-parties new-parties})))

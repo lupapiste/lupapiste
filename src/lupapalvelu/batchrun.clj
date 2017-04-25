@@ -528,7 +528,7 @@
             app-xml  #_(krysp-fetch/get-application-xml-by-backend-id application kuntalupatunnus)
                     (sade.xml/parse (slurp "verdict-r-extend-prev-permit.xml"))
             app-info (krysp-reader/get-app-info-from-message app-xml kuntalupatunnus)]
-        (prev-permit/extend-prev-permit-with-all-parties application app-info)
+        (prev-permit/extend-prev-permit-with-all-parties application app-xml app-info)
         0)
       (do
         (println "Cannot find application")
