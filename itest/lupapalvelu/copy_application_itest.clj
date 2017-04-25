@@ -4,17 +4,24 @@
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.operations :as operations]
             [sade.property :as prop]))
 
 (apply-remote-minimal)
 
-(defn copy-application [apikey app-id & {:keys [x y address auth-invites propertyId]}]
+(defn- copy-application [apikey app-id & {:keys [x y address auth-invites propertyId]}]
   (command apikey :copy-application
            :x (or x 444445.0) :y (or y 6666665.0)
            :address (or address "Testitie 1")
            :auth-invites (or auth-invites [])
            :propertyId (or propertyId "75312312341234")
            :source-application-id app-id))
+
+(defn restore-sipoo-selected-operations []
+  (command sipoo "set-organization-selected-operations" :operations
+           (map first (filter (fn [[_ v]]
+                                (#{"R" "P" "YI" "YL" "YM" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v))))
+                              operations/operations))))
 
 (def ^:private mikko-user (find-user-from-minimal-by-apikey mikko))
 (def ^:private pena-user (find-user-from-minimal-by-apikey pena))
@@ -61,6 +68,12 @@
       (copy-application kaino app-id) => (partial expected-failure? "error.no-source-application")
       (invite-company-and-accept-invitation pena app-id "solita")
       (copy-application kaino app-id) => ok?))
+
+  (fact "fails if organization does not support given operation"
+    (let [{app-id :id} (create-and-submit-application pena)] ; kerrostalo-rivitalo
+      (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?
+      (copy-application sonja app-id) => (partial expected-failure? "error.operation-not-supported-by-organization")
+      (restore-sipoo-selected-operations)))
 
   (let [{app-id :id} (create-and-submit-application pena)
         _ (invite-company-and-accept-invitation pena app-id "solita")

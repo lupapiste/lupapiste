@@ -14,7 +14,7 @@
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.property :as prop]
-            [sade.util :refer [merge-in]]))
+            [sade.util :refer [merge-in find-first]]))
 
 ;;; Obtaining the parties to invite for the copied app
 
@@ -191,6 +191,8 @@
           not-in-source-auths? (not-in-auth (:auth source-application))]
       (when-not organization
         (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+      (when-not (find-first #(= % operation) (:selected-operations organization))
+        (fail! :error.operation-not-supported-by-organization :organization (:id organization) :operation operation))
       (when (some not-in-source-auths? auth-invites)
         (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))
 
