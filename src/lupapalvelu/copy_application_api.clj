@@ -14,7 +14,7 @@
 
 (defcommand copy-application
   {:parameters [:source-application-id :x :y :address :propertyId :auth-invites]
-   :user-roles #{:applicant :authority} ; TODO: only for company applicants and authorities
+   :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:address :propertyId :source-application-id])
                       (partial action/property-id-parameters [:propertyId])
                       (partial action/vector-parameters [:auth-invites])
@@ -30,9 +30,20 @@
 
 (defquery copy-application-invite-candidates
   {:parameters [:source-application-id]
-   :user-roles #{:applicant :authority} ; TODO: only for company applicants and authorities
+   :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:source-application-id])]
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
   [{{:keys [source-application-id]} :data user :user}]
   (ok :candidates (copy-app/copy-application-invite-candidates user source-application-id)))
+
+(defquery application-copyable-to-location
+  {:parameters [:source-application-id :x :y :address :propertyId]
+   :user-roles #{:applicant :authority}
+   :input-validators [(partial action/non-blank-parameters [:address :propertyId :source-application-id])
+                      (partial action/property-id-parameters [:propertyId])
+                      coord/validate-x coord/validate-y]
+   :pre-checks [(action/some-pre-check validate-is-authority
+                                       (company/validate-has-company-role :any))]}
+  [command]
+  (ok :result (copy-app/application-copyable-to-location command)))

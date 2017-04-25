@@ -181,18 +181,32 @@
     (fn [id]
       (not (get auth-id-set id)))))
 
+(defn check-copy-application-possible! [organization municipality permit-type operation]
+  (when-not organization
+    (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+  (when-not (find-first #(= % operation) (:selected-operations organization))
+    (fail! :error.operation-not-supported-by-organization :organization (:id organization) :operation operation)))
+
+(defn application-copyable-to-location
+  [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
+  (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
+    (let [municipality (prop/municipality-id-by-property-id propertyId)
+          operation    (-> source-application :primaryOperation :name)
+          permit-type  (op/permit-type-of-operation operation)
+          organization (org/resolve-organization municipality permit-type)]
+      (check-copy-application-possible! organization municipality permit-type operation)
+      true)
+    (fail! :error.no-source-application :id source-application-id)))
+
 (defn copy-application
-  [{{:keys [source-application-id x y address propertyId municipality auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
+  [{{:keys [source-application-id x y address propertyId auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [municipality (prop/municipality-id-by-property-id propertyId)
           operation    (-> source-application :primaryOperation :name)
           permit-type  (op/permit-type-of-operation operation)
           organization (org/resolve-organization municipality permit-type)
           not-in-source-auths? (not-in-auth (:auth source-application))]
-      (when-not organization
-        (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
-      (when-not (find-first #(= % operation) (:selected-operations organization))
-        (fail! :error.operation-not-supported-by-organization :organization (:id organization) :operation operation))
+      (check-copy-application-possible! organization municipality permit-type operation)
       (when (some not-in-source-auths? auth-invites)
         (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))
 

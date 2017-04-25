@@ -126,3 +126,19 @@
     (fact "Copying fails if some of provided auth-invites don't exist in source application"
           (copy-application sonja app-id :auth-invites ["nonexistent" pena-id])
           => (partial expected-failure? "error.nonexistent-auths"))))
+
+(facts "checking if app is copyable to location"
+
+  (fact "fails if organization does not support given operation"
+    (let [{app-id :id} (create-and-submit-application pena)] ; kerrostalo-rivitalo
+      (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?
+      (query sonja :application-copyable-to-location :source-application-id app-id
+             :x 444445.0 :y 6666665.0 :address "Testitie 1" :propertyId "75312312341234")
+      => (partial expected-failure? "error.operation-not-supported-by-organization")
+      (restore-sipoo-selected-operations)))
+
+  (fact "succeeds if organization supports given operation"
+    (let [{app-id :id} (create-and-submit-application pena)] ; kerrostalo-rivitalo
+      (query sonja :application-copyable-to-location :source-application-id app-id
+             :x 444445.0 :y 6666665.0 :address "Testitie 1" :propertyId "75312312341234")
+      => ok?)))
