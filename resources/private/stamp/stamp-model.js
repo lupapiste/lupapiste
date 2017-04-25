@@ -210,10 +210,6 @@ LUPAPISTE.StampModel = function(params) {
     self.transparency(transparencies[0].value);
   }
 
-  function getSection() {
-    return self.section() === "\u00a7" ? "" : self.section();
-  }
-
   ko.computed(function () {
     self.selectedStamp(_.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
@@ -281,19 +277,10 @@ LUPAPISTE.StampModel = function(params) {
     ajax
       .command("stamp-attachments", {
         id: findRowData("agreement-id"),
-        //text: findRowData("custom-text"),
         lang: loc.getCurrentLanguage(),
         timestamp: new Date(self.currentDate()).getTime(),
-        //organization: findRowData("organization"),
         files: _.map(self.selectedFiles(), "id"),
         stamp: self.selectedStamp()
-        //xMargin: _.parseInt(self.selectedStamp().position.x, 10),
-        //yMargin: _.parseInt(self.selectedStamp().position.y, 10),
-        //page: self.selectedStamp().page,
-        //transparency: self.selectedStamp().transparency,
-        //extraInfo: findRowData("extra-text"),
-        //kuntalupatunnus: findRowData("backend-id"),
-        //section: getSection()
       })
       .success(self.started)
       .call();

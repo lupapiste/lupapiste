@@ -62,53 +62,26 @@ var stamping = (function() {
     }
   }
 
-  var dummyStamp  = {
-    id: 1,
-    name: "Dummy leima",
-    position: {x: 15, y: 20},
-    background: 153,
-    page: "last",
-    qrCode: true,
-    rows: [[{type: "custom-text", value:"Hyväksytty"}, {type: "verdict-date", value: "06.04.2017"}],
-           [{type: "username", value: "Sonja Sibbo"}],
-           [{type: "organization", value: "Sipoon rakennusvalvonta"}],
-           [{type: "agreement-id", value: "LP-753-2017-90001"}],
-           [{type: "extra-text", value: "Muokattava teksti"}]]
-  };
-
-  var dummyStamp2  = {
-    id: 2,
-    name: "Dummy leima 2",
-    position: {x: 25, y: 10},
-    background: 51,
-    page: "all",
-    qrCode: false,
-    rows: [[{type: "extra-text", value:"Verdict given"}, {type: "current-date", value: "06.04.2017"}],
-      [{type: "backend-id", value: "17-0753-R"}, {type: "username", value: "Sonja Sibbo"}],
-      [{type: "organization", value: "Sipoon rakennusvalvonta"}],
-      [{type: "custom-text", value: "Custom teksti"}, {type: "section", value: "Pykälä \u00a75"}],
-      [{type: "verdict-date", value: "10.02.2017"}, {type: "building-id", value: "123456"}],
-      [{type: "agreement-id", value: "LP-753-2017-90001"}]]
-  };
-
-  function loadCustomStamps(appModel) {
-    model.stamps =  ko.observableArray([]);
+  function loadStampTemplates(appId) {
     ajax.query("custom-stamps", {
-      id: appModel.id()})
+      id: appId})
       .success(function (data) {
         _.each(data.stamps, function (stamp) {
-          model.stamps.push(stamp);
+          var existingStamp = _.find(model.stamps(), function(modelStamp) {
+            return modelStamp.id === stamp.id;
+          });
+          if (!existingStamp) {
+            model.stamps.push(stamp);
+          }
         });
       }).call();
-    model.stamps.push(dummyStamp);
-    model.stamps.push(dummyStamp2);
   }
 
   function initStamp(appModel) {
     model.appModel = appModel;
     model.attachments = lupapisteApp.services.attachmentsService.attachments;
     model.authorization = lupapisteApp.models.applicationAuthModel;
-    loadCustomStamps(appModel);
+    loadStampTemplates(model.appModel.id());
     setStampFields();
     pageutil.openPage("stamping", model.appModel.id());
   }
@@ -117,25 +90,18 @@ var stamping = (function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
+        var appId = pageutil.subPage();
         model.pending(true);
         model.stampingMode(false);
-
-        var appId = pageutil.subPage();
+        loadStampTemplates(appId);
         repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
-
           model.authorization = lupapisteApp.models.applicationAuthModel;
           model.appModel = lupapisteApp.models.application;
-
           ko.mapping.fromJS(application, {}, model.appModel);
           model.appModel._js = application;
-
           model.attachments = lupapisteApp.services.attachmentsService.attachments;
-
-          loadCustomStamps(model.appModel);
-
           setStampFields();
-
           model.stampingMode(true);
         }, true);
       } else { // appModel already initialized, show stamping
