@@ -164,3 +164,10 @@ div.organization-link-cell {
   border-style: dashed;
   color: $gray221
 }
+
+.stamp-row-focus {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: solid;
+  color: $gray221
+}

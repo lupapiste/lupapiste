@@ -12,6 +12,14 @@
   [v col]
   (some #(when (= v (:id %)) %) col))
 
+(defn cursor-of-vec->vec-of-cursors
+  ;;TODO generalize to maps as well
+  ;;rename to cursor-sequence? (sequenceA in Haskell?)
+  [an-atom]
+  (let [indexes (range 0 (count @an-atom))
+        idx->child-cursor (fn [idx] (rum/cursor an-atom idx))]
+    (mapv idx->child-cursor indexes)))
+
 (def empty-stamp   {:name     ""
                     :position {:x 0 :y 0}
                     :page     :first
@@ -79,39 +87,23 @@
     init-state))
 
 (rum/defc add-here-placeholder < rum/reactive
-  [is-dragged-over]
-  [:button.stamp-row-placeholder
-   {:on-drag-enter (fn [e] (reset! is-dragged-over true))
-    :on-drag-leave (fn [e] (reset! is-dragged-over false))
-    :style {:border-style (if (rum/react is-dragged-over)
-                            :solid
-                            :dashed)}}
-   [:span {:style {:pointer-events :none}} "Pudota tähän"]])
+  [{:keys [is-dragged-over drop-handler on-drag-enter on-drag-leave]}]
+  (let [class (if (rum/react is-dragged-over)
+                "stamp-row-focus"
+                "stamp-row-placeholder")]
+    [:button.stamp-row-placeholder
+     {:on-drag-enter on-drag-enter
+      :on-drag-over (fn [e] (.preventDefault e))
+      :on-drag-leave on-drag-leave
+      :on-drop drop-handler
+      :class class}
+     [:span {:style {:pointer-events :none}} "Pudota tähän"]]))
 
-(rum/defc stamp-row-btn [text]
+(rum/defc stamp-row-btn [text remove]
   [:button.stamp-row-btn
    [:span text]
-   [:i.lupicon-circle-remove]])
-
-(rum/defc stamp-row < rum/reactive [cursor #_{:keys [row-number stamps]}]
-  (let [{:keys [row-number stamps]} (rum/react cursor)
-        stamp-buttons (map stamp-row-btn stamps)
-        is-dragged-over (rum/cursor-in cursor [:is-dragged-over])]
-    (if (and row-number stamps)
-      [:div.stamp-row
-       [:button.stamp-row-label  [:span (str "Rivi "
-                                             row-number
-                                             #_(if (rum/react is-dragged-over)
-                                               "Current row"
-                                               ""))]]
-       stamp-buttons
-       (add-here-placeholder is-dragged-over)]
-      [:span "error: stamp-row"])))
-
-(rum/defc form-entry [label-string]
-  [:span.form-entry
-   [:label.form-label.form-label-string label-string]
-   [:input.form-input.text]])
+   [:i.lupicon-circle-remove
+    {:on-click (fn [e] (remove))}]])
 
 (def stamp-templates
   ;; TODO: use the enum from backend for keys
@@ -124,12 +116,60 @@
    :lp-tunnus       {:text-content "LP-tunnus"}
    :rakennustunnus  {:text-content "Rakennustunnus"}})
 
+(defn drop-at
+  [a-vec idx]
+  (vec (concat (subvec a-vec 0 idx)
+               (subvec a-vec (inc idx)))))
+
+(defn indexed
+  [a-seq]
+  (map vector (range) a-seq))
+
+(rum/defc stamp-row < rum/reactive
+  [{:keys [stamp-row-cursor drag-source]}]
+  (let [{:keys [row-number stamps]} (rum/react stamp-row-cursor)
+        remove-btn (fn [idx] (fn []
+                              (swap! stamp-row-cursor
+                                     update-in [:stamps] drop-at idx)))
+        stamp-buttons (for [[idx stamp] (indexed stamps)]
+                        (stamp-row-btn stamp
+                                       (remove-btn idx)))
+        drag-content (rum/react drag-source)
+        stamp-type (get drag-content :stamp-type :error-stamp-type)
+        content (get stamp-templates stamp-type :error-stamp-template)
+        text-content (get content :text-content :error-text-content)
+        is-dragged-over (rum/cursor-in stamp-row-cursor [:is-dragged-over])
+        drop-handler (fn [e]
+                       (swap! stamp-row-cursor update :stamps conj text-content)
+                       (reset! is-dragged-over false))
+        on-drag-enter (fn [e]
+                        (.preventDefault e)
+                        (reset! is-dragged-over true))
+        on-drag-leave (fn [e]
+                        (reset! is-dragged-over false))]
+    (if (and row-number stamps)
+      [:div.stamp-row
+       [:button.stamp-row-label  [:span (str "Rivi "
+                                             row-number)]]
+       stamp-buttons
+       (add-here-placeholder {:is-dragged-over is-dragged-over
+                              :drop-handler drop-handler
+                              :on-drag-enter on-drag-enter
+                              :on-drag-leave on-drag-leave})]
+      [:span "error: stamp-row"])))
+
+(rum/defc form-entry [label-string]
+  [:span.form-entry
+   [:label.form-label.form-label-string label-string]
+   [:input.form-input.text]])
+
 ;; TODO: check validity of parameters with spec
 (rum/defc stamp-btn [{:keys [key content drag-element]}]
-  [:button.stamp-editor-btn {:draggable true
-                             :on-drag-start (fn [e] (reset! drag-element {:type :new
-                                                                         :stamp-type key}))
-                             :on-drag-end (fn [e] (reset! drag-element nil))}
+  [:button.stamp-editor-btn
+   {:draggable true
+    :on-drag-start (fn [e] (reset! drag-element {:type :new
+                                                :stamp-type key}))
+    :on-drag-end (fn [e] (reset! drag-element nil))}
    [:i.lupicon-circle-plus]
    [:span content]])
 
@@ -140,11 +180,6 @@
      (stamp-btn {:key a-key
                  :content content
                  :drag-element drag-element}a-key content))])
-
-#_(rum/defc stamp-container [& stamp-names]
-  [:div {:style {:margin-bottom "5px"}}
-   (map stamp-btn stamp-names)])
-
 
 (rum/defc edit-stamp-bubble < rum/reactive
   [visible? editor-state]
@@ -178,7 +213,6 @@
           "sisältöä"]]
         [:div.form-group
          [:label.form-label.form-label-group "Leiman sisältö"]
-         #_(stamp-container "Vapaa teksti" "Kuluva pvm" "Päätös pvm" "Kuntalupatunnus" "Käyttäjä" "Organisaatio" "LP-tunnus" "Rakennutunnus")
          (stamp-templates-component drag-element)
          [:div "Raahaa ylläolevia leiman sisältökenttiä..."]
          [:div "raahattavana"
@@ -188,14 +222,10 @@
           (for [row (rum/react rows)]
             [:div (pr-str row)])]
          [:div ;;many rows
-          (for [[row-index row] (map vector (range) (rum/react rows))]
-            (stamp-row (rum/cursor-in rows [row-index])))
-          #_(stamp-row {:row-number 1
-                      :stamps ["Asian tunnus" "Kuntalupatunnus"]})
-          #_(stamp-row {:row-number 2
-                      :stamps ["Hiphei, laitoin tähän tekstiä" "Kuluva pvm" "juupeli juu"]})
-          #_(stamp-row {:row-number 3
-                      :stamps []})]]]
+          (for [row-cursor (cursor-of-vec->vec-of-cursors rows)]
+            (stamp-row {:stamp-row-cursor row-cursor
+                        ;;TODO: use lentes lenses for simple derived atoms?
+                        :drag-source drag-element}))]]]
        ;; TODO: Editor here
        ])))
 
