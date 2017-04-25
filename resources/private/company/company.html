@@ -15,7 +15,8 @@
         <h1 data-bind="text: info.model().name"></h1>
       </div>
       <!-- ko if: info.isLocked -->
-      <div class="like-btn">
+      <div class="like-btn"
+           data-test-id="company-is-locked">
         <i class="lupicon-lock"></i>
         <span data-bind="ltext: 'company.locked'"></span>
       </div>
@@ -164,7 +165,9 @@
                                attr: {'data-test-id': 'invitation-submit-' + $index()}"></td>
                 <td class="company-users-table--action">
                   <div data-bind="visible: opsEnabled">
-                    <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
+                    <a href="#" data-bind="click: deleteInvitation,
+                                           ltext: 'company.user.op.delete.invitation',
+                                           testId: 'company-user-uninvite-' + $index()"></a>
                   </div>
                 </td>
               </tr>
@@ -248,7 +251,8 @@
           </div>
           <button class="negative"
                   data-bind="visible: lupapisteApp.models.globalAuthModel.ok( 'company-user-delete-all'),
-                             click: nukeAll">
+                             click: nukeAll"
+                  data-test-id="company-nuke-all">
             <i class="lupicon-warning"></i>
             <span data-bind="ltext: 'company.delete-all'"></span>
           </button>

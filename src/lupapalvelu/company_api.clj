@@ -87,7 +87,7 @@
     (com/delete-every-user! company-id)
     (mongo/update-by-query
                    :token
-                   {:token-type "new-company-user"
+                   {:token-type #"(new|invite)-company-user"
                     :data.company.id company-id
                     :used {$type "null"}}
                    {$set {:used created}})

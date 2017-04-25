@@ -1,14 +1,16 @@
 *** Settings ***
 
 Documentation   Users are added to company
-Resource        ../../common_resource.robot
+Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
+Resource        ../../common_resource.robot
+Resource        company_resource.robot
+Default Tags    company
 
 *** Test Cases ***
 
 Company admin opens company details
-  Login  kaino@solita.fi  kaino123
-  User should be logged in  Kaino Solita
+  Kaino logs in
   Open company details
 
 Form is in read only mode

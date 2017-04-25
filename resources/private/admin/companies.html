@@ -52,16 +52,19 @@
               <td data-bind="dateTimeString: company.created"></td>
               <td>
                 <!-- ko if: company.locked -->
-                <span data-bind="dateString: company.locked"></span><br>
+                <span data-bind="dateString: company.locked,
+                                 testId: 'lock-date-' + company.id"></span><br>
                 <a class="link-btn"
-                   data-bind="click: $root.companiesModel.unlock">
+                   data-bind="click: $root.companiesModel.unlock,
+                              testId: 'unlock-company-' + company.id">
                   <i class="lupicon-lock-open-fully"></i>
                   <span data-bind="ltext: 'company.user.op.enabled.false'"></span>
                 </a>
                 <!-- /ko -->
                 <!-- ko ifnot: company.locked -->
                 <a class="link-btn"
-                   data-bind="click: $root.companiesModel.lock">
+                   data-bind="click: $root.companiesModel.lock,
+                              testId: 'lock-company-' + company.id">
                   <i class="lupicon-lock"></i>
                   <span data-bind="ltext: 'company.user.op.enabled.true'"></span>
                 </a>

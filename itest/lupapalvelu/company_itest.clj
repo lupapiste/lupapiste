@@ -315,10 +315,16 @@
              (command admin :company-lock :company "solita" :timestamp (+ (now) 10000)) => ok?)
        (fact "Company can now also be updated"
              (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) => ok?)
-       (fact "Admin locks Solita again"
-             (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
-       (fact "Kaino nukes locked company"
-             (command kaino :company-user-delete-all) => ok?)
+       (fact "Kaino invites Pena to Solita"
+             (command kaino :company-add-user :firstName "Pena" :lastName "Panaani"
+                      :email "pena@example.com" :admin false :submit true))
+       (let [pena-token (token-from-email "pena@example.com" (last-email))]
+         (fact "Admin locks Solita again"
+               (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+         (fact "Kaino nukes locked company"
+               (command kaino :company-user-delete-all) => ok?)
+         (fact "Pena's invitation has been rescinded"
+               (http-token-call pena-token {:ok true}) => (contains {:status 404})))
        (fact "Kaino cannot login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
        (fact "Kaino resets password"
@@ -326,7 +332,7 @@
                         {:form-params      {:email "kaino@solita.fi"}
                          :content-type     :json
                          :follow-redirects false
-                         :throw-exceptions false}) => http200?)
+                         :throw-exceptions false})=> http200?)
        (let [email (last-email)
              token (token-from-email "kaino@solita.fi" email)]
          (:subject email) => (contains "Uusi salasana")
