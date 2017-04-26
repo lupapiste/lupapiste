@@ -23,7 +23,8 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.application :as app]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.validator :as validator]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -298,6 +299,17 @@
   (cond
     (= koodi "p\u00e4\u00e4suunnittelija") "paasuunnittelija"
     :default                               "suunnittelija"))
+
+(defn- osapuoli-kuntaRoolikoodi->doc-schema [koodi]
+  (cond
+    (= koodi "Rakennusvalvonta-asian laskun maksaja") "maksaja"
+    (= koodi "Hakijan asiamies")                      "asiamies"))
+
+(defn- osapuoli->party-document [{:keys [schema-version] :as application} party]
+  (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
+    (let [doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
+          doc-updates (lupapalvelu.document.model/map2updates [] party)]
+      (lupapalvelu.document.model/apply-updates doc doc-updates))))
 
 (defn- suunnittelija->party-document [{:keys [schema-version] :as application} party]
   (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
