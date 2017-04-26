@@ -371,7 +371,8 @@
                   :html ["map-popup.html" "create.html"]}
 
    :copy         {:depends [:common-html :map]
-                  :html ["copy.html"]}
+                  :html ["copy.html"]
+                  :js ["copylocationmodel.js" "copy.js"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
@@ -429,7 +430,7 @@
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :mypage :header :debug
+                             :statement :docgen :create :copy :mypage :header :debug
                              :company :analytics :register-company :footer :new-appointment :ui-components]}
 
    :mycalendar   {:depends [:calendar-view]
@@ -439,7 +440,7 @@
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
-                             :statement :verdict :neighbors :docgen :create :mypage :header :debug
+                             :statement :verdict :neighbors :docgen :create :copy :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}

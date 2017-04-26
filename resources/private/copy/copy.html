@@ -4,18 +4,18 @@
 
   <!-- Phase 1: -->
 
-  <section class="page container" id="create-part-1">
+  <section class="page container" id="copy-part-1">
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
-    <div class="create-application-search-box">
+    <div class="copy-application-search-box">
       <p data-bind="ltext: 'newRequest.locationInfo'"></p>
       <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
-             id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
-      <button data-bind="click: searchNow" class="positive" data-test-id="create-search-button">
+             id="copy-search" type="text" class="form-input text address-search" autofocus="autofocus" />
+      <button data-bind="click: searchNow" class="positive" data-test-id="copy-search-button">
           <i class="lupicon-search"></i>
           <span data-bind="ltext: 'search'"></span>
       </button>
     </div>
-    <div id="create-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
+    <div id="copy-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
   </section>
 
 </body>
