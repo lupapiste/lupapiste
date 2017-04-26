@@ -18,19 +18,30 @@
     <!-- ko if: !locationSelected() -->
     <div id="copy-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
     <!-- /ko -->
-    <!-- ko if: locationSelected() -->
+
+    <!-- ko if: locationSelected() && inviteCandidatesFetched() -->
     <div id="copy-auths" class="filter-group__toggles"
-         data-bind="foreach: copyAuths"><div class="filter-wrapper">
+         data-bind="foreach: inviteCandidates "><div class="filter-wrapper">
         <input type="checkbox"
                data-bind="attr: {'id': $index()},
-                                 checked: false">
+                                 checked: $data.selected">
         <label class="filter-label"
                data-bind="attr: {'for': $index()},
                           text: $parent.authDescription($data)"></label>
     </div></div>
-
     <!-- /ko -->
-
+    <!-- ko if: locationSelected() -->
+    <div>
+      <button data-bind="click: back" class="reject">
+        <i class="lupicon-chevron-left"></i>
+        <span data-bind="text: 'Takas'"></span>
+      </button>
+      <button data-bind="click: proceed" class="positive">
+        <span data-bind="text: 'Eteen'"></span>
+        <i class="lupicon-chevron-right"></i>
+      </button>
+    </div>
+    <!-- /ko -->
   </section>
 
 </body>

@@ -3,11 +3,56 @@
 
   function CopyApplicationModel() {
     var self = this;
+    self.sourceApplicationId = ko.observable("LP-753-2017-90002");
 
+    self.inviteCandidatesFetched = ko.observable(false);
+    self.inviteCandidates = ko.observableArray([]);
     self.locationSelected = ko.observable(false);
+
+    function checkIfApplicationCanBeCopiedToSelectedLocation() {
+      if (self.locationModel.propertyIdOk() && self.locationModel.addressOk()) {
+        var params = self.locationModel.toJS();
+        params["source-application-id"] = self.sourceApplicationId(); // TODO
+        ajax
+          .query("application-copyable-to-location", params)
+          .processing(self.processing)
+          .pending(self.pending)
+          .success(function(data) {
+            fetchAuthCandidatesForApplication();
+          })
+          .error(function(data) {
+            notify.ajaxError(data);
+          })
+          .call();
+
+      }
+    }
+
+    function fetchAuthCandidatesForApplication() {
+      var application = self.sourceApplicationId();
+      if (application) {
+        ajax
+          .query("copy-application-invite-candidates", {
+            "source-application-id": application
+          })
+          .success(function(d) {
+            self.inviteCandidates(_.map(d.candidates, function(candidate) {
+              candidate.selected = ko.observable(false);
+              return candidate;
+            }));
+            self.inviteCandidatesFetched(true);
+            self.locationSelected(true);
+          })
+          .error(function(d) {
+            notify.ajaxError(d);
+          })
+          .call();
+      }
+    }
+
     hub.subscribe("copy-location-selected", function() {
       hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
-      self.locationSelected(true);
+      checkIfApplicationCanBeCopiedToSelectedLocation();
     });
 
     self.locationModel = new LUPAPISTE.CopyApplicationLocationModel();
@@ -19,22 +64,15 @@
     self.pending = ko.observable(false);
     self.message = ko.observable("");
 
-    self.copyAuths = ko.observableArray([
-      {firstName: "Ville",
-       lastName: "Outamaa",
-       role: "writer",
-       roleSource: "auth"},
-      {firstName: "Åke W.",
-       lastName: "Blomqvist",
-       role: "hakija",
-       roleSource: "document"}
-    ]);
-
     self.authDescription = function(auth) {
-      return auth.firstName + " " + auth.lastName + ", " +
+      var name = (auth.firstName !== "" ?
+                  (auth.firstName + (auth.lastName !== "" ? (" " + auth.lastName) : "")) :
+                  (auth.email !== null ? auth.email : ""));
+      return name + ", " +
         _.upperFirst(auth.roleSource === "document" ?
                      loc("applicationRole." + auth.role)
-                     : loc(auth.role));
+                     : (auth.role === "reader" ?
+                        loc("authorityrole." + auth.role) : loc(auth.role)));
     };
 
     self.findOperations = function(code) {
@@ -54,8 +92,11 @@
 
       return self
         .resetLocation()
+//        .sourceApplicationId(null)
         .search("")
-        .message("");
+        .message("")
+        .inviteCandidatesFetched(false)
+        .inviteCandidates([]);
     };
 
     self.copyOK = ko.pureComputed(function() {
@@ -186,9 +227,12 @@
     };
 
     self.copyApplication = function() {
-      var op = self.operation();
+      console.log("copyApplication");
       var params = self.locationModel.toJS();
       params["source-application-id"] = self.sourceApplicationId(); // TODO
+      params["auth-invites"] = _.map(_.filter(self.inviteCandidates(), function(candidate) {
+        return candidate.selected();
+      }), "id");
 
       ajax.command("copy-application", params)
         .processing(self.processing)
@@ -198,8 +242,22 @@
           params.id = data.id;
           pageutil.openApplicationPage(params);
         })
+        .error(function(data) {
+          notify.ajaxError(data);
+        })
         .call();
       hub.send("track-click", {category:"Copy", label:"tree", event:"copyApplication"});
+    };
+
+    self.back = function() {
+
+    };
+
+    self.proceed = function() {
+      console.log("proceed");
+      if (self.inviteCandidatesFetched()) {
+        self.copyApplication();
+      }
     };
   }
 
