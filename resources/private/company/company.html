@@ -14,6 +14,13 @@
       <div class="header">
         <h1 data-bind="text: info.model().name"></h1>
       </div>
+      <!-- ko if: info.isLocked -->
+      <div class="like-btn"
+           data-test-id="company-is-locked">
+        <i class="lupicon-lock"></i>
+        <span data-bind="ltext: 'company.locked'"></span>
+      </div>
+      <!-- /ko -->
       <div class="tabs-container" data-bind="with: tabs">
         <ul class="" data-bind="foreach: tabs">
           <li data-bind="css: {active: active}">
@@ -158,7 +165,9 @@
                                attr: {'data-test-id': 'invitation-submit-' + $index()}"></td>
                 <td class="company-users-table--action">
                   <div data-bind="visible: opsEnabled">
-                    <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
+                    <a href="#" data-bind="click: deleteInvitation,
+                                           ltext: 'company.user.op.delete.invitation',
+                                           testId: 'company-user-uninvite-' + $index()"></a>
                   </div>
                 </td>
               </tr>
@@ -214,7 +223,9 @@
                 <td data-bind="visible: $parent.isAdmin"
                     class="company-users-table--action">
                   <div data-bind="if: opsEnabled">
-                    <a data-bind="ltext: 'edit', click: edit,
+                    <a data-bind="ltext: 'edit',
+                                  click: edit,
+                                  visible: !$parent.info.isLocked(),
                                   attr: {'data-test-id': 'company-user-edit-' + $index()}"></a>
                     <a data-bind="click: deleteUser,
                                   ltext: 'company.user.op.delete',
@@ -226,7 +237,7 @@
               <!-- /ko -->
             </tbody>
           </table>
-          <div data-bind="visible: isAdmin">
+          <div data-bind="visible: isAdmin()  && !info.isLocked()">
             <button class="btn btn-primary"
                     data-test-id="company-add-user"
                     data-bind="click: openNewUser,
@@ -236,8 +247,15 @@
             </button>
             <span class="user-limit-reached"
                   data-bind="ltext: 'register.company.user-limit.reached',
-                             visible: isAdmin && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
+                             visible: isAdmin() && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
           </div>
+          <button class="negative"
+                  data-bind="visible: lupapisteApp.models.globalAuthModel.ok( 'company-user-delete-all'),
+                             click: nukeAll"
+                  data-test-id="company-nuke-all">
+            <i class="lupicon-warning"></i>
+            <span data-bind="ltext: 'company.delete-all'"></span>
+          </button>
         </div>
       </div>
     </div>

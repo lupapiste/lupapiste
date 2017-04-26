@@ -1,10 +1,12 @@
 (ns lupapalvelu.company-itest
   (:require [midje.sweet  :refer :all]
+            [sade.core :refer [now]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [cheshire.core :as json]
-            [clojure.string :refer [index-of]]))
+            [clojure.string :refer [index-of]]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -199,7 +201,7 @@
 
     (facts "Member can't update details but company admin and solita admin can"
       (fact "Teppo is member, denied"
-        (command teppo :company-update :company company-id :updates {:po "Pori"}) => unauthorized?)
+            (command teppo :company-update :company company-id :updates {:po "Pori"}) => unauthorized?)
       (fact "Kaino is admin, can upgrade account type, but can't use illegal values or downgrade"
         (command kaino :company-update :company company-id :updates {:accountType "account30"}) => ok?
         (command kaino :company-update :company company-id :updates {:accountType "account5"}) => (partial expected-failure? "company.account-type-not-downgradable")
@@ -238,10 +240,10 @@
     (fact "Dummy is in the company"
       (query kaino :company-search-user :email foo-email) => (result :already-in-company))
     (fact "Foo can set pw from email token"
-      (let [email (last-email)
-            token (token-from-email foo-email email)]
-        (:subject email) => (contains "Uusi salasana")
-        (http-token-call token {:password foo-pw}) => (contains {:status 200})))
+          (let [email (last-email)
+                token (token-from-email foo-email email)]
+            (:subject email) => (contains "Uusi salasana")
+            (http-token-call token {:password foo-pw}) => (contains {:status 200})))
 
     (let [store (atom {})
           params {:cookie-store (->cookie-store store)}
@@ -270,3 +272,112 @@
                                 params) [:body :invites])]
           (count invites) => 1
           (get-in (first invites) [:application :id]) => application-id)))))
+
+(def locked-err {:ok false :text "error.company-locked"})
+
+(fact "Company back to regular account"
+      (command admin :company-update :company "solita" :updates {:accountType "account5"}) => ok?)
+(facts "Teppo back into shape"
+       (fact "Teppo cannot login"
+             (command teppo :login :username "kaino@solita.fi" :password "kaino123") => fail?)
+       (fact "Teppo resets password"
+             (http-post (str (server-address) "/api/reset-password")
+                        {:form-params      {:email "teppo@example.com"}
+                         :content-type     :json
+                         :follow-redirects false
+                         :throw-exceptions false})=> http200?)
+       (let [email (last-email)
+             token (token-from-email "teppo@example.com" email)]
+         (:subject email) => (contains "Uusi salasana")
+         (http-token-call token {:password "Teppo rules!"}) => (contains {:status 200})))
+
+(facts "Company locking"
+       (fact "Admin locks Solita"
+             (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+       (fact "Locked pseudo-query succeeds"
+             (query kaino :user-company-locked) => ok?)
+       (fact "Companies listing no longer includes Solita"
+             (:companies (query pena :companies)) => (just [(contains {:id "esimerkki"})]))
+       (fact "Company is not authed to new applications"
+             (let [{auth :auth} (create-application kaino
+                                         :propertyId sipoo-property-id
+                                         :address "Sanyuanqiao") => ok?]
+               (count auth) => 1
+               auth => (just [(contains {:type "owner"})])))
+       (fact "Company can be queried"
+             (query kaino :company :company "solita" :users true) => ok?)
+       (fact "Company cannot be updated"
+             (command kaino :company-update :company "solita" :updates {:po "Beijing"})
+             => locked-err)
+       (fact "Users cannot be added to the company"
+             (command kaino :company-add-user :firstName "Hii" :lastName "Hoo"
+                      :email "hii.hoo@example.com" :admin true :submit true)
+             => locked-err)
+       (let [{solitans :users} (query kaino :company :company "solita" :users true)
+             {foo-id :id} (util/find-by-key :email "foo@example.com" solitans)]
+         (fact "User details cannot be changed"
+               (command kaino :company-user-update
+                        :user-id foo-id
+                        :role "admin"
+                        :submit false) => locked-err)
+         (fact "User can be deleted"
+               (command kaino :company-user-delete :user-id foo-id) => ok?))
+       (fact "Unlock company"
+             (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
+       (fact "Locked pseudo-query fails"
+             (query kaino :user-company-locked) => fail?)
+       (fact "Company is authed to new applications"
+             (let [{auth :auth} (create-application kaino
+                                         :propertyId sipoo-property-id
+                                         :address "Dongzhimen") => ok?]
+               (count auth) => 2
+               (map :type auth) => (just ["owner" "company"] :in-any-order)))
+       (fact "Company can now be updated"
+             (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
+       (fact "Nuking is not an option for unlocked company"
+             (command kaino :company-user-delete-all) => (contains {:text "error.company-not-locked"}))
+       (fact "Admin locks Solita in the future"
+             (command admin :company-lock :company "solita" :timestamp (+ (now) 10000)) => ok?)
+       (fact "Company can now also be updated"
+             (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) => ok?)
+       (fact "Erkki invites Teppo to Esimerkki"
+             (command erkki :company-invite-user :firstName "Teppo" :lastName "Nieminen"
+                      :email "teppo@example.com" :admin false :submit true))
+       (let [teppo-token (token-from-email "teppo@example.com" (last-email))]
+         (facts "Kaino invites Pena and Unknown to Solita"
+                (let [_ (command kaino :company-invite-user :firstName "Pena" :lastName "Panaani"
+                                 :email "pena@example.com" :admin false :submit true) => ok?
+                      pena-token (token-from-email "pena@example.com" (last-email))
+                      _ (command kaino :company-add-user :firstName "Bu" :lastName "Zhi Dao"
+                                 :email "unknown@example.com" :admin false :submit true) => ok?
+                      unknown-token (token-from-email "unknown@example.com" (last-email))]
+                  (fact "Admin locks Solita again"
+                        (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+                  (fact "Kaino nukes locked company"
+                        (command kaino :company-user-delete-all) => ok?)
+                  (fact "Pena's invitation has been rescinded"
+                        (http-token-call pena-token {:ok true}) => (contains {:status 404}))
+                  (fact "Pena can still login"
+                        (command pena :login :username "pena" :password "pena") => ok?)
+                  (fact "Unknown's invitation has been rescinded"
+                        (http-token-call unknown-token {:ok true}) => (contains {:status 404}))))
+         (fact "Teppo's invitation is untouched"
+               (http-token-call teppo-token {:ok true}) => (contains {:status 200}))
+         (fact "Erkki can still login"
+               (command erkki :login :username "erkki@example.com" :password "esimerkki") => ok?))
+       (fact "Kaino cannot login"
+             (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
+       (fact "Kaino resets password"
+             (http-post (str (server-address) "/api/reset-password")
+                        {:form-params      {:email "kaino@solita.fi"}
+                         :content-type     :json
+                         :follow-redirects false
+                         :throw-exceptions false})=> http200?)
+       (let [email (last-email)
+             token (token-from-email "kaino@solita.fi" email)]
+         (:subject email) => (contains "Uusi salasana")
+         (http-token-call token {:password "kaino456"}) => (contains {:status 200}))
+       (fact "Kaino can now login"
+             (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
+       (fact "Kaino is no longer Solitan"
+             (query kaino :company :company "solita" :users true) => unauthorized?))

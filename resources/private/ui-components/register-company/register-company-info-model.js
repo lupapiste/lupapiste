@@ -10,7 +10,7 @@ LUPAPISTE.RegisterCompanyInfoModel = function() {
 
   self.field = function( fieldName, cell ) {
     return _.defaults( service.field( fieldName),
-                           {cell: cell || "text"});
+                       {cell: cell || "text"});
   };
 
   self.languageField = function() {

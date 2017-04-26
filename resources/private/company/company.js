@@ -232,7 +232,9 @@
     self.role      = user.role;
     self.submit    = user.submit;
     self.tokenId   = user.tokenId;
-    self.opsEnabled   = ko.computed(function() { return lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.id() !== user.id; });
+    self.opsEnabled   = ko.computed(function() {
+      return lupapisteApp.models.currentUser.company.role() === "admin"
+          && lupapisteApp.models.currentUser.id() !== user.id; });
     self.deleteInvitation = _.partial( deleteCompanyUser, user, function() {
       invitations.remove(function(i) { return i.tokenId === user.tokenId; });
     } );
@@ -298,11 +300,14 @@
     };
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
-    this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
+    this.canStartEdit  = ko.computed(function() { return !this.edit()
+                                                      && parent.isAdmin()
+                                                      && !this.isLocked(); }, this);
     this.changed       = ko.computed(function() { return !_.isEqual(ko.mapping.toJS(this.model()), this.saved()); }, this);
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
     this.accountType   = ko.observable();
     this.accountTypes  = ko.observableArray();
+    this.isLocked      = ko.computed(_.wrap( "user-company-locked", lupapisteApp.models.globalAuthModel.ok ));
   }
 
   CompanyInfo.prototype.setAccountTypeOptionDisable = function(option, item) {
@@ -424,6 +429,19 @@
       newCompanyUser.open();
     };
 
+    self.nukeAll = function() {
+      hub.send("show-dialog", {ltitle: "company.delete-all",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "company.delete-all.confirmation",
+                                                 yesFn: function() {
+                                                   ajax.command( "company-user-delete-all", {})
+                                                   .success( _.wrap( "logout", hub.send))
+                                                   .call();
+                                                 },
+                                                 lyesTitle: "yes",
+                                                 lnoTitle: "cancel"} });
+    };
   }
 
   var company = new Company();
