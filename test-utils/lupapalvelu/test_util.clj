@@ -5,6 +5,7 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [clojure.test :refer [is]]
+            [clojure.walk :as walk]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
@@ -88,3 +89,11 @@
 ; test-languages = i18n/languages
 (def test-languages (remove (partial = :en)
                             i18n/languages))
+
+(defn walk-dissoc-keys
+  "dissoc given keys from the collection"
+  [coll & keys]
+  (walk/postwalk #(if (map? %)
+                    (apply dissoc % keys)
+                    %)
+                 coll))

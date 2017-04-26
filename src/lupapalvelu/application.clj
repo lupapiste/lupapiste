@@ -32,7 +32,7 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.property :as prop]
-            [sade.util :as util]
+            [sade.util :as util :refer [merge-in]]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]))
 
@@ -437,57 +437,98 @@
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
+(defn application-state [user organization-id info-request?]
+  (cond
+    info-request? :info
+    (or (usr/user-is-authority-in-organization? user organization-id)
+        (usr/rest-user? user)) :open
+    :else :draft))
+
+(defn application-history-map [{:keys [created organization state tosFunction]} user]
+  {:pre [(pos? created) (string? organization) (states/all-states (keyword state))]}
+  (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
+    {:history (cond->> [(history-entry state created user)]
+                tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
+
+(defn permit-type-and-operation-map [operation-name created]
+  (let [op (make-op operation-name created)
+        classification {:permitType       (op/permit-type-of-operation operation-name)
+                        :primaryOperation op}]
+    (merge classification
+           {:permitSubtype (first (resolve-valid-subtypes classification))})))
+
+(defn application-auth [user operation-name]
+  (let [owner (merge (usr/user-in-role user :owner :type :owner)
+                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})]
+    (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
+      [owner company]
+      [owner])))
+
+(defn application-comments [user messages open-inforequest? created]
+  (let [comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])]
+    (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)))
+
+(defn application-attachments-map [{:keys [infoRequest created primaryOperation state tosFunction]} organization]
+  {:pre [(pos? created) (map? primaryOperation) (states/all-states (keyword state))]}
+  {:attachments (if-not infoRequest
+                  (make-attachments created primaryOperation organization state tosFunction)
+                  [])})
+
+(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} user organization manual-schema-datas]
+  {:pre [(pos? created) (map? primaryOperation)]}
+  {:documents (if-not infoRequest
+                (make-documents user created organization primaryOperation application manual-schema-datas)
+                [])})
+
+(defn application-metadata-map [{:keys [attachments organization tosFunction]}]
+  {:pre [(string? organization)]}
+  (let [metadata (tos/metadata-for-document organization tosFunction "hakemus")]
+    {:metadata        metadata
+     :processMetadata (-> (tos/metadata-for-process organization tosFunction)
+                          (tos/calculate-process-metadata metadata attachments))}))
+
+(defn application-timestamp-map [{:keys [state created]}]
+  {:pre [(states/all-states (keyword state)) (pos? created)]}
+  {:opened   (when (#{:open :info} state) created)
+   :modified created})
+
+(defn location-map [location]
+  {:pre [(number? (first location)) (number? (second location))]}
+  {:location       location
+   :location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 location)})
+
+(defn tos-function [organization operation-name]
+  (get-in organization [:operations-tos-functions (keyword operation-name)]))
+
 (defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
-  (let [permit-type (op/permit-type-of-operation operation-name)
-        owner (merge (usr/user-in-role user :owner :type :owner)
-                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})
-        op (make-op operation-name created)
-        state (cond
-                info-request? :info
-                (or (usr/user-is-authority-in-organization? user (:id organization)) (usr/rest-user? user)) :open
-                :else :draft)
-        comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
-        tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
-        tos-function-map (tos/tos-function-with-name tos-function (:id organization))
-        classification {:permitType permit-type, :primaryOperation op}
-        attachments (when-not info-request? (make-attachments created op organization state tos-function))
-        metadata (tos/metadata-for-document (:id organization) tos-function "hakemus")
-        process-metadata (tos/calculate-process-metadata (tos/metadata-for-process (:id organization) tos-function) metadata attachments)
-        application (merge domain/application-skeleton
-                      classification
-                      {:id                  id
-                       :created             created
-                       :opened              (when (#{:open :info} state) created)
-                       :modified            created
-                       :permitSubtype       (first (resolve-valid-subtypes classification))
-                       :infoRequest         info-request?
-                       :openInfoRequest     open-inforequest?
-                       :secondaryOperations []
-                       :state               state
-                       :history             (cond->> [(history-entry state created user)]
-                                                     tos-function-map (concat [(tos-history-entry tos-function-map created user)]))
-                       :municipality        municipality
-                       :location            (->location x y)
-                       :location-wgs84      (coord/convert "EPSG:3067" "WGS84" 5 (->location x y))
-                       :organization        (:id organization)
-                       :address             address
-                       :propertyId          property-id
-                       :title               address
-                       :auth                (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
-                                              [owner company]
-                                              [owner])
-                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
-                       :schema-version      (schemas/get-latest-schema-version)
-                       :tosFunction         tos-function
-                       :metadata            metadata
-                       :processMetadata     process-metadata})]
-    (merge application (when-not info-request?
-                         {:attachments attachments
-                          :documents   (make-documents user created organization op application manual-schema-datas)}))))
+  (let [application (merge domain/application-skeleton
+                           (permit-type-and-operation-map operation-name created)
+                           (location-map (->location x y))
+                           {:address             address
+                            :auth                (application-auth user operation-name)
+                            :comments            (application-comments user messages open-inforequest? created)
+                            :created             created
+                            :id                  id
+                            :infoRequest         info-request?
+                            :municipality        municipality
+                            :openInfoRequest     open-inforequest?
+                            :organization        (:id organization)
+                            :propertyId          property-id
+                            :schema-version      (schemas/get-latest-schema-version)
+                            :state               (application-state user (:id organization) info-request?)
+                            :title               address
+                            :tosFunction         (tos-function organization operation-name)})]
+    (-> application
+        (merge-in application-timestamp-map)
+        (merge-in application-history-map user)
+        (merge-in application-attachments-map organization)
+        (merge-in application-documents-map user organization manual-schema-datas)
+        (merge-in application-metadata-map))))
 
+(def do-create-application-data-fields #{:operation :x :y :address :propertyId :infoRequest :messages})
 (defn do-create-application
-  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
   (let [municipality      (prop/municipality-id-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
