@@ -618,7 +618,6 @@
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -632,7 +631,6 @@
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles  roles/reader-org-authz-roles
    :user-roles       #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)

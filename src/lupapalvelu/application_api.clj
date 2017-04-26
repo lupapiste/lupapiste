@@ -127,7 +127,7 @@
                                 distinct))))
 
 (defcommand mark-seen
-  {:parameters       [:id type]
+  {:parameters       [id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/all-authz-roles

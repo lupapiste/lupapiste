@@ -23,8 +23,8 @@ div.attachment-multiselect-content {
     span {
       font-size: $baseline * 0.75;
     }
-    .icon {
-      margin-left: $marginS;
+    i {
+      padding-right: $marginS;
     }
   }
   form#stamp-info {
