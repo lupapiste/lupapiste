@@ -266,19 +266,21 @@
                           (get-in target-user [:company :id]))))
       unauthorized)))
 
+(defn locked? [{locked :locked} timestamp]
+  (boolean (and locked (> timestamp locked 0))))
+
 (defn company-not-locked
   "Pre-check that fails for a locked company."
   [{{company :company} :data created :created}]
-  (when-let [{locked :locked} (find-company-by-id! company)]
-    (when (and locked (> created locked 0))
-      (fail :error.company-locked))))
+  (when (locked? (find-company-by-id! company) created)
+    (fail :error.company-locked)))
 
 (defn user-company-is-locked
   "Pre-check that fails the user-associated company _is not_ locked."
   [{user :user created :created}]
-  (when-let [{locked :locked} (find-company-by-id! (some-> user :company :id))]
-    (when-not (and locked (> created locked 0))
-      (fail :error.company-not-locked))))
+  (when-not (locked? (find-company-by-id! (some-> user :company :id))
+                     created)
+    (fail :error.company-not-locked)))
 
 (defn delete-user!
   [user-id]
@@ -389,14 +391,17 @@
     (link-user-to-company! (:id user) (:id company) role submit))
   (ok))
 
-(defn company->auth [company]
-  (some-> company
-          (select-keys [:id :name :y])
-          (assoc :role      "writer"
-                 :type      "company"
-                 :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
-                 :firstName (:name company)
-                 :lastName  "")))
+(defn company->auth
+  "No auth if company is currently locked."
+  [company]
+  (when-not (locked? company (now))
+      (some-> company
+           (select-keys [:id :name :y])
+           (assoc :role      "writer"
+                  :type      "company"
+                  :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
+                  :firstName (:name company)
+                  :lastName  ""))))
 
 (defn company-invitation-token [caller company-id application-id]
   (token/make-token

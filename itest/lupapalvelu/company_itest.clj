@@ -285,6 +285,12 @@
              (query kaino :user-company-locked) => ok?)
        (fact "Companies listing no longer includes Solita"
              (query pena :companies) => {:ok true :companies []})
+       (fact "Company is not authed to new applications"
+             (let [{auth :auth} (create-application kaino
+                                         :propertyId sipoo-property-id
+                                         :address "Sanyuanqiao") => ok?]
+               (count auth) => 1
+               auth => [(contains {:type "owner"})]))
        (fact "Company can be queried"
              (query kaino :company :company "solita" :users true) => ok?)
        (fact "Company cannot be updated"
@@ -307,6 +313,12 @@
              (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
        (fact "Locked pseudo-query fails"
              (query kaino :user-company-locked) => fail?)
+       (fact "Company is authed to new applications"
+             (let [{auth :auth} (create-application kaino
+                                         :propertyId sipoo-property-id
+                                         :address "Dongzhimen") => ok?]
+               (count auth) => 2
+               (map :type auth) => (just ["owner" "company"] :in-any-order)))
        (fact "Company can now be updated"
              (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?)
        (fact "Nuking is not an option for unlocked company"
@@ -340,6 +352,4 @@
        (fact "Kaino can now login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
        (fact "Kaino is no longer Solitan"
-             (query kaino :company :company "solita" :users true) => unauthorized?)
-
-       )
+             (query kaino :company :company "solita" :users true) => unauthorized?))

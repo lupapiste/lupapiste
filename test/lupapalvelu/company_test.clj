@@ -93,6 +93,27 @@
   (fn [res]
     (util/=as-kw kw (:text res))))
 
+(facts "Locked and company auth"
+       (fact "Locked"
+             (com/locked? {} 123) => false
+             (com/locked? {} -123) => false
+             (com/locked? {:locked 0} -1) => false
+             (com/locked? {:locked nil} 123) => false
+             (com/locked? {:locked 100} 123) => true)
+       (fact "company auth"
+             (com/company->auth {:id "hii" :name "Hii" :y "Not real Y"})
+             => {:id "hii" :name "Hii" :y "Not real Y"
+                 :role "writer" :type "company" :username "not real y"
+                 :firstName "Hii" :lastName ""}
+             (com/company->auth {:locked (+ (core/now) 10000)
+                                 :id "hii" :name "Hii" :y "Not real Y"})
+             => {:id "hii" :name "Hii" :y "Not real Y"
+                 :role "writer" :type "company" :username "not real y"
+                 :firstName "Hii" :lastName ""}
+             (com/company->auth {:locked (- (core/now) 10000)
+                                 :id "hii" :name "Hii" :y "Not real Y"})
+             => nil))
+
 (facts "Pre-checkers"
        (let [unauthorized (partial expected-failure? :error.unauthorized)]
          (fact "validate-has-company-role"
