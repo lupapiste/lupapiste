@@ -306,6 +306,8 @@
     (command pena :invite-with-role :id application-id :email (email-for-key teppo) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
     (command teppo :approve-invite :id application-id) => ok?
 
+    (last-email)                                            ; reset
+
     (fact "Pena can cancel his application with reason text"
       (command pena :cancel-application :id application-id :text reason-text :lang "fi") => ok?)
     (fact "Sonja sees the canceled application"
@@ -318,11 +320,15 @@
           (count (:comments application)) => 1
           (-> application :comments (first) :text) => (contains reason-text))))
 
-    (let [email (last-email)]
-      (:to email) => (contains (email-for-key teppo))
-      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
-      (get-in email [:body :plain]) => (contains "Peruutettu")
-      email => (partial contains-application-link? application-id "applicant"))
+    (let [emails (sent-emails)
+          email1 (first emails)]
+      (count emails) => 2
+      (fact "Pena and Teppo get email" (map :to emails) => (just [#"teppo@example.com" #"pena@example.com"]))
+
+      (:to email1) => (contains (email-for-key teppo))
+      (:subject email1) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
+      (get-in email1 [:body :plain]) => (contains "Peruutettu")
+      email1 => (partial contains-application-link? application-id "applicant"))
 
     (fact "Luukas (reader) can't undo-cancellation"
       (command luukas :undo-cancellation :id application-id) => unauthorized?)
@@ -332,7 +338,7 @@
       (command pena :undo-cancellation :id application-id) => ok?)
 
     (let [email (last-email)]
-      (:to email) => (contains (email-for-key teppo))
+      (:to email) => (contains (email-for-key pena))
       (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hanke on palautunut tilaan Hakemus j\u00e4tetty"
       (get-in email [:body :plain]) => (contains "hakemus on palautettu aktiiviseksi")
       email => (partial contains-application-link? application-id "applicant"))
