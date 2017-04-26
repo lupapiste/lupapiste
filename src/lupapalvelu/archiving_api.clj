@@ -56,8 +56,8 @@
    :org-authz-roles #{:archivist}
    :states          states/all-application-states
    :pre-checks      [(fn [{:keys [user application]}]
-                       (when-not application                     ; If application, :org-authz-roles works as validator
-                         (usr/user-is-archivist? user nil)))]}
+                       (when-not (or application (usr/user-is-archivist? user nil)) ; If application, :org-authz-roles works as validator
+                         unauthorized))]}
   (ok))
 
 (defquery permanent-archive-enabled
