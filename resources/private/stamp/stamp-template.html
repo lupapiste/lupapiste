@@ -144,10 +144,10 @@
         </div>
         <!-- /ko -->
 
-        <div class="stamp-status">
+        <div class="stamp-status like-btn">
+          <i class="lupicon-circle-check positive" data-bind="visible: status() === statusDone"></i>
+          <i class="lupicon-circle-attention negative" data-bind="visible: status() === statusNoFiles"></i>
           <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
-          <span class="ok icon" data-bind="visible: status() === statusDone"></span>
-          <span class="missing icon" data-bind="visible: status() === statusNoFiles"></span>
         </div>
 
         <div class="attachment-multiselect-buttons">
