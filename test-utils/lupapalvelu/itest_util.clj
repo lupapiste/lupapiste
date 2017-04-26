@@ -435,8 +435,8 @@
             (:documents %)
             (:attachments %)
             (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
-    (let [{:keys [bulletin ok]} (f apikey :bulletin :bulletinId id)]
-      (assert ok)
+    (let [{:keys [bulletin ok text]} (f apikey :bulletin :bulletinId id)]
+      (assert ok (str "not ok: " text))
       bulletin)))
 
 (defn- test-application-create-successful [resp app-id]
@@ -483,13 +483,15 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000}}]
+(defn give-verdict-with-fn [f apikey application-id
+                            & {:keys [verdictId status name given official agreement]
+                               :or   {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000 agreement false}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
         verdict-id (or (:verdictId new-verdict-resp))]
     (if-not (ok? new-verdict-resp)
       new-verdict-resp
       (do
-       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "" :lang "fi")
+       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement agreement :section "" :lang "fi")
        (assoc
          (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
          :verdict-id verdict-id)))))

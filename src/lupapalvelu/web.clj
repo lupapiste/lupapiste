@@ -234,7 +234,7 @@
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
-  (let [build-number (:build-number env/buildinfo)]
+  (let [build-number env/build-number]
     (if (= build build-number)
      (single-resource (keyword res-type) (keyword app) nil unauthorized)
      (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))

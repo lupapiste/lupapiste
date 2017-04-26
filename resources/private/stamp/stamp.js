@@ -6,17 +6,18 @@ var stamping = (function() {
     authorization: null,
     appModel: null,
     attachments: null,
+    pending: ko.observable(false),
     stampFields: {
-      text: ko.observable(loc("stamp.verdict")),
-      date: ko.observable(new Date()),
+      text: ko.observable(),
+      date: ko.observable(),
       organization: null,
-      xMargin: ko.observable("10"),
-      yMargin: ko.observable("200"),
-      page: ko.observable("first"),
+      xMargin: ko.observable(),
+      yMargin: ko.observable(),
+      page: ko.observable(),
       transparency: ko.observable(),
-      extraInfo: ko.observable(""),
-      kuntalupatunnus: ko.observable(""),
-      section: ko.observable("")
+      extraInfo: ko.observable(),
+      kuntalupatunnus: ko.observable(),
+      section: ko.observable()
     },
 
     cancelStamping: function() {
@@ -37,6 +38,20 @@ var stamping = (function() {
       hub.send("page-load", { pageId: "stamping" });
     }
   };
+
+  function resetStampFields() {
+    var fields = model.stampFields;
+    fields.text(loc("stamp.verdict"));
+    fields.date(new Date());
+    fields.organization = null;
+    fields.xMargin("10");
+    fields.yMargin("200");
+    fields.page("first");
+    fields.transparency("");
+    fields.extraInfo("");
+    fields.kuntalupatunnus("");
+    fields.section("");
+  }
 
   function setStampFields() {
     var verdict = util.getIn(model.appModel._js, ["verdicts", 0]);
@@ -73,6 +88,7 @@ var stamping = (function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
+        model.pending(true);
         model.stampingMode(false);
 
         var appId = pageutil.subPage();
@@ -101,11 +117,25 @@ var stamping = (function() {
     }
   });
 
+  // This component is never disposed. We do reset initially and
+  // afterwards always on leaving an application. This way the
+  // initialization works both for regularly opening stamping view and
+  // for the view reload.
+  resetStampFields();
+
+  hub.subscribe( "contextService::leave", resetStampFields );
+
   hub.onPageUnload("stamping", function() {
     model.stampingMode(false);
     model.appModel = null;
     model.attachments = null;
+    model.pending(true);
+    lupapisteApp.services.attachmentsService.queryAll();
     model.authorization = null;
+  });
+
+  hub.subscribe({eventType: "attachmentsService::query", query: "attachments"}, function() {
+    model.pending(false);
   });
 
   hub.subscribe("start-stamping", function(param) {

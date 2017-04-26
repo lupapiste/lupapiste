@@ -47,7 +47,13 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     targetCount( 0 );
   });
 
-  upload.listenService( "fileCleared", _.bind( targetCount.decrement, targetCount , 1));
+  upload.listenService( "fileCleared", function() {
+    // We do not keep tabs, which file has been cleared.
+    targetCount( Math.max( targetCount() - 1, 0));
+    if( !targetCount()) {
+      targets({});
+    }
+  });
 
   self.isFinished = self.disposedPureComputed( function() {
     return _.includes( [100, Infinity], self.progress());
@@ -66,7 +72,8 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     } );
 
     var castFun = _.cond( [[_.isNaN, _.wrap( 0, _.constant )],
-                           [_.isFinite, _.constant],
+                           // We cap the percentage just in case
+                           [_.isFinite, _.flow( _.partial( Math.min, 100), _.constant)],
                            // Infinity result interpretation comes from IE9 that does
                            // not support progress info.
                            [_.stubTrue,_.wrap( 100, _.constant)]]);

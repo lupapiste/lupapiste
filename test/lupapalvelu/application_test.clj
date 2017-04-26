@@ -416,12 +416,18 @@
     (validate-link-agreements-state {:state "verdictGiven"}) => nil)
 
   (fact "Linked agreement have to be signed"
-    (validate-link-agreements-signature {:verdicts []}) => {:ok false, :text "error.link-permit-app-not-signed"}
-    (validate-link-agreements-signature {:verdicts [{:signatures [:created "1490772437443" :user []]}]}) => nil)
+    (fact "without subtype success"
+      (validate-link-agreements-signature {:verdicts []}) => nil
+      (validate-link-agreements-signature {:verdicts [{:signatures [:created "1490772437443" :user []]}]}) => nil)
+    (fact "with subtype actual check is done"
+      (validate-link-agreements-signature {:verdicts [] :permitSubtype "sijoitussopimus"}) => {:ok false, :text "error.link-permit-app-not-signed"}
+      (validate-link-agreements-signature {:verdicts [{:signatures [:created "1490772437443" :user []]}]
+                                           :permitSubtype "sijoitussopimus"}) => nil))
 
   (fact "Is enought that only one agreements have signature"
     (validate-link-agreements-signature {:verdicts [{:id "123456789" :signatures [:created "1490772437443" :user []]},
-                                                    {:id "987654321"}]}) => nil))
+                                                    {:id "987654321"}]
+                                         :permitSubtype "sijoitussopimus"}) => nil))
 
 (facts "Making new application"
   (let [user {:id        ..user-id..

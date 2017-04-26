@@ -10,32 +10,37 @@
             [lupapalvelu.action :refer [defraw]])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)))
 
+(defn handler-roles-org [org-id]
+  (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
+
 (defn open-applications-for-organization [organizationId excluded-operations]
-  (let [query (cond-> {:organization organizationId
-                       :state {$in ["submitted" "open" "draft"]}
-                       :infoRequest false}
-                excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
-    (mongo/select :applications
-                  query
-                  [:_id :created :opened :submitted :modified
-                   :state :authority.firstName :authority.lastName
-                   :primaryOperation :secondaryOperations]
-                  {:authority.lastName 1})))
+  (let [query     (cond-> {:organization organizationId
+                           :state {$in ["submitted" "open" "draft"]}
+                           :infoRequest false}
+                    excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))
+        roles-org (handler-roles-org organizationId)]
+    (map #(app/enrich-application-handlers % roles-org)
+         (mongo/select :applications
+                       query
+                       [:_id :created :opened :submitted :modified
+                        :state :handlers
+                        :primaryOperation :secondaryOperations]))))
 
 (defn submitted-applications-between [orgId startTs endTs excluded-operations]
-  (let [now (now)
-        query (cond-> {:organization orgId
-                       ;:state {$in ["submitted" "open" "draft"]
-                       :submitted {$gte startTs
-                                   $lte (if (< now endTs) now endTs)}
-                       :infoRequest false}
-                excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
-    (->> (mongo/select :applications
+  (let [now       (now)
+        query     (cond-> {:organization orgId
+                                        ;:state {$in ["submitted" "open" "draft"]
+                           :submitted {$gte startTs
+                                       $lte (if (< now endTs) now endTs)}
+                           :infoRequest false}
+                    excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))
+        roles-org (handler-roles-org orgId)]
+    (map #(app/enrich-application-handlers % roles-org)
+         (mongo/select :applications
                        query
                        [:_id :submitted :modified :state :handlers
-                        :primaryOperation :secondaryOperations]
-                       {:submitted 1})
-         (map #(app/enrich-application-handlers % (mongo/select-one :organizations {:_id orgId} [:handler-roles]))))))
+                        :primaryOperation :secondaryOperations :verdicts]
+                       {:submitted 1}))))
 
 (defn- authority [app]
   (->> app
@@ -56,6 +61,9 @@
 
 (defn- date-value [key app]
   (util/to-local-date (get app key)))
+
+(defn- verdict-date [app]
+  (some-> app :verdicts first :paatokset first :paivamaarat :anto util/to-local-date))
 
 (defn- localized-operation [lang operation]
   (i18n/localize lang "operations" (:name operation)))
@@ -120,6 +128,7 @@
                                                               "application.handlers.other"
                                                               "applications.status"
                                                               "applications.submitted"
+                                                              "verdictGiven"
                                                               "operations.primary"
                                                               "application.operations.secondary"])
         row-fn (juxt :id
@@ -127,6 +136,7 @@
                      (partial other-handlers lang)
                      (partial localized-state lang)
                      (partial date-value :submitted)
+                     verdict-date
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
 

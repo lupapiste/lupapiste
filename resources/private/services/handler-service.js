@@ -186,6 +186,10 @@ LUPAPISTE.HandlerService = function() {
     }
   };
 
+  self.isTemporaryRole = function(role) {
+    return _.startsWith(ko.unwrap(_.get(ko.unwrap(role), "id")), TMP);
+  };
+
   self.addOrganizationHandlerRole = function() {
     roles.push( processRawRole({id: _.uniqueId( TMP ),
                                 name: _( self.organizationLanguages())

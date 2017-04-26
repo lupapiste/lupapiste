@@ -4,11 +4,9 @@
             [lupapalvelu.application-bulletins-itest-util :refer :all]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer [now]]
-            [clojure.java.io :as io]
             [cheshire.core :as json]))
 
 (apply-remote-minimal)
@@ -91,6 +89,8 @@
           ok => true
           (count data) => 0))
 
+      (fact "Bulletin can still be queried" (query pena :bulletin :bulletinId app-id) => ok?)
+
       (fact "Bulletin is published with immediate proclamation"
         (command olli :move-to-proclaimed
                  :id app-id
@@ -101,7 +101,8 @@
           (->
             (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil)
             :data
-            count) => 1)))
+            count) => 1
+          (query pena :bulletin :bulletinId app-id) => ok?)))
 
     (fact "Regular user can't publish bulletin"
       (command pena :move-to-proclaimed
@@ -115,7 +116,60 @@
         (count bulletin-attachments) => 1
         (fact "Only energiatodistus"
           (:id (first bulletin-attachments)) => (:id (last attachments))
-          (get-in (first bulletin-attachments) [:type :type-id]) => "vastaanottopaikan_tiedot")))))
+          (get-in (first bulletin-attachments) [:type :type-id]) => "vastaanottopaikan_tiedot")))
+
+    (facts "States"
+      (fact "Can't move to verdictGiven until verdict is given"
+        (command olli :move-to-verdict-given
+                 :id app-id
+                 :verdictGivenAt ts-now
+                 :appealPeriodStartsAt ts-now
+                 :appealPeriodEndsAt (+ 1 ts-now)
+                 :verdictGivenText "foo") => (partial expected-failure? :error.command-illegal-state))
+      (fact "Can't move to final until verdict is given"
+        (command olli :move-to-final
+                 :id app-id
+                 :officialAt ts-now) => (partial expected-failure? :error.command-illegal-state))
+      (give-verdict olli app-id :verdictId "12330-2016") => ok?
+      (fact "Cant move to final before bulletin of verdictGiven exists"
+        (command olli :move-to-final
+                 :id app-id
+                 :officialAt ts-now) => (partial expected-failure? :error.bulletin.missing-verdict-given-bulletin)))
+
+    (facts "Publishing verdict given"
+      (command olli :move-to-verdict-given
+               :id app-id
+               :verdictGivenAt ts-now
+               :appealPeriodStartsAt ts-now
+               :appealPeriodEndsAt (util/get-timestamp-ago :day 2) ; the past
+               :verdictGivenText "foo") => (partial expected-failure? :error.startdate-before-enddate)
+      (command olli :move-to-verdict-given
+               :id app-id
+               :verdictGivenAt ts-now
+               :appealPeriodStartsAt ts-now
+               :appealPeriodEndsAt (util/get-timestamp-from-now :day 2)
+               :verdictGivenText "foo") => ok?
+      (fact "Can't move twice"
+        (command olli :move-to-verdict-given
+                 :id app-id
+                 :verdictGivenAt ts-now
+                 :appealPeriodStartsAt ts-now
+                 :appealPeriodEndsAt (util/get-timestamp-from-now :day 2)
+                 :verdictGivenText "foo") => (partial expected-failure? :error.bulletin.verdict-given-bulletin-exists)))
+    (facts "Moving to final"
+      (fact "Can't move to final if appeal date is still acitve"
+        (command olli :move-to-final
+                 :id app-id
+                 :officialAt ts-now) => (partial expected-failure? :error.bulletin.official-before-appeal-period))
+      (fact "OK if date same or greater than appealPeriodEndsAt"
+        (command olli :move-to-final
+                 :id app-id
+                 :officialAt (util/get-timestamp-from-now :day 2)) => ok?))
+    (facts "Bulletin data"
+      (let [bulletin (query-bulletin pena app-id)]
+        (:id bulletin) => app-id
+        (:canComment bulletin) => false
+        (:bulletinState bulletin) => "final"))))
 
 (facts "Add comment for published bulletin"
   (let [store        (atom {})

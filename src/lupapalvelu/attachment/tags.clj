@@ -45,6 +45,11 @@
     :notNeeded
     :needed))
 
+(defn- tag-by-forPrinting [{verdict-attachment :forPrinting :as attachment}]
+  (if verdict-attachment
+    :verdictAttachment
+    :nonVerdictAttachment))
+
 (defn- tag-by-file-status [{{file-id :fileId} :latestVersion :as attachment}]
   (when file-id
     :hasFile))
@@ -88,6 +93,7 @@
               tag-by-application-group-types
               tag-by-operation
               tag-by-notNeeded
+              tag-by-forPrinting
               tag-by-type
               tag-by-file-status)
         attachment)
@@ -125,6 +131,12 @@
       [{:tag :needed    :default true}
        {:tag :notNeeded :default false}])))
 
+(defn- for-printing-filters [{attachments :attachments}]
+  (let [existing-verdict-attachment-tags (-> (map tag-by-forPrinting attachments) set)]
+    (when (< 1 (count existing-verdict-attachment-tags))
+      [{:tag :verdictAttachment    :default false}
+       {:tag :nonVerdictAttachment :default false}])))
+
 (defn- targeting-assignments [assignments attachments]
   (or (not-empty (assignment/targeting-assignments assignments attachments))
       [{:trigger "not-targeted"}]))
@@ -154,7 +166,7 @@
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
   [application & [assignments]]
-  (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+  (->> (conj ((juxt application-state-filters group-and-type-filters not-needed-filters for-printing-filters) application)
              (when assignments
                (assignment-trigger-filters application assignments)))
        (remove nil?)

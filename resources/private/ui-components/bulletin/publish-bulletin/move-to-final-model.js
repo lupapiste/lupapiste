@@ -35,7 +35,7 @@ LUPAPISTE.MoveToFinalModel = function (params) {
       hub.send("indicator", {style: "positive"});
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: self.appId()});
     } else {
-      hub.send("indicator", {style: "negative"});
+      hub.send("indicator", {style: "negative", message: event.text});
     }
   });
 };

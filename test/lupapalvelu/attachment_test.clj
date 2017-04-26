@@ -29,7 +29,8 @@
                    make-ram-attachment
                    attachment-assignment-info
                    version-approval-path
-                   signature-updates)
+                   signature-updates
+                   manually-set-construction-time)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -458,3 +459,17 @@
                        {:created ..orig-created.. :user ..orig-user.. :fileId ..orig-file-id.. :version ..orig-version..}
                        [{:version ..orig-version.. :fileId ..some-file-id.. :user ..user.. :created ..created..}])
     => {$set {:attachments.$.signatures.0 {:fileId ..file-id.. :version ..orig-version.. :created ..orig-created.. :user ..orig-user..}}}))
+
+(facts "Manually set construction time"
+       (fact "draft -> verdictGiven"
+             (manually-set-construction-time {:applicationState "verdictGiven" :originalApplicationState "draft"})
+             => true)
+       (fact "info -> verdictGiven"
+             (manually-set-construction-time {:applicationState "verdictGiven" :originalApplicationState "info"})
+             => true)
+       (fact "No original application state"
+             (manually-set-construction-time {:applicationState "verdictGiven"})
+             => false)
+       (fact "open -> submitted"
+             (manually-set-construction-time {:applicationState "submitted" :originalApplicationState "open"})
+             => false))

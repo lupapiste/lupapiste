@@ -128,8 +128,8 @@
   (when-let [failures (seq (migration/failing-migrations))]
     (let [msg (format "%s build %s (%s)\nFailing migration(s): %s"
                 env/target-env
-                (:build-number env/buildinfo)
-                (:hg-branch env/buildinfo)
+                env/build-number
+                (:git-branch env/buildinfo)
                 (s/join failures))]
       (email/send-email-message (env/value :technical-contact) "Critical: Migration failure!" [msg msg])))
 

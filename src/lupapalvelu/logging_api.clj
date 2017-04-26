@@ -28,7 +28,7 @@
         user            (or (ss/canonize-email email) "(anonymous)")
         sanitized-ua    (sanitize user-agent)
         sanitized-build (sanitize build)
-        expired?        (not= sanitized-build (:build-number env/buildinfo))
+        expired?        (not= sanitized-build env/build-number)
         build-check     (if expired?
                          " - CLIENT HAS EXPIRED VERSION"
                          "")

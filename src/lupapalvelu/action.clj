@@ -53,11 +53,15 @@
 
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
-  Pre-check returns result of the first argument in case of failure."
+  Pre-check returns nil if some succees, or result of the last error returning pre-check."
   [& pre-checks]
   (fn [command]
-    (when ((apply every-pred pre-checks) command)
-      ((first pre-checks) command))))
+    (reduce (fn [res check]
+              (if (nil? res)
+                (reduced nil)
+                (check command)))
+            ((first pre-checks) command)
+            (rest pre-checks))))
 
 (defn email-validator
   "Reads email key from action parameters and checks that it is valid email address.
@@ -418,11 +422,11 @@
                                                                      (delay (mongo/select :assignments {:application.id (:id application)
                                                                                                         :status {$ne "canceled"}})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
-            command (assoc command
-                           :application application
-                           :organization organization
-                           :user-organizations user-organizations
-                           :application-assignments assignments)]
+            command (merge {:application application
+                            :organization organization
+                            :user-organizations user-organizations
+                            :application-assignments assignments}
+                           command)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)

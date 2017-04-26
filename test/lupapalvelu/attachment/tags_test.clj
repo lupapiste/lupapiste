@@ -20,29 +20,29 @@
 (facts attachment-tags
 
   (fact "submitted - not-needed"
-        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :application :general :notNeeded} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :application :general :notNeeded :nonVerdictAttachment} :in-any-order :gaps-ok))
 
   (fact "verdict-given - needed"
-        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :application :general :needed} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :application :general :needed :nonVerdictAttachment} :in-any-order :gaps-ok))
 
   (fact "defaults"
-    (attachment-tags {}) => (just #{:preVerdict :application :general :needed} :in-any-order :gaps-ok))
+    (attachment-tags {}) => (just #{:preVerdict :application :general :needed :nonVerdictAttachment} :in-any-order :gaps-ok))
 
   (fact "parties"
-    (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :application :parties :needed} :in-any-order :gaps-ok))
+    (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :application :parties :needed :nonVerdictAttachment} :in-any-order :gaps-ok))
 
   (fact "multiple operations"
-    (attachment-tags {:groupType "operation" :op [{:id "someOpId"} {:id "otherOpId"}]}) => (just #{:preVerdict :needed :multioperation :other} :in-any-order :gaps-ok))
+    (attachment-tags {:groupType "operation" :op [{:id "someOpId"} {:id "otherOpId"}]}) => (just #{:preVerdict :needed :multioperation :other :nonVerdictAttachment} :in-any-order :gaps-ok))
 
   (fact "file"
-    (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :application :general :needed :hasFile} :in-any-order :gaps-ok))
+    (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :application :general :needed :hasFile :nonVerdictAttachment} :in-any-order :gaps-ok))
 
   (fact "type"
-    (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :application :general :needed :somegroup} :in-any-order :gaps-ok)
+    (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :application :general :needed :somegroup :nonVerdictAttachment} :in-any-order :gaps-ok)
     (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup))
 
   (fact "verdictGiven - RAM"
-        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :application :general :needed} :in-any-order :gaps-ok)))
+        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :application :general :needed :nonVerdictAttachment} :in-any-order :gaps-ok)))
 
 (fact "add-operation-tag-groups"
   (add-operation-tag-groups [] []) => []
