@@ -544,7 +544,7 @@
 
   (assert (or (seq (:input-validators meta-data))
               (empty? (:parameters meta-data))
-              (= [:id] (:parameters meta-data)))
+              (some #{:id} (:parameters meta-data)))
     (str "Input validators must be defined for " action-name))
 
   (let [action-keyword (keyword action-name)
