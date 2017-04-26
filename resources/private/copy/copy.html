@@ -5,9 +5,9 @@
   <!-- Phase 1: -->
 
   <section class="page container" id="copy-part-1">
-    <h1 data-bind="ltext: 'newRequest.topic'"></h1>
+    <h1 data-bind="ltext: 'copyApplication.topic'"></h1>
     <div class="copy-application-search-box">
-      <p data-bind="ltext: 'newRequest.locationInfo'"></p>
+      <p data-bind="ltext: 'copyApplication.locationInfo'"></p>
       <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
              id="copy-search" type="text" class="form-input text address-search" autofocus="autofocus" />
       <button data-bind="click: searchNow" class="positive" data-test-id="copy-search-button">
@@ -15,7 +15,22 @@
           <span data-bind="ltext: 'search'"></span>
       </button>
     </div>
+    <!-- ko if: !locationSelected() -->
     <div id="copy-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
+    <!-- /ko -->
+    <!-- ko if: locationSelected() -->
+    <div id="copy-auths" class="filter-group__toggles"
+         data-bind="foreach: copyAuths"><div class="filter-wrapper">
+        <input type="checkbox"
+               data-bind="attr: {'id': $index()},
+                                 checked: false">
+        <label class="filter-label"
+               data-bind="attr: {'for': $index()},
+                          text: $parent.authDescription($data)"></label>
+    </div></div>
+
+    <!-- /ko -->
+
   </section>
 
 </body>

@@ -66,7 +66,7 @@ LUPAPISTE.CopyApplicationLocationModel = function() {
     return self;
   };
 
-  self.proceed = _.partial(hub.send, "copy-step-2");
+  self.proceed = _.partial(hub.send, "copy-location-selected");
 
 };
 

@@ -4,6 +4,12 @@
   function CopyApplicationModel() {
     var self = this;
 
+    self.locationSelected = ko.observable(false);
+    hub.subscribe("copy-location-selected", function() {
+      hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
+      self.locationSelected(true);
+    });
+
     self.locationModel = new LUPAPISTE.CopyApplicationLocationModel();
 
     self.search = ko.observable("");
@@ -13,6 +19,23 @@
     self.pending = ko.observable(false);
     self.message = ko.observable("");
 
+    self.copyAuths = ko.observableArray([
+      {firstName: "Ville",
+       lastName: "Outamaa",
+       role: "writer",
+       roleSource: "auth"},
+      {firstName: "Åke W.",
+       lastName: "Blomqvist",
+       role: "hakija",
+       roleSource: "document"}
+    ]);
+
+    self.authDescription = function(auth) {
+      return auth.firstName + " " + auth.lastName + ", " +
+        _.upperFirst(auth.roleSource === "document" ?
+                     loc("applicationRole." + auth.role)
+                     : loc(auth.role));
+    };
 
     self.findOperations = function(code) {
       municipalities.operationsForMunicipality(code, function(operations) {
@@ -35,7 +58,7 @@
         .message("");
     };
 
-    self.createOK = ko.pureComputed(function() {
+    self.copyOK = ko.pureComputed(function() {
       return self.locationModel.propertyIdOk() && self.locationModel.addressOk() && !self.processing();
     });
 
@@ -102,7 +125,7 @@
     var renderers = [
       [{kind: "poi"}, function(item) {
         return $("<a>")
-          .addClass("copy-find")
+          .addClass("create-find") // Todo: copy-find
           .addClass("poi")
           .append($("<span>").addClass("name").text(item.text))
           .append($("<span>").addClass("municipality").text(loc(["municipality", item.municipality])))
@@ -110,7 +133,7 @@
       }],
       [{kind: "address"}, function(item) {
         var a = $("<a>")
-          .addClass("copy-find")
+          .addClass("create-find") // Todo: copy-find
           .addClass("address")
           .append($("<span>").addClass("street").text(item.street));
         if (item.number) {
@@ -123,7 +146,7 @@
       }],
       [{kind: "property-id"}, function(item) {
         return $("<a>")
-          .addClass("copy-find")
+          .addClass("create-find") // Todo: copy-find
           .addClass("property-id")
           .append($("<span>").text(util.prop.toHumanFormat(item["property-id"])));
       }]
@@ -200,13 +223,6 @@
     $("#copy-part-1").applyBindings(model);
 
     initAutocomplete("#copy-search");
-
-    function ifStep2(fn) {
-      if ($("#create-part-2:visible").length === 1) {
-        fn();
-      }
-    }
-
 
   });
 

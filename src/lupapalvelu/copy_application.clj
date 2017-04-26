@@ -47,7 +47,9 @@
      :email (-> auth-entry :invite :email) ; for cases where invitee is not a registered user and name is not known
      :role (or (:role party-info)                      ; prefer role dictated by party document
                (keyword (-> auth-entry :invite :role)) ; but fall back to role in auth
-               (keyword (-> auth-entry :role)))}))
+               (keyword (-> auth-entry :role)))
+     :roleSource (if (:role party-info)
+                   :document :auth)}))
 
 (defn- get-invite-candidates [auth documents]
   (->> auth
