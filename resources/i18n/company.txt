@@ -95,7 +95,7 @@
 "company.user.op.admin.false" "fi" "Ylläpitäjäksi"
 "company.user.op.admin.false" "sv" "Som administrator"
 "company.user.op.admin.false.message" "en" "Are you sure you want to give user <b>{0}</b> the maintenance rights?"
-"company.user.op.admin.false.message" "fi" "Oletko varma että haluat antaa käyttäjälle <b>{0}</b> ylläpito oikeudet?"
+"company.user.op.admin.false.message" "fi" "Oletko varma että haluat antaa käyttäjälle <b>{0}</b> ylläpito-oikeudet?"
 "company.user.op.admin.false.message" "sv" "Är du säker på att du vill ge adminstratörsrättigheter till användare <b>{0}</b>?"
 "company.user.op.admin.false.title" "en" "Allocation of maintenance rights"
 "company.user.op.admin.false.title" "fi" "Ylläpito-oikeuksien antaminen"

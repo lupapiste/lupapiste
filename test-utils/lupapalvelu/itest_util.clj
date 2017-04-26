@@ -51,6 +51,8 @@
 
 (def kaino       (apikey-for "kaino@solita.fi"))
 (def kaino-id    (id-for "kaino@solita.fi"))
+(def erkki       (apikey-for "erkki@example.com"))
+(def erkki-id    (id-for "erkki@example.com"))
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
 (def mikko       (apikey-for "mikko@example.com"))

@@ -277,6 +277,19 @@
 
 (fact "Company back to regular account"
       (command admin :company-update :company "solita" :updates {:accountType "account5"}) => ok?)
+(facts "Teppo back into shape"
+       (fact "Teppo cannot login"
+             (command teppo :login :username "kaino@solita.fi" :password "kaino123") => fail?)
+       (fact "Teppo resets password"
+             (http-post (str (server-address) "/api/reset-password")
+                        {:form-params      {:email "teppo@example.com"}
+                         :content-type     :json
+                         :follow-redirects false
+                         :throw-exceptions false})=> http200?)
+       (let [email (last-email)
+             token (token-from-email "teppo@example.com" email)]
+         (:subject email) => (contains "Uusi salasana")
+         (http-token-call token {:password "Teppo rules!"}) => (contains {:status 200})))
 
 (facts "Company locking"
        (fact "Admin locks Solita"
@@ -284,13 +297,13 @@
        (fact "Locked pseudo-query succeeds"
              (query kaino :user-company-locked) => ok?)
        (fact "Companies listing no longer includes Solita"
-             (query pena :companies) => {:ok true :companies []})
+             (:companies (query pena :companies)) => (just [(contains {:id "esimerkki"})]))
        (fact "Company is not authed to new applications"
              (let [{auth :auth} (create-application kaino
                                          :propertyId sipoo-property-id
                                          :address "Sanyuanqiao") => ok?]
                (count auth) => 1
-               auth => [(contains {:type "owner"})]))
+               auth => (just [(contains {:type "owner"})])))
        (fact "Company can be queried"
              (query kaino :company :company "solita" :users true) => ok?)
        (fact "Company cannot be updated"
@@ -327,16 +340,31 @@
              (command admin :company-lock :company "solita" :timestamp (+ (now) 10000)) => ok?)
        (fact "Company can now also be updated"
              (command kaino :company-update :company "solita" :updates {:po "Chaoyang"}) => ok?)
-       (fact "Kaino invites Pena to Solita"
-             (command kaino :company-add-user :firstName "Pena" :lastName "Panaani"
-                      :email "pena@example.com" :admin false :submit true))
-       (let [pena-token (token-from-email "pena@example.com" (last-email))]
-         (fact "Admin locks Solita again"
-               (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
-         (fact "Kaino nukes locked company"
-               (command kaino :company-user-delete-all) => ok?)
-         (fact "Pena's invitation has been rescinded"
-               (http-token-call pena-token {:ok true}) => (contains {:status 404})))
+       (fact "Erkki invites Teppo to Esimerkki"
+             (command erkki :company-invite-user :firstName "Teppo" :lastName "Nieminen"
+                      :email "teppo@example.com" :admin false :submit true))
+       (let [teppo-token (token-from-email "teppo@example.com" (last-email))]
+         (facts "Kaino invites Pena and Unknown to Solita"
+                (let [_ (command kaino :company-invite-user :firstName "Pena" :lastName "Panaani"
+                                 :email "pena@example.com" :admin false :submit true) => ok?
+                      pena-token (token-from-email "pena@example.com" (last-email))
+                      _ (command kaino :company-add-user :firstName "Bu" :lastName "Zhi Dao"
+                                 :email "unknown@example.com" :admin false :submit true) => ok?
+                      unknown-token (token-from-email "unknown@example.com" (last-email))]
+                  (fact "Admin locks Solita again"
+                        (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
+                  (fact "Kaino nukes locked company"
+                        (command kaino :company-user-delete-all) => ok?)
+                  (fact "Pena's invitation has been rescinded"
+                        (http-token-call pena-token {:ok true}) => (contains {:status 404}))
+                  (fact "Pena can still login"
+                        (command pena :login :username "pena" :password "pena") => ok?)
+                  (fact "Unknown's invitation has been rescinded"
+                        (http-token-call unknown-token {:ok true}) => (contains {:status 404}))))
+         (fact "Teppo's invitation is untouched"
+               (http-token-call teppo-token {:ok true}) => (contains {:status 200}))
+         (fact "Erkki can still login"
+               (command erkki :login :username "erkki@example.com" :password "esimerkki") => ok?))
        (fact "Kaino cannot login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
        (fact "Kaino resets password"
