@@ -53,7 +53,7 @@
 
 (defquery archiving-operations-enabled
   {:user-roles      #{:authority}
-   :org-authz-roles #{:archivist}
+   :org-authz-roles (with-meta #{:archivist} {:skip-validation true})
    :states          states/all-application-states
    :pre-checks      [(fn [{:keys [user application]}]
                        (when-not (or application (usr/user-is-archivist? user nil)) ; If application, :org-authz-roles works as validator
