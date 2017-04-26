@@ -370,6 +370,9 @@
                   :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
+   :copy         {:depends [:common-html :map]
+                  :html ["copy.html"]}
+
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
 
