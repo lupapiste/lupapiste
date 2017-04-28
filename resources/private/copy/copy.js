@@ -92,7 +92,7 @@
 
       return self
         .resetLocation()
-//        .sourceApplicationId(null)
+        .sourceApplicationId(pageutil.lastSubPage())
         .search("")
         .message("")
         .inviteCandidatesFetched(false)
@@ -263,7 +263,7 @@
 
   var model = new CopyApplicationModel();
 
-  hub.onPageLoad("copy-part-1", model.clear);
+  hub.onPageLoad("copy", model.clear);
 
   function initAutocomplete(id) {
     $(id)
@@ -278,7 +278,7 @@
   }
 
   $(function() {
-    $("#copy-part-1").applyBindings(model);
+    $("#copy").applyBindings(model);
 
     initAutocomplete("#copy-search");
 
