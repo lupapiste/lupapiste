@@ -583,9 +583,31 @@
     (http-post (str (server-address) "/api/token/" token) {:follow-redirects false
                                                            :throw-exceptions false})))
 
+
 (defn invite-company-and-accept-invitation [apikey app-id company-id]
   (command apikey :company-invite :id app-id :company-id company-id) => ok?
   (accept-company-invitation))
+
+(defn http-token-call
+  ([token body]
+   (let [url (str (server-address) "/api/token/" token)]
+     (http-post url {:follow-redirects false
+                  :throw-exceptions false
+                  :content-type     :json
+                  :body (json/encode body)})))
+  ([token]
+   (fact "Call api/token"
+         (http-token-call token {:ok true}) => (contains {:status 200}))))
+
+(defn token-from-email
+  ([email]
+   (token-from-email email (last-email)))
+  ([email email-data]
+   (fact {:midje/description (str "Read email for " email)}
+     (s/index-of (:to email-data) email) => pos?)
+   (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
+                  (:plain (:body email-data))))))
+
 
 (defn login
   ([u p]
