@@ -3,11 +3,13 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.company :as com]))
 
 (testable-privates lupapalvelu.document.persistence
                    empty-op-attachments-ids
-                   validate-readonly-removes!)
+                   validate-readonly-removes!
+                   company-fields)
 
 (def some-time 123456789)
 
@@ -150,3 +152,36 @@
               (fact "Upper-case" (transform-value :upper-case " Foobar ") => "FOOBAR")
               (fact "Lower-case" (transform-value :lower-case " FooBar ") => "foobar")
               (fact "Zero-pad-4" (transform-value :zero-pad-4 " 1  ") => "0001")))
+
+(facts "Company fields"
+       (fact "No company auth, no company user"
+             (company-fields {:auth [{:id "1234"} {:id "5678"}]}
+                             "company"
+                             {:id "1234" :zip "remove"
+                              :firstName "U" :lastName "Ser"})
+             => {:id "company" :name "Company" :y "y" :zip "zip"}
+             (provided (com/find-company-by-id "company")
+                       => {:id "company" :name "Company" :y "y" :zip "zip"}
+                       (com/find-company-users "company")
+                       => [{:id "foo" :firstName "Foo" :lastName "Bar"
+                            :zip "bad"}]))
+       (fact "Company auth, no company user"
+             (company-fields {:auth [{:id "1234"} {:id "foo"}]}
+                             "company"
+                             {:id "1234" :zip "remove"
+                              :firstName "U" :lastName "Ser"})
+             => {:id "foo" :name "Company" :y "y" :zip "zip"
+                 :firstName "Foo" :lastName "Bar"}
+             (provided (com/find-company-by-id "company")
+                       => {:id "company" :name "Company" :y "y" :zip "zip"}
+                       (com/find-company-users "company")
+                       => [{:id "foo" :firstName "Foo" :lastName "Bar" :zip "forb"}]))
+       (fact "No company auth, company user"
+             (company-fields {:auth [{:id "1234"} {:id "5678"}]}
+                             "company"
+                             {:id "1234" :zip "remove"
+                              :firstName "U" :lastName "Ser" :company {:id "company"}})
+             => {:id "1234" :name "Company" :y "y" :zip "zip"
+                 :firstName "U" :lastName "Ser" :company {:id "company"}}
+             (provided (com/find-company-by-id "company")
+                       => {:id "company" :name "Company" :y "y" :zip "zip"})))
