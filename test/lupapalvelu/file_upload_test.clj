@@ -146,7 +146,6 @@
                                                            :contents contents
                                                            :fileId file-id
                                                            :size length
-                                                           :drawingNumber nil
                                                            :type {:metadata {:grouping :parties
                                                                              :for-operations #{:tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen}}
                                                                   :type-group :osapuolet
@@ -204,7 +203,6 @@
                                                    :contents contents
                                                    :fileId file-id
                                                    :size length
-                                                   :drawingNumber nil
                                                    :type {:metadata {:grouping :parties
                                                                      :for-operations #{:tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen}}
                                                           :type-group :osapuolet
