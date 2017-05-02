@@ -739,7 +739,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :user-roles #{:applicant :authority}
-   :states     #{:verdictGiven :constructionStarted}
+   :states     #{:verdictGiven :constructionStarted :appealed :inUse :onHold}
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (app/make-application-id (:municipality application))
