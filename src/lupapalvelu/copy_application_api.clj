@@ -6,7 +6,8 @@
             [lupapalvelu.logging :as logging]
             [lupapalvelu.user :as usr]
             [sade.coordinate :as coord]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.env :as env]))
 
 (defn- validate-is-authority [{user :user}]
   (when-not (usr/authority? user)
@@ -21,12 +22,23 @@
                       coord/validate-x coord/validate-y]
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
-  [command]
-  (let [copied-application (copy-app/copy-application command)]
+  [{:keys [created] :as command}]
+  (let [{source-application :source-application
+         copied-application :copy-application} (copy-app/copy-application command)]
     (logging/with-logging-context {:applicationId (:id copied-application)}
       (app/insert-application copied-application)
+      (copy-app/store-source-application source-application (:id copied-application) created)
       (copy-app/send-invite-notifications! copied-application command)
       (ok :id (:id copied-application)))))
+
+(env/in-dev
+  (defquery source-application
+    {:description "Return a source application entry from source-applications"
+     :parameters [:copy-application-id]
+     :input-validators [(partial action/non-blank-parameters [:copy-application-id])]
+     :user-roles #{:authority}}
+    [{{:keys [copy-application-id]} :data}]
+    (copy-app/get-source-application copy-application-id)))
 
 (defquery copy-application-invite-candidates
   {:parameters [:source-application-id]

@@ -212,18 +212,29 @@
       (when (some not-in-source-auths? auth-invites)
         (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))
 
-      (new-application-copy (assoc source-application
-                                   :auth         (filter #((set auth-invites) (auth-id %))
-                                                         (:auth source-application))
-                                   :state        :draft
-                                   :propertyId   propertyId
-                                   :location     (app/->location x y)
-                                   :municipality municipality
-                                   :organization (:id organization))
-                            user organization created
-                            default-copy-options
-                            manual-schema-datas))
+      {:source-application source-application
+       :copy-application (new-application-copy (assoc source-application
+                                                      :auth         (filter #((set auth-invites) (auth-id %))
+                                                                            (:auth source-application))
+                                                      :state        :draft
+                                                      :propertyId   propertyId
+                                                      :location     (app/->location x y)
+                                                      :municipality municipality
+                                                      :organization (:id organization))
+                                               user organization created
+                                               default-copy-options
+                                               manual-schema-datas)})
     (fail! :error.no-source-application :id source-application-id)))
+
+(defn store-source-application
+  "Store the state of the source application used for copying application specified by copy-application-id"
+  [source-application copy-application-id timestamp]
+  (mongo/insert :source-applications {:id copy-application-id
+                                      :timestamp timestamp
+                                      :source-application source-application}))
+
+(defn get-source-application [copy-application-id]
+  (first (mongo/select :source-applications {:id copy-application-id})))
 
 ;;; Sending invite notifications
 
