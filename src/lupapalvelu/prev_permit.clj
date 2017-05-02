@@ -10,6 +10,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
@@ -24,7 +25,8 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.validator :as validator]))
+            [lupapalvelu.document.validator :as validator]
+            [lupapalvelu.xml.krysp.common-reader :as common]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -242,9 +244,12 @@
         :turvakieltoKytkin (or (:turvakieltoKytkin applicant) false)
         :puhelin (get-in applicant [:yritys :puhelin])
         :email (get-in applicant [:yritys :sahkopostiosoite])
+        :verkkolaskuTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus])
+        :ovtTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :ovtTunnus])
+        :valittajaTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus])
         (tools/default-values element)))))
 
-(defn- applicant->applicant-doc [applicant]
+(defn applicant->applicant-doc [applicant]
   (let [schema         (schema/get-schema 1 "hakija-r")
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
@@ -252,6 +257,26 @@
                         :schema-info (:info schema)
                         :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
         unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
+
+(defn designer->designer-doc [designer schema-name]
+  (let [schema         (schema/get-schema 1 schema-name)
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values designer))}
+        unset-type     (if (contains? designer :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
+
+(defn maksaja->maksaja-doc [maksaja schema-name]
+  (let [schema         (schema/get-schema 1 schema-name)
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values maksaja))}
+        unset-type     (if (contains? maksaja :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
 (defn fix-prev-permit-applicants []
@@ -305,22 +330,18 @@
     (= koodi "Rakennusvalvonta-asian laskun maksaja") "maksaja"
     (= koodi "Hakijan asiamies")                      "asiamies"))
 
-(defn- osapuoli->party-document [{:keys [schema-version] :as application} party]
+(defn- osapuoli->party-document [party]
   (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
-    (let [doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
-          doc-updates (lupapalvelu.document.model/map2updates [] party)]
-      (lupapalvelu.document.model/apply-updates doc doc-updates))))
+    (maksaja->maksaja-doc party schema-name)))
 
-(defn- suunnittelija->party-document [{:keys [schema-version] :as application} party]
+(defn- suunnittelija->party-document [party]
   (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
-    (let [doc (doc-persistence/new-doc application (schemas/get-schema schema-version schema-name) (now))
-          doc-updates (lupapalvelu.document.model/map2updates [] party)]
-      (lupapalvelu.document.model/apply-updates doc doc-updates))))
+    (designer->designer-doc party schema-name)))
 
 (defn extend-prev-permit-with-all-parties
   [application app-xml app-info]
-  (let [new-parties (map (partial suunnittelija->party-document application) (:suunnittelijat app-info))
+  (let [new-parties (concat (map suunnittelija->party-document (:suunnittelijat app-info))
+                            (map osapuoli->party-document (:muutOsapuolet app-info)))
         buildings (building-reader/->buildings app-xml)]
-    (clojure.pprint/pprint
       {:new-op-documents (map (partial ->op-document application) buildings)
-       :new-parties new-parties})))
+       :new-parties new-parties}))

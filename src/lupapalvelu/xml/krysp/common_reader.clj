@@ -122,7 +122,7 @@
 (defn str-or-nil [& v]
   (when-not (some nil? v) (reduce str v)))
 
-(defn- get-osoite [osoite]
+(defn get-osoite [osoite]
   (-> (get-text osoite :osoitenimi :teksti)
       (get-updated-if (str-or-nil " " (get-text osoite :osoitenumero)))
       (get-updated-if (str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
@@ -153,9 +153,3 @@
                        :postinumero                   (get-text yritys :postiosoite :postinumero)
                        :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
               :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}}))
-
-(defn ->yritys-with-verkkolaskutustieto [xml-without-ns]
-  (assoc-in (->yritys xml-without-ns) [:yritys :verkkolaskutustieto]
-            {:verkkolaskuTunnus   (get-text :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus)
-             :ovtTunnus           (get-text :verkkolaskutustieto :Verkkolaskutus :ovtTunnus)
-             :valittajaTunnus     (get-text :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus)}))
