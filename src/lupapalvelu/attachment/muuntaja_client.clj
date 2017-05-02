@@ -53,7 +53,7 @@
 
         :else
         (do
-          (timbre/warn "Muuntaja failed to process the zip file: " error)
+          (timbre/warn "Muuntaja failed to process the zip file:" error)
           {:error error})))
     (catch Exception ex
       (timbre/error ex)

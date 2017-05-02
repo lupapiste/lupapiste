@@ -39,21 +39,48 @@
        (mongo/upload anything anything anything anything anything) => {:length length}]
 
       (fact "non-zip is saved normally"
-        (save-files application [file1] session-id) => [{:fileId file-id
+        (save-files application [file1] session-id) => {:ok true
+                                                        :files
+                                                        [{:fileId file-id
                                                          :filename "foobar.pdf"
                                                          :size length
                                                          :contentType "application/pdf"
-                                                         :metadata {:linked false, :sessionId "abc"}}])
+                                                         :metadata {:linked false, :sessionId "abc"}}]})
+      (against-background
+        [(muuntaja/unzip-attachment-collection content) => {:attachments []
+                                                            :error "invalid"}]
+
+        (fact "muuntaja error is passed on to front end"
+          (save-files application [file2] session-id) => {:ok false
+                                                          :error "invalid"}))
 
       (against-background
-        [(muuntaja/unzip-attachment-collection content) => nil]
+        [(muuntaja/unzip-attachment-collection content) => {:attachments []}]
 
-        (fact "non-attachment-collection zip is saved normally"
-          (save-files application [file2] session-id) => [{:fileId file-id
-                                                           :filename "foobar.zip"
-                                                           :size length
-                                                           :contentType "application/zip"
-                                                           :metadata {:linked false, :sessionId "abc"}}]))
+        (fact "zero attachments without muuntaja error is an unknown error"
+          (save-files application [file2] session-id) => {:ok false
+                                                          :error "unknown"}))
+
+      (against-background
+        [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
+                                                                           :filename "foobar1.pdf"}
+                                                                          {:uri "/path/to/foobar.pdf"
+                                                                           :filename "foobar2.pdf"}]}
+         (muuntaja/download-file "/path/to/foobar.pdf") => (io/input-stream content)]
+
+        (fact "files are extracted from a zip without index"
+          (save-files application [file2] session-id) => {:ok true
+                                                          :files
+                                                          [{:filename "foobar1.pdf"
+                                                            :contentType "application/pdf"
+                                                            :fileId file-id
+                                                            :size length
+                                                            :metadata {:linked false, :sessionId "abc"}}
+                                                           {:filename "foobar2.pdf"
+                                                            :contentType "application/pdf"
+                                                            :fileId file-id
+                                                            :size length
+                                                            :metadata {:linked false, :sessionId "abc"}}]}))
 
       (against-background
         [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
@@ -87,7 +114,9 @@
 
         (fact "attachment collection zip is parsed and stored as files"
           (env/enable-feature! :unzip-attachments)
-          (save-files application [file2] session-id) => [{:filename "foobar1.pdf"
+          (save-files application [file2] session-id) => {:ok true
+                                                          :files
+                                                          [{:filename "foobar1.pdf"
                                                            :contentType "application/pdf"
                                                            :contents contents
                                                            :drawingNumber "1"
@@ -151,7 +180,7 @@
                                                                   :type-group :osapuolet
                                                                   :type-id :cv}
                                                            :metadata {:linked false, :sessionId "abc"}
-                                                           :group {:groupType :parties}}]))
+                                                           :group {:groupType :parties}}]}))
 
       (against-background
         [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
@@ -173,7 +202,9 @@
 
         (fact "attachment collection zip is parsed and stored as files - without application"
           (env/enable-feature! :unzip-attachments)
-          (save-files nil [file2] session-id) => [{:filename "foobar1.pdf"
+          (save-files nil [file2] session-id) => {:ok true
+                                                  :files
+                                                  [{:filename "foobar1.pdf"
                                                    :contentType "application/pdf"
                                                    :contents contents
                                                    :drawingNumber "1"
@@ -208,5 +239,5 @@
                                                           :type-group :osapuolet
                                                           :type-id :cv}
                                                    :metadata {:linked false, :sessionId "abc"}
-                                                   :group {:groupType :parties}}])))
+                                                   :group {:groupType :parties}}]})))
     (env/set-feature! feature-status [:unzip-attachments])))

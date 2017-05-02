@@ -42,10 +42,10 @@
                       file-size-legal]
    :states           states/all-states}
   [{:keys [application]}]
-  (->> {:files (file-upload/save-files application files (vetuma/session-id))
-        :ok true}
-       (resp/json)
-       (resp/status 200)))
+  (let [{:keys [ok] :as result} (file-upload/save-files application files (vetuma/session-id))]
+    (->> result
+         (resp/json)
+         (resp/status (if ok 200 400)))))
 
 (defn- file-upload-in-database
   [{{attachment-id :attachmentId} :data}]
