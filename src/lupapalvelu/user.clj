@@ -238,7 +238,6 @@
    (let [projection (-> (ssc/plain-keys org/Organization)
                         (zipmap (repeat true))
                         (dissoc :areas :areas-wgs84
-                                :selected-operations
                                 :operations-attachments))]
      (get-organizations user projection)))
   ([user projection]
