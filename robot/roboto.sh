@@ -253,7 +253,7 @@ check_env() {
    # selenium version
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
-   echo "$SELENIUM" | grep "selenium (3\.[0-9]+.[0-9]*)" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 3.X.X."
+   echo "$SELENIUM" | grep -E "selenium \(3\.[0-9]+\.[0-9]+\)" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 3.X.X."
 
    echo "Browser: $BROWSER"
    case "$BROWSER" in
