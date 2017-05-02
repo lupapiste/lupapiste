@@ -93,9 +93,10 @@
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
      :documents (mapv (fn [doc]
-                        (let [doc (assoc doc
-                                         :id (mongo/create-id)
-                                         :created (:created application))]
+                        (let [doc (-> doc
+                                      (assoc :id (mongo/create-id)
+                                             :created (:created application))
+                                      (dissoc :meta))]
                           (if (-> doc :schema-info :op)
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
