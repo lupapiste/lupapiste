@@ -31,7 +31,6 @@
                     (map #(rename-keys % {:tempfile :content}) files))]
     (->> {:files file-info :ok true}
          (resp/json)
-         (resp/content-type "text/plain")
          (resp/status 200))))
 
 (defraw upload-file-authenticated
@@ -46,7 +45,6 @@
   (->> {:files (file-upload/save-files application files (vetuma/session-id))
         :ok true}
        (resp/json)
-       (resp/content-type "text/plain")
        (resp/status 200)))
 
 (defn- file-upload-in-database
