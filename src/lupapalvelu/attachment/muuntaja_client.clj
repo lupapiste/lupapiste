@@ -15,11 +15,13 @@
 
 (def column-keyword-map
   {"tiedosto"          :filename
+   "tiedostonimi"      :filename
    "tyyppi"            :localizedType
    "sis\u00e4lt\u00f6" :contents
    "piirrosnumero"     :drawingNumber
    "liittyy"           :operation
    "fil"               :filename
+   "filnamn"           :filename
    "typ"               :localizedType
    "inneh\u00e5ll"     :contents
    "ritningsnummer"    :drawingNumber
