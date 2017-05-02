@@ -269,7 +269,7 @@
         unset-type     (if (contains? designer :henkilo) :yritys :henkilo)]
     (assoc-in document [:data unset-type] (unset-type default-values))))
 
-(defn maksaja->maksaja-doc [maksaja schema-name]
+(defn osapuoli->osapuoli-doc [maksaja schema-name]
   (let [schema         (schema/get-schema 1 schema-name)
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
@@ -332,7 +332,7 @@
 
 (defn- osapuoli->party-document [party]
   (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
-    (maksaja->maksaja-doc party schema-name)))
+    (osapuoli->osapuoli-doc party schema-name)))
 
 (defn- suunnittelija->party-document [party]
   (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
