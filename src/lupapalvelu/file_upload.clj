@@ -89,11 +89,13 @@
         (when-let [is (muuntaja/download-file uri)]
           (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)
-            (merge file-data
-                   {:contents      contents
-                    :drawingNumber drawingNumber
-                    :group         (resolve-attachment-grouping attachment-type application operation)
-                    :type          attachment-type})))))
+            (merge
+              file-data
+              (util/strip-nils
+                {:contents      contents
+                 :drawingNumber drawingNumber
+                 :group         (resolve-attachment-grouping attachment-type application operation)
+                 :type          attachment-type}))))))
     attachments))
 
 (defn- is-zip-file? [filedata]
