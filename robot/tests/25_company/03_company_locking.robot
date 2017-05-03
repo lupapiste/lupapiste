@@ -11,8 +11,24 @@ Resource       company_resource.robot
 # -------------------
 # Company admin
 # -------------------
-Kaino logs in and invites Pena to Solita
+Kaino logs in
   Kaino logs in
+
+Kaino toggles between tabs but back button still works as expected
+  Open company details
+  Wait test id visible  company-info-tab
+  Company tab  users
+  No such test id  company-info-tab
+  Company tab  info
+  Wait test id visible  company-info-tab
+  Company tab  users
+  No such test id  company-info-tab
+  Click by test id  company-back
+  Wait until  Element should be visible  own-info-form
+  Click by test id  back-button
+  Wait until  Applications page should be open
+
+Kaino invites Pena to Solita
   Open company user listing
   Invite existing user  pena@example.com  Pena  Panaani
   [Teardown]  Logout
@@ -41,7 +57,7 @@ Admin admin locks Solita
 # -------------------
 Kaino logs in and sees Solita locked
   Kaino logs in
-  Company is locked
+  Company is locked for admin
   [Teardown]  Logout
 
 # -------------------
@@ -49,10 +65,7 @@ Kaino logs in and sees Solita locked
 # -------------------
 Pena locks in but locking status is not visible to him
   Pena logs in
-  Open company details
-  No such test id  company-is-locked
-  Open company user listing
-  No such test id  company-nuke-all
+  Company is locked for user
   [Teardown]  Logout
 
 # -------------------
@@ -90,12 +103,12 @@ Admin admin locks Solita in the past
 # -------------------
 Kaino logs in and sees Solita again locked
   Kaino logs in
-  Company is locked
+  Company is locked for admin
 
 Kaino nukes company
   Click by test id  company-nuke-all
   Click by test id  confirm-no
-  Company is locked
+  Company is locked for admin
   Click by test id  company-nuke-all
   Click by test id  confirm-yes
   User should not be logged in
@@ -141,7 +154,11 @@ Pena is no longer a company user
 
 *** Keywords ***
 
-Company is locked
+Company tab
+  [Arguments]  ${tab}
+  Click element  jquery=a[data-tab-id=${tab}]
+
+Company is locked for admin
   Open company details
   Wait test id visible  company-is-locked
   Test id disabled  company-details-edit
@@ -151,6 +168,12 @@ Company is locked
   No such test id  company-user-edit-0
   Wait test id visible  company-nuke-all
   No such test id  company-add-user
+
+Company is locked for user
+  Open company details
+  Wait test id visible  company-is-locked
+  Open company user listing
+  No such test id  company-nuke-all
 
 Company is not locked
   Open company details

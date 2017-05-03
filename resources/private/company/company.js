@@ -381,6 +381,19 @@
     self.info        = new CompanyInfo(self);
     self.tabs        = new TabsModel(self.id);
 
+    // Rewind history until we are no longer on the company page (or
+    // we give up).
+    function doRewind( backstop ) {
+      if( backstop && /\/company\//.test( window.location.href )) {
+        window.history.back();
+        // Delay to make sure that location has changed.
+        _.delay( doRewind, 100, backstop-- );
+      }
+    }
+    self.rewind = function() {
+      doRewind( 20 );
+    };
+
     self.clear = function() {
       return self
         .pending(false)

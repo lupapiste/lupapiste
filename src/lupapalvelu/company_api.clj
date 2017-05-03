@@ -97,8 +97,7 @@
   {:description "Pseudo-query that succeeds if the user's company is
   locked."
    :user-roles #{:applicant}
-   :pre-checks [(com/validate-has-company-role :admin)
-                com/user-company-is-locked]}
+   :pre-checks [com/user-company-is-locked]}
   [_])
 
 (defn- user-limit-not-exceeded [command]

@@ -5,7 +5,9 @@
 
     <div id="company-content" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'company'" class="accordion-container">
       <div class="inner-margins">
-        <button class="secondary" data-bind="click: function() { history.go(-1); }">
+        <button class="secondary"
+                data-bind="click: rewind"
+                data-test-id="company-back">
           <i class="lupicon-chevron-start"></i>
           <span data-bind="ltext: 'back'"></span>
         </button>
