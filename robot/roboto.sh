@@ -378,8 +378,9 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
-   echo "Cleaning up /tmp/*/webdriver-py-profilecopy"
+   echo "Cleaning up /tmp/*/webdriver-py-profilecopy & /tmp/rust_mozprofile*"
    rm -rf /tmp/*/webdriver-py-profilecopy
+   rm -rf /tmp/rust_mozprofile*
    echo "Removing stray X lock files"
    rm -rf /tmp/.X[1-9][0-9][0-9]-lock
 
