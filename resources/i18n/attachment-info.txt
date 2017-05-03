@@ -1,6 +1,6 @@
 "attachmentType.ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos.info" "en" "If an exceptional authorisation has been applied for the project from Centre for Economic Development, Transport and the Environment (ELY) or the municipality, other than through Lupapiste"
 "attachmentType.ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos.info" "fi" "Jos hankkeessa on haettu ELY:n tai kunnan poikkeamispäätös muuten kuin Lupapisteen kautta"
-"attachmentType.ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos.info" "sv" "Om man har ansökt om kommunens eller ELYs undantagsbeslut på annat sätt än via Lupapiste"
+"attachmentType.ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos.info" "sv" "Om man har ansökt om kommunens eller NTM-centralens undantagsbeslut på annat sätt än via Lupapiste"
 "attachmentType.ennakkoluvat_ja_lausunnot.ennakkoneuvottelumuistio.info" "en" "If prior consultation was undertaken concerning the project"
 "attachmentType.ennakkoluvat_ja_lausunnot.ennakkoneuvottelumuistio.info" "fi" "Jos hankkeesta on pidetty ennakkoneuvottelu"
 "attachmentType.ennakkoluvat_ja_lausunnot.ennakkoneuvottelumuistio.info" "sv" "Om det har hållits en förhandsförhandling om projektet"
