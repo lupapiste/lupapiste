@@ -86,6 +86,13 @@
                  [{:type :extra-text :text "Some extra text"}]
                  [{:type :agreement-id}]]}])
 
+(def info-fields
+  [[{:type "custom-text", :value "Hyväksytty"}
+    {:type "current-date", :value "26.04.2017"}]
+   [{:type "backend-id", :value "KLT-123"}]
+   [{:type "organization", :value "Sipoon rakennusvalvonta"}]
+   [{:type "building-id", :value "Rakennustunnus"}]])
+
 (facts tag-content
   (let [context {:organization organization :application application :user sonja}]
     (tag-content {:type :custom-text :text "Custom text"} context) => {:type :custom-text :value "Custom text"}
@@ -151,6 +158,8 @@
 
 (facts "Should get row value by type"
     (let [stamp (first (stamps organization application sonja))]
+      (value-by-type (:rows stamp) :custom-text) => "Hyv\u00e4ksytty"
+      (value-by-type (:rows stamp) :extra-text) => nil
       (row-value-by-type stamp :custom-text) => "Hyv\u00e4ksytty"
       (row-value-by-type stamp :backend-id) => "17-0753-R"
       (row-value-by-type stamp :organization) => "Sipoon rakennusvalvonta"
@@ -169,8 +178,19 @@
 
 (facts "Should get rows as strings"
   (let [stamp (first (stamps organization application sonja))]
-    (row-values-as-string (:rows stamp)) => [["Hyväksytty" "21.04.2017"]
+    (row-values-as-string (:rows stamp)) => [["Hyväksytty" (sade.util/to-local-date (sade.core/now))]
                                              ["17-0753-R"]
                                              ["Rakennustunnus"]
                                              ["Sipoon rakennusvalvonta"]]))
+
+(facts "Should update value for given type"
+  (let [stamp (first (stamps organization application sonja))]
+    (assoc-tag-by-type (:rows stamp) :building-id "7878787878") => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+                                                                    [{:type :backend-id :value "17-0753-R"}]
+                                                                    [{:type :building-id :value "7878787878"}]
+                                                                    [{:type :organization :value "Sipoon rakennusvalvonta"}]]
+    (assoc-tag-by-type info-fields :building-id "55556666") => [[{:type "custom-text" :value "Hyv\u00e4ksytty"} {:type "current-date" :value "26.04.2017"}]
+                                                                    [{:type "backend-id" :value "KLT-123"}]
+                                                                    [{:type "organization" :value "Sipoon rakennusvalvonta"}]
+                                                                    [{:type "building-id" :value "55556666"}]]))
 

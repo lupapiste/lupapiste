@@ -17,15 +17,15 @@
   (job/status job-id (util/->long version) (util/->long timeout)))
 
 (defn- ->file-info [attachment]
-  (let [versions   (-> attachment :versions reverse)
-        re-stamp?  (:stamped (first versions))
-        source     (if re-stamp? (second versions) (first versions))]
+  (let [versions (-> attachment :versions reverse)
+        re-stamp? (:stamped (first versions))
+        source (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
-           :signature (util/find-by-key :fileId (:fileId (first versions)) (:signatures attachment))
-           :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
-           :operation-ids (set (att/get-operation-ids attachment))
-           :attachment-id (:id attachment)
-           :attachment-type (:type attachment))))
+      :signature (util/find-by-key :fileId (:fileId (first versions)) (:signatures attachment))
+      :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
+      :operation-ids (set (att/get-operation-ids attachment))
+      :attachment-id (:id attachment)
+      :attachment-type (:type attachment))))
 
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id fileId filename stamped-original-file-id signature]} file-info
@@ -36,14 +36,14 @@
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (let [result (att/upload-and-attach!
                      {:application application :user user}
-                     {:attachment-id attachment-id
+                     {:attachment-id                attachment-id
                       :replaceable-original-file-id stamped-original-file-id
-                      :comment-text nil :created created
-                      :stamped true :comment? false
-                      :state :ok
-                      :signature signature}
+                      :comment-text                 nil :created created
+                      :stamped                      true :comment? false
+                      :state                        :ok
+                      :signature                    signature}
                      {:filename filename :content file
-                      :size (.length file)})]
+                      :size     (.length file)})]
         (tos/mark-attachment-final! application created attachment-id)
         (:fileId result)))))
 
@@ -61,18 +61,14 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
-(defn printteri [value]
-  (println "Printteri:")
-  (clojure.pprint/pprint value)
-  value)
+(defn update-buildings [lang info-fields]
+  (if (:buildings info-fields)
+    (stamps/assoc-tag-by-type (:fields info-fields) :building-id (first (sort (map (partial building->str lang) (:buildings info-fields)))))
+    info-fields))
 
-(defn update-buildings [value]
-  ;(update fields :buildings (fn->> (map (partial building->str lang)) sort))
-  value)
-
-(defn- info-fields->stamp [{:keys [stamp-created transparency lang qr-code]} fields]
+(defn- info-fields->stamp [{:keys [stamp-created transparency qr-code lang]} info-fields]
   {:pre [(pos? stamp-created)]}
-  (->> (update-buildings fields)
+  (->> (update-buildings lang info-fields)
        (stamps/row-values-as-string)
        (map
          (fn [field]
@@ -80,7 +76,7 @@
        (stamper/make-stamp transparency qr-code)))
 
 (defn- make-stamp-without-buildings [context info-fields]
-  (->> (stamps/dissoc-tag-by-type info-fields :building-id)
+  (->> (stamps/dissoc-tag-by-type (:fields info-fields) :building-id)
        (info-fields->stamp context)))
 
 (defn- make-operation-specific-stamps [context info-fields operation-id-sets]
@@ -101,7 +97,7 @@
 
 (defn- stamp-attachments!
   [file-infos {:keys [job-id application info-fields] :as context}]
-  (let [stamp-without-buildings   (make-stamp-without-buildings context info-fields)
+  (let [stamp-without-buildings (make-stamp-without-buildings context info-fields)
         operation-specific-stamps (->> (map :operation-ids file-infos)
                                        (remove empty?)
                                        distinct

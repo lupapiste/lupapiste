@@ -629,7 +629,7 @@
                :y-margin      (util/->long (get-in stamp [:position :y]))
                :page          (keyword (:page stamp))
                :transparency  (util/->long (or (:transparency stamp) 0))
-               :info-fields   (:rows stamp)})]
+               :info-fields   {:fields (:rows stamp) :buildings (building/building-ids application)}})]
     (ok :job job)))
 
 (defquery stamp-attachments-job

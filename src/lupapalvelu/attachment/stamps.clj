@@ -116,14 +116,19 @@
         context {:organization organization :application application :user user}]
     (map (fn [stamp] (fill-stamp-tags stamp context)) organization-stamp-templates)))
 
-(defn row-value-by-type [stamp type]
-  {:pre [(sc/validate Stamp stamp)
+(defn value-by-type [rows type]
+  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
          (contains? all-tag-types type)]}
-  (->> (:rows stamp)
+  (->> rows
        (map (fn [row] (filter #(= type (:type %)) row)))
        (flatten)
        (first)
        :value))
+
+(defn row-value-by-type [stamp type]
+  {:pre [(sc/validate Stamp stamp)
+         (contains? all-tag-types type)]}
+  (value-by-type (:rows stamp) type))
 
 (defn dissoc-tag-by-type [rows type]
   {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
@@ -136,3 +141,11 @@
 (defn row-values-as-string [rows]
   {:pre [(map (fn [row] (sc/validate StampRow row)) rows)]}
   (mapv (fn [row] (mapv :value row)) rows))
+
+(defn assoc-tag-by-type [rows type value]
+  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
+         (contains? all-tag-types type)]}
+  (->> rows
+       (mapv (fn [rows] (mapv (fn [row] (if (= type (keyword (:type row)))
+                                            (assoc (dissoc row :value) :value value)
+                                            row)) rows)))))

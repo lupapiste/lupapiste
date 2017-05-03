@@ -101,7 +101,7 @@ var stamping = (function() {
           ko.mapping.fromJS(application, {}, model.appModel);
           model.appModel._js = application;
           model.attachments = lupapisteApp.services.attachmentsService.attachments;
-          setStampFields();
+          //setStampFields();
           model.stampingMode(true);
         }, true);
       } else { // appModel already initialized, show stamping

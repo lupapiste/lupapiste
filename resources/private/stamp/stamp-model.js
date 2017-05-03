@@ -137,7 +137,7 @@ LUPAPISTE.StampModel = function(params) {
   self.update = true;
 
   // Stamping fields
-  self.stampFields = params.stampFields;
+  //self.stampFields = params.stampFields;
   self.stamps = params.stamps;
   self.selectedStampsId = ko.observable();
   self.selectedStamp = ko.observable(self.stamps()[0]);
@@ -276,7 +276,7 @@ LUPAPISTE.StampModel = function(params) {
     self.status(self.statusStarting);
     ajax
       .command("stamp-attachments", {
-        id: findRowData("agreement-id"),
+        id: self.application.id(),
         lang: loc.getCurrentLanguage(),
         timestamp: new Date(self.currentDate()).getTime(),
         files: _.map(self.selectedFiles(), "id"),
