@@ -149,7 +149,7 @@
 
 
 (def default-copy-options
-  {:blacklist [:comments :history :statements :attachments] ; copy everything except these
+  {:blacklist [:comments :history :statements :attachments :title] ; copy everything except these
    })
 
 (defn- new-application-overrides
@@ -218,6 +218,7 @@
                                                       :auth         (filter #((set auth-invites) (auth-id %))
                                                                             (:auth source-application))
                                                       :state        :draft
+                                                      :address      address
                                                       :propertyId   propertyId
                                                       :location     (app/->location x y)
                                                       :municipality municipality
