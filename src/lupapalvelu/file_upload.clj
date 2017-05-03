@@ -111,7 +111,7 @@
     (let [{:keys [attachments error]} (-> files first :tempfile muuntaja/unzip-attachment-collection)]
       (if (or (not-empty error) (empty? attachments))
         {:ok false
-         :error (or error "unknown")}
+         :error (or error "error.unzipping-error")}
         {:ok true
          :files (download-and-save-files application attachments session-id)}))
     {:ok true

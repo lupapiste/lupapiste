@@ -57,9 +57,9 @@
       (against-background
         [(muuntaja/unzip-attachment-collection content) => {:attachments []}]
 
-        (fact "zero attachments without muuntaja error is an unknown error"
+        (fact "zero attachments without muuntaja error is still an error"
           (save-files application [file2] session-id) => {:ok false
-                                                          :error "unknown"}))
+                                                          :error "error.unzipping-error"}))
 
       (against-background
         [(muuntaja/unzip-attachment-collection content) => {:attachments [{:uri "/path/to/foobar.pdf"
