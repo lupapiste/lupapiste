@@ -79,7 +79,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
       } else {
         notifyService( "fileCleared", {} );
         (params.errorHandler || indicatorError)({
-          message: loc( "attachment.upload.failure",
+          message: loc( event.errorKey || "attachment.upload.failure",
                         event.message )});
       }
     });

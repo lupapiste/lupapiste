@@ -188,7 +188,8 @@ jQuery(document).ready(function() {
     {name: "register-company-sign"},
     {name: "set-password"},
     {name: "login"},
-    {name: "campaign-editor"}
+    {name: "campaign-editor"},
+    {name: "date-editor"}
 ];
 
   ko.registerLupapisteComponents(components);

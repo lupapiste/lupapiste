@@ -17553,8 +17553,8 @@ div.attachment-multiselect-content tr.attachment-group-header {
   font-size: 18px;
 }
 
-#stamping-component-container .stamp-status .icon {
-  margin-left: 6px;
+#stamping-component-container .stamp-status i {
+  padding-right: 6px;
 }
 
 #stamping-component-container form#stamp-info select {

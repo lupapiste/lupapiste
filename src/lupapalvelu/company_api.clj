@@ -7,7 +7,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (defquery company
   {:user-roles #{:applicant :authority}
@@ -21,7 +22,7 @@
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
-  [{user :user}]
+  [{user :user created :created}]
   (if (usr/admin? user)
     (let [admins (->> (usr/find-users {"company.role" "admin"})
                    (partition-by (comp :id :company))
@@ -29,7 +30,7 @@
                           [(-> company-admins first :company :id), (map usr/summary company-admins)]))
                    (into {}))]
       (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (com/find-companies))))
-    (ok :companies (map (fn [company] (select-keys company [:id :name :y :address1 :zip :po])) (com/find-companies)))))
+    (ok :companies (map (fn [company] (select-keys company [:id :name :y :address1 :zip :po])) (com/find-companies {:locked {$not {$lt created}}})))))
 
 (defcommand company-update
   {:parameters [company updates]
@@ -38,17 +39,31 @@
                       (some-pre-check com/validate-is-admin
                                       com/validate-belongs-to-company)]
    :user-roles #{:applicant :admin}
-   :pre-checks [(some-pre-check com/validate-is-admin
+   :pre-checks [com/company-not-locked
+                (some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))]}
   [{caller :user}]
   (ok :company (com/update-company! company updates caller)))
+
+(defcommand company-lock
+  {:description      "Set/unset company lock timestamp. If timestamp is not positive
+  long, the locked property is removed from the company."
+   :user-roles       #{:admin}
+   :parameters       [company timestamp]
+   :input-validators [(partial action/non-blank-parameters [:company])]}
+  [{user :user}]
+  (let [ts (or (util/->long timestamp) 0)]
+    (ok :company (com/update-company! company
+                                      {:locked (if (pos? ts) ts 0)}
+                                      user))))
 
 (defcommand company-user-update
   {:parameters [user-id role submit]
    :input-validators [(partial action/non-blank-parameters [:user-id])
                       (partial action/boolean-parameters [:submit])
                       (partial action/select-parameters [:role] #{"user" "admin"})]
-   :pre-checks [com/company-user-edit-allowed]
+   :pre-checks [com/company-not-locked
+                com/company-user-edit-allowed]
    :user-roles #{:applicant :admin}}
   [_]
   (com/update-user! user-id role submit))
@@ -60,6 +75,30 @@
    :pre-checks [com/company-user-edit-allowed]}
   [_]
   (com/delete-user! user-id))
+
+(defcommand company-user-delete-all
+  {:description "Nuclear option for deleting every company user when
+  the company is locked. Also cancels every pending invite."
+   :user-roles #{:applicant}
+   :pre-checks [(com/validate-has-company-role :admin)
+                com/user-company-is-locked]}
+  [{user :user created :created}]
+  (let [company-id (-> user :company :id)]
+    (com/delete-every-user! company-id)
+    (mongo/update-by-query
+                   :token
+                   {:token-type #"(new|invite)-company-user"
+                    :data.company.id company-id
+                    :used {$type "null"}}
+                   {$set {:used created}})
+    (ok)))
+
+(defquery user-company-locked
+  {:description "Pseudo-query that succeeds if the user's company is
+  locked."
+   :user-roles #{:applicant}
+   :pre-checks [com/user-company-is-locked]}
+  [_])
 
 (defn- user-limit-not-exceeded [command]
   (let [company (com/find-company-by-id (get-in command [:user :company :id]))
@@ -92,7 +131,8 @@
                       (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
    :notified   true
-   :pre-checks [(some-pre-check com/validate-is-admin
+   :pre-checks [com/company-not-locked
+                (some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))
                 user-limit-not-exceeded]}
   [{caller :user}]
@@ -113,7 +153,8 @@
                       (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
    :notified   true
-   :pre-checks [(some-pre-check com/validate-is-admin
+   :pre-checks [com/company-not-locked
+                (some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))
                 user-limit-not-exceeded]}
   [{user :user}]
@@ -128,7 +169,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :company-id])]
    :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
-   :pre-checks [application/validate-authority-in-drafts
+   :pre-checks [com/company-not-locked
+                application/validate-authority-in-drafts
                 com/company-not-already-invited]
    :notified   true}
   [{caller :user application :application}]
