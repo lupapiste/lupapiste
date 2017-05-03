@@ -15795,6 +15795,11 @@ div.foreman-history-container {
   font-size: 44px;
 }
 
+.copy-selection-wrapper {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
 .copy-selection-verified {
   width: 100%;
   display: block;

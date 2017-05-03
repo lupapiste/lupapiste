@@ -21,15 +21,16 @@
 
     <!-- ko if: phase() >= 1 -->
     <div data-bind="ltext: 'applications.location'"></div>
-    <div class="copy-selection-verified">
+    <div class="copy-selection-verified copy-selection-wrapper">
       <span data-bind="text: locationInfo()"></span>
       <i class="lupicon-check right positive"></i>
     </div>
     <!-- /ko -->
+
     <!-- ko if: phase() === 1 -->
     <div data-bind="ltext: 'application.copy.osapuolet.candidates'"></div>
     <div id="copy-auths"
-         data-bind="foreach: inviteCandidates "><div class="blockbox-wrapper">
+         data-bind="foreach: inviteCandidates "><div class="blockbox-wrapper copy-selection-wrapper">
         <input type="checkbox"
                data-bind="attr: {'id': $index()},
                                  checked: $data.selected">
@@ -41,13 +42,12 @@
     <!-- ko if: phase() === 2 -->
     <div data-bind="ltext: 'application.copy.osapuolet.invitees'"></div>
     <div id="copy-auths"
-         data-bind="foreach: selectedInviteCandidates "><div class="blockbox-wrapper">
-        <div class="copy-selection-verified">
+         data-bind="foreach: selectedInviteCandidates ">
+        <div class="copy-selection-verified copy-selection-wrapper">
           <span data-bind="text: $parent.authDescription($data)"></span>
           <i class="lupicon-check right positive"></i>
         </div>
-
-    </div></div>
+    </div>
     <!-- /ko -->
 
     <!-- ko if: phase() > 0 -->
