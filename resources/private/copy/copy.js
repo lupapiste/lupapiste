@@ -28,6 +28,28 @@
       }
     });
 
+    function phaseClass(thisPhase, currentPhase) {
+      if (thisPhase === currentPhase) {
+        return "active-phase";
+      } else if (thisPhase < currentPhase) {
+        return "completed-phase";
+      } else {
+        return "";
+      }
+    }
+
+    self.phases = ko.pureComputed(function() {
+      var currentPhase = self.phase();
+      return [
+        {text: "1. " + loc("application.copy.phase.0"),
+         cssClass: phaseClass(0, currentPhase)},
+        {text: "2. " + loc("application.copy.phase.1"),
+         cssClass: phaseClass(1, currentPhase)},
+        {text: "3. " + loc("application.copy.phase.2"),
+         cssClass: phaseClass(2, currentPhase)}
+      ];
+    });
+
     self.buttonActions = [
       null,
       {previous: {ltext: "previous",

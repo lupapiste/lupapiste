@@ -15821,6 +15821,67 @@ div.foreman-history-container {
   float: right;
 }
 
+.copy-state-indication {
+  margin: 0 0 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+}
+
+.copy-state-indication div {
+  height: 24px;
+}
+
+.copy-state-indication div .active-phase {
+  color: white;
+  background-color: #2ca92c;
+}
+
+.copy-state-indication div .active-phase:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.copy-state-indication div .completed-phase {
+  color: white;
+  background-color: #555555;
+}
+
+.copy-state-indication div .completed-phase:after {
+  border-left: 11px solid #555555;
+}
+
+.copy-state-indication div span {
+  background-color: #f6f6f6;
+  color: #909090;
+  position: relative;
+  padding: 4px 8px 4px 24px;
+  display: inline-block;
+  margin: 0px -4px 0 0;
+  border: none;
+}
+
+.copy-state-indication div span:first-child {
+  padding: 4px 8px 4px 8px;
+}
+
+.copy-state-indication div span:last-child:after {
+  border-left: none;
+}
+
+.copy-state-indication div span:after {
+  display: inline-block;
+  position: absolute;
+  content: " ";
+  width: 0;
+  height: 0;
+  top: -1px;
+  right: -9px;
+  border-top: 17px solid transparent;
+  border-left: 11px solid #f6f6f6;
+  border-bottom: 17px solid transparent;
+  z-index: 1;
+}
+
 /* attachments */
 #attachment.container {
   padding-right: 0;
