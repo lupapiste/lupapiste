@@ -23,5 +23,9 @@ LUPAPISTE.CommentService = function() {
   hub.subscribe("application-model-updated", self.queryComments);
   hub.subscribe("upload-done", self.queryComments);
   hub.subscribe("attachmentsService::remove", self.queryComments);
-
+  hub.subscribe("attachmentsService::query", function( event ) {
+    if( event.key === "attachments" ) {
+      self.queryComments();
+    }
+  });
 };
