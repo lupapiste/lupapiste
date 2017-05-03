@@ -2,12 +2,11 @@
 <html>
 <body>
 
-  <!-- Phase 1: -->
-
+  <!-- autocomplete and map need to stay in dom, so 'ko if' cannot be used. -->
   <section class="page container" id="copy">
     <h1 data-bind="ltext: 'copyApplication.topic'"></h1>
-    <!-- ko if: phase() === 0 -->
-    <div class="create-application-search-box">
+    <div class="create-application-search-box"
+         data-bind="visible: phase() === 0">
       <p data-bind="ltext: 'copyApplication.locationInfo'"></p>
       <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
              id="copy-search" type="text" class="form-input text address-search" autofocus="autofocus" />
@@ -16,8 +15,9 @@
           <span data-bind="ltext: 'search'"></span>
       </button>
     </div>
-    <div id="copy-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
-    <!-- /ko -->
+    <div id="copy-map" class="map create-application-map"
+         data-bind="visible: phase() === 0"
+         style="width: 100%; height: 700px;"></div>
 
     <!-- ko if: phase() >= 1 -->
     <div data-bind="ltext: 'applications.location'"></div>

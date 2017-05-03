@@ -40,7 +40,7 @@
               }}},
       {previous: {ltext: "previous",
                   action: function() {
-                    clearCandidates();
+                    self.clearCandidates();
                     fetchAuthCandidatesForApplication();
                   }},
        next: {ltext: "done",
@@ -139,15 +139,16 @@
     };
 
     self.clear = function() {
-      self.locationModel.clearMap();
 
-      return self
+      self
         .resetLocation()
         .locationSelected(false)
         .sourceApplicationId(pageutil.lastSubPage())
         .search("")
         .message("")
         .clearCandidates();
+      self.locationModel.clearMap();
+      return self;
     };
 
     self.copyOK = ko.pureComputed(function() {
