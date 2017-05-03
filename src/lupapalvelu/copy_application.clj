@@ -47,7 +47,9 @@
      :email (-> auth-entry :invite :email) ; for cases where invitee is not a registered user and name is not known
      :role (or (:role party-info)                      ; prefer role dictated by party document
                (keyword (-> auth-entry :invite :role)) ; but fall back to role in auth
-               (keyword (-> auth-entry :role)))}))
+               (keyword (-> auth-entry :role)))
+     :roleSource (if (:role party-info)
+                   :document :auth)}))
 
 (defn- get-invite-candidates [auth documents]
   (->> auth
@@ -91,9 +93,10 @@
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
      :documents (mapv (fn [doc]
-                        (let [doc (assoc doc
-                                         :id (mongo/create-id)
-                                         :created (:created application))]
+                        (let [doc (-> doc
+                                      (assoc :id (mongo/create-id)
+                                             :created (:created application))
+                                      (dissoc :meta))]
                           (if (-> doc :schema-info :op)
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
@@ -210,18 +213,29 @@
       (when (some not-in-source-auths? auth-invites)
         (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))
 
-      (new-application-copy (assoc source-application
-                                   :auth         (filter #((set auth-invites) (auth-id %))
-                                                         (:auth source-application))
-                                   :state        :draft
-                                   :propertyId   propertyId
-                                   :location     (app/->location x y)
-                                   :municipality municipality
-                                   :organization (:id organization))
-                            user organization created
-                            default-copy-options
-                            manual-schema-datas))
+      {:source-application source-application
+       :copy-application (new-application-copy (assoc source-application
+                                                      :auth         (filter #((set auth-invites) (auth-id %))
+                                                                            (:auth source-application))
+                                                      :state        :draft
+                                                      :propertyId   propertyId
+                                                      :location     (app/->location x y)
+                                                      :municipality municipality
+                                                      :organization (:id organization))
+                                               user organization created
+                                               default-copy-options
+                                               manual-schema-datas)})
     (fail! :error.no-source-application :id source-application-id)))
+
+(defn store-source-application
+  "Store the state of the source application used for copying application specified by copy-application-id"
+  [source-application copy-application-id timestamp]
+  (mongo/insert :source-applications {:id copy-application-id
+                                      :timestamp timestamp
+                                      :source-application source-application}))
+
+(defn get-source-application [copy-application-id]
+  (first (mongo/select :source-applications {:_id copy-application-id})))
 
 ;;; Sending invite notifications
 

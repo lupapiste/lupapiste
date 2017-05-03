@@ -801,6 +801,10 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-heart:before {
+  content: "\e927";
+}
+
 .lupicon-lock-open-fully:before {
   content: "\e926";
 }
@@ -15793,6 +15797,28 @@ div.foreman-history-container {
 .create-help.lupicon-circle-question:before {
   vertical-align: top;
   font-size: 44px;
+}
+
+.copy-selection-wrapper {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid #2ca92c;
+  background-color: #f6f6f6;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.copy-selection-verified [class^="lupicon-"].right,
+.copy-selection-verified [class*="lupicon-"].right {
+  margin-right: 6px;
+  float: right;
 }
 
 /* attachments */

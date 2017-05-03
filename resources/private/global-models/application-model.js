@@ -887,4 +887,8 @@ LUPAPISTE.ApplicationModel = function() {
       return "";
     }
   };
+
+  self.copy = function() {
+    pageutil.openPage("copy",  self.id());
+  };
 };
