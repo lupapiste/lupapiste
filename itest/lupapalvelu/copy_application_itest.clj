@@ -53,11 +53,11 @@
 
     (fact "Pena, Mikko and Solita are candidates"
       (:candidates (query sonja :copy-application-invite-candidates :source-application-id app-id))
-      => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner")
-                (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija") ; role from hakija document
+      => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
+                (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")
                 (assoc {:firstName (:name solita-company)
                         :lastName ""
-                        :id (:_id solita-company)} :email nil :role "writer")]
+                        :id (:_id solita-company)} :email nil :role "writer" :roleSource "auth")]
                :in-any-order))))
 
 (facts "copying application"
@@ -116,6 +116,10 @@
 
         (-> emails second :body :html) => (contains "Sonja Sibbo haluaa valtuuttaa yrityksenne")
         (-> emails second :to) => (contains (:email solita-company-admin))))
+
+    (fact "the source application is stored in the source-applications collection"
+          (let [source-app (:source-application (query sonja :source-application :copy-application-id (:id copy-app)))]
+            (:id source-app) => (:id app)))
 
     (fact "Only auths with ids in auth-invites are copied from old app"
           (let [{copy-app-id :id} (copy-application sonja app-id

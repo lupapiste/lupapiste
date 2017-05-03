@@ -235,7 +235,7 @@
                                       :source-application source-application}))
 
 (defn get-source-application [copy-application-id]
-  (first (mongo/select :source-applications {:id copy-application-id})))
+  (first (mongo/select :source-applications {:_id copy-application-id})))
 
 ;;; Sending invite notifications
 

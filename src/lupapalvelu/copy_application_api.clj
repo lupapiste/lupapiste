@@ -38,7 +38,7 @@
      :input-validators [(partial action/non-blank-parameters [:copy-application-id])]
      :user-roles #{:authority}}
     [{{:keys [copy-application-id]} :data}]
-    (copy-app/get-source-application copy-application-id)))
+    (merge (ok) (copy-app/get-source-application copy-application-id))))
 
 (defquery copy-application-invite-candidates
   {:parameters [:source-application-id]
