@@ -1,24 +1,24 @@
 (ns lupapalvelu.archiving-api
-  (:require [clojure.set :as set]
-            [cheshire.core :as json]
+  (:require [cheshire.core :as json]
             [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
             [lupapalvelu.application :as app]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]))
 
-(defn check-user-is-archivist [{user :user {:keys [organization]} :application}]
-  (when-not (usr/user-is-archivist? user organization)
+(defn validate-permanent-archive-enabled [{user-orgs :user-organizations app-org :organization app :application}]
+  (when-not (if (:organization app)
+              (:permanent-archive-enabled @app-org)
+              (some :permanent-archive-enabled user-orgs))
     unauthorized))
 
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
-   :states           states/post-verdict-states
-   :pre-checks       [check-user-is-archivist]}
+   :org-authz-roles  #{:archivist}
+   :states           states/post-verdict-states}
   [{:keys [application user organization] :as command}]
   (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
                                (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
@@ -45,25 +45,23 @@
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
-   :states           states/post-verdict-states
-   :pre-checks       [check-user-is-archivist]}
+   :org-authz-roles  #{:archivist}
+   :states           states/post-verdict-states}
   [{:keys [application created]}]
   (archiving/mark-application-archived application created :application)
   (ok))
 
 (defquery archiving-operations-enabled
-  {:user-roles #{:authority}
-   :states     states/all-application-states
-   :pre-checks [check-user-is-archivist]}
+  {:user-roles      #{:authority}
+   :org-authz-roles (with-meta #{:archivist} {:skip-validation true})
+   :states          states/all-application-states
+   :pre-checks      [(fn [{:keys [user application]}]
+                       (when-not (or application (usr/user-is-archivist? user nil)) ; If application, :org-authz-roles works as validator
+                         unauthorized))]}
   (ok))
 
 (defquery permanent-archive-enabled
   {:user-roles #{:applicant :authority}
    :categories #{:attachments}
-   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
-                  (let [org-set (if organization
-                                  #{organization}
-                                  (usr/organization-ids-by-roles user #{:authority :reader :tos-editor :tos-publisher :archivist}))]
-                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                      unauthorized)))]}
+   :pre-checks [validate-permanent-archive-enabled]}
   [_])

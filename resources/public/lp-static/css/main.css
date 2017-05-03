@@ -16381,8 +16381,12 @@ td.comment-text {
   box-sizing: border-box;
 }
 
+.admin section#admin .container, .admin nav.nav-wrapper .container {
+  max-width: 1400px;
+}
+
 .admin .page {
-  margin-top: 130px;
+  margin-top: 150px;
 }
 
 .admin .users-table .filters {
@@ -17527,8 +17531,8 @@ div.attachment-multiselect-content tr.attachment-group-header {
   font-size: 18px;
 }
 
-#stamping-component-container .stamp-status .icon {
-  margin-left: 6px;
+#stamping-component-container .stamp-status i {
+  padding-right: 6px;
 }
 
 #stamping-component-container form#stamp-info select {

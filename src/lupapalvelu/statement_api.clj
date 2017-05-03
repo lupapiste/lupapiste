@@ -83,8 +83,8 @@
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :states states/all-application-states}
-  [{application :application}]
-  (ok :data (statement/possible-statement-statuses application)))
+  [command]
+  (ok :data (statement/possible-statement-statuses command)))
 
 (defquery get-statement-givers
   {:parameters [:id]
@@ -154,7 +154,7 @@
    :user-authz-roles #{:statementGiver}
    :description "statement owners can save statements as draft before giving final statement."}
   [{application :application user :user {:keys [text status modify-id]} :data :as command}]
-  (when (and status (not ((statement/possible-statement-statuses application) status)))
+  (when (and status (not ((statement/possible-statement-statuses command) status)))
     (fail! :error.unknown-statement-status))
   (let [statement (-> (util/find-by-id statementId (:statements application))
                       (statement/update-draft text status modify-id (:id user)))]
@@ -176,7 +176,7 @@
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "statement owners can give statements - notifies via comment."}
   [{:keys [application user created lang] {:keys [modify-id]} :data :as command}]
-  (when-not ((statement/possible-statement-statuses application) status)
+  (when-not ((statement/possible-statement-statuses command) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text (i18n/loc "statement.given")
         comment-target {:type :statement :id statementId}

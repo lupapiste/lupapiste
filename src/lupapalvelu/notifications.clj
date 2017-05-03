@@ -1,5 +1,6 @@
 (ns lupapalvelu.notifications
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [monger.operators :refer [$in]]
             [schema.core :as sc]
             [clojure.set :as set]
             [clojure.string :as s]
@@ -73,7 +74,8 @@
          (remove :invite)
          (remove :unsubscribed)
          (remove (comp (partial = "company") :type))
-         (map (comp usr/non-private usr/get-user-by-id :id)))))
+         (map :id)
+         (#(usr/get-users {:id {$in %}})))))
 
 ;;
 ;; Model creation functions

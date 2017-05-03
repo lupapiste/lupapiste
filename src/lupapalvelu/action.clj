@@ -53,11 +53,15 @@
 
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
-  Pre-check returns result of the first argument in case of failure."
+  Pre-check returns nil if some succees, or result of the last error returning pre-check."
   [& pre-checks]
   (fn [command]
-    (when ((apply every-pred pre-checks) command)
-      ((first pre-checks) command))))
+    (reduce (fn [res check]
+              (if (nil? res)
+                (reduced nil)
+                (check command)))
+            ((first pre-checks) command)
+            (rest pre-checks))))
 
 (defn email-validator
   "Reads email key from action parameters and checks that it is valid email address.
@@ -418,11 +422,11 @@
                                                                      (delay (mongo/select :assignments {:application.id (:id application)
                                                                                                         :status {$ne "canceled"}})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
-            command (assoc command
-                           :application application
-                           :organization organization
-                           :user-organizations user-organizations
-                           :application-assignments assignments)]
+            command (merge {:application application
+                            :organization organization
+                            :user-organizations user-organizations
+                            :application-assignments assignments}
+                           command)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -475,6 +479,9 @@
 (defn- subset-of [reference-set]
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
+
+(defn- skip-validation? [obj]
+  (boolean (get (meta obj) :skip-validation)))
 
 (def ActionMetaData
   {
@@ -540,8 +547,13 @@
 
   (assert (or (seq (:input-validators meta-data))
               (empty? (:parameters meta-data))
-              (= [:id] (:parameters meta-data)))
+              (some #{:id} (:parameters meta-data)))
     (str "Input validators must be defined for " action-name))
+
+  (assert (or (empty? (:org-authz-roles meta-data))
+              (skip-validation? (:org-authz-roles meta-data)) ; :skip-validation meta for generic actions requiring org-authz-roles
+              (some #{:id} (:parameters meta-data)))
+          (str "org-authz-roles depends on application, can't be used outside application context - " action-name))
 
   (let [action-keyword (keyword action-name)
         {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]

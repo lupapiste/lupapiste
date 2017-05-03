@@ -536,4 +536,11 @@
                                 {:pvm "2016-09-11Z" :tila "lupa rauennut"}
                                 {:pvm "2016-09-10Z" :tila "rakennusty\u00f6t keskeytetty"}]])
          (cr/strip-xml-namespaces)
-         (application-state)) => "lupa rauennut"))
+         (application-state)) => "lupa rauennut")
+  (fact "multiple state same day - pick correct by 'domain chronological ordering'"
+    (->> (build-multi-app-xml [[{:pvm "2016-09-09Z" :tila "rakennusty\u00f6t aloitettu"}
+                                {:pvm "2016-09-11Z" :tila "lopullinen loppukatselmus tehty"}
+                                {:pvm "2016-09-11Z" :tila "lupa rauennut"}
+                                {:pvm "2016-09-10Z" :tila "rakennusty\u00f6t keskeytetty"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => "lopullinen loppukatselmus tehty"))

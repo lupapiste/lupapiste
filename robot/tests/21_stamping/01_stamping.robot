@@ -36,7 +36,7 @@ Mikko creates & submits a second application and goes to empty attachments tab
 
 Mikko adds PDF attachment without comment
   Upload attachment  ${PDF_TESTFILE_PATH1}  Muu liite  Muu  Uusi asuinrakennus
-  Upload attachment  ${PDF_TESTFILE_PATH2}  Muu liite  Muu  Uusi asuinrakennus
+  Upload attachment  ${PDF_TESTFILE_PATH2}  IV-suunnitelma  IV  Uusi asuinrakennus
   Upload attachment  ${PDF_TESTFILE_PATH3}  Muu liite  Muu  Yleisesti hankkeeseen
 
 Mikko does not see stamping button
@@ -101,6 +101,7 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Wait until  Element should be visible  application-attachments-tab
   Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
+  One attachment is selected
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${STAMP_ORGANIZATION}

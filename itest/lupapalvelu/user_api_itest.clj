@@ -389,7 +389,7 @@
                 :content-type :json
                 :follow-redirects false
                 :throw-exceptions false}
-        resp   (http-post (str (server-address) "/api/reset-password") params) => http200?
+        resp (http-post (str (server-address) "/api/reset-password") params) => http200?
         email  (last-email)]
     (-> resp decode-response :body) => ok?
     (:to email) => (contains (email-for "pena"))
