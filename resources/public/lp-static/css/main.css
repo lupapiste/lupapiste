@@ -801,6 +801,10 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-heart:before {
+  content: "\e927";
+}
+
 .lupicon-lock-open-fully:before {
   content: "\e926";
 }

@@ -279,7 +279,6 @@
     };
 
     self.copyApplication = function() {
-      console.log("copyApplication");
       var params = self.locationModel.toJS();
       params["source-application-id"] = self.sourceApplicationId(); // TODO
       params["auth-invites"] = _.map(self.selectedInviteCandidates(), "id");
@@ -297,17 +296,6 @@
         })
         .call();
       hub.send("track-click", {category:"Copy", label:"tree", event:"copyApplication"});
-    };
-
-    self.back = function() {
-
-    };
-
-    self.proceed = function() {
-      console.log("proceed");
-      if (self.inviteCandidatesFetched()) {
-        self.copyApplication();
-      }
     };
   }
 

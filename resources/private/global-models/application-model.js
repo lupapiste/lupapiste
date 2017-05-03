@@ -889,7 +889,6 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.copy = function() {
-    console.log("copy " + self.id());
     pageutil.openPage("copy",  self.id());
   };
 };
