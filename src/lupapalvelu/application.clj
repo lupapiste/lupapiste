@@ -14,6 +14,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -161,8 +162,8 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn state-history-entries [history]
-  (filter :state history)) ; only history elements that regard state change
+; the function is in doc to avoid cyclic dependency
+(def state-history-entries doc/state-history-entries)
 
 (defn last-history-item
   [{history :history}]
@@ -723,3 +724,13 @@
   (let [ind (util/position-by-id (:id handler) handlers)]
     {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
+
+(defn autofill-rakennuspaikka [application time]
+  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+              :when (seq rakennuspaikka)]
+        (let [property-id (or
+                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                            (:propertyId application))]
+          (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
