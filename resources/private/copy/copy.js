@@ -56,7 +56,7 @@
           .query("application-copyable-to-location", params)
           .processing(self.processing)
           .pending(self.pending)
-          .success(function(data) {
+          .success(function() {
             fetchAuthCandidatesForApplication();
           })
           .error(function(data) {
