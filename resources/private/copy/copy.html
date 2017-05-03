@@ -6,7 +6,8 @@
 
   <section class="page container" id="copy">
     <h1 data-bind="ltext: 'copyApplication.topic'"></h1>
-    <div class="copy-application-search-box">
+    <!-- ko if: phase() === 0 -->
+    <div class="create-application-search-box">
       <p data-bind="ltext: 'copyApplication.locationInfo'"></p>
       <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}, css: {'ui-autocomplete-loading':searching}"
              id="copy-search" type="text" class="form-input text address-search" autofocus="autofocus" />
@@ -15,29 +16,48 @@
           <span data-bind="ltext: 'search'"></span>
       </button>
     </div>
-    <!-- ko if: !locationSelected() -->
     <div id="copy-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
     <!-- /ko -->
 
-    <!-- ko if: locationSelected() && inviteCandidatesFetched() -->
-    <div id="copy-auths" class="filter-group__toggles"
-         data-bind="foreach: inviteCandidates "><div class="filter-wrapper">
+    <!-- ko if: phase() >= 1 -->
+    <div data-bind="ltext: 'applications.location'"></div>
+    <div class="copy-selection-verified">
+      <span data-bind="text: locationInfo()"></span>
+      <i class="lupicon-check right positive"></i>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: phase() === 1 -->
+    <div data-bind="ltext: 'application.copy.osapuolet.candidates'"></div>
+    <div id="copy-auths"
+         data-bind="foreach: inviteCandidates "><div class="blockbox-wrapper">
         <input type="checkbox"
                data-bind="attr: {'id': $index()},
                                  checked: $data.selected">
-        <label class="filter-label"
+        <label class="blockbox-label"
                data-bind="attr: {'for': $index()},
                           text: $parent.authDescription($data)"></label>
     </div></div>
     <!-- /ko -->
-    <!-- ko if: locationSelected() -->
+    <!-- ko if: phase() === 2 -->
+    <div data-bind="ltext: 'application.copy.osapuolet.invitees'"></div>
+    <div id="copy-auths"
+         data-bind="foreach: selectedInviteCandidates "><div class="blockbox-wrapper">
+        <div class="copy-selection-verified">
+          <span data-bind="text: $parent.authDescription($data)"></span>
+          <i class="lupicon-check right positive"></i>
+        </div>
+
+    </div></div>
+    <!-- /ko -->
+
+    <!-- ko if: phase() > 0 -->
     <div>
-      <button data-bind="click: back" class="reject">
+      <button data-bind="click: buttonActions[phase()].previous.action" class="reject">
         <i class="lupicon-chevron-left"></i>
-        <span data-bind="text: 'Takas'"></span>
+        <span data-bind="ltext: buttonActions[phase()].previous.ltext"></span>
       </button>
-      <button data-bind="click: proceed" class="positive">
-        <span data-bind="text: 'Eteen'"></span>
+      <button data-bind="click: buttonActions[phase()].next.action" class="positive">
+        <span data-bind="ltext: buttonActions[phase()].next.ltext"></span>
         <i class="lupicon-chevron-right"></i>
       </button>
     </div>

@@ -3,11 +3,50 @@
 
   function CopyApplicationModel() {
     var self = this;
-    self.sourceApplicationId = ko.observable("LP-753-2017-90002");
 
+    self.sourceApplicationId = ko.observable("");
     self.inviteCandidatesFetched = ko.observable(false);
     self.inviteCandidates = ko.observableArray([]);
+    self.inviteCandidatesSelected = ko.observable(false);
+    self.selectedInviteCandidates = ko.pureComputed(function() {
+      return _.filter(self.inviteCandidates(), function(candidate) {
+        return candidate.selected();
+      });
+    });
     self.locationSelected = ko.observable(false);
+
+    self.phase = ko.pureComputed(function() {
+      var locationIsSelected = self.locationSelected();
+      var inviteCandidatesAreSelected = self.inviteCandidatesSelected();
+
+      if (!locationIsSelected) {
+        return 0;
+      } else if (!inviteCandidatesAreSelected) {
+        return 1;
+      } else {
+        return 2;
+      }
+    });
+
+    self.buttonActions = [
+      null,
+      {previous: {ltext: "previous",
+                  action: function() {
+                    self.clear();
+                  }},
+       next: {ltext: "continue",
+              action: function() {
+                self.inviteCandidatesSelected(true);
+              }}},
+      {previous: {ltext: "previous",
+                  action: function() {
+                    clearCandidates();
+                    fetchAuthCandidatesForApplication();
+                  }},
+       next: {ltext: "done",
+              action: function() {
+                self.copyApplication();
+              }}}];
 
     function checkIfApplicationCanBeCopiedToSelectedLocation() {
       if (self.locationModel.propertyIdOk() && self.locationModel.addressOk()) {
@@ -87,16 +126,28 @@
       return self;
     };
 
+    self.locationInfo = ko.pureComputed(function() {
+      return self.locationModel.propertyIdHumanReadable() + ", " +
+        self.locationModel.address() + ", " +
+        self.locationModel.municipalityName();
+    });
+
+    self.clearCandidates = function() {
+      return self.inviteCandidatesFetched(false)
+        .inviteCandidatesSelected(false)
+        .inviteCandidates([]);
+    };
+
     self.clear = function() {
       self.locationModel.clearMap();
 
       return self
         .resetLocation()
+        .locationSelected(false)
         .sourceApplicationId(pageutil.lastSubPage())
         .search("")
         .message("")
-        .inviteCandidatesFetched(false)
-        .inviteCandidates([]);
+        .clearCandidates();
     };
 
     self.copyOK = ko.pureComputed(function() {
@@ -230,9 +281,7 @@
       console.log("copyApplication");
       var params = self.locationModel.toJS();
       params["source-application-id"] = self.sourceApplicationId(); // TODO
-      params["auth-invites"] = _.map(_.filter(self.inviteCandidates(), function(candidate) {
-        return candidate.selected();
-      }), "id");
+      params["auth-invites"] = _.map(self.selectedInviteCandidates(), "id");
 
       ajax.command("copy-application", params)
         .processing(self.processing)

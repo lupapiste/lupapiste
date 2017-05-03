@@ -190,3 +190,22 @@
   }
   vertical-align: top;
 }
+
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid $positive;
+  background-color: $input-disabled-background-color;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
+
+  [class^="lupicon-"].right,
+  [class*="lupicon-"].right {
+    margin-right: 6px;
+    float: right;
+  }
+}

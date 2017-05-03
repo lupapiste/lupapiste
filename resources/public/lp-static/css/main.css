@@ -15795,6 +15795,23 @@ div.foreman-history-container {
   font-size: 44px;
 }
 
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid #2ca92c;
+  background-color: #f6f6f6;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.copy-selection-verified [class^="lupicon-"].right,
+.copy-selection-verified [class*="lupicon-"].right {
+  margin-right: 6px;
+  float: right;
+}
+
 /* attachments */
 #attachment.container {
   padding-right: 0;
