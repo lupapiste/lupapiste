@@ -62,7 +62,7 @@
     (get-invite-candidates (:auth source-application)
                            (:documents source-application)
                            user)
-    (fail! :error.no-source-application :id source-application-id)))
+    (fail! :error.application-not-found :id source-application-id)))
 
 ;;; Copying source application keys
 
@@ -191,9 +191,9 @@
 
 (defn check-copy-application-possible! [organization municipality permit-type operation]
   (when-not organization
-    (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+    (fail! :error.organization-not-found :municipality municipality :permit-type permit-type :operation operation))
   (when-not (find-first #(= % operation) (:selected-operations organization))
-    (fail! :error.operation-not-supported-by-organization :organization (:id organization) :operation operation)))
+    (fail! :error.operations.hidden :organization (:id organization) :operation operation)))
 
 (defn application-copyable-to-location
   [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
@@ -204,7 +204,7 @@
           organization (org/resolve-organization municipality permit-type)]
       (check-copy-application-possible! organization municipality permit-type operation)
       true)
-    (fail! :error.no-source-application :id source-application-id)))
+    (fail! :error.application-not-found :id source-application-id)))
 
 (defn copy-application
   [{{:keys [source-application-id x y address propertyId auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
@@ -231,7 +231,7 @@
                                                user organization created
                                                default-copy-options
                                                manual-schema-datas)})
-    (fail! :error.no-source-application :id source-application-id)))
+    (fail! :error.application-not-found :id source-application-id)))
 
 (defn store-source-application
   "Store the state of the source application used for copying application specified by copy-application-id"

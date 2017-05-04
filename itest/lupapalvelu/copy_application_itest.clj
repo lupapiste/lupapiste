@@ -32,7 +32,7 @@
 (facts "invite candidates"
   (fact "fails if the given application does not exist"
     (query sonja :copy-application-invite-candidates :source-application-id "nonexistent")
-    => (partial expected-failure? "error.no-source-application"))
+    => (partial expected-failure? "error.application-not-found"))
 
   (let [{app-id :id :as app}  (create-and-submit-application pena)
         _                     (invite-company-and-accept-invitation pena app-id "solita")
@@ -65,14 +65,14 @@
   (fact "fails if caller is not authority or company user"
     (let [{app-id :id} (create-and-submit-application pena)]
       (copy-application pena app-id) => (partial expected-failure? "error.unauthorized")
-      (copy-application kaino app-id) => (partial expected-failure? "error.no-source-application")
+      (copy-application kaino app-id) => (partial expected-failure? "error.application-not-found")
       (invite-company-and-accept-invitation pena app-id "solita")
       (copy-application kaino app-id) => ok?))
 
   (fact "fails if organization does not support given operation"
     (let [{app-id :id} (create-and-submit-application pena)] ; kerrostalo-rivitalo
       (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?
-      (copy-application sonja app-id) => (partial expected-failure? "error.operation-not-supported-by-organization")
+      (copy-application sonja app-id) => (partial expected-failure? "error.operations.hidden")
       (restore-sipoo-selected-operations)))
 
   (let [{app-id :id} (create-and-submit-application pena)
@@ -138,7 +138,7 @@
       (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?
       (query sonja :application-copyable-to-location :source-application-id app-id
              :x 444445.0 :y 6666665.0 :address "Testitie 1" :propertyId "75312312341234")
-      => (partial expected-failure? "error.operation-not-supported-by-organization")
+      => (partial expected-failure? "error.operations.hidden")
       (restore-sipoo-selected-operations)))
 
   (fact "succeeds if organization supports given operation"
