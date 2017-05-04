@@ -75,7 +75,7 @@
     (apply dissoc source-application (:blacklist copy-options))))
 
 
-;;; Updating ids
+;;; Updating documents
 
 (defn- new-app-id [application]
   {:id (app/make-application-id (:municipality application))})
@@ -101,6 +101,12 @@
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
                       (:documents application))}))
+
+(defn new-building-application? [application]
+  (-> application :primaryOperation :name keyword
+      op/operations :schema
+      #{"uusiRakennus" "uusi-rakennus-ei-huoneistoa"}
+      boolean))
 
 ;;; Handling noncopied and nonoverridden keys similarly to creating new application
 

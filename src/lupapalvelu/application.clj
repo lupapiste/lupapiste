@@ -725,12 +725,12 @@
     {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
 
-(defn autofill-rakennuspaikka [application time]
+(defn autofill-rakennuspaikka [application time & [force?]]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
     (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
       (doseq [rakennuspaikka rakennuspaikka-docs
               :when (seq rakennuspaikka)]
-        (let [property-id (or
-                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
-                            (:propertyId application))]
+        (let [property-id (or (and force? (:propertyId application))
+                              (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                              (:propertyId application))]
           (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
