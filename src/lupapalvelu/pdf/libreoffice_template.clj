@@ -67,7 +67,7 @@
    "LPAVALUE_MUNICIPALITY" (localized-text lang (str "municipality." (:municipality application)))
 
    "LPATITLE_ADDRESS"      (localized-text lang "application.address")
-   "LPAVALUE_ADDRESS"      (:address application)
+   "LPAVALUE_ADDRESS"      (xml-escape (:address application))
 
    "LPATITLE_PROPERTYID"   (localized-text lang "kiinteisto.kiinteisto.kiinteistotunnus")
    "LPAVALUE_PROPERTYID"   (if (nil? (:propertyId application)) (i18n/localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application)))
