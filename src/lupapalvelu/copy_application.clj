@@ -24,7 +24,7 @@
    :id (tools/party-doc-user-id document)
    :role (tools/party-doc->user-role document)})
 
-(def ^:private non-copyable-roles #{:tyonjohtaja})
+(def ^:private non-copyable-roles #{:tyonjohtaja :statementGiver})
 
 (defn- party-infos-from-documents [documents]
   (->> documents
@@ -51,15 +51,17 @@
      :roleSource (if (:role party-info)
                    :document :auth)}))
 
-(defn- get-invite-candidates [auth documents]
+(defn- get-invite-candidates [auth documents user]
   (->> auth
        (map (partial invite-candidate-info (party-infos-from-documents documents)))
-       (remove (comp non-copyable-roles :role))))
+       (remove (comp non-copyable-roles :role))
+       (remove #(= (:id %) (:id user)))))
 
 (defn copy-application-invite-candidates [user source-application-id]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (get-invite-candidates (:auth source-application)
-                           (:documents source-application))
+                           (:documents source-application)
+                           user)
     (fail! :error.no-source-application :id source-application-id)))
 
 ;;; Copying source application keys
@@ -155,7 +157,7 @@
 
 
 (def default-copy-options
-  {:blacklist [:comments :history :statements :attachments :title] ; copy everything except these
+  {:blacklist [:authority :comments :history :statements :attachments :title] ; copy everything except these
    })
 
 (defn- new-application-overrides
