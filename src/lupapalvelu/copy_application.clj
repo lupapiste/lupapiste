@@ -79,9 +79,6 @@
 
 ;;; Updating documents
 
-(defn- new-app-id [application]
-  {:id (app/make-application-id (:municipality application))})
-
 (defn- operation-id-map [source-application]
   (into {}
         (map #(vector (:id %) (mongo/create-id))
