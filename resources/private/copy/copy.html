@@ -59,7 +59,7 @@
     <!-- ko if: phase() > 0 -->
     <div>
       <button data-bind="click: buttonActions[phase()].previous.action,
-                         disable: processing() || pending()" class="reject">
+                         disable: processing() || pending()" class="secondary">
         <i class="lupicon-chevron-left"></i>
         <span data-bind="ltext: buttonActions[phase()].previous.ltext"></span>
       </button>
