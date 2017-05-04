@@ -154,8 +154,9 @@
 
 
 (def default-copy-options
-  {:blacklist [:authority :comments :history :statements :attachments :title] ; copy everything except these
-   })
+  {:whitelist [:address :auth :documents :location :location-wgs84 :municipality
+               :organization :permitSubtype :permitType :primaryOperation :propertyId
+               :schema-version :secondaryOperations]})
 
 (defn- new-application-overrides
   [{:keys [address auth infoRequest location municipality primaryOperation schema-version state title tosFunction] :as application}
@@ -167,7 +168,7 @@
                {:created          created
                 :id               (app/make-application-id municipality)
                 :schema-version   (or schema-version    (schemas/get-latest-schema-version))
-                :state            (or state             (app/application-state user org-id infoRequest))
+                :state            (or (not-empty state) (app/application-state user org-id infoRequest))
                 :title            (or (not-empty title) address)
                 :tosFunction      (or tosFunction       (tos-function org-id op-name))}
                (app/location-map  location))
@@ -242,6 +243,7 @@
 
 (defn get-source-application [copy-application-id]
   (first (mongo/select :source-applications {:_id copy-application-id})))
+
 
 ;;; Sending invite notifications
 

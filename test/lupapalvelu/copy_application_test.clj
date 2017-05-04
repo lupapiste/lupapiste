@@ -99,10 +99,9 @@
 
       (fact "If documents are not copied or overridden, those of normal new application are created"
         (let [new-app (new-application-copy source-app user organization created
-                                            (update default-copy-options :blacklist
-                                                    conj :documents))]
-          (= (dissoc-ids-and-timestamps (:documents new-app))
-             (dissoc-ids-and-timestamps (:documents raw-new-app))) => true?))
+                                            (update default-copy-options :whitelist
+                                                    (partial remove #{:documents})))]
+          (dissoc-ids-and-timestamps (:documents new-app)) => (dissoc-ids-and-timestamps (:documents raw-new-app))))
 
       (against-background
        (app/make-application-id anything) => "application-id-753"
