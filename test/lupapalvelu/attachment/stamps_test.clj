@@ -37,7 +37,7 @@
              :position   {:x 10 :y 200}
              :background 0
              :page       :first
-             :qr-code    true
+             :qrCode    true
              :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type :current-date}]
                           [{:type :backend-id}]
                           [{:type :building-id}]
@@ -62,7 +62,7 @@
     :position   {:x 10 :y 200}
     :background 0
     :page       :first
-    :qr-code    true
+    :qrCode    true
     :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type :current-date}]
                  [{:type :backend-id}]
                  [{:type :organization}]]}
@@ -71,7 +71,7 @@
     :position   {:x 15 :y 250}
     :background 10
     :page       :last
-    :qr-code    false
+    :qrCode    false
     :rows       [[{:type :custom-text :text "Verdict given"} {:type :verdict-date}]
                  [{:type :backend-id} {:type :username}]
                  [{:type :organization}]
@@ -81,7 +81,7 @@
     :position   {:x 50 :y 50}
     :background 15
     :page       :all
-    :qr-code    true
+    :qrCode    true
     :rows       [[{:type :current-date} {:type :verdict-date}]
                  [{:type :extra-text :text "Some extra text"}]
                  [{:type :agreement-id}]]}])
@@ -121,7 +121,7 @@
                                                  :position   {:x 10 :y 200}
                                                  :background 0
                                                  :page       :first
-                                                 :qr-code    true
+                                                 :qrCode    true
                                                  :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
                                                               [{:type :backend-id :value "17-0753-R"}]
                                                               [{:type :building-id :value "Rakennustunnus"}]
@@ -132,7 +132,7 @@
                                                                                    :position   {:x 10 :y 200}
                                                                                    :background 0
                                                                                    :page       :first
-                                                                                   :qr-code    true
+                                                                                   :qrCode    true
                                                                                    :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
                                                                                                 [{:type :backend-id :value "17-0753-R"}]
                                                                                                 [{:type :organization :value "Sipoon rakennusvalvonta"}]]}
@@ -141,7 +141,7 @@
                                                                                    :position   {:x 15 :y 250}
                                                                                    :background 10
                                                                                    :page       :last
-                                                                                   :qr-code    false
+                                                                                   :qrCode    false
                                                                                    :rows       [[{:type :custom-text :value "Verdict given"} {:type :verdict-date :value "06.04.2017"}]
                                                                                                 [{:type :backend-id :value "17-0753-R"} {:type :username, :value "Sonja Sibbo"}]
                                                                                                 [{:type :organization :value "Sipoon rakennusvalvonta"}]
@@ -151,7 +151,7 @@
                                                                                    :position   {:x 50 :y 50}
                                                                                    :background 15
                                                                                    :page       :all
-                                                                                   :qr-code    true
+                                                                                   :qrCode    true
                                                                                    :rows       [[{:type :current-date :value (sade.util/to-local-date (sade.core/now))} {:type :verdict-date :value "06.04.2017"}]
                                                                                                 [{:type :extra-text :value "Some extra text"}]
                                                                                                 [{:type :agreement-id :value "LP-753-2017-90001"}]]}]))

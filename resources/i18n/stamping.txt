@@ -181,3 +181,6 @@
 "stamp.qrcode" "en" ""
 "stamp.qrcode" "fi" "QR-koodi"
 "stamp.qrcode" "sv" ""
+"stamp.reload" "en" ""
+"stamp.reload" "fi" "Kumoa muutokset"
+"stamp.reload" "sv" ""

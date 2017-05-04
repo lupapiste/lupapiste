@@ -13,7 +13,7 @@
         </div>
         <div class="attachment-multiselect-content" data-bind="if: stampingMode">
           <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
-          <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields, stamps: stamps}}"></div>
+          <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stamps: stamps}}"></div>
         </div>
       </div>
 
@@ -34,21 +34,13 @@
               <div class="col-2">
                <label data-bind="ltext: 'stamp.preview'"></label>
                <textarea data-bind="value: preview"
-                         style="text-align: center; resize: none; font-family: Courier; font-weight: bold;"
+                         style="text-align: center; resize: none; font-weight: bold;"
                          rows="8"
                          readonly="true"></textarea>
               </div>
             </div>
             <div class="row">
               <h3 data-bind="ltext: 'stamp.information'"></h3>
-
-              <div class="col-1">
-                <label data-bind="ltext: 'stamp.text'"></label>
-                <input data-bind="value: customText, enable: false"
-                       type="text"
-                       class="text"
-                       data-test-id="stamp-info-text">
-              </div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.date'"></label>
@@ -63,7 +55,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.organization'"></label>
-                <input data-bind="value: organization, enable: status() === statusReady && organization() !== null"
+                <input data-bind="value: organization, enable: status() === statusReady && organization() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-organization">
@@ -71,7 +63,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.text.extra'"></label>
-                <input data-bind="value: extraText, enable: status() === statusReady && extraText() !== null"
+                <input data-bind="value: extraText, enable: status() === statusReady && extraText() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-extratext">
@@ -81,7 +73,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.agreementid'"></label>
-                <input data-bind="value: agreementId, enable: status() === statusReady && agreementId() !== null"
+                <input data-bind="value: agreementId, enable: status() === statusReady && agreementId() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-agreementId">
@@ -100,7 +92,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.user'"></label>
-                <input data-bind="value: userName, enable: status() === statusReady && userName() !== null"
+                <input data-bind="value: userName, enable: status() === statusReady && userName() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-user">
@@ -112,7 +104,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
-                <input data-bind="value: backendId, enable: status() === statusReady && backendId() !== null"
+                <input data-bind="value: backendId, enable: status() === statusReady && backendId() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-kuntalupatunnus"/>
@@ -120,7 +112,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.section'"></label>
-                <input data-bind="value: section, enable: status() === statusReady && section() !== null"
+                <input data-bind="value: section, enable: status() === statusReady && section() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-section">
@@ -169,6 +161,15 @@
                 <select data-bind="options: pages, optionsText: 'text', optionsValue: 'value', value: page" class="dropdown"
                         data-test-id="stamp-info-page"></select>
               </div>
+            </div>
+            <div class="row">
+              <button data-bind="
+                  ltext: 'stamp.reload',
+                  enable: stampsChanged(),
+                  click: $parent.reloadStamps"
+                class="secondary close"
+                data-test-id="stamp-reset">
+              </button>
             </div>
           </form>
         </div>

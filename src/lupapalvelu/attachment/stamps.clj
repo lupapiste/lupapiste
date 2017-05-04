@@ -62,7 +62,7 @@
    :page       (sc/enum :first
                         :last
                         :all)
-   :qr-code    sc/Bool
+   :qrCode     sc/Bool
    :rows       [StampTemplateRow]})
 
 (sc/defschema Stamp
@@ -74,7 +74,7 @@
    :page       (sc/enum :first
                         :last
                         :all)
-   :qr-code    sc/Bool
+   :qrCode     sc/Bool
    :rows       [StampRow]})
 
 (defn- get-verdict-date [{:keys [verdicts]}]

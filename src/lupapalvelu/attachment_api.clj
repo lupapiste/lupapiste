@@ -628,7 +628,7 @@
                :x-margin      (util/->long (get-in stamp [:position :x]))
                :y-margin      (util/->long (get-in stamp [:position :y]))
                :page          (keyword (:page stamp))
-               :transparency  (util/->long (or (:transparency stamp) 0))
+               :transparency  (util/->long (or (:background stamp) 0))
                :info-fields   {:fields (:rows stamp) :buildings (building/building-ids application)}})]
     (ok :job job)))
 
