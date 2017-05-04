@@ -28,6 +28,9 @@
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.xml.krysp.common-reader :as common]))
 
+(def building-fields
+  (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (cons :valtakunnallinenNumero)))
+
 (defn- get-applicant-email [applicant]
   (-> (or
         (get-in applicant [:henkilo :sahkopostiosoite])
@@ -109,9 +112,18 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
+#_(defn- ->op-document [{:keys [schema-version] :as application} building]
+    (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+          doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
+          doc (assoc-in doc [:schema-info :op] op)
+          doc-updates (lupapalvelu.document.model/map2updates [] (select-keys building building-fields))]
+      (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
-        manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
+        buildings (building-reader/->buildings xml)
+        first-building (doc-model/map2updates [] (select-keys (first buildings) building-fields))
+        manual-schema-datas {"aiemman-luvan-toimenpide" (remove empty? (conj first-building
                                                                     (when-not (ss/blank? rakennusvalvontaasianKuvaus)
                                                                       [["kuvaus"] rakennusvalvontaasianKuvaus])
                                                                     (when-not (ss/blank? vahainenPoikkeaminen)
@@ -309,9 +321,6 @@
     (println "fixed" @fix-prev-permit-counter "applications")
     (finally
       (mongo/disconnect!))))
-
-(def building-fields
-  (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (cons :valtakunnallinenNumero)))
 
 (defn- ->op-document [{:keys [schema-version] :as application} building]
   (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))

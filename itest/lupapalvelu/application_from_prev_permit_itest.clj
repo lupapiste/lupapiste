@@ -145,6 +145,9 @@
               (fact "hakija document count"
                 (count (domain/get-documents-by-name application "hakija-r")) => 5)
 
+              (fact "operation document count"
+                (count (domain/get-documents-by-name application "aiemman-luvan-toimenpide")) => 1)
+
               ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
               (fact "fetching prev-permit again after canceling the previously fetched one"
                 (local-command raktark-jarvenpaa :cancel-application-authority

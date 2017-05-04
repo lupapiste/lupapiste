@@ -317,6 +317,85 @@
           </rakval:rakennustieto>
         </rakval:Toimenpide>
       </rakval:toimenpidetieto>
+        <rakval:toimenpidetieto>
+            <rakval:Toimenpide>
+                <rakval:uusi>
+                    <rakval:kuvaus>Uusi</rakval:kuvaus>
+                    <rakval:aloitusPvm>2014-09-29Z</rakval:aloitusPvm>
+                </rakval:uusi>
+                <rakval:rakennustieto>
+                    <rakval:Rakennus gml:id="rakennus.4715">
+                        <yht:yksilointitieto>214796</yht:yksilointitieto>
+                        <yht:alkuHetki>2014-08-21T00:00:00Z</yht:alkuHetki>
+                        <rakval:sijaintitieto>
+                            <rakval:Sijainti>
+                                <yht:piste>
+                                    <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3879">
+                                        <gml:pos>2.5502936E7 6708332.0</gml:pos>
+                                    </gml:Point>
+                                </yht:piste>
+                            </rakval:Sijainti>
+                        </rakval:sijaintitieto>
+                        <rakval:rakennuksenTiedot>
+                            <rakval:rakennustunnus>
+                                <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                <rakval:kiinttun>18600303560006</rakval:kiinttun>
+                                <rakval:rakennusnro>001</rakval:rakennusnro>
+                                <rakval:aanestysalue>002</rakval:aanestysalue>
+                            </rakval:rakennustunnus>
+                            <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
+                            <rakval:tilavuus>443</rakval:tilavuus>
+                            <rakval:kokonaisala>129</rakval:kokonaisala>
+                            <rakval:osoite>
+                                <yht:kunta>186</yht:kunta>
+                                <yht:osoitenimi>
+                                    <yht:teksti xml:lang="fi">Kylykuja</yht:teksti>
+                                </yht:osoitenimi>
+                                <yht:osoitenumero>3</yht:osoitenumero>
+                                <yht:postinumero>04440</yht:postinumero>
+                                <yht:postitoimipaikannimi>JÄRVENPÄÄ</yht:postitoimipaikannimi>
+                            </rakval:osoite>
+                            <rakval:kerrosluku>1</rakval:kerrosluku>
+                            <rakval:kerrosala>125</rakval:kerrosala>
+                            <rakval:rakentamistapa>elementti</rakval:rakentamistapa>
+                            <rakval:kantavaRakennusaine>
+                                <rakval:rakennusaine>puu</rakval:rakennusaine>
+                            </rakval:kantavaRakennusaine>
+                            <rakval:julkisivu>
+                                <rakval:julkisivumateriaali>puu</rakval:julkisivumateriaali>
+                            </rakval:julkisivu>
+                            <rakval:verkostoliittymat>
+                                <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                                <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                                <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                                <rakval:maakaasuKytkin>false</rakval:maakaasuKytkin>
+                                <rakval:kaapeliKytkin>false</rakval:kaapeliKytkin>
+                            </rakval:verkostoliittymat>
+                            <rakval:energialuokka>B</rakval:energialuokka>
+                            <rakval:energiatehokkuusluku>139</rakval:energiatehokkuusluku>
+                            <rakval:energiatehokkuusluvunYksikko>kWh/brm2/vuosi</rakval:energiatehokkuusluvunYksikko>
+                            <rakval:paloluokka>P3</rakval:paloluokka>
+                            <rakval:lammitystapa>vesikeskus</rakval:lammitystapa>
+                            <rakval:lammonlahde>
+                                <rakval:muu>Muu</rakval:muu>
+                            </rakval:lammonlahde>
+                            <rakval:varusteet>
+                                <rakval:sahkoKytkin>false</rakval:sahkoKytkin>
+                                <rakval:kaasuKytkin>false</rakval:kaasuKytkin>
+                                <rakval:viemariKytkin>false</rakval:viemariKytkin>
+                                <rakval:vesijohtoKytkin>false</rakval:vesijohtoKytkin>
+                                <rakval:lamminvesiKytkin>false</rakval:lamminvesiKytkin>
+                                <rakval:aurinkopaneeliKytkin>false</rakval:aurinkopaneeliKytkin>
+                                <rakval:hissiKytkin>false</rakval:hissiKytkin>
+                                <rakval:koneellinenilmastointiKytkin>false</rakval:koneellinenilmastointiKytkin>
+                                <rakval:saunoja>1</rakval:saunoja>
+                            </rakval:varusteet>
+                        </rakval:rakennuksenTiedot>
+                        <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
+                    </rakval:Rakennus>
+                </rakval:rakennustieto>
+            </rakval:Toimenpide>
+        </rakval:toimenpidetieto>
       <rakval:katselmustieto>
         <rakval:Katselmus>
           <rakval:katselmuksenRakennustieto>
