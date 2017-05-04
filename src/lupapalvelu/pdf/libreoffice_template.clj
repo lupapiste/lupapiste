@@ -79,7 +79,9 @@
    "LPAVALUE_AUTHORITY"    (get-general-handler lang application)
 
    "LPATITLE_APPLICANT"    (localized-text lang "applicant")
-   "LPAVALUE_APPLICANT"    (s/join ", " (:_applicantIndex application))
+   "LPAVALUE_APPLICANT"    (->> (:_applicantIndex application)
+                                (map xml-escape)
+                                (s/join ", "))
 
    "LPATITLE_OPERATIONS"   (localized-text lang "selectm.source.label.edit-selected-operations")
    "LPAVALUE_OPERATIONS"   (get-operations application)
