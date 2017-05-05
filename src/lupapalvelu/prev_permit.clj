@@ -112,30 +112,38 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
-#_(defn- ->op-document [{:keys [schema-version] :as application} building]
-    (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
-          doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
-          doc (assoc-in doc [:schema-info :op] op)
-          doc-updates (lupapalvelu.document.model/map2updates [] (select-keys building building-fields))]
-      (lupapalvelu.document.model/apply-updates doc doc-updates)))
+(defn- document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (lupapalvelu.document.model/map2updates [] data)]
+    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
+(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
+  (map #(remove empty? (conj (doc-model/map2updates [] (select-keys % building-fields))
+                            (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                              [["kuvaus"] rakennusvalvontaasianKuvaus])
+                            (when-not (ss/blank? vahainenPoikkeaminen)
+                              [["poikkeamat"] vahainenPoikkeaminen]))) buildings))
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
-  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
+  (let [{:keys [hakijat]} app-info
         buildings (building-reader/->buildings xml)
-        first-building (doc-model/map2updates [] (select-keys (first buildings) building-fields))
-        manual-schema-datas {"aiemman-luvan-toimenpide" (remove empty? (conj first-building
-                                                                    (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                                                                      [["kuvaus"] rakennusvalvontaasianKuvaus])
-                                                                    (when-not (ss/blank? vahainenPoikkeaminen)
-                                                                      [["poikkeamat"] vahainenPoikkeaminen])))}
-        municipality (p/municipality-id-by-property-id (:propertyId location-info))
+        document-datas (schema-datas app-info buildings)
+        manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
                   {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
+
+        ;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
+        secondary-ops (map #(-> % :schema-info :op) other-building-docs)
+        created-application (update-in created-application [:documents] concat other-building-docs)
+        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
-
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
     ;; Get verdicts for the application
