@@ -14,7 +14,7 @@
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.property :as prop]
-            [sade.util :refer [merge-in find-first]]))
+            [sade.util :refer [merge-in find-first pathwalk]]))
 
 ;;; Obtaining the parties to invite for the copied app
 
@@ -38,6 +38,11 @@
 (defn- auth-id [auth-entry]
   (or (not-empty (:id auth-entry))
       (-> auth-entry :invite :user :id)))
+
+(defn- not-in-auth [auth]
+  (let [auth-id-set (set (map auth-id auth))]
+    (fn [id]
+      (not (get auth-id-set id)))))
 
 (defn- invite-candidate-info [party-infos auth-entry]
   (let [party-info (first (get party-infos (:id auth-entry)))]
@@ -85,7 +90,42 @@
              (conj (:secondaryOperations source-application)
                    (:primaryOperation source-application)))))
 
-(defn- updated-operation-and-document-ids [application source-application]
+(defn new-building-application? [application]
+  (-> application :primaryOperation :name keyword
+      op/operations :schema
+      #{"uusiRakennus" "uusi-rakennus-ei-huoneistoa"}
+      boolean))
+
+(defn- empty-document-copy [document {:keys [created primaryOperation schema-version] :as application} & [manual-schema-datas]]
+  (let [schema (schemas/get-schema schema-version (-> document :schema-info :name))]
+    (app/make-document application (:name primaryOperation) created manual-schema-datas schema)))
+
+(defn- user-id-from-personal-information [v]
+  (some->> v :userId :value not-empty))
+
+(defn- company-id-from-personal-information [v]
+  (some->> v :companyId :value not-empty))
+
+(defn id-from-personal-information [v]
+  (or (user-id-from-personal-information v)
+      (company-id-from-personal-information v)))
+
+(defn- personal-information-map? [v]
+  (and (map? v)
+       (or (contains? v :userId)
+           (contains? v :companyId))))
+
+(defn- clear-personal-information [document application & [manual-schema-datas]]
+  (let [empty-copy (empty-document-copy document application manual-schema-datas)
+        not-in-auth? (not-in-auth (:auth application))]
+    (pathwalk (fn [path v]
+                (if (and (personal-information-map? v)
+                         (not-in-auth? (id-from-personal-information v)))
+                  (get-in empty-copy path)
+                  v))
+              document)))
+
+(defn- updated-operation-and-document-ids [application source-application & [manual-schema-datas]]
   (let [op-id-mapping (operation-id-map source-application)]
     {:primaryOperation (update (:primaryOperation application) :id
                                op-id-mapping)
@@ -95,17 +135,12 @@
                         (let [doc (-> doc
                                       (assoc :id (mongo/create-id)
                                              :created (:created application))
-                                      (dissoc :meta))]
+                                      (dissoc :meta)
+                                      (clear-personal-information application manual-schema-datas))]
                           (if (-> doc :schema-info :op)
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
                       (:documents application))}))
-
-(defn new-building-application? [application]
-  (-> application :primaryOperation :name keyword
-      op/operations :schema
-      #{"uusiRakennus" "uusi-rakennus-ei-huoneistoa"}
-      boolean))
 
 ;;; Handling noncopied and nonoverridden keys similarly to creating new application
 
@@ -183,12 +218,7 @@
     (-> domain/application-skeleton
         (merge (copied-keys source-application options))
         (merge-in new-application-overrides user organization created manual-schema-datas)
-        (merge-in updated-operation-and-document-ids source-application))))
-
-(defn- not-in-auth [auth]
-  (let [auth-id-set (set (map auth-id auth))]
-    (fn [id]
-      (not (get auth-id-set id)))))
+        (merge-in updated-operation-and-document-ids source-application manual-schema-datas))))
 
 (defn check-copy-application-possible! [organization municipality permit-type operation]
   (when-not organization
