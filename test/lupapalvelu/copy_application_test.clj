@@ -4,7 +4,6 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.copy-application :refer :all]
-
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
@@ -27,7 +26,8 @@
                    :role      :applicant}})
 
 (with-redefs [coord/convert (fn [_ _ _ coords] (str "converted " coords))
-              usr/get-user-by-id (fn [id] (get users id))]
+              usr/get-user-by-id (fn [id] (get users id))
+              lupapalvelu.copy-application/empty-document-copy (fn [document _ & _] document)]
   (let [source-user (get users "source-user")
         user        (get users "copying-user")
         source-created 12345

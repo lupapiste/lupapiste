@@ -71,7 +71,7 @@
                                          [k (pathwalk f (conj path k) v)])
                                        f-coll))
            (set? f-coll) (into #{} (map (fn [v]
-                                          (pathwalk f (conj path v)))
+                                          (pathwalk f (conj path v) v))
                                         f-coll))
            (coll? f-coll) (into (empty f-coll)
                                 (map-indexed
