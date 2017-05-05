@@ -87,7 +87,7 @@
                  [{:type :agreement-id}]]}])
 
 (def info-fields
-  [[{:type "custom-text", :value "Hyväksytty"}
+  [[{:type "custom-text", :value "Hyv\u00e4ksytty"}
     {:type "current-date", :value "26.04.2017"}]
    [{:type "backend-id", :value "KLT-123"}]
    [{:type "organization", :value "Sipoon rakennusvalvonta"}]
@@ -178,7 +178,7 @@
 
 (facts "Should get rows as strings"
   (let [stamp (first (stamps organization application sonja))]
-    (row-values-as-string (:rows stamp)) => [["Hyväksytty" (sade.util/to-local-date (sade.core/now))]
+    (row-values-as-string (:rows stamp)) => [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
                                              ["17-0753-R"]
                                              ["Rakennustunnus"]
                                              ["Sipoon rakennusvalvonta"]]))
