@@ -255,9 +255,12 @@
                              )}))
           (partition 2 1 nil state-changes)))))
 
-(defn- document-metadata-final-state [metadata verdicts]
-  (-> (assoc metadata :tila :valmis)
-      (update-end-dates verdicts)))
+(defn- document-metadata-final-state [{:keys [tila] :as metadata} verdicts]
+  (if (#{:arkistoitu :arkistoidaan} (keyword tila))
+    ;; Must not alter already archived documents
+    metadata
+    (-> (assoc metadata :tila :valmis)
+        (update-end-dates verdicts))))
 
 (defn mark-attachment-final! [{:keys [attachments verdicts] :as application} now attachment-or-id]
   (let [{:keys [id metadata]} (if (map? attachment-or-id)
