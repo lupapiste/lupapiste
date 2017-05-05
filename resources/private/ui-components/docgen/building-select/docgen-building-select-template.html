@@ -7,11 +7,11 @@
       <select data-bind="options: buildingOptions,
                          optionsText: optionsText,
                          optionsValue: 'buildingId',
-                         value: value,
+                         value: selectValue,
                          valueAllowUnset: true,
-                         optionsCaption: loc( 'selectone'),
+                         optionsCaption: nonSelection,
                          disable: disabled() || readonly(),
-                         css: inputClasses,                     
+                         css: inputClasses,
                          testId: path.join('.')"
               class="form-input combobox long"
               name="buildingId">

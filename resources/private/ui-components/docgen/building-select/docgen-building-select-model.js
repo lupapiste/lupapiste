@@ -8,6 +8,10 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
 
   var service = lupapisteApp.services.buildingService;
 
+  // selectValue is a proxy for the underlying document data service
+  // value. This approach allows for canceling.
+  self.selectValue = ko.observable( self.value() );
+
   self.buildingOptions = self.disposedComputed( function() {
     var infosObservable = service.buildingsInfo();
     var infos = infosObservable() || [];
@@ -25,6 +29,11 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
       : textTemplate( building );
   };
 
+  // We show "empty selection" only before any value is selected.
+  self.nonSelection = self.disposedComputed( function() {
+    return self.selectValue() ? null : loc( "selectone");
+  });
+
   // Id is needed for focusing support when following a link from the
   // required fields summary tab.
   self.otherId = sprintf( "%s-%s",
@@ -40,6 +49,7 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
   });
 
   function merge(overwrite) {
+    self.value( self.selectValue());
     hub.send( "buildingService::merge",
               {documentId: self.documentId,
                buildingId: self.value(),
@@ -52,10 +62,11 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
     });
   }
 
-  self.disposedSubscribe( self.value, function( value) {
+  self.disposedSubscribe( self.selectValue, function( value) {
     var documentDataService = lupapisteApp.services.documentDataService;
-    if (value) {
+    if (value !== self.value()) {
       if (value === OTHER) {
+        self.value( value );
         var accordionFields = _.get(documentDataService.findDocumentById(params.documentId), "schema.accordion-fields");
         var updates = _.map(accordionFields, function(field) { return [_.get(field, "paths", field), ""]; });
         documentDataService.updateDoc(params.documentId, updates, emitAccordionUpdates(updates));
@@ -67,6 +78,13 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
           {title: loc("no"), fn: _.partial(merge, false)}
         );
       }
+    }
+  });
+
+  self.addHubListener( "dialog-close", function( event ) {
+    if( event.id === "dynamic-yes-no-confirm-dialog"
+     && self.selectValue() !== self.value()) {
+      self.selectValue( self.value() );
     }
   });
 };

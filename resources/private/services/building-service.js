@@ -45,11 +45,11 @@ LUPAPISTE.BuildingService = function() {
 
   // Options [optional]
   // documentId: Document id
-  // buildingId: Building id[[/Users/vespesa/projects/lupapiste/.gitignore][]]
+  // buildingId: Building id
   // overwrite: Whether overwrite during merge
   // [path]: Schema path (default "buildingId")
   // [collection]: Mongo collection ("documents")
- hub.subscribe( "buildingService::merge", function( options ) {
+  hub.subscribe( "buildingService::merge", function( options ) {
     ajax.command("merge-details-from-krysp",
                  _.defaults( _.pick( options, ["documentId",
                                                "buildingId",
