@@ -89,6 +89,7 @@ Duff3 user gets invite email again
   Wait Until  Page Should Contain  dummy3@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Delete Duff3 again
   Kaino logs in
@@ -159,6 +160,7 @@ Pena accepts invitation
   Wait Until  Page Should Contain  pena@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Pena logs in and sees the non-admin view of the company
   Go to login page
