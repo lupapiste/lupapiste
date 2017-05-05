@@ -66,7 +66,7 @@
 (defn- set-attachment-state [next-state application now id]
   (action/update-application
     (action/application->command application)
-    {:attachments.id id}
+    {:attachments {$elemMatch {:id id :metadata.tila {$ne :arkistoitu}}}}
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
@@ -75,12 +75,14 @@
 (defn- set-application-state [next-state application now _]
   (action/update-application
     (action/application->command application)
+    {:metadata.tila {$ne :arkistoitu}}
     {$set {:modified now
            :metadata.tila next-state}}))
 
 (defn- set-process-state [next-state application now _]
   (action/update-application
     (action/application->command application)
+    {:processMetadata.tila {$ne :arkistoitu}}
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
