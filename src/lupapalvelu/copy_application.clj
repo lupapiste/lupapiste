@@ -140,7 +140,12 @@
                           (if (-> doc :schema-info :op)
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
-                      (:documents application))}))
+                      (:documents application))
+     :attachments (mapv (fn [attachment]
+                          (if (:op attachment)
+                            (update attachment :op (partial map #(update % :id op-id-mapping)))
+                            attachment))
+                        (:attachments application))}))
 
 ;;; Handling noncopied and nonoverridden keys similarly to creating new application
 

@@ -10,7 +10,8 @@
             [lupapalvelu.user :as usr]
             [midje.sweet :refer :all]
             [sade.coordinate :as coord]
-            [sade.schema-generators :as ssg]))
+            [sade.schema-generators :as ssg]
+            [sade.util :as util]))
 
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
@@ -24,6 +25,14 @@
                    :firstName "New"
                    :lastName  "User"
                    :role      :applicant}})
+
+(defn pointing-to-operations-of [application]
+  (let [operations (conj (:secondaryOperations application) (:primaryOperation application))]
+    (fn [op-infos]
+      (every? (fn [op-info]
+                (= (:name (util/find-by-id (:id op-info) operations))
+                   (:name op-info)))
+              op-infos))))
 
 (with-redefs [coord/convert (fn [_ _ _ coords] (str "converted " coords))
               usr/get-user-by-id (fn [id] (get users id))
@@ -63,6 +72,9 @@
             (keys new) ; gives the same result as (keys old)
             => (just [:auth :attachments :comments :created :documents :history :id :modified :primaryOperation]
                      :in-any-order))
+
+          (fact "the operation info of attachments in copied application points to the new copied operations"
+                (->> new-app :attachments (map :op)) => (pointing-to-operations-of new-app))
 
           (fact "application is created and modified now"
             (:created new-app) => created
