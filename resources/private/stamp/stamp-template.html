@@ -18,7 +18,16 @@
       </div>
 
       <script type="text/x-jquery-tmpl" id="stamp-attachments-template">
-        <div class="stamp-info-container form-grid">
+       <div data-bind="visible: !selectedStamp()" data-test-id="stamp-templates-missing" class="row">
+          <h2 data-bind="ltext: 'stamp.templates.missing.title'"></h2>
+          <div class="info-line like-btn">
+              <i class="lupicon-circle-attention"></i>
+              <span data-bind="ltext: 'stamp.templates.missing.guide'"></span>
+          </div>
+          <div class="col-4"><br></div>
+       </div>
+
+        <div class="stamp-info-container form-grid" data-bind="visible: selectedStamp()">
           <form id="stamp-info">
             <div class="row">
               <h3 data-bind="ltext: 'stamp.title'"></h3>

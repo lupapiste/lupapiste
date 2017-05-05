@@ -103,7 +103,7 @@ var stamping = (function() {
     if (model.stamps().length > 0) {
       initStamp(param.application);
     } else {
-      _.delay(initStamp, 1500, param.application);
+      _.delay(initStamp, 2000, param.application);
     }
   });
 

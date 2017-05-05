@@ -182,6 +182,18 @@ LUPAPISTE.StampModel = function(params) {
     }).join("\n") + "\nwww.lupapiste.fi";
   }
 
+  if (!self.selectedStamp()) {
+    self.selectedStamp({
+      id: null,
+      name: null,
+      position: {},
+      background: null,
+      page: null,
+      qrCode: null,
+      rows: [[]]
+    });
+  }
+
   // Stamp info
   self.xMargin = ko.observable(self.selectedStamp().position.x);
   self.xMarginOk = ko.computed(function() { return self.xMargin() >= 0; });
