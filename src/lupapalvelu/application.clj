@@ -380,6 +380,26 @@
           (assoc-in body path val)))
       {} schema-data)))
 
+(defn make-document [application primary-operation-name created manual-schema-datas schema]
+  (let [op-info (op/operations (keyword primary-operation-name))
+        op-schema-name (:schema op-info)
+        schema-version (:schema-version application)
+        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
+                                                   op-schema-name
+                                                   (:schema-data op-info))
+        merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
+        schema-name (get-in schema [:info :name])]
+    {:id          (mongo/create-id)
+     :schema-info (:info schema)
+     :created     created
+     :data        (util/deep-merge
+                   (tools/create-document-data schema tools/default-values)
+                   (tools/timestamped
+                    (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                      (schema-data-to-body schema-data application)
+                      {})
+                    created))}))
+
 (defn make-documents [user created org op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
   (let [op-info (op/operations (keyword (:name op)))
@@ -388,19 +408,9 @@
         default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
                                                    op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
-        make (fn [schema]
-               {:pre [(:info schema)]}
-               (let [schema-name (get-in schema [:info :name])]
-                 {:id          (mongo/create-id)
-                  :schema-info (:info schema)
-                  :created     created
-                  :data        (util/deep-merge
-                                 (tools/create-document-data schema tools/default-values)
-                                 (tools/timestamped
-                                   (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                                     (schema-data-to-body schema-data application)
-                                     {})
-                                   created))}))
+
+        make (partial make-document application (:name op) created manual-schema-datas)
+
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
 
