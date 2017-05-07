@@ -6,6 +6,7 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notif]
@@ -96,7 +97,9 @@
       #{"uusiRakennus" "uusi-rakennus-ei-huoneistoa"}
       boolean))
 
-(defn- empty-document-copy [document {:keys [created primaryOperation schema-version] :as application} & [manual-schema-datas]]
+(defn- empty-document-copy
+  "Returns an empty copy of the given document"
+  [document {:keys [created primaryOperation schema-version] :as application} & [manual-schema-datas]]
   (let [schema (schemas/get-schema schema-version (-> document :schema-info :name))]
     (app/make-document application (:name primaryOperation) created manual-schema-datas schema)))
 
@@ -115,28 +118,75 @@
        (or (contains? v :userId)
            (contains? v :companyId))))
 
-(defn- clear-personal-information [document application & [manual-schema-datas]]
+(defn- clear-personal-information
+  "Clears personal information from documents if
+   - it is possible to enter the information using user or company id and
+   - user/company id is missing or the provided id is not authorized for the new
+     application"
+  [document application & [manual-schema-datas]]
   (let [empty-copy (empty-document-copy document application manual-schema-datas)
         not-in-auth? (not-in-auth (:auth application))]
     (pathwalk (fn [path v]
                 (if (and (personal-information-map? v)
-                         (not-in-auth? (id-from-personal-information v)))
+                         (or (empty? (id-from-personal-information v))
+                             (not-in-auth? (id-from-personal-information v))))
                   (get-in empty-copy path)
                   v))
               document)))
 
-(defn- updated-operation-and-document-ids [application source-application & [manual-schema-datas]]
+(defn- construction-waste-plan? [doc]
+  ;; This is as intended, waste-schemas/construction-waste-plan-for-organization
+  ;; chooses between these two instead of the basic and extended reports
+  (#{waste-schemas/basic-construction-waste-plan-name
+     waste-schemas/extended-construction-waste-report-name}
+   (-> doc :schema-info :name)))
+
+(defn- correct-waste-plan-for-organization? [doc organization]
+  {:pre [(construction-waste-plan? doc)]}
+  (= (-> doc :schema-info :name)
+     (waste-schemas/construction-waste-plan-for-organization organization)))
+
+(defn construction-waste-plan
+  "Returns the given document if it is the correct construction waste
+   plan for the organization. Otherwise, it creates an empty document of
+   the correct type."
+  [document application organization manual-schema-datas]
+  (if (correct-waste-plan-for-organization? document organization)
+    document
+    (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
+      (app/make-document application
+                         (-> application :primaryOperation :name)
+                         (:created application)
+                         manual-schema-datas
+                         (schemas/get-schema (:schema-version application)
+                                             plan-name)))))
+
+(defn- handle-waste-plan [document application organization manual-schema-datas]
+  (if (construction-waste-plan? document)
+    (construction-waste-plan document application
+                             organization manual-schema-datas)
+    document))
+
+(defn- preprocess-document [document application organization manual-schema-datas]
+  (-> document
+      (handle-waste-plan application organization manual-schema-datas)
+      (assoc :id (mongo/create-id)
+             :created (:created application))
+      (dissoc :meta)
+      (clear-personal-information application manual-schema-datas)))
+
+(defn- updated-operation-and-document-ids
+  [application source-application organization & [manual-schema-datas]]
   (let [op-id-mapping (operation-id-map source-application)]
     {:primaryOperation (update (:primaryOperation application) :id
                                op-id-mapping)
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
      :documents (mapv (fn [doc]
-                        (let [doc (-> doc
-                                      (assoc :id (mongo/create-id)
-                                             :created (:created application))
-                                      (dissoc :meta)
-                                      (clear-personal-information application manual-schema-datas))]
+                        (let [doc (preprocess-document doc
+                                                       application
+                                                       organization
+                                                       manual-schema-datas)]
                           (if (-> doc :schema-info :op)
                             (update-in doc [:schema-info :op :id] op-id-mapping)
                             doc)))
@@ -224,7 +274,8 @@
     (-> domain/application-skeleton
         (merge (copied-keys source-application options))
         (merge-in new-application-overrides user organization created manual-schema-datas)
-        (merge-in updated-operation-and-document-ids source-application manual-schema-datas))))
+        (merge-in updated-operation-and-document-ids source-application
+                                                     organization manual-schema-datas))))
 
 (defn check-copy-application-possible! [organization municipality permit-type operation]
   (when-not organization

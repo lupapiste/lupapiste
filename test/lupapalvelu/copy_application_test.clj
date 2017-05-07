@@ -4,14 +4,19 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.copy-application :refer :all]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.test-util :refer [walk-dissoc-keys]]
             [lupapalvelu.user :as usr]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [sade.coordinate :as coord]
             [sade.schema-generators :as ssg]
             [sade.util :as util]))
+
+(testable-privates lupapalvelu.copy-application
+                   handle-waste-plan)
 
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
@@ -118,3 +123,41 @@
       (against-background
        (app/make-application-id anything) => "application-id-753"
        (org/get-organization (:id organization)) => organization))))
+
+(facts "document intricacies"
+
+  (fact "if waste plan does not match organization settings, it is replaced by correct one"
+    (let [application {:created 12345
+                       :schema-version 1
+                       :primaryOperation {:name "kerrostalo-rivitalo"}}
+          basic-waste-plan-doc {:schema-info
+                                {:name waste-schemas/basic-construction-waste-plan-name}}
+          extended-waste-report-doc {:schema-info
+                                     {:name waste-schemas/extended-construction-waste-report-name}}
+          organization-with-basic-waste-plan {:extended-construction-waste-report-enabled false}
+          organization-with-extended-waste-report {:extended-construction-waste-report-enabled true}]
+      (handle-waste-plan basic-waste-plan-doc
+                         application
+                         organization-with-basic-waste-plan
+                         nil)
+      => basic-waste-plan-doc
+
+      (-> (handle-waste-plan basic-waste-plan-doc
+                             application
+                             organization-with-extended-waste-report
+                             nil)
+          :schema-info :name)
+      => waste-schemas/extended-construction-waste-report-name
+
+      (handle-waste-plan extended-waste-report-doc
+                         application
+                         organization-with-extended-waste-report
+                         nil)
+      => extended-waste-report-doc
+
+      (-> (handle-waste-plan extended-waste-report-doc
+                             application
+                             organization-with-basic-waste-plan
+                             nil)
+          :schema-info :name)
+      => waste-schemas/basic-construction-waste-plan-name)))
