@@ -4,7 +4,7 @@
   (.getCurrentLanguage js/loc))
 
 (defn loc [& args]
-  (apply js/loc args))
+  (apply js/loc (map name args)))
 
 (defn query [query-name success-fn & kvs]
   (-> (js/ajax.query (clj->js query-name) (-> (apply hash-map kvs) clj->js))

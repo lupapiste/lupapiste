@@ -4,7 +4,7 @@
             [lupapalvelu.ui.authorization :as auth]
             [lupapalvelu.ui.common :refer [query command loc] :as common]
             [lupapalvelu.ui.components :as uc]
-            [lupapalvelu.ui.util :as jsutil]
+            [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]))
 
@@ -35,18 +35,23 @@
                             :editor {:drag-element nil
                                      :debug-data {}
                                      :rows [{:row-number 1
-                                             :stamps ["Asian tunnus" "Kuntalupatunnus"]
+                                             :fields [{:id 1
+                                                       :type :application-id}
+                                                      {:id 2
+                                                       :type :kuntalupatunnus}]
                                              :is-dragged-over false}
                                             {:row-number 2
-                                             :stamps ["Hiphei, laitoin tähän tekstiä"
-                                                      "Kuluva pvm"
-                                                      "juupeli juu"]
+                                             :fields [{:id 1
+                                                       :type :custom-text
+                                                       :text "Hiphei, laitoin tähän tekstiä"}
+                                                      {:id 2
+                                                       :type :current-date}]
                                              :is-dragged-over false}
                                             {:row-number 3
-                                             :stamps []
+                                             :fields []
                                              :is-dragged-over false}]}})
 
-(def component-state  (atom empty-component-state))
+(defonce component-state  (atom empty-component-state))
 
 (def selected-stamp (rum-util/derived-atom
                      [component-state]
@@ -90,26 +95,13 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
-(rum/defc add-here-placeholder < rum/reactive
-  [{:keys [is-dragged-over drop-handler on-drag-enter on-drag-leave]}]
-  (let [class (if (rum/react is-dragged-over)
-                "stamp-row-focus"
-                "stamp-row-placeholder")]
-    [:button.stamp-row-placeholder
-     {:on-drag-enter on-drag-enter
-      :on-drag-over (fn [e] (.preventDefault e))
-      :on-drag-leave on-drag-leave
-      :on-drop drop-handler
-      :class class}
-     [:span {:style {:pointer-events :none}} "Pudota tähän"]]))
-
 (rum/defc placeholder-box [width]
   [:button.stamp-row-btn
    {:style {:width width
             :background-color "black"}}])
 
 (rum/defc stamp-row-btn < rum/reactive
-  [{:keys [text remove debug-data row-number row-index]}]
+  [{:keys [data remove debug-data row-number row-index]}]
   (let [closest? (= [row-number row-index]
                     (get-in (rum/react debug-data) [:closest :elem]))
         side (get-in (rum/react debug-data) [:closest :side])
@@ -117,25 +109,31 @@
                      :right :border-right}
         border-style (if (and closest? *debug-edge-detection*)
                        {(border-side side) "solid red 2px"}
-                       {})]
+                       {})
+        {:keys [type text]} (rum/react data)
+        rendered-content (if (= type :custom-text)
+                           [:input {:placeholder (loc :stamp.custom-text)
+                                    :value text
+                                    :on-change #(swap! data assoc :text (-> % .-target .-value))}]
+                           [:span (loc (str "stamp." (name type)))])]
     [:button.stamp-row-btn
      {:style border-style
       :data-row row-number
       :data-row-index row-index}
-     [:span text]
+     rendered-content
      [:i.lupicon-circle-remove
       {:on-click (fn [e] (remove))}]]))
 
-(def stamp-templates
+(def field-templates
   ;; TODO: use the enum from backend for keys
-  {:vapaa-teksti    {:text-content "Vapaa teksti"}
-   :kuluva-pvm      {:text-content "Kuluva pvm"}
-   :paatos-pvm      {:text-content "Päätös pvm"}
-   :kuntalupatunnus {:text-content "Kuntalupatunnus"}
-   :kayttaja        {:text-content "Käyttäjä"}
-   :organisaatio    {:text-content "Organisaatio"}
-   :lp-tunnus       {:text-content "LP-tunnus"}
-   :rakennustunnus  {:text-content "Rakennustunnus"}})
+  {:custom-text     {:text ""}
+   :current-date    {}
+   :verdict-date    {}
+   :kuntalupatunnus {}
+   :user            {}
+   :organization    {}
+   :application-id  {}
+   :building-id     {}})
 
 ;;TODO: needs better name
 (defn drop-at
@@ -227,75 +225,87 @@
         (= :left side) elem
         :else          (update-in elem [1] inc)))
 
-(defn with-placeholder [{:keys [buttons debug-data row-number placeholder-width]}]
-  (if-not (:closest debug-data)
-    buttons
-    (let [placeholder-location (closest->placeholder-position
-                                 (:closest debug-data))
-          placeholder-row? #_false (= row-number (first placeholder-location))
-          placeholder-position (second placeholder-location)
-          placeholder-element (placeholder-box (or placeholder-width
-                                                   7))
-          [before after] (split-at placeholder-position buttons)]
-      (if-not placeholder-row?
-        buttons
-        (concat before
-                [placeholder-element]
-                after)))))
+(def closest-elem (atom []))
 
-(rum/defc stamp-row < rum/reactive
-  [{:keys [stamp-row-cursor drag-source debug-data]}]
-  (let [{:keys [row-number stamps]} (rum/react stamp-row-cursor)
+(defn add-at-index [a-seq index elem]
+  (let [[before after] (split-at index a-seq)]
+    (vec (concat before
+                 [elem]
+                 after))))
+
+(rum/defcs stamp-row < rum/reactive (rum/local 0 ::drag-event-sum)
+  [state {:keys [stamp-row-cursor drag-source debug-data]}]
+  (let [{:keys [row-number fields]} (rum/react stamp-row-cursor)
+        drag-event-sum (::drag-event-sum state)
         remove-btn (fn [idx] (fn []
                               (swap! stamp-row-cursor
-                                     update-in [:stamps] drop-at idx)))
-        stamp-buttons (for [[idx stamp] (indexed stamps)]
-                        (stamp-row-btn {:text stamp
-                                        :remove (remove-btn idx)
-                                        :debug-data debug-data
-                                        :row-number row-number
-                                        :row-index idx}))
+                                     update-in [:fields] drop-at idx)))
+        field-buttons (for [[idx field] (indexed fields)]
+                        (rum/with-key
+                          (stamp-row-btn {:data (rum/cursor-in stamp-row-cursor [:fields idx])
+                                          :remove (remove-btn idx)
+                                          :debug-data debug-data
+                                          :row-number row-number
+                                          :row-index idx})
+                          (:id field)))
         drag-content (rum/react drag-source)
-        stamp-type (get drag-content :stamp-type :error-stamp-type)
-        content (get stamp-templates stamp-type :error-stamp-template)
-        text-content (get content :text-content :error-text-content)
-        is-dragged-over (rum/cursor-in stamp-row-cursor [:is-dragged-over])
+        field-type (get drag-content :stamp-type)
+        extra-props (get field-templates field-type {})
         placeholder-width (get-in (rum/react drag-source)
                                   [:source-boundaries :width])
-        buttons-with-placeholder (with-placeholder
-                                   {:buttons stamp-buttons
-                                    :debug-data (rum/react debug-data)
-                                    :placeholder-width placeholder-width
-                                    :row-number row-number})
-        drop-handler (fn [e]
-                       (swap! stamp-row-cursor update :stamps conj text-content)
-                       (reset! is-dragged-over false))
         on-drag-enter (fn [e]
                         (.preventDefault e)
-                        (reset! is-dragged-over true))
-        on-drag-leave (fn [e]
-                        (reset! is-dragged-over false))
+                        (swap! drag-event-sum inc))
+        on-drag-leave (fn [_]
+                        (swap! drag-event-sum dec))
+        is-dragged-over? (pos? @drag-event-sum)
         mouse-move-handler (fn [e]
+                             (let [dt (-> e .-dataTransfer)]
+                               (when (.getData dt "stampField")
+                                 (.preventDefault e)
+                                 (when (= "new" (.getData dt "dragIntent"))
+                                   (set! (-> e .-dataTransfer .-dropEffect) "copy"))))
                              (let [client-x (aget e "clientX")
                                    client-y (aget e "clientY")
                                    data {:row-mouse {:client-x client-x
                                                      :client-y client-y}
                                          :current-row row-number}
-                                   dom-data (dom-data)
-                                   closest-data {:closest (closest-with-edge
-                                                            (merge data dom-data))}]
-                               (swap! debug-data merge data dom-data closest-data)))]
-    (if (and row-number stamps)
-      [:div.stamp-row {;;:on-mouse-move mouse-move-handler
+                                   dom-data (dom-data)]
+                               (reset! closest-elem (closest-with-edge
+                                                      (merge data dom-data)))))
+        placeholder-location (closest->placeholder-position (rum/react closest-elem))
+        placeholder-row? (= row-number (first placeholder-location))
+        split-pos (second placeholder-location)
+        drop-handler (fn [e]
+                       (.preventDefault e)
+                       (let [{:strs [type]} (-> e .-dataTransfer (.getData "stampField") util/json->clj)
+                             type-kw (keyword type)
+                             field-data (merge {:type type-kw
+                                                :id (->> fields (map :id) max inc)}
+                                               (type-kw field-templates))]
+                         (swap! stamp-row-cursor update :fields add-at-index split-pos field-data)))
+        placeholder-element [:button.stamp-row-placeholder
+                             {:key :placeholder
+                              :style {:width (or placeholder-width 7)}}
+                             [:span {:style {:pointer-events :none}} "Pudota tähän"]]
+        [before after] (when (number? split-pos) (split-at split-pos field-buttons))]
+    (if (and row-number fields)
+      [:div.stamp-row {:on-drag-enter on-drag-enter
+                       :on-drag-leave on-drag-leave
                        :on-drag-over mouse-move-handler
+                       :on-drop drop-handler
                        :data-row-number row-number}
        [:button.stamp-row-label  [:span (str "Rivi "
                                              row-number)]]
-       buttons-with-placeholder
-       (add-here-placeholder {:is-dragged-over is-dragged-over
-                              :drop-handler drop-handler
-                              :on-drag-enter on-drag-enter
-                              :on-drag-leave on-drag-leave})]
+       (if (and placeholder-row? is-dragged-over?)
+         (concat before
+                 [placeholder-element]
+                 after)
+         (concat
+           field-buttons
+           [[:button.stamp-row-placeholder
+             {:key :default-placeholder}
+             [:span {:style {:pointer-events :none}} "Pudota tähän"]]]))]
       [:span "error: stamp-row"])))
 
 (rum/defc form-entry [label-string]
@@ -305,15 +315,16 @@
 
 ;; TODO: check validity of parameters with spec
 (rum/defcs stamp-btn < (rum/local false)
-  [state {:keys [key content drag-element drag-end-cb]}]
-  (let [drag-source? (:rum/local state)
+  [local-state {:keys [key]}]
+  (let [drag-source? (:rum/local local-state)
+        drag-element (rum/cursor-in component-state [:editor :drag-element])
         base-classes "stamp-editor-btn"
         extra-classes (if @drag-source?
                         "drag-source"
                         "")
         all-classes (clojure.string/join " " [base-classes extra-classes])
         element-selector (str ".stamp-editor-btn[data-stamp-btn-name='"
-                              content
+                              key
                               "']")
         find-boundaries (fn []
                           (-> element-selector
@@ -326,23 +337,26 @@
                                {:type :new
                                 :stamp-type key
                                 :source-boundaries (find-boundaries)})
-                       (reset! drag-source? true))
-      :on-drag-end (fn [e]
-                     (drag-end-cb)
-                     (reset! drag-element nil)
-                     (reset! drag-source? false))
-      :data-stamp-btn-name content
+                       (reset! drag-source? true)
+
+                       (let [data-transfer (.-dataTransfer e)]
+                         (.setData data-transfer "stampField" (util/clj->json {:type key}))
+                         (.setData data-transfer "dragIntent" "new")))
+      :on-drag-end (fn [_]
+                     (reset! drag-source? false)
+                     (reset! closest-elem []))
+      :data-stamp-btn-name key
       :class all-classes}
      [:i.lupicon-circle-plus]
-     [:span content]]))
+     [:span (loc (str "stamp." (name key)))]]))
 
 (rum/defc stamp-templates-component < rum/reactive
-  [{:keys [drag-element drag-end-cb] :as params}]
+  []
   [:div
-   (for [[a-key {content :text-content}] stamp-templates]
-     (stamp-btn (merge params
-                       {:key a-key
-                        :content content})))])
+   (for [[field-type _] field-templates]
+     (rum/with-key
+       (stamp-btn {:key field-type})
+       field-type))])
 
 (rum/defc debug-component < rum/reactive
   [debug-data]
@@ -384,36 +398,11 @@
    [:div
     "sisältöä"]])
 
-(defn add-at-index [a-seq index elem]
-  (let [[before after] (split-at index a-seq)]
-    (vec (concat before
-                 [elem]
-                 after))))
-
-(defn drag-end [editor-state]
-  (when-let [closest (get-in @editor-state
-                        [:debug-data :closest])]
-    (let [[row col] (closest->placeholder-position closest)
-          row-index (dec row)
-          source (:drag-element  @editor-state)
-          new-content (-> source
-                          :stamp-type
-                          stamp-templates
-                          :text-content)
-          add-source-elem (fn [stamps]
-                            (add-at-index stamps col new-content))]
-      (swap! editor-state
-             update-in [:rows row-index :stamps]
-             add-source-elem)
-      (swap! editor-state
-             assoc-in [:debug-data :closest] nil))))
-
 (rum/defc edit-stamp-bubble < rum/reactive
   [visible? editor-state]
   (let [drag-element (rum/cursor editor-state :drag-element)
         debug-data (rum/cursor editor-state :debug-data)
-        rows (rum/cursor editor-state :rows)
-        drag-end-handler (fn [] (drag-end editor-state))]
+        rows (rum/cursor editor-state :rows)]
     (when (rum/react visible?)
       [:div.edit-stamp-bubble
        (header-component)
@@ -422,8 +411,7 @@
         (preview-component)
         [:div.form-group
          [:label.form-label.form-label-group "Leiman sisältö"]
-         (stamp-templates-component {:drag-element drag-element
-                                     :drag-end-cb drag-end-handler})
+         (stamp-templates-component)
          [:div "Raahaa ylläolevia leiman sisältökenttiä..."]
          (when *debug-info-divs*
            [:div "raahattavana: "
@@ -435,10 +423,12 @@
               [:div (pr-str row)])])
          [:div ;;many rows
           (for [row-cursor (cursor-of-vec->vec-of-cursors rows)]
-            (stamp-row {:stamp-row-cursor row-cursor
-                        :debug-data debug-data
-                        ;;TODO: use lentes lenses for simple derived atoms?
-                        :drag-source drag-element}))]
+            (rum/with-key
+              (stamp-row {:stamp-row-cursor row-cursor
+                          :debug-data debug-data
+                          ;;TODO: use lentes lenses for simple derived atoms?
+                          :drag-source drag-element})
+              (:row-number @row-cursor)))]
          (when *debug-info-divs*
            (debug-component debug-data))]]])))
 
