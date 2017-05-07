@@ -216,7 +216,8 @@
         (merge-in app/application-timestamp-map)
         (merge-in app/application-history-map user)
         (merge-in app/application-attachments-map organization)
-        (merge-in copy-application-documents-map user organization manual-schema-datas))))
+        (merge-in copy-application-documents-map user organization manual-schema-datas)
+        (merge-in app/application-metadata-map))))
 
 (defn new-application-copy [source-application user organization created copy-options & [manual-schema-datas]]
   (let [options (merge default-copy-options copy-options)]
