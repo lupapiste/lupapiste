@@ -1404,14 +1404,14 @@ Open company user listing
   Click Element  user-name
   Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
   Open accordion by test id  mypage-company-accordion
-  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-users']
   Click by test id  company-edit-users
   Wait until  Element should be visible  company
 
 Open company details
   Click Element  user-name
   Open accordion by test id  mypage-company-accordion
-  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-info']
   Click by test id  company-edit-info
   Wait until  Element should be visible  company
 

@@ -58,6 +58,7 @@ Accept invitation
   Wait Until  Page Should Contain  ${email}
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  invite-company-user
 
 Check invitation
   [Arguments]  ${index}  ${email}  ${lastname}  ${firstname}  ${role}  ${submit}

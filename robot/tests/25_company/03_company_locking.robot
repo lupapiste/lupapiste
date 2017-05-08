@@ -35,6 +35,7 @@ Kaino invites Pena to Solita
 
 Accept invitation for Pena
   Accept invitation  pena@example.com
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Kaino invites Teppo to Solita
   Kaino logs in
