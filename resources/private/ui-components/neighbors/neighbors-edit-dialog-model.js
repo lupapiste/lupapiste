@@ -15,7 +15,7 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
       .status(self.statusInit)
       .id(lupapisteApp.models.application.id())
       .neighborId(neighbor.id)
-      .propertyId(neighbor.propertyId)
+      .propertyId(util.prop.toHumanFormat( neighbor.propertyId ))
       .name(owner.name)
       .street(address.street)
       .city(address.city)
@@ -52,30 +52,26 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
     }
   }, self);
 
-  self.editablePropertyId = ko.computed({
-    read: function() {
-      return util.prop.toHumanFormat(self.propertyId());
-    },
-    write: function(newValue) {
-      if (util.prop.isPropertyId(newValue)) {
-        self.propertyId(util.prop.toDbFormat(newValue));
-      }
-    },
-    owner: self
+  self.propertyIdCss = ko.computed( function() {
+    var blank = _.isBlank( self.propertyId() );
+    return {tip: blank,
+            warn: !blank && !self.propertyIdOk()};
   });
 
-  self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
+  self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId());});
   self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
   self.isSubmitEnabled = ko.pureComputed(function() { return !self.pending() && self.propertyIdOk() && self.emailOk(); });
 
-  var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email", "type", "businessID", "nameOfDeceased"];
+  var paramNames = ["id", "neighborId", "name", "street", "city", "zip", "email", "type", "businessID", "nameOfDeceased"];
   function paramValue(paramName) { return self[paramName](); }
 
   self.openEdit = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
 
   self.save = function() {
     ajax
-      .command(self.neighborId() ? "neighbor-update" : "neighbor-add", _.zipObject(paramNames, _.map(paramNames, paramValue)))
+      .command(self.neighborId() ? "neighbor-update" : "neighbor-add",
+               _.defaults(_.zipObject(paramNames, _.map(paramNames, paramValue)),
+                         {propertyId: util.prop.toDbFormat( self.propertyId()) }))
       .pending(self.pending)
       .success(function() {
         repository.load(self.id());
