@@ -1,4 +1,4 @@
-;if (features.enabled("copy-applications")) {
+if (features.enabled("copy-applications")) {
   (function() {
   "use strict";
 
