@@ -832,7 +832,7 @@
                                  :background 0
                                  :page :first
                                  :qrCode true
-                                 :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:name "current-date"}]
+                                 :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
                                         [{:type :backend-id}]
                                         [{:type :organization}]]}]
                        }

@@ -29,7 +29,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [me.raynes.fs :as fs]
-            [lupapalvelu.attachment.stamps :as stamps]
+            [lupapalvelu.attachment.stamp-schema :as stmp]
             [clojure.walk :refer [keywordize-keys]]))
 
 (def scope-skeleton
@@ -137,7 +137,7 @@
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
-   (sc/optional-key :stamps) [stamps/Stamp]})
+   (sc/optional-key :stamps) [stmp/StampTemplate]})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles

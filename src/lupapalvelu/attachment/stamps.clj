@@ -1,81 +1,10 @@
 (ns lupapalvelu.attachment.stamps
   (:require [sade.core :as score]
-            [sade.schemas :as ssc]
             [sade.util :as sutil]
             [schema.core :as sc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
-            [clojure.set :as set]))
-
-(def simple-tag-types
-  #{:current-date
-    :verdict-date
-    :backend-id
-    :username
-    :organization
-    :agreement-id
-    :building-id})
-
-(def text-tag-types
-  #{:custom-text
-    :extra-text})
-
-(def all-tag-types
-  (set/union simple-tag-types text-tag-types))
-
-(sc/defschema SimpleTagType
-  (apply sc/enum simple-tag-types))
-
-(sc/defschema SimpleTag
-  {:type SimpleTagType})
-
-(sc/defschema TextTag
-  {:type sc/Keyword
-   :text sc/Str})
-
-(sc/defschema Tag
-  (sc/conditional #(contains? simple-tag-types
-                              (:type %))
-                  SimpleTag
-                  #(contains? text-tag-types
-                              (:type %))
-                  TextTag))
-
-(sc/defschema StampTemplateRow
-  [Tag])
-
-(sc/defschema FilledTag
-  {:type  (apply sc/enum all-tag-types)
-   :value sc/Str})
-
-(sc/defschema StampRow
-  [FilledTag])
-
-(sc/defschema StampName (sc/pred string?))
-
-(sc/defschema StampTemplate
-  {:name       StampName
-   :id         ssc/ObjectIdStr
-   :position   {:x ssc/Nat
-                :y ssc/Nat}
-   :background ssc/Nat
-   :page       (sc/enum :first
-                        :last
-                        :all)
-   :qrCode     sc/Bool
-   :rows       [StampTemplateRow]})
-
-(sc/defschema Stamp
-  {:name       StampName
-   :id         ssc/ObjectIdStr
-   :position   {:x ssc/Nat
-                :y ssc/Nat}
-   :background ssc/Nat
-   :page       (sc/enum :first
-                        :last
-                        :all)
-   :qrCode     sc/Bool
-   :rows       [StampRow]})
+            [lupapalvelu.attachment.stamp-schema :as stmpSc]))
 
 (defn- get-verdict-date [{:keys [verdicts]}]
   (let [ts (->> verdicts
@@ -117,8 +46,8 @@
     (map (fn [stamp] (fill-stamp-tags stamp context)) organization-stamp-templates)))
 
 (defn value-by-type [rows type]
-  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
-         (contains? all-tag-types type)]}
+  {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
+         (contains? stmpSc/all-tag-types type)]}
   (->> rows
        (map (fn [row] (filter #(= type (:type %)) row)))
        (flatten)
@@ -126,25 +55,25 @@
        :value))
 
 (defn row-value-by-type [stamp type]
-  {:pre [(sc/validate Stamp stamp)
-         (contains? all-tag-types type)]}
+  {:pre [(sc/validate stmpSc/Stamp stamp)
+         (contains? stmpSc/all-tag-types type)]}
   (value-by-type (:rows stamp) type))
 
 (defn dissoc-tag-by-type [rows type]
-  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
-         (contains? all-tag-types type)]}
+  {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
+         (contains? stmpSc/all-tag-types type)]}
   (->> rows
        (mapv (fn [rows] (filterv #(not (= type (:type %))) rows)))
        (remove empty?)
        (into [])))
 
 (defn row-values-as-string [rows]
-  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)]}
+  {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)]}
   (mapv (fn [row] (mapv :value row)) rows))
 
 (defn assoc-tag-by-type [rows type value]
-  {:pre [(map (fn [row] (sc/validate StampRow row)) rows)
-         (contains? all-tag-types type)]}
+  {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
+         (contains? stmpSc/all-tag-types type)]}
   (->> rows
        (mapv (fn [rows] (mapv (fn [row] (if (= type (keyword (:type row)))
                                             (assoc (dissoc row :value) :value value)
