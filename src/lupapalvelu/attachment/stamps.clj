@@ -47,7 +47,7 @@
 
 (defn value-by-type [rows type]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
-         (contains? stmpSc/all-tag-types type)]}
+         (contains? stmpSc/all-field-types type)]}
   (->> rows
        (map (fn [row] (filter #(= type (:type %)) row)))
        (flatten)
@@ -56,12 +56,12 @@
 
 (defn row-value-by-type [stamp type]
   {:pre [(sc/validate stmpSc/Stamp stamp)
-         (contains? stmpSc/all-tag-types type)]}
+         (contains? stmpSc/all-field-types type)]}
   (value-by-type (:rows stamp) type))
 
 (defn dissoc-tag-by-type [rows type]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
-         (contains? stmpSc/all-tag-types type)]}
+         (contains? stmpSc/all-field-types type)]}
   (->> rows
        (mapv (fn [rows] (filterv #(not (= type (:type %))) rows)))
        (remove empty?)
@@ -73,7 +73,7 @@
 
 (defn assoc-tag-by-type [rows type value]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
-         (contains? stmpSc/all-tag-types type)]}
+         (contains? stmpSc/all-field-types type)]}
   (->> rows
        (mapv (fn [rows] (mapv (fn [row] (if (= type (keyword (:type row)))
                                             (assoc (dissoc row :value) :value value)

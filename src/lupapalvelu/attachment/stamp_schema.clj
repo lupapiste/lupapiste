@@ -3,7 +3,7 @@
             [schema.core :as sc]
             [clojure.set :as set]))
 
-(def simple-tag-types
+(def simple-field-types
   #{:current-date
     :verdict-date
     :backend-id
@@ -12,12 +12,12 @@
     :agreement-id
     :building-id})
 
-(def text-tag-types
+(def text-field-types
   #{:custom-text
     :extra-text})
 
-(def all-tag-types
-  (set/union simple-tag-types text-tag-types))
+(def all-field-types
+  (set/union simple-field-types text-field-types))
 
 (sc/defschema SimpleTag
               {:type sc/Str})
@@ -27,10 +27,10 @@
                :text sc/Str})
 
 (sc/defschema Tag
-              (sc/conditional #(contains? simple-tag-types
+              (sc/conditional #(contains? simple-field-types
                                           (keyword (:type %)))
                               SimpleTag
-                              #(contains? text-tag-types
+                              #(contains? text-field-types
                                           (keyword (:type %)))
                               TextTag))
 
@@ -38,7 +38,7 @@
               [Tag])
 
 (sc/defschema FilledTag
-              {:type  (apply sc/enum all-tag-types)
+              {:type  (apply sc/enum all-field-types)
                :value sc/Str})
 
 (sc/defschema StampRow
