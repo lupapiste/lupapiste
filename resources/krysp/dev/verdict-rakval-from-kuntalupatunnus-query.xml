@@ -259,6 +259,7 @@
               </rakval:sijaintitieto>
               <rakval:rakennuksenTiedot>
                 <rakval:rakennustunnus>
+                  <rakval:valtakunnallinenNumero>100222397J</rakval:valtakunnallinenNumero>
                   <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
                   <rakval:kiinttun>18600303560006</rakval:kiinttun>
                   <rakval:rakennusnro>001</rakval:rakennusnro>
@@ -338,9 +339,10 @@
                         </rakval:sijaintitieto>
                         <rakval:rakennuksenTiedot>
                             <rakval:rakennustunnus>
-                                <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                                <rakval:valtakunnallinenNumero>100222398K</rakval:valtakunnallinenNumero>
+                                <rakval:jarjestysnumero>2</rakval:jarjestysnumero>
                                 <rakval:kiinttun>18600303560006</rakval:kiinttun>
-                                <rakval:rakennusnro>001</rakval:rakennusnro>
+                                <rakval:rakennusnro>002</rakval:rakennusnro>
                                 <rakval:aanestysalue>002</rakval:aanestysalue>
                             </rakval:rakennustunnus>
                             <rakval:kayttotarkoitus>011 yhden asunnon talot</rakval:kayttotarkoitus>
