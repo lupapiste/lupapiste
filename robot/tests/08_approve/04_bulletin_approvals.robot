@@ -24,13 +24,13 @@ Olli approves operation
 Olli rejects period with note
   Reject with note  ymp-ilm-kesto  ymp-ilm-kesto  Too noisy, too long!
 
-Olli adds and approves attachment
+Olli adds approved attachment
   Open tab  attachments
   Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
   Open attachment details  muut.muu
   Wait Until  Element Should Be Visible  test-attachment-approve
-  Wait Until  Element Should Be Enabled  test-attachment-approve
-  Click button  test-attachment-approve
+  Wait Until  Element Should Be Disabled  test-attachment-approve
+  Attachment is  approved
   Return to application
 
 Olli publishes bulletin
