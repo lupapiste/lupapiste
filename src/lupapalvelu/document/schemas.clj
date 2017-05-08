@@ -1304,6 +1304,7 @@
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "aiemman-luvan-toimenpide"
+           :i18name "uusiRakennus"
            :approvable true
            :accordion-fields buildingid-accordion-paths}
     :body (body kuvaus
