@@ -865,3 +865,6 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
+"error.propertyId.municipality-mismatch" "en" "Property id and municipality do not match."
+"error.propertyId.municipality-mismatch" "fi" "Kiinteistötunnus ja kunta eivät täsmää."
+"error.propertyId.municipality-mismatch" "sv" ""

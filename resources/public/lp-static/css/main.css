@@ -7590,6 +7590,18 @@ input.form-input.inline, input.inline.form-input--inline {
   margin: 0 4px;
 }
 
+.form-warning-message {
+  color: #df3215;
+  line-height: 24px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.form-warning-message span {
+  margin-left: 3px;
+  vertical-align: top;
+}
+
 .group-buttons {
   width: 100%;
   display: block;
@@ -15066,6 +15078,17 @@ span.icon_clear:before {
   content: "\2026";
 }
 
+.application_summary_text .warning-message {
+  color: #df3215;
+  line-height: 24px;
+  margin-top: 6px;
+}
+
+.application_summary_text .warning-message span {
+  margin-left: 3px;
+  vertical-align: top;
+}
+
 .edit-handlers-container {
   min-height: 280px;
   width: 80px;
@@ -15648,6 +15671,11 @@ div.foreman-history-container {
 
 .map-select-info .use-manual-entry {
   color: red;
+  margin-bottom: 15px;
+}
+
+.map-select-info .warning-message {
+  color: #df3215;
   margin-bottom: 15px;
 }
 

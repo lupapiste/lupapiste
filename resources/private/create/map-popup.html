@@ -6,14 +6,17 @@
      <div class="map-select-info">
        <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
        <p data-bind="lhtml: 'create.search-check-prompt'"></p>
-
        <div>
          <div class="form-entry">
+           <p class="warning-message" data-bind="visible: locationServiceUnavailable, ltext: 'create.location-service-unavailable.info'"></p>
            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
            <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processing">
-           <input data-bind="textInput: propertyIdHumanReadable"
-                  data-test-id="create-property-id" type="text" readonly="readonly"
+           <input data-bind="textInput: propertyIdForCreateApplication,
+                             css: {'warn': propertyIdError},
+                             attr: { 'readonly': !locationServiceUnavailable() }"
+                  data-test-id="create-property-id" type="text"
                   class="form-input text bottom-marginM">
+           <p class="warning-message", data-bind="visible: propertyIdError, text: propertyIdError"></p>
          </div>
 
          <div class="form-entry">
@@ -34,7 +37,7 @@
                data-bind="ltext: 'municipality.unknown'">
             </p>
           </div>
-         <button data-bind="enable: addressOk() && propertyIdOk() && municipalitySupported(), click: proceed"
+         <button data-bind="enable: addressOk() && propertyIdOk() && municipalitySupported() && propertyInMunicipality(), click: proceed"
                  class="positive"
                  data-test-id="create-continue" id="create-location-continue">
            <span data-bind="ltext: 'continue'"></span>

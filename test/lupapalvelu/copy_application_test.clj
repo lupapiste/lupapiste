@@ -55,7 +55,7 @@
                        ["paapiirustus"
                         "pohjapiirustus"]]}}
         raw-new-app (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0
-                                          "address" "01234567891234" municipality
+                                          "address" "01234567891234" nil municipality
                                           organization false false ["message1" "message2"] source-user
                                           source-created nil)
         source-app (-> raw-new-app

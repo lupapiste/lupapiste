@@ -26,6 +26,8 @@ LUPAPISTE.PropertyGroupModel = function(params) {
            params.propertyId;
   });
 
+  self.propertyIdSource = ko.observable(params.propertyIdSource);
+
   var partitionedSchemas = _.partition(self.subSchemas(), function(schema) {
     return schema.name === "maaraalaTunnus";
   });
