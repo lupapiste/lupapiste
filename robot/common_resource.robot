@@ -955,6 +955,10 @@ Cancel current application as authority
   Confirm yes no dialog
 
 # New yes no modal dialog
+
+New modal mask is invisible
+  Element should not be visible  xpath=//div[@id='modal-dialog-content-container']/div[contains(@class, 'mask')]
+
 Confirm yes no dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait until  Element should be enabled  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
@@ -967,12 +971,14 @@ Deny yes no dialog
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Wait Until  New modal mask is invisible
 
 Confirm ok dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Wait Until  New modal mask is invisible
 
 Confirm
   [Arguments]  ${modalId}
