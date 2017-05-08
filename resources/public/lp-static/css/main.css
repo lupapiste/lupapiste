@@ -16641,10 +16641,33 @@ div.organization-link-cell {
   border-width: 2px;
   border-color: #dddddd;
   background-color: white;
+  display: inline-block;
+  font-size: 15px;
+  padding: 5px 10px;
+  cursor: move;
 }
 
-.stamp-row-btn span {
-  line-height: 36px;
+.stamp-row-btn .btn-content {
+  display: inline-block;
+}
+
+.stamp-row-btn span, .stamp-row-btn input {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.stamp-row-btn i {
+  display: inline;
+  vertical-align: middle;
+}
+
+.stamp-row-btn input {
+  font-size: inherit;
+}
+
+.stamp-row-btn i {
+  margin-left: 10px;
+  cursor: pointer;
 }
 
 .stamp-editor-btn {
@@ -16652,11 +16675,33 @@ div.organization-link-cell {
   border-width: 2px;
   border-color: #dddddd;
   background-color: white;
+  display: inline-block;
+  font-size: 15px;
+  padding: 5px 10px;
   color: #f39129;
+  cursor: move;
 }
 
-.stamp-editor-btn span {
-  line-height: 36px;
+.stamp-editor-btn .btn-content {
+  display: inline-block;
+}
+
+.stamp-editor-btn span, .stamp-editor-btn input {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.stamp-editor-btn i {
+  display: inline;
+  vertical-align: middle;
+}
+
+.stamp-editor-btn input {
+  font-size: inherit;
+}
+
+.stamp-editor-btn i {
+  margin-right: 10px;
 }
 
 .stamp-row-btn, .stamp-editor-btn {
@@ -16667,11 +16712,9 @@ div.organization-link-cell {
 .stamp-row-label {
   margin-right: 15px;
   margin-bottom: 10px;
-  background-color: white;
   display: inline-block;
-  border-width: 2px;
-  border-style: none;
-  margin-right: 20px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .stamp-row-placeholder {
@@ -16679,14 +16722,31 @@ div.organization-link-cell {
   border-width: 2px;
   border-color: #dddddd;
   background-color: white;
+  display: inline-block;
+  font-size: 15px;
+  padding: 5px 10px;
   margin-right: 15px;
   margin-bottom: 10px;
   border-style: dashed;
   color: #dddddd;
 }
 
-.stamp-row-placeholder span {
-  line-height: 36px;
+.stamp-row-placeholder .btn-content {
+  display: inline-block;
+}
+
+.stamp-row-placeholder span, .stamp-row-placeholder input {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.stamp-row-placeholder i {
+  display: inline;
+  vertical-align: middle;
+}
+
+.stamp-row-placeholder input {
+  font-size: inherit;
 }
 
 .stamp-row-focus {
@@ -16694,14 +16754,31 @@ div.organization-link-cell {
   border-width: 2px;
   border-color: #dddddd;
   background-color: white;
+  display: inline-block;
+  font-size: 15px;
+  padding: 5px 10px;
   margin-right: 15px;
   margin-bottom: 10px;
   border-style: solid;
   color: #dddddd;
 }
 
-.stamp-row-focus span {
-  line-height: 36px;
+.stamp-row-focus .btn-content {
+  display: inline-block;
+}
+
+.stamp-row-focus span, .stamp-row-focus input {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.stamp-row-focus i {
+  display: inline;
+  vertical-align: middle;
+}
+
+.stamp-row-focus input {
+  font-size: inherit;
 }
 
 #neighbor-show .pending {

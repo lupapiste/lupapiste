@@ -125,9 +125,22 @@ div.organization-link-cell {
   border-width: 2px;
   border-color: $gray221;
   background-color: white;
-  span {
-    // is this really the best way? :(
-    line-height: $btn-height - 4px;
+  display: inline-block;
+  font-size: $font-size-body;
+  padding: 5px 10px;
+  .btn-content {
+    display: inline-block;
+  }
+  span, input {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  i {
+    display: inline;
+    vertical-align: middle;
+  }
+  input {
+    font-size: inherit;
   }
 }
 
@@ -138,11 +151,20 @@ div.organization-link-cell {
 
 .stamp-row-btn {
   @include btn-with-border;
+  cursor: move;
+  i {
+    margin-left: 10px;
+    cursor: pointer;
+  }
 }
 
 .stamp-editor-btn {
   @include btn-with-border;
   color: $orange-dark;
+  cursor: move;
+  i {
+    margin-right: 10px;
+  }
 }
 
 .stamp-row-btn, .stamp-editor-btn {
@@ -151,11 +173,9 @@ div.organization-link-cell {
 
 .stamp-row-label {
   @include stamp-editor-borders;
-  background-color: white;
   display: inline-block;
-  border-width: 2px;
-  border-style: none;
-  margin-right: 20px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .stamp-row-placeholder {

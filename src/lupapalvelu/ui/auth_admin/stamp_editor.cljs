@@ -96,11 +96,6 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
-(rum/defc placeholder-box [width]
-  [:button.stamp-row-btn
-   {:style {:width width
-            :background-color "black"}}])
-
 (rum/defc stamp-row-field < rum/reactive
   [{:keys [data remove debug-data row-number row-index]}]
   (let [closest? (= [row-number row-index]
@@ -115,15 +110,17 @@
         rendered-content (if (= type :custom-text)
                            [:input {:placeholder (loc :stamp.custom-text)
                                     :value text
-                                    :on-change #(swap! data assoc :text (-> % .-target .-value))}]
+                                    :on-change #(swap! data assoc :text (-> % .-target .-value))
+                                    :style {:width (max 150 (Math/floor (* 8 (count text))))}}]
                            [:span (loc (str "stamp." (name type)))])]
-    [:button.stamp-row-btn
+    [:div.stamp-row-btn
      {:style border-style
       :data-row row-number
       :data-row-index row-index}
-     rendered-content
-     [:i.lupicon-circle-remove
-      {:on-click (fn [e] (remove))}]]))
+     [:div.btn-content
+      rendered-content
+      [:i.lupicon-circle-remove
+       {:on-click (fn [e] (remove))}]]]))
 
 ;;TODO: needs better name
 (defn drop-at
@@ -238,8 +235,9 @@
                                           :row-number row-number
                                           :row-index  idx})
                           (:id field)))
-        placeholder-width (get-in (rum/react drag-source)
-                                  [:source-boundaries :width])
+        placeholder-width (or (get-in (rum/react drag-source)
+                                      [:source-boundaries :width])
+                              110)
         on-drag-enter (fn [e]
                         (.preventDefault e)
                         (swap! drag-event-sum inc))
@@ -270,9 +268,9 @@
                              field-data {:type type-kw
                                          :id (->> fields (map :id) max inc)}]
                          (swap! stamp-row-cursor update :fields add-at-index split-pos field-data)))
-        placeholder-element [:button.stamp-row-placeholder
+        placeholder-element [:div.stamp-row-placeholder
                              {:key :placeholder
-                              :style {:width (or placeholder-width 7)}}
+                              :style {:width (max placeholder-width 110)}}
                              [:span {:style {:pointer-events :none}} "Pudota tähän"]]
         [before after] (when (number? split-pos) (split-at split-pos field-buttons))]
     (if (and row-number fields)
@@ -281,7 +279,7 @@
                        :on-drag-over mouse-move-handler
                        :on-drop drop-handler
                        :data-row-number row-number}
-       [:button.stamp-row-label  [:span (str "Rivi "
+       [:div.stamp-row-label  [:span (str "Rivi "
                                              row-number)]]
        (if (and placeholder-row? is-dragged-over?)
          (concat before
@@ -289,7 +287,7 @@
                  after)
          (concat
            field-buttons
-           [[:button.stamp-row-placeholder
+           [[:div.stamp-row-placeholder
              {:key :default-placeholder}
              [:span {:style {:pointer-events :none}} "Pudota tähän"]]]))]
       [:span "error: stamp-row"])))
@@ -315,7 +313,7 @@
                           (-> element-selector
                               query-selector
                               boundaries-from-dom-element))]
-    [:button
+    [:div
      {:draggable true
       :on-drag-start (fn [e]
                        (reset! drag-element
@@ -332,8 +330,9 @@
                      (reset! closest-elem []))
       :data-stamp-btn-name key
       :class all-classes}
-     [:i.lupicon-circle-plus]
-     [:span (loc (str "stamp." (name key)))]]))
+     [:div.btn-content
+      [:i.lupicon-circle-plus]
+      [:span (loc (str "stamp." (name key)))]]]))
 
 (rum/defc field-types-component < rum/reactive
   []
