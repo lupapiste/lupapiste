@@ -46,7 +46,7 @@
 </script>
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-template">
-  <div>
+  <div data-test-id="application-foreman-template">
     <div class="foreman-info" data-bind="lhtml: 'help.AddForeman'"></div>
     <div class="foreman-info" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'),
                                          lhtml: 'help.AddForeman.buttonInfo'"
