@@ -110,7 +110,7 @@
 
 (defn- can-read-comments? [app user]
   (or (auth/user-authz? roles/comment-user-authz-roles app user)
-      (auth/has-organization-authz-roles? roles/commenter-org-authz-roles app user)
+      (auth/has-organization-authz-roles? roles/commenter-org-authz-roles (:organization app) user)
       (auth/has-auth? app (get-in user [:company :id]))))
 
 (defn filter-application-content-for [application user]

@@ -117,3 +117,57 @@ div.organization-link-cell {
   @include link-text( 24em );
   white-space: nowrap;
 }
+
+// Stamp Editor
+
+@mixin btn-with-border {
+  border-style: solid;
+  border-width: 2px;
+  border-color: $gray221;
+  background-color: white;
+  span {
+    // is this really the best way? :(
+    line-height: $btn-height - 4px;
+  }
+}
+
+@mixin stamp-editor-borders {
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+
+.stamp-row-btn {
+  @include btn-with-border;
+}
+
+.stamp-editor-btn {
+  @include btn-with-border;
+  color: $orange-dark;
+}
+
+.stamp-row-btn, .stamp-editor-btn {
+  @include stamp-editor-borders;
+}
+
+.stamp-row-label {
+  @include stamp-editor-borders;
+  background-color: white;
+  display: inline-block;
+  border-width: 2px;
+  border-style: none;
+  margin-right: 20px;
+}
+
+.stamp-row-placeholder {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: dashed;
+  color: $gray221
+}
+
+.stamp-row-focus {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: solid;
+  color: $gray221
+}
