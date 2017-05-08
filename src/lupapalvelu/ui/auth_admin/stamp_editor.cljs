@@ -34,18 +34,16 @@
                             :view {:bubble-visible false
                                    :selected-stamp-id nil}
                             :editor {:drag-element nil
+                                     :closest-element []
                                      :debug-data {}
-                                     :rows [{:row-number 1
-                                             :fields [{:type :application-id}
+                                     :rows [{:fields [{:type :application-id}
                                                       {:type :backend-id}]
                                              :is-dragged-over false}
-                                            {:row-number 2
-                                             :fields [{:type :custom-text
+                                            {:fields [{:type :custom-text
                                                        :text "Hiphei, laitoin tähän tekstiä"}
                                                       {:type :current-date}]
                                              :is-dragged-over false}
-                                            {:row-number 3
-                                             :fields []
+                                            {:fields []
                                              :is-dragged-over false}]}})
 
 (defonce component-state  (atom empty-component-state))
@@ -92,27 +90,51 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
-(rum/defc stamp-row-field < rum/reactive
-  [{:keys [data remove debug-data row-number row-index]}]
-  (let [closest? (= [row-number row-index]
-                    (get-in (rum/react debug-data) [:closest :elem]))
-        side (get-in (rum/react debug-data) [:closest :side])
-        border-side {:left :border-left
-                     :right :border-right}
-        border-style (if (and closest? *debug-edge-detection*)
-                       {(border-side side) "solid red 2px"}
-                       {})
+(defn get-js-fields [object & fields]
+  (let [field->pair (fn [field]
+                      [(keyword field)
+                       (aget object field)])]
+    (into {}
+          (map field->pair fields))))
+
+(defn boundaries-from-dom-element [dom-element]
+  (-> (.getBoundingClientRect dom-element)
+      (get-js-fields "top" "bottom" "left" "right" "width")))
+
+(defn boundaries-from-component [component-state]
+  (let [comp     (:rum/react-component component-state)
+        dom-node (js/ReactDOM.findDOMNode comp)]
+    (boundaries-from-dom-element dom-node)))
+
+(rum/defcs stamp-row-field < rum/reactive (rum/local "inline-block" ::display)
+  [local-state {:keys [data remove row-number row-index]}]
+  (let [drag-element (rum/cursor-in component-state [:editor :drag-element])
+        closest-elem (rum/cursor-in component-state [:editor :closest-element])
         {:keys [type text]} (rum/react data)
         rendered-content (if (= type :custom-text)
                            [:input {:placeholder (loc :stamp.custom-text)
                                     :value text
                                     :on-change #(swap! data assoc :text (-> % .-target .-value))
                                     :style {:width (max 150 (Math/floor (* 8 (count text))))}}]
-                           [:span (loc (str "stamp." (name type)))])]
+                           [:span (loc (str "stamp." (name type)))])
+        display-style (::display local-state)]
     [:div.stamp-row-btn
-     {:style border-style
+     {:style {:display @display-style}
       :data-row row-number
-      :data-row-index row-index}
+      :data-row-index row-index
+      :draggable true
+      :on-drag-start (fn [e]
+                       (reset! drag-element
+                               {:type :new
+                                :stamp-type key
+                                :source-boundaries (boundaries-from-component local-state)})
+                       (let [data-transfer (.-dataTransfer e)]
+                         (.setData data-transfer "moveField" (util/clj->json {:row row-number
+                                                                              :index row-index})))
+                       (reset! display-style "none"))
+      :on-drag-end (fn [_]
+                     (reset! closest-elem [])
+                     (reset! display-style "inline-block"))}
      [:div.btn-content
       rendered-content
       [:i.lupicon-circle-remove
@@ -127,13 +149,6 @@
 (defn indexed
   [a-seq]
   (map vector (range) a-seq))
-
-(defn get-js-fields [object & fields]
-  (let [field->pair (fn [field]
-                      [(keyword field)
-                       (aget object field)])]
-    (into {}
-          (map field->pair fields))))
 
 (defn abs [x]
   (if (neg? x)
@@ -178,15 +193,6 @@
 (defn query-selector [query]
   (.querySelector js/document query))
 
-(defn boundaries-from-dom-element [dom-element]
-  (let [client-rect (.getBoundingClientRect dom-element)]
-    (get-js-fields client-rect
-                   "top" "bottom" "left" "right" "width")))
-
-(defn drag-source-boundaries []
-  (when-let [elem (query-selector ".drag-source")]
-    (boundaries-from-dom-element elem)))
-
 (defn dom-data-for-row [row-number]
   (let [buttons (query-selector-all (str ".stamp-row-btn[data-row='"
                                          row-number
@@ -200,7 +206,7 @@
 (defn dom-data []
   (let [rows (query-selector-all ".stamp-row")
         row-datas (for [[i _] (indexed rows)]
-                    (dom-data-for-row (inc i)))]
+                    (dom-data-for-row i))]
     {:row-data (apply merge row-datas)}))
 
 (defn closest->placeholder-position [{:keys [elem side] :as closest}]
@@ -208,18 +214,37 @@
         (= :left side) elem
         :else          (update-in elem [1] inc)))
 
-(def closest-elem (atom []))
-
 (defn add-at-index [a-seq index elem]
   (let [[before after] (split-at index a-seq)]
     (vec (concat before
                  [elem]
                  after))))
 
+(defn drop-handler [all-rows-cursor current-row split-pos]
+  (fn [e]
+    (.preventDefault e)
+    (let [dt (.-dataTransfer e)
+          new (.getData dt "newField")
+          moved (.getData dt "moveField")
+          {:strs [type]} (when-not (string/blank? new) (util/json->clj new))
+          {:strs [row index]} (when-not (string/blank? moved) (util/json->clj moved))
+          field-data (if (and row index)
+                       (get-in @all-rows-cursor [row :fields index])
+                       {:type (keyword type)})]
+      (swap! all-rows-cursor update-in [current-row :fields] add-at-index split-pos field-data)
+      (when (and row index)
+        (let [drop-index (if (and (= row current-row) (< split-pos index))
+                           (inc index)
+                           index)]
+          (swap! all-rows-cursor update-in [row :fields] drop-at drop-index)))
+      (-> e .-dataTransfer (.clearData)))))
+
 (rum/defcs stamp-row < rum/reactive (rum/local 0 ::drag-event-sum)
-  [state {:keys [stamp-row-cursor drag-source debug-data]}]
-  (let [{:keys [row-number fields]} (rum/react stamp-row-cursor)
+  [state {:keys [index rows-cursor drag-source debug-data]}]
+  (let [stamp-row-cursor (rum/cursor rows-cursor index)
+        {:keys [fields]} (rum/react stamp-row-cursor)
         drag-event-sum (::drag-event-sum state)
+        closest-elem (rum/cursor-in component-state [:editor :closest-element])
         remove-btn (fn [idx] (fn []
                               (swap! stamp-row-cursor
                                      update-in [:fields] drop-at idx)))
@@ -228,7 +253,7 @@
                           (stamp-row-field {:data       (rum/cursor-in stamp-row-cursor [:fields idx])
                                             :remove     (remove-btn idx)
                                             :debug-data debug-data
-                                            :row-number row-number
+                                            :row-number index
                                             :row-index  idx})
                           idx))
         placeholder-width (or (get-in (rum/react drag-source)
@@ -241,40 +266,39 @@
                         (swap! drag-event-sum dec))
         is-dragged-over? (pos? @drag-event-sum)
         mouse-move-handler (fn [e]
-                             (let [dt (-> e .-dataTransfer)]
-                               (when (.getData dt "stampField")
+                             (let [dt (-> e .-dataTransfer)
+                                   op-type (.-type (aget (.-items dt) 0))
+                                   effect (case op-type
+                                            "newfield" "copy"
+                                            "movefield" "move"
+                                            nil)]
+                               (when effect
                                  (.preventDefault e)
-                                 (when (= "new" (.getData dt "dragIntent"))
-                                   (set! (-> e .-dataTransfer .-dropEffect) "copy"))))
+                                 (set! (-> e .-dataTransfer .-dropEffect) effect)))
                              (let [client-x (aget e "clientX")
                                    client-y (aget e "clientY")
                                    data {:row-mouse {:client-x client-x
                                                      :client-y client-y}
-                                         :current-row row-number}
+                                         :current-row index}
                                    dom-data (dom-data)]
                                (reset! closest-elem (closest-with-edge
                                                       (merge data dom-data)))))
         placeholder-location (closest->placeholder-position (rum/react closest-elem))
-        placeholder-row? (= row-number (first placeholder-location))
+        placeholder-row? (= index (first placeholder-location))
         split-pos (second placeholder-location)
-        drop-handler (fn [e]
-                       (.preventDefault e)
-                       (let [{:strs [type]} (-> e .-dataTransfer (.getData "stampField") util/json->clj)
-                             field-data {:type (keyword type)}]
-                         (swap! stamp-row-cursor update :fields add-at-index split-pos field-data)))
+        on-drop (drop-handler rows-cursor index split-pos)
         placeholder-element [:div.stamp-row-placeholder
                              {:key :placeholder
                               :style {:width (max placeholder-width 110)}}
                              [:span {:style {:pointer-events :none}} "Pudota tähän"]]
         [before after] (when (number? split-pos) (split-at split-pos field-buttons))]
-    (if (and row-number fields)
+    (if (and index fields)
       [:div.stamp-row {:on-drag-enter on-drag-enter
                        :on-drag-leave on-drag-leave
                        :on-drag-over mouse-move-handler
-                       :on-drop drop-handler
-                       :data-row-number row-number}
-       [:div.stamp-row-label  [:span (str "Rivi "
-                                             row-number)]]
+                       :on-drop on-drop
+                       :data-row-number index}
+       [:div.stamp-row-label  [:span (str "Rivi " (inc index))]]
        (if (and placeholder-row? is-dragged-over?)
          (concat before
                  [placeholder-element]
@@ -295,30 +319,23 @@
   [local-state {:keys [key]}]
   (let [drag-source? (:rum/local local-state)
         drag-element (rum/cursor-in component-state [:editor :drag-element])
+        closest-elem (rum/cursor-in component-state [:editor :closest-element])
         base-classes "stamp-editor-btn"
         extra-classes (if @drag-source?
                         "drag-source"
                         "")
-        all-classes (string/join " " [base-classes extra-classes])
-        element-selector (str ".stamp-editor-btn[data-stamp-btn-name='"
-                              key
-                              "']")
-        find-boundaries (fn []
-                          (-> element-selector
-                              query-selector
-                              boundaries-from-dom-element))]
+        all-classes (string/join " " [base-classes extra-classes])]
     [:div
      {:draggable true
       :on-drag-start (fn [e]
                        (reset! drag-element
                                {:type :new
                                 :stamp-type key
-                                :source-boundaries (find-boundaries)})
+                                :source-boundaries (boundaries-from-component local-state)})
                        (reset! drag-source? true)
 
                        (let [data-transfer (.-dataTransfer e)]
-                         (.setData data-transfer "stampField" (util/clj->json {:type key}))
-                         (.setData data-transfer "dragIntent" "new")))
+                         (.setData data-transfer "newField" (util/clj->json {:type key}))))
       :on-drag-end (fn [_]
                      (reset! drag-source? false)
                      (reset! closest-elem []))
@@ -400,13 +417,13 @@
             (for [row (rum/react rows)]
               [:div (pr-str row)])])
          [:div ;;many rows
-          (for [row-cursor (cursor-of-vec->vec-of-cursors rows)]
+          (for [[idx _] (indexed (rum/react rows))]
             (rum/with-key
-              (stamp-row {:stamp-row-cursor row-cursor
+              (stamp-row {:index idx
+                          :rows-cursor rows
                           :debug-data debug-data
-                          ;;TODO: use lentes lenses for simple derived atoms?
                           :drag-source drag-element})
-              (:row-number @row-cursor)))]
+              idx))]
          (when *debug-info-divs*
            (debug-component debug-data))]]])))
 
