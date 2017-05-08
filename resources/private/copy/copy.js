@@ -116,7 +116,7 @@
       checkIfApplicationCanBeCopiedToSelectedLocation();
     });
 
-    self.locationModel = new LUPAPISTE.CopyApplicationLocationModel();
+    self.locationModel = new LUPAPISTE.CreateApplicationLocationModel({mapId: "copy-map", category: "Copy", nextStep: "copy-location-selected"});
 
     self.search = ko.observable("");
     self.searching = ko.observable(false);
