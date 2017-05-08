@@ -113,10 +113,20 @@
   (or (user-id-from-personal-information v)
       (company-id-from-personal-information v)))
 
-(defn- personal-information-map? [v]
+(defn- personal-information-element? [v]
   (and (map? v)
        (or (contains? v :userId)
            (contains? v :companyId))))
+
+(defn- building-selector-element? [v]
+  (and (map? v)
+       (contains? v :buildingId)))
+
+(defn- document-element-sould-be-cleared? [element not-in-auth?]
+  (or (and (personal-information-element? element)
+           (or (empty? (id-from-personal-information element))
+               (not-in-auth? (id-from-personal-information element))))
+      (building-selector-element? element)))
 
 (defn- clear-personal-information
   "Clears personal information from documents if
@@ -127,9 +137,7 @@
   (let [empty-copy (empty-document-copy document application manual-schema-datas)
         not-in-auth? (not-in-auth (:auth application))]
     (pathwalk (fn [path v]
-                (if (and (personal-information-map? v)
-                         (or (empty? (id-from-personal-information v))
-                             (not-in-auth? (id-from-personal-information v))))
+                (if (document-element-sould-be-cleared? v not-in-auth?)
                   (get-in empty-copy path)
                   v))
               document)))
