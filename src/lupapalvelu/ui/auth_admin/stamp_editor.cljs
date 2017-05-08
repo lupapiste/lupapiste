@@ -101,7 +101,7 @@
    {:style {:width width
             :background-color "black"}}])
 
-(rum/defc stamp-row-btn < rum/reactive
+(rum/defc stamp-row-field < rum/reactive
   [{:keys [data remove debug-data row-number row-index]}]
   (let [closest? (= [row-number row-index]
                     (get-in (rum/react debug-data) [:closest :elem]))
@@ -232,11 +232,11 @@
                                      update-in [:fields] drop-at idx)))
         field-buttons (for [[idx field] (indexed fields)]
                         (rum/with-key
-                          (stamp-row-btn {:data (rum/cursor-in stamp-row-cursor [:fields idx])
-                                          :remove (remove-btn idx)
+                          (stamp-row-field {:data     (rum/cursor-in stamp-row-cursor [:fields idx])
+                                          :remove     (remove-btn idx)
                                           :debug-data debug-data
                                           :row-number row-number
-                                          :row-index idx})
+                                          :row-index  idx})
                           (:id field)))
         placeholder-width (get-in (rum/react drag-source)
                                   [:source-boundaries :width])
@@ -299,8 +299,7 @@
    [:label.form-label.form-label-string label-string]
    [:input.form-input.text]])
 
-;; TODO: check validity of parameters with spec
-(rum/defcs stamp-btn < (rum/local false)
+(rum/defcs field-type-selector < (rum/local false)
   [local-state {:keys [key]}]
   (let [drag-source? (:rum/local local-state)
         drag-element (rum/cursor-in component-state [:editor :drag-element])
@@ -308,7 +307,7 @@
         extra-classes (if @drag-source?
                         "drag-source"
                         "")
-        all-classes (clojure.string/join " " [base-classes extra-classes])
+        all-classes (string/join " " [base-classes extra-classes])
         element-selector (str ".stamp-editor-btn[data-stamp-btn-name='"
                               key
                               "']")
@@ -336,12 +335,12 @@
      [:i.lupicon-circle-plus]
      [:span (loc (str "stamp." (name key)))]]))
 
-(rum/defc stamp-templates-component < rum/reactive
+(rum/defc field-types-component < rum/reactive
   []
   [:div
    (for [field-type (concat ss/simple-field-types ss/text-field-types)]
      (rum/with-key
-       (stamp-btn {:key field-type})
+       (field-type-selector {:key field-type})
        field-type))])
 
 (rum/defc debug-component < rum/reactive
@@ -397,7 +396,7 @@
         (preview-component)
         [:div.form-group
          [:label.form-label.form-label-group "Leiman sisältö"]
-         (stamp-templates-component)
+         (field-types-component)
          [:div "Raahaa ylläolevia leiman sisältökenttiä..."]
          (when *debug-info-divs*
            [:div "raahattavana: "
