@@ -3,19 +3,21 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
+            [lupapalvelu.copy-application :as copy-app]
+            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.minimal]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notif]
-            [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
 (defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data {:keys [tasks]} :application}]
@@ -188,18 +190,17 @@
         (validate-notice-submittable application link-permit)
         (validate-foreman-submittable application link-permit)))))
 
-(defn new-foreman-application [{:keys [created user application] :as command}]
+(defn new-foreman-application [{:keys [created user application organization] :as command}]
   (-> (app/do-create-application
-        (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                              :x (-> application :location first)
-                              :y (-> application :location second)
-                              :address (:address application)
-                              :propertyId (:propertyId application)
-                              :municipality (:municipality application)
-                              :infoRequest false
-                              :messages []}))
-    (assoc :opened (if (util/pos? (:opened application)) created nil))))
-
+       (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
+                             :x (-> application :location first)
+                             :y (-> application :location second)
+                             :address (:address application)
+                             :propertyId (:propertyId application)
+                             :municipality (:municipality application)
+                             :infoRequest false
+                             :messages []}))
+      (assoc :opened (if (util/pos? (:opened application)) created nil))))
 
 (defn- cleanup-hakija-doc [{info :schema-info :as doc}]
   (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)]
@@ -278,7 +279,7 @@
     (let [invited (usr/get-or-create-user-by-email (:email inv) inviter)]
       (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
 
-(defn copy-auths-from-linked-app [foreman-app foreman-user linked-app user created]
+(defn copy-auths-from-linked-app [foreman-app linked-app user created]
   (->> (:auth linked-app)
        (applicant-invites (:documents foreman-app))
        (remove #(= (:email %) (:email user)))
@@ -291,48 +292,6 @@
          (update foreman-app :auth conj))
     foreman-app))
 
-(defn- invite-company! [foreman-app {user :user} auth]
-  (let [company-id (get-in auth [:invite :user :id])
-        token-id   (company/company-invitation-token user company-id (:id foreman-app))]
-    (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
-                                               :inviter    user
-                                               :company    (company/find-company! {:id company-id})
-                                               :token-id   token-id
-                                               :application foreman-app})))
-
-(defn- invited-as-foreman? [application user]
-  (->> application
-       :auth
-       (filter #(= (-> % :invite :role) "foreman"))
-       (map :id)
-       (some #(= (:id user) %))))
-
-(defn foreman-in-foreman-app? [application user]
-  (and (invited-as-foreman? application user)
-       (foreman-app? application)))
-
-(defn- notify-of-invite! [app command invite-type recipients]
-  (->> (map (fn [{{:keys [email user]} :invite}] (or (usr/get-user-by-email email) (assoc user :email email))) recipients)
-         (assoc command :application app :recipients)
-         (notif/notify! invite-type)))
-
-
-(defn- user-invite-notifications! [foreman-app command auths]
-  (let [[foremen others] ((juxt filter remove) (partial foreman-in-foreman-app?
-                                                        foreman-app)
-                                               auths)]
-    (notify-of-invite! foreman-app command :invite-foreman foremen)
-    (notify-of-invite! foreman-app command :invite others)))
-
-(defn- invite-notifications! [{auths :auth :as foreman-app} command]
-  (let [invite-auths (remove (comp #{:owner} :role) auths)]
-    ;; Non-company invites
-    (->> (remove (comp #{"company"} :type) invite-auths)
-         (user-invite-notifications! foreman-app command))
-    ;; Company invites
-    (->> (filter (comp #{"company"} :type) invite-auths)
-         (run! (partial invite-company! foreman-app command)))))
-
 (defn- invite-to-linked-app! [linked-app foreman-user {user :user created :created :as command}]
   (update-application command
                       {:auth {$not {$elemMatch {:invite.user.username (:email foreman-user)}}}}
@@ -343,7 +302,7 @@
   (try
     (when (and foreman-user (not (auth/has-auth? linked-app (:id foreman-user))))
       (invite-to-linked-app! linked-app foreman-user command))
-    (invite-notifications! foreman-app command)
+    (copy-app/send-invite-notifications! foreman-app command)
     (catch Exception e
       (error "Error when inviting to foreman application:" e))))
 

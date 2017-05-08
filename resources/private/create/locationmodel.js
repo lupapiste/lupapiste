@@ -1,10 +1,12 @@
-LUPAPISTE.CreateApplicationLocationModel = function() {
+LUPAPISTE.CreateApplicationLocationModel = function(options) {
   "use strict";
+
+  options = _.assign({mapId: "create-map", category: "Create", nextStep: "create-step-2"}, options);
 
   var self = this;
   LUPAPISTE.LocationModelBase.call(self,
-      {mapId:"create-map", initialZoom: 2, zoomWheelEnabled: true,
-       afterClick: _.partial(hub.send, "track-click", {category:"Create", label:"map", event:"mapClick"}),
+      {mapId: options.mapId, initialZoom: 2, zoomWheelEnabled: true,
+       afterClick: _.partial(hub.send, "track-click", {category: options.category, label:"map", event:"mapClick"}),
        popupContentModel: "section#map-popup-content"});
 
   self.municipalitySupported = ko.observable(true);
@@ -15,6 +17,33 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
       municipalities.findById(code, function(m) {
         self.municipalitySupported(m ? true : false);
       });
+    }
+  });
+
+  self.propertyIdForCreateApplication = ko.pureComputed({
+    read: self.propertyIdHumanReadable,
+    write: self.propertyId
+  });
+
+  var municipalityByPropertyId = ko.observable();
+  ko.computed(function() {
+    if (self.locationServiceUnavailable() && self.propertyIdOk()) {
+      ajax.query("municipality-for-property", {propertyId: self.propertyId()})
+        .success(function(resp) {
+          municipalityByPropertyId(resp.municipality);
+        }).call();
+    } else {
+      municipalityByPropertyId(null);
+    }
+  }).extend({ throttle: 200 });
+
+  self.propertyInMunicipality = ko.computed(function() {
+    return !self.locationServiceUnavailable() || municipalityByPropertyId() && self.municipalityCode() === municipalityByPropertyId();
+  });
+
+  self.propertyIdError = ko.computed(function() {
+    if (municipalityByPropertyId() && !self.propertyInMunicipality()) {
+      return loc("error.propertyId.municipality-mismatch");
     }
   });
 
@@ -66,7 +95,7 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
     return self;
   };
 
-  self.proceed = _.partial(hub.send, "create-step-2");
+  self.proceed = _.partial(hub.send, options.nextStep);
 
 };
 

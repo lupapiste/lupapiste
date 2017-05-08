@@ -152,6 +152,7 @@ Pena logs in and changes the type of aitapiirros to aitapiirustus
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Positive indicator should be visible
+  Positive indicator should not be visible
   Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
   Scroll to test id  back-to-application-from-attachment
   Click element  jquery=[data-test-id=back-to-application-from-attachment]

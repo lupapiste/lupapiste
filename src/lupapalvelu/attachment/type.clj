@@ -192,3 +192,22 @@
 
 (defn localisation->attachment-type [permit-type localisation]
   (get (localisation-to-attachment-type-map permit-type) (str/lower-case localisation)))
+
+;; Utils for printing out the attachment types and contents for zip import index sheet
+
+(defn print-localized-attachment-types [permit-type lang]
+  (->> ((keyword permit-type) attachment-types-by-permit-type)
+       (map (fn [{:keys [type-group type-id]}]
+              (i18n/localize (keyword lang) (ss/join "." ["attachmentType" (name type-group) (name type-id)]))))
+       sort
+       (map println)
+       dorun))
+
+(defn print-localized-attachment-contents [lang]
+  (->> (map second content-mapping)
+       flatten
+       dedupe
+       (map #(i18n/localize (keyword lang) (str "attachments.contents." (name %))))
+       sort
+       (map println)
+       dorun))

@@ -120,6 +120,13 @@ Bulletin shows as proclaimed
   Open tab  bulletin
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana
 
+Bulletin not proclaimed but can be moved to verdict given
+  Open tab  bulletin
+  Wait until  Element should not be visible  xpath=//p[@data-test-id='bulletin-state-paragraph']
+  Wait until  Element should not be visible  xpath=//table[@data-test-id='bulletin-versions-table']
+  Element should be visible  xpath=//div[@data-test-id='move-to-verdict-given-fields']
+  Element text should be  xpath=//div[@data-test-id='move-to-verdict-given-fields']/p  Hakemus julkaistaan seuraavaksi tilaan: Päätös annettu
+
 Bulletin shows as proclaimed and can be moved to verdict given
   Open tab  bulletin
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana  Hakemus julkaistaan seuraavaksi tilaan: Päätös annettu

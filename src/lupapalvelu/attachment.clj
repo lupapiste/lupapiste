@@ -839,7 +839,7 @@
     (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
       (fail :error.attachment.content-type)
       ;; else
-      (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
+      (let [{:keys [fileId filename user stamped]} (last (:versions attachment))
             file-content (mongo/download fileId)]
         (if (nil? file-content)
           (do
@@ -852,7 +852,7 @@
                                   {:attachment-id (:id attachment)
                                    :comment-text nil
                                    :required false
-                                   :created created
+                                   :created (now)
                                    :stamped stamped
                                    :original-file-id fileId}
                                   {:content temp-pdf :filename filename}))))))))

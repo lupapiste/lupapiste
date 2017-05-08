@@ -13,7 +13,8 @@
   (:import (org.apache.commons.io FilenameUtils)))
 
 
-(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error :not-validated})
+(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff
+                            :libre-conversion-error :not-validated :permanent-archive-disabled})
 
 (def libre-conversion-file-types
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
@@ -67,7 +68,7 @@
         (catch Throwable t
           (io/delete-file pdf-file :silently)
           (throw t))))
-    {:archivable false :archivabilityError :not-validated}))
+    {:archivable false :archivabilityError :permanent-archive-disabled}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
   (files/with-temp-file tmp-file
@@ -90,7 +91,7 @@
           (catch Exception e
             (timbre/error "Could not wrap JPEG" e)
             {:archivable false :archivabilityError :not-validated}))))
-    {:archivable false :archivabilityError :not-validated}))
+    {:archivable false :archivabilityError :permanent-archive-disabled}))
 
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]
   (if (libreoffice-conversion-required? filedata)

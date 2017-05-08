@@ -1,8 +1,9 @@
 (ns lupapalvelu.application-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof
-                                                warn error errorf]]
+                                                warnf warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
+            [slingshot.slingshot :refer [try+]]
             [monger.operators :refer :all]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
@@ -25,6 +26,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.drawing :as draw]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -37,7 +39,8 @@
             [lupapalvelu.suti :as suti]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.ya :as ya]))
+            [lupapalvelu.ya :as ya])
+  (:import (java.net SocketTimeoutException)))
 
 (defn- return-to-draft-model [{{:keys [text]} :data :as command} conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -93,16 +96,6 @@
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
-(defn- autofill-rakennuspaikka [application time]
-  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
-      (doseq [rakennuspaikka rakennuspaikka-docs
-              :when (seq rakennuspaikka)]
-        (let [property-id (or
-                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
-                            (:propertyId application))]
-          (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
-
 (defquery party-document-names
   {:parameters [:id]
    :user-roles #{:applicant :authority}
@@ -124,7 +117,7 @@
                                 distinct))))
 
 (defcommand mark-seen
-  {:parameters       [:id type]
+  {:parameters       [id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/all-authz-roles
@@ -347,7 +340,7 @@
    :user-roles #{:authority}
    :states     (states/all-application-states-but (conj states/terminal-states :draft))}
   [{:keys [application created]}]
-  (autofill-rakennuspaikka application created)
+  (app/autofill-rakennuspaikka application created)
   (ok))
 
 (defcommand save-application-drawings
@@ -437,16 +430,24 @@
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (app/do-create-application command)]
-    (app/insert-application created-application)
-    (when (boolean infoRequest)
-      ; Notify organization about new inforequest
-      (if (:openInfoRequest created-application)
-        (open-inforequest/new-open-inforequest! created-application)
-        (notifications/notify! :inforequest-invite {:application created-application})))
-    (try
-      (autofill-rakennuspaikka created-application created)
-      (catch Exception e (warn "Could not get KTJ data for the new application")))
-    (ok :id (:id created-application))))
+    (logging/with-logging-context {:applicationId (:id created-application)}
+      (app/insert-application created-application)
+      (when (boolean infoRequest)
+        ; Notify organization about new inforequest
+        (if (:openInfoRequest created-application)
+          (open-inforequest/new-open-inforequest! created-application)
+          (notifications/notify! :inforequest-invite {:application created-application})))
+      (try+
+        (app/autofill-rakennuspaikka created-application created)
+        (catch [:sade.core/type :sade.core/fail] {:keys [cause text] :as exp}
+          (warnf "Could not get KTJ data for the new application, cause: %s, text: %s. From %s:%s"
+                 cause
+                 text
+                 (:sade.core/file exp)
+                 (:sade.core/line exp)))
+        (catch SocketTimeoutException _
+          (warn "Socket timeout from KTJ when creating application")))
+      (ok :id (:id created-application)))))
 
 (defn- add-operation-allowed? [{application :application}]
   (let [op (-> application :primaryOperation :name keyword)
@@ -550,8 +551,9 @@
                                  :address    (ss/trim address)
                                  :propertyId propertyId
                                  :title      (ss/trim address)
-                                 :modified   created}})
-      (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+                                 :modified   created}
+                           $unset {:propertyIdSource true}})
+      (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed"))))
     (fail :error.property-in-other-muinicipality)))
 
@@ -728,7 +730,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :user-roles #{:applicant :authority}
-   :states     #{:verdictGiven :constructionStarted}
+   :states     #{:verdictGiven :constructionStarted :appealed :inUse :onHold}
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (app/make-application-id (:municipality application))
@@ -858,7 +860,7 @@
                                :documents              (app/make-documents user created @org op app)
                                :modified               created}
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
-  (try (autofill-rakennuspaikka app created)
+  (try (app/autofill-rakennuspaikka app created)
        (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
 
 (defn- validate-organization-backend-urls [{organization :organization}]

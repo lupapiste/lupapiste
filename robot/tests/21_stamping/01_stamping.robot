@@ -36,7 +36,7 @@ Mikko creates & submits a second application and goes to empty attachments tab
 
 Mikko adds PDF attachment without comment
   Upload attachment  ${PDF_TESTFILE_PATH1}  Muu liite  Muu  Uusi asuinrakennus
-  Upload attachment  ${PDF_TESTFILE_PATH2}  Muu liite  Muu  Uusi asuinrakennus
+  Upload attachment  ${PDF_TESTFILE_PATH2}  IV-suunnitelma  IV  Uusi asuinrakennus
   Upload attachment  ${PDF_TESTFILE_PATH3}  Muu liite  Muu  Yleisesti hankkeeseen
 
 Mikko does not see stamping button
@@ -101,6 +101,7 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Wait until  Element should be visible  application-attachments-tab
   Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
+  One attachment is selected
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${STAMP_ORGANIZATION}
@@ -109,15 +110,15 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
 
 Sonja can toggle selection of attachments by group/all/none
-  # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
-  # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
-  # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  # Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
-  # Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
-  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
-  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
-  Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
+  Scroll and click  div#stamping-container div[data-test-id='pre-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  2
+  Scroll and click  div#stamping-container div[data-test-id='post-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  Scroll and click  div#stamping-container div[data-test-id='pre-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
+  Scroll and click  div#stamping-container div[data-test-id='post-verdict-files'] tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-deselect]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
   Wait until  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]

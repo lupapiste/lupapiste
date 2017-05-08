@@ -14,6 +14,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -32,7 +33,7 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.property :as prop]
-            [sade.util :as util]
+            [sade.util :as util :refer [merge-in]]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]))
 
@@ -161,8 +162,8 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn state-history-entries [history]
-  (filter :state history)) ; only history elements that regard state change
+; the function is in doc to avoid cyclic dependency
+(def state-history-entries doc/state-history-entries)
 
 (defn last-history-item
   [{history :history}]
@@ -379,6 +380,26 @@
           (assoc-in body path val)))
       {} schema-data)))
 
+(defn make-document [application primary-operation-name created manual-schema-datas schema]
+  (let [op-info (op/operations (keyword primary-operation-name))
+        op-schema-name (:schema op-info)
+        schema-version (:schema-version application)
+        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
+                                                   op-schema-name
+                                                   (:schema-data op-info))
+        merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
+        schema-name (get-in schema [:info :name])]
+    {:id          (mongo/create-id)
+     :schema-info (:info schema)
+     :created     created
+     :data        (util/deep-merge
+                   (tools/create-document-data schema tools/default-values)
+                   (tools/timestamped
+                    (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                      (schema-data-to-body schema-data application)
+                      {})
+                    created))}))
+
 (defn make-documents [user created org op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
   (let [op-info (op/operations (keyword (:name op)))
@@ -387,19 +408,9 @@
         default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
                                                    op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
-        make (fn [schema]
-               {:pre [(:info schema)]}
-               (let [schema-name (get-in schema [:info :name])]
-                 {:id          (mongo/create-id)
-                  :schema-info (:info schema)
-                  :created     created
-                  :data        (util/deep-merge
-                                 (tools/create-document-data schema tools/default-values)
-                                 (tools/timestamped
-                                   (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                                     (schema-data-to-body schema-data application)
-                                     {})
-                                   created))}))
+
+        make (partial make-document application (:name op) created manual-schema-datas)
+
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
 
@@ -437,57 +448,99 @@
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
-(defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+(defn application-state [user organization-id info-request?]
+  (cond
+    info-request? :info
+    (or (usr/user-is-authority-in-organization? user organization-id)
+        (usr/rest-user? user)) :open
+    :else :draft))
+
+(defn application-history-map [{:keys [created organization state tosFunction]} user]
+  {:pre [(pos? created) (string? organization) (states/all-states (keyword state))]}
+  (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
+    {:history (cond->> [(history-entry state created user)]
+                tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
+
+(defn permit-type-and-operation-map [operation-name created]
+  (let [op (make-op operation-name created)
+        classification {:permitType       (op/permit-type-of-operation operation-name)
+                        :primaryOperation op}]
+    (merge classification
+           {:permitSubtype (first (resolve-valid-subtypes classification))})))
+
+(defn application-auth [user operation-name]
+  (let [owner (merge (usr/user-in-role user :owner :type :owner)
+                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})]
+    (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
+      [owner company]
+      [owner])))
+
+(defn application-comments [user messages open-inforequest? created]
+  (let [comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])]
+    (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)))
+
+(defn application-attachments-map [{:keys [infoRequest created primaryOperation state tosFunction]} organization]
+  {:pre [(pos? created) (map? primaryOperation) (states/all-states (keyword state))]}
+  {:attachments (if-not infoRequest
+                  (make-attachments created primaryOperation organization state tosFunction)
+                  [])})
+
+(defn application-documents-map [{:keys [infoRequest created primaryOperation auth] :as application} user organization manual-schema-datas]
+  {:pre [(pos? created) (map? primaryOperation)]}
+  {:documents (if-not infoRequest
+                (make-documents user created organization primaryOperation application manual-schema-datas)
+                [])})
+
+(defn application-metadata-map [{:keys [attachments organization tosFunction]}]
+  {:pre [(string? organization)]}
+  (let [metadata (tos/metadata-for-document organization tosFunction "hakemus")]
+    {:metadata        metadata
+     :processMetadata (-> (tos/metadata-for-process organization tosFunction)
+                          (tos/calculate-process-metadata metadata attachments))}))
+
+(defn application-timestamp-map [{:keys [state created]}]
+  {:pre [(states/all-states (keyword state)) (pos? created)]}
+  {:opened   (when (#{:open :info} state) created)
+   :modified created})
+
+(defn location-map [location]
+  {:pre [(number? (first location)) (number? (second location))]}
+  {:location       location
+   :location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 location)})
+
+(defn tos-function [organization operation-name]
+  (get-in organization [:operations-tos-functions (keyword operation-name)]))
+
+(defn make-application [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
-  (let [permit-type (op/permit-type-of-operation operation-name)
-        owner (merge (usr/user-in-role user :owner :type :owner)
-                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})
-        op (make-op operation-name created)
-        state (cond
-                info-request? :info
-                (or (usr/user-is-authority-in-organization? user (:id organization)) (usr/rest-user? user)) :open
-                :else :draft)
-        comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
-        tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
-        tos-function-map (tos/tos-function-with-name tos-function (:id organization))
-        classification {:permitType permit-type, :primaryOperation op}
-        attachments (when-not info-request? (make-attachments created op organization state tos-function))
-        metadata (tos/metadata-for-document (:id organization) tos-function "hakemus")
-        process-metadata (tos/calculate-process-metadata (tos/metadata-for-process (:id organization) tos-function) metadata attachments)
-        application (merge domain/application-skeleton
-                      classification
-                      {:id                  id
-                       :created             created
-                       :opened              (when (#{:open :info} state) created)
-                       :modified            created
-                       :permitSubtype       (first (resolve-valid-subtypes classification))
-                       :infoRequest         info-request?
-                       :openInfoRequest     open-inforequest?
-                       :secondaryOperations []
-                       :state               state
-                       :history             (cond->> [(history-entry state created user)]
-                                                     tos-function-map (concat [(tos-history-entry tos-function-map created user)]))
-                       :municipality        municipality
-                       :location            (->location x y)
-                       :location-wgs84      (coord/convert "EPSG:3067" "WGS84" 5 (->location x y))
-                       :organization        (:id organization)
-                       :address             address
-                       :propertyId          property-id
-                       :title               address
-                       :auth                (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
-                                              [owner company]
-                                              [owner])
-                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
-                       :schema-version      (schemas/get-latest-schema-version)
-                       :tosFunction         tos-function
-                       :metadata            metadata
-                       :processMetadata     process-metadata})]
-    (merge application (when-not info-request?
-                         {:attachments attachments
-                          :documents   (make-documents user created organization op application manual-schema-datas)}))))
+  (let [application (merge domain/application-skeleton
+                           (permit-type-and-operation-map operation-name created)
+                           (location-map (->location x y))
+                           {:address             address
+                            :auth                (application-auth user operation-name)
+                            :comments            (application-comments user messages open-inforequest? created)
+                            :created             created
+                            :id                  id
+                            :infoRequest         info-request?
+                            :municipality        municipality
+                            :openInfoRequest     open-inforequest?
+                            :organization        (:id organization)
+                            :propertyId          property-id
+                            :schema-version      (schemas/get-latest-schema-version)
+                            :state               (application-state user (:id organization) info-request?)
+                            :title               address
+                            :tosFunction         (tos-function organization operation-name)}
+                           (when-not (#{:location-service nil} (keyword property-id-source))
+                             {:propertyIdSource property-id-source}))]
+    (-> application
+        (merge-in application-timestamp-map)
+        (merge-in application-history-map user)
+        (merge-in application-attachments-map organization)
+        (merge-in application-documents-map user organization manual-schema-datas)
+        (merge-in application-metadata-map))))
 
 (defn do-create-application
-  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  [{{:keys [operation x y address propertyId propertyIdSource infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
   (let [municipality      (prop/municipality-id-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
@@ -505,7 +558,7 @@
         (fail! :error.new-applications-disabled)))
 
     (let [id (make-application-id municipality)]
-      (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
+      (make-application id operation x y address propertyId propertyIdSource municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
 ;;
 ;; Link permit
@@ -682,3 +735,13 @@
   (let [ind (util/position-by-id (:id handler) handlers)]
     {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
+
+(defn autofill-rakennuspaikka [application time & [force?]]
+  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+              :when (seq rakennuspaikka)]
+        (let [property-id (or (and force? (:propertyId application))
+                              (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                              (:propertyId application))]
+          (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))

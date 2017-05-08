@@ -1,16 +1,16 @@
 *** Settings ***
 
 Documentation   Users are added to company
-Resource        ../../common_resource.robot
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Default Tags    company
+Resource        ../../common_resource.robot
+Resource        company_resource.robot
 
 *** Test Cases ***
 
 Company admin logs in
-  Login  kaino@solita.fi  kaino123
-  User should be logged in  Kaino Solita
+  Kaino logs in
 
 Kaino sees the help text if there are no applications
   Wait until  Element should be visible  //section[@id='applications']//*[@data-test-id='applications-no-application']
@@ -38,10 +38,7 @@ Duff3 cannot be invited again
   Click enabled by test id  company-user-already-invited-close-dialog
 
 Duff3 user gets invite email
-  Open last email
-  Wait Until  Page Should Contain  dummy3@example.com
-  Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
-  Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Accept invitation  dummy3@example.com
 
 Account is linked
   Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
@@ -53,9 +50,7 @@ Duff3 user gets password reset email
   Page Should Contain  /app/fi/welcome#!/setpw/
 
 Admin logs in again
-  Go to login page
-  Login  kaino@solita.fi  kaino123
-  User should be logged in  Kaino Solita
+  Kaino logs in
   Open company user listing
 
 Duff3 is an active member in the company
@@ -94,11 +89,10 @@ Duff3 user gets invite email again
   Wait Until  Page Should Contain  dummy3@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Delete Duff3 again
-  Go to login page
-  Login  kaino@solita.fi  kaino123
-  User should be logged in  Kaino Solita
+  Kaino logs in
   Open company user listing
   Click by test id  company-user-delete-0
   Confirm  dynamic-yes-no-confirm-dialog
@@ -166,6 +160,7 @@ Pena accepts invitation
   Wait Until  Page Should Contain  pena@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Pena logs in and sees the non-admin view of the company
   Go to login page
@@ -182,39 +177,42 @@ Ulla logs in and changes her username
   Go to page  login
   Applicant logs in  user2@solita.fi  pitka123  Ulla Ser
   Click Element  user-name
-  Fill test id  newEmail  ulla.ser@solita.fi
+  Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
+  Input text  xpath=//input[@data-test-id='newEmail']  ulla.ser@solita.fi
   Click by test id  change-email
   Wait for jquery
   Open last email
   Click link  xpath=//a
-  Wait test id visible  vetuma-init
-  Click by test id  vetuma-init
-  Wait test id visible  submit-button
-  Click by test id  submit-button
-  Wait test id visible  login-new-email
-  Click by test id  login-new-email
+  Wait until  Element should be visible  xpath=//section[@id='email']//div[@data-test-id='init-email-change']
+  Wait until  Element should be visible  vetuma-init-email
+  Click element  vetuma-init-email
+  Element should be visible by test id  submit-button
+  Click element  xpath=//input[@data-test-id='submit-button']
+  Element should be visible by test id  login-new-email
+  Click element  xpath=//a[@data-test-id='login-new-email']
 
 Subsequent username changes must use the same person id.
   Applicant logs in  ulla.ser@solita.fi  pitka123  Ulla Ser
   Click Element  user-name
-  Fill test id  newEmail  res.allu@solita.fi
+  Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
+  Input text  xpath=//input[@data-test-id='newEmail']  res.allu@solita.fi
   Click by test id  change-email
   Wait for jquery
   Open last email
   Click link  xpath=//a
-  Wait test id visible  vetuma-init
-  Click by test id  vetuma-init
-  Wait test id visible  submit-button
+  Wait until  Element should be visible  xpath=//section[@id='email']//div[@data-test-id='init-email-change']
+  Wait until  Element should be visible  vetuma-init-email
+  Click element  vetuma-init-email
+  Element should be visible by test id  submit-button
   Fill test id  dummy-login-userid  240441-937H
-  Click by test id  submit-button
+  Click element  xpath=//input[@data-test-id='submit-button']
   Wait until  Element should be visible  jquery=section#change-email p.error-message
   Logout
 
 Kaino logs in and removes Ulla's admin rights
   # This is needed to make sure that only Kaino receives the
   # invitation mail from the next case.
-  Login  kaino@solita.fi  kaino123
-  User should be logged in  Kaino Solita
+  Kaino logs in
   Open company user listing
   # Panaani, Ser, Solita
   Edit company user  1  user  Kyllä
@@ -240,7 +238,7 @@ Solita accepts invite
   Go to login page
 
 Kaino logs in and could submit application
-  Login  kaino@solita.fi  kaino123
+  Kaino logs in
   Open application  ${appname}  ${propertyId}
   Open tab  requiredFieldSummary
   Wait until  Test id enabled  application-submit-btn
@@ -274,7 +272,7 @@ Solita admin sets custom account for company 'Solita Oy', max users 3
   SolitaAdmin logs in
   Wait until  Click element  xpath=//li/a[contains(text(), "Yritykset")]
   Wait until  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
-  Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
+  Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritystä
   Select from list by value  xpath=//select[@name="account-type"]  custom
   Input text with jQuery   input[name="customAccountLimit"]  3
   Focus  xpath=//button[@data-test-id="modal-dialog-submit-button"]
@@ -283,8 +281,7 @@ Solita admin sets custom account for company 'Solita Oy', max users 3
   Logout
 
 Kaino logs in and sees account is custom, and it can't be changed by Kaino
-  Login  kaino@solita.fi  kaino123
-  User should be logged in  Kaino Solita
+  Kaino logs in
   Open company details
   Wait until  Element should be visible  xpath=//span[@data-test-id="company-custom-account"]
   Element should not be visible  xpath=//select[@data-test-id="company-account-select"]
@@ -296,70 +293,3 @@ Kaino wants to invite new users, but can't because account limit is reached
 
 No frontend errors
   There are no frontend errors
-
-*** Keywords ***
-
-Invite existing dummy user
-  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
-  Click enabled by test id  company-add-user
-  Wait until  Element should be visible  dialog-company-new-user
-  Test id disabled  company-search-email
-  Input text by test id  company-new-user-email  ${email}
-  Click enabled by test id  company-search-email
-  Test id disabled  company-new-user-email
-
-  Textfield value should be  jquery=[data-test-id=company-new-user-firstname]  ${EMPTY}
-  Test id enabled  company-new-user-firstname
-  Textfield value should be  jquery=[data-test-id=company-new-user-lastname]  ${EMPTY}
-  Test id enabled  company-new-user-lastname
-  Input text by test id  company-new-user-firstname  ${firstname}
-  Input text by test id  company-new-user-lastname  ${lastname}
-  Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
-  Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
-  Click enabled by test id  company-user-send-invite
-  Wait Test id visible  company-add-user-done
-  Click by test id  company-new-user-invited-close-dialog
-
-Invite existing user
-  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
-  Click enabled by test id  company-add-user
-  Wait until  Element should be visible  dialog-company-new-user
-  Test id disabled  company-search-email
-  Input text by test id  company-new-user-email  ${email}
-  Click enabled by test id  company-search-email
-  Test id disabled  company-new-user-email
-
-  Textfield should contain  jquery=[data-test-id=company-new-user-firstname]  ${firstname}
-  Test id disabled  company-new-user-firstname
-  Textfield should contain  jquery=[data-test-id=company-new-user-lastname]  ${lastname}
-  Test id disabled  company-new-user-lastname
-
-  Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
-  Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
-  Click enabled by test id  company-user-send-invite
-  Wait Test id visible  company-add-user-done
-  Click by test id  company-new-user-invited-close-dialog
-
-Check invitation
-  [Arguments]  ${index}  ${email}  ${lastname}  ${firstname}  ${role}  ${submit}
-  Test id should contain  invitation-lastname-${index}  ${lastname}
-  Test id should contain  invitation-firstname-${index}  ${firstname}
-  Test id should contain  invitation-email-${index}  ${email}
-  Test id should contain  invitation-invited-${index}  Kutsuttu
-  Test id should contain  invitation-role-${index}  ${role}
-  Test id should contain  invitation-submit-${index}  ${submit}
-
-Check company user
-  [Arguments]  ${index}  ${email}  ${lastname}  ${firstname}  ${role}  ${submit}
-  Test id should contain  company-user-lastname-${index}  ${lastname}
-  Test id should contain  company-user-firstname-${index}  ${firstname}
-  Test id should contain  company-user-email-${index}  ${email}
-  Test id should contain  company-user-enabled-${index}  Käytössä
-  Test id should contain  company-user-role-${index}  ${role}
-  Test id should contain  company-user-submit-${index}  ${submit}
-
-Edit company user
-  [Arguments]  ${index}  ${role}  ${submit}
-  Click by test id  company-user-edit-${index}
-  Select from test id  company-user-edit-role-${index}  ${role}
-  Select from test id  company-user-edit-submit-${index}  ${submit}

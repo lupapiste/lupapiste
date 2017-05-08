@@ -34,7 +34,9 @@ Open foreman application
 
 Open foreman accordions
   Open accordions  parties
-  Execute Javascript  $("button[data-test-id=accordion-application-foreman-header]:not(.toggled)").click();
+  ${toggled}=  Run Keyword And Return Status  Element should be visible  xpath=//button[@data-test-id='accordion-application-foreman-header' and contains(@class,'toggled')]
+  Run keyword unless  ${toggled}  Click element  xpath=//button[@data-test-id='accordion-application-foreman-header' and not(contains(@class,'toggled'))]
+  Wait until  Element should be visible  xpath=//section[@id='accordion-application-foreman']//div[@data-test-id='application-foreman-template']
 
 Sonja invites foreman to application
   Open tab  parties
@@ -53,7 +55,6 @@ Foreman applies personal information to the foreman application
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
-  Open foreman accordions
   Wait until  Click by test id  fill-info-button
   Wait for jQuery
 

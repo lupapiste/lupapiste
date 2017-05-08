@@ -222,12 +222,13 @@
        (for [att  attachments
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi description :kuvaus} att
                    _ (debug "Download " url)
-                   url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
-                   resp            (http/get url :as :stream :throw-exceptions false)
+                   java-url        (URL. (URL. "http://") url) ; LPK-2903 HTTP is given as default URL context, if protocol is not defined
+                   url-filename    (-> java-url (.getPath) (ss/suffix "/"))
+                   resp            (http/get (.toString java-url) :as :stream :throw-exceptions false)
                    header-filename (content-disposition-filename resp)
                    filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                   urlhash         (pandect/sha1 url)
+                   urlhash         (pandect/sha1 (.toString java-url))
                    attachment-id      urlhash
                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
                    contents           (or description (if (= type "lupaehto") "Lupaehto"))

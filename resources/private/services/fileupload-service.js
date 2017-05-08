@@ -122,7 +122,8 @@ LUPAPISTE.FileuploadService = function() {
       fail: function(e, data) {
         hubSend("filesUploaded", {
           status: "failed",
-          message: data.textStatus || data.jqXHR.responseJSON.text
+          message: data.textStatus || data.jqXHR.responseJSON.text,
+          errorKey: data.jqXHR.responseJSON.error
         });
       },
       progress: function (e, data) {

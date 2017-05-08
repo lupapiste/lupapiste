@@ -23,8 +23,8 @@ LUPAPISTE.PublishBulletinService = function() {
       .success(function() {
         hub.send("publishBulletinService::publishProcessed", {status: "success"});
       })
-      .error(function() {
-        hub.send("publishBulletinService::publishProcessed", {status: "failed"});
+      .error(function(resp) {
+        hub.send("publishBulletinService::publishProcessed", {status: "failed", text: resp.text});
       })
       .call();
   };
