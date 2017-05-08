@@ -29,6 +29,7 @@ Olli adds and approves attachment
   Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
   Open attachment details  muut.muu
   Wait Until  Element Should Be Visible  test-attachment-approve
+  Wait Until  Element Should Be Enabled  test-attachment-approve
   Click button  test-attachment-approve
   Return to application
 
