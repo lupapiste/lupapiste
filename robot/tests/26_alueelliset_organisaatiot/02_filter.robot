@@ -3,6 +3,7 @@
 Documentation  Authority uses default filter
 Suite Teardown  Run Keywords  Logout  Apply minimal fixture now
 Resource        ../../common_resource.robot
+Resource        filter_resource.robot
 Suite Setup     Apply minimal fixture now
 
 *** Test Cases ***
@@ -189,14 +190,6 @@ Handler filter should contain text
   [Arguments]  ${text}
   Wait until  Element should be visible  //div[@data-test-id="handler-filter-component"]//span[@class="autocomplete-selection"]//span[contains(text(), "${text}")]
 
-Filter item should contain X number of tags
-  [Arguments]  ${filter name}  ${amount}
-  Wait until  Xpath should match X times  //div[@data-test-id="${filter name}-filter-component"]//ul[@class="tags"]//li[@class="tag"]  ${amount}
-
-Filter should contain tag
-  [Arguments]  ${filter name}  ${text}
-  Wait Until  Element Should Contain  xpath=//div[@data-test-id="${filter name}-filter-component"]//ul[@class="tags"]//li[@class="tag"]//span  ${text}
-
 Sorting Should Be Set As Ascending
   [Arguments]  ${field name}
   Wait until  Element should be visible  //table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]//i[contains(@class, "lupicon-chevron-small-up")]
@@ -209,9 +202,3 @@ Click sorting field
   [Arguments]  ${field name}
   Wait Until  Element should be visible  xpath=//table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]
   Wait Until  Scroll and click  table#applications-list th[data-test-id=search-column-${field name}]
-
-Save advanced filter
-  [Arguments]  ${filter-name}
-  Input text  new-filter-name  ${filter-name}
-  Wait Until  Scroll and click  div[data-test-id=new-filter-submit-button] button
-  Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(text(), "${filter-name}")]

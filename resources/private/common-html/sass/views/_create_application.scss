@@ -43,6 +43,10 @@
     color: red;
     margin-bottom: 15px;
   }
+  .warning-message {
+    color: $negative;
+    margin-bottom: 15px;
+  }
 }
 
 .create-application-map {
@@ -189,4 +193,84 @@
     font-size: 2 * $lupicon-size;
   }
   vertical-align: top;
+}
+
+.copy-selection-wrapper {
+  margin-top: $marginS;
+  margin-bottom: $marginM;
+}
+
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid $positive;
+  background-color: $input-disabled-background-color;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
+
+  [class^="lupicon-"].right,
+  [class*="lupicon-"].right {
+    margin-right: 6px;
+    float: right;
+  }
+}
+
+.copy-state-indication {
+  margin: 0 0 $marginM 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+
+  div {
+    height: 24px;
+    .active-phase {
+      color: white;
+      background-color: $green-dark;
+      &:after {
+        border-left: 11px solid $green-dark;
+      }
+    }
+
+    .completed-phase {
+      color: white;
+      background-color: $gray-link;
+      &:after {
+        border-left: 11px solid $gray-link;
+      }
+    }
+
+    span {
+      background-color: $app-gray-light;
+      color: darken($lp-light-grey, 40%);
+      position: relative;
+      padding: 4px 8px 4px 24px;
+      display: inline-block;
+      margin: 0px -4px 0 0;
+      border: none;
+      &:first-child {
+        padding: 4px 8px 4px 8px;
+      }
+      &:last-child:after {
+        border-left: none;
+      }
+
+      &:after {
+        display: inline-block;
+        position: absolute;
+        content: " ";
+        width: 0;
+        height: 0;
+        top: -1px;
+        right: -9px;
+        border-top: 17px solid transparent;
+        border-left: 11px solid $app-gray-light;
+        border-bottom: 17px solid transparent;
+        z-index: 1;
+      }
+    }
+  }
 }

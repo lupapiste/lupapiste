@@ -14,6 +14,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as com]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -161,8 +162,8 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn state-history-entries [history]
-  (filter :state history)) ; only history elements that regard state change
+; the function is in doc to avoid cyclic dependency
+(def state-history-entries doc/state-history-entries)
 
 (defn last-history-item
   [{history :history}]
@@ -379,6 +380,26 @@
           (assoc-in body path val)))
       {} schema-data)))
 
+(defn make-document [application primary-operation-name created manual-schema-datas schema]
+  (let [op-info (op/operations (keyword primary-operation-name))
+        op-schema-name (:schema op-info)
+        schema-version (:schema-version application)
+        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
+                                                   op-schema-name
+                                                   (:schema-data op-info))
+        merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
+        schema-name (get-in schema [:info :name])]
+    {:id          (mongo/create-id)
+     :schema-info (:info schema)
+     :created     created
+     :data        (util/deep-merge
+                   (tools/create-document-data schema tools/default-values)
+                   (tools/timestamped
+                    (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                      (schema-data-to-body schema-data application)
+                      {})
+                    created))}))
+
 (defn make-documents [user created org op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
   (let [op-info (op/operations (keyword (:name op)))
@@ -387,19 +408,9 @@
         default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
                                                    op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
-        make (fn [schema]
-               {:pre [(:info schema)]}
-               (let [schema-name (get-in schema [:info :name])]
-                 {:id          (mongo/create-id)
-                  :schema-info (:info schema)
-                  :created     created
-                  :data        (util/deep-merge
-                                 (tools/create-document-data schema tools/default-values)
-                                 (tools/timestamped
-                                   (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                                     (schema-data-to-body schema-data application)
-                                     {})
-                                   created))}))
+
+        make (partial make-document application (:name op) created manual-schema-datas)
+
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
 
@@ -500,7 +511,7 @@
 (defn tos-function [organization operation-name]
   (get-in organization [:operations-tos-functions (keyword operation-name)]))
 
-(defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+(defn make-application [id operation-name x y address property-id property-id-source municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [application (merge domain/application-skeleton
                            (permit-type-and-operation-map operation-name created)
@@ -518,7 +529,9 @@
                             :schema-version      (schemas/get-latest-schema-version)
                             :state               (application-state user (:id organization) info-request?)
                             :title               address
-                            :tosFunction         (tos-function organization operation-name)})]
+                            :tosFunction         (tos-function organization operation-name)}
+                           (when-not (#{:location-service nil} (keyword property-id-source))
+                             {:propertyIdSource property-id-source}))]
     (-> application
         (merge-in application-timestamp-map)
         (merge-in application-history-map user)
@@ -526,9 +539,8 @@
         (merge-in application-documents-map user organization manual-schema-datas)
         (merge-in application-metadata-map))))
 
-(def do-create-application-data-fields #{:operation :x :y :address :propertyId :infoRequest :messages})
 (defn do-create-application
-  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
+  [{{:keys [operation x y address propertyId propertyIdSource infoRequest messages]} :data :keys [user created]} & [manual-schema-datas]]
   (let [municipality      (prop/municipality-id-by-property-id propertyId)
         permit-type       (op/permit-type-of-operation operation)
         organization      (org/resolve-organization municipality permit-type)
@@ -546,7 +558,7 @@
         (fail! :error.new-applications-disabled)))
 
     (let [id (make-application-id municipality)]
-      (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
+      (make-application id operation x y address propertyId propertyIdSource municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
 ;;
 ;; Link permit
@@ -723,3 +735,13 @@
   (let [ind (util/position-by-id (:id handler) handlers)]
     {$set  (merge {:modified created} {(util/kw-path :handlers (or ind (count handlers))) handler})
      $push {:history (handler-history-entry (util/assoc-when handler :new-entry (nil? ind)) created user)}}))
+
+(defn autofill-rakennuspaikka [application time & [force?]]
+  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
+    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
+      (doseq [rakennuspaikka rakennuspaikka-docs
+              :when (seq rakennuspaikka)]
+        (let [property-id (or (and force? (:propertyId application))
+                              (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
+                              (:propertyId application))]
+          (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))

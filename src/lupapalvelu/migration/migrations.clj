@@ -1288,8 +1288,8 @@
        (into {})))
 
 (defmigration update-tila-metadata-value-in-all-metadata-maps
-  {:apply-when (pos? (mongo/count :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]}))}
-  (doseq [application (mongo/select :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]})]
+  {:apply-when (pos? (mongo/count :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu" "arkistoidaan"]}}]}))}
+  (doseq [application (mongo/select :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu" "arkistoidaan"]}}]})]
     (let [data-for-$set (-> (update-array-metadata application)
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))

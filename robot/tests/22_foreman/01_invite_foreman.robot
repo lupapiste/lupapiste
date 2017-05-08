@@ -62,9 +62,9 @@ Sonja can invite foremen to application
   Open application  ${appname}  753-416-25-22
   Open tab  parties
   Open foreman accordions
+  Wait until  Element should be visible  xpath=//button[@data-test-id="invite-foreman-button"]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
   Element should not be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
-  Element should be visible  xpath=//button[@data-test-id="invite-foreman-button"]
-  Element should be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
 
 Sonja invites foreman Teppo to application
   Click by test id  invite-foreman-button
@@ -85,12 +85,15 @@ Applicant sees sent invitation on the original application
   # Also in auth array
   Wait until  Is authorized party  teppo@example.com
 
-Applicant sees sent invitations on the foreman application
+Owner is invited to foreman app, approves invitation
   Open application by id  ${foremanAppId}
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${foremanAppId}
+  Confirm yes no dialog
+  Wait until  New modal mask is invisible
+
+
+Applicant sees sent invitations on the foreman application
   Open tab  parties
-  Open foreman accordions
-  Wait and click  xpath=//button[@data-test-id='confirm-yes']
   Wait until  Xpath Should Match X Times  //table//tr[@class="party"]  4
   Go to  ${LOGOUT URL}
   [Teardown]  logout
@@ -184,6 +187,7 @@ Applicant can link existing foreman application to foreman task
   Pena logs in
   Open project application
   Open tab  tasks
+  Wait until  Element should be visible  xpath=//select[@data-test-id="foreman-selection-1"]
   Select From List By Value  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
   # Sleep so the repository reload does not prune dom when waiting
   Sleep  2s

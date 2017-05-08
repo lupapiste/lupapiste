@@ -7,6 +7,9 @@ LUPAPISTE.MaaraalaTunnusModel = function(params) {
   self.applicationId = params.applicationId || (lupapisteApp.models.application && lupapisteApp.models.application.id()) || null;
   self.documentId = params.documentId;
   self.propertyId = ko.unwrap(params.propertyId);
+  self.propertyIdEnteredManually = ko.pureComputed(function() {
+    return ko.unwrap(params.propertyIdSource) === "user";
+  });
   self.propertyIdLabel = ko.pureComputed(function() {
     return self.isMaaraala() ? loc("kiinteisto.maaraala.label") : loc("kiinteisto.kiinteisto.label");
   });

@@ -89,6 +89,7 @@ Duff3 user gets invite email again
   Wait Until  Page Should Contain  dummy3@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Delete Duff3 again
   Kaino logs in
@@ -159,6 +160,7 @@ Pena accepts invitation
   Wait Until  Page Should Contain  pena@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
   Click link  xpath=//a[contains(@href,'invite-company-user')]
+  Wait until  Element should be visible  xpath=//section[@id='invite-company-user']//p[@data-test-id='invite-company-user-success']
 
 Pena logs in and sees the non-admin view of the company
   Go to login page
@@ -175,31 +177,35 @@ Ulla logs in and changes her username
   Go to page  login
   Applicant logs in  user2@solita.fi  pitka123  Ulla Ser
   Click Element  user-name
-  Fill test id  newEmail  ulla.ser@solita.fi
+  Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
+  Input text  xpath=//input[@data-test-id='newEmail']  ulla.ser@solita.fi
   Click by test id  change-email
   Wait for jquery
   Open last email
   Click link  xpath=//a
-  Wait test id visible  vetuma-init
-  Click by test id  vetuma-init
-  Wait test id visible  submit-button
-  Click by test id  submit-button
-  Wait test id visible  login-new-email
-  Click by test id  login-new-email
+  Wait until  Element should be visible  xpath=//section[@id='email']//div[@data-test-id='init-email-change']
+  Wait until  Element should be visible  vetuma-init-email
+  Click element  vetuma-init-email
+  Element should be visible by test id  submit-button
+  Click element  xpath=//input[@data-test-id='submit-button']
+  Element should be visible by test id  login-new-email
+  Click element  xpath=//a[@data-test-id='login-new-email']
 
 Subsequent username changes must use the same person id.
   Applicant logs in  ulla.ser@solita.fi  pitka123  Ulla Ser
   Click Element  user-name
-  Fill test id  newEmail  res.allu@solita.fi
+  Wait until  Element Should Be Enabled  xpath=//input[@data-test-id='newEmail']
+  Input text  xpath=//input[@data-test-id='newEmail']  res.allu@solita.fi
   Click by test id  change-email
   Wait for jquery
   Open last email
   Click link  xpath=//a
-  Wait test id visible  vetuma-init
-  Click by test id  vetuma-init
-  Wait test id visible  submit-button
+  Wait until  Element should be visible  xpath=//section[@id='email']//div[@data-test-id='init-email-change']
+  Wait until  Element should be visible  vetuma-init-email
+  Click element  vetuma-init-email
+  Element should be visible by test id  submit-button
   Fill test id  dummy-login-userid  240441-937H
-  Click by test id  submit-button
+  Click element  xpath=//input[@data-test-id='submit-button']
   Wait until  Element should be visible  jquery=section#change-email p.error-message
   Logout
 

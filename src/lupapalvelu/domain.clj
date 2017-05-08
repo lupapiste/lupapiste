@@ -398,7 +398,8 @@
    :processMetadata          {}
    :appeals                  []
    :appealVerdicts           []
-   :archived                 {:application nil
+   :archived                 {:initial     nil
+                              :application nil
                               :completed   nil}
    :reservations             []
    :warrantyStart            nil ; timestamp

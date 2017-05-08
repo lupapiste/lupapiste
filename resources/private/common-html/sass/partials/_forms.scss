@@ -659,6 +659,17 @@ input.form-input.inline {
 
 }
 
+.form-warning-message {
+  color: $negative;
+  line-height: 24px;
+  margin-top: $marginS;
+  margin-bottom: $marginS;
+  span {
+    margin-left: 3px;
+    vertical-align: top;
+  }
+}
+
 .group-buttons {
   width: 100%;
   display: block;

@@ -67,7 +67,7 @@
    "LPAVALUE_MUNICIPALITY" (localized-text lang (str "municipality." (:municipality application)))
 
    "LPATITLE_ADDRESS"      (localized-text lang "application.address")
-   "LPAVALUE_ADDRESS"      (:address application)
+   "LPAVALUE_ADDRESS"      (xml-escape (:address application))
 
    "LPATITLE_PROPERTYID"   (localized-text lang "kiinteisto.kiinteisto.kiinteistotunnus")
    "LPAVALUE_PROPERTYID"   (if (nil? (:propertyId application)) (i18n/localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application)))
@@ -79,7 +79,9 @@
    "LPAVALUE_AUTHORITY"    (get-general-handler lang application)
 
    "LPATITLE_APPLICANT"    (localized-text lang "applicant")
-   "LPAVALUE_APPLICANT"    (s/join ", " (:_applicantIndex application))
+   "LPAVALUE_APPLICANT"    (->> (:_applicantIndex application)
+                                (map xml-escape)
+                                (s/join ", "))
 
    "LPATITLE_OPERATIONS"   (localized-text lang "selectm.source.label.edit-selected-operations")
    "LPAVALUE_OPERATIONS"   (get-operations application)
