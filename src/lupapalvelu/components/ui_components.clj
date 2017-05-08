@@ -372,7 +372,7 @@
 
    :copy         {:depends [:common-html :map]
                   :html ["copy.html"]
-                  :js ["copylocationmodel.js" "copy.js"]}
+                  :js ["copy.js"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
