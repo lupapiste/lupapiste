@@ -26,9 +26,9 @@
                 :current-date (sutil/to-local-date (score/now))
                 :verdict-date (get-verdict-date (:application context))
                 :backend-id (get-backend-id (get-in context [:application :verdicts]))
-                :username (user/full-name (:user context))
+                :user (user/full-name (:user context))
                 :organization (get-in context [:organization :name :fi])
-                :agreement-id (get-in context [:application :id])
+                :application-id (get-in context [:application :id])
                 :building-id (i18n/with-lang (or (get-in context [:user :language]) :fi) (i18n/loc "stamp.buildingid"))
                 (or (:text tag) ""))]
     {:type (:type tag) :value value}))

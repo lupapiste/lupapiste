@@ -1,5 +1,5 @@
 (ns lupapalvelu.attachment.stamp-schema
-  (:require [sade.schemas :as ssc]
+  (:require [sade.shared-schemas :as sssc]
             [schema.core :as sc]
             [clojure.set :as set]))
 
@@ -7,10 +7,11 @@
   #{:current-date
     :verdict-date
     :backend-id
-    :username
+    :user
     :organization
-    :agreement-id
-    :building-id})
+    :application-id
+    :building-id
+    :section})
 
 (def text-field-types
   #{:custom-text
@@ -48,20 +49,20 @@
 
 (sc/defschema StampTemplate
               {:name       StampName
-               :id         ssc/ObjectIdStr
-               :position   {:x ssc/Nat
-                            :y ssc/Nat}
-               :background ssc/Nat
+               :id         sssc/ObjectIdStr
+               :position   {:x sssc/Nat
+                            :y sssc/Nat}
+               :background sssc/Nat
                :page       sc/Str
                :qrCode     sc/Bool
                :rows       [StampTemplateRow]})
 
 (sc/defschema Stamp
               {:name       StampName
-               :id         ssc/ObjectIdStr
-               :position   {:x ssc/Nat
-                            :y ssc/Nat}
-               :background ssc/Nat
+               :id         sssc/ObjectIdStr
+               :position   {:x sssc/Nat
+                            :y sssc/Nat}
+               :background sssc/Nat
                :page       (sc/enum :first
                                     :last
                                     :all)

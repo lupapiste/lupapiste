@@ -4,7 +4,8 @@
             [sade.strings :as ss]
             [clj-time.format :as ctf]
             [schema.core :refer [defschema] :as sc]
-            [schema.coerce :as coerce])
+            [schema.coerce :as coerce]
+            [sade.shared-schemas :as sssc])
   (:import  [org.joda.time IllegalFieldValueException]))
 
 ;;
@@ -66,9 +67,7 @@
 ;; Schemas
 ;;
 
-(defschema Nat
-  "A schema for natural number integer"
-  (sc/constrained sc/Int (comp not neg?) "Natural number"))
+(def Nat sssc/Nat)
 
 (defschema IntString
   "A schema for string containing single integer"
@@ -152,8 +151,7 @@
 (defschema Hetu
   (sc/pred validators/valid-hetu? "Not valid hetu"))
 
-(defschema ObjectIdStr
-  (sc/pred (partial validators/matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
+(def ObjectIdStr sssc/ObjectIdStr)
 
 (defschema IpAddress
   (sc/pred validators/ip-address? "IP address"))

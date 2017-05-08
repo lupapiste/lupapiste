@@ -6,7 +6,8 @@
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.rum-util :as rum-util]))
+            [lupapalvelu.ui.rum-util :as rum-util]
+            [lupapalvelu.attachment.stamp-schema :as ss]))
 
 (def ^:dynamic *debug-edge-detection* false)
 (def ^:dynamic *debug-info-divs* false)
@@ -38,7 +39,7 @@
                                              :fields [{:id 1
                                                        :type :application-id}
                                                       {:id 2
-                                                       :type :kuntalupatunnus}]
+                                                       :type :backend-id}]
                                              :is-dragged-over false}
                                             {:row-number 2
                                              :fields [{:id 1
@@ -123,17 +124,6 @@
      rendered-content
      [:i.lupicon-circle-remove
       {:on-click (fn [e] (remove))}]]))
-
-(def field-templates
-  ;; TODO: use the enum from backend for keys
-  {:custom-text     {:text ""}
-   :current-date    {}
-   :verdict-date    {}
-   :kuntalupatunnus {}
-   :user            {}
-   :organization    {}
-   :application-id  {}
-   :building-id     {}})
 
 ;;TODO: needs better name
 (defn drop-at
@@ -248,9 +238,6 @@
                                           :row-number row-number
                                           :row-index idx})
                           (:id field)))
-        drag-content (rum/react drag-source)
-        field-type (get drag-content :stamp-type)
-        extra-props (get field-templates field-type {})
         placeholder-width (get-in (rum/react drag-source)
                                   [:source-boundaries :width])
         on-drag-enter (fn [e]
@@ -280,9 +267,8 @@
                        (.preventDefault e)
                        (let [{:strs [type]} (-> e .-dataTransfer (.getData "stampField") util/json->clj)
                              type-kw (keyword type)
-                             field-data (merge {:type type-kw
-                                                :id (->> fields (map :id) max inc)}
-                                               (type-kw field-templates))]
+                             field-data {:type type-kw
+                                         :id (->> fields (map :id) max inc)}]
                          (swap! stamp-row-cursor update :fields add-at-index split-pos field-data)))
         placeholder-element [:button.stamp-row-placeholder
                              {:key :placeholder
@@ -353,7 +339,7 @@
 (rum/defc stamp-templates-component < rum/reactive
   []
   [:div
-   (for [[field-type _] field-templates]
+   (for [field-type (concat ss/simple-field-types ss/text-field-types)]
      (rum/with-key
        (stamp-btn {:key field-type})
        field-type))])

@@ -209,9 +209,9 @@ LUPAPISTE.StampModel = function(params) {
   self.currentDate = ko.observable(stringToDate(findRowData("current-date")));
   self.verdictDate = ko.observable(stringToDate(findRowData("verdict-date")));
   self.backendId = ko.observable(findRowData("backend-id"));
-  self.userName = ko.observable(findRowData("username"));
+  self.user = ko.observable(findRowData("user"));
   self.organization = ko.observable(findRowData("organization"));
-  self.agreementId = ko.observable(findRowData("agreement-id"));
+  self.applicationId = ko.observable(findRowData("application-id"));
   self.buildingId = ko.observable(findRowData("building-id"));
   self.section = ko.observable(findRowData("section"));
   self.preview = ko.observable(generatePreview());
@@ -236,9 +236,9 @@ LUPAPISTE.StampModel = function(params) {
       self.currentDate(stringToDate(findRowData("current-date")));
       self.verdictDate(stringToDate(findRowData("verdict-date")));
       self.backendId(findRowData("backend-id"));
-      self.userName(findRowData("username"));
+      self.user(findRowData("user"));
       self.organization(findRowData("organization"));
-      self.agreementId(findRowData("agreement-id"));
+      self.applicationId(findRowData("application-id"));
       self.buildingId(findRowData("building-id"));
       self.section(findRowData("section"));
       self.preview(generatePreview());
@@ -259,9 +259,9 @@ LUPAPISTE.StampModel = function(params) {
           self.stamps()[i].rows = (updateRowData("current-date", ddmmyyyyDate(self.currentDate())));
           self.stamps()[i].rows = (updateRowData("verdict-date", ddmmyyyyDate(self.verdictDate())));
           self.stamps()[i].rows = (updateRowData("backend-id", self.backendId()));
-          self.stamps()[i].rows = (updateRowData("username", self.userName()));
+          self.stamps()[i].rows = (updateRowData("user", self.user()));
           self.stamps()[i].rows = (updateRowData("organization", self.organization()));
-          self.stamps()[i].rows = (updateRowData("agreement-id", self.agreementId()));
+          self.stamps()[i].rows = (updateRowData("application-id", self.applicationId()));
           self.stamps()[i].rows = (updateRowData("building-id", self.buildingId()));
           self.stamps()[i].rows = (updateRowData("section", self.section()));
           self.preview(generatePreview());
@@ -275,7 +275,7 @@ LUPAPISTE.StampModel = function(params) {
   };
 
   _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section, self.organization, self.backendId,
-          self.extraText, self.currentDate, self.verdictDate, self.buildingId, self.userName, self.agreementId, self.qrCode],
+          self.extraText, self.currentDate, self.verdictDate, self.buildingId, self.user, self.applicationId, self.qrCode],
     function(o) {
       o.subscribe(self.submit);
     }

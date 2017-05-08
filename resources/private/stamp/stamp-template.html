@@ -71,7 +71,7 @@
               </div>
 
               <div class="col-1">
-                <label data-bind="ltext: 'stamp.text.extra'"></label>
+                <label data-bind="ltext: 'stamp.extra-text'"></label>
                 <input data-bind="value: extraText, enable: status() === statusReady && extraText() !== undefined"
                        type="text"
                        class="text"
@@ -81,15 +81,15 @@
               <div class="col-4"><br></div>
 
               <div class="col-1">
-                <label data-bind="ltext: 'stamp.agreementid'"></label>
-                <input data-bind="value: agreementId, enable: status() === statusReady && agreementId() !== undefined"
+                <label data-bind="ltext: 'stamp.application-id'"></label>
+                <input data-bind="value: applicationId, enable: status() === statusReady && applicationId() !== undefined"
                        type="text"
                        class="text"
-                       data-test-id="stamp-info-agreementId">
+                       data-test-id="stamp-info-applicationId">
               </div>
 
               <div class="col-1">
-                <label data-bind="ltext: 'stamp.verdict.date'"></label>
+                <label data-bind="ltext: 'stamp.verdict-date'"></label>
                 <input data-bind="
                             datepicker: verdictDate,
                             enable: status() === statusReady,
@@ -101,7 +101,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.user'"></label>
-                <input data-bind="value: userName, enable: status() === statusReady && userName() !== undefined"
+                <input data-bind="value: user, enable: status() === statusReady && user() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-user">
@@ -112,7 +112,7 @@
               <h3 data-bind="ltext: 'stamp.reference-info'"></h3>
 
               <div class="col-1">
-                <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
+                <label data-bind="ltext: 'stamp.backend-id'"></label>
                 <input data-bind="value: backendId, enable: status() === statusReady && backendId() !== undefined"
                        type="text"
                        class="text"

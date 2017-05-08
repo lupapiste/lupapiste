@@ -46,7 +46,7 @@
 (def sonja
   {:role "authority"
    :email "sonja.sibbo@sipoo.fi"
-   :username "sonja"
+   :user "sonja"
    :firstName "Sonja"
    :orgAuthz
    {:753-R        #{:commenter :tos-editor :tos-publisher :authority :approver :reader :archivist}
@@ -73,9 +73,9 @@
     :page       :last
     :qrCode    false
     :rows       [[{:type :custom-text :text "Verdict given"} {:type :verdict-date}]
-                 [{:type :backend-id} {:type :username}]
+                 [{:type :backend-id} {:type :user}]
                  [{:type :organization}]
-                 [{:type :agreement-id}]]}
+                 [{:type :application-id}]]}
    {:id         "999999888887777722223300"
     :name       "YA-Leima"
     :position   {:x 50 :y 50}
@@ -84,7 +84,7 @@
     :qrCode    true
     :rows       [[{:type :current-date} {:type :verdict-date}]
                  [{:type :extra-text :text "Some extra text"}]
-                 [{:type :agreement-id}]]}])
+                 [{:type :application-id}]]}])
 
 (def info-fields
   [[{:type "custom-text", :value "Hyv\u00e4ksytty"}
@@ -100,9 +100,9 @@
     (tag-content {:type :current-date} context) => {:type :current-date :value (sade.util/to-local-date (sade.core/now))}
     (tag-content {:type :verdict-date} context) => {:type :verdict-date :value "06.04.2017"}
     (tag-content {:type :backend-id} context) => {:type :backend-id :value "17-0753-R"}
-    (tag-content {:type :username} context) => {:type :username :value "Sonja Sibbo"}
+    (tag-content {:type :user} context) => {:type :user :value "Sonja Sibbo"}
     (tag-content {:type :organization} context) => {:type :organization :value "Sipoon rakennusvalvonta"}
-    (tag-content {:type :agreement-id} context) => {:type :agreement-id :value "LP-753-2017-90001"}
+    (tag-content {:type :application-id} context) => {:type :application-id :value "LP-753-2017-90001"}
     (tag-content {:type :building-id} context) => {:type :building-id :value "Rakennustunnus"}
     (tag-content {:type :section :text "Section"} context) => {:type :section :value "Section"}))
 
@@ -143,9 +143,9 @@
                                                                                    :page       :last
                                                                                    :qrCode    false
                                                                                    :rows       [[{:type :custom-text :value "Verdict given"} {:type :verdict-date :value "06.04.2017"}]
-                                                                                                [{:type :backend-id :value "17-0753-R"} {:type :username, :value "Sonja Sibbo"}]
+                                                                                                [{:type :backend-id :value "17-0753-R"} {:type :user, :value "Sonja Sibbo"}]
                                                                                                 [{:type :organization :value "Sipoon rakennusvalvonta"}]
-                                                                                                [{:type :agreement-id :value "LP-753-2017-90001"}]]}
+                                                                                                [{:type :application-id :value "LP-753-2017-90001"}]]}
                                                                                   {:id         "999999888887777722223300"
                                                                                    :name       "YA-Leima"
                                                                                    :position   {:x 50 :y 50}
@@ -154,7 +154,7 @@
                                                                                    :qrCode    true
                                                                                    :rows       [[{:type :current-date :value (sade.util/to-local-date (sade.core/now))} {:type :verdict-date :value "06.04.2017"}]
                                                                                                 [{:type :extra-text :value "Some extra text"}]
-                                                                                                [{:type :agreement-id :value "LP-753-2017-90001"}]]}]))
+                                                                                                [{:type :application-id :value "LP-753-2017-90001"}]]}]))
 
 (facts "Should get row value by type"
     (let [stamp (first (stamps organization application sonja))]

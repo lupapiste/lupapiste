@@ -79,7 +79,7 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.1.3"]
+                 [prismatic/schema "1.1.5"]
                  [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution
@@ -140,7 +140,7 @@
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.0"]]
-  :cljsbuild {:builds {:rum {:source-paths ^:replace ["src/lupapalvelu/ui"]}}}
+  :cljsbuild {:builds {:rum {:source-paths ^:replace ["src"]}}}
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
                                     "resources/public/lp-static/js/out"
