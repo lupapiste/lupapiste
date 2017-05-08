@@ -34,9 +34,9 @@
 
 (def five-min-in-ms (* 5 60 1000))
 
-(defn- valid-timestamp? [ts now]
+(defn- valid-timestamp? [ts now ip]
   (let [delta (util/abs (- now (util/to-long ts)))]
-    (boolean (or (< delta five-min-in-ms) (debug "Too much time difference" delta)))))
+    (boolean (or (< delta five-min-in-ms) (debug "Too much time difference" delta "from ip" ip)))))
 
 (defn- load-secret-from-db [ip]
   (let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})
@@ -62,7 +62,7 @@
 
     (when (and ts hash
             (valid-hash? hash email ip ts (load-secret ip))
-            (valid-timestamp? ts (now)))
+            (valid-timestamp? ts (now) ip))
       (let [user (user/get-user-by-email canonical-email)
             organization-ids (user/organization-ids user)]
 

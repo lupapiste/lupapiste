@@ -49,7 +49,7 @@ LUPAPISTE.MoveToProclaimedModel = function (params) {
       self.proclaimAgain(false);
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: self.appId()});
     } else {
-      hub.send("indicator", {style: "negative"});
+      hub.send("indicator", {style: "negative", message: event.text});
     }
   });
 };

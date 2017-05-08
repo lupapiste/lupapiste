@@ -256,50 +256,77 @@
             (fact {:midje/description (str (get-in att [:type :type-id]) " versions count ok")}
               (count (:versions att)) => 1)))))))
 
+(defn upload-file-id [apikey filename]
+  (let [resp (upload-file apikey (str "dev-resources/" filename))]
+    (get-in resp [:files 0 :fileId])))
+
 (facts "construction-time attachments bind"
-  (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
-        application-id (:id application)
-        attachments    (:attachments application)
-        resp1 (upload-file pena "dev-resources/test-attachment.txt")
-        file-id-1 (get-in resp1 [:files 0 :fileId])
-        resp2 (upload-file pena "dev-resources/invalid-pdfa.pdf")
-        file-id-2 (get-in resp2 [:files 0 :fileId])]
+       (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
+             application-id (:id application)
+             attachments    (:attachments application)
+             file-id-1      (upload-file-id pena "test-attachment.txt")
+             file-id-2      (upload-file-id pena "invalid-pdfa.pdf")
+             file-id-3      (upload-file-id pena "test-attachment.txt")
+             file-id-4      (upload-file-id pena "cake.jpg")]
     (fact "attachment types - for clarity"
-      (map :type attachments) => (just [{:type-group "paapiirustus", :type-id "asemapiirros"}
-                                        {:type-group "paapiirustus", :type-id "pohjapiirustus"}
-                                        {:type-group "hakija", :type-id "valtakirja"}
-                                        {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat", :type-id "vaestonsuojasuunnitelma"}]))
+          (map :type attachments) => (just [{:type-group "paapiirustus", :type-id "asemapiirros"}
+                                            {:type-group "paapiirustus", :type-id "pohjapiirustus"}
+                                            {:type-group "hakija", :type-id "valtakirja"}
+                                            {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat", :type-id "vaestonsuojasuunnitelma"}]))
 
     (let [{job :job :as resp} (command
-                                pena
-                                :bind-attachments
-                                :id application-id
-                                :filedatas [{:fileId file-id-1 :type (:type (get attachments 2)) ; hakija
-                                             :group {:groupType "parties"}
-                                             :contents "hakija"
-                                             :constructionTime true}
-                                            {:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
-                                             :group {:groupType nil}
-                                             :contents "esuunnitelma"
-                                             :constructionTime true}])]
+                               pena
+                               :bind-attachments
+                               :id application-id
+                               :filedatas [{:fileId           file-id-1 :type (:type (get attachments 2)) ; hakija
+                                            :group            {:groupType "parties"}
+                                            :contents         "hakija"
+                                            :constructionTime true}
+                                           ;; Erityissuunnitelmat are implicitly construction time attachments.
+                                           {:fileId   file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
+                                            :group    {:groupType nil}
+                                            :contents "esuunnitelma"}
+                                           {:fileId   file-id-3 :type {:type-group "muut" :type-id "muu"}
+                                            :group    {:groupType nil}
+                                            :contents "harmless"}])]
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
         (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
 
       (facts "attachments status"
-        (let [attachments (:attachments (query-application pena application-id))
-              hakija      (util/find-first #(= "hakija" (-> % :type :type-group)) attachments)
-              suunnitelma (util/find-first #(= "erityissuunnitelmat" (-> % :type :type-group)) attachments)]
-          suunnitelma => truthy
-          (fact "contents are set"
-            (:contents hakija) => "hakija"
-            (:contents suunnitelma) => "esuunnitelma")
-          (fact "construction time"
-            (:originalApplicationState hakija) => "draft"
-            (:applicationState hakija) => "verdictGiven"
-            (:originalApplicationState suunnitelma) => "submitted"
-            (:applicationState suunnitelma) => "verdictGiven"))))))
+             (let [attachments (:attachments (query-application pena application-id))
+                   hakija      (util/find-first #(= "hakija" (-> % :type :type-group)) attachments)
+                   suunnitelma (util/find-first #(= "erityissuunnitelmat" (-> % :type :type-group)) attachments)
+                   other (util/find-first #(= "muut" (-> % :type :type-group)) attachments)]
+               suunnitelma => truthy
+               (fact "contents are set"
+                     (:contents hakija) => "hakija"
+                     (:contents suunnitelma) => "esuunnitelma"
+                     (:contents other) => "harmless")
+               (fact "construction time"
+                     (:originalApplicationState hakija) => "draft"
+                     (:applicationState hakija) => "verdictGiven"
+                     (:originalApplicationState suunnitelma) => "submitted"
+                     (:applicationState suunnitelma) => "verdictGiven"
+                     (:originalApplicationState other) => nil
+                     (:applicationState other) => "submitted")
+               (facts "New version and filedata"
+                      (let [{job :job :as resp} (command pena :bind-attachment
+                                                         :id application-id
+                                                         :attachmentId (:id other)
+                                                         :fileId file-id-4)]
+                        resp => ok?
+                        (when-not (= "done" (:status job))
+                          (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => ok?)
+                        (facts "New version details"
+                               (let [new-other (util/find-first #(= "muut" (-> % :type :type-group))
+                                                                (:attachments (query-application pena application-id)))]
+                                 (fact "filename"
+                                       (-> new-other :latestVersion :filename) => "cake.jpg")
+                                 (fact "construction time (regression test)"
+                                       (:originalApplicationState new-other) => nil
+                                       (:applicationState new-other) => "submitted"))))))))))
 
 (facts "signing w/ attachments bind"
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)

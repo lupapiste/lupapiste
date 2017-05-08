@@ -115,8 +115,8 @@
                                           id="permitSubtypeSelect">
                                   </select>
                                   <!-- /ko -->
-                                  <!-- ko if: permitSubtypes().length == 1 -->
-                                  <span class="permit-subtype-text" data-bind="text: loc('permitSubtype.'+permitSubtype())"></span>
+                                  <!-- ko if: permitSubtype() && permitSubtypes().length == 1 -->
+                                  <span data-test-id="permit-subtype-text" class="permit-subtype-text" data-bind="text: loc('permitSubtype.'+permitSubtype()), attr: {'data-test-value': permitSubtype()}"></span>
                                   <!-- /ko -->
                                   <!-- ko if: permitSubtypeHelp() -->
                                   <span data-bind="component: { name: 'help-toggle', params: { lhtml: [permitSubtypeHelp()]}}"></span>

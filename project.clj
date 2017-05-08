@@ -49,7 +49,7 @@
                  [cheshire "5.7.0"]
 
                  ; HTTP client
-                 [clj-http "3.3.0" :exclusions [commons-codec]]
+                 [clj-http "3.4.1" :exclusions [commons-codec]]
 
                  ; Email client
                  [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
@@ -124,7 +124,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.100"]
+                 [lupapiste/commons "0.7.103"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

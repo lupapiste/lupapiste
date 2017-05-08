@@ -626,7 +626,7 @@
               (henkilo-yritys-select-group
                :yritys-body yritys-with-verkkolaskutustieto
                :henkilo-body henkilo-maksaja)
-              {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+              {:name "laskuviite" :type :string :max-len 500 :layout :full-width}))
 
 (def ya-maksaja (body
                  (henkilo-yritys-select-group :default "yritys"

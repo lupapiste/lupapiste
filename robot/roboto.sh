@@ -13,7 +13,7 @@ BROWSER=firefox
 SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
-STARTUPTIMEOUT=300 
+STARTUPTIMEOUT=300
 PERFECT=
 BLACKLIST=
 RETRIES=3
@@ -92,8 +92,8 @@ usage() {
                         fail and non-roboto-proof are always excluded
   -i | --include tags   comma separated list of tags to include
   -E | --no-env-check   skip version and environment startup sanity checks
-  -P | --parallel style 'files': find files under test-dirs and run them in 
-                                 parallel (default)  
+  -P | --parallel style 'files': find files under test-dirs and run them in
+                                 parallel (default)
                         'args':  run test-dirs in parallel
   -o | --order          testsuite order (modified,numeric,random) [$ORDER]
 "
@@ -253,15 +253,15 @@ check_env() {
    # selenium version
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
-   echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 2.53.*."
+   echo "$SELENIUM" | grep -E "selenium \(3\.[0-9]+\.[0-9]+\)" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 3.X.X."
 
    echo "Browser: $BROWSER"
    case "$BROWSER" in
       "firefox" )
          # (lack of) geckodriver
-         which geckodriver 2> /dev/null && fail "Remove geckodriver from path."
+         which geckodriver 2> /dev/null || fail "Add geckodriver to path."
          FF=$(firefox --version)
-         echo "$FF" | grep -q "^Mozilla Firefox 45\." || versionfail "Major version '$FF' of Firefox may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
+         echo "$FF" | grep -q "^Mozilla Firefox 5[2-9]\." || versionfail "Major version '$FF' of Firefox may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          ;;
       "chrome" )
          CG=$(google-chrome --version)
@@ -331,7 +331,7 @@ run_test() {
    test -z "$XPID" || {
       DISPLAY=:$MYSCREEN openbox &>/dev/null &
       sleep 1
-      echo "Xft.dpi: 75" | DISPLAY=:$MYSCREEN xrdb -merge 
+      echo "Xft.dpi: 75" | DISPLAY=:$MYSCREEN xrdb -merge
       WMPID=$!
    }
 
@@ -378,8 +378,9 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
-   echo "Cleaning up /tmp/*/webdriver-py-profilecopy"
+   echo "Cleaning up /tmp/*/webdriver-py-profilecopy & /tmp/rust_mozprofile*"
    rm -rf /tmp/*/webdriver-py-profilecopy
+   rm -rf /tmp/rust_mozprofile*
    echo "Removing stray X lock files"
    rm -rf /tmp/.X[1-9][0-9][0-9]-lock
 
@@ -484,8 +485,8 @@ case "$PARALLEL" in
       ;;
 esac
 
-# sort the test suites numerically or by modification date 
-case "$ORDER" in 
+# sort the test suites numerically or by modification date
+case "$ORDER" in
    "numeric")
       TARGETS=$(for TARGET in "$TARGETS"; do echo $TARGET; done | sort);
       ;;
@@ -519,7 +520,7 @@ do
    test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
       echo "WARNING: skippin blacklisted test $test";
       continue; }
-   
+
    tag_found=
    if [[ ! -z "$INCLUDE_TAGS" ]]; then
       for tag in $INCLUDE_TAGS; do
@@ -528,12 +529,12 @@ do
    else
       tag_found="irrelevant"
    fi
-   
+
    if [[ -z "$tag_found" ]]; then
       echo "WARNING: tag(s) $INCLUDE_TAGS not found, skipping $test"
       continue
    fi
-      
+
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    echo " - Starting $test"
    run_test $SCREEN "$test" &

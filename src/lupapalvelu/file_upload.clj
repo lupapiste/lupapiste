@@ -89,11 +89,13 @@
         (when-let [is (muuntaja/download-file uri)]
           (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)
-            (merge file-data
-                   {:contents      contents
-                    :drawingNumber drawingNumber
-                    :group         (resolve-attachment-grouping attachment-type application operation)
-                    :type          attachment-type})))))
+            (merge
+              file-data
+              (util/strip-nils
+                {:contents      contents
+                 :drawingNumber drawingNumber
+                 :group         (resolve-attachment-grouping attachment-type application operation)
+                 :type          attachment-type}))))))
     attachments))
 
 (defn- is-zip-file? [filedata]
@@ -106,13 +108,16 @@
 
 (defn save-files [application files session-id]
   (if (unzip? files)
-    (let [muuntaja-resp (-> files first :tempfile muuntaja/unzip-attachment-collection)]
-      (if-let [attachments (:attachments muuntaja-resp)]
-        (download-and-save-files application (seq attachments) session-id)
-        (or (not-empty (select-keys muuntaja-resp [:error]))
-            {:error "unknown"})))
-    (pmap #(save-file % :sessionId session-id :linked false)
-          (map #(rename-keys % {:tempfile :content}) files))))
+    (let [{:keys [attachments error]} (-> files first :tempfile muuntaja/unzip-attachment-collection)]
+      (if (or (not-empty error) (empty? attachments))
+        {:ok false
+         :error (or error "error.unzipping-error")}
+        {:ok true
+         :files (download-and-save-files application attachments session-id)}))
+    {:ok true
+     :files (pmap
+              #(save-file % :sessionId session-id :linked false)
+              (map #(rename-keys % {:tempfile :content}) files))}))
 
 (defn- two-hours-ago []
   ; Matches vetuma session TTL

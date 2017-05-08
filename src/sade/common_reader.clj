@@ -126,7 +126,7 @@
   ([url options]
     (get-xml url options nil false))
   ([url options credentials]
-    (get-xml url credentials false))
+    (get-xml url options credentials false))
   ([url options credentials raw?]
     {:pre [(string? url)
            (or (nil? options) (map? options))

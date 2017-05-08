@@ -380,6 +380,9 @@
    :schema-version           nil ; Long
    :sent                     nil ; timestamp
    :started                  nil ; construction started
+   :agreementPrepared        nil                            ; agreement prepared YA
+   :agreementSigned          nil            ; Agreemetn signed YA, terminal
+   :finished                 nil                   ; Finished  YA
    :startedBy                {}
    :state                    ""
    :statements               []

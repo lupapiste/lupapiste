@@ -56,7 +56,8 @@ Sonja signs sijoitussopimus agreement
   Go to page  applications
   Open application  ${ss_app}  753-416-45-3
   Open tab  verdict
-  Sign verdict
+  Sign verdict  sonja
+  Wait until  Application state should be  agreementSigned
 
 Tyolupa should be submittable now
   Go to page  applications
@@ -64,6 +65,8 @@ Tyolupa should be submittable now
   Open tab  requiredFieldSummary
   Wait test id hidden  submit-errors-container
   Wait until  Test id enabled  application-submit-btn
+  Submit application
+  Wait until  Application state should be  submitted
 
 
 *** Keywords ***
@@ -72,10 +75,3 @@ Open link permit dialog
   Click enabled by test id  application-add-link-permit-btn
   Wait until  Element should be visible  dialog-add-link-permit
   Wait test id visible  link-permit-select
-
-Sign verdict
-  Click Element  xpath=//div[@data-test-id='given-verdict-id-0-content']//button[@data-test-id='sign-verdict-button']
-  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  sonja
-  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-0-content']//div[@data-test-id='verdict-signature-listing']

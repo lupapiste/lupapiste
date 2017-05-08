@@ -43,15 +43,16 @@
   (when-not (app/verdict-given? link-permit)
     (fail :error.link-permit-app-not-in-post-verdict-state)))
 
-(defn- validate-link-agreements-signature [{:keys [verdicts]}]
-  (when (empty? (filter #(:signatures %) verdicts))
+(defn- validate-link-agreements-signature [{:keys [verdicts] :as app}]
+  (when (and (agreement-subtype? app)                       ; If agreement, signatures must exist
+             (empty? (filter #(:signatures %) verdicts)))
     (fail :error.link-permit-app-not-signed)))
 
 (defn validate-digging-permit [application]
   (when (digging-permit? application)
     (let [link        (some #(when (= (:type %) "lupapistetunnus") %) (:linkPermitData application))
           link-permit (when link
-                        (domain/get-application-no-access-checking {:_id (:id link)} {:state 1 :verdicts 1}))]
+                        (domain/get-application-no-access-checking (:id link) [:state :verdicts :permitType :permitSubtype :primaryOperation]))]
       (when link-permit
         (or
           (validate-link-agreements-state link-permit)

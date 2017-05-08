@@ -52,9 +52,9 @@
                                                  {:id "c" :role "reader"}] :title "title" }
                                         nil nil) => [ {:email "a@foo.com"} {:email "b@foo.com"} {:email "c@foo.com"}]
   (provided
-    (user/get-user-by-id "a") => {:email "a@foo.com"}
-    (user/get-user-by-id "b") => {:email "b@foo.com"}
-    (user/get-user-by-id "c") => {:email "c@foo.com"}))
+    (user/get-users {:id {"$in" ["a" "b" "c"]}}) => [{:email "a@foo.com"}
+                                                     {:email "b@foo.com"}
+                                                     {:email "c@foo.com"}]))
 
 (fact "Every user except with role invalid get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
@@ -62,8 +62,7 @@
                                                  {:id "c" :role "invalid"}] :title "title" }
                                         nil nil) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
-    (user/get-user-by-id "a") => {:email "a@foo.com"}
-    (user/get-user-by-id "b") => {:email "b@foo.com"}))
+    (user/get-users {:id {"$in" ["a" "b"]}}) => [{:email "a@foo.com"} {:email "b@foo.com"}]))
 
 (fact "Every user except with role reader get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
@@ -71,8 +70,7 @@
                                                  {:id "c" :role "reader"}] :title "title" }
                                         nil [:reader]) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
-    (user/get-user-by-id "a") => {:email "a@foo.com"}
-    (user/get-user-by-id "b") => {:email "b@foo.com"}))
+    (user/get-users {:id {"$in" ["a" "b"]}}) => [{:email "a@foo.com"} {:email "b@foo.com"}]))
 
 (fact "Only writers get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
@@ -82,9 +80,7 @@
                                                  {:id "c" :role "reader"}] :title "title" }
                                         [:writer] nil) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
-    (user/get-user-by-id "w1") => {:email "w1@foo.com"}
-    (user/get-user-by-id "w2") => {:email "w2@foo.com"}
-    (user/get-user-by-id "w3") => {:email "w3@foo.com"}))
+    (user/get-users {:id {"$in" ["w1" "w2" "w3"]}}) => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
 
 (fact "Only writers get email (owner exlusion overrides include))"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
@@ -94,9 +90,7 @@
                                                  {:id "c" :role "reader"}] :title "title" }
                                         [:owner :writer] [:owner]) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
-    (user/get-user-by-id "w1") => {:email "w1@foo.com"}
-    (user/get-user-by-id "w2") => {:email "w2@foo.com"}
-    (user/get-user-by-id "w3") => {:email "w3@foo.com"}))
+    (user/get-users {:id {"$in" ["w1" "w2" "w3"]}}) => [{:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]))
 
 (fact "Unsubsribtion prevents email"
   (get-email-recipients-for-application
@@ -105,8 +99,7 @@
             {:id "c" :role "reader"}] :title "title" }
     nil nil) => [{:email "a@foo.com"} {:email "c@foo.com"}]
   (provided
-    (user/get-user-by-id "a") => {:email "a@foo.com"}
-    (user/get-user-by-id "c") => {:email "c@foo.com"}))
+    (user/get-users {:id {"$in" ["a" "c"]}}) => [{:email "a@foo.com"} {:email "c@foo.com"}]))
 
 (testable-privates lupapalvelu.open-inforequest base-email-model)
 (fact "Email for sending an open inforequest is like"

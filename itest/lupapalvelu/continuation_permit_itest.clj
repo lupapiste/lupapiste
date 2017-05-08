@@ -45,8 +45,8 @@
           jatkoaika-application     (query-application apikey jatkoaika-application-id) => truthy]
 
       ;; Jatkoaika permit cannot be applied for applications with operation "ya-jatkoaika".
-      ;; When a jatkoaika application is approved it goes straight into the state "closed".
+      ;; When a jatkoaika application is approved it goes straight into the state "finished".
       ;; It is forbidden to add jatkolupa for a jatkolupa, but already the wrong state blocks the try.
-      (:state jatkoaika-application) => "closed"
+      (:state jatkoaika-application) => "finished"
       (give-verdict apikey jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state")
       (command apikey :create-continuation-period-permit :id jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state"))))

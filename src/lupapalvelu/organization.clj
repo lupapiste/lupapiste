@@ -607,10 +607,14 @@
 (defn add-assignment-trigger [{org-id :id} trigger]
   (update-organization org-id {$push {:assignment-triggers trigger}}))
 
+(defn- user-created? [trigger-id]
+  (= trigger-id "user-created"))
+
 (defn- update-assignment-descriptions [trigger-id description]
-  (mongo/update-by-query :assignments
-                         {:trigger trigger-id}
-                         {$set {:description description}}))
+  (when (not (user-created? trigger-id))
+    (mongo/update-by-query :assignments
+                           {:trigger trigger-id}
+                           {$set {:description description}})))
 
 (defn update-assignment-trigger [{org-id :id} trigger triggerId]
   (let [query (assoc {:assignment-triggers {$elemMatch {:id triggerId}}} :_id org-id)

@@ -1359,6 +1359,15 @@ Verdict is given
   Wait until  Element should be visible  application-verdict-details
   Wait until  Element text should be  //div[@id='application-verdict-tab']//h2//*[@data-test-id='given-verdict-id-${i}']  ${kuntalupatunnus}
 
+Sign verdict
+  [Arguments]  ${password}  ${idx}=0
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  ${password}
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-${idx}-content']//div[@data-test-id='verdict-signature-listing']
+
+
 
 # User management
 
@@ -1685,3 +1694,10 @@ Fill required fields for the parties
   Wait until  Element should be visible  //div[@id='application-parties-tab']//section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
   Fill in yritys info  hakija-ya
   Fill in yritys info  yleiset-alueet-maksaja
+
+Permit subtype is
+  [Arguments]  ${localizedPermitSubtype}
+  ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
+  Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
+  Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
+

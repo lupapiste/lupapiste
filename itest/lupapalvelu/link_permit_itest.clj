@@ -74,11 +74,11 @@
       (fact "so a link permit is no longer required"
         (query apikey :link-permit-required :id jatkoaika-application-id) => fail?))
 
-    (fact "approving ya-jatkoaika leads to closed state"
+    (fact "approving ya-jatkoaika leads to finished state"
       (command apikey :submit-application :id jatkoaika-application-id) => ok?
       (generate-documents jatkoaika-application apikey)
       (command apikey :approve-application :id jatkoaika-application-id :lang "fi") => ok?
-      (:state (query-application apikey jatkoaika-application-id)) => "closed")
+      (:state (query-application apikey jatkoaika-application-id)) => "finished")
 
 
     ;;
@@ -132,18 +132,30 @@
         (count matches) => 3
         (-> matches first :id) => approved-application-id))
 
-    (fact "Sijoitussopimus is insert as linked agreement ot tyolupa application"
-      (command apikey :add-link-permit :id tyolupa-application-id :linkPermitId sijoitussopimus-application-id) => ok?)
+    (facts "YA"
+      (fact "Sijoitussopimus is insert as linked agreement ot tyolupa application"
+        (command apikey :add-link-permit :id tyolupa-application-id :linkPermitId sijoitussopimus-application-id) => ok?)
 
-    (fact "Tyolupa cant be submitted before linked sijoitussopimus is post verdict state"
-      (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-in-post-verdict-state"))
+      (fact "Tyolupa cant be submitted before linked sijoitussopimus is post verdict state"
+        (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-in-post-verdict-state"))
 
-    (fact "Tyolupa cant be submitted before linked sijoitussopimus is signed"
-      (give-verdict apikey sijoitussopimus-application-id)
-      (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-signed"))
+      (fact "Tyolupa can be submitted without signatures, if linked is of type sijoituslupa and has verdict"
+        (give-verdict apikey sijoitussopimus-application-id :agreement false)
+        (let [app (query-application apikey sijoitussopimus-application-id)]
+          (:state app) => "verdictGiven"
+          (:permitSubtype app) => "sijoituslupa"
+          (fact "with verdictGiven, tyolupa is submittable"
+            (query apikey :application-submittable :id tyolupa-application-id) => ok?)
+          (command apikey :delete-verdict :id sijoitussopimus-application-id :verdictId (-> app :verdicts first :id)) => ok?
+          (:state (query-application apikey sijoitussopimus-application-id)) => "sent"))
 
-    (fact "Tyolupa should be able to submit when linked sijoitussopimus is signed"
-      (let [linked-application (query-application apikey sijoitussopimus-application-id)
-            verdict-id (:id (first (:verdicts linked-application)))]
-      (command apikey :sign-verdict :id sijoitussopimus-application-id :verdictId verdict-id :password "sonja" :lang "fi") => ok?)
-      (command apikey :submit-application :id tyolupa-application-id) => ok?)))
+      (fact "Tyolupa cant be submitted before linked sijoitussopimus is signed"
+        (give-verdict apikey sijoitussopimus-application-id :agreement true) => ok?
+        (:permitSubtype (query-application apikey sijoitussopimus-application-id)) => "sijoitussopimus"
+        (command apikey :submit-application :id tyolupa-application-id) => (partial expected-failure? "error.link-permit-app-not-signed"))
+
+      (fact "Tyolupa should be able to submit when linked sijoitussopimus is signed"
+        (let [linked-application (query-application apikey sijoitussopimus-application-id)
+              verdict-id (:id (first (:verdicts linked-application)))]
+          (command apikey :sign-verdict :id sijoitussopimus-application-id :verdictId verdict-id :password "sonja" :lang "fi") => ok?)
+        (command apikey :submit-application :id tyolupa-application-id) => ok?))))

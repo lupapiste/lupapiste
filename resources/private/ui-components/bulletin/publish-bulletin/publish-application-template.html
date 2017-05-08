@@ -18,13 +18,16 @@
       </p>
       <!-- /ko -->
       <!-- ko if: canMoveToProclaimed -->
-      <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canMoveToProclaimed, bulletinState: bulletinState } }"></div>
+      <div data-bind="component: { name: 'move-to-proclaimed', params: { appId: appId, canPublish: canMoveToProclaimed, bulletinState: bulletinState } }"
+           data-test-id="move-to-proclaimed-fields" ></div>
       <!-- /ko -->
       <!-- ko if: canMoveToVerdictGiven -->
-      <div data-bind="component: { name: 'move-to-verdict-given', params: { appId: appId, canPublish: canMoveToVerdictGiven, bulletinState: bulletinState } }"></div>
+      <div data-bind="component: { name: 'move-to-verdict-given', params: { appId: appId, canPublish: canMoveToVerdictGiven, bulletinState: bulletinState } }"
+           data-test-id="move-to-verdict-given-fields"></div>
       <!-- /ko -->
       <!-- ko if: canMoveToFinal -->
-      <div data-bind="component: { name: 'move-to-final', params: { appId: appId, canPublish: canMoveToFinal, bulletinState: bulletinState } }"></div>
+      <div data-bind="component: { name: 'move-to-final', params: { appId: appId, canPublish: canMoveToFinal, bulletinState: bulletinState } }"
+           data-test-id="move-to-final-fields"></div>
       <!-- /ko -->
     </script>
   </section>

@@ -404,6 +404,12 @@
   [m pred & kvs]
   (apply merge m (filter (comp pred val) (apply hash-map kvs))))
 
+(defn merge-in
+  "Merges the result of (apply f x args) into x"
+  [x f & args]
+  {:pre [(map? x)]}
+  (merge x (apply f x args)))
+
 (defn upsert
   [{id :id :as item} coll]
   (if id

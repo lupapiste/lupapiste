@@ -112,7 +112,7 @@
                                                                       [["poikkeamat"] vahainenPoikkeaminen])))}
         municipality (p/municipality-id-by-property-id (:propertyId location-info))
         command (update-in command [:data] merge
-                  {:operation operation :municipality municipality :infoRequest false :messages []}
+                  {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
         ;; attaches the new application, and its id to path [:data :id], into the command

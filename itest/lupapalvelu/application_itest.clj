@@ -306,6 +306,8 @@
     (command pena :invite-with-role :id application-id :email (email-for-key teppo) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
     (command teppo :approve-invite :id application-id) => ok?
 
+    (last-email)                                            ; reset
+
     (fact "Pena can cancel his application with reason text"
       (command pena :cancel-application :id application-id :text reason-text :lang "fi") => ok?)
     (fact "Sonja sees the canceled application"
@@ -318,11 +320,15 @@
           (count (:comments application)) => 1
           (-> application :comments (first) :text) => (contains reason-text))))
 
-    (let [email (last-email)]
-      (:to email) => (contains (email-for-key teppo))
-      (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
-      (get-in email [:body :plain]) => (contains "Peruutettu")
-      email => (partial contains-application-link? application-id "applicant"))
+    (let [emails (sent-emails)
+          email1 (first emails)]
+      (count emails) => 2
+      (fact "Pena and Teppo get email" (map :to emails) => (just [#"teppo@example.com" #"pena@example.com"]))
+
+      (:to email1) => (contains (email-for-key teppo))
+      (:subject email1) => "Lupapiste: Penahouse 88, Sipoo - hankkeen tila on nyt Peruutettu"
+      (get-in email1 [:body :plain]) => (contains "Peruutettu")
+      email1 => (partial contains-application-link? application-id "applicant"))
 
     (fact "Luukas (reader) can't undo-cancellation"
       (command luukas :undo-cancellation :id application-id) => unauthorized?)
@@ -332,7 +338,7 @@
       (command pena :undo-cancellation :id application-id) => ok?)
 
     (let [email (last-email)]
-      (:to email) => (contains (email-for-key teppo))
+      (:to email) => (contains (email-for-key pena))
       (:subject email) => "Lupapiste: Penahouse 88, Sipoo - hanke on palautunut tilaan Hakemus j\u00e4tetty"
       (get-in email [:body :plain]) => (contains "hakemus on palautettu aktiiviseksi")
       email => (partial contains-application-link? application-id "applicant"))
@@ -571,12 +577,30 @@
               suunnittelija (domain/get-document-by-id app doc-id)]
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
+(defn get-doc-value [doc path-prefix path]
+  (tools/unwrapped (get-in doc (into path-prefix path))))
+
+(defn company-to-document [apikey app-id company-id user-data]
+  (let [{doc-id :doc} (command apikey :create-doc :id app-id :collection "documents"
+                               :schemaName "hakija-r") => ok?
+        _             (command apikey :set-company-to-document :id app-id
+                               :documentId doc-id) => ok?
+        app (query-application apikey app-id)
+        doc (domain/get-document-by-id app doc-id)
+        company (company-from-minimal-by-id company-id)
+        check (partial get-doc-value doc [:data :yritys])]
+    (check [:yritysnimi :value]) => (:name company)
+    (check [:liikeJaYhteisoTunnus :value]) => (:y company)
+    (check [:verkkolaskutustieto :ovtTunnus :value]) => (:ovt company)
+    (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
+    (check [:yhteyshenkilo :henkilotiedot :etunimi :value]) => (:firstName user-data)
+    (check [:yhteyshenkilo :henkilotiedot :sukunimi :value]) => (:lastName user-data)
+    (check [:yhteyshenkilo :yhteystiedot :email :value]) => (:email user-data)
+    (check [:yhteyshenkilo :yhteystiedot :puhelin :value]) => (:phone user-data)))
+
 (facts "Set company to document"
-  (let [{app-id :id :as app} (create-application pena :propertyId sipoo-property-id)
-        maksaja              (domain/get-document-by-name app "maksaja")
-        get-doc-value        (fn [doc path-prefix path]
-                               (-> (get-in doc (into path-prefix path))
-                                   tools/unwrapped))]
+  (let [{app-id :id :as app} (create-and-open-application pena :propertyId sipoo-property-id)
+        maksaja              (domain/get-document-by-name app "maksaja")]
 
     (fact "initially maksaja company is empty"
       (let [check (partial get-doc-value maksaja [:data :yritys])]
@@ -587,20 +611,29 @@
                       [:yhteyshenkilo :henkilotiedot :etunimi]]]
           (check path) => ss/blank?)))
 
-    (let [resp (invite-company-and-accept-invitation pena app-id "solita")]
+    (let [resp (invite-company-and-accept-invitation pena app-id "esimerkki")]
       (:status resp) => 200)
 
-    (command pena :set-company-to-document :id app-id :documentId (:id maksaja) :companyId "solita" :path "yritys") => ok?
-
-    (let [application (query-application pena app-id)
-          maksaja     (domain/get-document-by-id application (:id maksaja))
-          company     (company-from-minimal-by-id "solita")
-          check       (partial get-doc-value maksaja [:data :yritys])]
-      (check [:yritysnimi :value]) => (:name company)
-      (check [:liikeJaYhteisoTunnus :value]) => (:y company)
-      (check [:verkkolaskutustieto :ovtTunnus :value]) => (:ovt company)
-      (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
-      (check [:yhteyshenkilo :henkilotiedot :etunimi :value]) => (-> (find-user-from-minimal-by-apikey pena) :firstName))))
+    (fact "No company auth, no company user"
+          (company-to-document pena app-id "esimerkki"
+                               {:firstName "" :lastName ""
+                                :email "" :phone ""}))
+    (fact "No company auth, company user"
+          (company-to-document erkki app-id "esimerkki"
+                               {:firstName "Erkki" :lastName "Esimerkki"
+                                :email "erkki@example.com" :phone "556677"}))
+    (fact "Pena joins Esimerkki"
+          (command erkki :company-invite-user :firstName "Pena" :lastName "Panaani"
+                   :email "pena@example.com" :admin false :submit true) => ok?
+          (->> (last-email) (token-from-email "pena@example.com") http-token-call) => true)
+    (fact "Company auth, no company user"
+          (company-to-document sonja app-id "esimerkki"
+                               {:firstName "Pena" :lastName "Panaani"
+                                :email "pena@example.com" :phone ""}))
+    (fact "Company auth, company user"
+          (company-to-document erkki app-id "esimerkki"
+                               {:firstName "Erkki" :lastName "Esimerkki"
+                                :email "erkki@example.com" :phone "556677"}))))
 
 (facts "Facts about update operation description"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
@@ -817,3 +850,14 @@
   (fact "R operation - rakennelman rakentaminen"
     (:operations (query pena :all-operations-in :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
     => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok)))
+
+(facts "Application organization archive enabled"
+       (let [app-id (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)]
+         (fact "No archive"
+               (query pena :application-organization-archive-enabled :id app-id )
+               => {:ok false :text "error.archive-not-enabled"})
+         (fact "Enable archive in Sipoo"
+               (command admin :set-organization-permanent-archive-enabled :enabled true :organizationId "753-R"))
+         (fact "Archive enabled"
+               (query pena :application-organization-archive-enabled :id app-id )
+               => ok?)))

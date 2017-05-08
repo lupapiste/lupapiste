@@ -192,6 +192,14 @@
              :targets ["ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos"]
              :description ""
              :handler nil) => (partial expected-failure? :error.missing-parameters))
+  (fact "handler data must be valid"
+    (command sipoo :upsert-assignment-trigger
+             :targets ["ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos"]
+             :description "Description"
+             :handler {:id "handler-id"
+                       :name {:fi " " ; names must be non-blank
+                              :sv " "
+                              :en ""}}) => (partial expected-failure? :error.validator))
   (fact "correct data is inserted"
     (let [trigger {:targets ["ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos"]
                    :description "ely"}

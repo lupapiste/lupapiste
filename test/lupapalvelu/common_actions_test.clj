@@ -78,7 +78,8 @@
                           :application-info-tab-visible
                           :application-summary-tab-visible
                           :application-verdict-tab-visible
-                          :application-handlers}
+                          :application-handlers
+                          :application-organization-archive-enabled}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})
@@ -117,16 +118,17 @@
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
         allowed-actions  #{; queries
                            :application :validate-doc :fetch-validation-errors :document
-                           :get-organization-tags :get-organization-areas :get-possible-statement-statuses
-                           :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
+                           :get-possible-statement-statuses
+                           :reduced-foreman-history :foreman-history :foreman-applications
                            :get-building-info-from-wfs :mark-seen :info-links :organization-links
                            :mark-seen-organization-links :pdfa-casefile :suti-application-data :suti-application-products
                            :redirect-to-3d-map :ya-extensions
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
+                           :application-organization-archive-enabled
                            ; raw
-                           :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
-                           :view-file :pdf-export
-                           :application-guests :latest-attachment-version :submitted-application-pdf-export
+                           :download-all-attachments :download-attachments
+                           :pdf-export
+                           :application-guests :submitted-application-pdf-export
                            ; tab visibility
                            :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
                            :application-verdict-tab-visible}]

@@ -173,45 +173,13 @@
       (provided
        (krysp-reader/get-app-info-from-message anything anything) => (-> example-app-info
                                                                          (assoc :kuntalupatunnus "14-0241-R 2")
-                                                                         (update-in [:hakijat] (fn [hakijat] (map #(dissoc % :henkilo :yritys) hakijat))))))
-
-    (facts "Application from kuntalupatunnus via rest API"
-      (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
-            params  {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
-                     :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
-        (against-background [(before :facts (apply-remote-minimal))]
-                            (mongo/with-db local-db-name
-                              (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
-                                (let [response (http-get rest-address params)
-                                      resp-body (:body (iutil/decode-response response))]
-                                  response => http200?
-                                  resp-body => ok?
-                                  (keyword (:text resp-body)) => :created-new-application
-                                  (let [application (query-application local-query raktark-jarvenpaa (:id resp-body))]
-                                    (:opened application) => truthy))))
-
-                            (fact "should return the LP application if the kuntalupatunnus matches an existing app"
-                              (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
-                                    verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
-                                    response     (http-get rest-address params)
-                                    resp-body    (:body (iutil/decode-response response))]
-                                verdict-resp => ok?
-                                response => http200?
-                                resp-body => ok?
-                                (keyword (:text resp-body)) => :already-existing-application))
-
-                            (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
-                              (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
-                                    verdict-resp (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
-                                    response     (http-get rest-address params)
-                                    resp-body    (:body (iutil/decode-response response))]
-                                verdict-resp => ok?
-                                response => http200?
-                                resp-body => ok?
-                                (keyword (:text resp-body)) => :created-new-application))))))
+                                                                         (update-in [:hakijat] (fn [hakijat] (map #(dissoc % :henkilo :yritys) hakijat)))))))
 
 
     (facts "Applicants invitation should be selectable"
+      (against-background
+        (krysp-fetch/get-application-xml-by-backend-id anything anything) => example-xml
+        (krysp-fetch/get-application-xml-by-application-id anything) => example-xml)
       (fact "When not authorise applicants - there should be only one authorised"
         (->> (:id (create-app-from-prev-permit raktark-jarvenpaa
                                               :kuntalupatunnus "14-0241-R 10"
@@ -241,3 +209,36 @@
        (provided
          (krysp-reader/get-app-info-from-message anything anything) => example-app-info))))
 
+(facts "Application from kuntalupatunnus via rest API"      ; DOES NOT USE LOCAL QUERIES
+  (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
+        params  {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
+                 :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
+    (against-background [(before :facts (apply-remote-minimal))]
+                        (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
+                          (let [response (http-get rest-address params)
+                                resp-body (:body (iutil/decode-response response))]
+                            response => http200?
+                            resp-body => ok?
+                            (keyword (:text resp-body)) => :created-new-application
+                            (let [application (query-application raktark-jarvenpaa (:id resp-body))]
+                              (:opened application) => truthy)))
+
+                        (fact "should return the LP application if the kuntalupatunnus matches an existing app"
+                          (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+                                verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
+                                response     (http-get rest-address params)
+                                resp-body    (:body (iutil/decode-response response))]
+                            verdict-resp => ok?
+                            response => http200?
+                            resp-body => ok?
+                            (keyword (:text resp-body)) => :already-existing-application))
+
+                        (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
+                          (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
+                                verdict-resp (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
+                                response     (http-get rest-address params)
+                                resp-body    (:body (iutil/decode-response response))]
+                            verdict-resp => ok?
+                            response => http200?
+                            resp-body => ok?
+                            (keyword (:text resp-body)) => :created-new-application)))))
