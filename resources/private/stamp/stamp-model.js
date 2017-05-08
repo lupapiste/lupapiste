@@ -117,32 +117,12 @@ LUPAPISTE.StampModel = function(params) {
     self.status(_.size(filteredFiles) > 0 ? self.statusReady : self.statusNoFiles);
   });
 
-
-
   self.selectedFiles = self.disposedComputed(function() {
     return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
   });
   self.allSelected = self.disposedComputed(function() {
     return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
   });
-
-  self.jobId = null;
-  self.jobVersion = null;
-
-  // Stamping fields
-  self.stampFields = params.stampFields;
-
-  self.text = self.stampFields.text;
-  self.date = self.stampFields.date;
-  self.organization = self.stampFields.organization;
-  self.xMargin = self.stampFields.xMargin;
-  self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
-  self.yMargin = self.stampFields.yMargin;
-  self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
-  self.page = self.stampFields.page;
-  self.extraInfo = self.stampFields.extraInfo;
-  self.kuntalupatunnus = self.stampFields.kuntalupatunnus;
-  self.section = self.stampFields.section;
 
   var transparencies = _.map([0,20,40,60,80], function(v) {
     return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
@@ -153,32 +133,163 @@ LUPAPISTE.StampModel = function(params) {
     return {text: loc(["stamp.page", v]), value: v};
   });
 
-  self.transparency = self.stampFields.transparency;
-  if ( !self.transparency() ) {
+  self.jobId = null;
+  self.jobVersion = null;
+  self.updateRowValue = true;
+  self.stampsChanged = ko.observable(false);
+
+  // Stamping fields
+  self.stamps = params.stamps;
+  self.selectedStampsId = ko.observable();
+  self.selectedStamp = ko.observable(self.stamps()[0]);
+
+  function stringToDate(dateString) {
+    return new Date (moment(dateString, "DD.MM.YYYY"));
+  }
+
+  function ddmmyyyyDate(date) {
+    return moment(new Date(date)).format("DD.MM.YYYY");
+  }
+
+  function findRowData (type) {
+    var foundValue = null;
+    _.each( self.selectedStamp().rows, function( row ) {
+      foundValue = _.get(_.find( row, {type: type} ), "value");
+      return !foundValue;
+    });
+    return foundValue;
+  }
+
+  function updateRowData (type, value) {
+    return _.map(self.selectedStamp().rows,  function (row) {
+      return _.map(row , function(object) {
+        if (object.type === type) {
+          return {type: type, value: value}
+        }
+        return object;
+      });
+    });
+  }
+
+  function generatePreview() {
+    return _.map(self.selectedStamp().rows,  function (row) {
+      return _.map(row , function(object) {
+        if (object.type.endsWith("date")) {
+          return object.value;
+        }
+        return object.value;
+      }).join(" ");
+    }).join("\n") + "\nwww.lupapiste.fi";
+  }
+
+  if (!self.selectedStamp()) {
+    self.selectedStamp({
+      id: null,
+      name: null,
+      position: {},
+      background: null,
+      page: null,
+      qrCode: null,
+      rows: [[]]
+    });
+  }
+
+  // Stamp info
+  self.xMargin = ko.observable(self.selectedStamp().position.x);
+  self.xMarginOk = ko.computed(function() { return self.xMargin() >= 0; });
+  self.yMargin = ko.observable(self.selectedStamp().position.y);
+  self.yMarginOk = ko.computed(function() { return self.yMargin() >= 0; });
+  self.page = ko.observable(self.selectedStamp().page);
+  self.transparency = ko.observable(self.selectedStamp().background);
+  self.qrCode = ko.observable(self.selectedStamp().qrCode);
+
+  // Stamp rows
+  self.customText = ko.observable(findRowData("custom-text"));
+  self.extraText = ko.observable(findRowData("extra-text"));  //not editable
+  self.currentDate = ko.observable(stringToDate(findRowData("current-date")));
+  self.verdictDate = ko.observable(stringToDate(findRowData("verdict-date")));
+  self.backendId = ko.observable(findRowData("backend-id"));
+  self.userName = ko.observable(findRowData("username"));
+  self.organization = ko.observable(findRowData("organization"));
+  self.agreementId = ko.observable(findRowData("agreement-id"));
+  self.buildingId = ko.observable(findRowData("building-id"));
+  self.section = ko.observable(findRowData("section"));
+  self.preview = ko.observable(generatePreview());
+
+  if ( !self.selectedStamp().background ) {
     self.transparency(transparencies[0].value);
   }
 
-  function getSection() {
-    return self.section() === "\u00a7" ? "" : self.section();
-  }
+  ko.computed(function () {
+    self.selectedStamp(_.find(self.stamps(), function (stamp) {
+      return stamp.id === self.selectedStampsId();
+    }));
+    if (self.selectedStamp()) {
+      self.updateRowValue = false;
+      self.page(self.selectedStamp().page);
+      self.xMargin(self.selectedStamp().position.x);
+      self.yMargin(self.selectedStamp().position.y);
+      self.transparency(self.selectedStamp().background);
+      self.qrCode(self.selectedStamp().qrCode);
+      self.customText(findRowData("custom-text"));
+      self.extraText(findRowData("extra-text"));
+      self.currentDate(stringToDate(findRowData("current-date")));
+      self.verdictDate(stringToDate(findRowData("verdict-date")));
+      self.backendId(findRowData("backend-id"));
+      self.userName(findRowData("username"));
+      self.organization(findRowData("organization"));
+      self.agreementId(findRowData("agreement-id"));
+      self.buildingId(findRowData("building-id"));
+      self.section(findRowData("section"));
+      self.preview(generatePreview());
+      self.updateRowValue = true;
+    }
+  });
+
+  self.submit = function() {
+    if (self.updateRowValue) {
+      for (var i in self.stamps()) {
+        if (self.stamps()[i].id === self.selectedStampsId()) {
+          self.stamps()[i].position.x = self.xMargin();
+          self.stamps()[i].position.y = self.yMargin();
+          self.stamps()[i].page = self.page();
+          self.stamps()[i].background = self.transparency();
+          self.stamps()[i].qrCode = self.qrCode();
+          self.stamps()[i].rows = (updateRowData("extra-text", self.extraText()));
+          self.stamps()[i].rows = (updateRowData("current-date", ddmmyyyyDate(self.currentDate())));
+          self.stamps()[i].rows = (updateRowData("verdict-date", ddmmyyyyDate(self.verdictDate())));
+          self.stamps()[i].rows = (updateRowData("backend-id", self.backendId()));
+          self.stamps()[i].rows = (updateRowData("username", self.userName()));
+          self.stamps()[i].rows = (updateRowData("organization", self.organization()));
+          self.stamps()[i].rows = (updateRowData("agreement-id", self.agreementId()));
+          self.stamps()[i].rows = (updateRowData("building-id", self.buildingId()));
+          self.stamps()[i].rows = (updateRowData("section", self.section()));
+          self.preview(generatePreview());
+          break;
+        }
+      }
+      self.updateRowValue = true;
+      self.stampsChanged(true);
+    }
+    return true;
+  };
+
+  _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section, self.organization, self.backendId,
+          self.extraText, self.currentDate, self.verdictDate, self.buildingId, self.userName, self.agreementId, self.qrCode],
+    function(o) {
+      o.subscribe(self.submit);
+    }
+  );
 
   var doStart = function() {
     self.status(self.statusStarting);
     ajax
       .command("stamp-attachments", {
         id: self.application.id(),
-        text: self.text(),
         lang: loc.getCurrentLanguage(),
-        timestamp: new Date(self.date()).getTime(),
-        organization: self.organization(),
+        timestamp: new Date(self.currentDate()).getTime(),
         files: _.map(self.selectedFiles(), "id"),
-        xMargin: _.parseInt(self.xMargin(), 10),
-        yMargin: _.parseInt(self.yMargin(), 10),
-        page: self.page(),
-        transparency: self.transparency(),
-        extraInfo: self.extraInfo(),
-        kuntalupatunnus: self.kuntalupatunnus(),
-        section: getSection()
+        stamp: self.selectedStamp()
       })
       .success(self.started)
       .call();
