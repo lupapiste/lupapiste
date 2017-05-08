@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <body>
-
+  <!-- ko if: features.enabled("copy-applications") -->
   <!-- autocomplete and map need to stay in dom, so 'ko if' cannot be used. -->
   <section class="page container" id="copy">
     <h1 data-bind="ltext: 'copyApplication.topic'"></h1>
@@ -71,6 +71,6 @@
     </div>
     <!-- /ko -->
   </section>
-
+  <!-- /ko -->
 </body>
 </html>

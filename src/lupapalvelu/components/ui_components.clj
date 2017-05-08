@@ -370,7 +370,7 @@
                   :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
-   :copy         {:depends [:common-html :map]
+   :copy         {:depends [:common-html :map :create]
                   :html ["copy.html"]
                   :js ["copy.js"]}
 

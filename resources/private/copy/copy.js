@@ -1,4 +1,5 @@
-;(function() {
+;if (features.enabled("copy-applications")) {
+  (function() {
   "use strict";
 
   function CopyApplicationModel() {
@@ -345,3 +346,4 @@
   });
 
 })();
+}
