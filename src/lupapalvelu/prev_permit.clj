@@ -120,11 +120,15 @@
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
 (defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
-  (map #(remove empty? (conj (doc-model/map2updates [] (select-keys % building-fields))
-                            (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                              [["kuvaus"] rakennusvalvontaasianKuvaus])
-                            (when-not (ss/blank? vahainenPoikkeaminen)
-                              [["poikkeamat"] vahainenPoikkeaminen]))) buildings))
+  (map
+    (fn [building]
+      (remove empty? (conj (doc-model/map2updates [] (select-keys building building-fields))
+                           (when-not (ss/blank? (:rakennusnro building))
+                             [["tunnus"] (:rakennusnro building)])
+                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                             [["kuvaus"] rakennusvalvontaasianKuvaus])
+                           (when-not (ss/blank? vahainenPoikkeaminen)
+                             [["poikkeamat"] vahainenPoikkeaminen])))) buildings))
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
