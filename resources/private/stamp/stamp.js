@@ -19,6 +19,7 @@ var stamping = (function() {
       kuntalupatunnus: ko.observable(),
       section: ko.observable()
     },
+    stamps: ko.observableArray([]),
 
     cancelStamping: function() {
       var id = pageutil.subPage();
@@ -35,7 +36,13 @@ var stamping = (function() {
       model.attachments = null;
       model.authorization = null;
 
-      hub.send("page-load", { pageId: "stamping" });
+      hub.send("page-load", {pageId: "stamping"});
+    },
+
+    reloadStamps: function(param) {
+      param.stamps([]);
+      param.stampsChanged(false);
+      loadStampTemplates(param.application.id());
     }
   };
 
@@ -51,36 +58,27 @@ var stamping = (function() {
     fields.extraInfo("");
     fields.kuntalupatunnus("");
     fields.section("");
-  }
+  };
 
-  function setStampFields() {
-    var verdict = util.getIn(model.appModel._js, ["verdicts", 0]);
-
-    if (!model.stampFields.organization) {
-      model.stampFields.organization = ko.observable(model.appModel.organizationName());
-    }
-
-    if (verdict) {
-      model.stampFields.kuntalupatunnus(verdict.kuntalupatunnus);
-      var pykala = util.getIn(verdict, ["paatokset", 0, "poytakirjat", 0, "pykala"]);
-
-      if (pykala) {
-        model.stampFields.section(_.includes(pykala, "\u00a7") ? pykala : "\u00a7 " + pykala);
-      } else {
-        model.stampFields.section("\u00a7");
-      }
-    } else {
-      model.stampFields.kuntalupatunnus("");
-      model.stampFields.section("\u00a7");
-    }
+  function loadStampTemplates(appId) {
+    ajax.query("custom-stamps", {
+      id: appId})
+      .success(function (data) {
+        _.each(data.stamps, function (stamp) {
+          var existingStamp = _.find(model.stamps(), function(modelStamp) {
+            return modelStamp.id === stamp.id;
+          });
+          if (!existingStamp) {
+            model.stamps.push(stamp);
+          }
+        });
+      }).call();
   }
 
   function initStamp(appModel) {
     model.appModel = appModel;
     model.attachments = lupapisteApp.services.attachmentsService.attachments;
     model.authorization = lupapisteApp.models.applicationAuthModel;
-
-    setStampFields();
     pageutil.openPage("stamping", model.appModel.id());
   }
 
@@ -88,23 +86,17 @@ var stamping = (function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
+        var appId = pageutil.subPage();
         model.pending(true);
         model.stampingMode(false);
-
-        var appId = pageutil.subPage();
+        loadStampTemplates(appId);
         repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
-
           model.authorization = lupapisteApp.models.applicationAuthModel;
           model.appModel = lupapisteApp.models.application;
-
           ko.mapping.fromJS(application, {}, model.appModel);
           model.appModel._js = application;
-
           model.attachments = lupapisteApp.services.attachmentsService.attachments;
-
-          setStampFields();
-
           model.stampingMode(true);
         }, true);
       } else { // appModel already initialized, show stamping
@@ -115,6 +107,7 @@ var stamping = (function() {
       error("No application ID provided for stamping");
       LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
     }
+    pageutil.hideAjaxWait();
   });
 
   // This component is never disposed. We do reset initially and
@@ -139,7 +132,13 @@ var stamping = (function() {
   });
 
   hub.subscribe("start-stamping", function(param) {
-    initStamp(param.application);
+    loadStampTemplates(param.application.id());
+    pageutil.showAjaxWait();
+    if (model.stamps().length > 0) {
+      initStamp(param.application);
+    } else {
+      _.delay(initStamp, 2000, param.application);
+    }
   });
 
   ko.components.register("stamping-component", {
