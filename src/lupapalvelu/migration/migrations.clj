@@ -3088,23 +3088,6 @@
                                {:attachments {$elemMatch {:originalApplicationState
                                                           {$in states/post-verdict-states}}}})))
 
-(def default-stamp
-  [{:id (mongo/create-id)
-    :name "Oletusleima"
-    :position {:x 10 :y 200}
-    :background 0
-    :page :first
-    :qrCode true
-    :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
-           [{:type :backend-id}]
-           [{:type :organization}]]}])
-
-(defmigration add-default-stamp-template-to-organizations
-              {:apply-when (pos? (mongo/count :organizations {:stamps {$exists false}}))}
-              (doseq [organization (mongo/select :organizations {:stamps {$exists false}})]
-                (mongo/update-by-id :organizations (:id organization)
-                                    {$set {:stamps default-stamp}})))
-
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
