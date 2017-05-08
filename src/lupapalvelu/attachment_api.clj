@@ -35,8 +35,7 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.attachment.stamps :as stamps]))
+            [lupapalvelu.tiedonohjaus :as tos]))
 
 ;; Action category: attachments
 
@@ -108,12 +107,6 @@
     (when-let [version (some->> attachment-id (att/get-attachment-info application) :latestVersion)]
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
-
-(defn- org-authz-validator [org-authz-roles]
-  (fn [{user :user {app-org-id :organization} :application}]
-    (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
-      (when-not (auth/has-organization-authz-roles? org-authz-roles org-id user)
-        (fail :error.unauthorized)))))
 
 ;;
 ;; Attachments
@@ -580,28 +573,12 @@
         (ok)))
     (fail :error.unknown)))
 
-(defquery stamp-templates
-  {:pre-checks       [(org-authz-validator #{:authority :authorityAdmin})]
-   :user-roles       #{:authority :authorityAdmin}}
-  [{user :user {app-org-id :organization} :application}]
-  (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
-    (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
-
-(defquery custom-stamps
-  {:parameters       [id]
-   :user-roles       #{:authority}
-   :states           states/all-application-states
-   :description      "Stamps based on organization stamp templates and filled with application data"}
-  [{user :user {app-org-id :organization} :application}]
-  (let [org-id (or (first (usr/organization-ids-by-roles user #{:authority})) app-org-id)
-        organization (organization/get-organization org-id)
-        application (mongo/by-id :applications id)]
-    (ok :stamps (stamps/stamps organization application user))))
-
 (defcommand stamp-attachments
-  {:parameters [:id timestamp files lang stamp]
+  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]
    :categories #{:attachments}
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
+                      (partial action/number-parameters [:xMargin :yMargin])
+                      (partial action/non-blank-parameters [:page])]
    :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
    :states     states/post-submitted-states
@@ -612,19 +589,26 @@
                            (ss/blank? timestamp) (:created command)
                            :else (util/->long timestamp))
         stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
-        job (stamping/make-stamp-job
-              (att/get-attachments-infos application files)
-              {:application   application
-               :user          (:user command)
-               :lang          lang
-               :qr-code       (:qrCode stamp)
-               :stamp-created stamp-timestamp
-               :created       (:created command)
-               :x-margin      (util/->long (get-in stamp [:position :x]))
-               :y-margin      (util/->long (get-in stamp [:position :y]))
-               :page          (keyword (:page stamp))
-               :transparency  (util/->long (or (:background stamp) 0))
-               :info-fields   {:fields (:rows stamp) :buildings (building/building-ids application)}})]
+        org             (if-not (ss/blank? organization)
+                          organization
+                          (organization/get-organization-name @org))
+        job             (stamping/make-stamp-job
+                         (att/get-attachments-infos application files)
+                         {:application application
+                          :user (:user command)
+                          :lang lang
+                          :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+                          :stamp-created stamp-timestamp
+                          :created  (:created command)
+                          :x-margin (util/->long xMargin)
+                          :y-margin (util/->long yMargin)
+                          :page     (keyword page)
+                          :transparency (util/->long (or transparency 0))
+                          :info-fields  {:backend-id   kuntalupatunnus
+                                         :section      section
+                                         :extra-info   extraInfo
+                                         :organization org
+                                         :buildings    (building/building-ids application)}})]
     (ok :job job)))
 
 (defquery stamp-attachments-job

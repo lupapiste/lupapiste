@@ -590,23 +590,21 @@
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
         application (query-application sonja application-id)
         comments (:comments application)
-        stamp {:id         "123456789012345678901234"
-               :name       "Oletusleima"
-               :position   {:x 10 :y 200}
-               :background 0
-               :page       :first
-               :qrCode     true
-               :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                            [{:type :backend-id :value "17-0753-R"}]
-                            [{:type :organization :value "Sipoon rakennusvalvonta"}]]}
         {job :job :as resp} (command
                               sonja
                               :stamp-attachments
                               :id application-id
                               :timestamp ""
-                              :files [(:id attachment)]
                               :lang "fi"
-                              :stamp stamp)
+                              :text "OK"
+                              :organization ""
+                              :files [(:id attachment)]
+                              :xMargin 0
+                              :yMargin 0
+                              :page "first"
+                              :extraInfo ""
+                              :kuntalupatunnus ""
+                              :section "")
         file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
 
     (fact "not stamped by default"
@@ -644,9 +642,16 @@
                               :stamp-attachments
                               :id application-id
                               :timestamp ""
-                              :files [(:id attachment)]
                               :lang "fi"
-                              :stamp stamp)]
+                              :text "OK"
+                              :organization ""
+                              :files [(:id attachment)]
+                              :xMargin 0
+                              :yMargin 0
+                              :page "all"
+                              :extraInfo ""
+                              :kuntalupatunnus ""
+                              :section "")]
           resp => ok?
           ; Poll for 5 seconds
           (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
