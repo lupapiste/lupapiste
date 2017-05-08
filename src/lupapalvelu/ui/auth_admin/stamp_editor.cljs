@@ -36,17 +36,13 @@
                             :editor {:drag-element nil
                                      :debug-data {}
                                      :rows [{:row-number 1
-                                             :fields [{:id 1
-                                                       :type :application-id}
-                                                      {:id 2
-                                                       :type :backend-id}]
+                                             :fields [{:type :application-id}
+                                                      {:type :backend-id}]
                                              :is-dragged-over false}
                                             {:row-number 2
-                                             :fields [{:id 1
-                                                       :type :custom-text
+                                             :fields [{:type :custom-text
                                                        :text "Hiphei, laitoin tähän tekstiä"}
-                                                      {:id 2
-                                                       :type :current-date}]
+                                                      {:type :current-date}]
                                              :is-dragged-over false}
                                             {:row-number 3
                                              :fields []
@@ -227,14 +223,14 @@
         remove-btn (fn [idx] (fn []
                               (swap! stamp-row-cursor
                                      update-in [:fields] drop-at idx)))
-        field-buttons (for [[idx field] (indexed fields)]
+        field-buttons (for [[idx _] (indexed fields)]
                         (rum/with-key
-                          (stamp-row-field {:data     (rum/cursor-in stamp-row-cursor [:fields idx])
-                                          :remove     (remove-btn idx)
-                                          :debug-data debug-data
-                                          :row-number row-number
-                                          :row-index  idx})
-                          (:id field)))
+                          (stamp-row-field {:data       (rum/cursor-in stamp-row-cursor [:fields idx])
+                                            :remove     (remove-btn idx)
+                                            :debug-data debug-data
+                                            :row-number row-number
+                                            :row-index  idx})
+                          idx))
         placeholder-width (or (get-in (rum/react drag-source)
                                       [:source-boundaries :width])
                               110)
@@ -264,9 +260,7 @@
         drop-handler (fn [e]
                        (.preventDefault e)
                        (let [{:strs [type]} (-> e .-dataTransfer (.getData "stampField") util/json->clj)
-                             type-kw (keyword type)
-                             field-data {:type type-kw
-                                         :id (->> fields (map :id) max inc)}]
+                             field-data {:type (keyword type)}]
                          (swap! stamp-row-cursor update :fields add-at-index split-pos field-data)))
         placeholder-element [:div.stamp-row-placeholder
                              {:key :placeholder
