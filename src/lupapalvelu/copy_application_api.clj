@@ -43,8 +43,7 @@
     (logging/with-logging-context {:applicationId (:id copied-application)}
       (app/insert-application copied-application)
       (copy-app/store-source-application source-application (:id copied-application) created)
-      (when (copy-app/new-building-application? copied-application)
-        (try-autofill-rakennuspaikka copied-application created))
+      (try-autofill-rakennuspaikka copied-application created)
       (copy-app/send-invite-notifications! copied-application command)
       (ok :id (:id copied-application)))))
 
