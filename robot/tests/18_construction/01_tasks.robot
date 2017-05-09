@@ -24,11 +24,13 @@ Mikko prepares YA application and fills it to pass KRYSP validation later in tes
   # Alkupvm + loppupvm
   Fill tyoaika fields
   # Osapuolet
-  Invite company to application  Solita Oy
-  Select from list by value  jquery=select[name=company-select]:first  solita
-  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Solita Oy
-  Select from list by value  jquery=select[name=company-select]:last  solita
-  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:last  Solita Oy
+  Invite erkki@example.com to application
+  # LPK-2915, previous was Solita Oy, which didn't have parties invited to application
+  Invite company to application  Esimerkki Oy
+  Select from list by value  jquery=select[name=company-select]:first  esimerkki
+  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Esimerkki Oy
+  Select from list by value  jquery=select[name=company-select]:last  esimerkki
+  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:last  Esimerkki Oy
   Submit application
   Logout
 
