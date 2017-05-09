@@ -269,7 +269,7 @@
 "authorityAdmin.openApplicationsReport.title" "sv" "Lista över organisationens öppna ansökningar"
 "authorityrole.approver" "en" "Right to transfer to the background system"
 "authorityrole.approver" "fi" "Taustajärjestelmään siirto-oikeus"
-"authorityrole.approver" "sv" "Rätt att överföra till back-end system"
+"authorityrole.approver" "sv" "Rätt att överföra till bakgrundssystem"
 "authorityrole.archivist" "en" "Archivist"
 "authorityrole.archivist" "fi" "Arkistonhoitaja"
 "authorityrole.archivist" "sv" "Arkivarie"
