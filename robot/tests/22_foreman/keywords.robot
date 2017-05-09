@@ -56,7 +56,7 @@ Foreman applies personal information to the foreman application
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
   Wait until  Click by test id  fill-info-button
-  Wait for jQuery
+  Wait until  Textfield value should be  xpath=//section[@data-doc-type='tyonjohtaja-v2']//input[@data-docgen-path='henkilotiedot.etunimi']  Teppo
 
 Submit foreman base app
   [Arguments]  ${index}
