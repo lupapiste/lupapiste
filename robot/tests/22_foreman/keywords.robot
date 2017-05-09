@@ -70,17 +70,14 @@ Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
   Wait for jQuery
-  Open foreman accordions
   Wait until  Click by test id  fill-info-button
   Wait for jQuery
-  Open foreman accordions
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman application  ${index}
   Deny yes no dialog
   Open tab  parties
-  Open foreman accordions
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}
