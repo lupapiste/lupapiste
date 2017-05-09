@@ -1310,6 +1310,7 @@
     :body (body kuvaus
                 {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}
                 tunnus
+                rakennuksen-omistajat
                 (approvable-top-level-groups rakennuksen-tiedot)
                 rakennustunnus)}
 
