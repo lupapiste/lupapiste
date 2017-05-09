@@ -4,6 +4,8 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.copy-application :refer :all]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -17,7 +19,8 @@
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.copy-application
-                   handle-waste-plan)
+                   handle-waste-plan
+                   clear-personal-information)
 
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
@@ -161,5 +164,33 @@
                               organization-with-basic-waste-plan
                               nil)
            :schema-info :name)
-       => waste-schemas/basic-construction-waste-plan-name)))
- )
+       => waste-schemas/basic-construction-waste-plan-name))
+
+   (facts "clear-personal-information"
+     (let [application {:created 12345
+                        :schema-version 1
+                        :primaryOperation {:name "kerrostalo-rivitalo"}}
+           empty-hakija-document {:schema-info {:name "hakija-r"}
+                                  :data (tools/create-document-data (schemas/get-schema 1 "hakija-r"))}
+           hakija-document (-> empty-hakija-document
+                               (assoc-in [:_selected :value] "henkilo")
+                               (assoc-in [:henkilo :userId :value] "ab12cd34")
+                               (assoc-in [:henkilo :henkilotiedot :etunimi :value] "Erkki")
+                               (assoc-in [:henkilo :henkilotiedot :sukunimi :value] "Esimerkki"))]
+
+       (fact "user information with unauthorized user is cleared"
+         (:henkilo (clear-personal-information hakija-document application)) => (:henkilo empty-hakija-document))
+
+       (fact "for invited users that have not accepted invitation, the userId field is cleared to make the document valid"
+             (let [cleared (clear-personal-information hakija-document
+                                                       (assoc application :auth [{:id "ab12cd34"
+                                                                                  :role "reader"
+                                                                                  :invite {:id "ab12cd34"
+                                                                                           :role "writer"}}]))]
+               (-> cleared :henkilo :henkilotiedot :etunimi :value) => "Erkki"
+               (-> cleared :henkilo :henkilotiedot :sukunimi :value) => "Esimerkki"
+               (-> cleared :henkilo :userId :value) => ""))
+
+       ))
+
+   ))

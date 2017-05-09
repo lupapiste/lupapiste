@@ -128,6 +128,13 @@
                (not-in-auth? (id-from-personal-information element))))
       (building-selector-element? element)))
 
+(defn- clear-user-and-company-ids [element]
+  (if (map? element)
+    (cond (contains? element :userId)    (assoc-in element [:userId :value] "")
+          (contains? element :companyId) (assoc-in element [:companyId :value] "")
+          :else element)
+    element))
+
 (defn- clear-personal-information
   "Clears personal information from documents if
    - it is possible to enter the information using user or company id and
@@ -139,7 +146,11 @@
     (pathwalk (fn [path v]
                 (if (document-element-sould-be-cleared? v not-in-auth?)
                   (get-in empty-copy path)
-                  v))
+
+                  ; clear user and company id's in any case because
+                  ; document is invalid if an unauthorized id is found, and
+                  ; invites are not considered authorizations
+                  (clear-user-and-company-ids v)))
               document)))
 
 (defn- construction-waste-plan? [doc]
