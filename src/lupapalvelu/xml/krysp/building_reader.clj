@@ -18,7 +18,7 @@
    (building-xml server credentials property-id false))
   ([server credentials property-id raw?]
    (let [url (common/wfs-krysp-url server common/building-type (common/property-equals common/rakennuksen-kiinteistotunnus property-id))
-         options {:http-error :error.no-legacy-available, :connection-error :error.no-legacy-available}]
+         options {:http-error :error.building-info.backend-system-not-responding, :connection-error :error.building-info.backend-system-not-responding}]
      (or (cr/get-xml url options credentials raw?) {}))))
 
 (defn pysyva-rakennustunnus
