@@ -97,6 +97,7 @@
 (defn inject-content [t {:keys [nav info page footer templates]} component lang theme]
   (-> t
       (set-body-class component theme)
+      (enlive/transform [:html] #(assoc-in % [:attrs :lang] (name lang)))
       (enlive/transform [:nav] (enlive/content (map :content nav)))
       (enlive/transform [:div.notification] (enlive/content (map :content info)))
       (enlive/transform [:section] (enlive/content page))
