@@ -150,8 +150,7 @@
 
               <div class="col-1">
                 <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
-                <input data-bind="event: {onblur: $parent.saveta},
-                            value: yMargin,
+                <input data-bind="value: yMargin,
                             enable: status() === statusReady,
                             css: {'invalid-margin': !yMarginOk()}"
                        type="text"
@@ -177,7 +176,7 @@
                   enable: stampsChanged(),
                   click: $parent.reloadStamps"
                 class="secondary close"
-                data-test-id="stamp-reset">
+                data-test-id="stamp-reload">
               </button>
             </div>
           </form>

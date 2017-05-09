@@ -81,7 +81,6 @@ Sonja prepares for stamping
   One attachment is selected
   Stamping info fields visible
   Input stamping info values
-  Test id input is  stamp-info-extratext  ${STAMP_EXTRATEXT}
 
 Sonja goes back to the second application
   Open application  ${appname2}  753-416-25-30
@@ -102,12 +101,10 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
   One attachment is selected
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${STAMP_ORGANIZATION}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]  ${STAMP_XMARGIN}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]  ${STAMP_YMARGIN}
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
 
 Sonja can toggle selection of attachments by group/all/none
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
@@ -193,22 +190,23 @@ One attachment is selected
 
 Stamping info fields visible
   Element should be visible  stamp-info
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-applicationId"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-verdict-date"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-transparency"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
 
 Input stamping info values
-  Input text by test id  stamp-info-text  ${STAMP_TEXT}
   ## Disable date picker
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text by test id  stamp-info-date  ${STAMP_DATE}
   Input text by test id  stamp-info-organization  ${STAMP_ORGANIZATION}
+  Input text by test id  stamp-info-verdict-date  ${STAMP_DATE}
   Input text by test id  stamp-info-xmargin  ${STAMP_XMARGIN}
   Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}
-  Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
