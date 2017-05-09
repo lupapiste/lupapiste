@@ -141,7 +141,7 @@ Add attachment to loppukatselmus
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Test id disabled  review-done
   Review active
-  Review checkboxes disabled
+  Review checkboxes enabled
   Upload verdict or task attachment  ${PDF_TESTFILE_PATH}  Katselmuksen pöytäkirja  Pöytäkirja  Yleisesti hankkeeseen
   Return from review
 
