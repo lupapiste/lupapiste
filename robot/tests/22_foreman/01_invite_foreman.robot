@@ -26,7 +26,7 @@ Solita accepts invitation
   Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
   Click Element  xpath=(//a[contains(., 'accept-company-invitation')])
   Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
-  [Teardown]  Go to login page
+  Go to login page
 
 Mikko accepts invitation
   Mikko logs in
@@ -35,7 +35,7 @@ Mikko accepts invitation
   Element Text Should Be  xpath=//div[@class='invitation']//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
-  [Teardown]  logout
+  Logout
 
 Applicant sets Solita as hakija
   Pena logs in
@@ -55,7 +55,7 @@ Applicant sets his info to the applicant document
   Click by test id  hakija-r_append_btn
   Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Panaani Pena
   Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
-  [Teardown]  logout
+  Logout
 
 Sonja can invite foremen to application
   Sonja logs in
@@ -74,7 +74,7 @@ Sonja invites foreman Teppo to application
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Set Suite Variable  ${foremanAppId}  ${foremanAppId}
-  [Teardown]  logout
+  Logout
 
 Applicant sees sent invitation on the original application
   Pena logs in
@@ -95,8 +95,7 @@ Owner is invited to foreman app, approves invitation
 Applicant sees sent invitations on the foreman application
   Open tab  parties
   Wait until  Xpath Should Match X Times  //table//tr[@class="party"]  4
-  Go to  ${LOGOUT URL}
-  [Teardown]  logout
+  Logout
 
 Foreman can see application
   Teppo logs in
@@ -108,7 +107,7 @@ Foreman can see application
 Foreman accepts invite to project application
   Open project application
   Wait until  Confirm yes no dialog
-  [Teardown]  logout
+  Logout
 
 Applicant returns to project application
   Pena logs in
@@ -147,7 +146,7 @@ Application is submitted
   Open project application
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
-  [Teardown]  logout
+  Logout
 
 Original application is approved and given a verdict
   Sonja logs in
@@ -163,7 +162,7 @@ All foremen table is shown on the Construction tab
   Open tab  tasks
   Element should contain  jquery=table.all-foremen-table tbody tr  (sijainen)
   Element should contain  jquery=table.all-foremen-table tbody tr  12345678
-  [Teardown]  logout
+  Logout
 
 Applicant can create foreman applications after verdict is given for the original application
   Pena logs in
@@ -173,7 +172,7 @@ Applicant can create foreman applications after verdict is given for the origina
   Element should not be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
   Wait until  Element should be visible  xpath=//button[@data-test-id="invite-foreman-button"]
   Wait until  Element should be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
-  [Teardown]  logout
+  Logout
 
 Authority adds työnjohtaja task to original application
   Sonja logs in
@@ -181,7 +180,7 @@ Authority adds työnjohtaja task to original application
   Add työnjohtaja task to current application  Ylitarkastaja
   Add työnjohtaja task to current application  Alitarkastaja
   Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  2
-  [Teardown]  logout
+  Logout
 
 Applicant can link existing foreman application to foreman task
   Pena logs in
@@ -235,7 +234,7 @@ Applicant invites foreman Mikko to application
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId2} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Set Suite Variable  ${foremanAppId2}  ${foremanAppId2}
-  [Teardown]  logout
+  Logout
 
 Authority can view draft foreman application, but can't use commands
   # LPK-289
@@ -267,7 +266,10 @@ Authority can view draft foreman application, but can't use commands
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-add-link-permit-btn"]
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-btn"]
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-authority-btn"]
-  [Teardown]  logout
+  Logout
+
+Frontend errors check
+  There are no frontend errors
 
 *** Keywords ***
 
