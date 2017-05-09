@@ -7,7 +7,7 @@
             [lupapalvelu.attachment.stamp-schema :as sts]))
 
 (rum/defc header-component < rum/reactive
-          [cursor]
+          [cursor valid-stamp?]
           [:div.group-buttons
            {:style {:background-color "#f6f6f6"
                     :border "1px solid #dddddd"}}
@@ -19,7 +19,10 @@
               :on-change #(reset! cursor (-> % .-target .-value))}]]
            [:button.secondary.is-right
             [:i.lupicon-remove]
-            [:span "Poista"]]])
+            [:span (loc "remove")]]
+           [:button.positive.is-right
+            {:disabled (not valid-stamp?)}
+            (loc "save")]])
 
 (rum/defc number-input < rum/reactive
           [label-key cursor max-value]

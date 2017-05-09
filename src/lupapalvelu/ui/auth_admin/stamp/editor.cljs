@@ -9,7 +9,9 @@
             [lupapalvelu.ui.auth-admin.stamp.preview :refer [preview-component]]
             [lupapalvelu.ui.auth-admin.stamp.field-types :refer [field-types-component]]
             [lupapalvelu.ui.auth-admin.stamp.stamp-row :refer [stamp-row]]
-            [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]))
+            [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
+            [schema.core :as sc]
+            [lupapalvelu.attachment.stamp-schema :as sts]))
 
 (defn- refresh
   ([] (refresh nil))
@@ -41,6 +43,12 @@
              (cons ["" (loc "choose")]
                    (map (juxt :id :name) (rum/react stamps)))))
 
+(defn valid-stamp? [stamp-data]
+  (try (sc/validate sts/StampTemplate stamp-data)
+       true
+       (catch js/Error _
+         false)))
+
 (rum/defc edit-stamp-bubble < rum/reactive
           [visible? editor-state]
           (let [drag-element (rum/cursor editor-state :drag-element)
@@ -49,14 +57,14 @@
                 rows (rum/cursor-in editor-state [:stamp :rows])]
             (when-not (empty? (rum/react stamp-in-editor))
               [:div.edit-stamp-bubble
-               (header-component (rum/cursor stamp-in-editor :name))
+               (header-component (rum/cursor stamp-in-editor :name) (valid-stamp? (rum/react stamp-in-editor)))
                [:div.form-group {:style {:display :block}}
                 (metadata-component)
                 (preview-component)
                 [:div.form-group
-                 [:label.form-label.form-label-group "Leiman sisältö"]
+                 [:label.form-label.form-label-group (loc "stamp.information")]
                  (field-types-component)
-                 [:div "Raahaa ylläolevia leiman sisältökenttiä..."]
+                 [:div (loc "stamp-editor.drag.guide")]
                  [:div ;;many rows
                   (for [[idx _] (stamp-util/indexed (rum/react rows))]
                     (rum/with-key
@@ -79,7 +87,8 @@
      [:div
       (stamp-select stamps selected-stamp-id)
       (new-stamp-button editor-state)]
-     [:div.row.edit-stamp(edit-stamp-bubble bubble-visible editor-state)]]))
+     [:div.row.edit-stamp
+      (edit-stamp-bubble bubble-visible editor-state)]]))
 
 (defonce args (atom {}))
 

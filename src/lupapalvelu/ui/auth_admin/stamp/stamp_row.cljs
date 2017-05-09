@@ -7,15 +7,14 @@
 (rum/defcs stamp-row < rum/reactive (rum/local 0 ::drag-event-sum)
            [state {:keys [index rows-cursor drag-source debug-data]}]
            (let [stamp-row-cursor (rum/cursor rows-cursor index)
-                 {:keys [fields]} (rum/react stamp-row-cursor)
                  drag-event-sum (::drag-event-sum state)
                  closest-elem (rum/cursor-in component-state [:editor :closest-element])
                  remove-btn (fn [idx] (fn []
                                         (swap! stamp-row-cursor
-                                               update-in [:fields] stamp-util/drop-at idx)))
-                 field-buttons (for [[idx _] (stamp-util/indexed fields)]
+                                               stamp-util/drop-at idx)))
+                 field-buttons (for [[idx _] (stamp-util/indexed (rum/react stamp-row-cursor))]
                                  (rum/with-key
-                                   (stamp-row-field {:data       (rum/cursor-in stamp-row-cursor [:fields idx])
+                                   (stamp-row-field {:data       (rum/cursor-in stamp-row-cursor [idx])
                                                      :remove     (remove-btn idx)
                                                      :debug-data debug-data
                                                      :row-number index
@@ -57,20 +56,18 @@
                                        :style {:width (max placeholder-width 110)}}
                                       [:span {:style {:pointer-events :none}} "Pudota tähän"]]
                  [before after] (when (number? split-pos) (split-at split-pos field-buttons))]
-             (if (and index fields)
-               [:div.stamp-row {:on-drag-enter on-drag-enter
-                                :on-drag-leave on-drag-leave
-                                :on-drag-over mouse-move-handler
-                                :on-drop on-drop
-                                :data-row-number index}
-                [:div.stamp-row-label  [:span (str "Rivi " (inc index))]]
-                (if (and placeholder-row? is-dragged-over?)
-                  (concat before
-                          [placeholder-element]
-                          after)
-                  (concat
-                    field-buttons
-                    [[:div.stamp-row-placeholder
-                      {:key :default-placeholder}
-                      [:span {:style {:pointer-events :none}} "Pudota tähän"]]]))]
-               [:span "error: stamp-row"])))
+             [:div.stamp-row {:on-drag-enter on-drag-enter
+                              :on-drag-leave on-drag-leave
+                              :on-drag-over mouse-move-handler
+                              :on-drop on-drop
+                              :data-row-number index}
+              [:div.stamp-row-label  [:span (str "Rivi " (inc index))]]
+              (if (and placeholder-row? is-dragged-over?)
+                (concat before
+                        [placeholder-element]
+                        after)
+                (concat
+                  field-buttons
+                  [[:div.stamp-row-placeholder
+                    {:key :default-placeholder}
+                    [:span {:style {:pointer-events :none}} "Pudota tähän"]]]))]))

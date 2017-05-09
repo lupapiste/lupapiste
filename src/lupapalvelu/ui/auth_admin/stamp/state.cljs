@@ -7,10 +7,10 @@
                     :position {:x 100 :y 100}
                     :background 0
                     :page     :first
-                    :qr-code  true
-                    :rows     [{:fields []}
-                               {:fields []}
-                               {:fields []}]})
+                    :qrCode   true
+                    :rows     [[]
+                               []
+                               []]})
 
 (def empty-component-state {:stamps []
                             :view {:bubble-visible false

@@ -25,10 +25,10 @@
 (def pages [:first :last :all])
 
 (sc/defschema SimpleTag
-              {:type sc/Str})
+              {:type sc/Keyword})
 
 (sc/defschema TextTag
-              {:type sc/Str
+              {:type sc/Keyword
                :text sc/Str})
 
 (sc/defschema Tag
@@ -57,7 +57,7 @@
                :position   {:x sssc/Nat
                             :y sssc/Nat}
                :background sssc/Nat
-               :page       sc/Str
+               :page       (apply sc/enum pages)
                :qrCode     sc/Bool
                :rows       [StampTemplateRow]})
 

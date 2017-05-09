@@ -199,3 +199,6 @@
 "stamp-editor.new-stamp.button" "fi" "Lisää uusi leima"
 "stamp-editor.new-stamp.button" "sv" ""
 "stamp-editor.new-stamp.button" "en" ""
+"stamp-editor.drag.guide" "fi" "Raahaa ylläolevia leiman sisältökenttiä allaoleviin tyhjiin ruutuihin. Poista klikkaamalla kentän lopussa olevaa ruksia."
+"stamp-editor.drag.guide" "sv" ""
+"stamp-editor.drag.guide" "en" ""

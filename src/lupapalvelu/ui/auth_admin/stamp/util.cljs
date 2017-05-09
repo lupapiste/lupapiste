@@ -110,12 +110,12 @@
           {:strs [type]} (when-not (string/blank? new) (util/json->clj new))
           {:strs [row index]} (when-not (string/blank? moved) (util/json->clj moved))
           field-data (if (and row index)
-                       (get-in @all-rows-cursor [row :fields index])
+                       (get-in @all-rows-cursor [row index])
                        {:type (keyword type)})]
-      (swap! all-rows-cursor update-in [current-row :fields] add-at-index split-pos field-data)
+      (swap! all-rows-cursor update-in [current-row] add-at-index split-pos field-data)
       (when (and row index)
         (let [drop-index (if (and (= row current-row) (< split-pos index))
                            (inc index)
                            index)]
-          (swap! all-rows-cursor update-in [row :fields] drop-at drop-index)))
+          (swap! all-rows-cursor update-in [row] drop-at drop-index)))
       (-> e .-dataTransfer (.clearData)))))
