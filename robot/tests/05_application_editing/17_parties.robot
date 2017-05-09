@@ -51,7 +51,7 @@ Roles and levels are localized
 
 Pena executes test scenario
   Test scenario
-  [Teardown]  Logout
+  Logout
 
 Sonja logs in
   Sonja logs in
@@ -59,7 +59,10 @@ Sonja logs in
 
 Sonja executes test scenario
   Test scenario
-  [Teardown]  Logout
+  Logout
+
+Frontend errors check
+  There are no frontend errors
 
 *** Keywords ***
 
