@@ -70,6 +70,7 @@ Test scenario
   Two remove buttons
   Scroll to  ${remove-button}:first
   Click element  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[1]
+  Wait until  Element should be visible  modal-dialog-content
   Deny yes no dialog
   Scroll to  ${remove-button}:last
   Click element  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[2]
