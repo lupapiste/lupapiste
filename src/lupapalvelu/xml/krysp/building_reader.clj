@@ -172,7 +172,8 @@
            util/not-empty-or-nil?
 
            :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
-           :huoneistot (->> (select rakennus [:valmisHuoneisto])
+           :huoneistot (->> (remove nil? (concat (select rakennus [:valmisHuoneisto])
+                                                 (select rakennus [:huoneisto])))
                             (map (fn [huoneisto]
                                    {:huoneistonumero (get-text huoneisto :huoneistonumero)
                                     :jakokirjain     (get-text huoneisto :jakokirjain)
@@ -185,11 +186,23 @@
                                     :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
                                     :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
                                     :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
-                                    :saunaKytkin             (get-text huoneisto :saunaKytkin)}))
+                                    :saunaKytkin             (get-text huoneisto :saunaKytkin)
+                                    :muutostapa      (get-text huoneisto :muutostapa)}))
                             (sort-by (juxt :porras :huoneistonumero :jakokirjain)))))))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
+
+(defn- ->rakennelman-tiedot [rakennelma]
+  {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
+   :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})
+
+(defn toimenpidetieto->building-or-structure [toimenpidetieto-xml]
+  (let [rakennus (->rakennuksen-tiedot (-> toimenpidetieto-xml (select [:Rakennus]) first))
+        rakennelma (->rakennelman-tiedot (-> toimenpidetieto-xml (select [:Rakennelma]) first))]
+    {:data (or rakennus rakennelma)
+     :description (or (-> (->buildings-summary toimenpidetieto-xml) first :description)
+                      (:rakennelman-kuvaus rakennelma))}))
 
 (defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
 

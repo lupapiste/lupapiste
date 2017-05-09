@@ -204,10 +204,11 @@
 
 (defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map
-    (fn [building]
-      (remove empty? (conj (doc-model/map2updates [] (select-keys building building-fields))
-                           (when-not (ss/blank? (:rakennusnro building))
-                             [["tunnus"] (:rakennusnro building)])
+    (fn [{:keys [data]}]
+      (remove empty? (conj (doc-model/map2updates [] (select-keys data building-fields))
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [["tunnus"] (:rakennusnro data)])
                            (when-not (ss/blank? rakennusvalvontaasianKuvaus)
                              [["kuvaus"] rakennusvalvontaasianKuvaus])
                            (when-not (ss/blank? vahainenPoikkeaminen)
@@ -215,20 +216,25 @@
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
-        buildings (building-reader/->buildings xml)
-        document-datas (schema-datas app-info buildings)
+        buildings-and-structures (map building-reader/toimenpidetieto->building-or-structure
+                                      (sade.xml/select xml [:toimenpidetieto]))
+        document-datas (schema-datas app-info buildings-and-structures)
         manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
                   {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
+        new-parties (remove nil?
+                            (concat (map suunnittelija->party-document (:suunnittelijat app-info))
+                                    (map osapuoli->party-document (:muutOsapuolet app-info))))
 
-        new-parties (concat (map suunnittelija->party-document (:suunnittelijat app-info))
-                            (map osapuoli->party-document (:muutOsapuolet app-info)))
+        structure-descriptions (map :description buildings-and-structures)
+        created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
 
         ;; make secondaryOperations for buildings other than the first one in case there are many
         other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
-        secondary-ops (map #(-> % :schema-info :op) other-building-docs)
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
         created-application (update-in created-application [:documents] concat other-building-docs new-parties)
         created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
 
