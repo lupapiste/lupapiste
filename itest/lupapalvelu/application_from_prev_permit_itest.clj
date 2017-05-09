@@ -145,6 +145,13 @@
               (fact "hakija document count"
                 (count (domain/get-documents-by-name application "hakija-r")) => 5)
 
+              (fact "operation documents"
+                (count (domain/get-documents-by-name application "hankkeen-kuvaus")) => 0
+                (let [op-documents (domain/get-documents-by-name application "aiemman-luvan-toimenpide")]
+                  (count op-documents) => 2
+                  (fact "building identifiers"
+                        (map #(-> % :data :valtakunnallinenNumero :value) op-documents) => ["100222397J" "100222398K"])))
+
               ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
               (fact "fetching prev-permit again after canceling the previously fetched one"
                 (local-command raktark-jarvenpaa :cancel-application-authority

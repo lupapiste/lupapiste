@@ -965,7 +965,7 @@
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :asianhallinta false}
-   :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
+   :aiemmalla-luvalla-hakeminen {:schema "aiemman-luvan-toimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required []

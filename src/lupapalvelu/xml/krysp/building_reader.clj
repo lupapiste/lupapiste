@@ -77,49 +77,14 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- str-or-nil [& v]
-  (when-not (some nil? v) (reduce str v)))
-
-(defn- get-updated-if [current to-add]
-  (if to-add
-    (str current to-add)
-    current))
-
 (defn- get-osoite [osoite]
   (-> (get-text osoite :osoitenimi :teksti)
-      (get-updated-if (str-or-nil " " (get-text osoite :osoitenumero)))
-      (get-updated-if (str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
-      (get-updated-if (str-or-nil " " (get-text osoite :jakokirjain)))
-      (get-updated-if (str-or-nil "\u2013" (get-text osoite :jakokirjain2)))
-      (get-updated-if (str-or-nil " " (get-text osoite :porras)))
-      (get-updated-if (str-or-nil " " (get-text osoite :huoneisto)))))
-
-(defn- ->henkilo [xml-without-ns]
-  (let [henkilo (select1 xml-without-ns [:henkilo])]
-    {:_selected "henkilo"
-     :henkilo   {:henkilotiedot {:etunimi  (get-text henkilo :nimi :etunimi)
-                                 :sukunimi (get-text henkilo :nimi :sukunimi)
-                                 :hetu     (get-text henkilo :henkilotunnus)
-                                 :turvakieltoKytkin (cr/to-boolean (get-text xml-without-ns :turvakieltoKytkin))}
-                 :yhteystiedot  {:email     (get-text henkilo :sahkopostiosoite)
-                                 :puhelin   (get-text henkilo :puhelin)}
-                 :osoite        {:katu         (get-osoite (select1 henkilo :osoite))
-                                 :postinumero  (get-text henkilo :osoite :postinumero)
-                                 :postitoimipaikannimi  (get-text henkilo :osoite :postitoimipaikannimi)}}
-     :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
-     :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
-
-(defn- ->yritys [xml-without-ns]
-  (let [yritys (select1 xml-without-ns [:yritys])]
-    {:_selected "yritys"
-     :yritys {:yritysnimi                             (get-text yritys :nimi)
-              :liikeJaYhteisoTunnus                   (get-text yritys :liikeJaYhteisotunnus)
-              :osoite {:katu                          (get-osoite (select1 yritys :postiosoite))
-                       :postinumero                   (get-text yritys :postiosoite :postinumero)
-                       :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
-              :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}
-     :omistajalaji     (get-text xml-without-ns :omistajalaji :omistajalaji)
-     :muu-omistajalaji (get-text xml-without-ns :omistajalaji :muu)}))
+      (common/get-updated-if (common/str-or-nil " " (get-text osoite :osoitenumero)))
+      (common/get-updated-if (common/str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
+      (common/get-updated-if (common/str-or-nil " " (get-text osoite :jakokirjain)))
+      (common/get-updated-if (common/str-or-nil "\u2013" (get-text osoite :jakokirjain2)))
+      (common/get-updated-if (common/str-or-nil " " (get-text osoite :porras)))
+      (common/get-updated-if (common/str-or-nil " " (get-text osoite :huoneisto)))))
 
 (defn- ->rakennuksen-omistaja-legacy-version [omistaja]
   {:_selected "yritys"
@@ -135,8 +100,12 @@
 
 (defn- ->rakennuksen-omistaja [omistaja]
   (cond
-    (seq (select omistaja [:yritys])) (->yritys omistaja)
-    (seq (select omistaja [:henkilo])) (->henkilo omistaja)
+    (seq (select omistaja [:yritys]))
+        (merge (common/->yritys omistaja) {:omistajalaji     (get-text omistaja :omistajalaji :omistajalaji)
+                                           :muu-omistajalaji (get-text omistaja :omistajalaji :muu)})
+    (seq (select omistaja [:henkilo]))
+        (merge (common/->henkilo omistaja) {:omistajalaji     (get-text omistaja :omistajalaji :omistajalaji)
+                                            :muu-omistajalaji (get-text omistaja :omistajalaji :muu)})
     :default (->rakennuksen-omistaja-legacy-version omistaja)))
 
 (def polished  (comp cr/index-maps cr/cleanup cr/convert-booleans))
@@ -203,7 +172,8 @@
            util/not-empty-or-nil?
 
            :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
-           :huoneistot (->> (select rakennus [:valmisHuoneisto])
+           :huoneistot (->> (remove nil? (concat (select rakennus [:valmisHuoneisto])
+                                                 (select rakennus [:huoneisto])))
                             (map (fn [huoneisto]
                                    {:huoneistonumero (get-text huoneisto :huoneistonumero)
                                     :jakokirjain     (get-text huoneisto :jakokirjain)
@@ -216,11 +186,23 @@
                                     :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
                                     :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
                                     :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
-                                    :saunaKytkin             (get-text huoneisto :saunaKytkin)}))
+                                    :saunaKytkin             (get-text huoneisto :saunaKytkin)
+                                    :muutostapa      (get-text huoneisto :muutostapa)}))
                             (sort-by (juxt :porras :huoneistonumero :jakokirjain)))))))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
+
+(defn- ->rakennelman-tiedot [rakennelma]
+  {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
+   :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})
+
+(defn toimenpidetieto->building-or-structure [toimenpidetieto-xml]
+  (let [rakennus (->rakennuksen-tiedot (-> toimenpidetieto-xml (select [:Rakennus]) first))
+        rakennelma (->rakennelman-tiedot (-> toimenpidetieto-xml (select [:Rakennelma]) first))]
+    {:data (or rakennus rakennelma)
+     :description (or (-> (->buildings-summary toimenpidetieto-xml) first :description)
+                      (:rakennelman-kuvaus rakennelma))}))
 
 (defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
 
