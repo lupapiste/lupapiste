@@ -119,4 +119,3 @@
                            index)]
           (swap! all-rows-cursor update-in [row :fields] drop-at drop-index)))
       (-> e .-dataTransfer (.clearData)))))
-

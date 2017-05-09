@@ -50,7 +50,7 @@
                                                                (merge data dom-data)))))
                  placeholder-location (stamp-util/closest->placeholder-position (rum/react closest-elem))
                  placeholder-row? (= index (first placeholder-location))
-                 split-pos (second placeholder-location)
+                 split-pos (or (second placeholder-location) 0)
                  on-drop (stamp-util/drop-handler rows-cursor index split-pos)
                  placeholder-element [:div.stamp-row-placeholder
                                       {:key :placeholder
