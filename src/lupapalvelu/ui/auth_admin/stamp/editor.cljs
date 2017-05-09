@@ -2,7 +2,7 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.authorization :as auth]
-            [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state empty-component-state update-stamp-view]]
+            [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state empty-component-state update-stamp-view] :as state]
             [lupapalvelu.ui.common :refer [query command loc]]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.ui.auth-admin.stamp.metadata :refer [header-component metadata-component]]
@@ -19,7 +19,6 @@
             (swap! component-state assoc :stamps (:stamps data))
             (when cb (cb data))))))
 
-
 (defn init
   [init-state props]
   (let [[auth-model] (-> (aget props ":rum/initial-state") :rum/args)]
@@ -27,11 +26,9 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
-(rum/defc new-stamp-button [bubble-visible selected-stamp-id]
+(rum/defc new-stamp-button [editor-state]
   [:button.positive
-   {:on-click (fn [_]
-                (reset! selected-stamp-id nil)
-                (reset! bubble-visible true))
+   {:on-click #(swap! editor-state assoc :stamp state/empty-stamp)
     :data-test-id "open-create-stamp-bubble"}
    [:i.lupicon-circle-plus]
    [:span (loc "stamp-editor.new-stamp.button")]])
@@ -48,10 +45,11 @@
           [visible? editor-state]
           (let [drag-element (rum/cursor editor-state :drag-element)
                 debug-data (rum/cursor editor-state :debug-data)
-                rows (rum/cursor editor-state :rows)]
-            (when (rum/react visible?)
+                stamp-in-editor (rum/cursor editor-state :stamp)
+                rows (rum/cursor-in editor-state [:stamp :rows])]
+            (when-not (empty? (rum/react stamp-in-editor))
               [:div.edit-stamp-bubble
-               (header-component)
+               (header-component (rum/cursor stamp-in-editor :name))
                [:div.form-group {:style {:display :block}}
                 (metadata-component)
                 (preview-component)
@@ -80,9 +78,8 @@
      [:h1 (loc "stamp-editor.tab.title")]
      [:div
       (stamp-select stamps selected-stamp-id)
-      (new-stamp-button bubble-visible selected-stamp-id)]
-     [:div.row.edit-sta (edit-stamp-bubble bubble-visible
-                                           editor-state)]]))
+      (new-stamp-button editor-state)]
+     [:div.row.edit-stamp(edit-stamp-bubble bubble-visible editor-state)]]))
 
 (defonce args (atom {}))
 

@@ -3,26 +3,21 @@
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]))
 
 (def empty-stamp   {:name     ""
-                    :position {:x 0 :y 0}
+                    :id       nil
+                    :position {:x 100 :y 100}
+                    :background 0
                     :page     :first
                     :qr-code  true
-                    :rows     [[]]})
+                    :rows     [{:fields []}
+                               {:fields []}
+                               {:fields []}]})
 
 (def empty-component-state {:stamps []
                             :view {:bubble-visible false
                                    :selected-stamp-id nil}
                             :editor {:drag-element nil
                                      :closest-element []
-                                     :debug-data {}
-                                     :rows [{:fields [{:type :application-id}
-                                                      {:type :backend-id}]
-                                             :is-dragged-over false}
-                                            {:fields [{:type :custom-text
-                                                       :text "Hiphei, laitoin tähän tekstiä"}
-                                                      {:type :current-date}]
-                                             :is-dragged-over false}
-                                            {:fields []
-                                             :is-dragged-over false}]}})
+                                     :stamp {}}})
 
 (defonce component-state  (atom empty-component-state))
 

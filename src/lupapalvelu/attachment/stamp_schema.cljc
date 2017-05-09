@@ -20,6 +20,10 @@
 (def all-field-types
   (set/union simple-field-types text-field-types))
 
+(def transparency-options [0 20 40 60 80])
+
+(def pages [:first :last :all])
+
 (sc/defschema SimpleTag
               {:type sc/Str})
 
@@ -49,7 +53,7 @@
 
 (sc/defschema StampTemplate
               {:name       StampName
-               :id         sssc/ObjectIdStr
+               :id         (sc/maybe sssc/ObjectIdStr)
                :position   {:x sssc/Nat
                             :y sssc/Nat}
                :background sssc/Nat
@@ -63,8 +67,6 @@
                :position   {:x sssc/Nat
                             :y sssc/Nat}
                :background sssc/Nat
-               :page       (sc/enum :first
-                                    :last
-                                    :all)
+               :page       (apply sc/enum pages)
                :qrCode     sc/Bool
                :rows       [StampRow]})
