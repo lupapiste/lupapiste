@@ -138,6 +138,7 @@ Add työnjohtaja task to current application
   Open tab  tasks
   Click enabled by test id  application-new-task
   Wait until  Element should be visible  dialog-create-task
+  Wait until  Element should be visible  choose-task-type
   Select From List By Value  choose-task-type   task-vaadittu-tyonjohtaja
   Input text  create-task-name  ${role}
   Click enabled by test id  create-task-save
