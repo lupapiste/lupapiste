@@ -29,7 +29,7 @@
                 :user (user/full-name (:user context))
                 :organization (get-in context [:organization :name :fi])
                 :application-id (get-in context [:application :id])
-                :building-id (i18n/with-lang (or (get-in context [:user :language]) :fi) (i18n/loc "stamp.buildingid"))
+                :building-id (i18n/with-lang (or (get-in context [:user :language]) :fi) (i18n/loc "stamp.building-id"))
                 (or (:text tag) ""))]
     {:type (:type tag) :value value}))
 
