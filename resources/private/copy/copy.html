@@ -34,19 +34,31 @@
     <!-- /ko -->
 
     <!-- ko if: phase() === 1 -->
-    <div data-bind="ltext: 'application.copy.osapuolet.candidates'"></div>
+    <!-- ko if: inviteCandidates().length > 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.candidates'"></div>
     <div id="copy-auths"
-         data-bind="foreach: inviteCandidates "><div class="blockbox-wrapper copy-selection-wrapper">
+         data-bind="foreach: inviteCandidates ">
+      <div class="blockbox-wrapper copy-selection-wrapper">
         <input type="checkbox"
                data-bind="attr: {'id': $index()},
                                  checked: $data.selected">
         <label class="blockbox-label"
                data-bind="attr: {'for': $index()},
                           text: $parent.authDescription($data)"></label>
-    </div></div>
+      </div>
+    </div>
     <!-- /ko -->
+    <!-- ko if: inviteCandidates().length === 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.not-available'"></div>
+    <!-- /ko -->
+    <!-- /ko -->
+
     <!-- ko if: phase() === 2 -->
-    <div data-bind="ltext: 'application.copy.osapuolet.invitees'"></div>
+    <!-- ko if: selectedInviteCandidates().length > 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.invitees'"></div>
     <div id="copy-auths"
          data-bind="foreach: selectedInviteCandidates ">
         <div class="copy-selection-verified copy-selection-wrapper">
@@ -55,9 +67,14 @@
         </div>
     </div>
     <!-- /ko -->
+    <!-- ko if: selectedInviteCandidates().length === 0 -->
+    <div class="copy-auth-selection-text"
+         data-bind="ltext: 'application.copy.osapuolet.not-selected'"></div>
+    <!-- /ko -->
+    <!-- /ko -->
 
     <!-- ko if: phase() > 0 -->
-    <div>
+    <div class="copy-phase-buttons">
       <button data-bind="click: buttonActions[phase()].previous.action,
                          disable: processing() || pending()" class="secondary">
         <i class="lupicon-chevron-left"></i>
