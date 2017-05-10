@@ -14595,7 +14595,7 @@ span.icon_clear:before {
   padding-left: 6px;
 }
 
-.application_summary .application_summary_info select {
+.application_summary .application_summary_info select, .application_summary .application_summary_info .property-id {
   vertical-align: top;
 }
 
@@ -15079,6 +15079,7 @@ span.icon_clear:before {
 }
 
 .application_summary_text .warning-message {
+  margin-left: 6px;
   color: #df3215;
   line-height: 24px;
   margin-top: 6px;
