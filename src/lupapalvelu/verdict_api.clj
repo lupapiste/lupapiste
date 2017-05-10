@@ -29,7 +29,7 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(def give-verdict-states (set/union #{:submitted :complementNeeded :sent}
+(def give-verdict-states (set/union #{:submitted :sent}
                                     (set/difference states/verdict-given-states states/terminal-states)))
 
 (defquery verdict-attachment-type
