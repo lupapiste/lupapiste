@@ -312,18 +312,62 @@
                     <documentation>Lupapisteen tunnus lausunnolle</documentation>
                 </annotation>
             </element>
-            <element name="Saateteksti" type="string">
+            <element name="AsianTunnus" type="string">
                 <annotation>
-                    <documentation>Lausunnon pyyntäjän saateteksti</documentation>
+                    <documentation>Asianhallintajärjestelmän tunnus</documentation>
                 </annotation>
             </element>
-            <element name="LausuntoTeksti" type="string">
+            <!-- Lausunnon pyyntö -->
+            <element name="Saateteksti" type="string" maxOccurs="1" minOccurs="0">
+                <annotation>
+                    <documentation>Lausunnon pyytäjän saateteksti</documentation>
+                </annotation>
+            </element>
+            <element name="Pyytaja" type="string" maxOccurs="1" minOccurs="0">
+                <annotation>
+                    <documentation>Lausuntoa pyytänyt taho</documentation>
+                </annotation>
+            </element>
+            <element name="PyyntoPvm" type="date" maxOccurs="1" minOccurs="0">
+                <annotation>
+                    <documentation>Lausunnon pyyntöpäivämäärä</documentation>
+                </annotation>
+            </element>
+            <element name="Maaraaika" type="date" maxOccurs="1" minOccurs="0">
+                <annotation>
+                    <documentation>Lausunnon määräaika, johon mennessä vastausta pyydetään</documentation>
+                </annotation>
+            </element>
+            <!-- /Lausunnon pyyntö -->
+            <!-- Lausunnon vastaus -->
+            <element name="LausuntoTeksti" type="string" maxOccurs="1" minOccurs="0">
                 <annotation>
                     <documentation>Varsinainen lausunto</documentation>
                 </annotation>
             </element>
+            <element name="LausuntoPvm" type="date" maxOccurs="1" minOccurs="0">
+                <annotation>
+                    <documentation>Lausunnon antopäivämäärä</documentation>
+                </annotation>
+            </element>
+            <element name="Puolto" type="ah:LausuntoPuoltoType" maxOccurs="1" minOccurs="0"></element>
+            <!-- /Lausunnon vastaus -->
         </sequence>
     </complexType>
+
+    <simpleType name="LausuntoPuoltoType">
+        <restriction base="string">
+            <enumeration value="ei-huomautettavaa"></enumeration>
+            <enumeration value="ehdollinen"></enumeration>
+            <enumeration value="puollettu"></enumeration>
+            <enumeration value="ei-puollettu"></enumeration>
+            <enumeration value="ei-lausuntoa"></enumeration>
+            <enumeration value="lausunto"></enumeration>
+            <enumeration value="kielteinen"></enumeration>
+            <enumeration value="palautettu"></enumeration>
+            <enumeration value="poydalle"></enumeration>
+        </restriction>
+    </simpleType>
 
     <complexType name="ViiteluvatType">
         <sequence>
