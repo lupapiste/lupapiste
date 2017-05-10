@@ -6526,7 +6526,7 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
 }
 
 .radio-field-wrapper {
-  display: inline;
+  display: inline-block;
   box-sizing: border-box;
   border: 1px solid #dddddd;
 }
