@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema targetNamespace="http://www.lupapiste.fi/asianhallinta"
-        elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ah="http://www.lupapiste.fi/asianhallinta" version="1.2">
+        elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ah="http://www.lupapiste.fi/asianhallinta" version="1.3">
 
     <element name="UusiAsia" type="ah:AsiaType">
         <annotation>
@@ -28,6 +28,7 @@
             <element name="Liitteet" type="ah:LiitteetType" maxOccurs="1" minOccurs="0"></element>
             <element name="Asiointikieli" type="ah:KieliType" minOccurs="0"></element>
             <element name="Toimenpiteet" type="ah:ToimenpiteetType" maxOccurs="1" minOccurs="1"></element>
+            <element name="Lausunnot" type="ah:LausunnotType" maxOccurs="1" minOccurs="0"></element>
             <element name="Viiteluvat" type="ah:ViiteluvatType" maxOccurs="1" minOccurs="0"></element>
             <element name="Sijainti" type="ah:SijaintiType" maxOccurs="1" minOccurs="0"></element>
             <element name="Kiinteistotunnus" type="ah:KiinteistotunnusType" maxOccurs="1" minOccurs="0"></element>
@@ -228,6 +229,8 @@
         </attribute>
     </complexType>
 
+    <!-- TODO Lausunnon "paatos" -->
+
     <simpleType name="AsianTyyppiType">
         <restriction base="string">
             <enumeration value="KasiteltavaHakemus"></enumeration>
@@ -266,6 +269,27 @@
     <complexType name="ToimenpiteetType">
         <sequence>
             <element name="Toimenpide" type="ah:ToimenpideType" maxOccurs="unbounded" minOccurs="1"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="LausunnotType">
+        <sequence>
+            <element name="Lausunto" type="ah:LausuntoType" maxOccurs="unbounded" minOccurs="1"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="LausuntoType">
+        <sequence>
+            <element name="LausuntoTunnus" type="string">
+                <annotation>
+                    <documentation>Lupapisteen tunnus lausunnolle</documentation>
+                </annotation>
+            </element>
+            <element name="LausuntoTeksti" type="string">
+                <annotation>
+                    <documentation>Selväkielinen toimenpiteen lokalisointiteksti</documentation>
+                </annotation>
+            </element>
         </sequence>
     </complexType>
 
@@ -314,6 +338,7 @@
                     <documentation>Asianhallintajärjestelmän tunnus</documentation>
                 </annotation>
             </element>
+            <!-- TODO MIHIN ASIAAN VASTATAAN -->
             <element name="VastaanotettuPvm" type="date"></element>
         </sequence>
         <attribute name="version" type="string">
