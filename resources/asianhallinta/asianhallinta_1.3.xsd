@@ -261,6 +261,7 @@
         <restriction base="string">
             <enumeration value="KasiteltavaHakemus"></enumeration>
             <enumeration value="Tiedoksianto"></enumeration>
+            <enumeration value="Lausuntopyyntö"></enumeration>
         </restriction>
     </simpleType>
 
