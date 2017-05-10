@@ -58,7 +58,7 @@ var stamping = (function() {
     fields.extraInfo("");
     fields.kuntalupatunnus("");
     fields.section("");
-  };
+  }
 
   function loadStampTemplates(appId) {
     ajax.query("custom-stamps", {
