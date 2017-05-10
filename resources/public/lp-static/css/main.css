@@ -15850,6 +15850,14 @@ div.foreman-history-container {
   float: right;
 }
 
+.copy-auth-selection-text {
+  margin-bottom: 12px;
+}
+
+.copy-phase-buttons {
+  margin-top: 24px;
+}
+
 .copy-state-indication {
   margin: 0 0 12px 0;
   overflow: hidden;
