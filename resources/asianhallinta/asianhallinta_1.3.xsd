@@ -38,6 +38,11 @@
                 <documentation>Käytettävän skeeman versio</documentation>
             </annotation>
         </attribute>
+        <attribute name="messageId" type="string">
+            <annotation>
+                <documentation>Lähettäjän määrittämä sanoman tunnus</documentation>
+            </annotation>
+        </attribute>
     </complexType>
 
     <complexType name="HakijatType">
@@ -187,9 +192,14 @@
                 <documentation>Käytettävän skeeman versio</documentation>
             </annotation>
         </attribute>
+        <attribute name="messageId" type="string">
+            <annotation>
+                <documentation>Lähettäjän määrittämä sanoman tunnus</documentation>
+            </annotation>
+        </attribute>
     </complexType>
 
-    <element name="AsianPaatos" type="ah:AsianPaatosType" >
+    <element name="AsianPaatos" type="ah:AsianPaatosType">
         <annotation>
             <documentation>Päätös asiaan.</documentation>
         </annotation>
@@ -253,6 +263,11 @@
         <attribute name="version" type="string">
             <annotation>
                 <documentation>Käytettävän skeeman versio</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="messageId" type="string">
+            <annotation>
+                <documentation>Kuitattavan sanoman ID</documentation>
             </annotation>
         </attribute>
     </complexType>
@@ -414,12 +429,16 @@
                     <documentation>Asianhallintajärjestelmän tunnus</documentation>
                 </annotation>
             </element>
-            <!-- TODO MIHIN ASIAAN VASTATAAN -->
             <element name="VastaanotettuPvm" type="date"></element>
         </sequence>
         <attribute name="version" type="string">
             <annotation>
                 <documentation>Käytettävän skeeman versio</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="messageId" type="string">
+            <annotation>
+                <documentation>Kuitattavan sanoman ID</documentation>
             </annotation>
         </attribute>
     </complexType>
