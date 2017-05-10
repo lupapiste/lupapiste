@@ -229,7 +229,33 @@
         </attribute>
     </complexType>
 
-    <!-- TODO Lausunnon "paatos" -->
+    <element name="LausuntoVastaus" type="ah:LausuntoResponseType" >
+        <annotation>
+            <documentation>Lausunto asiasta</documentation>
+        </annotation>
+    </element>
+
+    <complexType name="LausuntoResponseType">
+        <sequence>
+            <element name="HakemusTunnus" type="string" maxOccurs="1" minOccurs="1">
+                <annotation>
+                    <documentation>Lupapisteen tunnus</documentation>
+                </annotation>
+            </element>
+            <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="1">
+                <annotation>
+                    <documentation>Asianhallintajärjestelmän tunnus</documentation>
+                </annotation>
+            </element>
+            <element name="Lausunto" type="ah:LausuntoType" maxOccurs="1" minOccurs="1"></element>
+            <element name="Liitteet" type="ah:LiitteetType" maxOccurs="1" minOccurs="0"></element>
+        </sequence>
+        <attribute name="version" type="string">
+            <annotation>
+                <documentation>Käytettävän skeeman versio</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
 
     <simpleType name="AsianTyyppiType">
         <restriction base="string">
@@ -285,9 +311,14 @@
                     <documentation>Lupapisteen tunnus lausunnolle</documentation>
                 </annotation>
             </element>
+            <element name="Saateteksti" type="string">
+                <annotation>
+                    <documentation>Lausunnon pyyntäjän saateteksti</documentation>
+                </annotation>
+            </element>
             <element name="LausuntoTeksti" type="string">
                 <annotation>
-                    <documentation>Selväkielinen toimenpiteen lokalisointiteksti</documentation>
+                    <documentation>Varsinainen lausunto</documentation>
                 </annotation>
             </element>
         </sequence>
