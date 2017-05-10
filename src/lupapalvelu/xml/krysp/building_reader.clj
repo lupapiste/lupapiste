@@ -172,8 +172,8 @@
            util/not-empty-or-nil?
 
            :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
-           :huoneistot (->> (remove nil? (concat (select rakennus [:valmisHuoneisto])
-                                                 (select rakennus [:huoneisto])))
+           :huoneistot (->> (remove empty? (conj (select rakennus [:valmisHuoneisto])
+                                                 (select rakennus [:asuinhuoneistot :> :huoneisto])))
                             (map (fn [huoneisto]
                                    {:huoneistonumero (get-text huoneisto :huoneistonumero)
                                     :jakokirjain     (get-text huoneisto :jakokirjain)
@@ -197,12 +197,17 @@
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
    :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})
 
-(defn toimenpidetieto->building-or-structure [toimenpidetieto-xml]
-  (let [rakennus (->rakennuksen-tiedot (-> toimenpidetieto-xml (select [:Rakennus]) first))
-        rakennelma (->rakennelman-tiedot (-> toimenpidetieto-xml (select [:Rakennelma]) first))]
-    {:data (or rakennus rakennelma)
-     :description (or (-> (->buildings-summary toimenpidetieto-xml) first :description)
-                      (:rakennelman-kuvaus rakennelma))}))
+(defn ->buildings-and-structures [app-xml]
+  "Produces a building or structure for each (valid) construction operation in the application"
+  (remove empty?
+    (map (fn [xml]
+           (let [rakennus (->rakennuksen-tiedot (-> xml (select [:Rakennus]) first))
+                 rakennelma (->rakennelman-tiedot (-> xml (select [:Rakennelma]) first))]
+             (when-not (empty? (or rakennus rakennelma))
+               {:data (or rakennus rakennelma)
+                :description (or (-> (->buildings-summary xml) first :description)
+                                 (:rakennelman-kuvaus rakennelma))})))
+          (-> app-xml cr/strip-xml-namespaces (select [:toimenpidetieto])))))
 
 (defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
 

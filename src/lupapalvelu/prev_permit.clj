@@ -24,9 +24,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.application :as app]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.xml.krysp.common-reader :as common]))
+            [lupapalvelu.document.schemas :as schemas]))
 
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (cons :valtakunnallinenNumero)))
@@ -216,15 +214,14 @@
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
-        buildings-and-structures (map building-reader/toimenpidetieto->building-or-structure
-                                      (sade.xml/select xml [:toimenpidetieto]))
+        buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (schema-datas app-info buildings-and-structures)
         manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
                   {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
-        new-parties (remove nil?
+        new-parties (remove empty?
                             (concat (map suunnittelija->party-document (:suunnittelijat app-info))
                                     (map osapuoli->party-document (:muutOsapuolet app-info))))
 
