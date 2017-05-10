@@ -76,14 +76,23 @@
     <!-- ko if: phase() > 0 -->
     <div class="copy-phase-buttons">
       <button data-bind="click: buttonActions[phase()].previous.action,
-                         disable: processing() || pending()" class="secondary">
+                         disable: processing() || pending()"
+              class="secondary">
         <i class="lupicon-chevron-left"></i>
         <span data-bind="ltext: buttonActions[phase()].previous.ltext"></span>
       </button>
       <button data-bind="click: buttonActions[phase()].next.action,
-                         disable: processing() || pending()" class="positive">
+                         disable: processing() || pending(),
+                         css: {waiting: pending}"
+              class="positive">
+        <!-- ko if: phase() === 2 -->
+        <i class="lupicon-check"></i>
+        <!-- /ko -->
+        <i class="wait spin lupicon-refresh"></i>
         <span data-bind="ltext: buttonActions[phase()].next.ltext"></span>
+        <!-- ko if: phase() < 2 -->
         <i class="lupicon-chevron-right"></i>
+        <!-- /ko -->
       </button>
     </div>
     <!-- /ko -->
