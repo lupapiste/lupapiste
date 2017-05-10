@@ -189,6 +189,7 @@
 
     (facts "Delete verdicts"
      (command sonja :delete-verdict :id application-id :verdictId verdict-id1) => ok?
+     (command sonja :new-verdict-draft :id application-id) => ok?
      (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
      (let [app-without-verdict (query-application mikko application-id)]
        (fact "State stepped back"

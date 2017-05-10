@@ -63,7 +63,7 @@
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
-                 :build                 (:build-number env/buildinfo)
+                 :build                 env/build-number
                  :cookie                (env/value :cookie)
                  :wannaJoinUrl          (env/value :oir :wanna-join-url)
                  :rumURL                rum-app-url
@@ -142,7 +142,7 @@
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :knockout       {:js ["knockout-3.4.1.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
+   :knockout       {:js ["knockout-3.4.2.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -370,6 +370,10 @@
                   :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
+   :copy         {:depends [:common-html :map :create]
+                  :html ["copy.html"]
+                  :js ["copy.js"]}
+
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
 
@@ -426,7 +430,7 @@
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :mypage :header :debug
+                             :statement :docgen :create :copy :mypage :header :debug
                              :company :analytics :register-company :footer :new-appointment :ui-components]}
 
    :mycalendar   {:depends [:calendar-view]
@@ -436,7 +440,7 @@
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
-                             :statement :verdict :neighbors :docgen :create :mypage :header :debug
+                             :statement :verdict :neighbors :docgen :create :copy :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}

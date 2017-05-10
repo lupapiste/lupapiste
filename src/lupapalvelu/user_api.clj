@@ -723,12 +723,12 @@
 
 (defquery enable-foreman-search
   {:user-roles #{:authority}
-   :org-authz-roles (disj roles/all-org-authz-roles :tos-editor :tos-publisher)
-   :pre-checks [(fn [{:keys [user application]}]
-                  (let [org-ids (usr/organization-ids user)]
-                    (if-not application
-                      (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
-                        unauthorized)
+   :pre-checks [(fn [{:keys [user]}]
+                  (let [org-ids (->> (usr/organization-ids user)
+                                     (filter
+                                       (fn [oid]
+                                         (some roles/reader-org-authz-roles (get-in user [:orgAuthz (keyword oid)]))) ))]
+                    (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
                       unauthorized)))]}
   [_])
 

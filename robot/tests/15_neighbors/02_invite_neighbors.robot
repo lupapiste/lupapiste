@@ -1,9 +1,9 @@
 *** Settings ***
 
 Documentation   Authority adds couple of neighbors, then we invite them and see how they respond
+Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Library         DebugLibrary
 
 *** Test Cases ***
 
@@ -46,9 +46,30 @@ Sonja removes mistakenly added neighbor d
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
 
-Sonja corrects the email address of neighbor c
+Sonja checks that property id and email validation works
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-edit']
   Click element  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-edit']
+  Test id does not have class  neighbors.edit.propertyId  warn
+  Test id does not have class  neighbors.edit.propertyId  tip
+  Test id enabled  modal-dialog-submit-button
+  Input text by test id  neighbors.edit.propertyId  ${EMPTY}
+  Test id does not have class  neighbors.edit.propertyId  warn
+  Test id has class  neighbors.edit.propertyId  tip
+  Test id disabled  modal-dialog-submit-button
+  Input text by test id  neighbors.edit.propertyId  blaah
+  Test id has class  neighbors.edit.propertyId  warn
+  Test id does not have class  neighbors.edit.propertyId  tip
+  Test id disabled  modal-dialog-submit-button
+  Input text by test id  neighbors.edit.propertyId  753-416-25-22
+  Test id does not have class  neighbors.edit.propertyId  warn
+  Test id does not have class  neighbors.edit.propertyId  tip
+  Test id enabled  modal-dialog-submit-button
+  Test id does not have class  neighbors.edit.email  warn
+  Input text by test id  neighbors.edit.email  blaah
+  Test id has class  neighbors.edit.email  warn
+  Test id disabled  modal-dialog-submit-button
+
+Sonja corrects the email address of neighbor c
   Input text by test id  neighbors.edit.email  c@example.com
   Click by test id  modal-dialog-submit-button
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-remove']
@@ -215,3 +236,11 @@ Start drawing a polygon
   # Ignore error, navigation might already be active
   Run Keyword And Ignore Error  Click element  css=.olControlLupapisteEditingToolbar .olControlNavigationItemInactive
   Click element  css=.olControlDrawFeaturePolygonItemInactive
+
+Test id has class
+  [Arguments]  ${tid}  ${cls}
+  Wait until  Element should be visible  jquery=[data-test-id='${tid}'].${cls}
+
+Test id does not have class
+  [Arguments]  ${tid}  ${cls}
+  Wait until  Element should not be visible  jquery=[data-test-id='${tid}'].${cls}

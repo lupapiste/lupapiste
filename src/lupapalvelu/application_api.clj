@@ -96,16 +96,6 @@
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
-(defn- autofill-rakennuspaikka [application time]
-  (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]
-      (doseq [rakennuspaikka rakennuspaikka-docs
-              :when (seq rakennuspaikka)]
-        (let [property-id (or
-                            (get-in rakennuspaikka [:data :kiinteisto :kiinteistoTunnus :value])
-                            (:propertyId application))]
-          (doc/fetch-and-persist-ktj-tiedot application rakennuspaikka property-id time))))))
-
 (defquery party-document-names
   {:parameters [:id]
    :user-roles #{:applicant :authority}
@@ -127,7 +117,7 @@
                                 distinct))))
 
 (defcommand mark-seen
-  {:parameters       [:id type]
+  {:parameters       [id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/all-authz-roles
@@ -350,7 +340,7 @@
    :user-roles #{:authority}
    :states     (states/all-application-states-but (conj states/terminal-states :draft))}
   [{:keys [application created]}]
-  (autofill-rakennuspaikka application created)
+  (app/autofill-rakennuspaikka application created)
   (ok))
 
 (defcommand save-application-drawings
@@ -448,7 +438,7 @@
           (open-inforequest/new-open-inforequest! created-application)
           (notifications/notify! :inforequest-invite {:application created-application})))
       (try+
-        (autofill-rakennuspaikka created-application created)
+        (app/autofill-rakennuspaikka created-application created)
         (catch [:sade.core/type :sade.core/fail] {:keys [cause text] :as exp}
           (warnf "Could not get KTJ data for the new application, cause: %s, text: %s. From %s:%s"
                  cause
@@ -561,8 +551,9 @@
                                  :address    (ss/trim address)
                                  :propertyId propertyId
                                  :title      (ss/trim address)
-                                 :modified   created}})
-      (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
+                                 :modified   created}
+                           $unset {:propertyIdSource true}})
+      (try (app/autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (warn "KTJ data was not updated after location changed"))))
     (fail :error.property-in-other-muinicipality)))
 
@@ -739,7 +730,7 @@
 (defcommand create-change-permit
   {:parameters ["id"]
    :user-roles #{:applicant :authority}
-   :states     #{:verdictGiven :constructionStarted}
+   :states     #{:verdictGiven :constructionStarted :appealed :inUse :onHold}
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (app/make-application-id (:municipality application))
@@ -869,7 +860,7 @@
                                :documents              (app/make-documents user created @org op app)
                                :modified               created}
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
-  (try (autofill-rakennuspaikka app created)
+  (try (app/autofill-rakennuspaikka app created)
        (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
 
 (defn- validate-organization-backend-urls [{organization :organization}]

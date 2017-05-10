@@ -89,25 +89,35 @@
         (when-let [is (muuntaja/download-file uri)]
           (let [file-data (save-file {:filename filename :content is} :sessionId session-id :linked false)]
             (.close is)
-            (merge file-data
-                   {:contents      contents
-                    :drawingNumber drawingNumber
-                    :group         (resolve-attachment-grouping attachment-type application operation)
-                    :type          attachment-type})))))
+            (merge
+              file-data
+              (util/strip-nils
+                {:contents      contents
+                 :drawingNumber drawingNumber
+                 :group         (resolve-attachment-grouping attachment-type application operation)
+                 :type          attachment-type}))))))
     attachments))
 
 (defn- is-zip-file? [filedata]
   (-> filedata :filename mime/sanitize-filename mime/mime-type (= "application/zip")))
 
+(defn- unzip? [files]
+  (and (empty? (rest files))
+       (env/feature? :unzip-attachments)
+       (is-zip-file? (first files))))
+
 (defn save-files [application files session-id]
-  (if-let [attachments (and (empty? (rest files))
-                            (env/feature? :unzip-attachments)
-                            (is-zip-file? (first files))
-                            (-> files first :tempfile muuntaja/unzip-attachment-collection :attachments seq))]
-    (download-and-save-files application attachments session-id)
-    (pmap
-      #(save-file % :sessionId session-id :linked false)
-      (map #(rename-keys % {:tempfile :content}) files))))
+  (if (unzip? files)
+    (let [{:keys [attachments error]} (-> files first :tempfile muuntaja/unzip-attachment-collection)]
+      (if (or (not-empty error) (empty? attachments))
+        {:ok false
+         :error (or error "error.unzipping-error")}
+        {:ok true
+         :files (download-and-save-files application attachments session-id)}))
+    {:ok true
+     :files (pmap
+              #(save-file % :sessionId session-id :linked false)
+              (map #(rename-keys % {:tempfile :content}) files))}))
 
 (defn- two-hours-ago []
   ; Matches vetuma session TTL

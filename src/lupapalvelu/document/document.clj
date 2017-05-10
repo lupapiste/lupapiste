@@ -5,7 +5,6 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :refer [update-application] :as action]
-            [lupapalvelu.application :as app]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
@@ -24,6 +23,9 @@
 ;; Validators
 ;;
 
+(defn state-history-entries [history]
+  (filter :state history)) ; only history elements that regard state change
+
 (defn state-valid-by-schema? [schema schema-states-key default-states state]
   (-> (get-in schema [:info (keyword schema-states-key)])
       (or default-states)
@@ -32,7 +34,7 @@
 (defn created-after-verdict? [document application]
   (if (contains? states/post-verdict-states (keyword (:state application)))
     (let [verdict-state        (sm/verdict-given-state application)
-          verdict-history-item (->> (app/state-history-entries (:history application))
+          verdict-history-item (->> (state-history-entries (:history application))
                                     (filter #(= (:state %) (name verdict-state)))
                                     (sort-by :ts)
                                     last)]

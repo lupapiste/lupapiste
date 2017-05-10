@@ -18,6 +18,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.authorizationModel = authorizationModel;
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
+  self.propertyIdSource = application.propertyIdSource;
   self.isDisabled = (options && options.disabled) || self.docDisabled;
   self.events = [];
 
@@ -838,6 +839,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       isDisabled: self.isDisabled,
       authModel: self.authorizationModel,
       propertyId: self.propertyId,
+      propertyIdSource: self.propertyIdSource,
       docModel: self
     };
 

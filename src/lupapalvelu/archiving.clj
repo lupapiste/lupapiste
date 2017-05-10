@@ -63,10 +63,18 @@
         (catch Exception _)))
     result))
 
+(defn mark-first-time-archival [application now]
+  (action/update-application
+    (action/application->command application)
+    {:archived.initial nil
+     :archived.application nil
+     :archived.completed nil}
+    {$set {:archived.initial now}}))
+
 (defn- set-attachment-state [next-state application now id]
   (action/update-application
     (action/application->command application)
-    {:attachments.id id}
+    {:attachments {$elemMatch {:id id :metadata.tila {$ne :arkistoitu}}}}
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
@@ -75,12 +83,14 @@
 (defn- set-application-state [next-state application now _]
   (action/update-application
     (action/application->command application)
+    {:metadata.tila {$ne :arkistoitu}}
     {$set {:modified now
            :metadata.tila next-state}}))
 
 (defn- set-process-state [next-state application now _]
   (action/update-application
     (action/application->command application)
+    {:processMetadata.tila {$ne :arkistoitu}}
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
@@ -97,12 +107,14 @@
                 (do
                   (state-update-fn :arkistoitu application now id)
                   (info "Archived attachment id" id "from application" app-id)
+                  (mark-first-time-archival application now)
                   (mark-application-archived-if-done application now))
 
                 (and (= status 409) (string/includes? body "already exists"))
                 (do
                   (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
                   (state-update-fn :arkistoitu application now id)
+                  (mark-first-time-archival application now)
                   (mark-application-archived-if-done application now))
 
                 :else

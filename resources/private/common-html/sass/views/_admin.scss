@@ -49,8 +49,13 @@
 }
 
 .admin {
+  section#admin, nav.nav-wrapper {
+    .container {
+      max-width: 1400px;
+    }
+  }
   .page {
-    margin-top: 130px;
+    margin-top: 150px;
   }
   .users-table {
     .filters {

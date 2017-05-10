@@ -14,6 +14,7 @@ ${appname}        Alexandria
 ${propertyid}     753-423-2-41
 ${not-validated}  Liitteen arkistokelpoisuutta ei ole tarkastettu.
 ${invalid}        Tiedostotyyppi ei sovellu pysyvään säilytykseen
+${permanent-archive-disabled}  Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä.
 
 *** Test Cases ***
 
@@ -55,10 +56,11 @@ Pena logs in again
   Open tab  attachments
 
 Attachment now has archive error
-  Archive error  erityissuunnitelmat.hulevesisuunnitelma  ${not-validated}
+  Archive error  erityissuunnitelmat.hulevesisuunnitelma  ${permanent-archive-disabled}
 
 Pena adds PDF attachment that becomes archivable
   Upload attachment  ${PDF_TESTFILE_PATH}  Johtokartta  Map  ${EMPTY}
+  # There will be archive error if pdf2pdf is not installed locally
   No archive error  ennakkoluvat_ja_lausunnot.johtokartta
 
 Pena adds PNG attachment that is not archivable
@@ -107,7 +109,8 @@ Archive error
   [Arguments]  ${type}  ${title}
   Icon selector  ${type}
   Wait until  Element should be visible  jquery=${selector}
-  Javascript?  $("${selector}").attr( "title") === '${title}'
+  ${error_title}=  Get element attribute  jquery=${selector}@title
+  Should be equal as strings  ${error_title}  ${title}
 
 Admin edits Sipoo
   SolitaAdmin logs in

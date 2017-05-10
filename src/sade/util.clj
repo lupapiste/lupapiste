@@ -62,6 +62,24 @@
   "Makes sure that the value of key k in map m is sequental"
   [m k] (let [v (k m)] (if (and v (not (sequential? v))) (assoc m k [v]) m)))
 
+(defn pathwalk
+  "A prewalk that keeps track of the path traversed from the root of the collection"
+  ([f coll] (pathwalk f [] coll))
+  ([f path coll]
+   (let [f-coll (f path coll)]
+     (cond (map? f-coll) (into {} (map (fn [[k v]]
+                                         [k (pathwalk f (conj path k) v)])
+                                       f-coll))
+           (set? f-coll) (into #{} (map (fn [v]
+                                          (pathwalk f (conj path v) v))
+                                        f-coll))
+           (coll? f-coll) (into (empty f-coll)
+                                (map-indexed
+                                 (fn [idx v]
+                                   (pathwalk f (conj path idx) v))
+                                 f-coll))
+           :else f-coll))))
+
 ; from clojure.contrib/core
 
 (defn map-keys
@@ -403,6 +421,12 @@
   "Assocs entries into m when pred returns truthy for value."
   [m pred & kvs]
   (apply merge m (filter (comp pred val) (apply hash-map kvs))))
+
+(defn merge-in
+  "Merges the result of (apply f x args) into x"
+  [x f & args]
+  {:pre [(map? x)]}
+  (merge x (apply f x args)))
 
 (defn upsert
   [{id :id :as item} coll]

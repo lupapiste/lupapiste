@@ -30,7 +30,8 @@
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]
             [lupapalvelu.drawing :as draw]
-            [lupapalvelu.user :as usr])
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.states :as states])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -1287,8 +1288,8 @@
        (into {})))
 
 (defmigration update-tila-metadata-value-in-all-metadata-maps
-  {:apply-when (pos? (mongo/count :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]}))}
-  (doseq [application (mongo/select :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu"]}}]})]
+  {:apply-when (pos? (mongo/count :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu" "arkistoidaan"]}}]}))}
+  (doseq [application (mongo/select :applications {$and [{"metadata.tila" {$exists true}} {"metadata.tila" {$nin ["luonnos" "valmis" "arkistoitu" "arkistoidaan"]}}]})]
     (let [data-for-$set (-> (update-array-metadata application)
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
@@ -3120,6 +3121,18 @@
                                     :primaryOperation.name "ya-kayttolupa-muu-liikennealuetyo"}
                                    [:state :primaryOperation :history :documents :infoRequest])]
             (update-liikennealue-application-to-katulupa coll app))))
+
+(defmigration clean-post-verdict-original-application-states
+  {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:originalApplicationState
+                                                                           {$in states/post-verdict-states}}}}))}
+  (letfn [(do-cleanup [attachment]
+            (if (contains? states/post-verdict-states (keyword (:originalApplicationState attachment)))
+              (dissoc attachment :originalApplicationState)
+              attachment))]
+    (update-applications-array :attachments
+                               do-cleanup
+                               {:attachments {$elemMatch {:originalApplicationState
+                                                          {$in states/post-verdict-states}}}})))
 
 ;;
 ;; ****** NOTE! ******

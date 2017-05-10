@@ -402,8 +402,7 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
 
@@ -412,8 +411,7 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles roles/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id false (partial att/get-attachment-file-as! user)))
 
@@ -423,8 +421,7 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles roles/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles}
   [{{:keys [fileId]} :data session :session}]
   (att/output-file fileId (:id session)))
 
@@ -433,8 +430,7 @@
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
 
@@ -444,8 +440,7 @@
    :optional-parameters [:download]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id download]} :data user :user}]
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id) (= download "true")))
 
@@ -554,10 +549,10 @@
                  att/attachment-matches-application]
    :states      (conj (states/all-states-but states/terminal-states) :answered)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
-  [{:keys [application]}]
+  [{:keys [application created]}]
   (if-let [attachment (att/get-attachment-info application attachmentId)]
     (files/with-temp-file temp-pdf
-      (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
+      (let [{:keys [contentType fileId originalFileId filename user autoConversion] :as latest-version} (last (:versions attachment))
            attachment-options (util/assoc-when {:comment-text nil
                                                 :required false
                                                 :original-file-id originalFileId
@@ -794,9 +789,9 @@
                           (when (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
                             (fail :error.attachment.content-type))))]
    :states           (states/all-application-states-but :draft)}
-  [{:keys [application]}]
+  [{:keys [application created]}]
   (if-let [attachment (att/get-attachment-info application attachmentId)]
-    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))]
+    (let [{:keys [fileId filename user stamped]} (last (:versions attachment))]
       (files/with-temp-file temp-pdf
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)

@@ -237,7 +237,8 @@
   ([user]
    (let [projection (-> (ssc/plain-keys org/Organization)
                         (zipmap (repeat true))
-                        (dissoc :areas :areas-wgs84))]
+                        (dissoc :areas :areas-wgs84
+                                :operations-attachments))]
      (get-organizations user projection)))
   ([user projection]
    (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
@@ -384,7 +385,7 @@
                                     {$or (map hash-map
                                            [:email :firstName :lastName]
                                            (repeat t))})
-                               (map re-pattern searches))))))
+                                  (map #(re-pattern (str "(?i)" %)) searches))))))
 
 (defn- limit-organizations [query]
   (if-let [org-ids (:organizations query)]

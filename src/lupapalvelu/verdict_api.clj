@@ -29,7 +29,7 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(def give-verdict-states (set/union #{:submitted :complementNeeded :sent}
+(def give-verdict-states (set/union #{:submitted :sent}
                                     (set/difference states/verdict-given-states states/terminal-states)))
 
 (defquery verdict-attachment-type
@@ -166,7 +166,7 @@
           attachments (filter is-verdict-attachment? (:attachments application))
           {:keys [sent state verdicts]} application
           ; Deleting the only given verdict? Return sent or submitted state.
-          step-back? (and (= 1 (count verdicts)) (states/verdict-given-states (keyword state)))
+          step-back? (and (= 1 (count (remove :draft verdicts))) (states/verdict-given-states (keyword state)))
           task-ids (verdict/deletable-verdict-task-ids application verdictId)
           attachments (concat attachments (verdict/task-ids->attachments application task-ids))
           updates (merge {$pull {:verdicts {:id verdictId}

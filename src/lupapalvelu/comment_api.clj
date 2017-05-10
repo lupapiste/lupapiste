@@ -69,6 +69,7 @@
 
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
+   :parameters [id]
    :user-roles #{:authority}
    :org-authz-roles roles/commenter-org-authz-roles
    :states      (disj commenting-states :draft)})

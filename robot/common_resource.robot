@@ -640,13 +640,13 @@ Table with id should have rowcount
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
   Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create application with state
   [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
   Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create bulletins the fast way
@@ -670,14 +670,14 @@ Create application
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait Until  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyId}
 
 Create first application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait Until  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
@@ -955,6 +955,10 @@ Cancel current application as authority
   Confirm yes no dialog
 
 # New yes no modal dialog
+
+New modal mask is invisible
+  Element should not be visible  xpath=//div[@id='modal-dialog-content-container']/div[contains(@class, 'mask')]
+
 Confirm yes no dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait until  Element should be enabled  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
@@ -967,12 +971,14 @@ Deny yes no dialog
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Wait Until  New modal mask is invisible
 
 Confirm ok dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Wait Until  New modal mask is invisible
 
 Confirm
   [Arguments]  ${modalId}
@@ -1054,13 +1060,13 @@ Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
 
 Open canceled application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}  canceled
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
@@ -1398,14 +1404,14 @@ Open company user listing
   Click Element  user-name
   Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
   Open accordion by test id  mypage-company-accordion
-  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-users']
   Click by test id  company-edit-users
   Wait until  Element should be visible  company
 
 Open company details
   Click Element  user-name
   Open accordion by test id  mypage-company-accordion
-  Wait Until  Element should be visible  //div[@data-test-id='my-company']
+  Wait Until  Element should be visible  //div[@data-test-id='my-company']//button[@data-test-id='company-edit-info']
   Click by test id  company-edit-info
   Wait until  Element should be visible  company
 

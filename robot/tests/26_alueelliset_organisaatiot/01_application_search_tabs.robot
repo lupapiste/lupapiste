@@ -85,6 +85,12 @@ Sonja selects construction tab
   Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${verdictGiven}"]
   Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${constructionStarted}"]
 
+Sonja select foremen view
+  Click element  jquery=label[for=searchTypeForeman]
+  Active search tab is  all
+  Click element  jquery=label[for=searchTypeApplications]
+  Active search tab is  all
+
 Sonja selects inforequest tab
   Click by test id  search-tab-inforequest
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3

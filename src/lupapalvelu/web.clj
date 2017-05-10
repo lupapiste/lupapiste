@@ -208,6 +208,10 @@
        "Vary"          "Accept-Encoding"
        "Last-Modified" last-modified})))
 
+(defn lang-headers [resource-type]
+  (when (= :html resource-type)
+    {"Content-Language" (name i18n/*lang*)}))
+
 (def- never-cache #{:hashbang})
 
 (def default-lang (name i18n/default-lang))
@@ -226,7 +230,8 @@
        (->>
          (java.io.ByteArrayInputStream. (compose resource-type app lang theme))
          (resp/content-type (resource-type content-type))
-         (resp/set-headers (cache-headers resource-type)))
+         (resp/set-headers (cache-headers resource-type))
+         (resp/set-headers (lang-headers resource-type)))
        {:status 304})
      failure)))
 
@@ -234,7 +239,7 @@
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
-  (let [build-number (:build-number env/buildinfo)]
+  (let [build-number env/build-number]
     (if (= build build-number)
      (single-resource (keyword res-type) (keyword app) nil unauthorized)
      (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))

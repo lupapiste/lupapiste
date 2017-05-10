@@ -7,7 +7,7 @@
   (:import java.util.UUID))
 
 (def content-security-policy
-  (str "default-src 'self' https://*.lupapiste.fi" (when (env/dev-mode?) " ws://*") "; "
+  (str "default-src 'self' https://*.lupapiste.fi" (when (env/dev-mode?) " ws://*:*") "; "
        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.aspnetcdn.com https://www.googletagmanager.com https://tagmanager.google.com;"
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "img-src 'self' data: https://*.lupapiste.fi https://www.facebook.com;"

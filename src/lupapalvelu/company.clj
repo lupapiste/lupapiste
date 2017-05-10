@@ -56,7 +56,7 @@
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     ssc/Timestamp
               (sc/optional-key :campaign)    sc/Str
-              })
+              (sc/optional-key :locked)      ssc/Timestamp})
 
 (def company-skeleton ; required keys
   {:name nil
@@ -148,9 +148,13 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies
-  "Returns all data off all companies"
-  []
-  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :netbill :reference :document] (array-map :name 1)))
+  "Makes a company query. If query is not given, returns every
+  company."
+  ([] (find-companies {}))
+  ([query]
+   (mongo/select :companies query [:name :y :address1 :zip :po :accountType
+                                   :customAccountLimit :created :pop :ovt
+                                   :netbill :reference :document :locked] (array-map :name 1))))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -262,9 +266,30 @@
                           (get-in target-user [:company :id]))))
       unauthorized)))
 
+(defn locked? [{locked :locked} timestamp]
+  (boolean (and locked (> timestamp locked 0))))
+
+(defn company-not-locked
+  "Pre-check that fails for a locked company."
+  [{{company :company} :data created :created}]
+  (when (locked? (find-company-by-id! company) created)
+    (fail :error.company-locked)))
+
+(defn user-company-is-locked
+  "Pre-check that fails the user-associated company _is not_ locked."
+  [{user :user created :created}]
+  (when-not (locked? (find-company-by-id! (some-> user :company :id))
+                     created)
+    (fail :error.company-not-locked)))
+
 (defn delete-user!
   [user-id]
   (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}}))
+
+(defn delete-every-user! [company-id]
+  (mongo/update-by-query :users
+                         {:company.id company-id}
+                         {$set {:enabled false}, $unset {:company 1}}))
 
 (defn update-user! [user-id role submit]
   (mongo/update-by-id :users user-id {$set {:company.role role
@@ -366,14 +391,17 @@
     (link-user-to-company! (:id user) (:id company) role submit))
   (ok))
 
-(defn company->auth [company]
-  (some-> company
-          (select-keys [:id :name :y])
-          (assoc :role      "writer"
-                 :type      "company"
-                 :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
-                 :firstName (:name company)
-                 :lastName  "")))
+(defn company->auth
+  "No auth if company is currently locked."
+  [company]
+  (when-not (locked? company (now))
+      (some-> company
+           (select-keys [:id :name :y])
+           (assoc :role      "writer"
+                  :type      "company"
+                  :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
+                  :firstName (:name company)
+                  :lastName  ""))))
 
 (defn company-invitation-token [caller company-id application-id]
   (token/make-token

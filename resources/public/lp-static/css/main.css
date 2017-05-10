@@ -801,6 +801,10 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-heart:before {
+  content: "\e927";
+}
+
 .lupicon-lock-open-fully:before {
   content: "\e926";
 }
@@ -6522,7 +6526,7 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
 }
 
 .radio-field-wrapper {
-  display: inline;
+  display: inline-block;
   box-sizing: border-box;
   border: 1px solid #dddddd;
 }
@@ -7584,6 +7588,18 @@ input.form-input.inline, input.inline.form-input--inline {
   display: inline;
   width: 48px;
   margin: 0 4px;
+}
+
+.form-warning-message {
+  color: #df3215;
+  line-height: 24px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.form-warning-message span {
+  margin-left: 3px;
+  vertical-align: top;
 }
 
 .group-buttons {
@@ -15062,6 +15078,17 @@ span.icon_clear:before {
   content: "\2026";
 }
 
+.application_summary_text .warning-message {
+  color: #df3215;
+  line-height: 24px;
+  margin-top: 6px;
+}
+
+.application_summary_text .warning-message span {
+  margin-left: 3px;
+  vertical-align: top;
+}
+
 .edit-handlers-container {
   min-height: 280px;
   width: 80px;
@@ -15647,6 +15674,11 @@ div.foreman-history-container {
   margin-bottom: 15px;
 }
 
+.map-select-info .warning-message {
+  color: #df3215;
+  margin-bottom: 15px;
+}
+
 .create-application-map {
   position: relative;
   background: white;
@@ -15793,6 +15825,89 @@ div.foreman-history-container {
 .create-help.lupicon-circle-question:before {
   vertical-align: top;
   font-size: 44px;
+}
+
+.copy-selection-wrapper {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.copy-selection-verified {
+  width: 100%;
+  display: block;
+  border: 1px solid #2ca92c;
+  background-color: #f6f6f6;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.copy-selection-verified [class^="lupicon-"].right,
+.copy-selection-verified [class*="lupicon-"].right {
+  margin-right: 6px;
+  float: right;
+}
+
+.copy-state-indication {
+  margin: 0 0 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+}
+
+.copy-state-indication div {
+  height: 24px;
+}
+
+.copy-state-indication div .active-phase {
+  color: white;
+  background-color: #2ca92c;
+}
+
+.copy-state-indication div .active-phase:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.copy-state-indication div .completed-phase {
+  color: white;
+  background-color: #555555;
+}
+
+.copy-state-indication div .completed-phase:after {
+  border-left: 11px solid #555555;
+}
+
+.copy-state-indication div span {
+  background-color: #f6f6f6;
+  color: #909090;
+  position: relative;
+  padding: 4px 8px 4px 24px;
+  display: inline-block;
+  margin: 0px -4px 0 0;
+  border: none;
+}
+
+.copy-state-indication div span:first-child {
+  padding: 4px 8px 4px 8px;
+}
+
+.copy-state-indication div span:last-child:after {
+  border-left: none;
+}
+
+.copy-state-indication div span:after {
+  display: inline-block;
+  position: absolute;
+  content: " ";
+  width: 0;
+  height: 0;
+  top: -1px;
+  right: -9px;
+  border-top: 17px solid transparent;
+  border-left: 11px solid #f6f6f6;
+  border-bottom: 17px solid transparent;
+  z-index: 1;
 }
 
 /* attachments */
@@ -16381,8 +16496,12 @@ td.comment-text {
   box-sizing: border-box;
 }
 
+.admin section#admin .container, .admin nav.nav-wrapper .container {
+  max-width: 1400px;
+}
+
 .admin .page {
-  margin-top: 130px;
+  margin-top: 150px;
 }
 
 .admin .users-table .filters {
@@ -17527,8 +17646,8 @@ div.attachment-multiselect-content tr.attachment-group-header {
   font-size: 18px;
 }
 
-#stamping-component-container .stamp-status .icon {
-  margin-left: 6px;
+#stamping-component-container .stamp-status i {
+  padding-right: 6px;
 }
 
 #stamping-component-container form#stamp-info select {

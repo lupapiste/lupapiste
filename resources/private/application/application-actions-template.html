@@ -138,6 +138,14 @@
                     data-test-id="decline-invite-button">
                 <span data-bind="ltext: 'applications.declineInvite'"></span>
             </button>
-        <!-- /ko -->
+       <!-- /ko -->
+       <!-- ko if: $root.authorization.ok("copy-application") -->
+            <button class="function"
+                    data-bind="click: copy, enable: $root.authorization.ok('copy-application')"
+                    data-test-id="copy-application-button">
+              <i class="lupicon-copy"></i>
+              <span data-bind="ltext: 'application.copy'"></span>
+            </button>
+      <!-- /ko -->
     </div>
 </script>

@@ -46,6 +46,12 @@
                  :data (contains {:rows (comp (partial = 1) count)
                                   :total 6
                                   :display 1
+                                  :echo "123"})}))
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 6 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "SoNJa"})
+   => (contains {:ok true
+                 :data (contains {:rows (comp (partial = 1) count)
+                                  :total 6
+                                  :display 1
                                   :echo "123"})})))
 
 (facts "Check passwords"
@@ -389,7 +395,7 @@
                 :content-type :json
                 :follow-redirects false
                 :throw-exceptions false}
-        resp   (http-post (str (server-address) "/api/reset-password") params) => http200?
+        resp (http-post (str (server-address) "/api/reset-password") params) => http200?
         email  (last-email)]
     (-> resp decode-response :body) => ok?
     (:to email) => (contains (email-for "pena"))

@@ -8,6 +8,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.permit :as permit]
             [sade.util :as util]
             [sade.env :as env]))
 
@@ -81,7 +82,10 @@
   {:pre-checks [(action/some-pre-check
                   inspection-summary/inspection-summary-api-authority-pre-check
                   inspection-summary/inspection-summary-api-applicant-pre-check)
-                inspection-summary/application-has-R-permit-type-pre-check]
+                inspection-summary/application-has-R-permit-type-pre-check
+                (action/not-pre-check (partial permit/valid-permit-types
+                                               {:R ["tyonjohtaja-hakemus"
+                                                    "tyonjohtaja-ilmoitus"]}))]
    :parameters [:id]
    :categories #{:inspection-summaries}
    :states states/post-verdict-states

@@ -1,6 +1,7 @@
 LUPAPISTE.PublishApplicationModel = function(params) {
   "use strict";
   var self = this;
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.authModel = params.authModel;
   self.appId     = params.appId;
@@ -33,11 +34,11 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.canMoveToVerdictGiven = ko.pureComputed(function() {
     // TODO bulletin state check in backend
-    return self.authModel.ok("move-to-verdict-given") && self.bulletinState() === "proclaimed";
+    return self.authModel.ok("move-to-verdict-given");
   });
 
   self.canMoveToFinal = ko.pureComputed(function() {
-    return self.authModel.ok("move-to-final") && self.bulletinState() === "verdictGiven";
+    return self.authModel.ok("move-to-final");
   });
 
   self.showBulletinState = ko.pureComputed(function() {
@@ -46,5 +47,9 @@ LUPAPISTE.PublishApplicationModel = function(params) {
 
   self.canNotPublishForAuthority = ko.pureComputed(function() {
     return !self.canMoveToProclaimed() && !self.canMoveToVerdictGiven() && !self.canMoveToFinal();
+  });
+
+  self.addHubListener({eventType:"publishBulletinService::publishProcessed", status: "success"}, function() {
+    self.authModel.refresh(self.appId());
   });
 };

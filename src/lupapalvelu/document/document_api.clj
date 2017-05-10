@@ -313,16 +313,20 @@
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created))
 
 (defcommand set-company-to-document
-  {:parameters [id documentId companyId path]
-   :categories #{:documents}
-   :user-roles #{:applicant :authority}
+  {:description "Updates company information on the document.The
+  contact person information is filled only if either the current user
+  is a company member or the application has a company member in the
+  auth array. Otherwise, left empty."
+   :parameters       [id documentId companyId path]
+   :categories       #{:documents}
+   :user-roles       #{:applicant :authority}
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(document-in-application-validator :documentId)
-                (editable-by-state? :documentId states/update-doc-states)
-                validate-user-authz-by-document-id
-                application/validate-authority-in-drafts
-                (doc-disabled-validator :documentId)]}
+   :pre-checks       [(document-in-application-validator :documentId)
+                      (editable-by-state? :documentId states/update-doc-states)
+                      validate-user-authz-by-document-id
+                      application/validate-authority-in-drafts
+                      (doc-disabled-validator :documentId)]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
     (doc-persistence/do-set-company-to-document application document companyId path (user/get-user-by-id (:id user)) created)

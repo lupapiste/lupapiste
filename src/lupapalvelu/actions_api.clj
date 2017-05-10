@@ -18,7 +18,7 @@
 (defquery allowed-actions
   {:user-roles       #{:anonymous}
    :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :org-authz-roles  (with-meta roles/reader-org-authz-roles {:skip-validation true})}
   [command]
   (ok :actions (->> (action/foreach-action command)
                     (action/validate-actions))))
@@ -27,7 +27,7 @@
   {:description      "Returns map of allowed actions for a category (attachments, tasks, etc.)"
    :user-roles       #{:anonymous}
    :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :org-authz-roles  (with-meta roles/reader-org-authz-roles {:skip-validation true})}
   [command]
   (if-let [actions-by-id (action/allowed-actions-for-category command)]
     (ok :actionsById actions-by-id)

@@ -182,7 +182,7 @@ Make the first batch row to match an empty template
   Select type  0  Valtakirja
   Fill test id  batch-contents-0  My contents
   Click label by test id  batch-sign-0-label  # Not signed
-  Sleep  0.5s     # wait for "My contents" to reach it's observable
+  Sleep  0.5s     # wait for "My contents" to reach its observable
 
 Pena is ready
   Scroll and click test id  batch-ready
@@ -192,6 +192,11 @@ Pena is ready
   Wait until  Element should not be visible  jquery=div.batch-bad-files li strong
   No such test id  upload-progress-title
   Wait until  Element should not be visible  jquery=table.attachment-batch-table
+
+Conversation shows three attachments
+  Open side panel  conversation
+  jQuery should match X times  div.is-comment.attachment  3
+  Close side panel  conversation
 
 Upload attachments results: still empty
   Empty attachment  paapiirustus.asemapiirros

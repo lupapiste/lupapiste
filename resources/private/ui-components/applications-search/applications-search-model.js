@@ -121,13 +121,15 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     return self.noApplications() ? "applications.empty.desc" : "applications.no-match.desc";
   });
 
-  // clear filters when search type is changed
+  // clear filters when search type is changed.
+  // Note: assignments view does not support default filter.
   self.searchType.subscribe(function(val) {
     self.dataProvider.clearFilters();
     if (val === "foreman") {
       self.dataProvider.setDefaultForemanSort();
       lupapisteApp.services.applicationFiltersService.reloadDefaultForemanFilter();
-    } else {
+    }
+    if (val === "applications"){
       self.dataProvider.setDefaultSort();
       lupapisteApp.services.applicationFiltersService.reloadDefaultFilter();
     }

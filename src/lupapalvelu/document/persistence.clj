@@ -324,14 +324,23 @@
           (fail! :error.user-not-found)))
       (fail :error.document-not-found))))
 
+(defn- company-fields [{auth :auth} company-id user]
+  (merge (company/find-company-by-id company-id)
+         (dissoc (if (= company-id (some-> user :company :id))
+                   user
+                   (let [auth-ids (set (map :id auth))]
+                     (util/find-first #(contains? auth-ids (:id %))
+                                      (company/find-company-users company-id))))
+                 :zip)))
+
 (defn do-set-company-to-document [application document company-id path user timestamp]
   {:pre [document]}
   (when-not (ss/blank? company-id)
     (let [path-arr (if-not (ss/blank? path) (s/split path #"\.") [])
           schema (schemas/get-schema (:schema-info document))
-          subject (company/find-company-by-id company-id)
-          ;; Company contact person fields are filled with the current user's data.
-          company (tools/unwrapped (model/->yritys (merge subject (dissoc user :zip)) :with-empty-defaults true))
+          company (tools/unwrapped (model/->yritys (company-fields application
+                                                                   company-id user)
+                                                   :with-empty-defaults true))
           model (if (seq path-arr)
                   (assoc-in {} (map keyword path-arr) company)
                   company)

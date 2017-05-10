@@ -214,9 +214,10 @@ Change attachment type
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Positive indicator should be visible
+  Positive indicator should not be visible
   Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
   Scroll to test id  back-to-application-from-attachment
-  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Click element  xpath=//a[@data-test-id='back-to-application-from-attachment']
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  jquery=tr[data-test-type='muut.muu'] a[data-test-id='open-attachment']
 
@@ -233,13 +234,14 @@ Mikko adds another attachment and signs it as single attachment
   Input text by test id  signSingleAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachment
   Wait Until   Element should not be visible  signSingleAttachmentPassword
+  Wait for jQuery
 
 One signature is visible in attachment page
   [Tags]  attachments
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  1
-  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
-  Element text should be  xpath=//section[@id="attachment"]//*/span[@data-test-id="attachment-signature-version"]  1.0
-  Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-date"]
+  Element text should be  xpath=//section[@id="attachment"]//div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
+  Element text should be  xpath=//section[@id="attachment"]//span[@data-test-id="attachment-signature-version"]  1.0
+  Element should be visible  xpath=//section[@id="attachment"]//div[@data-test-id="attachment-signature-date"]
   Return to application
 
 Signature icon is visible in attachments tab, and only one

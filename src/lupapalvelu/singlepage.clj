@@ -71,7 +71,7 @@
       :templates (concat (:templates c) (enlive/select h [:script.ko-template])))))
 
 (defn- resource-url [component kind]
-  (str (kind (env/value :cdn)) (:build-number env/buildinfo) "/" (name component) "." (name kind)))
+  (str (kind (env/value :cdn)) env/build-number "/" (name component) "." (name kind)))
 
 (def- buildinfo-summary
   (format "%s %s [%s] %4$tF %4$tT (%5$s)"
@@ -97,6 +97,7 @@
 (defn inject-content [t {:keys [nav info page footer templates]} component lang theme]
   (-> t
       (set-body-class component theme)
+      (enlive/transform [:html] #(assoc-in % [:attrs :lang] (name lang)))
       (enlive/transform [:nav] (enlive/content (map :content nav)))
       (enlive/transform [:div.notification] (enlive/content (map :content info)))
       (enlive/transform [:section] (enlive/content page))
@@ -106,7 +107,7 @@
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
       (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
       (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
-      (enlive/transform [:link#main-css] (fn [e] (update-in e [:attrs :href] #(str % "?b=" (:build-number env/buildinfo)))))
+      (enlive/transform [:link#main-css] (fn [e] (update-in e [:attrs :href] #(str % "?b=" env/build-number))))
       (enlive/transform [:div.ko-templates] (enlive/content templates))
       enlive/emit*))
 

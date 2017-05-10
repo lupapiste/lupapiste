@@ -10,6 +10,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.model :as doc-model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
@@ -20,7 +21,13 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.document.schemas :as schemas]))
+
+(def building-fields
+  (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (cons :valtakunnallinenNumero)))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -35,6 +42,89 @@
 
 (defn- get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
+
+(defn- applicant-field-values [applicant {:keys [name] :as element}]
+  (if (contains? applicant :henkilo)
+    (case (keyword name)
+      :_selected "henkilo"
+      :userId nil
+      :etunimi (get-in applicant [:henkilo :nimi :etunimi])
+      :sukunimi (get-in applicant [:henkilo :nimi :sukunimi])
+      :hetu (get-in applicant [:henkilo :henkilotunnus])
+      :turvakieltoKytkin (boolean (:turvakieltoKytkin applicant))
+      :katu (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
+      :postinumero (get-in applicant [:henkilo :osoite :postinumero])
+      :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
+      :puhelin (get-in applicant [:henkilo :puhelin])
+      :email (get-in applicant [:henkilo :sahkopostiosoite])
+      (tools/default-values element))
+    (let [postiosoite (or
+                        (get-in applicant [:yritys :postiosoite])
+                        (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
+      (case (keyword name)
+        :_selected "yritys"
+        :companyId nil
+        :yritysnimi (get-in applicant [:yritys :nimi])
+        :liikeJaYhteisoTunnus (get-in applicant [:yritys :liikeJaYhteisotunnus])
+        :katu (get-in postiosoite [:osoitenimi :teksti])
+        :postinumero (get-in postiosoite [:postinumero])
+        :postitoimipaikannimi (get-in postiosoite [:postitoimipaikannimi])
+        :turvakieltoKytkin (boolean (:turvakieltoKytkin applicant))
+        :puhelin (get-in applicant [:yritys :puhelin])
+        :email (get-in applicant [:yritys :sahkopostiosoite])
+        :verkkolaskuTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus])
+        :ovtTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :ovtTunnus])
+        :valittajaTunnus (get-in applicant [:yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus])
+        (tools/default-values element)))))
+
+(defn applicant->applicant-doc [applicant]
+  (let [schema         (schema/get-schema 1 "hakija-r")
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
+        unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
+
+(defn designer->designer-doc [designer schema-name]
+  (let [schema         (schema/get-schema 1 schema-name)
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values designer))}
+        unset-type     (if (contains? designer :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
+
+(defn osapuoli->osapuoli-doc [maksaja schema-name]
+  (let [schema         (schema/get-schema 1 schema-name)
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values maksaja))}
+        unset-type     (if (contains? maksaja :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
+
+
+(defn- suunnittelijaRoolikoodi->doc-schema [koodi]
+  (cond
+    (= koodi "p\u00e4\u00e4suunnittelija") "paasuunnittelija"
+    :default                               "suunnittelija"))
+
+(defn- osapuoli-kuntaRoolikoodi->doc-schema [koodi]
+  (cond
+    (= koodi "Rakennusvalvonta-asian laskun maksaja") "maksaja"
+    (= koodi "Hakijan asiamies")                      "asiamies"))
+
+(defn- osapuoli->party-document [party]
+  (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
+    (osapuoli->osapuoli-doc party schema-name)))
+
+(defn- suunnittelija->party-document [party]
+  (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
+    (designer->designer-doc party schema-name)))
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants authorize-applicants]
 
@@ -103,21 +193,50 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
+(defn- document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (lupapalvelu.document.model/map2updates [] data)]
+    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
+(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
+  (map
+    (fn [{:keys [data]}]
+      (remove empty? (conj (doc-model/map2updates [] (select-keys data building-fields))
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [["tunnus"] (:rakennusnro data)])
+                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                             [["kuvaus"] rakennusvalvontaasianKuvaus])
+                           (when-not (ss/blank? vahainenPoikkeaminen)
+                             [["poikkeamat"] vahainenPoikkeaminen])))) buildings))
+
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
-  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
-        manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
-                                                                    (when-not (ss/blank? rakennusvalvontaasianKuvaus)
-                                                                      [["kuvaus"] rakennusvalvontaasianKuvaus])
-                                                                    (when-not (ss/blank? vahainenPoikkeaminen)
-                                                                      [["poikkeamat"] vahainenPoikkeaminen])))}
-        municipality (p/municipality-id-by-property-id (:propertyId location-info))
+  (let [{:keys [hakijat]} app-info
+        buildings-and-structures (building-reader/->buildings-and-structures xml)
+        document-datas (schema-datas app-info buildings-and-structures)
+        manual-schema-datas {"aiemman-luvan-toimenpide" (first document-datas)}
         command (update-in command [:data] merge
-                  {:operation operation :municipality municipality :infoRequest false :messages []}
+                  {:operation operation :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
+        new-parties (remove empty?
+                            (concat (map suunnittelija->party-document (:suunnittelijat app-info))
+                                    (map osapuoli->party-document (:muutOsapuolet app-info))))
+
+        structure-descriptions (map :description buildings-and-structures)
+        created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
+
+        ;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
+        created-application (update-in created-application [:documents] concat other-building-docs new-parties)
+        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
-
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
     ;; Get verdicts for the application
@@ -209,47 +328,6 @@
     (finally
       (mongo/disconnect!))))
 
-(defn- applicant-field-values [applicant {:keys [name] :as element}]
-  (if (contains? applicant :henkilo)
-    (case (keyword name)
-      :_selected "henkilo"
-      :userId nil
-      :etunimi (get-in applicant [:henkilo :nimi :etunimi])
-      :sukunimi (get-in applicant [:henkilo :nimi :sukunimi])
-      :hetu (get-in applicant [:henkilo :henkilotunnus])
-      :turvakieltoKytkin (or (:turvakieltoKytkin applicant) false)
-      :katu (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
-      :postinumero (get-in applicant [:henkilo :osoite :postinumero])
-      :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
-      :puhelin (get-in applicant [:henkilo :puhelin])
-      :email (get-in applicant [:henkilo :sahkopostiosoite])
-      (tools/default-values element))
-    (let [postiosoite (or
-                        (get-in applicant [:yritys :postiosoite])
-                        (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
-      (case (keyword name)
-        :_selected "yritys"
-        :companyId nil
-        :yritysnimi (get-in applicant [:yritys :nimi])
-        :liikeJaYhteisoTunnus (get-in applicant [:yritys :liikeJaYhteisotunnus])
-        :katu (get-in postiosoite [:osoitenimi :teksti])
-        :postinumero (get-in postiosoite [:postinumero])
-        :postitoimipaikannimi (get-in postiosoite [:postitoimipaikannimi])
-        :turvakieltoKytkin (or (:turvakieltoKytkin applicant) false)
-        :puhelin (get-in applicant [:yritys :puhelin])
-        :email (get-in applicant [:yritys :sahkopostiosoite])
-        (tools/default-values element)))))
-
-(defn- applicant->applicant-doc [applicant]
-  (let [schema         (schema/get-schema 1 "hakija-r")
-        default-values (tools/create-document-data schema tools/default-values)
-        document       {:id          (mongo/create-id)
-                        :created     (now)
-                        :schema-info (:info schema)
-                        :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
-        unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
-    (assoc-in document [:data unset-type] (unset-type default-values))))
-
 (defn fix-prev-permit-applicants []
   (when @mongo/connection
     (throw "Mongo already connected, aborting"))
@@ -280,3 +358,18 @@
     (println "fixed" @fix-prev-permit-counter "applications")
     (finally
       (mongo/disconnect!))))
+
+(defn- ->op-document [{:keys [schema-version] :as application} building]
+  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (lupapalvelu.document.model/map2updates [] (select-keys building building-fields))]
+    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
+(defn extend-prev-permit-with-all-parties
+  [application app-xml app-info]
+  (let [new-parties (concat (map suunnittelija->party-document (:suunnittelijat app-info))
+                            (map osapuoli->party-document (:muutOsapuolet app-info)))
+        buildings (building-reader/->buildings app-xml)]
+      {:new-op-documents (map (partial ->op-document application) buildings)
+       :new-parties new-parties}))

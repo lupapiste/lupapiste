@@ -24,12 +24,13 @@ Olli approves operation
 Olli rejects period with note
   Reject with note  ymp-ilm-kesto  ymp-ilm-kesto  Too noisy, too long!
 
-Olli adds and approves attachment
+Olli adds approved attachment
   Open tab  attachments
   Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
   Open attachment details  muut.muu
   Wait Until  Element Should Be Visible  test-attachment-approve
-  Click button  test-attachment-approve
+  Wait Until  Element Should Be Disabled  test-attachment-approve
+  Attachment is  approved
   Return to application
 
 Olli publishes bulletin
@@ -40,6 +41,7 @@ Olli publishes bulletin
 Olli opens bulletin and checks that not icons are visible
   Wait until  Click link  jquery=td.actions a[target=_blank]
   Select window  new
+  Wait until  Element should be visible  bulletin-component
   No icons  info
   No icons  attachments
 

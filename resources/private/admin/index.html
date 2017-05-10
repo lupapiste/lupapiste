@@ -12,7 +12,9 @@
                     <li><a class="link-btn" href="#!/admin" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('admin')}">XML-lataus</a></li>
                     <li><a class="link-btn" href="#!/users" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('users')}" data-test-id="users">K&auml;ytt&auml;j&auml;t</a></li>
                     <li><a class="link-btn" href="#!/organizations" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('organizations')}">Organisaatiot</a></li>
-                    <li><a class="link-btn" href="#!/companies" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('companies')}">Yritykset</a></li>
+                    <li><a class="link-btn" href="#!/companies"
+                           data-test-id="companies"
+                           data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('companies')}">Yritykset</a></li>
                     <li><a class="link-btn" href="#!/features" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('features')}">Feature-flagit</a></li>
                     <li><a class="link-btn" href="#!/actions" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('actions')}">Toiminnot</a></li>
                     <li><a class="link-btn" href="#!/single-sign-on-keys" data-bind="css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('single-sign-on-keys')}">SSO-avaimet</a></li>

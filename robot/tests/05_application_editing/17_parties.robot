@@ -51,7 +51,7 @@ Roles and levels are localized
 
 Pena executes test scenario
   Test scenario
-  [Teardown]  Logout
+  Logout
 
 Sonja logs in
   Sonja logs in
@@ -59,7 +59,10 @@ Sonja logs in
 
 Sonja executes test scenario
   Test scenario
-  [Teardown]  Logout
+  Logout
+
+Frontend errors check
+  There are no frontend errors
 
 *** Keywords ***
 
@@ -68,9 +71,12 @@ Test scenario
   No remove button
   Add hakija-r
   Two remove buttons
-  Scroll and click  ${remove-button}:first
+  Scroll to  ${remove-button}:first
+  Click element  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[1]
+  Wait until  Element should be visible  modal-dialog-content
   Deny yes no dialog
-  Scroll and click  ${remove-button}:last
+  Scroll to  ${remove-button}:last
+  Click element  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[2]
   Confirm yes no dialog
   No remove button
 

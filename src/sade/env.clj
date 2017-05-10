@@ -2,11 +2,13 @@
   (:require [clojure.string :as s]
             [clojure.java.io :as io]
             [clojure.walk :as walk]
+            [clj-time.format :as timeformat]
             [sade.core :refer [def-]]
             [sade.util :as util]
             [sade.strings :as ss])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
-           [org.jasypt.properties EncryptableProperties]))
+           [org.jasypt.properties EncryptableProperties]
+           [org.joda.time DateTime]))
 
 (defn- try-to-open [in]
   (when in
@@ -23,6 +25,12 @@
       "local"))
 
 (def target-env (parse-target-env (:build-tag buildinfo)))
+
+(def build-number (str (->> (:time buildinfo)
+                            (DateTime.)
+                            (timeformat/unparse (timeformat/formatter "YYYYMMdd")))
+                       "-"
+                       (:build-number buildinfo)))
 
 (def file-separator (System/getProperty "file.separator"))
 

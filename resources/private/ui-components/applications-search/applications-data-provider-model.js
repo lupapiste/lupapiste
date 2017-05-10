@@ -41,12 +41,19 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   self.searchStartDate = ko.observable();
   self.searchEndDate = ko.observable();
 
-  // Application <-> foremanApplication
-  // foremanNotice -> application
+  var latestSearchType = null;
+
+  // Application   <-> foremanApplication
+  // foremanNotice  -> application
+  // construction   -> all
   self.updateSearchResultType = function( searchType ) {
     var current = self.searchResultType();
-    if( searchType === "foreman" && current === "application") {
-      self.searchResultType( "foremanApplication");
+    latestSearchType = searchType;
+    if( searchType === "foreman" ) {
+      self.searchResultType( _.get( {application: "foremanApplication",
+                                     construction: "all"},
+                                    current,
+                                    current ));
     } else {
       if( searchType === "applications" && _.startsWith( current, "foreman")) {
         self.searchResultType( "application");
@@ -157,11 +164,14 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     }
     // Create dependency to the observable
     var fields = searchFields();
+    var currentSearchType = latestSearchType;
     if( self.initialized() && cacheMiss()) {
       ajax.datatables("applications-search", fields)
       .success(function( res ) {
-        fieldsCache = _.cloneDeep(fields);
-        self.onSuccess( res );
+        if( currentSearchType === latestSearchType ) {
+          fieldsCache = _.cloneDeep(fields);
+          self.onSuccess( res );
+        }
       })
       .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)

@@ -599,12 +599,12 @@
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role "dummy"}
 
-   ;; Yrityksen admin
-
+   ;; Solita company admin
+   ;; kaino@solita.fi  / kaino123
    {:id "kainosolita"
     :enabled true
     :language "fi"
-    :username "kaino@solita.fi" ; / kaino123
+    :username "kaino@solita.fi" ;
     :firstName "Kaino"
     :lastName "Solita"
     :email "kaino@solita.fi"
@@ -617,6 +617,24 @@
     :architect true
     :company {:id "solita" :role "admin" :submit true}}
 
+   ;; Esimerkki company admin
+   ;; erkki@example.com / esimerkki
+   {:id "erkkiesimerkki"
+    :enabled true
+    :language "fi"
+    :username "erkki@example.com" ;
+    :firstName "Erkki"
+    :lastName "Esimerkki"
+    :phone "5566677"
+    :email "erkki@example.com"
+    :street "Merkintie 88"
+    :zip "12345"
+    :city "Humppila"
+    :private {:password "$2a$10$XzjXRA80jV.O3v35cOmtc.Teqqk.1.d8rBd3P52UCfa2C/oiVeeVG"
+              :apikey "502cb9e58426c613c8b85eba"}
+    :role "applicant"
+    :architect true
+    :company {:id "esimerkki" :role "admin" :submit true}}
    ])
 
 (def- ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
@@ -1227,7 +1245,22 @@
                  :ovt "003710601555"
                  :pop "BAWCFI22"
                  :reference "Lupis"
-                 :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"}])
+                 :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"}
+                {:_id "esimerkki"
+                 :accountType "account5"
+                 :customAccountLimit nil
+                 :created 1493200035783
+                 :name "Esimerkki Oy"
+                 :address1 "Merkintie 88"
+                 :zip "12345"
+                 :po "Humppila"
+                 :country "Suomi"
+                 :y "7208863-8"
+                 :netbill "samplebilling"
+                 :ovt "003710601555"
+                 :pop "BAWCFI22"
+                 :reference "Esim"
+                 :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQMF3"}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

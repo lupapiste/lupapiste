@@ -45,7 +45,13 @@
                               <!-- Property ID: -->
                               <div>
                                 <p data-bind="ltext: 'application.property'"></p>
-                                <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+                                <div class="application_summary_text">
+                                  <div data-bind="propertyId: propertyId" data-test-id="application-property-id"></div>
+                                  <div class="warning-message" data-bind="visible: propertyIdSource() === 'user'">
+                                    <i class="lupicon-circle-attention negative"></i>
+                                    <span data-bind="ltext: 'application.property-id.entered-manually'"></span>
+                                  </div>
+                                </div>
                               </div>
 
                               <!-- Municipality: -->
