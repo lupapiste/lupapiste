@@ -17,13 +17,16 @@
 
 
 (facts "Buildings exist with operation id"
-  (let [xml (xml/parse (slurp "resources/krysp/dev/buildings-with-operationIds.xml"))
-        buildings (->buildings-summary xml)
-        rakennus (first buildings)
+  (let [xml        (xml/parse (slurp "resources/krysp/dev/buildings-with-operationIds.xml"))
+        buildings  (->buildings-summary xml)
+        rakennus   (first buildings)
         rakennelma (second buildings)]
 
     (:operationId rakennus) => "abcdefghijklmnopqr"
-    (:operationId rakennelma) => "56c72f3cf165623f0132a28b"))
+    (:operationId rakennelma) => "56c72f3cf165623f0132a28b"
+    (fact "Index used as description if needed"
+      (:description rakennus) => "Talo A, Toinen selite"
+      (:description rakennelma) => "3")))
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (xml/parse (slurp "dev-resources/krysp/building-2.1.2.xml"))
@@ -122,7 +125,7 @@
              (let [simple-group (group-xml "resources/krysp/dev/r-verdict-review.xml")]
                (keys simple-group) => ["LP-186-2014-90009"]
                (->buildings-summary (get simple-group "LP-186-2014-90009"))
-               => [{:description  nil,
+               => [{:description  "1",
                     :localShortId "001",
                     :buildingId   "001",
                     :index        "1",
@@ -137,7 +140,7 @@
              (let [fc-group (group-xml "resources/krysp/dev/feature-collection.xml")]
                (keys fc-group) => (contains ["LP-020-2016-22222" "LP-020-2016-99999"] :in-any-order)
                               (->buildings-summary (get fc-group "LP-020-2016-22222"))
-                              => [{:description  nil,
+                              => [{:description  "001",
                                    :localShortId "002",
                                    :buildingId   "1987654324",
                                    :index        "001",
@@ -149,7 +152,7 @@
                                    :propertyId   "02054321",
                                    :operationId  nil}]
                               (->buildings-summary (get fc-group "LP-020-2016-99999"))
-                              => [{:description  nil,
+                              => [{:description  "001",
                                    :localShortId nil,
                                    :buildingId   "1234567892",
                                    :index        "001",
@@ -164,7 +167,7 @@
              (let [fc-group (group-xml "resources/krysp/dev/feature-collection-having-boundedby.xml")]
                (keys fc-group) => (contains ["LP-020-2016-22222" "LP-020-2016-99999"] :in-any-order)
                (->buildings-summary (get fc-group "LP-020-2016-22222"))
-               => [{:description  nil,
+               => [{:description  "001",
                     :localShortId "002",
                     :buildingId   "1987654324",
                     :index        "001",
@@ -176,7 +179,7 @@
                     :propertyId   "02054321",
                     :operationId  nil}]
                (->buildings-summary (get fc-group "LP-020-2016-99999"))
-               => [{:description  nil,
+               => [{:description  "001",
                     :localShortId nil,
                     :buildingId   "1234567892",
                     :index        "001",
