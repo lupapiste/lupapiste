@@ -1096,6 +1096,6 @@
 "link-permit.same-property" "en" "Display only applications with the same property code that is used in this application"
 "link-permit.same-property" "fi" "Näytä vain hakemukset, joilla on sama kiinteistötunnus kuin tällä hakemuksella"
 "link-permit.same-property" "sv" "Visa endast ansökningar, med samma fastighetsbeteckning som denna ansökan"
-"application.property-id.entered-manually" "en" ""
+"application.property-id.entered-manually" "en" "Property ID entered manually!"
 "application.property-id.entered-manually" "fi" "Kiinteistötunnus syötetty käsin!"
-"application.property-id.entered-manually" "sv" ""
+"application.property-id.entered-manually" "sv" "Fastighetsbeteckning angiven för hand!"
