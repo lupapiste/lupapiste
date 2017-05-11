@@ -16,7 +16,7 @@
 (defn- refresh
   ([] (refresh nil))
   ([cb]
-   (query :stamp-templates
+   (query :custom-stamps
           (fn [data]
             (swap! component-state assoc :stamps (:stamps data))
             (when cb (cb data))))))
@@ -28,16 +28,18 @@
     (when (auth/ok? auth-model :stamp-templates) (refresh))
     init-state))
 
-(rum/defc new-stamp-button [editor-state]
+(rum/defc new-stamp-button [selected-stamp-id editor-state]
   [:button.positive
-   {:on-click #(swap! editor-state assoc :stamp state/empty-stamp)
+   {:on-click (fn []
+                (reset! selected-stamp-id nil)
+                (swap! editor-state assoc :stamp state/empty-stamp))
     :data-test-id "open-create-stamp-bubble"}
    [:i.lupicon-circle-plus]
    [:span (loc "stamp-editor.new-stamp.button")]])
 
 (rum/defc stamp-select < rum/reactive
   [stamps selection]
-  (uc/select update-stamp-view
+  (uc/select state/update-stamp-view
              "stamp-select"
              (rum/react selection)
              (cons ["" (loc "choose")]
@@ -50,7 +52,7 @@
          false)))
 
 (rum/defc edit-stamp-bubble < rum/reactive
-          [visible? editor-state]
+          [editor-state]
           (let [drag-element (rum/cursor editor-state :drag-element)
                 debug-data (rum/cursor editor-state :debug-data)
                 stamp-in-editor (rum/cursor editor-state :stamp)
@@ -74,21 +76,21 @@
                                   :drag-source drag-element})
                       idx))]]]])))
 
-(rum/defc stamp-editor
-  [global-auth-model]
+
+(rum/defc stamp-editor < rum/reactive
   {:init init
    :will-unmount (fn [& _] (reset! component-state empty-component-state))}
+  [global-auth-model]
   (let [stamps            (rum/cursor component-state :stamps)
-        selected-stamp-id (rum/cursor-in component-state [:view :selected-stamp-id])
-        bubble-visible    (rum/cursor-in component-state [:view :bubble-visible])
-        editor-state      (rum/cursor-in component-state [:editor])]
+        editor-state      (rum/cursor component-state :editor)
+        selected-stamp-id (rum/cursor component-state :selected-stamp-id)]
     [:div
      [:h1 (loc "stamp-editor.tab.title")]
      [:div
       (stamp-select stamps selected-stamp-id)
-      (new-stamp-button editor-state)]
+      (new-stamp-button selected-stamp-id editor-state)]
      [:div.row.edit-stamp
-      (edit-stamp-bubble bubble-visible editor-state)]]))
+      (edit-stamp-bubble editor-state)]]))
 
 (defonce args (atom {}))
 

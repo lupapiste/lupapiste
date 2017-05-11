@@ -13,8 +13,7 @@
                                []]})
 
 (def empty-component-state {:stamps []
-                            :view {:bubble-visible false
-                                   :selected-stamp-id nil}
+                            :selected-stamp-id nil
                             :editor {:drag-element nil
                                      :closest-element []
                                      :stamp {}}})
@@ -22,11 +21,6 @@
 (defonce component-state  (atom empty-component-state))
 
 (defn update-stamp-view [id]
-  (swap! component-state assoc-in [:view :selected-stamp-id] id))
-
-(def selected-stamp (rum-util/derived-atom
-                      [component-state]
-                      (fn [state]
-                        (or (-> (get-in state [:view :selected-stamp-id])
-                                (stamp-util/find-by-id (:stamps state)))
-                            empty-stamp))))
+  (swap! component-state (fn [state] (-> state
+                                         (assoc :selected-stamp-id id)
+                                         (assoc-in [:editor :stamp] (stamp-util/find-by-id id (:stamps state)))))))
