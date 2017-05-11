@@ -44,12 +44,12 @@
             <element name="Sijainti" type="ah:SijaintiType" maxOccurs="1" minOccurs="0"></element>
             <element name="Kiinteistotunnus" type="ah:KiinteistotunnusType" maxOccurs="1" minOccurs="0"></element>
         </sequence>
-        <attribute name="version" type="string">
+        <attribute name="version" type="string" use="required">
             <annotation>
                 <documentation>Käytettävän skeeman versio</documentation>
             </annotation>
         </attribute>
-        <attribute name="messageId" type="string">
+        <attribute name="messageId" type="string" use="required">
             <annotation>
                 <documentation>Lähettäjän määrittämä sanoman tunnus</documentation>
             </annotation>
