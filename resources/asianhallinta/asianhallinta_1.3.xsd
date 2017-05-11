@@ -28,7 +28,18 @@
             <element name="Liitteet" type="ah:LiitteetType" maxOccurs="1" minOccurs="0"></element>
             <element name="Asiointikieli" type="ah:KieliType" minOccurs="0"></element>
             <element name="Toimenpiteet" type="ah:ToimenpiteetType" maxOccurs="1" minOccurs="1"></element>
-            <element name="Lausunnot" type="ah:LausunnotType" maxOccurs="1" minOccurs="0"></element>
+            <choice minOccurs="0">
+                <element name="Lausunnot" type="ah:LausunnotType">
+                    <annotation>
+                        <documentation>Asian lausunnot, kun siirretään KasiteltavaHakemus/Tiedoksianto</documentation>
+                    </annotation>
+                </element>
+                <element name="Lausuntopyynto" type="ah:LausuntopyyntoType">
+                    <annotation>
+                        <documentation>Kun tyyppinä on Lausuntopyyntö</documentation>
+                    </annotation>
+                </element>
+            </choice>
             <element name="Viiteluvat" type="ah:ViiteluvatType" maxOccurs="1" minOccurs="0"></element>
             <element name="Sijainti" type="ah:SijaintiType" maxOccurs="1" minOccurs="0"></element>
             <element name="Kiinteistotunnus" type="ah:KiinteistotunnusType" maxOccurs="1" minOccurs="0"></element>
