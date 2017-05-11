@@ -2,12 +2,19 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.auth-admin.stamp.form-entry :refer [form-entry]]
             [lupapalvelu.ui.auth-admin.stamp.state :as state]
-            [lupapalvelu.ui.common :refer [loc]]
+            [lupapalvelu.ui.common :refer [loc command]]
             [lupapalvelu.ui.components :as uc]
             [lupapalvelu.attachment.stamp-schema :as sts]))
 
+(defn- delete-stamp [stamp-id]
+  (command :delete-stamp-template
+           (fn [{ok :ok}]
+             (when ok (state/update-stamp-view nil))
+             (state/refresh))
+           :stamp-id stamp-id))
+
 (rum/defc header-component < rum/reactive
-          [cursor valid-stamp?]
+          [stamp-id stamp-name valid-stamp?]
           [:div.group-buttons
            {:style {:background-color "#f6f6f6"
                     :border "1px solid #dddddd"}}
@@ -15,9 +22,11 @@
            [:span.form-entry
             [:label.form-label.form-label-string (loc "stamp.name")]
             [:input.form-input.text
-             {:value (rum/react cursor)
-              :on-change #(reset! cursor (-> % .-target .-value))}]]
+             {:value (rum/react stamp-name)
+              :on-change #(reset! stamp-name (-> % .-target .-value))}]]
            [:button.secondary.is-right
+            {:on-click (fn [_] (delete-stamp @stamp-id))
+             :disabled (not @stamp-id)}
             [:i.lupicon-remove]
             [:span (loc "remove")]]
            [:button.positive.is-right

@@ -587,6 +587,16 @@
   (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
     (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
 
+(defcommand delete-stamp-template
+  {:parameters       [stamp-id]
+   :input-validators [(partial action/non-blank-parameters [:stamp-id])]
+   :pre-checks       [(org-authz-validator #{:authorityAdmin})]
+   :user-roles       #{:authorityAdmin}}
+  [{user :user}]
+  (->> {$pull {:stamps {:id stamp-id}}}
+       (organization/update-organization (usr/authority-admins-organization-id user)))
+  (ok))
+
 (defquery custom-stamps
   {:optional-parameters [id]
    :pre-checks       [(org-authz-validator #{:authority :authorityAdmin})]
