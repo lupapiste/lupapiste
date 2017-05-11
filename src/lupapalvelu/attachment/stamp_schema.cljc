@@ -25,11 +25,18 @@
 (def pages [:first :last :all])
 
 (sc/defschema SimpleTag
-              {:type sc/Keyword})
+              (sc/conditional #(keyword? (:type %))
+                              {:type sc/Keyword}
+                              #(string? (:type %))
+                              {:type sc/Str}))
 
 (sc/defschema TextTag
-              {:type sc/Keyword
-               :text sc/Str})
+              (sc/conditional #(keyword? (:type %))
+                              {:type sc/Keyword
+                               :text sc/Str}
+                              #(string? (:type %))
+                              {:type sc/Str
+                               :text sc/Str}))
 
 (sc/defschema Tag
               (sc/conditional #(contains? simple-field-types
@@ -57,7 +64,7 @@
                :position   {:x sssc/Nat
                             :y sssc/Nat}
                :background sssc/Nat
-               :page       (apply sc/enum pages)
+               :page       (sc/if keyword? (apply sc/enum pages) (apply sc/enum (mapv name pages)))
                :qrCode     sc/Bool
                :rows       [StampTemplateRow]})
 

@@ -164,7 +164,7 @@ LUPAPISTE.StampModel = function(params) {
     return _.map(self.selectedStamp().rows,  function (row) {
       return _.map(row , function(object) {
         if (object.type === type) {
-          return {type: type, value: value}
+          return {type: type, value: value};
         }
         return object;
       });

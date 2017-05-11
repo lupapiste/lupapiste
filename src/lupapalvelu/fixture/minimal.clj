@@ -834,6 +834,17 @@
                                  :qrCode true
                                  :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
                                         [{:type :backend-id}]
+                                        [{:type :organization}]]}
+                                {:id "112233445566778899001122"
+                                 :name "KV-leima"
+                                 :position {:x 10 :y 10}
+                                 :background 0
+                                 :page :all
+                                 :qrCode true
+                                 :rows [[{:type :custom-text :text "Custom text"} {:type "current-date"}]
+                                        [{:type :extra-text :text "Extra text"}]
+                                        [{:type :application-id} {:type :backend-id}]
+                                        [{:type :user}]
                                         [{:type :organization}]]}]
                        }
 
