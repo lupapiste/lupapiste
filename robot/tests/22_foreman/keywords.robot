@@ -34,7 +34,9 @@ Open foreman application
 
 Open foreman accordions
   Open accordions  parties
-  Execute Javascript  $("button[data-test-id=accordion-application-foreman-header]:not(.toggled)").click();
+  ${toggled}=  Run Keyword And Return Status  Element should be visible  xpath=//button[@data-test-id='accordion-application-foreman-header' and contains(@class,'toggled')]
+  Run keyword unless  ${toggled}  Click element  xpath=//button[@data-test-id='accordion-application-foreman-header' and not(contains(@class,'toggled'))]
+  Wait until  Element should be visible  xpath=//section[@id='accordion-application-foreman']//div[@data-test-id='application-foreman-template']
 
 Sonja invites foreman to application
   Open tab  parties
@@ -53,9 +55,8 @@ Foreman applies personal information to the foreman application
   Wait until  Confirm yes no dialog
   Open tab  parties
   Wait until  Page should contain  Hyväksynyt valtuutuksen
-  Open foreman accordions
   Wait until  Click by test id  fill-info-button
-  Wait for jQuery
+  Wait until  Textfield value should be  xpath=//section[@data-doc-type='tyonjohtaja-v2']//input[@data-docgen-path='henkilotiedot.etunimi']  Teppo
 
 Submit foreman base app
   [Arguments]  ${index}
@@ -69,17 +70,14 @@ Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
   Wait for jQuery
-  Open foreman accordions
   Wait until  Click by test id  fill-info-button
   Wait for jQuery
-  Open foreman accordions
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman application  ${index}
   Deny yes no dialog
   Open tab  parties
-  Open foreman accordions
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}
@@ -140,6 +138,7 @@ Add työnjohtaja task to current application
   Open tab  tasks
   Click enabled by test id  application-new-task
   Wait until  Element should be visible  dialog-create-task
+  Wait until  Element should be visible  choose-task-type
   Select From List By Value  choose-task-type   task-vaadittu-tyonjohtaja
   Input text  create-task-name  ${role}
   Click enabled by test id  create-task-save

@@ -1,4 +1,5 @@
-;(function() {
+if (features.enabled("copy-applications")) {
+  (function() {
   "use strict";
 
   function CopyApplicationModel() {
@@ -116,7 +117,7 @@
       checkIfApplicationCanBeCopiedToSelectedLocation();
     });
 
-    self.locationModel = new LUPAPISTE.CopyApplicationLocationModel();
+    self.locationModel = new LUPAPISTE.CreateApplicationLocationModel({mapId: "copy-map", category: "Copy", nextStep: "copy-location-selected"});
 
     self.search = ko.observable("");
     self.searching = ko.observable(false);
@@ -312,6 +313,12 @@
           self.clear();
           params.id = data.id;
           pageutil.openApplicationPage(params);
+          hub.send("show-dialog",
+                   {ltitle: "application.copy.success.title",
+                    component: "ok-dialog",
+                    componentParams: {
+                      ltext: "application.copy.success.text"
+                    }});
         })
         .error(function(data) {
           notify.ajaxError(data);
@@ -345,3 +352,4 @@
   });
 
 })();
+}

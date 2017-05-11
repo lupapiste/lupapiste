@@ -1303,6 +1303,17 @@
            hankkeen-vaativuus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
+   {:info {:name "aiemman-luvan-toimenpide"
+           :i18name "uusiRakennus"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
+    :body (body kuvaus
+                {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}
+                tunnus
+                rakennuksen-omistajat
+                (approvable-top-level-groups rakennuksen-tiedot)
+                rakennustunnus)}
+
    {:info {:name "uusiRakennus"
            :approvable true
            :accordion-fields buildingid-accordion-paths}

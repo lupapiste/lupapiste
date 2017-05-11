@@ -128,6 +128,13 @@
                (not-in-auth? (id-from-personal-information element))))
       (building-selector-element? element)))
 
+(defn- clear-user-and-company-ids [element]
+  (if (map? element)
+    (cond (contains? element :userId)    (assoc-in element [:userId :value] "")
+          (contains? element :companyId) (assoc-in element [:companyId :value] "")
+          :else element)
+    element))
+
 (defn- clear-personal-information
   "Clears personal information from documents if
    - it is possible to enter the information using user or company id and
@@ -139,7 +146,11 @@
     (pathwalk (fn [path v]
                 (if (document-element-sould-be-cleared? v not-in-auth?)
                   (get-in empty-copy path)
-                  v))
+
+                  ; clear user and company id's in any case because
+                  ; document is invalid if an unauthorized id is found, and
+                  ; invites are not considered authorizations
+                  (clear-user-and-company-ids v)))
               document)))
 
 (defn- construction-waste-plan? [doc]
@@ -149,35 +160,32 @@
      waste-schemas/extended-construction-waste-report-name}
    (-> doc :schema-info :name)))
 
-(defn- correct-waste-plan-for-organization? [doc organization]
-  {:pre [(construction-waste-plan? doc)]}
-  (= (-> doc :schema-info :name)
-     (waste-schemas/construction-waste-plan-for-organization organization)))
-
 (defn construction-waste-plan
-  "Returns the given document if it is the correct construction waste
-   plan for the organization. Otherwise, it creates an empty document of
-   the correct type."
-  [document application organization manual-schema-datas]
-  (if (correct-waste-plan-for-organization? document organization)
-    document
-    (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
-      (app/make-document application
-                         (-> application :primaryOperation :name)
-                         (:created application)
-                         manual-schema-datas
-                         (schemas/get-schema (:schema-version application)
-                                             plan-name)))))
+  [application organization manual-schema-datas]
+  (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
+    (app/make-document application
+                       (-> application :primaryOperation :name)
+                       (:created application)
+                       manual-schema-datas
+                       (schemas/get-schema (:schema-version application)
+                                           plan-name))))
 
-(defn- handle-waste-plan [document application organization manual-schema-datas]
-  (if (construction-waste-plan? document)
-    (construction-waste-plan document application
-                             organization manual-schema-datas)
-    document))
+(defn- location-document? [document]
+  (= (-> document :schema-info :type) :location))
+
+(defn- handle-special-cases [document application organization manual-schema-datas]
+  (let [schema-name (-> document :schema-info :name)]
+    (cond (construction-waste-plan? document)
+            (construction-waste-plan application
+                                     organization
+                                     manual-schema-datas)
+          (location-document? document)
+            (empty-document-copy document application manual-schema-datas)
+          :else document)))
 
 (defn- preprocess-document [document application organization manual-schema-datas]
   (-> document
-      (handle-waste-plan application organization manual-schema-datas)
+      (handle-special-cases application organization manual-schema-datas)
       (assoc :id (mongo/create-id)
              :created (:created application))
       (dissoc :meta)

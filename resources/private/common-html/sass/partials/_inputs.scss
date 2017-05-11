@@ -147,7 +147,7 @@
 
 // Radio field component. In order to make sure that the components are adjacent without
 // gaps, some adjustments are needed.
-@include toggle-helper (radio-field, "e635", "e634", $wrapper-display: inline,
+@include toggle-helper (radio-field, "e635", "e634", $wrapper-display: inline-block,
                         $input-display: inline-block, $label-display: inline) {}
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;

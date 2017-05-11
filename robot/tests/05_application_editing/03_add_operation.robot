@@ -61,3 +61,7 @@ Primary operation can be changed
   Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
+  Logout
+
+Frontend errors check
+  There are no frontend errors

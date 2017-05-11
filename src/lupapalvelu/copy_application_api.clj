@@ -30,6 +30,7 @@
 
 (defcommand copy-application
   {:parameters [:source-application-id :x :y :address :propertyId :auth-invites]
+   :feature :copy-applications
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:address :propertyId :source-application-id])
                       (partial action/property-id-parameters [:propertyId])
@@ -49,6 +50,7 @@
 
 (defquery copy-application-invite-candidates
   {:parameters [:source-application-id]
+   :feature :copy-applications
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:source-application-id])]
    :pre-checks [(action/some-pre-check validate-is-authority
@@ -58,6 +60,7 @@
 
 (defquery application-copyable-to-location
   {:parameters [:source-application-id :x :y :address :propertyId]
+   :feature :copy-applications
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:address :propertyId :source-application-id])
                       (partial action/property-id-parameters [:propertyId])
@@ -70,6 +73,7 @@
 (env/in-dev
   (defquery source-application
     {:description "Return a source application entry from source-applications"
+     :feature :copy-applications
      :parameters [:copy-application-id]
      :input-validators [(partial action/non-blank-parameters [:copy-application-id])]
      :user-roles #{:authority}}

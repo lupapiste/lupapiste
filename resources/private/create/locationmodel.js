@@ -1,10 +1,12 @@
-LUPAPISTE.CreateApplicationLocationModel = function() {
+LUPAPISTE.CreateApplicationLocationModel = function(options) {
   "use strict";
+
+  options = _.assign({mapId: "create-map", category: "Create", nextStep: "create-step-2"}, options);
 
   var self = this;
   LUPAPISTE.LocationModelBase.call(self,
-      {mapId:"create-map", initialZoom: 2, zoomWheelEnabled: true,
-       afterClick: _.partial(hub.send, "track-click", {category:"Create", label:"map", event:"mapClick"}),
+      {mapId: options.mapId, initialZoom: 2, zoomWheelEnabled: true,
+       afterClick: _.partial(hub.send, "track-click", {category: options.category, label:"map", event:"mapClick"}),
        popupContentModel: "section#map-popup-content"});
 
   self.municipalitySupported = ko.observable(true);
@@ -93,7 +95,7 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
     return self;
   };
 
-  self.proceed = _.partial(hub.send, "create-step-2");
+  self.proceed = _.partial(hub.send, options.nextStep);
 
 };
 
