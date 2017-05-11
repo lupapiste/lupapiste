@@ -313,6 +313,12 @@ if (features.enabled("copy-applications")) {
           self.clear();
           params.id = data.id;
           pageutil.openApplicationPage(params);
+          hub.send("show-dialog",
+                   {ltitle: "application.copy.success.title",
+                    component: "ok-dialog",
+                    componentParams: {
+                      ltext: "application.copy.success.text"
+                    }});
         })
         .error(function(data) {
           notify.ajaxError(data);
