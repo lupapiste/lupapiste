@@ -321,13 +321,27 @@
     </complexType>
 
     <complexType name="LausuntoType">
+        <!-- TODO: aika paljon minOccurs=0, koska tässä on kaksi käyttötapausta
+            1) Lausuntopyyntö, jossa pyydetään lausuntoa esim ELY:ltä.
+            2) Varsinainen lausunto puoltotietoineen.
+
+            Pitäisiköhän erottaa omiksi osikseen? Lausuntopyynnön käyttötapauksessa se olisi loogista, mutta mitä jos
+            lausuntojen jälkeen koko hakemus halutaan siirtää könttänä asianhallinta järjestelmään UusiAsia elementtinä?
+
+            Toteutus voisi olla: AsiaType saa <choice>:n jossa on joko "LausuntoType", joka on tilaltaan valmis lausunto,
+            tai "LausuntopyyntoType", joka lähetettäisiin kun käyttötapauksena on Lausuntopyyntö. LausuntopyyntöType
+            sisältäisi vain alla olevan Lausunnon pyyntö osion. Tämä toteutus käytännössä ohjaisi kolmeen eri tapaukseen:
+            1) Lausuntopyyntö
+            2) Lausunto response
+            3) Koko asian osana lähetettävä valmis lausunto (kun asia lähetetään päätöksen tekoon).
+        -->
         <sequence>
             <element name="LausuntoTunnus" type="string">
                 <annotation>
                     <documentation>Lupapisteen tunnus lausunnolle</documentation>
                 </annotation>
             </element>
-            <element name="AsianTunnus" type="string">
+            <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="0">
                 <annotation>
                     <documentation>Asianhallintajärjestelmän tunnus</documentation>
                 </annotation>
