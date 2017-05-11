@@ -6,6 +6,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.document.attachments-canonical :refer :all]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.metadata :refer :all]
@@ -461,15 +462,46 @@
     => {$set {:attachments.$.signatures.0 {:fileId ..file-id.. :version ..orig-version.. :created ..orig-created.. :user ..orig-user..}}}))
 
 (facts "Manually set construction time"
-       (fact "draft -> verdictGiven"
-             (manually-set-construction-time {:applicationState "verdictGiven" :originalApplicationState "draft"})
+  (fact "draft -> verdictGiven"
+    (manually-set-construction-time {:applicationState "verdictGiven" :originalApplicationState "draft"})
              => true)
-       (fact "info -> verdictGiven"
-             (manually-set-construction-time {:applicationState "verdictGiven" :originalApplicationState "info"})
-             => true)
-       (fact "No original application state"
-             (manually-set-construction-time {:applicationState "verdictGiven"})
-             => false)
-       (fact "open -> submitted"
-             (manually-set-construction-time {:applicationState "submitted" :originalApplicationState "open"})
-             => false))
+  (fact "info -> verdictGiven"
+    (manually-set-construction-time {:applicationState "verdictGiven" :originalApplicationState "info"})
+    => true)
+  (fact "No original application state"
+    (manually-set-construction-time {:applicationState "verdictGiven"})
+    => false)
+  (fact "open -> submitted"
+    (manually-set-construction-time {:applicationState "submitted" :originalApplicationState "open"})
+    => false))
+
+(testable-privates lupapalvelu.document.attachments-canonical
+                   get-attachment-meta)
+
+(defn attachment-metadata-check [{att-id :id :as attachment} application op-ids]
+  (fact {:midje/description (format "%s -> %s" att-id op-ids)}
+    (get-attachment-meta attachment application)
+    => (just (->> (map #(list "toimenpideId" %) op-ids)
+                  (cons ["liiteId" att-id])
+                  (filter identity)
+                  (map #(hash-map :Metatieto {:metatietoArvo (second %) :metatietoNimi (first %)}
+                                  :metatieto {:metatietoArvo (second %) :metatietoNimi (first %)})))
+             :in-any-order)))
+
+(facts "Attachment meta and operations"
+  (let [doc1 (assoc-in {:data []} [:schema-info :op :id] "op1")
+        doc2 (assoc-in {:data []} [:schema-info :op :id] "op2")
+        doc3 (assoc-in {:data []} [:schema-info :op :id] "op3")
+        att1 {:id "att1" :op [{:id "op1"}]}
+        att2 {:id "att2" :op [{:id "op1"} {:id "op2"}]}
+        att3 {:id "att3"}
+        app  {:primaryOperation    {:id "op1"}
+              :secondaryOperations [{:id "op2"} {:id "op3"}]
+              :documents           [doc1 doc2 doc3]
+              :attachments         [att1 att2 att3]}]
+    (fact "Attachment with one operation"
+      (attachment-metadata-check att1 app ["op1"]))
+    (fact "Attachment with two operations"
+      (attachment-metadata-check att2 app ["op1" "op2"]))
+    (fact "Attachment without explicit operation is linked to every operation"
+      (attachment-metadata-check att3 app ["op1" "op2" "op3"]))))
