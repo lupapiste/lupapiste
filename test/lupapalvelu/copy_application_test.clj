@@ -140,11 +140,12 @@
                                       {:name waste-schemas/extended-construction-waste-report-name}}
            organization-with-basic-waste-plan {:extended-construction-waste-report-enabled false}
            organization-with-extended-waste-report {:extended-construction-waste-report-enabled true}]
-       (handle-waste-plan basic-waste-plan-doc
-                          application
-                          organization-with-basic-waste-plan
-                          nil)
-       => basic-waste-plan-doc
+       (-> (handle-waste-plan basic-waste-plan-doc
+                              application
+                              organization-with-basic-waste-plan
+                              nil)
+           :schema-info :name)
+       => waste-schemas/basic-construction-waste-plan-name
 
        (-> (handle-waste-plan basic-waste-plan-doc
                               application
@@ -153,11 +154,12 @@
            :schema-info :name)
        => waste-schemas/extended-construction-waste-report-name
 
-       (handle-waste-plan extended-waste-report-doc
-                          application
-                          organization-with-extended-waste-report
-                          nil)
-       => extended-waste-report-doc
+       (-> (handle-waste-plan extended-waste-report-doc
+                              application
+                              organization-with-extended-waste-report
+                              nil)
+           :schema-info :name)
+       => waste-schemas/extended-construction-waste-report-name
 
        (-> (handle-waste-plan extended-waste-report-doc
                               application

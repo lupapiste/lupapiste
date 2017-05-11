@@ -160,30 +160,24 @@
      waste-schemas/extended-construction-waste-report-name}
    (-> doc :schema-info :name)))
 
-(defn- correct-waste-plan-for-organization? [doc organization]
-  {:pre [(construction-waste-plan? doc)]}
-  (= (-> doc :schema-info :name)
-     (waste-schemas/construction-waste-plan-for-organization organization)))
-
 (defn construction-waste-plan
-  "Returns the given document if it is the correct construction waste
-   plan for the organization. Otherwise, it creates an empty document of
-   the correct type."
-  [document application organization manual-schema-datas]
-  (if (correct-waste-plan-for-organization? document organization)
-    document
-    (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
-      (app/make-document application
-                         (-> application :primaryOperation :name)
-                         (:created application)
-                         manual-schema-datas
-                         (schemas/get-schema (:schema-version application)
-                                             plan-name)))))
+  [application organization manual-schema-datas]
+  (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
+    (app/make-document application
+                       (-> application :primaryOperation :name)
+                       (:created application)
+                       manual-schema-datas
+                       (schemas/get-schema (:schema-version application)
+                                           plan-name))))
 
-(defn- handle-waste-plan [document application organization manual-schema-datas]
+(defn- handle-waste-plan
+  "Replace the waste plan with an empty waste plan that is of correct
+  type for the target organization"
+  [document application organization manual-schema-datas]
   (if (construction-waste-plan? document)
-    (construction-waste-plan document application
-                             organization manual-schema-datas)
+    (construction-waste-plan application
+                             organization
+                             manual-schema-datas)
     document))
 
 (defn- preprocess-document [document application organization manual-schema-datas]
