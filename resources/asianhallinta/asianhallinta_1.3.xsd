@@ -252,9 +252,9 @@
                     <documentation>Lupapisteen tunnus</documentation>
                 </annotation>
             </element>
-            <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="1">
+            <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="0">
                 <annotation>
-                    <documentation>Asianhallintajärjestelmän tunnus</documentation>
+                    <documentation>Asianhallintajärjestelmän tunnus. Lausunnon tunnus ilmoitetaan erikseen Lausunto elementin alla.</documentation>
                 </annotation>
             </element>
             <element name="Lausunto" type="ah:LausuntoType" maxOccurs="1" minOccurs="1"></element>
@@ -321,43 +321,54 @@
     </complexType>
 
     <complexType name="LausuntoType">
-        <!-- TODO: aika paljon minOccurs=0, koska tässä on kaksi käyttötapausta
-            1) Lausuntopyyntö, jossa pyydetään lausuntoa esim ELY:ltä.
-            2) Varsinainen lausunto puoltotietoineen.
+        <complexContent>
+            <extension base="ah:LausuntopyyntoType">
+                <sequence>
+                    <element name="AsianTunnus" type="string" minOccurs="0">
+                        <annotation>
+                            <documentation>Asianhallintajärjestelmän tunnus lausunnolle</documentation>
+                        </annotation>
+                    </element>
+                    <element name="Lausunnonantaja" type="string">
+                        <annotation>
+                            <documentation>Lausunnonantaja</documentation>
+                        </annotation>
+                    </element>
+                    <element name="LausuntoPvm" type="date">
+                        <annotation>
+                            <documentation>Lausunnon antopäivämäärä</documentation>
+                        </annotation>
+                    </element>
+                    <element name="Puolto" type="ah:LausuntoPuoltoType"></element>
+                    <element name="LausuntoTeksti" type="string" maxOccurs="1" minOccurs="0">
+                        <annotation>
+                            <documentation>Lausunnon vapaateksti</documentation>
+                        </annotation>
+                    </element>
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
 
-            Pitäisiköhän erottaa omiksi osikseen? Lausuntopyynnön käyttötapauksessa se olisi loogista, mutta mitä jos
-            lausuntojen jälkeen koko hakemus halutaan siirtää könttänä asianhallinta järjestelmään UusiAsia elementtinä?
-
-            Toteutus voisi olla: AsiaType saa <choice>:n jossa on joko "LausuntoType", joka on tilaltaan valmis lausunto,
-            tai "LausuntopyyntoType", joka lähetettäisiin kun käyttötapauksena on Lausuntopyyntö. LausuntopyyntöType
-            sisältäisi vain alla olevan Lausunnon pyyntö osion. Tämä toteutus käytännössä ohjaisi kolmeen eri tapaukseen:
-            1) Lausuntopyyntö
-            2) Lausunto response
-            3) Koko asian osana lähetettävä valmis lausunto (kun asia lähetetään päätöksen tekoon).
-        -->
+    <complexType name="LausuntopyyntoType">
         <sequence>
             <element name="LausuntoTunnus" type="string">
                 <annotation>
                     <documentation>Lupapisteen tunnus lausunnolle</documentation>
                 </annotation>
             </element>
-            <element name="AsianTunnus" type="string" maxOccurs="1" minOccurs="0">
-                <annotation>
-                    <documentation>Asianhallintajärjestelmän tunnus</documentation>
-                </annotation>
-            </element>
-            <!-- Lausunnon pyyntö -->
             <element name="Saateteksti" type="string" maxOccurs="1" minOccurs="0">
                 <annotation>
                     <documentation>Lausunnon pyytäjän saateteksti</documentation>
                 </annotation>
             </element>
-            <element name="Pyytaja" type="string" maxOccurs="1" minOccurs="0">
+            <!-- TODO: tarvitaanko tieto keneltä pyydetään? -->
+            <element name="Pyytaja" type="string">
                 <annotation>
                     <documentation>Lausuntoa pyytänyt taho</documentation>
                 </annotation>
             </element>
-            <element name="PyyntoPvm" type="date" maxOccurs="1" minOccurs="0">
+            <element name="PyyntoPvm" type="date">
                 <annotation>
                     <documentation>Lausunnon pyyntöpäivämäärä</documentation>
                 </annotation>
@@ -367,20 +378,6 @@
                     <documentation>Lausunnon määräaika, johon mennessä vastausta pyydetään</documentation>
                 </annotation>
             </element>
-            <!-- /Lausunnon pyyntö -->
-            <!-- Lausunnon vastaus -->
-            <element name="LausuntoTeksti" type="string" maxOccurs="1" minOccurs="0">
-                <annotation>
-                    <documentation>Varsinainen lausunto</documentation>
-                </annotation>
-            </element>
-            <element name="LausuntoPvm" type="date" maxOccurs="1" minOccurs="0">
-                <annotation>
-                    <documentation>Lausunnon antopäivämäärä</documentation>
-                </annotation>
-            </element>
-            <element name="Puolto" type="ah:LausuntoPuoltoType" maxOccurs="1" minOccurs="0"></element>
-            <!-- /Lausunnon vastaus -->
         </sequence>
     </complexType>
 
