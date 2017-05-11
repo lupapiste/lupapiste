@@ -19,7 +19,7 @@
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.copy-application
-                   handle-waste-plan
+                   handle-special-cases
                    clear-personal-information)
 
 (defn dissoc-ids-and-timestamps [application]
@@ -140,31 +140,31 @@
                                       {:name waste-schemas/extended-construction-waste-report-name}}
            organization-with-basic-waste-plan {:extended-construction-waste-report-enabled false}
            organization-with-extended-waste-report {:extended-construction-waste-report-enabled true}]
-       (-> (handle-waste-plan basic-waste-plan-doc
-                              application
-                              organization-with-basic-waste-plan
-                              nil)
+       (-> (handle-special-cases basic-waste-plan-doc
+                                 application
+                                 organization-with-basic-waste-plan
+                                 nil)
            :schema-info :name)
        => waste-schemas/basic-construction-waste-plan-name
 
-       (-> (handle-waste-plan basic-waste-plan-doc
-                              application
-                              organization-with-extended-waste-report
-                              nil)
+       (-> (handle-special-cases basic-waste-plan-doc
+                                 application
+                                 organization-with-extended-waste-report
+                                 nil)
            :schema-info :name)
        => waste-schemas/extended-construction-waste-report-name
 
-       (-> (handle-waste-plan extended-waste-report-doc
-                              application
-                              organization-with-extended-waste-report
-                              nil)
+       (-> (handle-special-cases extended-waste-report-doc
+                                 application
+                                 organization-with-extended-waste-report
+                                 nil)
            :schema-info :name)
        => waste-schemas/extended-construction-waste-report-name
 
-       (-> (handle-waste-plan extended-waste-report-doc
-                              application
-                              organization-with-basic-waste-plan
-                              nil)
+       (-> (handle-special-cases extended-waste-report-doc
+                                 application
+                                 organization-with-basic-waste-plan
+                                 nil)
            :schema-info :name)
        => waste-schemas/basic-construction-waste-plan-name))
 

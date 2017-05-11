@@ -170,19 +170,22 @@
                        (schemas/get-schema (:schema-version application)
                                            plan-name))))
 
-(defn- handle-waste-plan
-  "Replace the waste plan with an empty waste plan that is of correct
-  type for the target organization"
-  [document application organization manual-schema-datas]
-  (if (construction-waste-plan? document)
-    (construction-waste-plan application
-                             organization
-                             manual-schema-datas)
-    document))
+(defn- location-document? [document]
+  (= (-> document :schema-info :type) :location))
+
+(defn- handle-special-cases [document application organization manual-schema-datas]
+  (let [schema-name (-> document :schema-info :name)]
+    (cond (construction-waste-plan? document)
+            (construction-waste-plan application
+                                     organization
+                                     manual-schema-datas)
+          (location-document? document)
+            (empty-document-copy document application manual-schema-datas)
+          :else document)))
 
 (defn- preprocess-document [document application organization manual-schema-datas]
   (-> document
-      (handle-waste-plan application organization manual-schema-datas)
+      (handle-special-cases application organization manual-schema-datas)
       (assoc :id (mongo/create-id)
              :created (:created application))
       (dissoc :meta)
