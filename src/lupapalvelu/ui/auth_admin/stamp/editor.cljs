@@ -54,7 +54,7 @@
                (header-component stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))
                [:div.form-group {:style {:display :block}}
                 (metadata-component)
-                (preview-component)
+                (preview-component rows)
                 [:div.form-group
                  [:label.form-label.form-label-group (loc "stamp.information")]
                  (field-types-component)
