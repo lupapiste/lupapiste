@@ -83,7 +83,9 @@
         ["jatekatoksien-sijoittaminen" :ya-sijoituslupa-jatekatoksien-sijoittaminen]
         ["leikkipaikan-tai-koiratarhan-sijoittaminen" :ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen]
         ["rakennuksen-pelastuspaikan-sijoittaminen" :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen]]]
-     ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
+      ["terassit" :ya-sijoituslupa-terassit]
+      ["kioskit" :ya-sijoituslupa-kioskit]
+      ["muu-sijoituslupa" :ya-sijoituslupa-muu-sijoituslupa]]]
     ["katulupa"
      [["kaivaminen-yleisilla-alueilla"
        [["vesi-ja-viemarityot" :ya-katulupa-vesi-ja-viemarityot]
@@ -106,8 +108,6 @@
       ["mainokset" :ya-kayttolupa-mainostus-ja-viitoitus]
       ["metsastys" :ya-kayttolupa-metsastys]
       ["vesistoluvat" :ya-kayttolupa-vesistoluvat]
-      ["terassit" :ya-kayttolupa-terassit]
-      ["kioskit" :ya-kayttolupa-kioskit]
       ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
     ["jatkoaika" :ya-jatkoaika]]])
 
@@ -298,8 +298,6 @@
    :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    ya-kayttolupa-general
    :ya-kayttolupa-metsastys                                           ya-kayttolupa-general
    :ya-kayttolupa-vesistoluvat                                        ya-kayttolupa-general
-   :ya-kayttolupa-terassit                                            ya-kayttolupa-general
-   :ya-kayttolupa-kioskit                                             ya-kayttolupa-general
    :ya-kayttolupa-muu-kayttolupa                                      ya-kayttolupa-general
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type permit/YA
@@ -324,6 +322,8 @@
    :ya-katulupa-kaukolampotyot                                        ya-katulupa-general
    :ya-katulupa-kaapelityot                                           ya-katulupa-general
    :ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat           ya-katulupa-general
+   :ya-sijoituslupa-terassit                                          ya-sijoituslupa-general
+   :ya-sijoituslupa-kioskit                                           ya-sijoituslupa-general
    :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen             ya-sijoituslupa-general
    :ya-sijoituslupa-maalampoputkien-sijoittaminen                     ya-sijoituslupa-general
    :ya-sijoituslupa-kaukolampoputkien-sijoittaminen                   ya-sijoituslupa-general
