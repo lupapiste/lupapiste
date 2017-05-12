@@ -974,7 +974,7 @@
   [{:keys [application user]}]
   (when (util/=as-kw :sent (:state application))
     (when-not (or (auth/application-authority? application user)
-                  (contains? #{:YI :YL :YM :VVVL} (-> application :permitType keyword)))
+                  (contains? #{:YI :YL :YM :VVVL :MAL} (-> application :permitType keyword)))
       (fail :error.unauthorized))))
 
 (defn attachment-editable-by-application-state
