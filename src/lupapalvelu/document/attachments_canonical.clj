@@ -41,7 +41,7 @@
     (->> metas flatten (remove nil?) )))
 
 (defn- get-attachment-meta
-  [{:keys [signatures latestVersion id forPrinting :as attachment]} application]
+  [{:keys [signatures latestVersion id forPrinting] :as attachment} application]
   (let [op-metas (operation-attachment-meta attachment application)
         liitepohja [(create-metatieto "liiteId" id)]
         signatures (->> signatures
