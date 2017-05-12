@@ -29,7 +29,7 @@
 (defn refresh
   ([] (refresh nil))
   ([cb]
-   (query :custom-stamps
+   (query :stamp-templates
           (fn [data]
             (swap! component-state assoc :stamps (:stamps data))
             (when cb (cb data))))))

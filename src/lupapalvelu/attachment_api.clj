@@ -580,13 +580,6 @@
         (ok)))
     (fail :error.unknown)))
 
-(defquery stamp-templates
-  {:pre-checks       [(org-authz-validator #{:authority :authorityAdmin})]
-   :user-roles       #{:authority :authorityAdmin}}
-  [{user :user {app-org-id :organization} :application}]
-  (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
-    (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
-
 (defcommand delete-stamp-template
   {:parameters       [stamp-id]
    :input-validators [(partial action/non-blank-parameters [:stamp-id])]
@@ -597,17 +590,21 @@
        (organization/update-organization (usr/authority-admins-organization-id user)))
   (ok))
 
+(defquery stamp-templates
+  {:pre-checks       [(org-authz-validator #{:authorityAdmin})]
+   :user-roles       #{:authorityAdmin}}
+  [{user :user}]
+  (let [org-id (usr/authority-admins-organization-id user)]
+    (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
+
 (defquery custom-stamps
   {:optional-parameters [id]
-   :pre-checks       [(org-authz-validator #{:authority :authorityAdmin})]
-   :user-roles       #{:authority :authorityAdmin}
+   :pre-checks       [(org-authz-validator #{:authority})]
+   :user-roles       #{:authority}
    :states           states/all-application-states
    :description      "Stamps based on organization stamp templates and filled with application data"}
   [{user :user application :application app-org :organization user-orgs :user-organizations}]
-  (let [organization (if (usr/authority-admin? user)
-                       (util/find-by-id (usr/authority-admins-organization-id user) user-orgs)
-                       @app-org)]
-    (ok :stamps (stamps/stamps organization application user))))
+  (ok :stamps (stamps/stamps @app-org application user)))
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp files lang stamp]

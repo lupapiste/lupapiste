@@ -17,7 +17,7 @@
   [init-state props]
   (let [[auth-model] (-> (aget props ":rum/initial-state") :rum/args)]
     (swap! component-state assoc :auth-models {:global-auth-model auth-model})
-    (when (auth/ok? auth-model :custom-stamps) (state/refresh))
+    (when (auth/ok? auth-model :stamp-templates) (state/refresh))
     init-state))
 
 (rum/defc new-stamp-button [selected-stamp-id editor-state]
