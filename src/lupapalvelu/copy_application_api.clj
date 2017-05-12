@@ -68,7 +68,7 @@
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
   [command]
-  (ok :result (copy-app/application-copyable-to-location command)))
+  (ok :result (copy-app/check-application-copyable-to-organization! command)))
 
 (env/in-dev
   (defquery source-application

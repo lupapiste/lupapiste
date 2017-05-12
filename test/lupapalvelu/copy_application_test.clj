@@ -20,7 +20,8 @@
 
 (testable-privates lupapalvelu.copy-application
                    handle-special-cases
-                   clear-personal-information)
+                   clear-personal-information
+                   check-application-copyable!)
 
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
@@ -194,5 +195,18 @@
                (-> cleared :henkilo :userId :value) => ""))
 
        ))
+   (facts "checks"
 
-   ))
+     (fact "change permits cannot be copied"
+       (check-application-copyable! {:permitSubtype "muutoslupa"})
+       => (throws #"error.application-invalid-permit-subtype"))
+
+     (fact "foreman and jatkoaika applications cannot be copied"
+       (check-application-copyable! {:primaryOperation {:name "tyonjohtajan-nimeaminen"}})
+       => (throws #"error.operations.copying-not-allowed")
+       (check-application-copyable! {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}})
+       => (throws #"error.operations.copying-not-allowed")
+       (check-application-copyable! {:primaryOperation {:name "jatkoaika"}})
+       => (throws #"error.operations.copying-not-allowed"))
+
+     (fact ))))
