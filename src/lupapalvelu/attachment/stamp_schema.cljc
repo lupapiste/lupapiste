@@ -1,7 +1,8 @@
 (ns lupapalvelu.attachment.stamp-schema
   (:require [sade.shared-schemas :as sssc]
             [schema.core :as sc]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [clojure.string :as s]))
 
 (def simple-field-types
   #{:current-date
@@ -56,7 +57,7 @@
 (sc/defschema StampRow
               [FilledTag])
 
-(sc/defschema StampName (sc/pred string?))
+(sc/defschema StampName (sc/constrained sc/Str (comp not s/blank?)))
 
 (sc/defschema StampTemplate
               {:name       StampName
