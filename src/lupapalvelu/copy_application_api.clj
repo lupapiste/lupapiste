@@ -29,7 +29,8 @@
      (warn "Socket timeout from KTJ when creating application"))))
 
 (defcommand copy-application
-  {:parameters [:source-application-id :x :y :address :propertyId :auth-invites]
+  {:description "Create a new application where various fields are copied from the source application"
+   :parameters [:source-application-id :x :y :address :propertyId :auth-invites]
    :feature :copy-applications
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:address :propertyId :source-application-id])
@@ -49,7 +50,8 @@
       (ok :id (:id copied-application)))))
 
 (defquery copy-application-invite-candidates
-  {:parameters [:source-application-id]
+  {:description "Possible parties to invite from the source application to the copied application"
+   :parameters [:source-application-id]
    :feature :copy-applications
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:source-application-id])]
@@ -59,7 +61,8 @@
   (ok :candidates (copy-app/copy-application-invite-candidates user source-application-id)))
 
 (defquery application-copyable-to-location
-  {:parameters [:source-application-id :x :y :address :propertyId]
+  {:description "Is it possible to copy the application to the given location"
+   :parameters [:source-application-id :x :y :address :propertyId]
    :feature :copy-applications
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:address :propertyId :source-application-id])
@@ -69,6 +72,18 @@
                                        (company/validate-has-company-role :any))]}
   [command]
   (ok :result (copy-app/check-application-copyable-to-organization! command)))
+
+(defquery application-copyable
+  {:description "Is it possible to copy the application at all"
+   :parameters [:source-application-id]
+   :feature :copy-applications
+   :user-roles #{:applicant :authority}
+   :input-validators [(partial action/non-blank-parameters [:source-application-id])]
+   :pre-checks [(action/some-pre-check validate-is-authority
+                                       (company/validate-has-company-role :any))]}
+  [command]
+  (ok :result (copy-app/check-application-copyable! command)))
+
 
 (env/in-dev
   (defquery source-application
