@@ -3122,6 +3122,12 @@
                                    [:state :primaryOperation :history :documents :infoRequest])]
             (update-liikennealue-application-to-katulupa coll app))))
 
+(defmigration muu-liikennealue-lupa-selected-operation
+  {:apply-when (pos? (mongo/count :organizations {:selected-operations "ya-kayttolupa-muu-liikennealuetyo"}))}
+  (mongo/update-by-query :organizations
+                         {:selected-operations "ya-kayttolupa-muu-liikennealuetyo"}
+                         {$set {:selected-operations.$ "ya-katulupa-muu-liikennealuetyo"}}))
+
 (defmigration clean-post-verdict-original-application-states
   {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:originalApplicationState
                                                                            {$in states/post-verdict-states}}}}))}
