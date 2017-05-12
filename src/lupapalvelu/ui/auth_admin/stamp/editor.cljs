@@ -5,7 +5,7 @@
             [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state empty-component-state update-stamp-view] :as state]
             [lupapalvelu.ui.common :refer [loc]]
             [lupapalvelu.ui.components :as uc]
-            [lupapalvelu.ui.auth-admin.stamp.metadata :refer [header-component metadata-component]]
+            [lupapalvelu.ui.auth-admin.stamp.metadata :refer [header-component metadata-component control-buttons]]
             [lupapalvelu.ui.auth-admin.stamp.preview :refer [preview-component]]
             [lupapalvelu.ui.auth-admin.stamp.field-types :refer [field-types-component]]
             [lupapalvelu.ui.auth-admin.stamp.stamp-row :refer [stamp-row]]
@@ -51,7 +51,7 @@
                 rows (rum/cursor-in editor-state [:stamp :rows])]
             (when-not (empty? (rum/react stamp-in-editor))
               [:div.edit-stamp-bubble
-               (header-component stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))
+               (header-component stamp-id stamp-in-editor)
                [:div.form-group {:style {:display :block}}
                 (metadata-component)
                 (preview-component rows)
@@ -66,7 +66,8 @@
                                   :rows-cursor rows
                                   :debug-data debug-data
                                   :drag-source drag-element})
-                      idx))]]]])))
+                      idx))]]]
+               (control-buttons stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))])))
 
 (rum/defc stamp-editor < rum/reactive
   {:init init

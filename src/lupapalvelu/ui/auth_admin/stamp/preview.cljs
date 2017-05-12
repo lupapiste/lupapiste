@@ -50,4 +50,4 @@
           [:div.form-group {:style {:width "35%"
                                     :border "1px solid"
                                     :display :inline-block}}
-           [:ul (rum-util/map-with-key stamp-row-preview (conj (rum/react rows) [{:type :lupapiste}]))]])
+           [:ul.stamp-preview (rum-util/map-with-key stamp-row-preview (conj (rum/react rows) [{:type :lupapiste}]))]])

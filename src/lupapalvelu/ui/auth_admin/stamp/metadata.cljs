@@ -26,11 +26,8 @@
            :rows rows))
 
 (rum/defc header-component < rum/reactive
-          [stamp-id stamp valid-stamp?]
-          [:div.group-buttons
-           {:style {:background-color "#f6f6f6"
-                    :border "1px solid #dddddd"}}
-           ;;TODO: onks joku otsikkorivicontainer-luokka josta tulis toi oikee harmaa taustaväri ja muut tyylit niinku haitareissa?
+          [stamp-id stamp]
+          [:div.stamp-editor-header.group-buttons
            [:span.form-entry
             [:label.form-label.form-label-string (loc "stamp.name")]
             [:input.form-input.text
@@ -40,11 +37,20 @@
             {:on-click (fn [_] (delete-stamp @stamp-id))
              :disabled (not @stamp-id)}
             [:i.lupicon-remove]
-            [:span (loc "remove")]]
-           [:button.positive.is-right
+            [:span (loc "remove")]]])
+
+(rum/defc control-buttons < rum/reactive
+          [stamp-id stamp valid-stamp?]
+          [:div.stamp-editor-control-buttons.group-buttons
+           [:button.positive
             {:on-click (fn [_] (save-stamp @stamp @stamp-id))
              :disabled (not valid-stamp?)}
-            (loc "save")]])
+            [:i.lupicon-save]
+            [:span (loc "save")]]
+           [:button.secondary
+            {:on-click (fn [_] (state/refresh (fn [_] (state/update-stamp-view nil))))}
+            [:i.lupicon-remove]
+            [:span (loc "cancel")]]])
 
 (rum/defc number-input < rum/reactive
           [label-key cursor max-value]

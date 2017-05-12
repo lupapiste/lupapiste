@@ -14166,6 +14166,29 @@ button.rollup-button {
   margin-bottom: 12px;
 }
 
+.stamp-editor-header {
+  background-color: #f6f6f6;
+  border: 1px solid #dddddd;
+}
+
+.stamp-editor-header button {
+  margin: 12px;
+}
+
+.stamp-editor-control-buttons button {
+  margin: 6px;
+}
+
+.stamp-preview {
+  list-style: none;
+  text-align: center;
+  font-weight: bold;
+}
+
+.stamp-preview .stamp-preview-element {
+  margin: 6px;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
