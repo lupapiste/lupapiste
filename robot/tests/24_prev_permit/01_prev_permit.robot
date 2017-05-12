@@ -35,8 +35,8 @@ Open 'prev permit' create page and check the fields
 
 Click create button
   Click button  prev-permit-create-button
-  #Wait until  Element should be visible  xpath=//section[@id='application']//div[@data-test-id='application-property-id']
-  Wait until  Element text should be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  186-3-356-6
+  #Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-id='application-property-id']
+  Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-primary-operation']  Rakentamisen lupa (haettu paperilla)
   Application state should be  verdictGiven
   ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
@@ -58,7 +58,7 @@ Re-fetch application with same kuntalupatunnus
   Click button  prev-permit-create-button
 
 The same application is opened, new one is not created
-  Wait until  Element text should be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  186-3-356-6
+  Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Should Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
@@ -73,7 +73,7 @@ A new application is opened, still with same property id
   Wait until  Element should be visible  application
   Wait for jQuery
   Wait until  Element should not contain  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${applicationid}
-  Wait until  Element text should be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  186-3-356-6
+  Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   ${newApplicationid} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
 

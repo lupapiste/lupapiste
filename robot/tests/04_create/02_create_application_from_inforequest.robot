@@ -20,7 +20,7 @@ Mikko creates new application from inforequest
   [Tags]  firefox
   Click by test id  inforequest-convert-to-application
   Wait until  Element should be visible  application
-  Wait until  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  753-416-25-30
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  753-416-25-30
   Wait until  Element should be visible  xpath=//*[contains(text(),'Hankkeen kuvaus')]
 
 Proper attachment templates are present
