@@ -9,9 +9,7 @@
                     :background 0
                     :page     :first
                     :qrCode   true
-                    :rows     [[]
-                               []
-                               []]})
+                    :rows     []})
 
 (def empty-component-state {:stamps []
                             :selected-stamp-id nil

@@ -60,7 +60,7 @@
                  (field-types-component)
                  [:div (loc "stamp-editor.drag.guide")]
                  [:div ;;many rows
-                  (for [[idx _] (stamp-util/indexed (rum/react rows))]
+                  (for [[idx _] (stamp-util/indexed (conj (rum/react rows) []))]
                     (rum/with-key
                       (stamp-row {:index idx
                                   :rows-cursor rows

@@ -4,18 +4,20 @@
             [lupapalvelu.ui.auth-admin.stamp.stamp-row-field :refer [stamp-row-field]]
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]))
 
+(defn- remove-button [rows row-number stamp-row idx]
+  (fn [] (if (< 1 (count @stamp-row))
+           (swap! stamp-row stamp-util/drop-at idx)
+           (swap! rows stamp-util/drop-at row-number))))
+
 (rum/defcs stamp-row < rum/reactive (rum/local 0 ::drag-event-sum)
            [state {:keys [index rows-cursor drag-source debug-data]}]
            (let [stamp-row-cursor (rum/cursor rows-cursor index)
                  drag-event-sum (::drag-event-sum state)
                  closest-elem (rum/cursor-in component-state [:editor :closest-element])
-                 remove-btn (fn [idx] (fn []
-                                        (swap! stamp-row-cursor
-                                               stamp-util/drop-at idx)))
                  field-buttons (for [[idx _] (stamp-util/indexed (rum/react stamp-row-cursor))]
                                  (rum/with-key
                                    (stamp-row-field {:data       (rum/cursor-in stamp-row-cursor [idx])
-                                                     :remove     (remove-btn idx)
+                                                     :remove     (remove-button rows-cursor index stamp-row-cursor idx)
                                                      :debug-data debug-data
                                                      :row-number index
                                                      :row-index  idx})
