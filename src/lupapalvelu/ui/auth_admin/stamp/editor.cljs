@@ -51,7 +51,7 @@
                 rows (rum/cursor-in editor-state [:stamp :rows])]
             (when-not (empty? (rum/react stamp-in-editor))
               [:div.edit-stamp-bubble
-               (header-component stamp-id (rum/cursor stamp-in-editor :name) (valid-stamp? (rum/react stamp-in-editor)))
+               (header-component stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))
                [:div.form-group {:style {:display :block}}
                 (metadata-component)
                 (preview-component)
@@ -67,7 +67,6 @@
                                   :debug-data debug-data
                                   :drag-source drag-element})
                       idx))]]]])))
-
 
 (rum/defc stamp-editor < rum/reactive
   {:init init

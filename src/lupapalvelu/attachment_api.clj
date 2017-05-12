@@ -8,7 +8,6 @@
             [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
-            [schema.core :as sc]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -23,6 +22,7 @@
             [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
             [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.attachment.stamp-schema :refer [StampTemplate]]
             [lupapalvelu.building :as building]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -579,6 +579,26 @@
                                           :size (.length temp-pdf)}))
         (ok)))
     (fail :error.unknown)))
+
+(defcommand upsert-stamp-template
+  {:parameters       [name position background page qrCode rows]
+   :input-validators [(partial action/non-blank-parameters [:name :page])
+                      (partial action/number-parameters [:background])
+                      (partial action/boolean-parameters [:qrCode])
+                      (partial action/parameters-matching-schema [:position] (:position StampTemplate))
+                      (partial action/parameters-matching-schema [:rows] (:rows StampTemplate))]
+   :pre-checks       [(org-authz-validator #{:authorityAdmin})]
+   :user-roles       #{:authorityAdmin}}
+  [{{stamp-id :stamp-id :as data} :data user :user}]
+  (let [stamp (assoc (select-keys data [:name :position :background :page :qrCode :rows]) :id (or stamp-id (mongo/create-id)))]
+    (if stamp-id
+      (mongo/update :organizations
+                    {:_id (usr/authority-admins-organization-id user) :stamps {$elemMatch {:id stamp-id}}}
+                    {$set {:stamps.$ stamp}})
+      (mongo/update :organizations
+                    {:_id (usr/authority-admins-organization-id user)}
+                    {$push {:stamps stamp}}))
+    (ok :stamp-id (:id stamp))))
 
 (defcommand delete-stamp-template
   {:parameters       [stamp-id]

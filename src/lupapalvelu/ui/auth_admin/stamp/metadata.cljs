@@ -13,8 +13,20 @@
              (state/refresh))
            :stamp-id stamp-id))
 
+(defn- save-stamp [{:keys [name position background page qrCode rows] :as stamp} stamp-id]
+  (command :upsert-stamp-template
+           (fn [{ok :ok id :stamp-id}]
+             (state/refresh (fn [_] (state/update-stamp-view id))))
+           :stamp-id stamp-id
+           :name name
+           :position position
+           :background background
+           :page page
+           :qrCode qrCode
+           :rows rows))
+
 (rum/defc header-component < rum/reactive
-          [stamp-id stamp-name valid-stamp?]
+          [stamp-id stamp valid-stamp?]
           [:div.group-buttons
            {:style {:background-color "#f6f6f6"
                     :border "1px solid #dddddd"}}
@@ -22,15 +34,16 @@
            [:span.form-entry
             [:label.form-label.form-label-string (loc "stamp.name")]
             [:input.form-input.text
-             {:value (rum/react stamp-name)
-              :on-change #(reset! stamp-name (-> % .-target .-value))}]]
+             {:value (:name (rum/react stamp))
+              :on-change #(swap! stamp assoc :name (-> % .-target .-value))}]]
            [:button.secondary.is-right
             {:on-click (fn [_] (delete-stamp @stamp-id))
              :disabled (not @stamp-id)}
             [:i.lupicon-remove]
             [:span (loc "remove")]]
            [:button.positive.is-right
-            {:disabled (not valid-stamp?)}
+            {:on-click (fn [_] (save-stamp @stamp @stamp-id))
+             :disabled (not valid-stamp?)}
             (loc "save")]])
 
 (rum/defc number-input < rum/reactive
