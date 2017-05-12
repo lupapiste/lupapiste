@@ -159,20 +159,28 @@
    :states     give-verdict-states
    :notified true
    :user-roles #{:authority}}
-  [{:keys [application created] :as command}]
+  [{:keys [application created user] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
     (let [target {:type "verdict", :id verdictId} ; key order seems to be significant!
           is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) target)
           attachments (filter is-verdict-attachment? (:attachments application))
           {:keys [sent state verdicts]} application
           ; Deleting the only given verdict? Return sent or submitted state.
-          step-back? (and (= 1 (count (remove :draft verdicts))) (states/verdict-given-states (keyword state)))
+          step-back? (and (not (:draft verdict))
+                          (= 1 (count (remove :draft verdicts)))
+                          (states/verdict-given-states (keyword state)))
           task-ids (verdict/deletable-verdict-task-ids application verdictId)
           attachments (concat attachments (verdict/task-ids->attachments application task-ids))
           updates (merge {$pull {:verdicts {:id verdictId}
                                  :comments {:target target}
                                  :tasks {:id {$in task-ids}}}}
-                    (when step-back? {$set {:state (if (and sent (sm/valid-state? application :sent)) :sent :submitted)}}))]
+                         (when step-back?
+                           (app/state-transition-update (if (and sent (sm/valid-state? application :sent))
+                                                          :sent
+                                                          :submitted)
+                                                        created
+                                                        application
+                                                        user)))]
       (update-application command updates)
       (attachment/delete-attachments! application (remove nil? (map :id attachments)))
       (appeal-common/delete-by-verdict command verdictId)

@@ -293,7 +293,7 @@
         (merge-in updated-operation-and-document-ids source-application
                   organization manual-schema-datas))))
 
-(defn- check-application-copyable!
+(defn- check-valid-source-application!
   "Throws with fail! if the application cannot be copied because of its
   subtype or primary operation type"
   [source-application]
@@ -322,12 +322,21 @@
              :permit-type permit-type :operation operation-name))
     org))
 
+(defn check-application-copyable!
+  "Throws with fail! if the source application cannot be copied"
+  [{{:keys [source-application-id]} :data :keys [user]}]
+  (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
+    (let [operation-name (-> source-application :primaryOperation :name)]
+      (check-valid-source-application! source-application)
+      true)
+    (fail! :error.application-not-found :id source-application-id)))
+
 (defn check-application-copyable-to-organization!
   "Throws with fail! if the application cannot be copied to the specific organization"
   [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [operation-name (-> source-application :primaryOperation :name)]
-      (check-application-copyable! source-application)
+      (check-valid-source-application! source-application)
       (check-valid-operation-for-organization! source-application
                                                (organization-for-property-id propertyId
                                                                              operation-name))
@@ -352,7 +361,7 @@
           operation    (-> source-application :primaryOperation :name)
           organization (organization-for-property-id propertyId operation)]
 
-      (check-application-copyable! source-application)
+      (check-valid-source-application! source-application)
       (check-valid-operation-for-organization! source-application organization)
       (check-valid-auth-invites! source-application auth-invites)
 

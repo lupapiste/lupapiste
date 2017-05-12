@@ -100,7 +100,7 @@ Clicking the first link in email should redirect 'login required' page
 Application is shown after login
   # Manual login because 'Mikko logs in' checks a different landing page
   User logs in  mikko@example.com  mikko123  Mikko Intonen
-  Wait until  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Mikko sees that application is assigned to Sonja
   General handler is  Sibbo Sonja

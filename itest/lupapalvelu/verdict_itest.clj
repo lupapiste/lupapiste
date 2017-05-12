@@ -188,22 +188,28 @@
       (-> app-with-verdict :tasks count) => 9)
 
     (facts "Delete verdicts"
-     (command sonja :delete-verdict :id application-id :verdictId verdict-id1) => ok?
-     (command sonja :new-verdict-draft :id application-id) => ok?
-     (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
-     (let [app-without-verdict (query-application mikko application-id)]
-       (fact "State stepped back"
-         (:state app-without-verdict) => "submitted")
-       (fact "Tasks have been deleted"
-         (-> app-without-verdict :tasks count) => 0)
-       (fact "Attachment has been deleted"
-         (-> app-without-verdict :attachments count) => attachment-count)
-       (fact "Verdicts have been deleted"
-         (-> app-without-verdict :verdicts count) => 0)
-       (fact "Comments have been deleted"
-         (-> app-without-verdict :comments count) => 0)))
-
-    ))
+      (command sonja :delete-verdict :id application-id :verdictId verdict-id1) => ok?
+      (fact "No step back since there still is a verdict"
+        (:state (query-application mikko application-id)) => "verdictGiven")
+      (let [draft-id (:verdictId (command sonja :new-verdict-draft :id application-id))]
+        (fact "No step back: draft deleted"
+          (command sonja :delete-verdict :id application-id :verdictId draft-id) => ok?
+          (:state (query-application mikko application-id)) => "verdictGiven"))
+      (command sonja :new-verdict-draft :id application-id) => ok?
+      (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+      (let [app-without-verdict (query-application mikko application-id)]
+        (fact "State stepped back"
+          (:state app-without-verdict) => "submitted")
+        (fact "History is updated"
+          (-> app-without-verdict :history last :state) => "submitted")
+        (fact "Tasks have been deleted"
+          (-> app-without-verdict :tasks count) => 0)
+        (fact "Attachment has been deleted"
+          (-> app-without-verdict :attachments count) => attachment-count)
+        (fact "Verdicts have been deleted"
+          (-> app-without-verdict :verdicts count) => 0)
+        (fact "Comments have been deleted"
+          (-> app-without-verdict :comments count) => 0)))))
 
 (fact "Rakennus & rakennelma"
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")

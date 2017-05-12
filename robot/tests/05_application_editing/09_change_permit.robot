@@ -27,7 +27,7 @@ Sonja submits the application and gives it a verdict
 Sonja creates a change permit
   Wait Until  Element should be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Element Text Should Be  xpath=//span[@data-test-id='application-id']  ${applicationid}
-  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyid}
+  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyid}
   Element Should Be Visible  xpath=//span[@data-test-id='application-submitted-date']
   Element Should Not Be Visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
 
@@ -43,7 +43,7 @@ Sonja creates a change permit
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
   Application address should be  ${appname}
-  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyid}
+  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyid}
   Element Should Not Be Visible  xpath=//span[@data-test-id='application-submitted-date']
 
   Element Should Not Be Visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']

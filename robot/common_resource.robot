@@ -640,13 +640,13 @@ Table with id should have rowcount
 Create application the fast way
   [Arguments]  ${address}  ${propertyId}  ${operation}
   Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create application with state
   [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
   Go to  ${CREATE URL}&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create bulletins the fast way
@@ -670,14 +670,14 @@ Create application
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create first application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Prepare first request  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${permitType}
@@ -1060,13 +1060,13 @@ Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open canceled application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}  canceled
   Wait until  Element Should Be Visible  application
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
