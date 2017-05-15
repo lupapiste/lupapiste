@@ -10,7 +10,7 @@
            (let [drag-element (rum/cursor-in component-state [:editor :drag-element])
                  closest-elem (rum/cursor-in component-state [:editor :closest-element])
                  {:keys [type text]} (rum/react data)
-                 rendered-content (if (= type :custom-text)
+                 rendered-content (if (= (keyword type) :custom-text)
                                     [:input {:placeholder (loc :stamp.custom-text)
                                              :value text
                                              :on-change #(swap! data assoc :text (-> % .-target .-value))
