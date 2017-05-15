@@ -17,6 +17,7 @@
         pre-verdict-query {:_id id
                            ; Look for pre-verdict attachments that have versions, are not yet archived, but need to be
                            $or  [{:archived.application {$ne nil}}
+                                 {:tosFunction nil}
                                  {:attachments {$elemMatch (merge {:applicationState {$nin [states/post-verdict-states]}
                                                                    :versions         {$gt []}}
                                                                   attachment-or-app-md)}}
