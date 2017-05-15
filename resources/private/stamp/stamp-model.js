@@ -160,6 +160,15 @@ LUPAPISTE.StampModel = function(params) {
     return foundValue;
   }
 
+  function findRow (type) {
+    var foundValue = null;
+    _.each( self.selectedStamp().rows, function( row ) {
+      foundValue = _.get(_.find( row, {type: type} ), "type");
+      return !foundValue;
+    });
+    return foundValue;
+  }
+
   function updateRowData (type, value) {
     return _.map(self.selectedStamp().rows,  function (row) {
       return _.map(row , function(object) {
@@ -205,7 +214,8 @@ LUPAPISTE.StampModel = function(params) {
 
   // Stamp rows
   self.customText = ko.observable(findRowData("custom-text"));
-  self.extraText = ko.observable(findRowData("extra-text"));  //not editable
+  self.extraText = ko.observable(findRowData("extra-text"));
+  self.extraTextRow = ko.observable(findRow("extra-text"));
   self.currentDate = ko.observable(stringToDate(findRowData("current-date")));
   self.verdictDate = ko.observable(stringToDate(findRowData("verdict-date")));
   self.backendId = ko.observable(findRowData("backend-id"));
@@ -214,6 +224,7 @@ LUPAPISTE.StampModel = function(params) {
   self.applicationId = ko.observable(findRowData("application-id"));
   self.buildingId = ko.observable(findRowData("building-id"));
   self.section = ko.observable(findRowData("section"));
+  self.sectionRow = ko.observable(findRow("section"));
   self.preview = ko.observable(generatePreview());
 
   if ( !self.selectedStamp().background ) {
@@ -233,6 +244,7 @@ LUPAPISTE.StampModel = function(params) {
       self.qrCode(self.selectedStamp().qrCode);
       self.customText(findRowData("custom-text"));
       self.extraText(findRowData("extra-text"));
+      self.extraTextRow(findRow("extra-text"));
       self.currentDate(stringToDate(findRowData("current-date")));
       self.verdictDate(stringToDate(findRowData("verdict-date")));
       self.backendId(findRowData("backend-id"));
@@ -241,6 +253,7 @@ LUPAPISTE.StampModel = function(params) {
       self.applicationId(findRowData("application-id"));
       self.buildingId(findRowData("building-id"));
       self.section(findRowData("section"));
+      self.sectionRow(findRow("section"));
       self.preview(generatePreview());
       self.updateRowValue = true;
     }

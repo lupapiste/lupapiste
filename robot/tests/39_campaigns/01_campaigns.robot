@@ -41,6 +41,7 @@ Add huhtikuu2017 campaign that has ended
 # Anonymous
 # ---------------------
 Company registration page does not show campaign information
+  Set campaign code
   Wait and click  register-button
   Click by test id  register-company-start
   No such test id  account5-last-discount-date
@@ -65,6 +66,7 @@ Delete old campaign create new into the future
 # Anonymous
 # ---------------------
 Still no campaign info on the registration page
+  Set campaign code
   Wait and click  register-button
   Click by test id  register-company-start
   No such test id  account5-last-discount-date
@@ -89,6 +91,7 @@ Delete old campaign and create new for today
 # Anonymous
 # ---------------------
 Campaign info shown on the registration page
+  Set campaign code
   Wait and click  register-button
   Click by test id  register-company-start
   Test id should contain  register-company-title  maksutta
@@ -191,3 +194,6 @@ Add huhtikuu2017
   Set Suite Variable  ${last-date}  ${last}
   Set Suite Variable  ${regular-date}  ${regular}
   Add campaign  huhtikuu2017  ${starts}  ${ends}  ${account5}  ${account15}  ${account30}  ${last}
+
+Set campaign code
+  Execute Javascript  lupapisteApp.services.campaignService.code( "huhtikuu2017")

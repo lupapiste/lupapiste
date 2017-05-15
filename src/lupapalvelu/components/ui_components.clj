@@ -72,7 +72,7 @@
                  :attachmentSizes       attachment-sizes
                  :accountTypes          company/account-types
                  ;; Hardcoded campaign code for April 2017
-                 :campaignCode          :huhtikuu2017
+                 ;; :campaignCode          :huhtikuu2017
                  :eInvoiceOperators     schemas/e-invoice-operators
                  :postVerdictStates     states/post-verdict-states
                  :loggedInUploadMaxSize (env/value :file-upload :max-size :logged-in)
