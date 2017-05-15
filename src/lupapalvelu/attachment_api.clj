@@ -611,7 +611,7 @@
 (defquery custom-stamps
   {:parameters       [id]
    :user-roles       #{:authority}
-   :org-authz-roles  roles/reader-org-authz-roles
+   :org-authz-roles  roles/default-org-authz-roles
    :states           states/all-application-states
    :description      "Stamps based on organization stamp templates and filled with application data"}
   [{user :user application :application app-org :organization user-orgs :user-organizations}]
