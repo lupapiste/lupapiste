@@ -153,11 +153,12 @@
                 inspection-summary/validate-summary-target-found-in-application
                 inspection-summary/validate-summary-not-locked]
    :parameters [:id summaryId targetId targetName]
+   :optional-parameters [inspectionDate]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetName])]
    :user-roles #{:authority}}
   [{application :application}]
-  (inspection-summary/edit-target application summaryId targetId {:set {:target-name targetName}})
+  (inspection-summary/edit-target application summaryId targetId {:set {:target-name targetName :inspection-date inspectionDate}})
   (ok))
 
 (defcommand remove-target-from-inspection-summary

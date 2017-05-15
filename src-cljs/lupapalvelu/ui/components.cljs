@@ -34,3 +34,24 @@
                                   :yesFn     callback
                                   :lyesTitle "ok"
                                   :lnoTitle  "cancel"}}))
+
+(defn date-picker [value]
+  (let [val (atom value)]
+    [:input {:type          "text"
+             :value         @val
+             :on-change     #(reset! val (-> % .-target .-value))
+             :on-blur       #(println "Save")  ;save
+             :on-focus      #(hub/send "modal-datepicker"
+                                       {:command save-date
+                                        :value val
+                                        :dateSelectorLabel "Valitse date"
+                                        :dialogHeader "Inspection date"
+                                        :dialogHelpParagraph "Apua ei tule"
+                                        :dialogButtonSend "Ok"
+                                        :areYouSureMessage "Ookkos nyt aivan varma?"})
+             :on-key-press  #(when (= "Enter" (.-key %))
+                               (do
+                                 (.preventDefault %)
+                                 (.stopPropagation %)
+                                 (commit-fn @val)))
+             :data-test-id  "dp-test"}]))

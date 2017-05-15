@@ -77,12 +77,27 @@ LUPAPISTE.ModalDatepickerModel = function() {
 
   //Open the dialog
 
-  self.openWithConfig = function(config, app) {
+  self.openWithConfig = function(config, app) {c
     self.config = config;
     if (self.config) {
       self.reset(app);
       LUPAPISTE.ModalDialog.open(self.dialogSelector);
     }
   };
+
+  hub.subscribe("modal-datepicker", function(data) {
+    console.log("Availlaan datepicker");
+    var config =
+      {checkIntegrationAvailability: false,
+       dateParameter       : data.value,
+       extraParameters     : {lang: loc.getCurrentLanguage()},
+       dateSelectorLabel   : data.dateSelectorLabel,
+       dialogHeader        : data.dialogHeader,
+       dialogHelpParagraph : data.dialogHelpParagraph,
+       dialogButtonSend    : data.dialogButtonSend,
+       areYouSureMessage   : data.areYouSureMessage};
+    self.config = config;
+    LUPAPISTE.ModalDialog.open(self.dialogSelector);
+  });
 
 };

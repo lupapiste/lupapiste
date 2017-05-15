@@ -110,7 +110,16 @@
                :id         (:applicationId @component-state)
                :summaryId  (:id @selected-summary)
                :targetId   target-id
-               :targetName val))
+               :targetName val
+               :inspectionDate (:inspection-date @selected-summary)))
+    (refresh)))
+
+(defn- commit-inspection-date-edit [target-id val]
+  (if (not (empty? val))
+    (let [cmd-name (if target-id
+                     :edit-inspection-summary-target
+                     :add-target-to-inspection-summary)]
+      (println "NYT UPPIA"))
     (refresh)))
 
 (defn- toggle-summary-locking [locked?]
@@ -227,6 +236,13 @@
            (attc/delete-attachment-link attachment remove-attachment-success))])
      (when (and target-id (not locked?) (not targetFinished?))
        [:div (attc/upload-link (partial got-files (:id row-target)))])]
+     [:td
+      (if (auth/ok? auth-model :add-target-to-inspection-summary)
+        ;(uc/autofocus-input-field (:inspection-date row-target)
+        ;                          (str "edit-inspection-date-" idx)
+        ;                          (fn [] (println "PÄIVÄ PÄIVITYS"))
+        (uc/date-picker (:inspection-date row-target))
+        (:inspection-date row-target))]
      [:td
       (when (:finished-date row-target)
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]
@@ -370,7 +386,8 @@
             [:th (js/loc "inspection-summary.targets.table.state")]
             [:th (js/loc "inspection-summary.targets.table.target-name")]
             [:th (js/loc "inspection-summary.targets.table.attachment")]
-            [:th (js/loc "inspection-summary.targets.table.date")]
+            [:th (js/loc "inspection-summary.targets.table.inspection-date")]
+            [:th (js/loc "inspection-summary.targets.table.finished-date")]
             [:th (js/loc "inspection-summary.targets.table.marked-by")]
             [:th ""]]]
           [:tbody
