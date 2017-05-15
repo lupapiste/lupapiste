@@ -89,5 +89,7 @@ LUPAPISTE.CampaignService = function() {
   };
 
   // Hardcoded campaign code
-  self.code( LUPAPISTE.config.campaignCode );
+  if( LUPAPISTE.config.campaignCode ) {
+    self.code( LUPAPISTE.config.campaignCode );
+  }
 };
