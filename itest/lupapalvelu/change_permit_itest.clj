@@ -15,6 +15,13 @@
                               :address "Paatoskuja 12")
         application-id      (:id application)]
 
+    (fact "Request statement from Pena"
+      (command sonja :request-for-statement :id application-id
+               :functionCode ""
+               :selectedPersons [{:email "pena@example.com"
+                                  :name "Pena"
+                                  :text "Pena"}]) => ok?)
+
     (generate-documents application apikey)
 
     (command apikey :approve-application :id application-id :lang "fi") => ok?
@@ -47,7 +54,9 @@
        (fact "All documents have new ids"
          (let [old-ids (set (map :id (:documents application)))
                new-ids (set (map :id (:documents change-app)))]
-           (intersection new-ids old-ids) => empty?))))))
+           (intersection new-ids old-ids) => empty?))
+       (fact "No statement givers"
+         (map :role (:auth change-app)) => ["owner"])))))
 
 (facts "Change permit can only be applied for an R type of application."
   (let [apikey                 sonja
