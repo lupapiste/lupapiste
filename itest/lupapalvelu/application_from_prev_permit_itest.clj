@@ -151,8 +151,7 @@
                   (count op-documents) => 3
                   (fact "building identifiers"
                     (map #(-> % :data :valtakunnallinenNumero :value) op-documents) => (contains ["100222397J" "100222398K"]))
-                  ;; the following test is commented temporarily
-                  #_(fact "maalampokaivo"
+                  (fact "maalampokaivo"
                     (application :secondaryOperations) => (has some (contains {:description "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4"})))))
 
               ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID

@@ -208,8 +208,8 @@
                  rakennelma (->rakennelman-tiedot (-> xml (select [:Rakennelma]) first))]
              (when-not (empty? (or rakennus rakennelma))
                {:data (or rakennus rakennelma)
-                :description (or (-> (->buildings-summary xml) first :description)
-                                 (:rakennelman-kuvaus rakennelma))})))
+                :description (or (:rakennelman-kuvaus rakennelma)
+                                 (-> (->buildings-summary xml) first :description))})))
           (-> app-xml cr/strip-xml-namespaces (select [:toimenpidetieto])))))
 
 (defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
