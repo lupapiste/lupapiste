@@ -1083,7 +1083,8 @@
                                  :stamp-id stamp-id :name "zero stamp"
                                  :page "last" :background 20 :qrCode false
                                  :position {:x 1 :y 2}
-                                 :rows [])]
+                                 :rows [[{:type "custom-text"
+                                          :text "Hello World"}]])]
         (fact "edit ok"
           edit-result => ok?
           (:stamp-id edit-result) => stamp-id)
