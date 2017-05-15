@@ -4,8 +4,10 @@ var cljsLoader = {
     "use strict";
     if (_.startsWith(name, "cljs-") && name !== "cljs-component") {
       var cljsComponentName = _.join(_.drop(_.split(name,"-"),1), "-");
+      var cljsComponentPath = cljsComponentName.replace(/_/g, ".").replace(/-/g,"_");
       var elemId = _.uniqueId(_.snakeCase(cljsComponentName));
       callback({cljsComponentName:  _.snakeCase(cljsComponentName),
+                cljsComponentPath:  cljsComponentPath,
                 template: "<div id='" + elemId + "'></div>"});
     } else {
       callback(null);
@@ -15,12 +17,13 @@ var cljsLoader = {
     "use strict";
     if (_.has(componentConfig, "cljsComponentName")) {
       var cljsComponentName = _.get(componentConfig, "cljsComponentName");
+      var cljsComponentPath = _.get(componentConfig, "cljsComponentPath");
       var elemId = _.uniqueId(cljsComponentName);
       var elems = ko.utils.parseHtmlFragment("<div id='" + elemId + "'></div>");
       var doCallback = function() {
         callback({template: elems,
                   createViewModel: function(params /*, componentInfo */) {
-                    var newParams = _.defaults(params, {elemId: elemId, componentName: cljsComponentName});
+                    var newParams = _.defaults(params, {elemId: elemId, componentPath: cljsComponentPath});
                     return new LUPAPISTE.CljsComponentModel(newParams);
                   }});
       };

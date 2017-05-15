@@ -21,3 +21,6 @@
                       (hub/subscribe (assoc result :eventType eventName)
                                      (partial callback state)))))
     :will-unmount (fn [state] (doseq [subscription (:hubscriptions state)] (hub/unsubscribe subscription)))})
+
+(defn map-with-key [f coll]
+  (map-indexed (fn [idx elem] (rum/with-key (f elem) idx)) coll))

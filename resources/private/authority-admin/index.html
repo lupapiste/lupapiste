@@ -20,6 +20,9 @@
                     <li data-bind="if: features.enabled('ajanvaraus') && lupapisteApp.models.globalAuthModel.ok('calendars-enabled')">
                       <a class="link-btn" href="#!/organization-calendars" data-test-id="" data-bind="ltext: 'auth-admin.organization-calendars', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('organization-calendars')}"></a>
                     </li>
+                    <li data-bind="if: features.enabled('stamp-editor')">
+                      <a class="link-btn" href="#!/stamp-editor" data-test-id="stamp-editor" data-bind="ltext: 'auth-admin.stamp-editor', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('stamp-editor')}"></a>
+                    </li>
                 </ul>
             </div>
         </div>

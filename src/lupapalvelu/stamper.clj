@@ -43,11 +43,8 @@
   (.draw text g x y))
 
 (defn make-stamp
-  [^String verdict ^Long created ^Integer transparency info-fields]
-  (let [fields (conj
-                 (vec
-                   (conj info-fields (str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))))
-                 "LUPAPISTE.fi")
+  [^Integer transparency qr-code info-fields]
+  (let [fields (conj (vec info-fields) (str "www.lupapiste.fi"))
         font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (remove nil?
@@ -59,7 +56,7 @@
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
         line-height 22
         rect-height (+ (* (count texts) line-height) 10)
-        qr-size 70
+        qr-size (if (true? qr-code) 70 0)
         width (int (+ (reduce max text-widths) 52))
         height (int (+ qr-size rect-height 5))
         image (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)
@@ -234,7 +231,7 @@
 (comment
 
   (defn- paint-component [g w h]
-    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) 128 ["SIPOO" "" "Rakennustunnus" "Kuntalupatunnus" "Pykala"])
+    (let [i (make-stamp 128 false ["SIPOO" "" "Rakennustunnus" "Kuntalupatunnus" "Pykala"])
           iw (.getWidth i)
           ih (.getHeight i)]
       (.setColor g Color/GRAY)
@@ -267,7 +264,7 @@
 
   ; Run this in REPL and check that every new file has been stamped
   (let [d "checkouts/lupapiste-aux/problematic-pdfs"
-        my-stamp (make-stamp "OK" 0 0 ["Solita Oy"])]
+        my-stamp (make-stamp 0 true ["Solita Oy"])]
     (doseq [f (remove #(.endsWith (.getName %) "-leima.pdf") (fs/list-dir d))]
       (println f)
       (with-open [my-in  (io/input-stream (str f))
