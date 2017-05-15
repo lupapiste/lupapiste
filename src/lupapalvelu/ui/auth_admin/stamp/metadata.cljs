@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.auth-admin.stamp.metadata
   (:require [rum.core :as rum]
-            [lupapalvelu.ui.auth-admin.stamp.form-entry :refer [form-entry]]
             [lupapalvelu.ui.auth-admin.stamp.state :as state]
             [lupapalvelu.ui.common :refer [loc command]]
             [lupapalvelu.ui.components :as uc]
