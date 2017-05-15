@@ -250,7 +250,7 @@
 "error.illegal-rakennusnumero" "en" "Invalid building number"
 "error.illegal-rakennusnumero" "fi" "Virheellinen rakennusnumero"
 "error.illegal-rakennusnumero" "sv" "Felaktig byggnadsnummer"
-"error.illegal-rakennustunnus" "en" "Invalid building code"
+"error.illegal-rakennustunnus" "en" "Invalid building number"
 "error.illegal-rakennustunnus" "fi" "Virheellinen rakennustunnus"
 "error.illegal-rakennustunnus" "sv" "Felaktig byggnadsbeteckning"
 "error.illegal-recent-year:future" "en" "The year is in the future"
