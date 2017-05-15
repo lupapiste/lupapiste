@@ -109,12 +109,6 @@
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
 
-(defn- org-authz-validator [org-authz-roles]
-  (fn [{user :user {app-org-id :organization} :application}]
-    (let [org-id (or (usr/authority-admins-organization-id user) app-org-id)]
-      (when-not (auth/has-organization-authz-roles? org-authz-roles org-id user)
-        (fail :error.unauthorized)))))
-
 ;;
 ;; Attachments
 ;;
@@ -587,7 +581,6 @@
                       (partial action/boolean-parameters [:qrCode])
                       (partial action/parameters-matching-schema [:position] (:position StampTemplate))
                       (partial action/parameters-matching-schema [:rows] (:rows StampTemplate))]
-   :pre-checks       [(org-authz-validator #{:authorityAdmin})]
    :user-roles       #{:authorityAdmin}}
   [{{stamp-id :stamp-id :as data} :data user :user}]
   (let [stamp (assoc (select-keys data [:name :position :background :page :qrCode :rows]) :id (or stamp-id (mongo/create-id)))]
@@ -603,7 +596,6 @@
 (defcommand delete-stamp-template
   {:parameters       [stamp-id]
    :input-validators [(partial action/non-blank-parameters [:stamp-id])]
-   :pre-checks       [(org-authz-validator #{:authorityAdmin})]
    :user-roles       #{:authorityAdmin}}
   [{user :user}]
   (->> {$pull {:stamps {:id stamp-id}}}
@@ -611,16 +603,15 @@
   (ok))
 
 (defquery stamp-templates
-  {:pre-checks       [(org-authz-validator #{:authorityAdmin})]
-   :user-roles       #{:authorityAdmin}}
+  {:user-roles       #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)]
     (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
 
 (defquery custom-stamps
-  {:optional-parameters [id]
-   :pre-checks       [(org-authz-validator #{:authority})]
+  {:parameters       [id]
    :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-application-states
    :description      "Stamps based on organization stamp templates and filled with application data"}
   [{user :user application :application app-org :organization user-orgs :user-organizations}]
