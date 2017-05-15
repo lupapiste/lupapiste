@@ -67,7 +67,7 @@
                :background sssc/Nat
                :page       (sc/if keyword? (apply sc/enum pages) (apply sc/enum (mapv name pages)))
                :qrCode     sc/Bool
-               :rows       [StampTemplateRow]})
+               :rows       (sc/constrained [StampTemplateRow] #(ffirst %) 'at-least-one-field-in-first-row)})
 
 (sc/defschema Stamp
               {:name       StampName
