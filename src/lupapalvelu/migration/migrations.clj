@@ -3128,49 +3128,6 @@
                          {:selected-operations "ya-kayttolupa-muu-liikennealuetyo"}
                          {$set {:selected-operations.$ "ya-katulupa-muu-liikennealuetyo"}}))
 
-;; SECONDARY OPSS?!?!?
-
-(defn get-state-for-sijoituslupa [old-state verdict]
-  (if (:sopimus verdict)
-    (cond
-      (and
-        (#{:finished :verdictGiven} (keyword old-state))
-        (not-empty (:signatures verdict))) :agreementSigned
-      (#{:finished :verdictGiven} (keyword old-state)) :agreementPrepared
-      :else old-state)
-    old-state))
-
-(defn terassit-to-sijoituslupa
-  "1: Sijoitusluvalla ei tyoaikaa
-   2: Hankkeen kuvaus muuttuu + varattava pinta-ala poistuu"
-  [coll {:keys [documents verdicts state id]}]
-  {:pre [(sequential? documents) (string? id)]}
-  (let [new-op-doc-name (get-in op/ya-operations [:ya-sijoituslupa-terassit :schema])
-        _ (assert (= new-op-doc-name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"))
-        kuvaus-idx (->> documents
-                        (util/positions #(= "yleiset-alueet-hankkeen-kuvaus-kayttolupa" (get-in % [:schema-info :name])))
-                        first)
-        op-doc     (->> documents
-                        (util/find-first #(= "tyoaika" (get-in % [:schema-info :op :name]))))
-        op-doc-idx (util/position-by-id (:id op-doc) documents)
-        verdict   (-> (remove :draft verdicts) first)]
-    (mongo/update-by-id coll id {$set   {(str "documents." kuvaus-idx ".schema-info-op") (-> (get-in op-doc [:schema-info :op])
-                                                                                             (assoc :name "ya-sijoituslupa-terassit"))
-                                         :primaryOperation.name "ya-sijoituslupa-terassit"
-                                         :permitSubtype (if (:sopimus verdict) "sijoitussopimus" "sijoituslupa")
-                                         :state (get-state-for-sijoituslupa state verdict)}
-                                 $unset {(str "documents." op-doc-idx) 1
-                                         (str "documents." kuvaus-idx ".data.varattava-pinta-ala") 1}})))
-
-(defmigration terassit-kayttolupa-to-sijoituslupa
-  (reduce + 0
-          (for [coll [:submitted-applications :applications]
-                app  (mongo/select coll
-                                   {:permitType "YA"
-                                    :primaryOperation.name "ya-kayttolupa-terassit"}
-                                   [:state :primaryOperation :history :documents :infoRequest :verdicts])]
-            (terassit-to-sijoituslupa coll app))))
-
 (defmigration clean-post-verdict-original-application-states
   {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:originalApplicationState
                                                                            {$in states/post-verdict-states}}}}))}
