@@ -761,7 +761,9 @@
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
-                                                           (let [doc (assoc doc :id (mongo/create-id))]
+                                                           (let [doc (-> doc
+                                                                         (assoc :id (mongo/create-id))
+                                                                         (util/dissoc-in [:meta :_approved]))]
                                                              (if (-> doc :schema-info :op)
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))
