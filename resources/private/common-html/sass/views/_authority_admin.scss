@@ -120,6 +120,37 @@ div.organization-link-cell {
 
 // Stamp Editor
 
+.edit-stamp-bubble {
+  border: 1px solid $gray221;
+  margin-top: 1em;
+}
+
+.stamp-selection {
+  select {
+    margin-right: 1em;
+  }
+}
+
+.stamp-editor-header {
+  margin: 0;
+  .row {
+    margin: 10px 0;
+    button {
+      float: right;
+    }
+  }
+  .buttons {
+    text-align: right;
+    button {
+      margin-right: 0;
+    }
+  }
+}
+
+.stamp-preview {
+  border: 1px solid $gray221;
+}
+
 @mixin btn-with-border {
   border-style: solid;
   border-width: 2px;
@@ -182,12 +213,16 @@ div.organization-link-cell {
   @include btn-with-border;
   @include stamp-editor-borders;
   border-style: dashed;
-  color: $gray221
+  color: $gray221;
 }
 
 .stamp-row-focus {
   @include btn-with-border;
   @include stamp-editor-borders;
   border-style: solid;
-  color: $gray221
+  color: $gray221;
+}
+
+.stamp-editor-drag-guide {
+  margin: 1em 0;
 }

@@ -47,7 +47,5 @@
 
 (rum/defc preview-component < rum/reactive
           [rows]
-          [:div.form-group {:style {:width "35%"
-                                    :border "1px solid"
-                                    :display :inline-block}}
+          [:div.col-2
            [:ul.stamp-preview (rum-util/map-with-key stamp-row-preview (conj (rum/react rows) [{:type :lupapiste}]))]])

@@ -196,3 +196,6 @@
 "stamp-editor.drag.guide" "fi" "Raahaa ylläolevia leiman sisältökenttiä allaoleviin tyhjiin ruutuihin. Poista klikkaamalla kentän lopussa olevaa ruksia."
 "stamp-editor.drag.guide" "sv" ""
 "stamp-editor.drag.guide" "en" ""
+"stamp-editor.qrCode" "fi" "Näytä QR-koodi"
+"stamp-editor.qrCode" "sv" "Visa QR-kod"
+"stamp-editor.qrCode" "en" "Show QR code"
