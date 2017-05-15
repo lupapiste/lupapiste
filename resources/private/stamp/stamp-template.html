@@ -72,7 +72,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.extra-text'"></label>
-                <input data-bind="value: extraText, enable: status() === statusReady && extraText() !== undefined"
+                <input data-bind="value: extraText, enable: status() === statusReady && extraTextRow() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-extratext">
@@ -121,7 +121,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.section'"></label>
-                <input data-bind="value: section, enable: status() === statusReady && section() !== undefined"
+                <input data-bind="value: section, enable: status() === statusReady && sectionRow() !== undefined"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-section">
