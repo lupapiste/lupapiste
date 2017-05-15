@@ -8,7 +8,6 @@
             [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
-            [schema.core :as sc]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -23,6 +22,7 @@
             [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
             [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.attachment.stamp-schema :refer [StampTemplate]]
             [lupapalvelu.building :as building]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -35,7 +35,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as tos]))
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.attachment.stamps :as stamps]))
 
 ;; Action category: attachments
 
@@ -573,12 +574,53 @@
         (ok)))
     (fail :error.unknown)))
 
+(defcommand upsert-stamp-template
+  {:parameters       [name position background page qrCode rows]
+   :input-validators [(partial action/non-blank-parameters [:name :page])
+                      (partial action/number-parameters [:background])
+                      (partial action/boolean-parameters [:qrCode])
+                      (partial action/parameters-matching-schema [:position] (:position StampTemplate))
+                      (partial action/parameters-matching-schema [:rows] (:rows StampTemplate))]
+   :user-roles       #{:authorityAdmin}}
+  [{{stamp-id :stamp-id :as data} :data user :user}]
+  (let [stamp (assoc (select-keys data [:name :position :background :page :qrCode :rows]) :id (or stamp-id (mongo/create-id)))]
+    (if stamp-id
+      (mongo/update :organizations
+                    {:_id (usr/authority-admins-organization-id user) :stamps {$elemMatch {:id stamp-id}}}
+                    {$set {:stamps.$ stamp}})
+      (mongo/update :organizations
+                    {:_id (usr/authority-admins-organization-id user)}
+                    {$push {:stamps stamp}}))
+    (ok :stamp-id (:id stamp))))
+
+(defcommand delete-stamp-template
+  {:parameters       [stamp-id]
+   :input-validators [(partial action/non-blank-parameters [:stamp-id])]
+   :user-roles       #{:authorityAdmin}}
+  [{user :user}]
+  (->> {$pull {:stamps {:id stamp-id}}}
+       (organization/update-organization (usr/authority-admins-organization-id user)))
+  (ok))
+
+(defquery stamp-templates
+  {:user-roles       #{:authorityAdmin}}
+  [{user :user}]
+  (let [org-id (usr/authority-admins-organization-id user)]
+    (ok :stamps (:stamps (organization/get-organization (name org-id) [:stamps])))))
+
+(defquery custom-stamps
+  {:parameters       [id]
+   :user-roles       #{:authority}
+   :org-authz-roles  roles/reader-org-authz-roles
+   :states           states/all-application-states
+   :description      "Stamps based on organization stamp templates and filled with application data"}
+  [{user :user application :application app-org :organization user-orgs :user-organizations}]
+  (ok :stamps (stamps/stamps @app-org application user)))
+
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo kuntalupatunnus section lang]
+  {:parameters [:id timestamp files lang stamp]
    :categories #{:attachments}
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
-                      (partial action/number-parameters [:xMargin :yMargin])
-                      (partial action/non-blank-parameters [:page])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
    :states     states/post-submitted-states
@@ -589,26 +631,19 @@
                            (ss/blank? timestamp) (:created command)
                            :else (util/->long timestamp))
         stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
-        org             (if-not (ss/blank? organization)
-                          organization
-                          (organization/get-organization-name @org))
-        job             (stamping/make-stamp-job
-                         (att/get-attachments-infos application files)
-                         {:application application
-                          :user (:user command)
-                          :lang lang
-                          :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-                          :stamp-created stamp-timestamp
-                          :created  (:created command)
-                          :x-margin (util/->long xMargin)
-                          :y-margin (util/->long yMargin)
-                          :page     (keyword page)
-                          :transparency (util/->long (or transparency 0))
-                          :info-fields  {:backend-id   kuntalupatunnus
-                                         :section      section
-                                         :extra-info   extraInfo
-                                         :organization org
-                                         :buildings    (building/building-ids application)}})]
+        job (stamping/make-stamp-job
+              (att/get-attachments-infos application files)
+              {:application   application
+               :user          (:user command)
+               :lang          lang
+               :qr-code       (:qrCode stamp)
+               :stamp-created stamp-timestamp
+               :created       (:created command)
+               :x-margin      (util/->long (get-in stamp [:position :x]))
+               :y-margin      (util/->long (get-in stamp [:position :y]))
+               :page          (keyword (:page stamp))
+               :transparency  (util/->long (or (:background stamp) 0))
+               :info-fields   {:fields (:rows stamp) :buildings (building/building-ids application)}})]
     (ok :job job)))
 
 (defquery stamp-attachments-job

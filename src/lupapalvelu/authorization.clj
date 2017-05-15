@@ -101,19 +101,20 @@
 
 (defn org-authz
   "Returns user's org authz in given organization, nil if not found"
-  [organization user]
-  (get-in user [:orgAuthz (keyword organization)]))
+  [organization-id user]
+  (get-in user [:orgAuthz (keyword organization-id)]))
 
 (defn has-organization-authz-roles?
   "Returns true if user has requested roles in organization"
-  [requested-authz-roles {organization :organization} user]
-  (let [user-org-authz (org-authz organization user)]
-    (and (usr/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))
+  [requested-authz-roles organization-id user]
+  (and (or (usr/authority? user) (usr/authority-admin? user))
+       requested-authz-roles
+       (some requested-authz-roles (org-authz organization-id user))))
 
 (defn application-authority?
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
-  (boolean (has-organization-authz-roles? #{:authority :approver} application user)))
+  (boolean (has-organization-authz-roles? #{:authority :approver} (:organization application) user)))
 
 ;;
 ;; Enrich auth array

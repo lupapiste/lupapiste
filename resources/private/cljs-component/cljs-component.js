@@ -7,13 +7,12 @@
 LUPAPISTE.CljsComponentModel = function(params) {
   "use strict";
   var self = this;
-  self.componentName = params.componentName;
+  self.componentPath = params.componentPath;
 
   self.dispose = function() {
     ReactDOM.unmountComponentAtNode(document.getElementById(params.elemId));
   };
 
   // bind React component only after template has been injected
-  _.defer(lupapalvelu.ui[self.componentName].start, params.elemId, params);
+  _.defer(_.get(lupapalvelu.ui, self.componentPath).start, params.elemId, params);
 };
-

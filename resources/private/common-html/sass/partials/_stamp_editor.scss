@@ -1,0 +1,24 @@
+.stamp-editor-header {
+  background-color: $gray246;
+  border: 1px solid $gray221;
+
+  button {
+    margin: $marginM;
+  }
+}
+
+.stamp-editor-control-buttons {
+  button {
+    margin: $marginS;
+  }
+}
+
+.stamp-preview {
+  list-style: none;
+  text-align: center;
+  font-weight: bold;
+
+ .stamp-preview-element {
+    margin: $marginS;
+  }
+}
