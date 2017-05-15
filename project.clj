@@ -140,11 +140,13 @@
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.0"]]
-  :cljsbuild {:builds {:rum {:source-paths ^:replace ["src"]}}}
   :clean-targets ^{:protect false} ["resources/public/lp-static/js/rum-app.js"
                                     "resources/public/lp-static/js/rum-app.js.map"
                                     "resources/public/lp-static/js/out"
                                     :target-path]
+  :source-paths ["src" "src-cljc"]
+  :java-source-paths ["java-src"]
+  :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
@@ -180,7 +182,7 @@
                         :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
                                                                         :output-to "resources/public/lp-static/js/rum-app.js"
                                                                         :asset-path "/lp-static/js/out"
-                                                                        :externs ["src/lupapalvelu/ui/lupapiste-externs.js"]
+                                                                        :externs ["src-cljs/lupapalvelu/ui/lupapiste-externs.js"]
                                                                         :parallel-build true
                                                                         :pretty-print false
                                                                         :optimizations :advanced}}}}
@@ -199,7 +201,6 @@
   :sass {:target-path  "resources/public/lp-static/css/"
          :source-paths ["resources/private/common-html/sass/"]
          :output-style :compressed}
-  :java-source-paths ["java-src"]
   :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
