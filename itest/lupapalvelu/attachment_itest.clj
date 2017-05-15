@@ -1040,3 +1040,69 @@
       (fact "Not needed can be set after version deletion"
         (command pena :set-attachment-not-needed :id application-id :notNeeded true
                  :attachmentId (:id updated-attachment)) => ok?))))
+
+(facts stamp-templates
+  (let [result (query sipoo :stamp-templates)
+        stamps (:stamps result)]
+
+    (fact "stamps in query result"
+      (keys result) =contains=> :stamps)
+
+    (fact "two stamps by default"
+      (count stamps) => 2)))
+
+(facts "editing stamp templates"
+  (let [add-result (command sipoo :upsert-stamp-template :name "zero stamp" :page "first" :background 0 :qrCode false :position {:x 0 :y 0} :rows [])
+        stamp-id (:stamp-id add-result)]
+    (fact "add new stamp"
+      add-result => ok?
+      stamp-id => string?)
+
+    (fact "stamp is added"
+      (let [stamps (:stamps (query sipoo :stamp-templates))
+            new-stamp (last stamps)]
+        (count stamps) => 3
+
+        (fact "stamp data is ok"
+          (keys new-stamp) => (just [:id :name :page :background :qrCode :position :rows] :in-any-order :gaps-ok)
+          (:id new-stamp) => stamp-id
+          (:name new-stamp) => "zero stamp"
+          (:page new-stamp) => "first"
+          (:background new-stamp) => 0
+          (:qrCode new-stamp) => false
+          (:position new-stamp) => {:x 0 :y 0}
+          (:rows new-stamp) => [])))
+
+    (facts "edit existing stamp"
+      (let [edit-result (command sipoo :upsert-stamp-template :stamp-id stamp-id :name "zero stamp" :page "last" :background 20 :qrCode false :position {:x 1 :y 2} :rows [])]
+        (fact "edit ok"
+          edit-result => ok?
+          (:stamp-id edit-result) => stamp-id)
+
+        (fact "stamp is added"
+          (let [stamps (:stamps (query sipoo :stamp-templates))
+                edited-stamp (last stamps)]
+            (count stamps) => 3
+
+            (fact "stamp data is ok"
+              (keys edited-stamp) => (just [:id :name :page :background :qrCode :position :rows] :in-any-order :gaps-ok)
+              (:id edited-stamp) => stamp-id
+              (:name edited-stamp) => "zero stamp"
+              (:page edited-stamp) => "last"
+              (:background edited-stamp) => 20
+              (:qrCode edited-stamp) => false
+              (:position edited-stamp) => {:x 1 :y 2}
+              (:rows edited-stamp) => [])))))))
+
+(facts "remove stamp"
+  (let [stamps (:stamps (query sipoo :stamp-templates))
+        stamp-id (:id (last stamps))]
+
+    stamp-id => string?
+
+    (command sipoo :delete-stamp-template :stamp-id stamp-id) => ok?
+
+    (fact "stamp is removed"
+      (let [updated-stamps (:stamps (query sipoo :stamp-templates))]
+        (count updated-stamps) => (dec (count stamps))
+        (util/find-by-id stamp-id updated-stamps) => nil))))
