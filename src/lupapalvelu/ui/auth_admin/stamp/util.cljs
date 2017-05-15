@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.auth-admin.stamp.util
   (:require [clojure.string :as string]
-            [lupapalvelu.ui.util :as util]))
+            [lupapalvelu.ui.util :as util]
+            [lupapalvelu.attachment.stamp-schema :as sts]))
 
 (defn find-by-id
   [v col]
@@ -111,7 +112,10 @@
           {:strs [row index]} (when-not (string/blank? moved) (util/json->clj moved))
           field-data (if (and row index)
                        (get-in @all-rows-cursor [row index])
-                       {:type (keyword type)})]
+                       (let [kw-type (keyword type)]
+                         (merge {:type kw-type}
+                                (when (kw-type sts/text-field-types)
+                                  {:text ""}))))]
       (swap! all-rows-cursor update-in [current-row] add-at-index split-pos field-data)
       (when (and row index)
         (let [drop-index (if (and (= row current-row) (< split-pos index))
