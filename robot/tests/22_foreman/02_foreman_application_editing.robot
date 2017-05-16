@@ -195,9 +195,9 @@ Change subtype back to foreman application
   Wait until  Select from list by value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
 
-Verdict could be given
+Verdict could be not given in complementNeeded (LPK-2559)
   Open tab  verdict
-  Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
+  Wait Until  Element should not be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
 
 Re-send and give verdict
   Open tab  requiredFieldSummary
