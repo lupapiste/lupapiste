@@ -67,7 +67,7 @@
        (remove empty?)
        (into [])))
 
-(defn row-values-as-string [rows]
+(defn stamp-rows->vec-of-string-value-vecs [rows]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)]}
   (mapv (fn [row] (mapv :value row)) rows))
 
