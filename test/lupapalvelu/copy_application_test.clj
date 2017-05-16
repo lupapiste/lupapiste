@@ -21,7 +21,7 @@
 (testable-privates lupapalvelu.copy-application
                    handle-special-cases
                    clear-personal-information
-                   check-valid-source-application!)
+                   check-valid-source-application)
 
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
@@ -198,15 +198,13 @@
    (facts "checks"
 
      (fact "change permits cannot be copied"
-       (check-valid-source-application! {:permitSubtype "muutoslupa"})
-       => (throws #"error.application-invalid-permit-subtype"))
+       (check-valid-source-application {:permitSubtype "muutoslupa"})
+       => (contains {:text "error.application-invalid-permit-subtype"}))
 
      (fact "foreman and jatkoaika applications cannot be copied"
-       (check-valid-source-application! {:primaryOperation {:name "tyonjohtajan-nimeaminen"}})
-       => (throws #"error.operations.copying-not-allowed")
-       (check-valid-source-application! {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}})
-       => (throws #"error.operations.copying-not-allowed")
-       (check-valid-source-application! {:primaryOperation {:name "jatkoaika"}})
-       => (throws #"error.operations.copying-not-allowed"))
-
-     (fact ))))
+       (check-valid-source-application {:primaryOperation {:name "tyonjohtajan-nimeaminen"}})
+       => (contains {:text "error.operations.copying-not-allowed"})
+       (check-valid-source-application {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}})
+       => (contains {:text "error.operations.copying-not-allowed"})
+       (check-valid-source-application {:primaryOperation {:name "jatkoaika"}})
+       => (contains {:text "error.operations.copying-not-allowed"})))))

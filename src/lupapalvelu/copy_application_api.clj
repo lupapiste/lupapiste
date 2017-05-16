@@ -40,14 +40,17 @@
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
   [{:keys [created] :as command}]
-  (let [{source-application :source-application
-         copied-application :copy-application} (copy-app/copy-application command)]
-    (logging/with-logging-context {:applicationId (:id copied-application)}
-      (app/insert-application copied-application)
-      (copy-app/store-source-application source-application (:id copied-application) created)
-      (try-autofill-rakennuspaikka copied-application created)
-      (copy-app/send-invite-notifications! copied-application command)
-      (ok :id (:id copied-application)))))
+  (let [copy-app-resp (copy-app/copy-application command)]
+    (if (fail? copy-app-resp)
+      copy-app-resp
+      (let [{source-application :source-application
+             copied-application :copy-application}  copy-app-resp]
+        (logging/with-logging-context {:applicationId (:id copied-application)}
+          (app/insert-application copied-application)
+          (copy-app/store-source-application source-application (:id copied-application) created)
+          (try-autofill-rakennuspaikka copied-application created)
+          (copy-app/send-invite-notifications! copied-application command)
+          (ok :id (:id copied-application)))))))
 
 (defquery copy-application-invite-candidates
   {:description "Possible parties to invite from the source application to the copied application"
@@ -58,7 +61,10 @@
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
   [{{:keys [source-application-id]} :data user :user}]
-  (ok :candidates (copy-app/copy-application-invite-candidates user source-application-id)))
+  (let [candidates (copy-app/copy-application-invite-candidates user source-application-id)]
+    (if (fail? candidates)
+      candidates
+      (ok :candidates candidates))))
 
 (defquery application-copyable-to-location
   {:description "Is it possible to copy the application to the given location"
@@ -71,7 +77,9 @@
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
   [command]
-  (ok :result (copy-app/check-application-copyable-to-organization! command)))
+  (if-let [check-fail (copy-app/check-application-copyable-to-organization command)]
+    check-fail
+    (ok :result true)))
 
 (defquery application-copyable
   {:description "Is it possible to copy the application at all"
@@ -82,7 +90,9 @@
    :pre-checks [(action/some-pre-check validate-is-authority
                                        (company/validate-has-company-role :any))]}
   [command]
-  (ok :result (copy-app/check-application-copyable! command)))
+  (if-let [check-fail (copy-app/check-application-copyable command)]
+    check-fail
+    (ok :result true)))
 
 
 (env/in-dev

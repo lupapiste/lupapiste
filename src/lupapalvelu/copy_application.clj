@@ -85,6 +85,9 @@
 
 ;;; Updating documents
 
+(defn- primary-op-name [application]
+  (-> application :primaryOperation :name))
+
 (defn- operation-id-map [source-application]
   (into {}
         (map #(vector (:id %) (mongo/create-id))
@@ -92,7 +95,7 @@
                    (:primaryOperation source-application)))))
 
 (defn new-building-application? [application]
-  (-> application :primaryOperation :name keyword
+  (-> application primary-op-name keyword
       op/operations :schema
       #{"uusiRakennus" "uusi-rakennus-ei-huoneistoa"}
       boolean))
@@ -164,7 +167,7 @@
   [application organization manual-schema-datas]
   (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
     (app/make-document application
-                       (-> application :primaryOperation :name)
+                       (primary-op-name application)
                        (:created application)
                        manual-schema-datas
                        (schemas/get-schema (:schema-version application)
@@ -298,24 +301,29 @@
         (merge-in updated-operation-and-document-ids source-application
                   organization manual-schema-datas))))
 
-(defn- check-valid-source-application!
-  "Throws with fail! if the application cannot be copied because of its
-  subtype or primary operation type"
+(defn- check-valid-source-application
+  "Fail if the application cannot be copied because of its subtype or
+  primary operation type"
   [source-application]
-  (when (= (:permitSubtype source-application) "muutoslupa")
-    (fail! :error.application-invalid-permit-subtype :permitSubtype (:permitSubtype source-application)))
-  (let [operation-name (-> source-application :primaryOperation :name)]
-    (when-not (op/get-operation-metadata operation-name :copying-allowed)
-      (fail! :error.operations.copying-not-allowed :operation operation-name))))
+  (cond (= (:permitSubtype source-application) "muutoslupa")
+        (fail :error.application-invalid-permit-subtype
+              :permitSubtype (:permitSubtype source-application))
 
-(defn check-valid-operation-for-organization!
-  "Throws with fail! if the target organization does not support the
-  primary operation of the source application"
+        (not (op/get-operation-metadata (primary-op-name source-application)
+                                        :copying-allowed))
+        (fail :error.operations.copying-not-allowed
+              :operation (primary-op-name source-application))
+
+        :else nil))
+
+(defn check-valid-operation-for-organization
+  "Fail if the target organization does not support the primary
+  operation of the source application"
   [source-application organization]
-  (let [operation-name (-> source-application :primaryOperation :name)]
+  (let [operation-name (primary-op-name source-application)]
     (when-not (find-first #(= % operation-name) (:selected-operations organization))
-      (fail! :error.operations.hidden :organization (:id organization)
-             :operation operation-name))))
+      (fail :error.operations.hidden :organization (:id organization)
+            :operation operation-name))))
 
 (defn- organization-for-property-id [propertyId operation-name]
   (let [municipality (prop/municipality-id-by-property-id propertyId)
@@ -327,33 +335,31 @@
              :permit-type permit-type :operation operation-name))
     org))
 
-(defn check-application-copyable!
-  "Throws with fail! if the source application cannot be copied"
+(defn check-application-copyable
+  "Fails if the source application cannot be copied"
   [{{:keys [source-application-id]} :data :keys [user]}]
-  (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    (let [operation-name (-> source-application :primaryOperation :name)]
-      (check-valid-source-application! source-application)
-      true)
-    (fail! :error.application-not-found :id source-application-id)))
+  (if-let [source-application (domain/get-application-as source-application-id
+                                                         user :include-canceled-apps? true)]
+    (check-valid-source-application source-application)
+    (fail :error.application-not-found :id source-application-id)))
 
-(defn check-application-copyable-to-organization!
-  "Throws with fail! if the application cannot be copied to the specific organization"
+(defn check-application-copyable-to-organization
+  "Fails if the application cannot be copied to the specific organization"
   [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    (let [operation-name (-> source-application :primaryOperation :name)]
-      (check-valid-source-application! source-application)
-      (check-valid-operation-for-organization! source-application
-                                               (organization-for-property-id propertyId
-                                                                             operation-name))
-      true)
+    (let [operation-name (primary-op-name source-application)]
+      (or (check-valid-source-application source-application)
+          (check-valid-operation-for-organization source-application
+                                                  (organization-for-property-id propertyId
+                                                                                operation-name))))
     (fail! :error.application-not-found :id source-application-id)))
 
-(defn- check-valid-auth-invites!
-  "Throws with fail! if some of the auth invites are not present on the source application"
+(defn- check-valid-auth-invites
+  "Fails if some of the auth invites are not present on the source application"
   [source-application auth-invites]
   (let [not-in-source-auths? (not-in-auth (:auth source-application))]
     (when (some not-in-source-auths? auth-invites)
-      (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))))
+      (fail :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))))
 
 (defn- select-auth-invites [source-application auth-invites]
   (filter #((set auth-invites) (auth-id %))
@@ -366,23 +372,23 @@
           operation    (-> source-application :primaryOperation :name)
           organization (organization-for-property-id propertyId operation)]
 
-      (check-valid-source-application! source-application)
-      (check-valid-operation-for-organization! source-application organization)
-      (check-valid-auth-invites! source-application auth-invites)
-
-      {:source-application source-application
-       :copy-application (new-application-copy (assoc source-application
-                                                      :auth         (select-auth-invites source-application
-                                                                                         auth-invites)
-                                                      :state        :draft
-                                                      :address      address
-                                                      :propertyId   propertyId
-                                                      :location     (app/->location x y)
-                                                      :municipality municipality
-                                                      :organization (:id organization))
-                                               user organization created
-                                               default-copy-options
-                                               manual-schema-datas)})
+      (if-let [check-failed (or (check-valid-source-application source-application)
+                                (check-valid-operation-for-organization source-application organization)
+                                (check-valid-auth-invites source-application auth-invites))]
+        check-failed
+        {:source-application source-application
+         :copy-application (new-application-copy (assoc source-application
+                                                        :auth         (select-auth-invites source-application
+                                                                                           auth-invites)
+                                                        :state        :draft
+                                                        :address      address
+                                                        :propertyId   propertyId
+                                                        :location     (app/->location x y)
+                                                        :municipality municipality
+                                                        :organization (:id organization))
+                                                 user organization created
+                                                 default-copy-options
+                                                 manual-schema-datas)}))
     (fail! :error.application-not-found :id source-application-id)))
 
 (defn store-source-application
