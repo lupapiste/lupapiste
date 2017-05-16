@@ -65,7 +65,7 @@
                      :on-drag-over    mouse-move-handler
                      :on-drop         on-drop
                      :data-row-number index}
-     [:div.stamp-row-label [:span (str "Rivi " (inc index))]]
+     [:div.stamp-row-label [:span (str (loc "stamp-editor.row") " " (inc index))]]
      (if (and placeholder-row? is-dragged-over?)
        (concat before
                [placeholder-element]

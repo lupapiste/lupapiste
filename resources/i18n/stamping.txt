@@ -202,3 +202,6 @@
 "stamp-editor.drop-zone" "fi" "Pudota tähän"
 "stamp-editor.drop-zone" "sv" "Släpp här"
 "stamp-editor.drop-zone" "en" "Drop here"
+"stamp-editor.row" "fi" "Rivi"
+"stamp-editor.row" "sv" "Rad"
+"stamp-editor.row" "en" "Row"
