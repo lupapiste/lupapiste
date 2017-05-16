@@ -58,7 +58,7 @@
         placeholder-element [:div.stamp-row-placeholder
                              {:key   :placeholder
                               :style {:width (max placeholder-width 110)}}
-                             [:span {:style {:pointer-events :none}} loc ("stamp-editor.drop-zone")]]
+                             [:span {:style {:pointer-events :none}} (loc "stamp-editor.drop-zone")]]
         [before after] (when (number? split-pos) (split-at split-pos field-buttons))]
     [:div.stamp-row {:on-drag-enter   on-drag-enter
                      :on-drag-leave   on-drag-leave
@@ -74,4 +74,4 @@
          field-buttons
          [[:div.stamp-row-placeholder
            {:key :default-placeholder}
-           [:span {:style {:pointer-events :none}} loc ("stamp-editor.drop-zone")]]]))]))
+           [:span {:style {:pointer-events :none}} (loc "stamp-editor.drop-zone")]]]))]))
