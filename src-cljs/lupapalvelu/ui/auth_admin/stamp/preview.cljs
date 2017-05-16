@@ -46,6 +46,6 @@
   [:li.stamp-preview-row (rum-util/map-with-key stamp-elem-preview row)])
 
 (rum/defc preview-component < rum/reactive
-          [rows]
-          [:div.col-2
-           [:ul.stamp-preview (rum-util/map-with-key stamp-row-preview (conj (rum/react rows) [{:type :lupapiste}]))]])
+  [rows]
+  [:div.col-2
+   [:ul.stamp-preview (rum-util/map-with-key stamp-row-preview (conj (rum/react rows) [{:type :lupapiste}]))]])

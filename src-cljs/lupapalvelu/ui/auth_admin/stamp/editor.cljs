@@ -22,9 +22,9 @@
 
 (rum/defc new-stamp-button [selected-stamp-id editor-state]
   [:button.positive
-   {:on-click (fn []
-                (reset! selected-stamp-id nil)
-                (swap! editor-state assoc :stamp state/empty-stamp))
+   {:on-click     (fn []
+                    (reset! selected-stamp-id nil)
+                    (swap! editor-state assoc :stamp state/empty-stamp))
     :data-test-id "open-create-stamp-bubble"}
    [:i.lupicon-circle-plus]
    [:span (loc "stamp-editor.new-stamp.button")]])
@@ -45,54 +45,54 @@
          false)))
 
 (rum/defc edit-stamp-bubble < rum/reactive
-          [stamp-id editor-state]
-          (let [drag-element (rum/cursor editor-state :drag-element)
-                debug-data (rum/cursor editor-state :debug-data)
-                stamp-in-editor (rum/cursor editor-state :stamp)
-                rows (rum/cursor-in editor-state [:stamp :rows])
-                qr-code (rum/cursor-in editor-state [:stamp :qrCode])]
-            (when-not (empty? (rum/react stamp-in-editor))
-              [:div.edit-stamp-bubble
-               (header-component stamp-id stamp-in-editor)
-               [:div.form-grid.metadata-and-preview
-                [:div.row.subheaders
-                 [:div.col-2
-                  [:h4 (loc "stamp.margin")]]
-                 [:div.col-2
-                  [:h4 (loc "stamp.preview")]]]
-                [:div.row
-                 (metadata-component)
-                 (preview-component rows)]
-                [:div.row
-                 [:h4 (loc "stamp.information")]]
-                [:div.row
-                 (field-types-component)
-                 [:div.stamp-editor-drag-guide (loc "stamp-editor.drag.guide")]
-                 [:div
-                  (for [[idx _] (stamp-util/indexed (conj (rum/react rows) []))]
-                    (rum/with-key
-                      (stamp-row {:index idx
-                                  :rows-cursor rows
-                                  :debug-data debug-data
-                                  :drag-source drag-element})
-                      idx))]]
-                [:div.row
-                 [:div.checkbox-wrapper
-                  [:input#qr-code-checkbox
-                   {:type "checkbox"
-                    :checked (rum/react qr-code)
-                    :on-change #(reset! qr-code (-> % .-target .-checked))}]
-                  [:label.blockbox-label
-                   {:for "qr-code-checkbox"}
-                   (loc "stamp-editor.qrCode")]]]]
-               (control-buttons stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))])))
+  [stamp-id editor-state]
+  (let [drag-element (rum/cursor editor-state :drag-element)
+        debug-data (rum/cursor editor-state :debug-data)
+        stamp-in-editor (rum/cursor editor-state :stamp)
+        rows (rum/cursor-in editor-state [:stamp :rows])
+        qr-code (rum/cursor-in editor-state [:stamp :qrCode])]
+    (when-not (empty? (rum/react stamp-in-editor))
+      [:div.edit-stamp-bubble
+       (header-component stamp-id stamp-in-editor)
+       [:div.form-grid.metadata-and-preview
+        [:div.row.subheaders
+         [:div.col-2
+          [:h4 (loc "stamp.margin")]]
+         [:div.col-2
+          [:h4 (loc "stamp.preview")]]]
+        [:div.row
+         (metadata-component)
+         (preview-component rows)]
+        [:div.row
+         [:h4 (loc "stamp.information")]]
+        [:div.row
+         (field-types-component)
+         [:div.stamp-editor-drag-guide (loc "stamp-editor.drag.guide")]
+         [:div
+          (for [[idx _] (stamp-util/indexed (conj (rum/react rows) []))]
+            (rum/with-key
+              (stamp-row {:index       idx
+                          :rows-cursor rows
+                          :debug-data  debug-data
+                          :drag-source drag-element})
+              idx))]]
+        [:div.row
+         [:div.checkbox-wrapper
+          [:input#qr-code-checkbox
+           {:type      "checkbox"
+            :checked   (rum/react qr-code)
+            :on-change #(reset! qr-code (-> % .-target .-checked))}]
+          [:label.blockbox-label
+           {:for "qr-code-checkbox"}
+           (loc "stamp-editor.qrCode")]]]]
+       (control-buttons stamp-id stamp-in-editor (valid-stamp? (rum/react stamp-in-editor)))])))
 
 (rum/defc stamp-editor < rum/reactive
-  {:init init
-   :will-unmount (fn [& _] (reset! component-state empty-component-state))}
-  [global-auth-model]
-  (let [stamps            (rum/cursor component-state :stamps)
-        editor-state      (rum/cursor component-state :editor)
+                         {:init         init
+                          :will-unmount (fn [& _] (reset! component-state empty-component-state))}
+  [_]
+  (let [stamps (rum/cursor component-state :stamps)
+        editor-state (rum/cursor component-state :editor)
         selected-stamp-id (rum/cursor component-state :selected-stamp-id)]
     [:div.container
      [:h1 (loc "stamp-editor.tab.title")]

@@ -61,19 +61,25 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
-(defn update-buildings [lang info-fields]
-  (if (:buildings info-fields)
-    (stamps/assoc-tag-by-type (:fields info-fields) :building-id (first (sort (map (partial building->str lang) (:buildings info-fields)))))
+(defn update-buildings [lang {:keys [buildings fields] :as info-fields}]
+  (if buildings
+    (->> buildings
+         (map (partial building->str lang))
+         sort
+         first
+         (stamps/assoc-tag-by-type fields :building-id))
     info-fields))
 
 (defn- info-fields->stamp [{:keys [stamp-created transparency qr-code lang]} info-fields]
   {:pre [(pos? stamp-created)]}
-  (->> (update-buildings lang info-fields)
-       (stamps/row-values-as-string)
-       (map
-         (fn [field]
-           (ss/join " " (mapv (fn [text] (if (seq text) (ss/limit (str text) 100))) field))))
-       (stamper/make-stamp transparency qr-code)))
+  (let [limit-to-100 (fn [text] (when (seq text)
+                                  (ss/limit (str text) 100)))
+        values->row-text  (fn [row-of-values]
+                            (ss/join " " (mapv limit-to-100 row-of-values)))]
+    (->> (update-buildings lang info-fields)
+         (stamps/stamp-rows->vec-of-string-value-vecs)
+         (map values->row-text)
+         (stamper/make-stamp transparency qr-code))))
 
 (defn- make-stamp-without-buildings [context info-fields]
   (->> (stamps/dissoc-tag-by-type (:fields info-fields) :building-id)
