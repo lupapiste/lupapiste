@@ -147,10 +147,13 @@
 
               (fact "operation documents"
                 (count (domain/get-documents-by-name application "hankkeen-kuvaus")) => 0
-                (let [op-documents (domain/get-documents-by-name application "aiemman-luvan-toimenpide")]
+                (let [op-documents (domain/get-documents-by-name application "aiemman-luvan-toimenpide")
+                      omistajat    (mapcat #(-> % :data :rakennuksenOmistajat vals) op-documents)]
                   (count op-documents) => 3
                   (fact "building identifiers"
                     (map #(-> % :data :valtakunnallinenNumero :value) op-documents) => (contains ["100222397J" "100222398K"]))
+                  (fact "building owner"
+                        (-> omistajat first (get-in [:henkilo :henkilotiedot :sukunimi :value])) => "Mainio")
                   (fact "maalampokaivo"
                     (application :secondaryOperations) => (has some (contains {:description "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4"})))))
 

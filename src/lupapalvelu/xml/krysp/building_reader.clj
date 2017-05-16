@@ -101,7 +101,7 @@
                                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
 
-(defn- ->rakennuksen-omistaja [omistaja]
+(defn ->rakennuksen-omistaja [omistaja]
   (cond
     (seq (select omistaja [:yritys]))
         (merge (common/->yritys omistaja) {:omistajalaji     (get-text omistaja :omistajalaji :omistajalaji)
@@ -174,9 +174,11 @@
                                                         (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
            util/not-empty-or-nil?
 
-           :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
-           :huoneistot (->> (remove empty? (conj (select rakennus [:valmisHuoneisto])
-                                                 (select rakennus [:asuinhuoneistot :> :huoneisto])))
+           :rakennuksenOmistajat (->> (remove empty? (concat (select rakennus [:omistaja])
+                                                           (select rakennus [:omistajatieto :Omistaja])))
+                                      (map ->rakennuksen-omistaja))
+           :huoneistot (->> (remove empty? (concat (select rakennus [:valmisHuoneisto])
+                                                   (select rakennus [:asuinhuoneistot :> :huoneisto])))
                             (map (fn [huoneisto]
                                    {:huoneistonumero (get-text huoneisto :huoneistonumero)
                                     :jakokirjain     (get-text huoneisto :jakokirjain)

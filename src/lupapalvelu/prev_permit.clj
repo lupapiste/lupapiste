@@ -27,7 +27,7 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (def building-fields
-  (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (cons :valtakunnallinenNumero)))
+  (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
 
 (defn- get-applicant-email [applicant]
   (-> (or

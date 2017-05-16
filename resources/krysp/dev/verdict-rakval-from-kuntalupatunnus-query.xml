@@ -314,6 +314,28 @@
                 </rakval:varusteet>
               </rakval:rakennuksenTiedot>
               <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
+              <rakval:omistajatieto>
+                  <rakval:Omistaja>
+                      <yht:kuntaRooliKoodi>Rakennuksen omistaja</yht:kuntaRooliKoodi>
+                      <yht:VRKrooliKoodi>rakennuksen omistaja</yht:VRKrooliKoodi>
+                      <yht:henkilo>
+                          <yht:nimi>
+                              <yht:etunimi>Matti</yht:etunimi>
+                              <yht:sukunimi>Mainio</yht:sukunimi>
+                          </yht:nimi>
+                          <yht:osoite>
+                              <yht:osoitenimi>
+                                  <yht:teksti>Mäennyppylänkatu 2 D 37</yht:teksti>
+                              </yht:osoitenimi>
+                              <yht:postinumero>09990</yht:postinumero>
+                              <yht:postitoimipaikannimi>Testikaupunki</yht:postitoimipaikannimi>
+                          </yht:osoite>
+                      </yht:henkilo>
+                      <rakval:omistajalaji>
+                          <rakval:omistajalaji>muu yksityinen henkilö tai perikunta</rakval:omistajalaji>
+                      </rakval:omistajalaji>
+                </rakval:Omistaja>
+            </rakval:omistajatieto>
             </rakval:Rakennus>
           </rakval:rakennustieto>
         </rakval:Toimenpide>
