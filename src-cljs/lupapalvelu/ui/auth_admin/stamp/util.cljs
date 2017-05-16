@@ -19,7 +19,7 @@
       (get-js-fields "top" "bottom" "left" "right" "width")))
 
 (defn boundaries-from-component [component-state]
-  (let [comp     (:rum/react-component component-state)
+  (let [comp (:rum/react-component component-state)
         dom-node (js/ReactDOM.findDOMNode comp)]
     (boundaries-from-dom-element dom-node)))
 
@@ -94,7 +94,7 @@
 (defn closest->placeholder-position [{:keys [elem side] :as closest}]
   (cond (nil? closest) nil
         (= :left side) elem
-        :else          (update-in elem [1] inc)))
+        :else (update-in elem [1] inc)))
 
 (defn add-at-index [a-seq index elem]
   (let [[before after] (split-at index a-seq)]

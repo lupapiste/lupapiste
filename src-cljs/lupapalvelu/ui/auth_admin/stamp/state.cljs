@@ -3,19 +3,19 @@
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
             [lupapalvelu.ui.common :refer [query]]))
 
-(def empty-stamp   {:name     ""
-                    :id       nil
-                    :position {:x 100 :y 100}
-                    :background 0
-                    :page     :first
-                    :qrCode   true
-                    :rows     []})
+(def empty-stamp {:name       ""
+                  :id         nil
+                  :position   {:x 100 :y 100}
+                  :background 0
+                  :page       :first
+                  :qrCode     true
+                  :rows       []})
 
-(def empty-component-state {:stamps []
+(def empty-component-state {:stamps            []
                             :selected-stamp-id nil
-                            :editor {:drag-element nil
-                                     :closest-element []
-                                     :stamp {}}})
+                            :editor            {:drag-element    nil
+                                                :closest-element []
+                                                :stamp           {}}})
 
 (defonce component-state (atom empty-component-state))
 
