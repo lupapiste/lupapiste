@@ -163,7 +163,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   };
 
   self.showToolbar = ko.pureComputed(function() {
-    return hasRole &&  (self.remove.fun || self.showStatus()
+    return hasRole &&  (self.showRemove() || self.showStatus()
                         || self.showReject() || self.showApprove()
                         || self.hasOperation() || self.canBeDisabled());
   });
