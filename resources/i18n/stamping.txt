@@ -199,3 +199,6 @@
 "stamp-editor.qrCode" "fi" "Näytä QR-koodi"
 "stamp-editor.qrCode" "sv" "Visa QR-kod"
 "stamp-editor.qrCode" "en" "Show QR code"
+"stamp-editor.drop-zone" "fi" "Pudota tähän"
+"stamp-editor.drop-zone" "sv" "Släpp här"
+"stamp-editor.drop-zone" "en" "Drop here"

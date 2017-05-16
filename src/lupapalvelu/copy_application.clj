@@ -173,6 +173,9 @@
 (defn- location-document? [document]
   (= (-> document :schema-info :type) :location))
 
+(defn- document-disabled? [document]
+  (boolean (-> document :disabled)))
+
 (defn- handle-special-cases [document application organization manual-schema-datas]
   (let [schema-name (-> document :schema-info :name)]
     (cond (construction-waste-plan? document)
@@ -180,6 +183,8 @@
                                      organization
                                      manual-schema-datas)
           (location-document? document)
+            (empty-document-copy document application manual-schema-datas)
+          (document-disabled? document)
             (empty-document-copy document application manual-schema-datas)
           :else document)))
 
