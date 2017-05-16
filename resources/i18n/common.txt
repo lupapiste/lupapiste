@@ -3351,7 +3351,7 @@
 "userInfo.company.y" "fi" "Y-tunnus"
 "userInfo.company.y" "sv" "FO-nummer"
 "userinfo.allowDirectMarketing" "en" "I give my consent to release my personal data for direct marketing, as well as statement polls and market research."
-"userinfo.allowDirectMarketing" "fi" "Annan suostumukseni luovuttaa henkilötietojani suoramarkkinointia sekä mielipide- ja markkinatutkimusta varten."
+"userinfo.allowDirectMarketing" "fi" "Annan suostumukseni käyttää sekä luovuttaa henkilötietojani sähköpostitse toteuttavaa suoramarkkinointia sekä mielipide- ja markkinatutkimusta varten Lupapisteen rekisteri- ja tietosuojaselosteen mukaisesti <a href=\"https://www.lupapiste.fi/rekisteriseloste\">https://www.lupapiste.fi/rekisteriseloste</a>."
 "userinfo.allowDirectMarketing" "sv" "Jag samtycker till att mina personuppgifter får användas för direkt marknadsföring samt opinions- och marknadsundersökningar."
 "userinfo.architect" "en" "I am a professional"
 "userinfo.architect" "fi" "Olen ammattilainen"
