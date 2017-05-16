@@ -1052,7 +1052,8 @@
       (count stamps) => 2)))
 
 (facts "editing stamp templates"
-  (let [add-result (command sipoo :upsert-stamp-template :name "zero stamp" :page "first" :background 0 :qrCode false :position {:x 0 :y 0} :rows [])
+  (let [add-result (command sipoo :upsert-stamp-template :name "zero stamp" :page "first" :background 0 :qrCode false :position {:x 0 :y 0}
+                            :rows [[{:type "custom-text" :text "Hello World"}]])
         stamp-id (:stamp-id add-result)]
     (fact "add new stamp"
       add-result => ok?
@@ -1071,10 +1072,11 @@
           (:background new-stamp) => 0
           (:qrCode new-stamp) => false
           (:position new-stamp) => {:x 0 :y 0}
-          (:rows new-stamp) => [])))
+          (:rows new-stamp) => [[{:type "custom-text" :text "Hello World"}]])))
 
     (facts "edit existing stamp"
-      (let [edit-result (command sipoo :upsert-stamp-template :stamp-id stamp-id :name "zero stamp" :page "last" :background 20 :qrCode false :position {:x 1 :y 2} :rows [])]
+      (let [edit-result (command sipoo :upsert-stamp-template :stamp-id stamp-id :name "zero stamp" :page "last" :background 20 :qrCode false :position {:x 1 :y 2}
+                                 :rows [[{:type "custom-text" :text "Hello World"}]])]
         (fact "edit ok"
           edit-result => ok?
           (:stamp-id edit-result) => stamp-id)
@@ -1092,7 +1094,7 @@
               (:background edited-stamp) => 20
               (:qrCode edited-stamp) => false
               (:position edited-stamp) => {:x 1 :y 2}
-              (:rows edited-stamp) => [])))))))
+              (:rows edited-stamp) => [[{:type "custom-text" :text "Hello World"}]])))))))
 
 (facts "remove stamp"
   (let [stamps (:stamps (query sipoo :stamp-templates))
