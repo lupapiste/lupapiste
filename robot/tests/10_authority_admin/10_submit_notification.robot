@@ -10,7 +10,7 @@ Sipoo admin sets email address for submit notification
   Go to page  applications
   Input text by test id  onSubmitEmails  ${email}
   Wait until  Positive indicator should be visible
-  [Teardown]  Logout
+  Logout
 
 Mikko submits an application
   Mikko logs in
@@ -28,4 +28,7 @@ Link is was for authority, need to continue to login
   Wait Until  Click by test id  login
   User logs in  mikko@example.com  mikko123  Mikko Intonen
   Wait Until  Application address should be  Jättökatu
-  [Teardown]  Logout
+  Logout
+
+No frontend errors
+  There are no frontend errors
