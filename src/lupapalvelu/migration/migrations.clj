@@ -2,8 +2,11 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.set :refer [rename-keys] :as set]
+            [clj-time.core :as cljt]
+            [clj-time.coerce :as cljtc]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as v]
@@ -3104,6 +3107,29 @@
               (doseq [organization (mongo/select :organizations {:stamps {$exists false}})]
                 (mongo/update-by-id :organizations (:id organization)
                                     {$set {:stamps default-stamp}})))
+
+(defn next-available-lp-id-for-app! [{:keys [municipality created]}]
+  (let [year    (cljt/year (cljtc/from-long created))
+        sequence-name (ss/join "-" ["applications" municipality year])
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
+    (ss/join "-" ["LP" municipality year counter])))
+
+(defn conform-application-id-for-application! [{id :id :as application}]
+  (let [new-id (next-available-lp-id-for-app! application)]
+    (mongo/insert :applications (assoc application :id new-id))
+    (mongo/update :fs.files {:metadata.application id} {$set {:metadata.application new-id}} :multi true)
+    (mongo/remove :applications id)
+    (when-let [submitted-application (mongo/select-one :submitted-applications {:_id id})]
+      (mongo/insert :submitted-applications (assoc submitted-application :id new-id))
+      (mongo/remove :submitted-applications id))))
+
+(defmigration conform-application-ids
+  {:apply-when (pos? (mongo/count :applications {:_id #"^(?!LP-).*"}))}
+  (->> (mongo/select :applications {:_id #"^(?!LP-).*"})
+       (run! conform-application-id-for-application!)))
+
 
 ;;
 ;; ****** NOTE! ******
