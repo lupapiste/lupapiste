@@ -1193,7 +1193,7 @@ $max-columns: 12;
     border: 0;
   }
 
-  input[type=text], input[type=password], select, textarea, span.form-string {
+  input[type=text], input[type=password], input[type=number], select, textarea, span.form-string {
     @include input-fields;
 
     width: 100%;

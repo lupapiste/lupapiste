@@ -26,17 +26,20 @@
 
 (rum/defc header-component < rum/reactive
           [stamp-id stamp]
-          [:div.stamp-editor-header.group-buttons
-           [:span.form-entry
-            [:label.form-label.form-label-string (loc "stamp.name")]
-            [:input.form-input.text
-             {:value (:name (rum/react stamp))
-              :on-change #(swap! stamp assoc :name (-> % .-target .-value))}]]
-           [:button.secondary.is-right
-            {:on-click (fn [_] (delete-stamp @stamp-id))
-             :disabled (not @stamp-id)}
-            [:i.lupicon-remove]
-            [:span (loc "remove")]]])
+          [:div.stamp-editor-header.form-grid
+           [:div.row
+            [:div.col-2
+             [:label (loc "stamp.name")]
+             [:input
+              {:type "text"
+               :value (:name (rum/react stamp))
+               :on-change #(swap! stamp assoc :name (-> % .-target .-value))}]]
+            [:div.col-2.buttons
+             [:button.secondary
+              {:on-click (fn [_] (delete-stamp @stamp-id))
+               :disabled (not @stamp-id)}
+              [:i.lupicon-remove]
+              [:span (loc "remove")]]]]])
 
 (rum/defc control-buttons < rum/reactive
           [stamp-id stamp valid-stamp?]
@@ -53,9 +56,9 @@
 
 (rum/defc number-input < rum/reactive
           [label-key cursor max-value]
-          [:span.form-entry
-           [:label.form-label.form-label-string (str (loc label-key) " (" (loc "unit.mm") ")")]
-           [:input.form-input.text
+          [:span
+           [:label (str (loc label-key) " (" (loc "unit.mm") ")")]
+           [:input
             {:type "number"
              :min 0
              :max max-value
@@ -64,12 +67,13 @@
 
 (rum/defc metadata-select < rum/reactive
           [label-key cursor options parse-fn to-value-fn]
-          [:span.form-entry
-           [:label.form-label.form-label-string (loc label-key)]
+          [:span
+           [:label (loc label-key)]
            (uc/select #(reset! cursor (parse-fn %))
                       (str (name label-key) "-select")
                       (to-value-fn (rum/react cursor))
-                      options)])
+                      options
+                      "dropdown")])
 
 (defn transparency-options []
   (map (fn [x]
@@ -81,19 +85,17 @@
 
 (rum/defc metadata-component < rum/reactive
           []
-          [:div.form-group {:style {:width "60%"
-                                    :display :inline-block}}
-           [:label.form-label.form-label-group (loc "stamp.margin")]
-           [:div
+          [:div
+           [:div.col-1
             (number-input "stamp.xMargin" (rum/cursor-in state/component-state [:editor :stamp :position :x]) 200)
-            (number-input "stamp.yMargin" (rum/cursor-in state/component-state [:editor :stamp :position :y]) 200)]
-           [:div
             (metadata-select
               "stamp.transparency"
               (rum/cursor-in state/component-state [:editor :stamp :background])
               (transparency-options)
               js/parseInt
-              identity)
+              identity)]
+           [:div.col-1
+            (number-input "stamp.yMargin" (rum/cursor-in state/component-state [:editor :stamp :position :y]) 200)
             (metadata-select
               "stamp.page"
               (rum/cursor-in state/component-state [:editor :stamp :page])

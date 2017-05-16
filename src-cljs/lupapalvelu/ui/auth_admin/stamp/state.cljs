@@ -17,7 +17,7 @@
                                      :closest-element []
                                      :stamp {}}})
 
-(defonce component-state  (atom empty-component-state))
+(defonce component-state (atom empty-component-state))
 
 (defn update-stamp-view [id]
   (swap! component-state (fn [state] (-> state

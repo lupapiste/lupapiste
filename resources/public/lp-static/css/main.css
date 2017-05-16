@@ -8367,7 +8367,7 @@ div.alleYli-radioGroup {
   border: 0;
 }
 
-.form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
+.form-grid input[type=text], .form-grid input[type=password], .form-grid input[type=number], .form-grid select, .form-grid textarea, .form-grid span.form-string {
   padding: 0 12px;
   box-sizing: border-box;
   min-height: 40px;
@@ -8381,21 +8381,21 @@ div.alleYli-radioGroup {
   width: 100%;
 }
 
-.form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid select:focus, .form-grid textarea:focus, .form-grid span.form-string:focus {
+.form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid input[type=number]:focus, .form-grid select:focus, .form-grid textarea:focus, .form-grid span.form-string:focus {
   color: #333333;
   border-color: #fbc732;
 }
 
-.form-grid input[type=text]:disabled, .form-grid input[type=password]:disabled, .form-grid select:disabled, .form-grid textarea:disabled, .form-grid span.form-string:disabled {
+.form-grid input[type=text]:disabled, .form-grid input[type=password]:disabled, .form-grid input[type=number]:disabled, .form-grid select:disabled, .form-grid textarea:disabled, .form-grid span.form-string:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
 
-.form-grid input[type=text].warning, .form-grid input[type=password].warning, .form-grid select.warning, .form-grid textarea.warning, .form-grid span.form-string.warning {
+.form-grid input[type=text].warning, .form-grid input[type=password].warning, .form-grid input[type=number].warning, .form-grid select.warning, .form-grid textarea.warning, .form-grid span.form-string.warning {
   border-color: #df3215;
 }
 
-.form-grid input[type=text].required, .form-grid input[type=password].required, .form-grid select.required, .form-grid textarea.required, .form-grid span.form-string.required {
+.form-grid input[type=text].required, .form-grid input[type=password].required, .form-grid input[type=number].required, .form-grid select.required, .form-grid textarea.required, .form-grid span.form-string.required {
   border-color: #f39129;
 }
 
@@ -16668,6 +16668,39 @@ div.organization-link-cell {
   white-space: nowrap;
 }
 
+.edit-stamp-bubble {
+  border: 1px solid #dddddd;
+  margin-top: 1em;
+}
+
+.stamp-selection select {
+  margin-right: 1em;
+}
+
+.stamp-editor-header {
+  margin: 0;
+}
+
+.stamp-editor-header .row {
+  margin: 10px 0;
+}
+
+.stamp-editor-header .row button {
+  float: right;
+}
+
+.stamp-editor-header .buttons {
+  text-align: right;
+}
+
+.stamp-editor-header .buttons button {
+  margin-right: 0;
+}
+
+.stamp-preview {
+  border: 1px solid #dddddd;
+}
+
 .stamp-row-btn {
   border-style: solid;
   border-width: 2px;
@@ -16811,6 +16844,10 @@ div.organization-link-cell {
 
 .stamp-row-focus input {
   font-size: inherit;
+}
+
+.stamp-editor-drag-guide {
+  margin: 1em 0;
 }
 
 #neighbor-show .pending {
