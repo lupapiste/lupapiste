@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.auth-admin.stamp.stamp-row
   (:require [rum.core :as rum]
+            [lupapalvelu.ui.common :refer [loc]]
             [lupapalvelu.ui.auth-admin.stamp.state :refer [component-state]]
             [lupapalvelu.ui.auth-admin.stamp.stamp-row-field :refer [stamp-row-field]]
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]))
@@ -56,7 +57,7 @@
                  placeholder-element [:div.stamp-row-placeholder
                                       {:key :placeholder
                                        :style {:width (max placeholder-width 110)}}
-                                      [:span {:style {:pointer-events :none}} "Pudota tähän"]]
+                                      [:span {:style {:pointer-events :none}} loc("stamp-editor.drop-zone")]]
                  [before after] (when (number? split-pos) (split-at split-pos field-buttons))]
              [:div.stamp-row {:on-drag-enter on-drag-enter
                               :on-drag-leave on-drag-leave
@@ -72,4 +73,4 @@
                   field-buttons
                   [[:div.stamp-row-placeholder
                     {:key :default-placeholder}
-                    [:span {:style {:pointer-events :none}} "Pudota tähän"]]]))]))
+                    [:span {:style {:pointer-events :none}} loc("stamp-editor.drop-zone")]]]))]))
