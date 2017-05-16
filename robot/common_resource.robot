@@ -542,13 +542,6 @@ Click by id
   Wait For Condition  return ${selector}.length===1;  10
   Execute Javascript  ${selector}.click();
 
-Click by test id
-  [Arguments]  ${id}
-  ${selector} =   Set Variable  $("[data-test-id='${id}']:visible")
-  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
-  Wait For Condition  return ${selector}.length===1;  10
-  Execute Javascript  ${selector}[0].click();
-
 Element should be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Be Visible  xpath=//*[@data-test-id="${id}"]
@@ -556,6 +549,11 @@ Element should be visible by test id
 Element should not be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
+
+Click by test id
+  [Arguments]  ${id}
+  Element should be visible by test id  ${id}
+  Click element  xpath=//*[@data-test-id="${id}"]
 
 Click enabled by test id
   [Arguments]  ${id}
