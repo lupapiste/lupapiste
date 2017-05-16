@@ -437,16 +437,19 @@
         (if (:openInfoRequest created-application)
           (open-inforequest/new-open-inforequest! created-application)
           (notifications/notify! :inforequest-invite {:application created-application})))
-      (try+
-        (app/autofill-rakennuspaikka created-application created)
-        (catch [:sade.core/type :sade.core/fail] {:keys [cause text] :as exp}
-          (warnf "Could not get KTJ data for the new application, cause: %s, text: %s. From %s:%s"
-                 cause
-                 text
-                 (:sade.core/file exp)
-                 (:sade.core/line exp)))
-        (catch SocketTimeoutException _
-          (warn "Socket timeout from KTJ when creating application")))
+      (try
+        (try+
+         (app/autofill-rakennuspaikka created-application created)
+         (catch [:sade.core/type :sade.core/fail] {:keys [cause text] :as exp}
+           (warnf "Could not get KTJ data for the new application, cause: %s, text: %s. From %s:%s"
+                  cause
+                  text
+                  (:sade.core/file exp)
+                  (:sade.core/line exp)))
+         (catch SocketTimeoutException _
+           (warn "Socket timeout from KTJ when creating application")))
+        (catch Exception e
+          (warn "Exception when creating application: " (.getMessage e))))
       (ok :id (:id created-application)))))
 
 (defn- add-operation-allowed? [{application :application}]
