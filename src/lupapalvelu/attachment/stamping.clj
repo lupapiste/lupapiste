@@ -61,9 +61,13 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
-(defn update-buildings [lang info-fields]
-  (if (:buildings info-fields)
-    (stamps/assoc-tag-by-type (:fields info-fields) :building-id (first (sort (map (partial building->str lang) (:buildings info-fields)))))
+(defn update-buildings [lang {:keys [buildings fields] :as info-fields}]
+  (if buildings
+    (->> buildings
+         (map (partial building->str lang))
+         sort
+         first
+         (stamps/assoc-tag-by-type fields :building-id))
     info-fields))
 
 (defn- info-fields->stamp [{:keys [stamp-created transparency qr-code lang]} info-fields]
