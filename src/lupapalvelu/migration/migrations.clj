@@ -6,6 +6,7 @@
             [clj-time.coerce :as cljtc]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.core :refer [def-]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as v]
@@ -3090,27 +3091,27 @@
                                {:attachments {$elemMatch {:originalApplicationState
                                                           {$in states/post-verdict-states}}}})))
 
-(defn next-available-lp-id-for-app! [collection {:keys [municipality created] :as app}]
-  (let [year     (cljt/year (cljtc/from-long created))
-        lp-match (re-pattern (ss/join "-" ["^LP" municipality year ".*"]))]
-    (->> (mongo/select :applications {:_id lp-match} [:_id])
-         (map (fn->> :id (drop 12) (apply str) util/->int))
-         (apply max 0)
-         inc
-         (format "LP-%s-%s-%05d" municipality year))))
+(defn next-available-lp-id-for-app! [{:keys [municipality created]}]
+  (let [year    (cljt/year (cljtc/from-long created))
+        sequence-name (ss/join "-" ["applications" municipality year])
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
+    (ss/join "-" ["LP" municipality year counter])))
 
-(defn conform-application-id-for-application! [collection {id :id :as application}]
-  (let [new-id (next-available-lp-id-for-app! collection application)]
-    (mongo/insert collection (assoc application :id new-id))
+(defn conform-application-id-for-application! [{id :id :as application}]
+  (let [new-id (next-available-lp-id-for-app! application)]
+    (mongo/insert :applications (assoc application :id new-id))
     (mongo/update :fs.files {:metadata.application id} {$set {:metadata.application new-id}} :multi true)
-    (mongo/remove collection id)))
+    (mongo/remove :applications id)
+    (when-let [submitted-application (mongo/select-one :submitted-applications {:_id id})]
+      (mongo/insert :submitted-applications (assoc submitted-application :id new-id))
+      (mongo/remove :submitted-applications id))))
 
 (defmigration conform-application-ids
-  {:apply-when (pos? (+ (mongo/count :applications {:_id #"^(?!LP-).*"})
-                        (mongo/count :submitted-applications {:_id #"^(?!LP-).*"})))}
-  (for [collection [:applications :submitted-applications]
-        app (mongo/select collection {:_id #"^(?!LP-).*"})]
-    (conform-application-id-for-application! collection app)))
+  {:apply-when (pos? (mongo/count :applications {:_id #"^(?!LP-).*"}))}
+  (->> (mongo/select :applications {:_id #"^(?!LP-).*"})
+       (run! conform-application-id-for-application!)))
 
 
 ;;
