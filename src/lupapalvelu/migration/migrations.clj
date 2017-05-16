@@ -2,6 +2,8 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.set :refer [rename-keys] :as set]
+            [clj-time.core :as cljt]
+            [clj-time.coerce :as cljtc]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -3087,6 +3089,29 @@
                                do-cleanup
                                {:attachments {$elemMatch {:originalApplicationState
                                                           {$in states/post-verdict-states}}}})))
+
+(defn next-available-lp-id-for-app! [collection {:keys [municipality created] :as app}]
+  (let [year     (cljt/year (cljtc/from-long created))
+        lp-match (re-pattern (ss/join "-" ["^LP" municipality year ".*"]))]
+    (->> (mongo/select :applications {:_id lp-match} [:_id])
+         (map (fn->> :id (drop 12) (apply str) util/->int))
+         (apply max 0)
+         inc
+         (format "LP-%s-%s-%05d" municipality year))))
+
+(defn conform-application-id-for-application! [collection {id :id :as application}]
+  (let [new-id (next-available-lp-id-for-app! collection application)]
+    (mongo/insert collection (assoc application :id new-id))
+    (mongo/update :fs.files {:metadata.application id} {$set {:metadata.application new-id}} :multi true)
+    (mongo/remove collection id)))
+
+(defmigration conform-application-ids
+  {:apply-when (pos? (+ (mongo/count :applications {:_id #"^(?!LP-).*"})
+                        (mongo/count :submitted-applications {:_id #"^(?!LP-).*"})))}
+  (for [collection [:applications :submitted-applications]
+        app (mongo/select collection {:_id #"^(?!LP-).*"})]
+    (conform-application-id-for-application! collection app)))
+
 
 ;;
 ;; ****** NOTE! ******
