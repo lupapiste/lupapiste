@@ -13,7 +13,25 @@
                               apikey
                               :propertyId sipoo-property-id
                               :address "Paatoskuja 12")
-        application-id      (:id application)]
+        application-id      (:id application)
+        [doc-id1 doc-id2 & doc-ids] (map :id (:documents application))]
+
+    (fact "Request statement from Pena"
+      (command sonja :request-for-statement :id application-id
+               :functionCode ""
+               :selectedPersons [{:email "pena@example.com"
+                                  :name "Pena"
+                                  :text "Pena"}]) => ok?)
+    (fact "Approve the first document"
+      (command sonja :approve-doc :id application-id
+               :doc doc-id1
+               :collection "documents"
+               :path "") => ok?)
+    (fact "Reject the second document"
+      (command sonja :reject-doc :id application-id
+               :doc doc-id2
+               :collection "documents"
+               :path "") => ok?)
 
     (generate-documents application apikey)
 
@@ -47,7 +65,14 @@
        (fact "All documents have new ids"
          (let [old-ids (set (map :id (:documents application)))
                new-ids (set (map :id (:documents change-app)))]
-           (intersection new-ids old-ids) => empty?))))))
+           (intersection new-ids old-ids) => empty?))
+       (fact "No statement givers"
+         (map :role (:auth change-app)) => ["owner"])
+       (fact "No approval information in documents"
+         (->> (:documents change-app)
+              (map :meta)
+              (map :_approved)
+              (filter identity)) => empty?)))))
 
 (facts "Change permit can only be applied for an R type of application."
   (let [apikey                 sonja

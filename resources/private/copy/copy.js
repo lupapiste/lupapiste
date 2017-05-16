@@ -313,6 +313,9 @@ if (features.enabled("copy-applications")) {
           self.clear();
           params.id = data.id;
           pageutil.openApplicationPage(params);
+          hub.send("indicator", {style: "positive",
+                                 message: "application.copy.success.text",
+                                 sticky: true});
         })
         .error(function(data) {
           notify.ajaxError(data);

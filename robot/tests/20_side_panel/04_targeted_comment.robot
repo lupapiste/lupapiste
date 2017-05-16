@@ -33,7 +33,7 @@ Ronja got email
 Open the application
   ## Click the first link
   Click link  xpath=//a
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//div[@data-test-id='application-property-id']  ${propertyId}
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
 Comment is visible
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']

@@ -745,17 +745,17 @@
         state (if (usr/authority? user) :open :draft)
         muutoslupa-app (merge domain/application-skeleton
                               (select-keys application
-                                [:auth
-                                 :propertyId, :location
-                                 :location-wgs84
-                                 :schema-version
-                                 :address, :title
-                                 :foreman, :foremanRole
-                                 :applicant, :_applicantIndex
-                                 :municipality, :organization
-                                 :drawings
-                                 :metadata])
-
+                                           [:propertyId :location
+                                            :location-wgs84
+                                            :schema-version
+                                            :address :title
+                                            :foreman :foremanRole
+                                            :applicant :_applicantIndex
+                                            :municipality :organization
+                                            :drawings
+                                            :metadata])
+                              {:auth (remove #(util/=as-kw (:role %) :statementGiver)
+                                             (:auth application))}
                               {:id            muutoslupa-app-id
                                :permitType    permit/R
                                :permitSubtype :muutoslupa
@@ -764,7 +764,9 @@
                                :modified      created
                                :documents     (into [] (map
                                                          (fn [doc]
-                                                           (let [doc (assoc doc :id (mongo/create-id))]
+                                                           (let [doc (-> doc
+                                                                         (assoc :id (mongo/create-id))
+                                                                         (util/dissoc-in [:meta :_approved]))]
                                                              (if (-> doc :schema-info :op)
                                                                (update-in doc [:schema-info :op :id] op-id-mapping)
                                                                doc)))

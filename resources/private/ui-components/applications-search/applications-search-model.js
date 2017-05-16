@@ -124,7 +124,6 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   // clear filters when search type is changed.
   // Note: assignments view does not support default filter.
   self.searchType.subscribe(function(val) {
-
     self.dataProvider.clearFilters();
     if (val === "foreman") {
       self.dataProvider.setDefaultForemanSort();

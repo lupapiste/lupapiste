@@ -41,6 +41,7 @@ Olli publishes bulletin
 Olli opens bulletin and checks that not icons are visible
   Wait until  Click link  jquery=td.actions a[target=_blank]
   Select window  new
+  Wait until  Element should be visible  bulletin-component
   No icons  info
   No icons  attachments
 

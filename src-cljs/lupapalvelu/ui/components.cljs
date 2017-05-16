@@ -2,9 +2,10 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.hub :as hub]))
 
-(rum/defc select [change-fn data-test-id value options]
-  [:select.form-entry.is-middle
-   {:on-change    #(change-fn (.. % -target -value))
+(rum/defc select [change-fn data-test-id value options & [classes]]
+  [:select
+   {:class (or classes "form-entry is-middle")
+    :on-change    #(change-fn (.. % -target -value))
     :data-test-id data-test-id
     :value        value}
    (map (fn [[k v]] [:option {:key k :value k} v]) options)])

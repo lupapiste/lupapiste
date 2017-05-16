@@ -43,19 +43,17 @@
             <!-- /ko -->
           </div>
 
+          <!-- No spaces since we do now want any gaps in the radio button group -->
           <!-- ko if: searchModels().length > 1 -->
           <div class="form-grid form-grid--no-border"
-               data-bind="foreach: searchModels">
-            <span
+               data-bind="foreach: searchModels"><span
                  data-bind="component: {name: 'radio-field',
                                         params: {value: $data.type,
                                                  selectedValue: $parent.searchType,
                                                  id: 'searchType' + _.capitalize($data.type),
                                                  name: 'searchType',
                                                  label: $data.label,
-                                                 lLabel: $data.lLabel}}"></span>
-
-          </div>
+                                                 lLabel: $data.lLabel}}"></span></div>
           <!-- /ko -->
 
           <!-- Filters -->

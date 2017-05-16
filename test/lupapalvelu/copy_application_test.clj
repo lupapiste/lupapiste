@@ -4,6 +4,8 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.copy-application :refer :all]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -17,7 +19,9 @@
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.copy-application
-                   handle-waste-plan)
+                   handle-special-cases
+                   clear-personal-information
+                   check-valid-source-application!)
 
 (defn dissoc-ids-and-timestamps [application]
   (walk-dissoc-keys application :id :created :modified :ts))
@@ -137,29 +141,72 @@
                                       {:name waste-schemas/extended-construction-waste-report-name}}
            organization-with-basic-waste-plan {:extended-construction-waste-report-enabled false}
            organization-with-extended-waste-report {:extended-construction-waste-report-enabled true}]
-       (handle-waste-plan basic-waste-plan-doc
-                          application
-                          organization-with-basic-waste-plan
-                          nil)
-       => basic-waste-plan-doc
+       (-> (handle-special-cases basic-waste-plan-doc
+                                 application
+                                 organization-with-basic-waste-plan
+                                 nil)
+           :schema-info :name)
+       => waste-schemas/basic-construction-waste-plan-name
 
-       (-> (handle-waste-plan basic-waste-plan-doc
-                              application
-                              organization-with-extended-waste-report
-                              nil)
+       (-> (handle-special-cases basic-waste-plan-doc
+                                 application
+                                 organization-with-extended-waste-report
+                                 nil)
            :schema-info :name)
        => waste-schemas/extended-construction-waste-report-name
 
-       (handle-waste-plan extended-waste-report-doc
-                          application
-                          organization-with-extended-waste-report
-                          nil)
-       => extended-waste-report-doc
-
-       (-> (handle-waste-plan extended-waste-report-doc
-                              application
-                              organization-with-basic-waste-plan
-                              nil)
+       (-> (handle-special-cases extended-waste-report-doc
+                                 application
+                                 organization-with-extended-waste-report
+                                 nil)
            :schema-info :name)
-       => waste-schemas/basic-construction-waste-plan-name)))
- )
+       => waste-schemas/extended-construction-waste-report-name
+
+       (-> (handle-special-cases extended-waste-report-doc
+                                 application
+                                 organization-with-basic-waste-plan
+                                 nil)
+           :schema-info :name)
+       => waste-schemas/basic-construction-waste-plan-name))
+
+   (facts "clear-personal-information"
+     (let [application {:created 12345
+                        :schema-version 1
+                        :primaryOperation {:name "kerrostalo-rivitalo"}}
+           empty-hakija-document {:schema-info {:name "hakija-r"}
+                                  :data (tools/create-document-data (schemas/get-schema 1 "hakija-r"))}
+           hakija-document (-> empty-hakija-document
+                               (assoc-in [:_selected :value] "henkilo")
+                               (assoc-in [:henkilo :userId :value] "ab12cd34")
+                               (assoc-in [:henkilo :henkilotiedot :etunimi :value] "Erkki")
+                               (assoc-in [:henkilo :henkilotiedot :sukunimi :value] "Esimerkki"))]
+
+       (fact "user information with unauthorized user is cleared"
+         (:henkilo (clear-personal-information hakija-document application)) => (:henkilo empty-hakija-document))
+
+       (fact "for invited users that have not accepted invitation, the userId field is cleared to make the document valid"
+             (let [cleared (clear-personal-information hakija-document
+                                                       (assoc application :auth [{:id "ab12cd34"
+                                                                                  :role "reader"
+                                                                                  :invite {:id "ab12cd34"
+                                                                                           :role "writer"}}]))]
+               (-> cleared :henkilo :henkilotiedot :etunimi :value) => "Erkki"
+               (-> cleared :henkilo :henkilotiedot :sukunimi :value) => "Esimerkki"
+               (-> cleared :henkilo :userId :value) => ""))
+
+       ))
+   (facts "checks"
+
+     (fact "change permits cannot be copied"
+       (check-valid-source-application! {:permitSubtype "muutoslupa"})
+       => (throws #"error.application-invalid-permit-subtype"))
+
+     (fact "foreman and jatkoaika applications cannot be copied"
+       (check-valid-source-application! {:primaryOperation {:name "tyonjohtajan-nimeaminen"}})
+       => (throws #"error.operations.copying-not-allowed")
+       (check-valid-source-application! {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}})
+       => (throws #"error.operations.copying-not-allowed")
+       (check-valid-source-application! {:primaryOperation {:name "jatkoaika"}})
+       => (throws #"error.operations.copying-not-allowed"))
+
+     (fact ))))

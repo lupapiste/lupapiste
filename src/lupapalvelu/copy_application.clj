@@ -128,6 +128,13 @@
                (not-in-auth? (id-from-personal-information element))))
       (building-selector-element? element)))
 
+(defn- clear-user-and-company-ids [element]
+  (if (map? element)
+    (cond (contains? element :userId)    (assoc-in element [:userId :value] "")
+          (contains? element :companyId) (assoc-in element [:companyId :value] "")
+          :else element)
+    element))
+
 (defn- clear-personal-information
   "Clears personal information from documents if
    - it is possible to enter the information using user or company id and
@@ -139,7 +146,11 @@
     (pathwalk (fn [path v]
                 (if (document-element-sould-be-cleared? v not-in-auth?)
                   (get-in empty-copy path)
-                  v))
+
+                  ; clear user and company id's in any case because
+                  ; document is invalid if an unauthorized id is found, and
+                  ; invites are not considered authorizations
+                  (clear-user-and-company-ids v)))
               document)))
 
 (defn- construction-waste-plan? [doc]
@@ -149,35 +160,37 @@
      waste-schemas/extended-construction-waste-report-name}
    (-> doc :schema-info :name)))
 
-(defn- correct-waste-plan-for-organization? [doc organization]
-  {:pre [(construction-waste-plan? doc)]}
-  (= (-> doc :schema-info :name)
-     (waste-schemas/construction-waste-plan-for-organization organization)))
-
 (defn construction-waste-plan
-  "Returns the given document if it is the correct construction waste
-   plan for the organization. Otherwise, it creates an empty document of
-   the correct type."
-  [document application organization manual-schema-datas]
-  (if (correct-waste-plan-for-organization? document organization)
-    document
-    (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
-      (app/make-document application
-                         (-> application :primaryOperation :name)
-                         (:created application)
-                         manual-schema-datas
-                         (schemas/get-schema (:schema-version application)
-                                             plan-name)))))
+  [application organization manual-schema-datas]
+  (let [plan-name (waste-schemas/construction-waste-plan-for-organization organization)]
+    (app/make-document application
+                       (-> application :primaryOperation :name)
+                       (:created application)
+                       manual-schema-datas
+                       (schemas/get-schema (:schema-version application)
+                                           plan-name))))
 
-(defn- handle-waste-plan [document application organization manual-schema-datas]
-  (if (construction-waste-plan? document)
-    (construction-waste-plan document application
-                             organization manual-schema-datas)
-    document))
+(defn- location-document? [document]
+  (= (-> document :schema-info :type) :location))
+
+(defn- document-disabled? [document]
+  (boolean (-> document :disabled)))
+
+(defn- handle-special-cases [document application organization manual-schema-datas]
+  (let [schema-name (-> document :schema-info :name)]
+    (cond (construction-waste-plan? document)
+            (construction-waste-plan application
+                                     organization
+                                     manual-schema-datas)
+          (location-document? document)
+            (empty-document-copy document application manual-schema-datas)
+          (document-disabled? document)
+            (empty-document-copy document application manual-schema-datas)
+          :else document)))
 
 (defn- preprocess-document [document application organization manual-schema-datas]
   (-> document
-      (handle-waste-plan application organization manual-schema-datas)
+      (handle-special-cases application organization manual-schema-datas)
       (assoc :id (mongo/create-id)
              :created (:created application))
       (dissoc :meta)
@@ -283,41 +296,84 @@
         (merge (copied-keys source-application options))
         (merge-in new-application-overrides user organization created manual-schema-datas)
         (merge-in updated-operation-and-document-ids source-application
-                                                     organization manual-schema-datas))))
+                  organization manual-schema-datas))))
 
-(defn check-copy-application-possible! [organization municipality permit-type operation]
-  (when-not organization
-    (fail! :error.organization-not-found :municipality municipality :permit-type permit-type :operation operation))
-  (when-not (find-first #(= % operation) (:selected-operations organization))
-    (fail! :error.operations.hidden :organization (:id organization) :operation operation)))
+(defn- check-valid-source-application!
+  "Throws with fail! if the application cannot be copied because of its
+  subtype or primary operation type"
+  [source-application]
+  (when (= (:permitSubtype source-application) "muutoslupa")
+    (fail! :error.application-invalid-permit-subtype :permitSubtype (:permitSubtype source-application)))
+  (let [operation-name (-> source-application :primaryOperation :name)]
+    (when-not (op/get-operation-metadata operation-name :copying-allowed)
+      (fail! :error.operations.copying-not-allowed :operation operation-name))))
 
-(defn application-copyable-to-location
-  [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
+(defn check-valid-operation-for-organization!
+  "Throws with fail! if the target organization does not support the
+  primary operation of the source application"
+  [source-application organization]
+  (let [operation-name (-> source-application :primaryOperation :name)]
+    (when-not (find-first #(= % operation-name) (:selected-operations organization))
+      (fail! :error.operations.hidden :organization (:id organization)
+             :operation operation-name))))
+
+(defn- organization-for-property-id [propertyId operation-name]
+  (let [municipality (prop/municipality-id-by-property-id propertyId)
+        permit-type  (op/permit-type-of-operation operation-name)
+        org (org/resolve-organization municipality
+                                      permit-type)]
+    (when-not org
+      (fail! :error.organization-not-found :municipality municipality
+             :permit-type permit-type :operation operation-name))
+    org))
+
+(defn check-application-copyable!
+  "Throws with fail! if the source application cannot be copied"
+  [{{:keys [source-application-id]} :data :keys [user]}]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
-    (let [municipality (prop/municipality-id-by-property-id propertyId)
-          operation    (-> source-application :primaryOperation :name)
-          permit-type  (op/permit-type-of-operation operation)
-          organization (org/resolve-organization municipality permit-type)]
-      (check-copy-application-possible! organization municipality permit-type operation)
+    (let [operation-name (-> source-application :primaryOperation :name)]
+      (check-valid-source-application! source-application)
       true)
     (fail! :error.application-not-found :id source-application-id)))
+
+(defn check-application-copyable-to-organization!
+  "Throws with fail! if the application cannot be copied to the specific organization"
+  [{{:keys [source-application-id x y address propertyId]} :data :keys [user]}]
+  (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
+    (let [operation-name (-> source-application :primaryOperation :name)]
+      (check-valid-source-application! source-application)
+      (check-valid-operation-for-organization! source-application
+                                               (organization-for-property-id propertyId
+                                                                             operation-name))
+      true)
+    (fail! :error.application-not-found :id source-application-id)))
+
+(defn- check-valid-auth-invites!
+  "Throws with fail! if some of the auth invites are not present on the source application"
+  [source-application auth-invites]
+  (let [not-in-source-auths? (not-in-auth (:auth source-application))]
+    (when (some not-in-source-auths? auth-invites)
+      (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))))
+
+(defn- select-auth-invites [source-application auth-invites]
+  (filter #((set auth-invites) (auth-id %))
+          (:auth source-application)))
 
 (defn copy-application
   [{{:keys [source-application-id x y address propertyId auth-invites]} :data :keys [user created]} & [manual-schema-datas]]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
     (let [municipality (prop/municipality-id-by-property-id propertyId)
           operation    (-> source-application :primaryOperation :name)
-          permit-type  (op/permit-type-of-operation operation)
-          organization (org/resolve-organization municipality permit-type)
-          not-in-source-auths? (not-in-auth (:auth source-application))]
-      (check-copy-application-possible! organization municipality permit-type operation)
-      (when (some not-in-source-auths? auth-invites)
-        (fail! :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))
+          organization (organization-for-property-id propertyId operation)]
+
+      (check-valid-source-application! source-application)
+      (check-valid-operation-for-organization! source-application organization)
+      (check-valid-auth-invites! source-application auth-invites)
 
       {:source-application source-application
        :copy-application (new-application-copy (assoc source-application
-                                                      :auth         (filter #((set auth-invites) (auth-id %))
-                                                                            (:auth source-application))
+                                                      :auth         (select-auth-invites source-application
+                                                                                         auth-invites)
                                                       :state        :draft
                                                       :address      address
                                                       :propertyId   propertyId

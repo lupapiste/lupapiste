@@ -19,4 +19,7 @@ Change permit subtype
   Positive indicator should be visible
   Reload page and kill dev-box
   Wait Until  List Selection Should Be  permitSubtypeSelect  suunnittelutarveratkaisu
-  [Teardown]  Logout
+  Logout
+
+Frontend errors check
+  There are no frontend errors

@@ -159,7 +159,7 @@ $preamble-min-height: 280px; // at least the size of the map container
         left: 6px;
       }
     }
-    select {
+    select , .property-id {
       vertical-align: top;
     }
     ul {
@@ -491,6 +491,7 @@ $preamble-min-height: 280px; // at least the size of the map container
     }
   }
   .warning-message {
+    margin-left: $marginS;
     color: $negative;
     line-height: 24px;
     margin-top: $marginS;

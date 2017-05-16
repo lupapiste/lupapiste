@@ -117,3 +117,112 @@ div.organization-link-cell {
   @include link-text( 24em );
   white-space: nowrap;
 }
+
+// Stamp Editor
+
+.edit-stamp-bubble {
+  border: 1px solid $gray221;
+  margin-top: 1em;
+}
+
+.stamp-selection {
+  select {
+    margin-right: 1em;
+  }
+}
+
+.stamp-editor-header {
+  margin: 0;
+  .row {
+    margin: 10px 0;
+    button {
+      float: right;
+    }
+  }
+  .buttons {
+    text-align: right;
+    button {
+      margin-right: 0;
+    }
+  }
+}
+
+.stamp-preview {
+  border: 1px solid $gray221;
+}
+
+@mixin btn-with-border {
+  border-style: solid;
+  border-width: 2px;
+  border-color: $gray221;
+  background-color: white;
+  display: inline-block;
+  font-size: $font-size-body;
+  padding: 5px 10px;
+  .btn-content {
+    display: inline-block;
+  }
+  span, input {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  i {
+    display: inline;
+    vertical-align: middle;
+  }
+  input {
+    font-size: inherit;
+  }
+}
+
+@mixin stamp-editor-borders {
+  margin-right: 15px;
+  margin-bottom: 10px;
+}
+
+.stamp-row-btn {
+  @include btn-with-border;
+  cursor: move;
+  i {
+    margin-left: 10px;
+    cursor: pointer;
+  }
+}
+
+.stamp-editor-btn {
+  @include btn-with-border;
+  color: $orange-dark;
+  cursor: move;
+  i {
+    margin-right: 10px;
+  }
+}
+
+.stamp-row-btn, .stamp-editor-btn {
+  @include stamp-editor-borders;
+}
+
+.stamp-row-label {
+  @include stamp-editor-borders;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.stamp-row-placeholder {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: dashed;
+  color: $gray221;
+}
+
+.stamp-row-focus {
+  @include btn-with-border;
+  @include stamp-editor-borders;
+  border-style: solid;
+  color: $gray221;
+}
+
+.stamp-editor-drag-guide {
+  margin: 1em 0;
+}

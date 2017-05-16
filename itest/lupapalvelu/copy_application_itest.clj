@@ -113,7 +113,7 @@
         (let [emails (sent-emails)]
           (count emails) => 2
 
-          (-> emails first :body :html) => (contains "Sinut halutaan valtuuttaa kirjoi<tusoikeudella")
+          (-> emails first :body :html) => (contains "Sinut halutaan valtuuttaa kirjoitusoikeudella")
           (-> emails first :to) => (contains "Pena Panaani")
 
           (-> emails second :body :html) => (contains "Sonja Sibbo haluaa valtuuttaa yrityksenne")

@@ -892,4 +892,18 @@ LUPAPISTE.ApplicationModel = function() {
   self.copy = function() {
     pageutil.openPage("copy",  self.id());
   };
+
+  self.canBeCopied = ko.observable(false);
+  hub.subscribe("application-model-updated", function() {
+    ajax
+      .query("application-copyable", {"source-application-id": self.id()})
+      .success(function() {
+        self.canBeCopied(true);
+      })
+      .error(function() {
+        self.canBeCopied(false);
+      })
+      .call();
+    return false;
+  });
 };

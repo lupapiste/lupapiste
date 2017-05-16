@@ -4,7 +4,7 @@
             [lupapalvelu.wfs :as wfs]
             [sade.common-reader :as scr]
             [sade.strings :as ss]
-            [sade.xml :as sxml]))
+            [sade.xml :refer [get-text select1] :as sxml]))
 
 
 ;; Object types (URL encoded)
@@ -111,3 +111,45 @@
 
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
+
+; --- Conversion helpers
+
+(defn get-updated-if [current to-add]
+  (if to-add
+    (str current to-add)
+    current))
+
+(defn str-or-nil [& v]
+  (when-not (some nil? v) (reduce str v)))
+
+(defn get-osoite [osoite]
+  (-> (get-text osoite :osoitenimi :teksti)
+      (get-updated-if (str-or-nil " " (get-text osoite :osoitenumero)))
+      (get-updated-if (str-or-nil "\u2013" (get-text osoite :osoitenumero2)));SFS4175 stardardin mukainen valiviiva
+      (get-updated-if (str-or-nil " " (get-text osoite :jakokirjain)))
+      (get-updated-if (str-or-nil "\u2013" (get-text osoite :jakokirjain2)))
+      (get-updated-if (str-or-nil " " (get-text osoite :porras)))
+      (get-updated-if (str-or-nil " " (get-text osoite :huoneisto)))))
+
+(defn ->henkilo [xml-without-ns]
+  (let [henkilo (select1 xml-without-ns [:henkilo])]
+    {:_selected "henkilo"
+     :henkilo   {:henkilotiedot {:etunimi  (get-text henkilo :nimi :etunimi)
+                                 :sukunimi (get-text henkilo :nimi :sukunimi)
+                                 :hetu     (get-text henkilo :henkilotunnus)
+                                 :turvakieltoKytkin (scr/to-boolean (get-text xml-without-ns :turvakieltoKytkin))}
+                 :yhteystiedot  {:email     (get-text henkilo :sahkopostiosoite)
+                                 :puhelin   (get-text henkilo :puhelin)}
+                 :osoite        {:katu         (get-osoite (select1 henkilo :osoite))
+                                 :postinumero  (get-text henkilo :osoite :postinumero)
+                                 :postitoimipaikannimi  (get-text henkilo :osoite :postitoimipaikannimi)}}}))
+
+(defn ->yritys [xml-without-ns]
+  (let [yritys (select1 xml-without-ns [:yritys])]
+    {:_selected "yritys"
+     :yritys {:yritysnimi                             (get-text yritys :nimi)
+              :liikeJaYhteisoTunnus                   (get-text yritys :liikeJaYhteisotunnus)
+              :osoite {:katu                          (get-osoite (select1 yritys :postiosoite))
+                       :postinumero                   (get-text yritys :postiosoite :postinumero)
+                       :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
+              :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}}))

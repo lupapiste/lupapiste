@@ -290,8 +290,8 @@ Sonja rejects shelter
 Sonja adds CV. It does not support RAMs
   Upload attachment  ${PNG_TESTFILE_PATH}  CV  CV  Osapuolet
   Open attachment details  osapuolet.cv
-  Wait Until  Click button  id=test-attachment-approve
   Wait Until  Element should be disabled  test-attachment-approve
+  Attachment is  approved
   No such test id  add-ram-attachment
   [Teardown]  Logout
 

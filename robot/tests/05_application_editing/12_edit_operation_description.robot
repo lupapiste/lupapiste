@@ -16,4 +16,7 @@ Mikko edits operation description
 Mikko can see new operation description
   Reload page and kill dev-box
   Operation description is  uusiRakennus  Talo A
-  [Teardown]  logout
+  Logout
+
+Frontend errors check
+  There are no frontend errors

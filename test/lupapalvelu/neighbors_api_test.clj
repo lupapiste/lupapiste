@@ -20,14 +20,14 @@
   (fact "token use after a day"
     (valid-token? valid-token valid-statuses day) => true)
 
-  (fact "token use after 3 weeks - 1 ms: valid"
-    (valid-token? valid-token valid-statuses (* 3 7 day)) => true)
+  (fact "token use after 2 weeks - 1 ms: valid"
+    (valid-token? valid-token valid-statuses (* 2 7 day)) => true)
 
-  (fact "token use at 3 weeks: valid"
-    (valid-token? valid-token valid-statuses (dec (* 3 7 day))) => true)
+  (fact "token use at 2 weeks: valid"
+    (valid-token? valid-token valid-statuses (dec (* 2 7 day))) => true)
 
-  (fact "token use after 3 weeks + 1 ms: expired. See lupapalvelu.ttl namespace."
-    (valid-token? valid-token valid-statuses (inc (* 3 7 day))) => false)
+  (fact "token use after 2 weeks + 1 ms: expired. See lupapalvelu.ttl namespace."
+    (valid-token? valid-token valid-statuses (inc (* 2 7 day))) => false)
 
   (fact "token use before it was created: very dodgy, should fail"
     (valid-token? valid-token [{:state "email-sent" :token valid-token :created 2}] 1) => false)

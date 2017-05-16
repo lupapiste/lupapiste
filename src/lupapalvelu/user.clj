@@ -385,7 +385,7 @@
                                     {$or (map hash-map
                                            [:email :firstName :lastName]
                                            (repeat t))})
-                               (map re-pattern searches))))))
+                                  (map #(re-pattern (str "(?i)" %)) searches))))))
 
 (defn- limit-organizations [query]
   (if-let [org-ids (:organizations query)]
