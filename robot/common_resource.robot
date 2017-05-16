@@ -1648,8 +1648,8 @@ There are no frontend errors
   ${ERR_COUNT}=    Get Matching Xpath Count  ${ERROR_LOG_XPATH}
   Print frontend error texts  ${FATAL_LOG_XPATH}  FATAL
   Print frontend error texts  ${ERROR_LOG_XPATH}  ERROR
-  Go to  ${LOGIN URL}
-  Logout
+  Go to  ${LOGOUT URL}
+  Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   # These test cases will fail if errors exist
   Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
   Should be equal  ${ERR_COUNT}  0  Frontend errors
