@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Mikko should not be able to copy applications but Sonja and
+Documentation   Mikko should not be able to copy applications but Sonja and Kaino should
 Resource        ../../common_resource.robot
 Resource        ../25_company/company_resource.robot
 Suite Setup     Apply minimal fixture now
