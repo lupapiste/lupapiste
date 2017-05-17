@@ -24,16 +24,16 @@
       :draggable      true
       :on-drag-start  (fn [e]
                         (reset! drag-element
-                                {:type              :new
-                                 :stamp-type        key
+                                {:type :move
                                  :source-boundaries (stamp-util/boundaries-from-component local-state)})
                         (let [data-transfer (.-dataTransfer e)]
-                          (.setData data-transfer "moveField" (util/clj->json {:row   row-number
-                                                                               :index row-index})))
+                          (.setData data-transfer "text" (util/clj->json {:row   row-number
+                                                                          :index row-index})))
                         (reset! display-style "none"))
       :on-drag-end    (fn [_]
                         (reset! closest-elem [])
-                        (reset! display-style "inline-block"))}
+                        (reset! display-style "inline-block")
+                        (reset! drag-element nil))}
      [:div.btn-content
       rendered-content
       [:i.lupicon-circle-remove

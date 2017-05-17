@@ -40,10 +40,10 @@
 (defn dist [x y]
   (abs (- x y)))
 
-(defn closest-rect [debug-data]
+(defn closest-rect [position-data]
   "Finds the element closest to mouse position in the current row"
-  (let [{:keys [client-x client-y]} (:row-mouse debug-data)
-        current-row (:current-row debug-data)
+  (let [{:keys [client-x client-y]} (:row-mouse position-data)
+        current-row (:current-row position-data)
         cursor-inside? (fn [{:keys [top bottom left right]}]
                          (and (<= left client-x right)
                               (<= top client-y bottom)))
@@ -52,13 +52,13 @@
                      0
                      (min (dist client-x left)
                           (dist client-x right))))
-        rects (get-in debug-data [:row-data current-row])
+        rects (get-in position-data [:row-data current-row])
         by-distance (sort-by distance rects)]
     (first by-distance)))
 
-(defn closest-with-edge [debug-data]
-  (let [{:keys [left right] :as closest} (closest-rect debug-data)
-        {:keys [client-x]} (:row-mouse debug-data)
+(defn closest-with-edge [position-data]
+  (let [{:keys [left right] :as closest} (closest-rect position-data)
+        {:keys [client-x]} (:row-mouse position-data)
         side (if (< (dist client-x left)
                     (dist client-x right))
                :left
@@ -106,10 +106,8 @@
   (fn [e]
     (.preventDefault e)
     (let [dt (.-dataTransfer e)
-          new (.getData dt "newField")
-          moved (.getData dt "moveField")
-          {:strs [type]} (when-not (string/blank? new) (util/json->clj new))
-          {:strs [row index]} (when-not (string/blank? moved) (util/json->clj moved))
+          data (.getData dt "text")
+          {:strs [type row index]} (when-not (string/blank? data) (util/json->clj data))
           field-data (if (and row index)
                        (get-in @all-rows-cursor [row index])
                        (let [kw-type (keyword type)]
