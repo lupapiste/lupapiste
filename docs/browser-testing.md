@@ -8,16 +8,19 @@ See [Robot Framework documentation](http://robotframework.org/robotframework/).
 
 ## Setup
 
-1. Install [Firefox Extended Support Release](https://www.mozilla.org/en-US/firefox/organizations/all/) version
+1. Install [Firefox Extended Support Release (>= 52.1.0)](https://www.mozilla.org/en-US/firefox/organizations/all/) version
+   1. For pre-geckodriver testing version 45 should work (also requires selenium 2 not 3)
 2. Install [Python version **2.7.x**](http://www.python.org/getit/) **NOT 3.x**
     1.  On Windows, append installation directory C:\Python27 and C:\Python27\Scripts to PATH environment variable
 3. Install [pip](http://www.pip-installer.org/en/latest/installing.html)
 4. Install Robot Framework: `pip install robotframework`
-5. Install Selenium 2 Library: `pip install robotframework-selenium2library`
-6. Install [Robotframework-DebugLibrary](https://github.com/xyb/robotframework-debuglibrary): `pip install robotframework-debuglibrary`
-7. Download drivers and include them in PATH
-    1.  [Chrome](http://chromedriver.storage.googleapis.com/index.html)
-    2.  [IE](http://selenium-release.storage.googleapis.com/index.html)
+5. Install Selenium (>= 3.4.0): `pip install selenium`
+6. Install Selenium 2 Library (>= 1.8.0): `pip install robotframework-selenium2library`
+7. Install [Robotframework-DebugLibrary](https://github.com/xyb/robotframework-debuglibrary): `pip install robotframework-debuglibrary`
+8. Download drivers and include them in PATH
+    1.  [Geckodriver >= 0.16.1](https://github.com/mozilla/geckodriver/releases/)
+    2.  [Chrome](http://chromedriver.storage.googleapis.com/index.html)
+    3.  [IE](http://selenium-release.storage.googleapis.com/index.html)
 
 Optional:
 
