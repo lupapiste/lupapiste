@@ -95,14 +95,19 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
-(defn- upload-and-set-state [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn]
+(defn- upload-and-set-state
+  "Does the actual archiving in a different thread pool"
+  [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn]
   (info "Trying to archive attachment id" id "from application" app-id)
   (do (state-update-fn :arkistoidaan application now id)
       (.submit
         upload-threadpool
         (fn []
           (let [metadata (metadata-fn)
-                {:keys [status body]} (upload-file id (is-or-file-fn) content-type (assoc metadata :tila :arkistoitu))]
+                {:keys [status body]} (upload-file id
+                                                   (is-or-file-fn)
+                                                   content-type
+                                                   (assoc metadata :tila :arkistoitu))]
             (cond
               (= 200 status)
               (do
@@ -193,7 +198,10 @@
   (str type-group "." type-id))
 
 (defn- person-name [person-data]
-  (ss/trim (str (get-in person-data [:henkilotiedot :sukunimi :value]) \space (get-in person-data [:henkilotiedot :etunimi :value]))))
+  (ss/trim
+    (str (get-in person-data [:henkilotiedot :sukunimi :value])
+         \space
+         (get-in person-data [:henkilotiedot :etunimi :value]))))
 
 (defn- foremen [application]
   (if (ss/blank? (:foreman application))
@@ -224,7 +232,9 @@
                        :propertyId            propertyId
                        :applicants            _applicantIndex
                        :operations            (find-op application (att/get-operation-ids attachment))
-                       :tosFunction           (first (filter #(= tosFunction (:code %)) (tiedonohjaus/available-tos-functions organization)))
+                       :tosFunction           (->> (tiedonohjaus/available-tos-functions organization)
+                                                   (filter #(= tosFunction (:code %)))
+                                                   first)
                        :address               address
                        :organization          organization
                        :municipality          municipality
@@ -255,7 +265,10 @@
         su/remove-blank-keys
         (merge s2-metadata))))
 
-(defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
+(defn send-to-archive
+  "Prepares metadata for selected attachments/documents
+   and sends them to Onkalo archive in a separate thread"
+  [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
   (if (or (get-paatospvm application)
           (foreman/foreman-app? application)
           (valid-ya-state? application))
@@ -291,8 +304,20 @@
                 metadata-fn #(-> (generate-archive-metadata application user :processMetadata)
                                  (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
                 xml-metadata-fn #(assoc (metadata-fn) :tiedostonimi (str case-file-archive-id ".xml"))]
-            (upload-and-set-state case-file-archive-id pdf-fn "application/pdf" metadata-fn application created set-process-state)
-            (upload-and-set-state case-file-xml-id xml-fn "text/xml" xml-metadata-fn application created set-process-state))))
+            (upload-and-set-state case-file-archive-id
+                                  pdf-fn
+                                  "application/pdf"
+                                  metadata-fn
+                                  application
+                                  created
+                                  set-process-state)
+            (upload-and-set-state case-file-xml-id
+                                  xml-fn
+                                  "text/xml"
+                                  xml-metadata-fn
+                                  application
+                                  created
+                                  set-process-state))))
       (doseq [attachment selected-attachments]
         (when-not (#{:arkistoidaan :arkistoitu} (keyword (get-in attachment [:metadata :tila])))
           (let [file-id (get-in attachment [:latestVersion :fileId])
