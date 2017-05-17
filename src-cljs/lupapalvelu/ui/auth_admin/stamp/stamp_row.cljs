@@ -5,6 +5,8 @@
             [lupapalvelu.ui.auth-admin.stamp.stamp-row-field :refer [stamp-row-field]]
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]))
 
+(def row-field-limit 6)
+
 (defn- remove-button [rows row-number stamp-row idx]
   (fn [] (if (< 1 (count @stamp-row))
            (swap! stamp-row stamp-util/drop-at idx)
@@ -17,7 +19,8 @@
         drag-event-sum (::drag-event-sum state)
         drag-element (rum/react (rum/cursor-in component-state [:editor :drag-element]))
         closest-elem (rum/cursor-in component-state [:editor :closest-element])
-        field-buttons (for [[idx _] (stamp-util/indexed (rum/react stamp-row-cursor))]
+        current-row (rum/react stamp-row-cursor)
+        field-buttons (for [[idx _] (stamp-util/indexed current-row)]
                         (rum/with-key
                           (stamp-row-field {:data       (rum/cursor-in stamp-row-cursor [idx])
                                             :remove     (remove-button rows-cursor index stamp-row-cursor idx)
@@ -33,8 +36,11 @@
         on-drag-leave (fn [_]
                         (swap! drag-event-sum dec))
         is-dragged-over? (pos? @drag-event-sum)
+        drag-type (:type drag-element)
+        drop-allowed? (or (< (count current-row) row-field-limit)
+                          (= :move drag-type))
         on-drag-over (fn [e]
-                       (when-let [drag-type (:type drag-element)]
+                       (when (and drag-type drop-allowed?)
                          (.preventDefault e)
                          (set! (-> e .-dataTransfer .-dropEffect) (name drag-type)))
                        (let [client-x (aget e "clientX")
@@ -60,12 +66,11 @@
                      :on-drop         on-drop
                      :data-row-number index}
      [:div.stamp-row-label [:span (str (loc "stamp-editor.row") " " (inc index))]]
-     (if (and placeholder-row? is-dragged-over?)
+     (if (and placeholder-row? is-dragged-over? drop-allowed?)
        (concat before
                [placeholder-element]
                after)
        (concat
          field-buttons
-         [[:div.stamp-row-placeholder
-           {:key :default-placeholder}
-           [:span {:style {:pointer-events :none}} (loc "stamp-editor.drop-zone")]]]))]))
+         (when drop-allowed?
+           [placeholder-element])))]))
