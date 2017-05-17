@@ -119,5 +119,5 @@
         (let [drop-index (if (and (= row current-row) (< split-pos index))
                            (inc index)
                            index)]
-          (swap! all-rows-cursor update-in [row] drop-at drop-index)))
-      (-> e .-dataTransfer (.clearData)))))
+          (swap! all-rows-cursor update-in [row] drop-at drop-index))))
+    true))
