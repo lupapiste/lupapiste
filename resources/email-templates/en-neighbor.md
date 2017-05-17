@@ -2,7 +2,7 @@
 
 we wanted to remind you that as neighbours of a building site you have been notified that there is an online permit application submitted via Lupapiste service for {{address}}, {{municipality}}. At Lupapiste you can take care of permits regarding built environment together with the authorities and other parties of the process.
 
-You can get more information regarding the project via the link below. The link expires in three weeks, {{expires}}. If the link doesn't work, copy the address and paste it in your browser's address bar.
+You can get more information regarding the project via the link below. The link expires in two weeks, {{expires}}. If the link doesn't work, copy the address and paste it in your browser's address bar.
 
 {{link}}
 
