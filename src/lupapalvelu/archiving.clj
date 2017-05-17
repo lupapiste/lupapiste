@@ -23,7 +23,8 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain]
             [lupapiste-commons.schema-utils :as su]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.mongo :as mongo])
   (:import [java.util.concurrent ThreadFactory Executors]
            [java.io InputStream]))
 
@@ -94,34 +95,33 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
-(defn- upload-and-set-state [id is-or-file content-type metadata {app-id :id :as application} now state-update-fn]
+(defn- upload-and-set-state [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn]
   (info "Trying to archive attachment id" id "from application" app-id)
-  (if-not (#{:arkistoidaan :arkistoitu} (:tila metadata))
-    (do (state-update-fn :arkistoidaan application now id)
-        (.submit
-          upload-threadpool
-          (fn []
-            (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
-              (cond
-                (= 200 status)
-                (do
-                  (state-update-fn :arkistoitu application now id)
-                  (info "Archived attachment id" id "from application" app-id)
-                  (mark-first-time-archival application now)
-                  (mark-application-archived-if-done application now))
+  (do (state-update-fn :arkistoidaan application now id)
+      (.submit
+        upload-threadpool
+        (fn []
+          (let [metadata (metadata-fn)
+                {:keys [status body]} (upload-file id (is-or-file-fn) content-type (assoc metadata :tila :arkistoitu))]
+            (cond
+              (= 200 status)
+              (do
+                (state-update-fn :arkistoitu application now id)
+                (info "Archived attachment id" id "from application" app-id)
+                (mark-first-time-archival application now)
+                (mark-application-archived-if-done application now))
 
-                (and (= status 409) (string/includes? body "already exists"))
-                (do
-                  (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
-                  (state-update-fn :arkistoitu application now id)
-                  (mark-first-time-archival application now)
-                  (mark-application-archived-if-done application now))
+              (and (= status 409) (string/includes? body "already exists"))
+              (do
+                (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
+                (state-update-fn :arkistoitu application now id)
+                (mark-first-time-archival application now)
+                (mark-application-archived-if-done application now))
 
-                :else
-                (do
-                  (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
-                  (state-update-fn :valmis application now id)))))))
-    (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
+              :else
+              (do
+                (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
+                (state-update-fn :valmis application now id))))))))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-ids]
   (cond->> (concat [primaryOperation] secondaryOperations)
@@ -214,8 +214,9 @@
   [{:keys [id propertyId _applicantIndex address organization municipality location
            location-wgs84 tosFunction verdicts handlers closed drawings] :as application}
    user
+   s2-md-key
    & [attachment]]
-  (let [s2-metadata (or (:metadata attachment) (:metadata application))
+  (let [s2-metadata (or (s2-md-key attachment) (s2-md-key application))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
                        :buildingIds           (get-building-ids :localId application (att/get-operation-ids attachment))
@@ -263,25 +264,47 @@
                                        attachments)
           application-archive-id (str id "-application")
           case-file-archive-id (str id "-case-file")
-          case-file-xml-id     (str case-file-archive-id "-xml")]
-      (when (document-ids application-archive-id)
-        (let [application-file-stream (pdf-export/generate-application-pdfa application :fi)
-              metadata (generate-archive-metadata application user)]
-          (upload-and-set-state application-archive-id application-file-stream "application/pdf" metadata application created set-application-state)))
-      (when (document-ids case-file-archive-id)
+          case-file-xml-id     (str case-file-archive-id "-xml")
+          file-ids (map #(get-in % [:latestVersion :fileId]) selected-attachments)
+          gridfs-results (->> (mongo/download-find-many {:_id {$in file-ids}})
+                              (map (fn [{:keys [fileId] :as res}] [fileId res]))
+                              (into {}))]
+      (when (and (document-ids application-archive-id)
+                 (not (#{:arkistoidaan :arkistoitu} (keyword (get-in application [:metadata :tila])))))
+        (let [content-fn #(pdf-export/generate-application-pdfa application :fi)
+              metadata-fn #(generate-archive-metadata application user :metadata)]
+          (upload-and-set-state application-archive-id
+                                content-fn
+                                "application/pdf"
+                                metadata-fn
+                                application
+                                created
+                                set-application-state)))
+      (when (and (document-ids case-file-archive-id)
+                 (not (#{:arkistoidaan :arkistoitu} (keyword (get-in application [:processMetadata :tila])))))
         (files/with-temp-file libre-file
           (let [pdf-is (libre/generate-casefile-pdfa application :fi libre-file)
-                case-file-xml (tiedonohjaus/xml-case-file application :fi)
-                xml-is (-> (.getBytes case-file-xml "UTF-8") io/input-stream)
-                metadata (-> (generate-archive-metadata application user)
-                             (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
-                xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
-            (upload-and-set-state case-file-archive-id pdf-is "application/pdf" metadata application created set-process-state)
-            (upload-and-set-state case-file-xml-id xml-is "text/xml" xml-metadata application created set-process-state))))
+                pdf-fn #(identity pdf-is)
+                xml-fn #(-> (tiedonohjaus/xml-case-file application :fi)
+                            (.getBytes "UTF-8")
+                            io/input-stream)
+                metadata-fn #(-> (generate-archive-metadata application user :processMetadata)
+                                 (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
+                xml-metadata-fn #(assoc (metadata-fn) :tiedostonimi (str case-file-archive-id ".xml"))]
+            (upload-and-set-state case-file-archive-id pdf-fn "application/pdf" metadata-fn application created set-process-state)
+            (upload-and-set-state case-file-xml-id xml-fn "text/xml" xml-metadata-fn application created set-process-state))))
       (doseq [attachment selected-attachments]
-        (let [{:keys [content contentType]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
-              metadata (generate-archive-metadata application user attachment)]
-          (upload-and-set-state (:id attachment) (content) contentType metadata application created set-attachment-state))))
+        (when-not (#{:arkistoidaan :arkistoitu} (keyword (get-in attachment [:metadata :tila])))
+          (let [file-id (get-in attachment [:latestVersion :fileId])
+                {:keys [content contentType]} (get gridfs-results file-id)
+                metadata-fn #(generate-archive-metadata application user :metadata attachment)]
+            (upload-and-set-state (:id attachment)
+                                  content
+                                  contentType
+                                  metadata-fn
+                                  application
+                                  created
+                                  set-attachment-state)))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]
