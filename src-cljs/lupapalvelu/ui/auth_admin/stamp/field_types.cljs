@@ -21,16 +21,16 @@
      {:draggable           true
       :on-drag-start       (fn [e]
                              (reset! drag-element
-                                     {:type              :new
-                                      :stamp-type        key
+                                     {:type :copy
                                       :source-boundaries (stamp-util/boundaries-from-component local-state)})
                              (reset! drag-source? true)
 
                              (let [data-transfer (.-dataTransfer e)]
-                               (.setData data-transfer "newField" (util/clj->json {:type key}))))
+                               (.setData data-transfer "text" (util/clj->json {:type key}))))
       :on-drag-end         (fn [_]
                              (reset! drag-source? false)
-                             (reset! closest-elem []))
+                             (reset! closest-elem [])
+                             (reset! drag-element nil))
       :data-stamp-btn-name key
       :class               all-classes}
      [:div.btn-content

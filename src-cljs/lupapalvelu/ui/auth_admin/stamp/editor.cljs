@@ -47,7 +47,6 @@
 (rum/defc edit-stamp-bubble < rum/reactive
   [stamp-id editor-state]
   (let [drag-element (rum/cursor editor-state :drag-element)
-        debug-data (rum/cursor editor-state :debug-data)
         stamp-in-editor (rum/cursor editor-state :stamp)
         rows (rum/cursor-in editor-state [:stamp :rows])
         qr-code (rum/cursor-in editor-state [:stamp :qrCode])]
@@ -73,7 +72,6 @@
             (rum/with-key
               (stamp-row {:index       idx
                           :rows-cursor rows
-                          :debug-data  debug-data
                           :drag-source drag-element})
               idx))]]
         [:div.row
