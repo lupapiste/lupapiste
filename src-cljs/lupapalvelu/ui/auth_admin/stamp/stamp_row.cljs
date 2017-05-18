@@ -41,8 +41,7 @@
                           (= :move drag-type))
         on-drag-over (fn [e]
                        (when (and drag-type drop-allowed?)
-                         (.preventDefault e)
-                         (set! (-> e .-dataTransfer .-dropEffect) (name drag-type)))
+                         (.preventDefault e))
                        (let [client-x (aget e "clientX")
                              client-y (aget e "clientY")
                              data {:row-mouse   {:client-x client-x
