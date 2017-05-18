@@ -47,7 +47,9 @@
      :index        building-index
      :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
      :area         (get-text xml-no-ns :kokonaisala)
-     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))
+     :created      (some->> (get-text xml-no-ns :alkuHetki)
+                            cr/parse-datetime
+                            (cr/unparse-datetime :year))
      :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
                            (when (#{"toimenpideId" "Lupapiste"} sovellus)
                              tunnus))
