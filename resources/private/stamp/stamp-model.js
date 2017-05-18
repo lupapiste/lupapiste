@@ -183,9 +183,6 @@ LUPAPISTE.StampModel = function(params) {
   function generatePreview() {
     return _.map(self.selectedStamp().rows,  function (row) {
       return _.map(row , function(object) {
-        if (object.type.endsWith("date")) {
-          return object.value;
-        }
         return object.value;
       }).join(" ");
     }).join("\n") + "\nwww.lupapiste.fi";
