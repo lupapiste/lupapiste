@@ -242,6 +242,35 @@
                                        raw-applications)]
     (ok :applications (map exported-application applications-with-operations))))
 
+(defn application-to-salesforce [application]
+  (letfn [(truncate-op-description [op] (update op :description #(ss/limit % 252 "...")))
+          (map-operations [app] (->> (application/get-operations app)
+                                     (map truncate-op-description)
+                                     (map (partial operation-mapper app))))]
+    (-> application
+        (assoc :operations (map-operations application))
+        (dissoc :documents))))
+
+(defexport salesforce-export
+  {:user-roles #{:trusted-salesforce}}
+  [{{after  :modifiedAfterTimestampMillis
+     before :modifiedBeforeTimestampMillis} :data user :user}]
+  (let [query (merge
+                (domain/application-query-for user)
+                {"primaryOperation" {$exists true}}
+                (when (or (ss/numeric? after) (ss/numeric? before))
+                  {:modified (util/assoc-when {}
+                                              $gte (when after (Long/parseLong after 10))
+                                              $lt  (when before (Long/parseLong before 10)))}))
+        fields [:address :authority :closed :created
+                :infoRequest :modified :municipality :opened :openInfoRequest :organization
+                :primaryOperation :propertyId :permitSubtype :permitType
+                :secondaryOperations :sent :started :state :submitted
+                :documents.data.kaytto.kayttotarkoitus.value
+                :documents.schema-info.op.id]
+        raw-applications (mongo/select :applications query fields)]
+    (ok :applications (map application-to-salesforce raw-applications))))
+
 (defexport export-organizations
   {:user-roles #{:trusted-etl}}
   [_]
