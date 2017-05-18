@@ -113,3 +113,9 @@ lupapisteApp.services.eventFilterService = {};
 lupapisteApp.services.inspectionSummaryService = {};
 lupapisteApp.services.handlerService = {};
 lupapisteApp.services.cardService = {};
+
+lupapisteApp.models = {};
+lupapisteApp.models.currentUser = {};
+lupapisteApp.models.currentUser.displayName = function() {};
+
+
