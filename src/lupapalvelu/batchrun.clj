@@ -14,6 +14,7 @@
             [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
@@ -393,7 +394,7 @@
   (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
     (when (ok? result)
       (try
-        (verdict/save-review-updates user application updates added-tasks-with-updated-buildings)
+        (review/save-review-updates user application updates added-tasks-with-updated-buildings)
         (catch Throwable t
           (logging/log-event :error {:run-by "Automatic review checking"
                                      :event "Failed to save"
@@ -403,7 +404,7 @@
   (try
     (when (and application app-xml)
       (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
-        (let [{:keys [review-count updated-tasks validation-errors] :as result} (verdict/read-reviews-from-xml user created application app-xml)]
+        (let [{:keys [review-count updated-tasks validation-errors] :as result} (review/read-reviews-from-xml user created application app-xml)]
           (cond
             (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
                                                                              :event "Reviews found"
