@@ -6,7 +6,12 @@
       <div class="col--horizontal checkbox-wrapper" data-bind="css: {disabled: disable}">
         <input type="checkbox"
                data-bind="checked: value, attr: {id: id, name: id, 'data-test-id': id}, disable: disable" />
+        <!-- ko if: hasHtmlLabel -->
         <label class="inline-label checkbox-label" data-bind="html: label, attr: {'for': id}"></label>
+        <!-- /ko -->
+        <!-- ko ifnot: hasHtmlLabel -->
+        <label class="inline-label checkbox-label" data-bind="text: label, attr: {'for': id}"></label>
+        <!-- /ko -->
       </div>
     </script>
   </section>

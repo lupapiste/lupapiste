@@ -8,6 +8,7 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.id = params.id || util.randomElementId();
   self.name = params.name;
   self.label = params.lLabel ? loc(params.lLabel) : params.label;
+  self.hasHtmlLabel = params.hasHtmlLabel;
   self.value = params.value;
   self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : params.placeholder;
   self.isSelected = params.hasFocus || ko.observable();
