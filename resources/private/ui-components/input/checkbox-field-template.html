@@ -6,7 +6,7 @@
       <div class="col--horizontal checkbox-wrapper" data-bind="css: {disabled: disable}">
         <input type="checkbox"
                data-bind="checked: value, attr: {id: id, name: id, 'data-test-id': id}, disable: disable" />
-        <label class="inline-label checkbox-label" data-bind="text: label, attr: {'for': id}"></label>
+        <label class="inline-label checkbox-label" data-bind="html: label, attr: {'for': id}"></label>
       </div>
     </script>
   </section>
