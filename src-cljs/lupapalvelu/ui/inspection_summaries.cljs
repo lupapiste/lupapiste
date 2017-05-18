@@ -6,6 +6,7 @@
             [lupapalvelu.ui.authorization :as auth]
             [lupapalvelu.ui.common :refer [query command] :as common]
             [lupapalvelu.ui.components :as uc]
+            [lupapalvelu.ui.components.datepicker :as date]
             [lupapalvelu.ui.util :as jsutil]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
@@ -112,14 +113,6 @@
                :targetId   target-id
                :targetName val
                :inspectionDate (:inspection-date @selected-summary)))
-    (refresh)))
-
-(defn- commit-inspection-date-edit [target-id val]
-  (if (not (empty? val))
-    (let [cmd-name (if target-id
-                     :edit-inspection-summary-target
-                     :add-target-to-inspection-summary)]
-      (println "NYT UPPIA"))
     (refresh)))
 
 (defn- toggle-summary-locking [locked?]
@@ -234,15 +227,18 @@
          (attc/view-with-download-small-inline latest)
          (when-not (or locked? targetFinished?)
            (attc/delete-attachment-link attachment remove-attachment-success))])
-     (when (and target-id (not locked?) (not targetFinished?))
-       [:div (attc/upload-link (partial got-files (:id row-target)))])]
+      (when (and target-id (not locked?) (not targetFinished?))
+        [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
-      (if (auth/ok? auth-model :add-target-to-inspection-summary)
-        ;(uc/autofocus-input-field (:inspection-date row-target)
-        ;                          (str "edit-inspection-date-" idx)
-        ;                          (fn [] (println "PÄIVÄ PÄIVITYS"))
-        (uc/date-picker (:inspection-date row-target))
-        (:inspection-date row-target))]
+      (date/datepicker)
+      ;(if (auth/ok? auth-model :add-target-to-inspection-summary)
+      ;(uc/autofocus-input-field (:inspection-date row-target)
+      ;                          (str "edit-inspection-date-" idx)
+      ;                          (fn [] (println "PÄIVÄ PÄIVITYS"))
+      ;[(uc/date-selector (:inspection-date row-target))]
+      ;(:inspection-date row-target)
+      ;)
+      ]
      [:td
       (when (:finished-date row-target)
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]

@@ -136,7 +136,9 @@
 
                  [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
-                 [com.andrewmcveigh/cljs-time "0.4.0"]]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
+                 ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)
+                 [cljs-pikaday "0.1.4"]]
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.0"]]
