@@ -53,10 +53,9 @@
    :parameters [frontendBuild]
    :input-validators [(partial action/non-blank-parameters [:frontendBuild])]}
   [_]
-  (let [currentBuild (:build-number env/buildinfo)]
-    (if (= frontendBuild currentBuild)
-      (ok)
-      (fail :frontend-too-old))))
+  (if (= frontendBuild env/build-number)
+    (ok)
+    (fail :frontend-too-old)))
 
 (def csp-report-keys [:blocked-uri :document-uri :line-number :referrer :script-sample :source-file :violated-directive])
 
