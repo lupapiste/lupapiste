@@ -182,7 +182,8 @@
                         :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
                                                                         :output-to "resources/public/lp-static/js/rum-app.js"
                                                                         :asset-path "/lp-static/js/out"
-                                                                        :externs ["src-cljs/lupapalvelu/ui/lupapiste-externs.js"]
+                                                                        :externs ["src-cljs/lupapalvelu/ui/lupapiste-externs.js"
+                                                                                  "src-cljs/lupapalvelu/ui/moment.ext.js"]
                                                                         :parallel-build true
                                                                         :pretty-print false
                                                                         :optimizations :advanced}}}}
