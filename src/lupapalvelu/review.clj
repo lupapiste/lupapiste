@@ -84,7 +84,7 @@
        vals
        (map #(apply merge %))))
 
-(defn review-preprocess [app-xml]
+(defn reviews-preprocessed [app-xml]
   (let [grouped-reviews (group-by
                           #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm])
                           (review-reader/xml->reviews app-xml))]
@@ -100,7 +100,7 @@
                                  (remove nil?))]]
       (merge (first values)
              (util/strip-nils {:katselmuksenRakennustieto (when (seq rakennukset)
-                                                            rakennukset)
+                                                            (map #(apply hash-map [:KatselmuksenRakennus %]) rakennukset))
                                :liitetieto (when (seq liitetiedot)
                                              liitetiedot)})))))
 
@@ -109,7 +109,7 @@
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml]
 
-  (let [reviews (review-reader/xml->reviews app-xml)
+  (let [reviews (reviews-preprocessed app-xml)
         attachment-data (group-by :liitetieto (map #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm]) reviews))
         reviews (pc/distinct-by
                   #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm])
