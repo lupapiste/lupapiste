@@ -79,25 +79,50 @@
         ; this existing review is left unchanged
         (recur from-update remaining (conj unchanged current) added-or-updated)))))
 
+(defn merge-maps-that-are-distinct-by [pred map-coll]
+  (->> (group-by pred map-coll)
+       vals
+       (map #(apply merge %))))
+
+(defn review-preprocess [app-xml]
+  (let [grouped-reviews (group-by
+                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm])
+                          (review-reader/xml->reviews app-xml))]
+    (for [k (keys grouped-reviews)
+          :let [values (get grouped-reviews k)
+                rakennukset (->> (get grouped-reviews k)
+                                 (mapcat :katselmuksenRakennustieto)
+                                 (map :KatselmuksenRakennus)
+                                 (merge-maps-that-are-distinct-by
+                                   #(select-keys % [:kiinttun :rakennusnro :jarjestysnumero])))
+                liitetiedot (->> (get grouped-reviews k)
+                                 (map #(-> % :liitetieto :Liite))
+                                 (remove nil?))]]
+      (merge (first values)
+             (util/strip-nils {:katselmuksenRakennustieto (when (seq rakennukset)
+                                                            rakennukset)
+                               :liitetieto (when (seq liitetiedot)
+                                             liitetiedot)})))))
+
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
+        attachment-data (group-by :liitetieto (map #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm]) reviews))
+        reviews (pc/distinct-by
+                  #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm])
+                  reviews)
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
-        review-tasks (pc/distinct-by (fn [task]
-                                       (-> task ; remove muuTunnus from data before comparison, as source background system...
-                                           (util/dissoc-in [:data :muuTunnus]) ;...might have exactly same data saved with two different IDs
-                                           (select-keys [:taskname :data]))) ; remove duplicates!
-                                     (->> reviews
-                                          (filter historical-timestamp-present?)
-                                          (map review-to-task)))
+        review-tasks (->> reviews
+                          (filter historical-timestamp-present?)
+                          (map review-to-task))
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
         review-tasks (keep-indexed (fn [idx item]
                                      (if (empty? (get validation-errors idx)) item)) review-tasks)

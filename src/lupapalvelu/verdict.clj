@@ -218,7 +218,6 @@
       (doall
        (for [att  attachments
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi description :kuvaus} att
-                   _ (debug "Download " url)
                    java-url        (URL. (URL. "http://") url) ; LPK-2903 HTTP is given as default URL context, if protocol is not defined
                    url-filename    (-> java-url (.getPath) (ss/suffix "/"))
                    resp            (http/get (.toString java-url) :as :stream :throw-exceptions false)
