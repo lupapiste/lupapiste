@@ -1,16 +1,20 @@
 (ns lupapalvelu.exports-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.excel-reader :as xls]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok]]
+            [sade.schemas :as ssc]
             [lupapalvelu.action :refer [defexport] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.permit :as permit]
+            [lupapiste-commons.states :as common-states]))
 
 (def kayttotarkoitus-hinnasto (delay (xls/read-map "kayttotarkoitus-hinnasto.xlsx")))
 
@@ -248,11 +252,56 @@
                                      (map truncate-op-description)
                                      (map (partial operation-mapper app))))]
     (-> application
-        (assoc :operations (map-operations application))
+        (assoc  :operations          (map-operations application))
+        (update :primaryOperation    truncate-op-description)
+        (update :secondaryOperations (fn [ops] (map truncate-op-description ops)))
         (dissoc :documents))))
 
+(def operation-schema
+  {:id          ssc/ObjectIdStr
+   :created     ssc/Timestamp
+   :description (sc/maybe (ssc/max-length-string 255))
+   :name        sc/Str})
+
+(def export-operation-schema
+  (merge operation-schema
+         {(sc/optional-key :displayNameFi) sc/Str
+          (sc/optional-key :displayNameSv) sc/Str
+          :priceClass                      (sc/enum "A" "B" "C" "D" "E" "F")
+          :priceCode                       (sc/maybe (apply sc/enum 900 (vals permit-type-price-codes)))
+          :usagePriceCode                  (sc/maybe (apply sc/enum (vals usage-price-codes)))
+          :use                             (sc/maybe sc/Str)
+          :useSv                           (sc/maybe sc/Str)
+          :useFi                           (sc/maybe sc/Str)
+          (sc/optional-key :submitted)     ssc/Timestamp}))
+
+(sc/defschema SalesforceExportApplication
+  "Application schema for export to Salesforce"
+  (merge {:id                  ssc/ApplicationId
+          :address             sc/Str
+          :infoRequest         sc/Bool
+          :municipality        sc/Str
+          :state               (apply sc/enum (map name (keys common-states/all-transitions-graph)))
+          :openInfoRequest     (sc/maybe sc/Bool)
+          :organization        sc/Str
+          :permitSubtype       (sc/maybe sc/Str)
+          :permitType          (apply sc/enum (keys (permit/permit-types)))
+          :propertyId          sc/Str
+          :primaryOperation    operation-schema
+          :secondaryOperations [operation-schema]}
+         {:operations [export-operation-schema]}
+         (zipmap [:created :modified] (repeat ssc/Timestamp))
+         (zipmap [:started :closed :opened :sent :submitted] (repeat (sc/maybe ssc/Timestamp)))))
+
+(defn- validate-export-data
+  "Validate output data against schema."
+  [_ {:keys [applications]}]
+  (doseq [exported-application applications]
+    (sc/validate SalesforceExportApplication exported-application)))
+
 (defexport salesforce-export
-  {:user-roles #{:trusted-salesforce}}
+  {:user-roles #{:trusted-salesforce}
+   :on-success validate-export-data}
   [{{after  :modifiedAfterTimestampMillis
      before :modifiedBeforeTimestampMillis} :data user :user}]
   (let [query (merge
@@ -262,7 +311,7 @@
                   {:modified (util/assoc-when {}
                                               $gte (when after (Long/parseLong after 10))
                                               $lt  (when before (Long/parseLong before 10)))}))
-        fields [:address :authority :closed :created
+        fields [:address :closed :created
                 :infoRequest :modified :municipality :opened :openInfoRequest :organization
                 :primaryOperation :propertyId :permitSubtype :permitType
                 :secondaryOperations :sent :started :state :submitted
