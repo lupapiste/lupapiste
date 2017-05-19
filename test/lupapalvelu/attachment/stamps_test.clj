@@ -11,7 +11,9 @@
   {:id "LP-753-2017-90001"
    :verdicts [{:kuntalupatunnus "17-0753-R"
                :paatokset [{:paivamaarat {:lainvoimainen 0
-                                          :anto 1491470000000}
+                                          :anto 1491460000000}
+                            :poytakirjat [{:paatospvm 1491470000000
+                                           :pykala 666}]
                             :id "5829b90bf63a8034c04f1492"}],
                :id "5829b90bf63a8034c04f148f"}]
    :buildings [:description "Rakennus"
@@ -104,7 +106,7 @@
     (tag-content {:type :organization} context) => {:type :organization :value "Sipoon rakennusvalvonta"}
     (tag-content {:type :application-id} context) => {:type :application-id :value "LP-753-2017-90001"}
     (tag-content {:type :building-id} context) => {:type :building-id :value "Rakennustunnus"}
-    (tag-content {:type :section :text "Section"} context) => {:type :section :value "Section"}))
+    (tag-content {:type :section} context) => {:type :section :value "666"}))
 
 (facts "Stamp rows should be formed correctly"
   (fill-rows (first (:stamps organization)) {:organization organization
