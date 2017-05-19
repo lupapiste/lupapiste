@@ -18,34 +18,29 @@
   "Given a clojure map of options, return a js object for a pikaday constructor argument."
   (clj->js (transform-keys ->camelCaseString opts)))
 
-(defn- watch [ratom predicate func])
-
 (defn datepicker-mixin
-  [{:keys [date-atom max-date-atom min-date-atom pikaday-attrs input-attrs]}]
-  (let [instance-atom (atom nil)]
+  []
+  (let [instance-atom (atom nil)
+        date-atom (atom nil)]
     {:did-mount
      (fn [state]
-       (let [pikaday-attrs
-             {:date-atom date-atom
-              :class "start-date"
-              :format "DD.MM.YYYY"
-              :i18n (pikaday-i18n)
-              :showWeekNumber true
-              :firstDay 1}
-             comp (:rum/react-component state)
+       (let [comp (:rum/react-component state)
+             args (first (:rum/args state))
              dom-node (js/ReactDOM.findDOMNode comp)
+             pikaday-attrs (:pikaday-attrs args)
+             _ (println (:type (first args)))
              date-atom (atom nil)
              _ (reset! date-atom the-date)
              default-opts
-             {:field dom-node
-              :default-date @date-atom
+             {:field            dom-node
+              :default-date     @date-atom
               :set-default-date true
               :on-select        #(when date-atom (reset! date-atom %))}
              opts (opts-transform (merge default-opts pikaday-attrs))
              instance (js/Pikaday. opts)]
          (reset! instance-atom instance)
-         (.addEventListener dom-node "input" (fn [] (when (= "" (.-value dom-node))
-                                                      (reset! date-atom nil))))
+         ;(.addEventListener dom-node "input" (fn [] (when (= "" (.-value dom-node))
+         ;                                            (reset! date-atom nil))))
          ; This code could probably be neater
          (when date-atom
            (add-watch date-atom :update-instance
@@ -75,7 +70,16 @@
        (reset! instance-atom nil))
      }))
 
-(rum/defcs datepicker < (datepicker-mixin %1)
-  [state]
-  [:input {:type "text"
-           :id "datepicker"}])
+(rum/defcs datepicker < (datepicker-mixin)
+  [state datepicker-args]
+  [:input {:type "text"}])
+
+(rum/defc basic-datepicker []
+  (datepicker {:date-atom the-date
+               :pikaday-attrs
+                          {:date-atom      date-atom
+                           :format         "DD.MM.YYYY"
+                           :i18n           (pikaday-i18n)
+                           :showWeekNumber true
+                           :firstDay       1
+                           :position       "bottom left"}}))

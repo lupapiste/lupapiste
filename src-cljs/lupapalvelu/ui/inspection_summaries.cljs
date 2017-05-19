@@ -230,7 +230,7 @@
       (when (and target-id (not locked?) (not targetFinished?))
         [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
-      (date/datepicker)
+      (date/basic-datepicker)
       ;(if (auth/ok? auth-model :add-target-to-inspection-summary)
       ;(uc/autofocus-input-field (:inspection-date row-target)
       ;                          (str "edit-inspection-date-" idx)
