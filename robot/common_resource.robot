@@ -1168,6 +1168,11 @@ Is authorized party
   [Arguments]  ${party}
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
 
+Is not authorized party
+  # Party can be either email or username
+  [Arguments]  ${party}
+  Wait Until  Element Should Not Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
+
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
