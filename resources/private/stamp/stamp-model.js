@@ -124,8 +124,12 @@ LUPAPISTE.StampModel = function(params) {
     return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
   });
 
+  function calculateTransparency(value) {
+    return Math.round(255 * value / 100.0);
+  }
+
   var transparencies = _.map([0,20,40,60,80], function(v) {
-    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
+    return {text: loc(["stamp.transparency", v.toString()]), value: calculateTransparency(v)};
   });
   self.transparencies = transparencies;
 
@@ -206,7 +210,7 @@ LUPAPISTE.StampModel = function(params) {
   self.yMargin = ko.observable(self.selectedStamp().position.y);
   self.yMarginOk = ko.computed(function() { return self.yMargin() >= 0; });
   self.page = ko.observable(self.selectedStamp().page);
-  self.transparency = ko.observable(self.selectedStamp().background);
+  self.transparency = ko.observable(calculateTransparency(self.selectedStamp().background));
   self.qrCode = ko.observable(self.selectedStamp().qrCode);
 
   // Stamp rows
@@ -237,7 +241,7 @@ LUPAPISTE.StampModel = function(params) {
       self.page(self.selectedStamp().page);
       self.xMargin(self.selectedStamp().position.x);
       self.yMargin(self.selectedStamp().position.y);
-      self.transparency(self.selectedStamp().background);
+      self.transparency(calculateTransparency(self.selectedStamp().background));
       self.qrCode(self.selectedStamp().qrCode);
       self.customText(findRowData("custom-text"));
       self.extraText(findRowData("extra-text"));
