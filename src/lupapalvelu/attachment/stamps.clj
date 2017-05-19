@@ -4,16 +4,17 @@
             [schema.core :as sc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
-            [lupapalvelu.attachment.stamp-schema :as stmpSc]))
+            [lupapalvelu.attachment.stamp-schema :as stmpSc]
+            [sade.strings :as str]))
 
-(defn- get-verdict-date [{:keys [verdicts]}]
+(defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
                 (map (fn [{:keys [paatokset]}]
-                       (->> (map #(get-in % [:paivamaarat :anto]) paatokset)
-                            (remove nil?)
-                            (first))))
+                       (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                (flatten)
                 (remove nil?)
-                (first))]
+                (sort)
+                (last))]
     (sutil/to-local-date ts)))
 
 (defn get-backend-id [verdicts]
@@ -21,15 +22,25 @@
        (remove :draft)
        (some :kuntalupatunnus)))
 
+(defn- get-section [{:keys [verdicts]}]
+  (->> verdicts
+       (map (fn [{:keys [paatokset]}]
+              (map (fn [pt] (map :pykala (:poytakirjat pt))) paatokset)))
+       (flatten)
+       (map str)
+       (remove str/blank?)
+       (first)))
+
 (defn- tag-content [tag context]
   (let [value (case (keyword (:type tag))
                 :current-date (sutil/to-local-date (score/now))
-                :verdict-date (get-verdict-date (:application context))
+                :verdict-date (get-paatospvm (:application context))
                 :backend-id (get-backend-id (get-in context [:application :verdicts]))
                 :user (user/full-name (:user context))
                 :organization (get-in context [:organization :name :fi])
                 :application-id (get-in context [:application :id])
                 :building-id (i18n/with-lang (or (get-in context [:user :language]) :fi) (i18n/loc "stamp.building-id"))
+                :section (get-section (:application context))
                 (or (:text tag) ""))]
     {:type (:type tag) :value value}))
 
