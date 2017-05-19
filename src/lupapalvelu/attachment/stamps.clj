@@ -6,24 +6,18 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment.stamp-schema :as stmpSc]))
 
-(defn- first-non-nil [coll]
-  (->> coll
-       seq
-       (remove nil?)
-       first))
-
 (defn- verdict->timestamp [verdict]
   (let [paatos->timestamps (fn [paatos]
                              (get-in paatos [:paivamaarat :anto]))]
     (->> verdict
         :paatokset
         (map paatos->timestamps)
-        first-non-nil)))
+        (sutil/find-first identity))))
 
 (defn- get-verdict-date [{:keys [verdicts]}]
   (let [timestamp (->> verdicts
                        (map verdict->timestamp)
-                       first-non-nil)]
+                       (sutil/find-first identity))]
     (sutil/to-local-date timestamp)))
 
 (defn get-backend-id [verdicts]
@@ -73,17 +67,14 @@
          (contains? stmpSc/all-field-types type)]}
   (value-by-type (:rows stamp) type))
 
-(defn- removev [pred coll]
-  (filterv (complement pred) coll))
-
 (defn dissoc-tag-by-type [rows type]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
          (contains? stmpSc/all-field-types type)]}
-  (let [remove-tag? (fn [tag] (= type (:type tag)))
-        remove-tags-from-row (fn [row] (removev remove-tag? row))]
+  (let [keep-tag? (fn [tag] (not= type (:type tag)))
+        remove-tags-from-row (fn [row] (filterv keep-tag? row))]
     (->> rows
          (mapv remove-tags-from-row)
-         (removev empty?))))
+         (filterv not-empty))))
 
 (defn stamp-rows->vec-of-string-value-vecs [rows]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)]}
