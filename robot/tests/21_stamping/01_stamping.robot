@@ -123,16 +123,17 @@ Sonja opens stamping page and sees info fields initialized
 Sonja inputs info values
   Input stamping info values
 
-Sonja can go to attachments tab. When she returns, stamp info fields are persistent
+Sonja can go to attachments tab. When she returns, only extra text field is persistent
+  Select From List by test id and index  stamp-selected  1
+  Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
   Wait until  Scroll and click test id  back-to-application-from-stamping
   Wait until  Element should be visible  application-attachments-tab
   Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
   One attachment is selected
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${STAMP_ORGANIZATION}
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]  ${STAMP_XMARGIN}
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]  ${STAMP_YMARGIN}
+  Select From List by test id and index  stamp-selected  1
+  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
+
 
 Sonja can toggle selection of attachments by group/all/none
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
