@@ -22,6 +22,7 @@
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.stamps :as stamps]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mime :as mime]
@@ -164,21 +165,41 @@
                         (when-not (contains? muni/municipality-codes municipality)
                           (fail :error.invalid-municipality)))]
    :user-roles #{:admin}}
-  (let [scope-count (mongo/count :organizations {:scope {$elemMatch {:permitType permitType :municipality municipality}}})]
-    (if (zero? scope-count)
-      (do
-        (org/update-organization
-          organization
-          {$push {:scope
-                  {:municipality            municipality
-                   :permitType              permitType
-                   :inforequest-enabled     inforequestEnabled
-                   :new-application-enabled applicationEnabled
-                   :open-inforequest        openInforequestEnabled
-                   :open-inforequest-email  openInforequestEmail
-                   :opening                 (when (number? opening) opening)}}})
-        (ok))
-      (fail :error.organization.duplicate-scope))))
+  (if-let [duplicate-scopes (get-duplicate-scopes municipality [permitType])]
+    (fail :error.organization.duplicate-scope :organization duplicate-scopes)
+    (do
+      (org/update-organization
+       organization
+       {$push {:scope
+               (org/new-scope municipality
+                              permitType
+                              :inforequest-enabled     inforequestEnabled
+                              :new-application-enabled applicationEnabled
+                              :open-inforequest        openInforequestEnabled
+                              :open-inforequest-email  openInforequestEmail
+                              :opening                 opening)}})
+      (ok))))
+
+(defn- permit-types-validator [{{:keys [permit-types]} :data}]
+  (when (some (comp not permit/valid-permit-type?) permit-types)
+    (fail :error.invalid-permit-type)))
+
+(defn- org-id-not-exist [{{org-id :org-id} :data}]
+  (when (and org-id (not-empty (mongo/by-id :organizations org-id [:_id])))
+    (fail :error.organization-already-exists)))
+
+(defcommand create-organization
+  {:parameters [org-id municipality name permit-types]
+   :pre-checks [org-id-not-exist]
+   :input-validators [permit-types-validator
+                      (partial action/non-blank-parameters [:org-id :municipality :name])
+                      (partial action/numeric-parameters [:municipality])]
+   :user-roles #{:admin}}
+  [_]
+  (if-let [duplicate-scopes (org/get-duplicate-scopes municipality permit-types)]
+    (fail :error.organization.duplicate-scope :organization duplicate-scopes)
+    (mongo/insert :organizations (org/new-organization org-id municipality name permit-types)))
+  (ok))
 
 (defn- validate-map-with-optional-url-values [param command]
   (let [urls (map ss/trim (vals (get-in command [:data param])))]

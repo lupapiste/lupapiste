@@ -78,3 +78,13 @@
        (mapv (fn [rows] (mapv (fn [row] (if (= type (keyword (:type row)))
                                             (assoc (dissoc row :value) :value value)
                                             row)) rows)))))
+
+(def default-stamp-data
+  {:name       "Oletusleima"
+   :position   {:x 10 :y 200}
+   :background 0
+   :page       :first
+   :qrCode     true
+   :rows       [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
+                [{:type :backend-id}]
+                [{:type :organization}]]})
