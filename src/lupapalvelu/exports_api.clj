@@ -281,17 +281,20 @@
           :address             sc/Str
           :infoRequest         sc/Bool
           :municipality        sc/Str
-          :state               (apply sc/enum (map name (keys common-states/all-transitions-graph)))
-          :openInfoRequest     (sc/maybe sc/Bool)
+          :state               (apply sc/enum "info" "answered" (map name (keys common-states/all-transitions-graph)))
+          (sc/optional-key :openInfoRequest) (sc/maybe sc/Bool)
           :organization        sc/Str
-          :permitSubtype       (sc/maybe sc/Str)
+          (sc/optional-key :permitSubtype)   (sc/maybe sc/Str)
           :permitType          (apply sc/enum (keys (permit/permit-types)))
           :propertyId          sc/Str
           :primaryOperation    operation-schema
           :secondaryOperations [operation-schema]}
          {:operations [export-operation-schema]}
          (zipmap [:created :modified] (repeat ssc/Timestamp))
-         (zipmap [:started :closed :opened :sent :submitted] (repeat (sc/maybe ssc/Timestamp)))))
+         (zipmap [(sc/optional-key :started)
+                  (sc/optional-key :closed)
+                  (sc/optional-key :opened)
+                  (sc/optional-key :sent) :submitted] (repeat (sc/maybe ssc/Timestamp)))))
 
 (defn- validate-export-data
   "Validate output data against schema."
