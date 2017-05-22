@@ -209,7 +209,7 @@
 
         <div class="stamp-status like-btn">
           <i class="lupicon-circle-check positive" data-bind="visible: status() === statusDone"></i>
-          <i class="lupicon-circle-attention negative" data-bind="visible: status() === statusNoFiles"></i>
+          <i class="lupicon-circle-attention negative" data-bind="visible: status() >= statusNoFiles"></i>
           <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
         </div>
 

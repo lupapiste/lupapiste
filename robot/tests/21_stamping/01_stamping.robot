@@ -11,7 +11,7 @@ Variables       variables.py
 ${STAMP_TEXT}              Hyvaksyn
 ${STAMP_DATE}              12.12.2012
 ${STAMP_ORGANIZATION}      LupaRobot
-${STAMP_XMARGIN}           12
+${STAMP_XMARGIN}           -12
 ${STAMP_YMARGIN}           88
 ${STAMP_TRANSPARENCY_IDX}  2
 ${STAMP_EXTRATEXT}         Lisateksti
