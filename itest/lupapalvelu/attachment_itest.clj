@@ -609,6 +609,16 @@
                               :stamp stamp)
         file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
 
+    (fact "stamp is validated against schema"
+      (command
+        sonja
+        :stamp-attachments
+        :id application-id
+        :timestamp ""
+        :files [(:id attachment)]
+        :lang "fi"
+        :stamp (assoc stamp :page "foo")) => (partial expected-failure? :error.illegal-value:schema-validation))
+
     (fact "not stamped by default"
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
 
