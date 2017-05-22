@@ -4,8 +4,10 @@
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
+            [schema.core :as sc]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.files :as files]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [lupapalvelu.authorization :as auth]
@@ -617,10 +619,22 @@
   [{user :user application :application app-org :organization user-orgs :user-organizations}]
   (ok :stamps (stamps/stamps @app-org application user)))
 
+(sc/defschema StampSchema
+  {:id   ssc/ObjectIdStr
+   :name sc/Str
+   :position {:x sc/Int :y sc/Int}
+   :background sc/Int
+   :page (sc/enum "all" "last" "first")
+   :qrCode sc/Bool
+   :rows [[{:type sc/Str
+            :value (sc/maybe sc/Str)}]]})
+
 (defcommand stamp-attachments
   {:parameters [:id timestamp files lang stamp]
    :categories #{:attachments}
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
+                      (partial action/parameters-matching-schema [:stamp] StampSchema)
+                      (partial action/supported-lang :lang)]
    :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
    :states     states/post-submitted-states
