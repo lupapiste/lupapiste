@@ -73,7 +73,6 @@ LUPAPISTE.StampModel = function(params) {
   self.statusRunning   = 3;  //   -       -       -
   self.statusDone      = 4;  //   -       -       +
   self.statusNoFiles   = 5;  //   -       -       +
-  self.statusError     = 6;  //   -       +       -
 
   // Init
   self.application = params.application;
@@ -145,8 +144,15 @@ LUPAPISTE.StampModel = function(params) {
 
   // Stamping fields
   self.stamps = params.stamps;
-  self.selectedStampsId = ko.observable();
-  self.selectedStamp = ko.observable(self.stamps()[0]);
+  self.selectedStampsId = params.selectedStampId;
+  self.selectedStamp = ko.observable();
+
+  if (!self.selectedStampsId) {
+    self.selectedStampsId(self.stamps()[0].id);
+  }
+  self.selectedStamp(_.find(self.stamps(), function (stamp) {
+      return stamp.id === self.selectedStampsId();
+  }));
 
   function stringToDate(dateString) {
     return new Date (moment(dateString, "DD.MM.YYYY"));
@@ -206,10 +212,10 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   // Stamp info
-  self.xMargin = ko.observable(self.selectedStamp().position.x.toString());
-  self.xMarginOk = ko.pureComputed(function() { return util.isNum(self.xMargin()); });
-  self.yMargin = ko.observable(self.selectedStamp().position.y.toString());
-  self.yMarginOk = ko.pureComputed(function() { return util.isNum(self.yMargin()); });
+  self.xMargin = ko.observable(self.selectedStamp().position.x);
+  self.xMarginOk = ko.computed(function() { return self.xMargin() >= 0; });
+  self.yMargin = ko.observable(self.selectedStamp().position.y);
+  self.yMarginOk = ko.computed(function() { return self.yMargin() >= 0; });
   self.page = ko.observable(self.selectedStamp().page);
   self.transparency = ko.observable(calculateTransparency(self.selectedStamp().background));
   self.qrCode = ko.observable(self.selectedStamp().qrCode);
@@ -233,15 +239,15 @@ LUPAPISTE.StampModel = function(params) {
     self.transparency(transparencies[0].value);
   }
 
-  self.disposedComputed(function () {
+  ko.computed(function () {
     self.selectedStamp(_.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
     }));
     if (self.selectedStamp()) {
       self.updateRowValue = false;
       self.page(self.selectedStamp().page);
-      self.xMargin(self.selectedStamp().position.x.toString());
-      self.yMargin(self.selectedStamp().position.y.toString());
+      self.xMargin(self.selectedStamp().position.x);
+      self.yMargin(self.selectedStamp().position.y);
       self.transparency(calculateTransparency(self.selectedStamp().background));
       self.qrCode(self.selectedStamp().qrCode);
       self.customText(findRowData("custom-text"));
@@ -265,8 +271,8 @@ LUPAPISTE.StampModel = function(params) {
     if (self.updateRowValue) {
       for (var i in self.stamps()) {
         if (self.stamps()[i].id === self.selectedStampsId()) {
-          self.stamps()[i].position.x = _.parseInt(self.xMargin(), 10);
-          self.stamps()[i].position.y = _.parseInt(self.yMargin(), 10);
+          self.stamps()[i].position.x = self.xMargin();
+          self.stamps()[i].position.y = self.yMargin();
           self.stamps()[i].page = self.page();
           self.stamps()[i].background = self.transparency();
           self.stamps()[i].qrCode = self.qrCode();
@@ -292,7 +298,7 @@ LUPAPISTE.StampModel = function(params) {
   _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section, self.organization, self.backendId,
           self.extraText, self.currentDate, self.verdictDate, self.buildingId, self.user, self.applicationId, self.qrCode],
     function(o) {
-      self.disposedSubscribe(o, self.submit);
+      o.subscribe(self.submit);
     }
   );
 
@@ -307,10 +313,6 @@ LUPAPISTE.StampModel = function(params) {
         stamp: self.selectedStamp()
       })
       .success(self.started)
-      .error(function(resp) {
-        util.showSavedIndicator(resp);
-        self.status(self.statusError);
-      })
       .call();
     return false;
   };
