@@ -12,6 +12,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.logging :as log]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -165,6 +166,10 @@
 
 (defn numeric-parameters [params command]
   (filter-params-of-command params command (complement ss/numeric?) :error.illegal-number))
+
+(defn supported-lang [param-key {data :data}]
+  (when-not (i18n/supported-lang? (get data (keyword param-key)))
+    (fail :error.unsupported-language)))
 
 (defn select-parameters
   "Parameters are valid if each of them belong to the value-set"
