@@ -15,22 +15,18 @@
    :weekdays-short  ["Su","Ma","Ti","Ke","To","Pe","Su"]})
 
 (defn- opts-transform [opts]
-  "Given a clojure map of options, return a js object for a pikaday constructor argument."
   (clj->js (transform-keys ->camelCaseString opts)))
 
 (defn datepicker-mixin
   []
-  (let [instance-atom (atom nil)
-        date-atom (atom nil)]
+  (let [instance-atom (atom nil)]
     {:did-mount
      (fn [state]
        (let [comp (:rum/react-component state)
              args (first (:rum/args state))
              dom-node (js/ReactDOM.findDOMNode comp)
              pikaday-attrs (:pikaday-attrs args)
-             _ (println (:type (first args)))
-             date-atom (atom nil)
-             _ (reset! date-atom the-date)
+             date-atom (:date-atom args)
              default-opts
              {:field            dom-node
               :default-date     @date-atom
@@ -39,28 +35,10 @@
              opts (opts-transform (merge default-opts pikaday-attrs))
              instance (js/Pikaday. opts)]
          (reset! instance-atom instance)
-         ;(.addEventListener dom-node "input" (fn [] (when (= "" (.-value dom-node))
-         ;                                            (reset! date-atom nil))))
-         ; This code could probably be neater
          (when date-atom
            (add-watch date-atom :update-instance
-                      (fn [key ref old new]
-                        ; final parameter here causes pikaday to skip onSelect() callback
-                        (.setDate instance new true))))
-         (when min-date-atom
-           (add-watch min-date-atom :update-min-date
-                      (fn [key ref old new]
-                        (.setMinDate instance new)
-                        ; If new max date is less than selected date, reset actual date to max
-                        (if (< @date-atom new)
-                          (reset! date-atom new)))))
-         (when max-date-atom
-           (add-watch max-date-atom :update-max-date
-                      (fn [key ref old new]
-                        (.setMaxDate instance new)
-                        ; If new max date is less than selected date, reset actual date to max
-                        (if (> @date-atom new)
-                          (reset! date-atom new)))))))
+                      (fn [new]
+                        (.setDate instance new true))))))
      :will-unmount
      (fn [this]
        (.destroy @instance-atom)
@@ -74,12 +52,12 @@
   [state datepicker-args]
   [:input {:type "text"}])
 
-(rum/defc basic-datepicker []
-  (datepicker {:date-atom the-date
+(rum/defc basic-datepicker [date]
+  (let [date-atom (atom date)]
+  (datepicker {:date-atom date-atom
                :pikaday-attrs
-                          {:date-atom      date-atom
-                           :format         "DD.MM.YYYY"
+                          {:format         "DD.MM.YYYY"
                            :i18n           (pikaday-i18n)
                            :showWeekNumber true
                            :firstDay       1
-                           :position       "bottom left"}}))
+                           :position       "bottom left"}})))

@@ -230,14 +230,8 @@
       (when (and target-id (not locked?) (not targetFinished?))
         [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
-      (date/basic-datepicker)
-      ;(if (auth/ok? auth-model :add-target-to-inspection-summary)
-      ;(uc/autofocus-input-field (:inspection-date row-target)
-      ;                          (str "edit-inspection-date-" idx)
-      ;                          (fn [] (println "PÄIVÄ PÄIVITYS"))
-      ;[(uc/date-selector (:inspection-date row-target))]
-      ;(:inspection-date row-target)
-      ;)
+      (if (and editing? (auth/ok? auth-model :add-target-to-inspection-summary))
+        (date/basic-datepicker (:inspection-date row-target)))
       ]
      [:td
       (when (:finished-date row-target)
