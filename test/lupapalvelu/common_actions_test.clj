@@ -89,17 +89,92 @@
 
 #_(facts "user-is-allowed-to-access?")
 
+(defn- map-vals [f a-map]
+  (reduce-kv (fn [acc k v]
+               (assoc acc k (f v)))
+             {}
+             a-map))
+
+(facts "map-vals"
+  (map-vals inc {:hip 2, :hep 4 :hop 1})
+  =>
+  {:hip 3, :hep 5, :hop 2})
+
+(defn- group-by-unique-key [a-key coll]
+  (->> (group-by a-key coll)
+       (map-vals first)))
+
+(facts "group-by-unique-key"
+  (group-by-unique-key :id [{:id 3, :name "Hemuli"}
+                            {:id 2, :name "Lissu"}])
+  =>
+  {3 {:id 3, :name "Hemuli"}
+   2 {:id 2, :name "Lissu"}})
+
+(defn- mongerify [x]
+  "transforms values into ones that could be returned by monger,
+
+     keyword             -> string
+     lists and lazy seqs -> vector
+
+   applied recursively into sequences and values of maps"
+  (cond (keyword? x)     (name x)
+        (map? x)         (map-vals mongerify x)
+        (or (seq? x)
+            (vector? x)) (mapv mongerify x)
+        :else            x))
+
+(facts "mongerify"
+  (mongerify {:id :186-R
+              :names (list :hemuli :hei)
+              :valid? true
+              :age 20
+              :substructure [{:hip :hep, :hop "laa"}]})
+  =>
+  {:id "186-R"
+   :names ["hemuli" "hei"]
+   :valid? true
+   :age 20
+   :substructure [{:hip "hep", :hop "laa"}]})
+
 (defn mock-get-org [orgs]
-  (let [org-map (group-by :id orgs)]
+  (let [org-map (group-by-unique-key :id orgs)]
     (fn [org-id]
-      (if (contains? org-map org-id)
-        (first (get bindings-map params))
-        (throw (IllegalArgumentException.
-                 "Invalid org id"))))))
+      (mongerify (get org-map org-id)))))
+
+(def all-orgs-minimal-by-id (group-by-unique-key :id minimal/organizations))
+(def all-orgs-minimal (vals all-orgs-minimal-by-id))
+
+(def jarvenpaa-r (get all-orgs-minimal "186-R"))
+(def sipoo-r (get all-orgs-minimal "753-R"))
+(def sipoo-ya (get all-orgs-minimal "753-YA"))
+(def kuopio-ya (get all-orgs-minimal "297-YA"))
+(def tampere-r (get all-orgs-minimal "837-R"))
+(def tampere-ya (get all-orgs-minimal "837-YA"))
+(def porvoo-r (get all-orgs-minimal "638-R"))
+(def oulu-r (get all-orgs-minimal "564-R"))
+(def oulu-ya (get all-orgs-minimal "564-YA"))
+(def naantali-r (get all-orgs-minimal "529-R"))
+(def selanne-r (get all-orgs-minimal "069-R"))
+(def loppi-r (get all-orgs-minimal "433-R"))
+(def turku-r (get all-orgs-minimal "853-R"))
+(def kuopio-r (get all-orgs-minimal "297-R"))
+(def helsinki-r (get all-orgs-minimal "091-R"))
+(def oulu-ymp (get all-orgs-minimal "564-YMP"))
+(def sipoo-r-new-application-disabled (get all-orgs-minimal "997-R-TESTI-1"))
+(def sipoo-r-inforequest-disabled (get all-orgs-minimal "998-R-TESTI-2"))
+(def sipoo-r-both-new-application-and-inforequest-disabled
+  (get all-orgs-minimal "999-R-TESTI-3"))
+
+(defmacro with-mocked-orgs [orgs & body]
+  `(with-redefs [org/get-organization (mock-get-org ~orgs)]
+     ~@body))
+
+(defmacro with-all-mocked-orgs [& body]
+  `(with-mocked-orgs all-orgs-minimal ~@body))
 
 (defn runnn []
-  (with-redefs [lupapalvelu.organization/get-organization
-                (mock-get-org minimal/organizations)]
+  (with-all-mocked-orgs
     (let [user :sonja-sibbo-here
           application (merge lupapalvelu.domain/application-skeleton
                              {:permitType "YA"
