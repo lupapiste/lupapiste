@@ -95,7 +95,7 @@
        [["nostotyot" :ya-kayttolupa-nostotyot]
         ["vaihtolavat" :ya-kayttolupa-vaihtolavat]
         ["kattolumien-pudotustyot" :ya-kayttolupa-kattolumien-pudotustyot]
-        ["muu-liikennealuetyo" :ya-kayttolupa-muu-liikennealuetyo]]]
+        ["muu-liikennealuetyo" :ya-katulupa-muu-liikennealuetyo]]]
       ["yleisen-alueen-rajaaminen-tyomaakayttoon"
        [["talon-julkisivutyot" :ya-kayttolupa-talon-julkisivutyot]
         ["talon-rakennustyot" :ya-kayttolupa-talon-rakennustyot]
@@ -319,10 +319,10 @@
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-with-tyomaastavastaava
-   :ya-kayttolupa-muu-liikennealuetyo                                 ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto                                    ya-kayttolupa-with-tyomaastavastaava
+   :ya-katulupa-muu-liikennealuetyo                                   ya-katulupa-general
    :ya-katulupa-vesi-ja-viemarityot                                   ya-katulupa-general
    :ya-katulupa-maalampotyot                                          ya-katulupa-general
    :ya-katulupa-kaukolampotyot                                        ya-katulupa-general

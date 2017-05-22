@@ -3079,6 +3079,58 @@
                                                               :user usr/migration-user-summary}}
                                              $set {(get app/timestamp-key (keyword migration-target-state)) verdict-ts}}))))
 
+(defn kayttolupa-to-tyolupa-state [{:keys [state history]}]
+  (if (= "finished" state)
+    (or (->> (app/state-history-entries history)
+             (sort-by :ts)
+             reverse
+             (map :state)
+             (some #{"closed" "constructionStarted"}))      ; From history, take either closed or constructionStartd, which one was previous
+        "constructionStarted")                              ; If history doesn't have state, put it to construction started.
+    state))
+
+(defn update-liikennealue-application-to-katulupa [coll {:keys [documents id infoRequest] :as app}]
+  {:pre [(sequential? documents) (string? id)]}
+  (let [new-op-doc-name (get-in op/ya-operations [:ya-katulupa-muu-liikennealuetyo :schema])
+        _ (assert (= new-op-doc-name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"))
+        operation-doc (->> documents
+                           (util/find-first #(= "ya-kayttolupa-muu-liikennealuetyo"
+                                                (get-in % [:schema-info :op :name]))))
+        to-be-op-doc  (->> documents
+                           (util/find-first #(= "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+                                                (get-in % [:schema-info :name]))))
+        updates (util/assoc-when
+                  {$set (merge {:primaryOperation.name "ya-katulupa-muu-liikennealuetyo"
+                                :state (kayttolupa-to-tyolupa-state app)
+                                :permitSubtype "tyolupa"}
+                               (when (seq documents)
+                                 (mongo/generate-array-updates :documents documents #(= (:id to-be-op-doc) (:id %))
+                                                               "schema-info.name" new-op-doc-name ; "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+                                                               "schema-info.op" (-> (get-in operation-doc [:schema-info :op])
+                                                                                    (assoc :name new-op-doc-name))
+                                                               "data.sijoitusLuvanTunniste" {:value nil})))}
+
+                  $unset (when (seq documents) (mongo/generate-array-updates :documents documents #(= (:id operation-doc) (:id %)) "schema-info.op" 1))
+                  $pull (when-not infoRequest {:history {:state "finished"}}))]
+    (mongo/update-by-id coll id updates))
+  1)
+
+(defmigration muu-liikennealue-lupa
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA" :primaryOperation.name "ya-kayttolupa-muu-liikennealuetyo"}))}
+  (reduce + 0
+          (for [coll [:submitted-applications :applications]
+                app  (mongo/select coll
+                                   {:permitType "YA"
+                                    :primaryOperation.name "ya-kayttolupa-muu-liikennealuetyo"}
+                                   [:state :primaryOperation :history :documents :infoRequest])]
+            (update-liikennealue-application-to-katulupa coll app))))
+
+(defmigration muu-liikennealue-lupa-selected-operation
+  {:apply-when (pos? (mongo/count :organizations {:selected-operations "ya-kayttolupa-muu-liikennealuetyo"}))}
+  (mongo/update-by-query :organizations
+                         {:selected-operations "ya-kayttolupa-muu-liikennealuetyo"}
+                         {$set {:selected-operations.$ "ya-katulupa-muu-liikennealuetyo"}}))
+
 (defmigration clean-post-verdict-original-application-states
   {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {:originalApplicationState
                                                                            {$in states/post-verdict-states}}}}))}

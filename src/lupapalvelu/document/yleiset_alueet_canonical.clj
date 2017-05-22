@@ -156,7 +156,6 @@
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat             kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot kayttolupa-config-plus-tyomaastavastaava
-   :ya-kayttolupa-muu-liikennealuetyo     kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-talon-julkisivutyot     kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-talon-rakennustyot      kayttolupa-config-plus-tyomaastavastaava
    :ya-kayttolupa-muu-tyomaakaytto        kayttolupa-config-plus-tyomaastavastaava
