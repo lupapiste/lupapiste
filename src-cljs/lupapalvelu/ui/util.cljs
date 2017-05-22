@@ -11,3 +11,11 @@
 
 (defn json->clj [json]
   (->> json (.parse js/JSON) js->clj))
+
+(def is-ie?
+  (let [agent (.-userAgent js/navigator)]
+    (not (nil? (re-find #".*Trident/.*" agent)))))
+
+(def is-edge?
+  (let [agent (.-userAgent js/navigator)]
+    (not (nil? (re-find #".*Edge/.*" agent)))))

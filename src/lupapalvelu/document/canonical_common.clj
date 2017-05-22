@@ -149,10 +149,10 @@
    :ya-kayttolupa-nostotyot "kadulta tapahtuvat nostot"
    :ya-kayttolupa-vaihtolavat "muu kaytt\u00f6lupa"
    :ya-kayttolupa-kattolumien-pudotustyot "muu kaytt\u00f6lupa"
-   :ya-kayttolupa-muu-liikennealuetyo "muu kaytt\u00f6lupa"
    :ya-kayttolupa-talon-julkisivutyot "kadulle pystytett\u00e4v\u00e4t rakennustelineet"
    :ya-kayttolupa-talon-rakennustyot "kiinteist\u00f6n rakentamis- ja korjaamisty\u00f6t, joiden suorittamiseksi rajataan osa kadusta tai yleisest\u00e4 alueesta ty\u00f6maaksi (ei kaivut\u00f6it\u00e4)"
    :ya-kayttolupa-muu-tyomaakaytto "muut yleiselle alueelle kohdistuvat tilan k\u00e4yt\u00f6t"
+   :ya-katulupa-muu-liikennealuetyo "muu kaytt\u00f6lupa"
    :ya-katulupa-vesi-ja-viemarityot "vesihuoltoverkostoty\u00f6"
    :ya-katulupa-maalampotyot "muu"
    :ya-katulupa-kaukolampotyot "kaukol\u00e4mp\u00f6verkostoty\u00f6"
@@ -174,7 +174,6 @@
   {;; Muu kayttolupa
    :ya-kayttolupa-vaihtolavat                      "vaihtolavat"
    :ya-kayttolupa-kattolumien-pudotustyot          "kattolumien pudotusty\u00f6t"
-   :ya-kayttolupa-muu-liikennealuetyo              "muu liikennealuety\u00f6"
    :ya-kayttolupa-muu-kayttolupa                   "muu k\u00e4ytt\u00f6lupa"
    ;; Muut yleiselle alueelle kohdistuvat tilan kaytot
    :ya-kayttolupa-harrastustoiminnan-jarjestaminen "harrastustoiminnan j\u00e4rjest\u00e4minen"
@@ -184,6 +183,7 @@
    :ya-kayttolupa-kioskit                          "kioskit"
    :ya-kayttolupa-muu-tyomaakaytto                 "muu ty\u00f6maak\u00e4ytt\u00f6"
    ;; Kaivu- tai katutyolupa
+   :ya-katulupa-muu-liikennealuetyo                "muu liikennealuety\u00f6"
    :ya-katulupa-vesi-ja-viemarityot                "vesi-ja-viem\u00e4rity\u00f6t"
    :ya-katulupa-maalampotyot                     "maal\u00e4mp\u00f6ty\u00f6t"
    :ya-katulupa-kaukolampotyot                     "kaukol\u00e4mp\u00f6ty\u00f6t"
@@ -215,10 +215,10 @@
    :ya-kayttolupa-nostotyot                                      :Kayttolupa
    :ya-kayttolupa-vaihtolavat                                    :Kayttolupa
    :ya-kayttolupa-kattolumien-pudotustyot                        :Kayttolupa
-   :ya-kayttolupa-muu-liikennealuetyo                            :Kayttolupa
    :ya-kayttolupa-talon-julkisivutyot                            :Kayttolupa
    :ya-kayttolupa-talon-rakennustyot                             :Kayttolupa
    :ya-kayttolupa-muu-tyomaakaytto                               :Kayttolupa
+   :ya-katulupa-muu-liikennealuetyo                              :Tyolupa
    :ya-katulupa-vesi-ja-viemarityot                              :Tyolupa
    :ya-katulupa-maalampotyot                                     :Tyolupa
    :ya-katulupa-kaukolampotyot                                   :Tyolupa

@@ -647,7 +647,7 @@
                                             :ya-kayttolupa-nostotyot                                           [[:muut :muu]]
                                             :ya-kayttolupa-vaihtolavat                                         [[:muut :muu]]
                                             :ya-kayttolupa-kattolumien-pudotustyot                             [[:muut :muu]]
-                                            :ya-kayttolupa-muu-liikennealuetyo                                 [[:muut :muu]]
+                                            :ya-katulupa-muu-liikennealuetyo                                   [[:muut :muu]]
                                             :ya-kayttolupa-talon-julkisivutyot                                 [[:muut :muu]]
                                             :ya-kayttolupa-talon-rakennustyot                                  [[:muut :muu]]
                                             :ya-kayttolupa-muu-tyomaakaytto                                    [[:muut :muu]]

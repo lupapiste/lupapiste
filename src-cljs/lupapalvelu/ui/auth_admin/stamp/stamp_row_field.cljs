@@ -5,7 +5,8 @@
             [lupapalvelu.ui.auth-admin.stamp.util :as stamp-util]
             [lupapalvelu.ui.common :refer [loc]]))
 
-(rum/defcs stamp-row-field < rum/reactive (rum/local "inline-block" ::display)
+(rum/defcs stamp-row-field < rum/reactive
+                             (rum/local "inline-block" ::display)
   [local-state {:keys [data remove row-number row-index]}]
   (let [drag-element (rum/cursor-in component-state [:editor :drag-element])
         closest-elem (rum/cursor-in component-state [:editor :closest-element])
@@ -14,14 +15,18 @@
                            [:input {:placeholder (loc :stamp.custom-text)
                                     :value       text
                                     :on-change   #(swap! data assoc :text (-> % .-target .-value))
-                                    :style       {:width (max 150 (Math/floor (* 8 (count text))))}}]
+                                    :style       {:width (max 150 (Math/floor (* 8 (count text))))}
+                                    :draggable   false}]
                            [:span (loc (str "stamp." (name type)))])
-        display-style (::display local-state)]
-    [:div.stamp-row-btn
-     {:style          {:display @display-style}
+        display-style (::display local-state)
+        draggable? (or (not= (keyword type) :custom-text)
+                       (and (not util/is-ie?)
+                            (not util/is-edge?)))]
+    [:div.stamp-row-btn.draggable
+     {:style          {:display @display-style :cursor (if draggable? "move" "default")}
       :data-row       row-number
       :data-row-index row-index
-      :draggable      true
+      :draggable      draggable?
       :on-drag-start  (fn [e]
                         (reset! drag-element
                                 {:type :move

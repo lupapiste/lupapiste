@@ -60,6 +60,27 @@ var stamping = (function() {
     fields.section("");
   }
 
+  function findRowData (rows, type) {
+    var foundValue = null;
+    _.each( rows, function( row ) {
+      foundValue = _.get(_.find( row, {type: type} ), "value");
+      return !foundValue;
+    });
+    return foundValue;
+  }
+
+  function updateRowData (type, value, rows) {
+    return _.map(rows,  function (row) {
+      return _.map(row , function(object) {
+        if (object.type === type) {
+          return {type: type, value: value};
+        }
+        return object;
+      });
+    });
+  }
+
+
   function loadStampTemplates(appId) {
     ajax.query("custom-stamps", {
       id: appId})
@@ -68,9 +89,11 @@ var stamping = (function() {
           var existingStamp = _.find(model.stamps(), function(modelStamp) {
             return modelStamp.id === stamp.id;
           });
-          if (!existingStamp) {
-            model.stamps.push(stamp);
+          if (existingStamp) {
+            stamp.rows = (updateRowData("extra-text", findRowData(existingStamp.rows, "extra-text"), stamp.rows));
+            model.stamps.splice(model.stamps.indexOf(existingStamp), 1);
           }
+          model.stamps.push(stamp);
         });
       }).call();
   }

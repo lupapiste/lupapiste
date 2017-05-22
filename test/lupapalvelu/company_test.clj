@@ -168,4 +168,17 @@
                 (fact "user company is locked"
                       (com/user-company-is-locked {:user {:company {:id "foo"}}
                                                    :created 12345}) => nil?
-                      (provided (com/find-company-by-id! "foo") =>  {:locked 11111})))))
+                      (provided (com/find-company-by-id! "foo") =>  {:locked 11111}))))
+       (let [already-invited (partial expected-failure? :company.already-invited)]
+         (fact "Company already invited and accepted"
+           (com/company-not-already-invited {:data {:company-id "foo"}
+                                             :application {:auth [{:id "hei"} {:id "foo"}]}})
+           => already-invited)
+         (fact "Company already invited but not yet accepted"
+           (com/company-not-already-invited {:data {:company-id "foo"}
+                                             :application {:auth [{:id "hei"} {:invite {:user {:id "foo"}}}]}})
+           => already-invited)
+         (fact "Company not already invited"
+           (com/company-not-already-invited {:data {:company-id "foo"}
+                                             :application {:auth [{:id "hei"} {:invite {:user {:id "foobar"}}}]}})
+           => nil)))

@@ -20,6 +20,9 @@
                        [:fi :sv]))
 (def default-lang (first supported-langs))
 
+(defn supported-lang? [lang]
+  (contains? (set supported-langs) (keyword lang)))
+
 (def common-translations-filename "shared_translations.txt")
 
 (defn- read-translations-txt [name-or-file]

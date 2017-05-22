@@ -41,7 +41,7 @@
 (defn valid-stamp? [stamp-data]
   (try (sc/validate sts/StampTemplate stamp-data)
        true
-       (catch js/Error _
+       (catch :default _
          false)))
 
 (rum/defc edit-stamp-bubble < rum/reactive

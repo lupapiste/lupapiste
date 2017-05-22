@@ -182,7 +182,6 @@ div.organization-link-cell {
 
 .stamp-row-btn {
   @include btn-with-border;
-  cursor: move;
   i {
     margin-left: 10px;
     cursor: pointer;
