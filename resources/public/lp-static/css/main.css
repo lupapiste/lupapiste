@@ -11192,6 +11192,7 @@ select.waste-unit-select {
 
 .attachment-batch-table tfoot > tr > td {
   padding: 0;
+  word-break: normal;
 }
 
 .attachment-batch-table tfoot > tr > td a.link-btn {
