@@ -390,11 +390,11 @@
                                          (when (seq organization-ids) {:_id {$in organization-ids}}))
                                {:krysp 1}))
 
-(defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings] :as result}]
+(defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id] :as result}]
   (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
     (when (ok? result)
       (try
-        (review/save-review-updates user application updates added-tasks-with-updated-buildings)
+        (review/save-review-updates user application updates added-tasks-with-updated-buildings attachments-by-task-id)
         (catch Throwable t
           (logging/log-event :error {:run-by "Automatic review checking"
                                      :event "Failed to save"
