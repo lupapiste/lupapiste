@@ -42,6 +42,8 @@
 
 (defonce upload-threadpool (Executors/newFixedThreadPool 3 (thread-factory)))
 
+(def archival-states #{:arkistoidaan :arkistoitu})
+
 (defn- upload-file [id is-or-file content-type metadata]
   (let [host (env/value :arkisto :host)
         app-id (env/value :arkisto :app-id)
@@ -79,7 +81,7 @@
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly (contains? #{:arkistoidaan :arkistoitu} next-state)}}))
+           :attachments.$.readOnly (contains? archival-states next-state)}}))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
@@ -283,7 +285,7 @@
                               (map (fn [{:keys [fileId] :as res}] [fileId res]))
                               (into {}))]
       (when (and (document-ids application-archive-id)
-                 (not (#{:arkistoidaan :arkistoitu} (keyword (get-in application [:metadata :tila])))))
+                 (not (archival-states (keyword (get-in application [:metadata :tila])))))
         (let [content-fn #(pdf-export/generate-application-pdfa application :fi)
               metadata-fn #(generate-archive-metadata application user :metadata)]
           (upload-and-set-state application-archive-id
@@ -294,7 +296,7 @@
                                 created
                                 set-application-state)))
       (when (and (document-ids case-file-archive-id)
-                 (not (#{:arkistoidaan :arkistoitu} (keyword (get-in application [:processMetadata :tila])))))
+                 (not (archival-states (keyword (get-in application [:processMetadata :tila])))))
         (files/with-temp-file libre-file
           (let [pdf-is (libre/generate-casefile-pdfa application :fi libre-file)
                 pdf-fn #(identity pdf-is)
@@ -318,18 +320,18 @@
                                   application
                                   created
                                   set-process-state))))
-      (doseq [attachment selected-attachments]
-        (when-not (#{:arkistoidaan :arkistoitu} (keyword (get-in attachment [:metadata :tila])))
-          (let [file-id (get-in attachment [:latestVersion :fileId])
-                {:keys [content contentType]} (get gridfs-results file-id)
-                metadata-fn #(generate-archive-metadata application user :metadata attachment)]
-            (upload-and-set-state (:id attachment)
-                                  content
-                                  contentType
-                                  metadata-fn
-                                  application
-                                  created
-                                  set-attachment-state)))))
+      (doseq [attachment selected-attachments
+              :when (not (archival-states (keyword (get-in attachment [:metadata :tila]))))]
+        (let [file-id (get-in attachment [:latestVersion :fileId])
+              {:keys [content contentType]} (get gridfs-results file-id)
+              metadata-fn #(generate-archive-metadata application user :metadata attachment)]
+          (upload-and-set-state (:id attachment)
+                                content
+                                contentType
+                                metadata-fn
+                                application
+                                created
+                                set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]
