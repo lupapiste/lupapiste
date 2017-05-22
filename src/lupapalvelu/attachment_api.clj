@@ -627,7 +627,7 @@
    :page (sc/enum "all" "last" "first")
    :qrCode sc/Bool
    :rows [[{:type sc/Str
-            :value sc/Str}]]})
+            :value (sc/maybe sc/Str)}]]})
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp files lang stamp]
