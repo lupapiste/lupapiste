@@ -1168,6 +1168,11 @@ Is authorized party
   [Arguments]  ${party}
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
 
+Is not authorized party
+  # Party can be either email or username
+  [Arguments]  ${party}
+  Wait Until  Element Should Not Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
+
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
@@ -1528,7 +1533,7 @@ Focus test id
 
 No such test id
   [Arguments]  ${id}
-  Wait until  Element should not be visible  jquery=[data-test-id=${id}]
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
 
 Test id should contain
   [Arguments]  ${id}  ${text}
@@ -1704,4 +1709,3 @@ Permit subtype is
   ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
   Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
   Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
-

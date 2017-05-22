@@ -27,8 +27,10 @@
 
     <!-- ko if: phase() >= 1 -->
     <div data-bind="ltext: 'applications.location'"></div>
-    <div class="copy-selection-verified copy-selection-wrapper">
-      <span data-bind="text: locationInfo()"></span>
+    <div class="copy-selection-verified copy-selection-wrapper"
+         data-test-id="copy-selected-location">
+      <span data-bind="text: locationInfo()"
+            data-test-id="copy-selected-location-text"></span>
       <i class="lupicon-check right positive"></i>
     </div>
     <!-- /ko -->
@@ -61,8 +63,10 @@
          data-bind="ltext: 'application.copy.osapuolet.invitees'"></div>
     <div id="copy-auths"
          data-bind="foreach: selectedInviteCandidates ">
-        <div class="copy-selection-verified copy-selection-wrapper">
-          <span data-bind="text: $parent.authDescription($data)"></span>
+      <div class="copy-selection-verified copy-selection-wrapper"
+           data-bind="attr: {'data-test-id': 'selected-auth-' + $index()}">
+          <span data-bind="text: $parent.authDescription($data),
+                           attr: {'data-test-id': 'selected-auth-text-' + $index()}"></span>
           <i class="lupicon-check right positive"></i>
         </div>
     </div>
@@ -77,6 +81,7 @@
     <div class="copy-phase-buttons">
       <button data-bind="click: buttonActions[phase()].previous.action,
                          disable: processing() || pending()"
+              data-test-id="copy-button-previous"
               class="secondary">
         <i class="lupicon-chevron-left"></i>
         <span data-bind="ltext: buttonActions[phase()].previous.ltext"></span>
@@ -84,6 +89,7 @@
       <button data-bind="click: buttonActions[phase()].next.action,
                          disable: processing() || pending(),
                          css: {waiting: pending}"
+              data-test-id="copy-button-next"
               class="positive">
         <!-- ko if: phase() === 2 -->
         <i class="lupicon-check"></i>
