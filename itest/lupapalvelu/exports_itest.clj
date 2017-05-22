@@ -112,7 +112,7 @@
         (count data) => 2)
 
       (fact "correct keys"
-        (-> data first keys) => (contains #{:id :operations :permitType :municipality :organization :state} :gaps-ok)
+        (-> data first keys) => (contains #{:id :operations :permitType :municipality :organization :state :submitted} :gaps-ok)
         (-> data first keys) =not=> (contains [:applicant :verdicts :authority]))
 
       (fact "price classes"
@@ -131,5 +131,5 @@
                                    :throw-exceptions false})
                      :body :applications
                      first :operations first)]
-          (:description op) => #(ss/ends-with % "...")
+          (fact "suffix" (:description op) => #(ss/ends-with % "..."))
           (fact "length 255" (count (:description op)) => 255))))))
