@@ -7,19 +7,8 @@ var stamping = (function() {
     appModel: null,
     attachments: null,
     pending: ko.observable(false),
-    stampFields: {
-      text: ko.observable(),
-      date: ko.observable(),
-      organization: null,
-      xMargin: ko.observable(),
-      yMargin: ko.observable(),
-      page: ko.observable(),
-      transparency: ko.observable(),
-      extraInfo: ko.observable(),
-      kuntalupatunnus: ko.observable(),
-      section: ko.observable()
-    },
     stamps: ko.observableArray([]),
+    selectedStampId: ko.observable(null),
 
     cancelStamping: function() {
       var id = pageutil.subPage();
@@ -45,20 +34,6 @@ var stamping = (function() {
       loadStampTemplates(param.application.id());
     }
   };
-
-  function resetStampFields() {
-    var fields = model.stampFields;
-    fields.text(loc("stamp.verdict"));
-    fields.date(new Date());
-    fields.organization = null;
-    fields.xMargin("10");
-    fields.yMargin("200");
-    fields.page("first");
-    fields.transparency("");
-    fields.extraInfo("");
-    fields.kuntalupatunnus("");
-    fields.section("");
-  }
 
   function findRowData (rows, type) {
     var foundValue = null;
@@ -131,14 +106,6 @@ var stamping = (function() {
     pageutil.hideAjaxWait();
   });
 
-  // This component is never disposed. We do reset initially and
-  // afterwards always on leaving an application. This way the
-  // initialization works both for regularly opening stamping view and
-  // for the view reload.
-  resetStampFields();
-
-  hub.subscribe( "contextService::leave", resetStampFields );
-
   hub.onPageUnload("stamping", function() {
     model.stampingMode(false);
     model.appModel = null;
@@ -155,11 +122,7 @@ var stamping = (function() {
   hub.subscribe("start-stamping", function(param) {
     loadStampTemplates(param.application.id());
     pageutil.showAjaxWait();
-    if (model.stamps().length > 0) {
-      initStamp(param.application);
-    } else {
-      _.delay(initStamp, 2000, param.application);
-    }
+    _.delay(initStamp, 1000, param.application);
   });
 
   ko.components.register("stamping-component", {
