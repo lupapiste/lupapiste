@@ -232,7 +232,7 @@ LUPAPISTE.StampModel = function(params) {
     self.transparency(transparencies[0].value);
   }
 
-  ko.computed(function () {
+  self.disposedComputed(function () {
     self.selectedStamp(_.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
     }));
@@ -291,7 +291,7 @@ LUPAPISTE.StampModel = function(params) {
   _.each([self.xMargin, self.yMargin, self.transparency, self.page, self.section, self.organization, self.backendId,
           self.extraText, self.currentDate, self.verdictDate, self.buildingId, self.user, self.applicationId, self.qrCode],
     function(o) {
-      o.subscribe(self.submit);
+      self.disposedSubscribe(o, self.submit);
     }
   );
 
