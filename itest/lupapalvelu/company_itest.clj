@@ -114,7 +114,10 @@
       (let [resp (accept-company-invitation)]
         (:status resp) => 200))
 
-    (fact "Company is fully authored to the application after accept"
+    (fact "Company still cannot be invited twice"
+      (command mikko :company-invite :id application-id :company-id "solita") => (partial expected-failure? "company.already-invited"))
+
+    (fact "Company is fully authorized to the application after accept"
       (let [auth (:auth (query-application mikko application-id))
             auth-ids (flatten (map (juxt :id) auth))]
         (some #(= "solita" %) auth-ids) => true))
