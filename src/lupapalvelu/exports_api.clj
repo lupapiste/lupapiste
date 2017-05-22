@@ -230,7 +230,7 @@
   [{{ts :modifiedAfterTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {"primaryOperation" {$exists true}}
+                {:primaryOperation.id {$exists true}}
                 (when (ss/numeric? ts)
                   {:modified {$gte (Long/parseLong ts 10)}}))
         fields {:address 1 :applicant 1 :authority 1 :closed 1 :created 1 :convertedToApplication 1
@@ -309,7 +309,7 @@
      before :modifiedBeforeTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {"primaryOperation" {$exists true}}
+                {:primaryOperation.id {$exists true}}
                 (when (or (ss/numeric? after) (ss/numeric? before))
                   {:modified (util/assoc-when {}
                                               $gte (when after (Long/parseLong after 10))
