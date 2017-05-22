@@ -86,7 +86,7 @@
 
 (defn reviews-preprocessed [app-xml]
   (let [grouped-reviews (group-by
-                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm])
+                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm :muuTunnustieto])
                           (review-reader/xml->reviews app-xml))]
     (for [k (keys grouped-reviews)
           :let [values (get grouped-reviews k)
@@ -111,9 +111,6 @@
 
   (let [reviews (reviews-preprocessed app-xml)
         attachment-data (group-by :liitetieto (map #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm]) reviews))
-        reviews (pc/distinct-by
-                  #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm])
-                  reviews)
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
