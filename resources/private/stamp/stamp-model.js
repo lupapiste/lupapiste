@@ -73,6 +73,7 @@ LUPAPISTE.StampModel = function(params) {
   self.statusRunning   = 3;  //   -       -       -
   self.statusDone      = 4;  //   -       -       +
   self.statusNoFiles   = 5;  //   -       -       +
+  self.statusError     = 6;  //   -       +       -
 
   // Init
   self.application = params.application;
@@ -306,6 +307,10 @@ LUPAPISTE.StampModel = function(params) {
         stamp: self.selectedStamp()
       })
       .success(self.started)
+      .error(function(resp) {
+        util.showSavedIndicator(resp);
+        self.status(self.statusError);
+      })
       .call();
     return false;
   };
