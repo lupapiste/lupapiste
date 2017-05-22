@@ -102,28 +102,30 @@
              (util/strip-nils {:katselmuksenRakennustieto (when (seq rakennukset)
                                                             (map #(apply hash-map [:KatselmuksenRakennus %]) rakennukset))
                                :liitetieto (when (seq liitetiedot)
-                                             liitetiedot)})))))
+                                             (map #(apply hash-map [:liite %]) liitetiedot))})))))
 
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml]
 
-  (let [reviews (reviews-preprocessed app-xml)
-        attachment-data (group-by :liitetieto (map #(select-keys % [:tarkastuksenTaiKatselmuksenNimi :pitaja :pitoPvm]) reviews))
+  (let [reviews (vec (reviews-preprocessed app-xml))
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
-        review-tasks (->> reviews
-                          (filter historical-timestamp-present?)
-                          (map review-to-task))
+        review-tasks (map review-to-task reviews)
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
         review-tasks (keep-indexed (fn [idx item]
-                                     (if (empty? (get validation-errors idx)) item)) review-tasks)
-        updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
+                                     (if (and (empty? (get validation-errors idx))
+                                              historical-timestamp-present?)
+                                       (assoc item :attachments (get-in reviews [idx :liitetieto])))) review-tasks)
+        attachments-by-task-id (apply hash-map
+                                 (remove empty? (mapcat (fn [t]
+                                  (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
+        updated-existing-and-added-tasks  (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
@@ -151,6 +153,7 @@
     (ok :review-count (count review-tasks)
         :updated-tasks (map :id updated-tasks)
         :updates (util/deep-merge task-updates building-updates state-updates)
+        :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
 

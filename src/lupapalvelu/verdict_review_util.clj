@@ -43,7 +43,7 @@
   attachments. On the other hand, traditional (e.g., R) verdict
   poytakirja can only have one attachment."
   [application user timestamp {target-type :type verdict-id :id :as target} pk]
-  (if-let [attachments (:liite pk)]
+  (if-let [attachments (or (:liite pk) (:Liite pk))]
     (let [;; Attachments without link are ignored
           attachments (->> [attachments] flatten (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
           ;; There is only one urlHash property in
@@ -54,7 +54,7 @@
                        (-> attachments first :linkkiliitteeseen pandect/sha1)
                        verdict-id)]
       (when-not (seq attachments)
-        (warnf "no valid attachment links in poytakirja, verdict-id: %s" verdict-id))
+        (warnf "no valid attachment links in poytakirja, %s-id: %s" target-type verdict-id))
       (doall
         (for [att  attachments
               :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi description :kuvaus} att
@@ -95,5 +95,5 @@
                                   (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     (do
-      (warnf "no attachments ('liite' elements) in poytakirja, verdict-id: %s" verdict-id)
+      (warnf "no attachments ('liite' elements) in poytakirja, %s-id: %s" target-type verdict-id)
       pk)))
