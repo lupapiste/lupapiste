@@ -80,7 +80,6 @@ var stamping = (function() {
     });
   }
 
-
   function loadStampTemplates(appId) {
     ajax.query("custom-stamps", {
       id: appId})
@@ -91,10 +90,9 @@ var stamping = (function() {
           });
           if (existingStamp) {
             stamp.rows = (updateRowData("extra-text", findRowData(existingStamp.rows, "extra-text"), stamp.rows));
-            model.stamps.splice(model.stamps.indexOf(existingStamp), 1);
           }
-          model.stamps.push(stamp);
         });
+        model.stamps(data.stamps);
       }).call();
   }
 
