@@ -9,6 +9,7 @@
             [sade.schemas :as ssc]
             [lupapalvelu.action :refer [defexport] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.archiving :as archiving]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
@@ -277,18 +278,22 @@
 
 (sc/defschema SalesforceExportApplication
   "Application schema for export to Salesforce"
-  (merge {:id                  ssc/ApplicationId
-          :address             sc/Str
-          :infoRequest         sc/Bool
-          :municipality        sc/Str
-          :state               (apply sc/enum "info" "answered" (map name (keys common-states/all-transitions-graph)))
+  (merge {:id                                ssc/ApplicationId
+          :address                           sc/Str
+          :archived                          archiving/archived-ts-keys-schema
+          :infoRequest                       sc/Bool
+          :municipality                      sc/Str
+          :state                             (apply sc/enum
+                                                    "info"
+                                                    "answered"
+                                                    (map name (keys common-states/all-transitions-graph)))
           (sc/optional-key :openInfoRequest) (sc/maybe sc/Bool)
-          :organization        sc/Str
+          :organization                      sc/Str
           (sc/optional-key :permitSubtype)   (sc/maybe sc/Str)
-          :permitType          (apply sc/enum (keys (permit/permit-types)))
-          :propertyId          sc/Str
-          :primaryOperation    operation-schema
-          :secondaryOperations [operation-schema]}
+          :permitType                        (apply sc/enum (keys (permit/permit-types)))
+          :propertyId                        sc/Str
+          :primaryOperation                  operation-schema
+          :secondaryOperations               [operation-schema]}
          {:operations [export-operation-schema]}
          (zipmap [:created :modified] (repeat ssc/Timestamp))
          (zipmap [(sc/optional-key :started)
@@ -314,7 +319,7 @@
                   {:modified (util/assoc-when {}
                                               $gte (when after (Long/parseLong after 10))
                                               $lt  (when before (Long/parseLong before 10)))}))
-        fields [:address :closed :created
+        fields [:address :archived :closed :created
                 :infoRequest :modified :municipality :opened :openInfoRequest :organization
                 :primaryOperation :propertyId :permitSubtype :permitType
                 :secondaryOperations :sent :started :state :submitted
