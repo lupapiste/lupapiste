@@ -272,8 +272,8 @@
                          (map #(assoc % :id (mongo/create-id)))
                          (filter seq)))))))
 
-(defn- get-verdicts-with-attachments [application user timestamp xml reader & reader-args]
-  (->> (apply krysp-reader/->verdicts xml (:permitType application) reader reader-args)
+(defn- get-verdicts-with-attachments [application user timestamp xml reader organization]
+  (->> (apply krysp-reader/->verdicts xml (:permitType application) reader organization)
        (map (partial verdict-attachments application user timestamp))
        (filter seq)))
 
@@ -286,16 +286,17 @@
 
 (defn find-verdicts-from-xml
   "Returns a monger update map"
-  [{:keys [application user created] :as command} app-xml]
+  [{:keys [application user created organization] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml))]
-    (inspection-summary/process-verdict-given application)
-    (util/deep-merge
-     {$set {:verdicts verdicts-with-attachments, :modified created}}
-     (get-task-updates application created verdicts-with-attachments app-xml)
-     (permit/read-verdict-extras-xml application app-xml)
-     (when-not (states/post-verdict-states (keyword (:state application)))
-       (application/state-transition-update (sm/verdict-given-state application) created application user)))))
+  (let [organization (if organization @organization (org/get-organization (:organization application)))]
+    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml organization))]
+      (inspection-summary/process-verdict-given application)
+      (util/deep-merge
+        {$set {:verdicts verdicts-with-attachments, :modified created}}
+        (get-task-updates application created verdicts-with-attachments app-xml)
+        (permit/read-verdict-extras-xml application app-xml)
+        (when-not (states/post-verdict-states (keyword (:state application)))
+          (application/state-transition-update (sm/verdict-given-state application) created application user))))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]

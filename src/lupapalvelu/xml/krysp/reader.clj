@@ -188,17 +188,18 @@
       (and validate-verdict-given-date
         (not-any? #(valid-antopvm? (:anto %)) paivamaarat)) (fail :info.paatos-future-date))))
 
-(defn- ->standard-verdicts [xml-without-ns]
-  (map (fn [paatos-xml-without-ns]
-         (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-               poytakirja       (poytakirja-with-paatos-data poytakirjat)
-               paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
-           (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)) (valid-antopvm? (:anto paivamaarat)))
-             {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
-              :paivamaarat    paivamaarat
-              :poytakirjat    (seq poytakirjat)})))
-    (select xml-without-ns [:paatostieto :Paatos])))
-
+(defn- ->standard-verdicts [xml-without-ns & [organization _]]
+  (let [{validate-verdict-given-date :validate-verdict-given-date} organization]
+    (map (fn [paatos-xml-without-ns]
+           (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
+                 poytakirja       (poytakirja-with-paatos-data poytakirjat)
+                 paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
+             (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)) (or (not validate-verdict-given-date)
+                                                                                  (valid-antopvm? (:anto paivamaarat))))
+               {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
+                :paivamaarat    paivamaarat
+                :poytakirjat    (seq poytakirjat)})))
+         (select xml-without-ns [:paatostieto :Paatos]))))
 
 ;; TJ/Suunnittelija verdict
 
@@ -410,13 +411,13 @@
                     :poytakirjat poytakirjat}))))
            (select xml-no-ns [:paatostieto :Paatos])))))
 
-(defmethod permit/read-verdict-xml :R    [_ xml-without-ns] (->standard-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :P    [_ xml-without-ns] (->standard-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :YA   [_ xml-without-ns] (->simple-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :YL   [_ xml-without-ns] (->simple-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :MAL  [_ xml-without-ns] (->simple-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :VVVL [_ xml-without-ns] (->simple-verdicts xml-without-ns))
-(defmethod permit/read-verdict-xml :KT   [_ xml-without-ns] (->outlier-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :R    [_ xml-without-ns & args] (apply ->standard-verdicts xml-without-ns args))
+(defmethod permit/read-verdict-xml :P    [_ xml-without-ns & args] (apply ->standard-verdicts xml-without-ns args))
+(defmethod permit/read-verdict-xml :YA   [_ xml-without-ns & _]    (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :YL   [_ xml-without-ns & _]    (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :MAL  [_ xml-without-ns & _]    (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :VVVL [_ xml-without-ns & _]    (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :KT   [_ xml-without-ns & _]    (->outlier-verdicts xml-without-ns))
 
 (defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ xml-without-ns & args] (apply ->tj-suunnittelija-verdicts xml-without-ns args))
 
@@ -459,7 +460,7 @@
 
 ;; Outliers (KT) do not have kuntalupatunnus
 (defmethod ->verdicts :KT
-  [xml _ reader]
+  [xml _ reader & _]
   (for [elem (enlive/select (cr/strip-xml-namespaces xml)
                             common/outlier-elem-selector)]
     {:kuntalupatunnus "-"
