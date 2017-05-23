@@ -272,8 +272,8 @@
                          (map #(assoc % :id (mongo/create-id)))
                          (filter seq)))))))
 
-(defn- get-verdicts-with-attachments [application user timestamp xml reader organization]
-  (->> (apply krysp-reader/->verdicts xml (:permitType application) reader organization)
+(defn- get-verdicts-with-attachments [application user timestamp xml reader & reader-args]
+  (->> (apply krysp-reader/->verdicts xml (:permitType application) reader reader-args)
        (map (partial verdict-attachments application user timestamp))
        (filter seq)))
 
