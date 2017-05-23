@@ -70,11 +70,11 @@
          (contains? stmpSc/all-field-types type)]}
   (value-by-type (:rows stamp) type))
 
-(defn dissoc-tag-by-type [rows type]
+(defn dissoc-tag-by-type [rows tag-type]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
-         (contains? stmpSc/all-field-types type)]}
+         (contains? stmpSc/all-field-types tag-type)]}
   (->> rows
-       (mapv (fn [rows] (filterv #(not (= type (:type %))) rows)))
+       (mapv (fn [row] (filterv #(not= (name tag-type) (:type %)) row)))
        (remove empty?)
        (into [])))
 

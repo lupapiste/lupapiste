@@ -62,7 +62,7 @@
                            [national-id]))))))
 
 (defn update-buildings [lang {:keys [buildings fields] :as info-fields}]
-  (if buildings
+  (if (seq buildings)
     (->> buildings
          (map (partial building->str lang))
          sort
