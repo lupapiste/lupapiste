@@ -1500,6 +1500,7 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
+           :section-help "schemas.paasuunnittelija.section.help"
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
     :body paasuunnittelija}
