@@ -122,11 +122,11 @@
         review-tasks (keep-indexed (fn [idx item]
                                      (if (and (empty? (get validation-errors idx))
                                               historical-timestamp-present?)
-                                       (assoc item :attachments (get-in reviews [idx :liitetieto])))) review-tasks)
+                                       (assoc item :attachments (-> (get reviews idx) :liitetieto)))) review-tasks)
         attachments-by-task-id (apply hash-map
                                  (remove empty? (mapcat (fn [t]
                                   (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
-        updated-existing-and-added-tasks  (merge-review-tasks (map #_(dissoc % :attachments) identity review-tasks) (:tasks application))
+        updated-existing-and-added-tasks  (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
@@ -162,5 +162,7 @@
   (let [update-result (update-application (application->command application) updates)
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
     (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
-      (verdict-review-util/get-poytakirja application user (now) {:type "review" :id id} (first (get attachments-by-task-id id)))
-      (tasks/generate-task-pdfa updated-application added-task user "fi"))))
+      (if-let [attachments (vec (get attachments-by-task-id id))]
+        (doseq [att attachments]
+          (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
+        (tasks/generate-task-pdfa updated-application added-task user "fi")))))
