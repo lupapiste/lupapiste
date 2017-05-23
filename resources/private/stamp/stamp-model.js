@@ -145,16 +145,16 @@ LUPAPISTE.StampModel = function(params) {
 
   // Stamping fields
   self.stamps = params.stamps;
-  self.selectedStampsId = params.selectedStampId;
-  self.selectedStamp = ko.observable();
 
+  self.selectedStampsId = params.selectedStampId;
   if (!ko.unwrap(self.selectedStampsId)) {
     self.selectedStampsId(self.stamps()[0].id);
   }
-
-  self.selectedStamp(_.find(self.stamps(), function (stamp) {
+  self.selectedStamp = ko.pureComputed(function() {
+    return _.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
-  }));
+    });
+  });
 
   function stringToDate(dateString) {
     return new Date (moment(dateString, "DD.MM.YYYY"));
@@ -242,9 +242,6 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   self.disposedComputed(function () {
-    self.selectedStamp(_.find(self.stamps(), function (stamp) {
-      return stamp.id === self.selectedStampsId();
-    }));
     if (self.selectedStamp()) {
       self.updateRowValue = false;
       self.page(self.selectedStamp().page);
