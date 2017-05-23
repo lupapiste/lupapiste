@@ -190,11 +190,19 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function generatePreview() {
-    return _.map(self.selectedStamp().rows,  function (row) {
-      return _.map(row , function(object) {
-        return object.value;
-      }).join(" ");
-    }).join("\n") + "\nwww.lupapiste.fi";
+    return _.chain(self.selectedStamp().rows)
+      .map(function (row) {
+        return _.chain(row)
+          .filter("value")
+          .map(function(o) {return _.get(o, "value");})
+          .value()
+          .join(" ");
+      })
+      .filter(function (row) {
+        return row !== "";
+      })
+      .value()
+      .join("\n") + "\nwww.lupapiste.fi";
   }
 
   if (!self.selectedStamp()) {
