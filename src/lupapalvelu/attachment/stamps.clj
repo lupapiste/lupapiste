@@ -34,8 +34,8 @@
 (defn- tag-content [tag context]
   (let [value (case (keyword (:type tag))
                 :current-date (sutil/to-local-date (score/now))
-                :verdict-date (get-paatospvm (:application context))
-                :backend-id (get-backend-id (get-in context [:application :verdicts]))
+                :verdict-date (or (get-paatospvm (:application context)) (sutil/to-local-date (score/now)))
+                :backend-id (or (get-backend-id (get-in context [:application :verdicts])) "")
                 :user (user/full-name (:user context))
                 :organization (get-in context [:organization :name :fi])
                 :application-id (get-in context [:application :id])
