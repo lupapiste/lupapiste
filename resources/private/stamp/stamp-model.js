@@ -169,7 +169,7 @@ LUPAPISTE.StampModel = function(params) {
     return _.chain(self.selectedStamp().rows)
       .find(function (row) { return _.some(row, {type: type}); })
       .find({type: type})
-      .result('value')
+      .result("value")
       .value();
   }
 
