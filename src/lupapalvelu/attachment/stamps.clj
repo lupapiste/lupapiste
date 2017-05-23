@@ -78,9 +78,14 @@
        (remove empty?)
        (into [])))
 
-(defn stamp-rows->vec-of-string-value-vecs [rows]
+(defn non-empty-stamp-rows->vec-of-string-value-vecs [rows]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)]}
-  (mapv (fn [row] (mapv :value row)) rows))
+  (->> rows
+       (map (fn [row] (->> (mapv :value row)
+                           (remove str/blank?)
+                           vec)))
+       (remove empty?)
+       vec))
 
 (defn assoc-tag-by-type [rows type value]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
