@@ -34,8 +34,8 @@
 (defn- tag-content [tag context]
   (let [value (case (keyword (:type tag))
                 :current-date (sutil/to-local-date (score/now))
-                :verdict-date (get-paatospvm (:application context))
-                :backend-id (get-backend-id (get-in context [:application :verdicts]))
+                :verdict-date (or (get-paatospvm (:application context)) (sutil/to-local-date (score/now)))
+                :backend-id (or (get-backend-id (get-in context [:application :verdicts])) "")
                 :user (user/full-name (:user context))
                 :organization (get-in context [:organization :name :fi])
                 :application-id (get-in context [:application :id])
@@ -74,18 +74,22 @@
          (contains? stmpSc/all-field-types type)]}
   (value-by-type (:rows stamp) type))
 
-(defn dissoc-tag-by-type [rows type]
+(defn dissoc-tag-by-type [rows tag-type]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
-         (contains? stmpSc/all-field-types type)]}
-  (let [keep-tag? (fn [tag] (not= type (:type tag)))
-        remove-tags-from-row (fn [row] (filterv keep-tag? row))]
-    (->> rows
-         (mapv remove-tags-from-row)
-         (filterv not-empty))))
+         (contains? stmpSc/all-field-types tag-type)]}
+  (->> rows
+       (mapv (fn [row] (filterv #(not= (name tag-type) (:type %)) row)))
+       (remove empty?)
+       (into [])))
 
-(defn stamp-rows->vec-of-string-value-vecs [rows]
+(defn non-empty-stamp-rows->vec-of-string-value-vecs [rows]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)]}
-  (mapv (fn [row] (mapv :value row)) rows))
+  (->> rows
+       (map (fn [row] (->> (mapv :value row)
+                           (remove str/blank?)
+                           vec)))
+       (remove empty?)
+       vec))
 
 (defn assoc-tag-by-type [rows type value]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)

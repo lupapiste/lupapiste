@@ -161,25 +161,21 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function ddmmyyyyDate(date) {
-    return moment(new Date(date)).format("DD.MM.YYYY");
+    var dateSeed = date ? new Date(date) : new Date();
+    return moment(dateSeed).format("DD.MM.YYYY");
   }
 
   function findRowData (type) {
-    var foundValue = null;
-    _.each( self.selectedStamp().rows, function( row ) {
-      foundValue = _.get(_.find( row, {type: type} ), "value");
-      return !foundValue;
-    });
-    return foundValue;
+    return _.chain(self.selectedStamp().rows)
+      .find(function (row) { return _.some(row, {type: type}); })
+      .find({type: type})
+      .result('value')
+      .value();
   }
 
   function findRow (type) {
-    var foundValue = null;
-    _.each( self.selectedStamp().rows, function( row ) {
-      foundValue = _.get(_.find( row, {type: type} ), "type");
-      return !foundValue;
-    });
-    return foundValue;
+    var value = findRowData(type);
+    return !_.isUndefined(value) && !_.isNull(value);
   }
 
   function updateRowData (type, value) {
@@ -194,11 +190,19 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function generatePreview() {
-    return _.map(self.selectedStamp().rows,  function (row) {
-      return _.map(row , function(object) {
-        return object.value;
-      }).join(" ");
-    }).join("\n") + "\nwww.lupapiste.fi";
+    return _.chain(self.selectedStamp().rows)
+      .map(function (row) {
+        return _.chain(row)
+          .filter("value")
+          .map(function(o) {return _.get(o, "value");})
+          .value()
+          .join(" ");
+      })
+      .filter(function (row) {
+        return row !== "";
+      })
+      .value()
+      .join("\n") + "\nwww.lupapiste.fi";
   }
 
   if (!self.selectedStamp()) {

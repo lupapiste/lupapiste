@@ -3182,6 +3182,33 @@
   (->> (mongo/select :applications {:_id #"^(?!LP-).*"})
        (run! conform-application-id-for-application!)))
 
+(def original-default-stamp-query
+  {:stamps {$elemMatch {:name "Oletusleima"
+                        :position {:x 10 :y 200}
+                        :background 0
+                        :page :first
+                        :qrCode true
+                        :rows {$all [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
+                                     [{:type :backend-id}]
+                                     [{:type :organization}]]
+                               $size 3}}}})
+
+(def updated-default-stamp-rows
+  [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
+   [{:type :backend-id}]
+   [{:type :section}]
+   [{:type :user}]
+   [{:type :building-id}]
+   [{:type :organization}]
+   [{:type :extra-text}]])
+
+(defmigration update-default-stamp-contents
+  {:apply-when (pos? (mongo/count :organizations original-default-stamp-query))}
+  (mongo/update-by-query :organizations
+                         original-default-stamp-query
+                         {$set {:stamps.$.rows updated-default-stamp-rows}}))
+
+
 
 ;;
 ;; ****** NOTE! ******

@@ -62,7 +62,7 @@
                            [national-id]))))))
 
 (defn update-buildings [lang {:keys [buildings fields] :as info-fields}]
-  (if buildings
+  (if (seq buildings)
     (->> buildings
          (map (partial building->str lang))
          sort
@@ -77,7 +77,7 @@
         values->row-text  (fn [row-of-values]
                             (ss/join " " (mapv limit-to-100 row-of-values)))]
     (->> (update-buildings lang info-fields)
-         (stamps/stamp-rows->vec-of-string-value-vecs)
+         stamps/non-empty-stamp-rows->vec-of-string-value-vecs
          (map values->row-text)
          (stamper/make-stamp transparency qr-code))))
 
