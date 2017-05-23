@@ -193,7 +193,7 @@
          (let [poytakirjat      (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
                poytakirja       (poytakirja-with-paatos-data poytakirjat)
                paivamaarat      (get-pvm-dates paatos-xml-without-ns [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])]
-           (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)))
+           (when (and poytakirja (valid-paatospvm? (:paatospvm poytakirja)) (valid-antopvm? (:anto paivamaarat)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    paivamaarat
               :poytakirjat    (seq poytakirjat)})))

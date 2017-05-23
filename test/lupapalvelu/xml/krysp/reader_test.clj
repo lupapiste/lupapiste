@@ -49,6 +49,14 @@
                                        {:tag :paatoksentekija :content [""]}
                                        {:tag :paatospvm :content ["1970-01-02"]}]))
 
+(def verdict-to-be-given-in-future {:tag :paatostieto
+                                    :content [{:tag :paatostieto
+                                               :content [{:tag :Paatos
+                                                          :content [{:tag :paivamaarat :content [{:tag :antoPvm :content ["2099-01-02"]}]}
+                                                                    {:tag :poytakirja :content [{:tag :paatoskoodi :content ["hyv\u00e4ksytty"]}
+                                                                                                {:tag :paatoksentekija :content [""]}
+                                                                                                {:tag :paatospvm :content ["1970-01-02"]}]}]}]}]})
+
 (def past-verdict (verdict-skeleton [{:tag :paatoskoodi :content ["hyv\u00e4ksytty"]}
                                      {:tag :paatoksentekija :content [""]}
                                      {:tag :paatospvm :content ["1970-01-01"]}]))
@@ -60,6 +68,8 @@
     (standard-verdicts-validator (verdict-skeleton []) {}) => {:ok false, :text "info.paatos-details-missing"})
   (fact "Future date"
     (standard-verdicts-validator future-verdict {}) => {:ok false, :text "info.paatos-future-date"} )
+  (fact "Verdict to be given on a future date"
+    (standard-verdicts-validator verdict-to-be-given-in-future {}) => {:ok false, :text "info.paatos-future-date"} )
   (fact "Past date"
     (standard-verdicts-validator past-verdict {}) => nil))
 
