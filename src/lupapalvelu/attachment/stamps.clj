@@ -74,7 +74,7 @@
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
          (contains? stmpSc/all-field-types tag-type)]}
   (->> rows
-       (mapv (fn [row] (filterv #(not= (name tag-type) (:type %)) row)))
+       (mapv (fn [row] (filterv #(not= (keyword tag-type) (keyword (:type %))) row)))
        (remove empty?)
        (into [])))
 
