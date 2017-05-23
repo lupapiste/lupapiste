@@ -3200,7 +3200,8 @@
    [{:type :user}]
    [{:type :building-id}]
    [{:type :organization}]
-   [{:type :extra-text}]])
+   [{:type :extra-text
+     :text ""}]])
 
 (defmigration update-default-stamp-contents
   {:apply-when (pos? (mongo/count :organizations original-default-stamp-query))}
