@@ -148,9 +148,10 @@ LUPAPISTE.StampModel = function(params) {
   self.selectedStampsId = params.selectedStampId;
   self.selectedStamp = ko.observable();
 
-  if (!self.selectedStampsId) {
+  if (!ko.unwrap(self.selectedStampsId)) {
     self.selectedStampsId(self.stamps()[0].id);
   }
+
   self.selectedStamp(_.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
   }));
