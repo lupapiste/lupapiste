@@ -1,12 +1,11 @@
 (ns lupapalvelu.attachment.stamps
   (:require [sade.core :as score]
             [sade.util :as sutil]
+            [sade.strings :as ss]
             [schema.core :as sc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
-            [lupapalvelu.attachment.stamp-schema :as stmpSc]
-            [sade.strings :as str]
-            [taoensso.timbre :as timbre]))
+            [lupapalvelu.attachment.stamp-schema :as stmpSc]))
 
 (defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
@@ -23,14 +22,21 @@
        (remove :draft)
        (some :kuntalupatunnus)))
 
+(defn- add-section-mark [section-str]
+  (when (string? section-str)
+    (if (ss/starts-with section-str "\u00a7")
+      section-str
+      (str \u00a7 " " section-str))))
+
 (defn- get-section [{:keys [verdicts]}]
   (->> verdicts
        (map (fn [{:keys [paatokset]}]
               (map (fn [pt] (map :pykala (:poytakirjat pt))) paatokset)))
        (flatten)
        (map str)
-       (remove str/blank?)
-       (first)))
+       (remove ss/blank?)
+       (first)
+       add-section-mark))
 
 (defn- tag-content [tag context]
   (let [value (case (keyword (:type tag))
@@ -84,7 +90,7 @@
 
 (defn non-empty-stamp-rows->vec-of-string-value-vecs [{rows :fields}]
   (let [processed-rows (->> (map kw-row rows)
-                            (map (fn [row] (remove #(str/blank? (:value %)) row)))
+                            (map (fn [row] (remove #(ss/blank? (:value %)) row)))
                             (remove empty?))]
     (doseq [row processed-rows]
       (sc/validate stmpSc/StampRow row))
