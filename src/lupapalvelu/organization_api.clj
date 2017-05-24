@@ -155,50 +155,54 @@
              :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
+(defn- duplicate-scope-validator [municipality & permit-types]
+  (when-let [duplicate-scopes (org/get-duplicate-scopes municipality (vec permit-types))]
+    (fail :error.organization.duplicate-scope :organization duplicate-scopes)))
+
 (defcommand add-scope
   {:description "Admin can add new scopes for organization"
    :parameters [organization permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening]
+   :pre-checks [(fn [{{:keys [municipality permitType]} :data}]
+                  (duplicate-scope-validator municipality permitType))]
    :input-validators [permit/permit-type-validator
                       (fn [{{:keys [municipality]} :data}]
                         (when-not (contains? muni/municipality-codes municipality)
                           (fail :error.invalid-municipality)))]
    :user-roles #{:admin}}
-  (if-let [duplicate-scopes (get-duplicate-scopes municipality [permitType])]
-    (fail :error.organization.duplicate-scope :organization duplicate-scopes)
-    (do
-      (org/update-organization
-       organization
-       {$push {:scope
-               (org/new-scope municipality
-                              permitType
-                              :inforequest-enabled     inforequestEnabled
-                              :new-application-enabled applicationEnabled
-                              :open-inforequest        openInforequestEnabled
-                              :open-inforequest-email  openInforequestEmail
-                              :opening                 opening)}})
-      (ok))))
+  (org/update-organization
+   organization
+   {$push {:scope
+           (org/new-scope municipality
+                          permitType
+                          :inforequest-enabled     inforequestEnabled
+                          :new-application-enabled applicationEnabled
+                          :open-inforequest        openInforequestEnabled
+                          :open-inforequest-email  openInforequestEmail
+                          :opening                 opening)}})
+  (ok))
 
 (defn- permit-types-validator [{{:keys [permit-types]} :data}]
   (when (some (comp not permit/valid-permit-type?) permit-types)
     (fail :error.invalid-permit-type)))
 
 (defn- org-id-not-exist [{{org-id :org-id} :data}]
-  (when (and org-id (not-empty (mongo/by-id :organizations org-id [:_id])))
+  (when (and org-id (pos? (mongo/count :organizations {:_id org-id})))
     (fail :error.organization-already-exists)))
 
 (defcommand create-organization
   {:parameters [org-id municipality name permit-types]
-   :pre-checks [org-id-not-exist]
-   :input-validators [permit-types-validator
+   :pre-checks [org-id-not-exist
+                (fn [{{:keys [municipality permit-types]} :data}]
+                  (apply duplicate-scope-validator municipality permit-types))]
+   :input-validators [(partial action/vector-parameters [:permit-types])
+                      permit-types-validator
                       (partial action/non-blank-parameters [:org-id :municipality :name])
                       (partial action/numeric-parameters [:municipality])]
    :user-roles #{:admin}}
   [_]
-  (if-let [duplicate-scopes (org/get-duplicate-scopes municipality permit-types)]
-    (fail :error.organization.duplicate-scope :organization duplicate-scopes)
-    (mongo/insert :organizations (org/new-organization org-id municipality name permit-types)))
+  (mongo/insert :organizations (org/new-organization org-id municipality name permit-types))
   (ok))
 
 (defn- validate-map-with-optional-url-values [param command]
