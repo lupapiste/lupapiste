@@ -109,7 +109,7 @@
                                        distinct
                                        (make-operation-specific-stamps context info-fields))]
     (doseq [{op-ids :operation-ids :as file-info} file-infos]
-      (-> (if (seq op-ids)
+      (-> (if (and (seq op-ids) (seq (:buildings info-fields)))
             (operation-specific-stamps op-ids)
             stamp-without-buildings)
           (stamp-attachment! file-info context job-id (:id application))))))
