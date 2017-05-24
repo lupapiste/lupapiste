@@ -1,0 +1,66 @@
+$matti-grid-margin: 20px;
+
+@mixin matti-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * (100% / $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $matti-grid-margin;
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+
+@mixin matti-grid ($columns) {
+  .matti-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    .row {
+      @include clearfix;
+      margin: $matti-grid-margin 0;
+      @for $i from 1 through $columns {
+        .col-#{$i} {
+          @include matti-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+    }
+  }
+}
+
+@for $i from 1 through 12 {
+  @include matti-grid( $i );
+}
