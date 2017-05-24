@@ -5,7 +5,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment.stamp-schema :as stmpSc]
-            [sade.strings :as str]))
+            [sade.strings :as str]
+            [taoensso.timbre :as timbre]))
 
 (defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
@@ -78,14 +79,16 @@
        (remove empty?)
        (into [])))
 
-(defn non-empty-stamp-rows->vec-of-string-value-vecs [rows]
-  {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)]}
-  (->> rows
-       (map (fn [row] (->> (mapv :value row)
-                           (remove str/blank?)
-                           vec)))
-       (remove empty?)
-       vec))
+(defn- kw-row [row]
+  (map #(assoc % :type (keyword (:type %))) row))
+
+(defn non-empty-stamp-rows->vec-of-string-value-vecs [{rows :fields}]
+  (let [processed-rows (->> (map kw-row rows)
+                            (map (fn [row] (remove #(str/blank? (:value %)) row)))
+                            (remove empty?))]
+    (doseq [row processed-rows]
+      (sc/validate stmpSc/StampRow row))
+    (mapv (fn [row] (mapv :value row)) processed-rows)))
 
 (defn assoc-tag-by-type [rows type value]
   {:pre [(map (fn [row] (sc/validate stmpSc/StampRow row)) rows)
