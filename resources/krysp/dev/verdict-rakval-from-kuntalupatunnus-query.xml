@@ -338,32 +338,6 @@
             </rakval:omistajatieto>
             </rakval:Rakennus>
           </rakval:rakennustieto>
-          <rakval:katselmustieto>
-            <rakval:Katselmus>
-                <rakval:katselmuksenRakennustieto>
-                  <rakval:KatselmuksenRakennus>
-                    <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
-                    <rakval:kiinttun>18600303560006</rakval:kiinttun>
-                    <rakval:rakennusnro>001</rakval:rakennusnro>
-                    <rakval:aanestysalue>002</rakval:aanestysalue>
-                    <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
-                    <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
-                  </rakval:KatselmuksenRakennus>
-                </rakval:katselmuksenRakennustieto>
-                <rakval:pitoPvm>2014-09-24Z</rakval:pitoPvm>
-                <rakval:osittainen>lopullinen</rakval:osittainen>
-                <rakval:pitaja>Seppo Exempel</rakval:pitaja>
-                <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
-                <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
-                <rakval:huomautukset>
-                  <rakval:huomautus>
-                    <rakval:kuvaus>Pöytäkirja arkistoitu</rakval:kuvaus>
-                  </rakval:huomautus>
-                </rakval:huomautukset>
-                <rakval:lasnaolijat>Teppo Esimerkki&#xd;
-                  Seppo Exempel rak tarkastaja</rakval:lasnaolijat>
-            </rakval:Katselmus>
-          </rakval:katselmustieto>
         </rakval:Toimenpide>
       </rakval:toimenpidetieto>
         <rakval:toimenpidetieto>
