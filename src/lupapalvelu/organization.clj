@@ -648,14 +648,14 @@
   (not-empty (mongo/select :organizations {:scope {$elemMatch {:permitType {$in permit-types} :municipality municipality}}} [:scope])))
 
 (defn new-scope [municipality permit-type & {:keys [inforequest-enabled application-enabled open-inforequest-enabled open-inforequest-email opening]}]
-  (merge scope-skeleton
-         {:municipality            municipality
-          :permitType              permit-type
-          :inforequest-enabled     inforequest-enabled
-          :new-application-enabled application-enabled
-          :open-inforequest        open-inforequest-enabled
-          :open-inforequest-email  open-inforequest-email
-          :opening                 (when (number? opening) opening)}))
+  (util/assoc-when scope-skeleton
+                   :municipality            municipality
+                   :permitType              permit-type
+                   :inforequest-enabled     inforequest-enabled
+                   :new-application-enabled application-enabled
+                   :open-inforequest        open-inforequest-enabled
+                   :open-inforequest-email  open-inforequest-email
+                   :opening                 (when (number? opening) opening)))
 
 (defn new-organization [org-id municipality name permit-types]
   {:_id           org-id
