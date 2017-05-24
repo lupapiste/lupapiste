@@ -81,6 +81,9 @@
     ;; 5. Cap the size of the final list
     (take max-number-of-ads)))
 
+
+;; Constructing RSS-feed items
+
 (defmethod waste-ads :rss [org-id _ lang]
   (let [ads (waste-ads org-id)
         columns (map :name waste-schemas/availableMaterialsRow)
@@ -103,7 +106,6 @@
                                               (col-row-map #(vec [:th (loc "available-materials." %)]))
                                               (for [m materials]
                                                 (col-row-map #(vec [:td (col-value % m)])))]])]]
-
                 {:title       "Lupapiste"
                  :link        "http://www.lupapiste.fi"
                  :author      name
