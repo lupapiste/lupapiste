@@ -1039,3 +1039,35 @@
   (fact "second handler is now enabled"
         (-> (get-in (query sipoo :organization-by-user) [:organization :handler-roles])
             second :disabled) => false))
+
+(facts create-organization
+  (fact "organization already exists"
+    (command admin :create-organization :org-id "753-R" :municipality "666" :name "Manalan rakennusvalvonta" :permit-types ["R" "P"]) => (partial expected-failure? :error.organization-already-exists))
+
+  (fact "duplicate scope"
+    (command admin :create-organization :org-id "666-R" :municipality "753" :name "Manalan rakennusvalvonta" :permit-types ["R" "P"]) => (partial expected-failure? :error.organization.duplicate-scope))
+
+  (fact "invalid permit type"
+    (command admin :create-organization :org-id "666-R" :municipality "666" :name "Manalan rakennusvalvonta" :permit-types ["G"]) => (partial expected-failure? :error.invalid-permit-type))
+
+  (fact "success"
+    (command admin :create-organization :org-id "666-R" :municipality "666" :name "Manalan rakennusvalvonta" :permit-types ["R" "P"]) => ok?)
+
+  (fact "organization created succesfully"
+    (let [result (query admin :organization-by-id :organizationId "666-R")
+          org    (:data result)]
+      (:id org) => "666-R"
+      (:name org) => {:en "Manalan rakennusvalvonta" :fi "Manalan rakennusvalvonta" :sv "Manalan rakennusvalvonta"}
+      (:scope org) => [{:inforequest-enabled false,
+                        :municipality "666",
+                        :new-application-enabled false,
+                        :open-inforequest false,
+                        :open-inforequest-email "",
+                        :opening nil, :permitType "R"}
+                       {:inforequest-enabled false,
+                        :municipality "666",
+                        :new-application-enabled false,
+                        :open-inforequest false,
+                        :open-inforequest-email "",
+                        :opening nil,
+                        :permitType "P"}])))
