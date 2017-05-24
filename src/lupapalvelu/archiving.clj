@@ -8,9 +8,12 @@
             [clj-time.format :as f]
             [cheshire.core :as json]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.env :as env]
             [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.schema-utils :as ssu]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
@@ -65,6 +68,11 @@
         (.close is-or-file)
         (catch Exception _)))
     result))
+
+(def archived-ts-keys-schema
+  {:application                 (sc/maybe ssc/Timestamp)
+   :completed                   (sc/maybe ssc/Timestamp)
+   (sc/optional-key :initial)   (sc/maybe ssc/Timestamp)})
 
 (defn mark-first-time-archival [application now]
   (action/update-application
@@ -335,6 +343,7 @@
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]
+  {:pre [(contains? (ssu/keys archived-ts-keys-schema) archived-ts-key)]}
   (action/update-application
     (action/application->command application)
     {$set {(str "archived." (name archived-ts-key)) now}}))

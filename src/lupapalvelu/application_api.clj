@@ -485,7 +485,8 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :categories #{:documents} ; edited from document header
-   :input-validators [(partial action/non-blank-parameters [:id :op-id])]
+   :input-validators [(partial action/non-blank-parameters [:id :op-id])
+                      (partial action/string-parameters [:desc])]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
    :pre-checks [app/validate-authority-in-drafts]}

@@ -1,7 +1,8 @@
 (ns lupapalvelu.exports-itest
   (:require [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]
-            [sade.core :refer [now]]))
+            [sade.core :refer [now]]
+            [sade.strings :as ss]))
 
 (apply-remote-minimal)
 
@@ -17,6 +18,14 @@
                 :follow-redirects false
                 :throw-exceptions false})]
     (:status resp) => 401))
+
+(fact "Can not use api with incorrect role"
+  (let [resp (decoded-get (str (server-address) "/data-api/json/export-applications")
+                          {:basic-auth ["salesforce-etl" "salesforce-etl"]
+                           :follow-redirects false
+                           :throw-exceptions false})]
+    (:status resp) => 200
+    (:body resp) => unauthorized?))
 
 (fact "With valid credentials, api returns one application"
   (let [application-id (create-app-id pena :operation "markatilan-laajentaminen")
@@ -81,3 +90,46 @@
       (fact "Every organization has expected keys"
         (doseq [organization organizations]
           organization => (contains {:id string?, :name map?, :scope sequential?})))))
+
+(facts "Salesforce export"
+  (let [endpoint (str (server-address) "/data-api/json/salesforce-export")]
+    (doseq [tester [{:role "trusted-etl"
+                     :auth ["solita-etl" "solita-etl"]}
+                    {:role "applicant"
+                     :auth ["pena" "pena"]}]]
+      (fact {:midje/description (str (:role tester) "not allowed")}
+        (:body (decoded-get endpoint
+                            {:basic-auth (:auth tester)
+                             :follow-redirects false
+                             :throw-exceptions false})) => unauthorized?))
+    (let [resp (decoded-get endpoint
+                            {:basic-auth       ["salesforce-etl" "salesforce-etl"]
+                             :follow-redirects false
+                             :throw-exceptions false})
+          data (get-in resp [:body :applications])]
+      (fact "correct credentials"
+        (:status resp) => 200
+        (count data) => 2)
+
+      (fact "correct keys"
+        (-> data first keys) => (contains #{:id :operations :permitType :municipality :organization :state :submitted} :gaps-ok)
+        (-> data first keys) =not=> (contains [:applicant :verdicts :authority]))
+
+      (fact "price classes"
+        (map :priceClass (flatten (map :operations data))) => (just ["D" "B"]))
+
+      (fact "truncated-op-description"
+        (command pena
+                 :update-op-description
+                 :id (get-in data [0 :id])
+                 :op-id (get-in data [0 :operations 0 :id])
+                 :desc (ss/join (repeat 100 "abc"))) => ok?
+
+        (let [op (-> (decoded-get endpoint
+                                  {:basic-auth       ["salesforce-etl" "salesforce-etl"]
+                                   :follow-redirects false
+                                   :throw-exceptions false})
+                     :body :applications
+                     first :operations first)]
+          (fact "suffix" (:description op) => #(ss/ends-with % "..."))
+          (fact "length 255" (count (:description op)) => 255))))))

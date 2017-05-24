@@ -1,16 +1,21 @@
 (ns lupapalvelu.exports-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.excel-reader :as xls]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok]]
+            [sade.schemas :as ssc]
             [lupapalvelu.action :refer [defexport] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.archiving :as archiving]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.permit :as permit]
+            [lupapiste-commons.states :as common-states]))
 
 (def kayttotarkoitus-hinnasto (delay (xls/read-map "kayttotarkoitus-hinnasto.xlsx")))
 
@@ -226,7 +231,7 @@
   [{{ts :modifiedAfterTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {"primaryOperation" {$exists true}}
+                {:primaryOperation.id {$exists true}}
                 (when (ss/numeric? ts)
                   {:modified {$gte (Long/parseLong ts 10)}}))
         fields {:address 1 :applicant 1 :authority 1 :closed 1 :created 1 :convertedToApplication 1
@@ -241,6 +246,87 @@
                                        (fn [a] (assoc a :operations (application/get-operations a)))
                                        raw-applications)]
     (ok :applications (map exported-application applications-with-operations))))
+
+(defn application-to-salesforce [application]
+  (letfn [(truncate-op-description [op] (update op :description #(ss/limit % 252 "...")))
+          (map-operations [app] (->> (application/get-operations app)
+                                     (map truncate-op-description)
+                                     (map (partial operation-mapper app))))]
+    (-> application
+        (assoc  :operations          (map-operations application))
+        (update :primaryOperation    truncate-op-description)
+        (update :secondaryOperations (fn [ops] (map truncate-op-description ops)))
+        (dissoc :documents))))
+
+(def operation-schema
+  {:id          ssc/ObjectIdStr
+   :created     ssc/Timestamp
+   :description (sc/maybe (ssc/max-length-string 255))
+   :name        sc/Str})
+
+(def export-operation-schema
+  (merge operation-schema
+         {(sc/optional-key :displayNameFi) sc/Str
+          (sc/optional-key :displayNameSv) sc/Str
+          :priceClass                      (sc/enum "A" "B" "C" "D" "E" "F")
+          :priceCode                       (sc/maybe (apply sc/enum 900 (vals permit-type-price-codes)))
+          :usagePriceCode                  (sc/maybe (apply sc/enum (vals usage-price-codes)))
+          :use                             (sc/maybe sc/Str)
+          :useSv                           (sc/maybe sc/Str)
+          :useFi                           (sc/maybe sc/Str)
+          (sc/optional-key :submitted)     ssc/Timestamp}))
+
+(sc/defschema SalesforceExportApplication
+  "Application schema for export to Salesforce"
+  (merge {:id                                ssc/ApplicationId
+          :address                           sc/Str
+          :archived                          archiving/archived-ts-keys-schema
+          :infoRequest                       sc/Bool
+          :municipality                      sc/Str
+          :state                             (apply sc/enum
+                                                    "info"
+                                                    "answered"
+                                                    (map name (keys common-states/all-transitions-graph)))
+          (sc/optional-key :openInfoRequest) (sc/maybe sc/Bool)
+          :organization                      sc/Str
+          (sc/optional-key :permitSubtype)   (sc/maybe sc/Str)
+          :permitType                        (apply sc/enum (keys (permit/permit-types)))
+          :propertyId                        sc/Str
+          :primaryOperation                  operation-schema
+          :secondaryOperations               [operation-schema]}
+         {:operations [export-operation-schema]}
+         (zipmap [:created :modified] (repeat ssc/Timestamp))
+         (zipmap [(sc/optional-key :started)
+                  (sc/optional-key :closed)
+                  (sc/optional-key :opened)
+                  (sc/optional-key :sent) :submitted] (repeat (sc/maybe ssc/Timestamp)))))
+
+(defn- validate-export-data
+  "Validate output data against schema."
+  [_ {:keys [applications]}]
+  (doseq [exported-application applications]
+    (sc/validate SalesforceExportApplication exported-application)))
+
+(defexport salesforce-export
+  {:user-roles #{:trusted-salesforce}
+   :on-success validate-export-data}
+  [{{after  :modifiedAfterTimestampMillis
+     before :modifiedBeforeTimestampMillis} :data user :user}]
+  (let [query (merge
+                (domain/application-query-for user)
+                {:primaryOperation.id {$exists true}}
+                (when (or (ss/numeric? after) (ss/numeric? before))
+                  {:modified (util/assoc-when {}
+                                              $gte (when after (Long/parseLong after 10))
+                                              $lt  (when before (Long/parseLong before 10)))}))
+        fields [:address :archived :closed :created
+                :infoRequest :modified :municipality :opened :openInfoRequest :organization
+                :primaryOperation :propertyId :permitSubtype :permitType
+                :secondaryOperations :sent :started :state :submitted
+                :documents.data.kaytto.kayttotarkoitus.value
+                :documents.schema-info.op.id]
+        raw-applications (mongo/select :applications query fields)]
+    (ok :applications (map application-to-salesforce raw-applications))))
 
 (defexport export-organizations
   {:user-roles #{:trusted-etl}}

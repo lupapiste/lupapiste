@@ -34,6 +34,17 @@
     :role "trusted-etl"
     :private {:password "$2a$10$uog/cI4n4vxFBNgku4xTpu6lcrF56cttBDW5zkTfDaSClgEw54/Nm"}}
 
+   ;; Salesforce export user: salesforce-etl / salesforce-etl
+   {:id "salesforce-etl"
+    :username "salesforce-etl"
+    :email "sf-etl@lupapiste.fi"
+    :firstName "Solita"
+    :lastName "SF ETL-lataus"
+    :language "fi"
+    :enabled true
+    :role "trusted-salesforce"
+    :private {:password "$2a$10$9PjOuMzuY/5oIpKR4PVACOWn2AFrwhTT2xtDe5sFXlJwRmk.6T6ji"}}
+
    ;; Tampere
 
    ;; Tampere YA paakayttaja:  tampere-ya / tampere

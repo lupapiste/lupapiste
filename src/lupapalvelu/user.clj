@@ -57,7 +57,8 @@
    "admin"
    "dummy"
    "rest-api"
-   "trusted-etl"])
+   "trusted-etl"
+   "trusted-salesforce"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
