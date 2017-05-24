@@ -81,8 +81,8 @@
          (map values->row-text)
          (stamper/make-stamp transparency qr-code))))
 
-(defn- make-stamp-without-buildings [context info-fields]
-  (->> (stamps/dissoc-tag-by-type (:fields info-fields) :building-id)
+(defn- make-stamp-without-buildings [context {:keys [fields]}]
+  (->> {:fields (stamps/dissoc-tag-by-type fields :building-id)}
        (info-fields->stamp context)))
 
 (defn- make-operation-specific-stamps [context info-fields operation-id-sets]
