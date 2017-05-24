@@ -86,9 +86,11 @@
        (map #(apply merge %))))
 
 (defn reviews-preprocessed [app-xml]
-  (let [grouped-reviews (group-by
+  (let [historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
+                                                                (< pvm (now))))
+        grouped-reviews (group-by
                           #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm :muuTunnustieto])
-                          (review-reader/xml->reviews app-xml))]
+                          (filter historical-timestamp-present? (review-reader/xml->reviews app-xml)))]
     (for [k (keys grouped-reviews)
           :let [values (get grouped-reviews k)
                 rakennukset (->> (get grouped-reviews k)
@@ -115,13 +117,10 @@
         building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
-        historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
-                                                                (< pvm (now))))
         review-tasks (map review-to-task reviews)
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
         review-tasks (keep-indexed (fn [idx item]
-                                     (if (and (empty? (get validation-errors idx))
-                                              historical-timestamp-present?)
+                                     (if (empty? (get validation-errors idx))
                                        (assoc item :attachments (-> (get reviews idx) :liitetieto)))) review-tasks)
         attachments-by-task-id (apply hash-map
                                  (remove empty? (mapcat (fn [t]
