@@ -53,6 +53,7 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.current-date'"></label>
+                <!-- ko if: currentDate() !== undefined -->
                 <input data-bind="
                             datepicker: currentDate,
                             enable: status() === statusReady,
@@ -60,36 +61,56 @@
                        type="text"
                        class="text"
                        data-test-id="stamp-info-date">
+                <!-- /ko -->
+                <!-- ko ifnot: currentDate() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.organization'"></label>
-                <input data-bind="value: organization, enable: status() === statusReady && organization() !== undefined"
+                <!-- ko if: organization() !== undefined -->
+                <input data-bind="value: organization, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-organization">
+                <!-- /ko -->
+                <!-- ko ifnot: organization() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.extra-text'"></label>
-                <input data-bind="value: extraText, enable: status() === statusReady && extraTextRow() !== undefined"
+                <!-- ko if: extraText() !== undefined -->
+                <input data-bind="value: extraText, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-extratext">
+                <!-- /ko -->
+                <!-- ko ifnot: extraText() !== undefined -->
+                  <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
 
               <div class="col-4"><br></div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.application-id'"></label>
-                <input data-bind="value: applicationId, enable: status() === statusReady && applicationId() !== undefined"
+                <!-- ko if: applicationId() !== undefined -->
+                <input data-bind="value: applicationId, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-applicationId">
+                <!-- /ko -->
+                <!-- ko ifnot: applicationId() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.verdict-date'"></label>
+                <!-- ko if: verdictDate() !== undefined -->
                 <input data-bind="
                             datepicker: verdictDate,
                             enable: status() === statusReady,
@@ -97,14 +118,23 @@
                        type="text"
                        class="text"
                        data-test-id="stamp-info-verdict-date">
+                <!-- /ko -->
+                <!-- ko ifnot: verdictDate() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.user'"></label>
-                <input data-bind="value: user, enable: status() === statusReady && user() !== undefined"
+                <!-- ko if: user() !== undefined -->
+                <input data-bind="value: user, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-user">
+                <!-- /ko -->
+                <!-- ko ifnot: user() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
             </div>
 
@@ -113,18 +143,28 @@
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.backend-id'"></label>
-                <input data-bind="value: backendId, enable: status() === statusReady && backendId() !== undefined"
+                <!-- ko if: backendId() !== undefined -->
+                <input data-bind="value: backendId, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-kuntalupatunnus"/>
+                <!-- /ko -->
+                <!-- ko ifnot: backendId() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+                <!-- /ko -->
               </div>
 
               <div class="col-1">
                 <label data-bind="ltext: 'stamp.section'"></label>
-                <input data-bind="value: section, enable: status() === statusReady && sectionRow() !== undefined"
+                <!-- ko if: section() !== undefined -->
+                <input data-bind="value: section, enable: status() === statusReady"
                        type="text"
                        class="text"
                        data-test-id="stamp-info-section">
+              <!-- /ko -->
+              <!-- ko ifnot: section() !== undefined -->
+                <p data-bind="ltext: 'stamp.row-missing-from-template'"></p>
+              <!-- /ko -->
               </div>
             </div>
 

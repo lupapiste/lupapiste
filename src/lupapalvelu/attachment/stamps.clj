@@ -24,7 +24,7 @@
 
 (defn- add-section-mark [section-str]
   (when (string? section-str)
-    (if (ss/starts-with section-str "\u00a7")
+    (if (ss/contains? section-str "\u00a7")
       section-str
       (str \u00a7 " " section-str))))
 
