@@ -92,10 +92,11 @@
 (defn- kw-row [row]
   (map #(assoc % :type (keyword (:type %))) row))
 
-(defn non-empty-stamp-rows->vec-of-string-value-vecs [{rows :fields}]
+(defn non-empty-stamp-rows->vec-of-string-value-vecs [rows]
   (let [processed-rows (->> (map kw-row rows)
                             (map (fn [row] (remove #(ss/blank? (:value %)) row)))
                             (remove empty?))]
+
     (doseq [row processed-rows]
       (sc/validate stmpSc/StampRow row))
     (mapv (fn [row] (mapv :value row)) processed-rows)))
