@@ -29,6 +29,7 @@
       :rest-api     {:organization {$in organizations}}
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
+      :trusted-salesforce {}
       (do
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results
