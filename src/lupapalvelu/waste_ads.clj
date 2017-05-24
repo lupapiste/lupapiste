@@ -12,40 +12,9 @@
 
 (defmulti waste-ads (fn [org-id & [fmt lang]] fmt))
 
-(defn max-modified
-  "Returns the max (latest) modified value of the given document part
-  or list of parts."
-  [m]
-  (cond
-    (:modified m) (:modified m)
-    (map? m) (max-modified (vals m))
-    (sequential? m) (apply max (map max-modified (cons 0 m)))
-    :default 0))
-
-(def max-number-of-ads 100)
-
-(defn- construction-waste-report? [doc]
-  (-> doc :schema-info :name waste-schemas/construction-waste-report-schemas))
-
-(defn- get-materials-info [municipality {data :data :as doc}]
-  (let [{contact :contact materials :availableMaterials} (-> (select-keys data [:contact :availableMaterials])
-                                                             tools/unwrapped)]
-    {:contact      contact
-     ;; Material and amount information are mandatory. If the information
-     ;; is not present, the row is not included.
-     :materials    (->> (tools/rows-to-list materials)
-                        (filter (fn->> ((juxt :aines :maara)) (not-any? ss/blank?))))
-     :modified     (max-modified data)
-     :municipality municipality}))
-
-(defn- valid-materials-info? [{{:keys [name phone email]} :contact
-                               materials                  :materials}]
-  (and (ss/not-blank? name)
-       (or (ss/not-blank? phone) (ss/not-blank? email))
-       (not-empty materials)))
-
 (defn- waste-ads-from-mongo [org-id]
-  ;; 1. Every application that maybe has available materials.
+  "Get ads that contain construction waste reports, have some materials available and something
+   in the contact field. Returns ads that have only relevant fields."
   (mongo/select
     :applications
     {:organization (if (ss/blank? org-id)
@@ -60,11 +29,43 @@
      :documents.data.availableMaterials 1
      :municipality                      1}))
 
+(defn- construction-waste-report? [doc]
+  (-> doc :schema-info :name waste-schemas/construction-waste-report-schemas))
+
+(defn max-modified
+  "Returns the max (latest) modified value of the given document part
+  or list of parts."
+  [m]
+  (cond
+    (:modified m) (:modified m)
+    (map? m) (max-modified (vals m))
+    (sequential? m) (apply max (map max-modified (cons 0 m)))
+    :default 0))
+
+(defn- get-materials-info [municipality {data :data :as doc}]
+  (let [{contact :contact materials :availableMaterials} (-> (select-keys data [:contact :availableMaterials])
+                                                             tools/unwrapped)]
+    {:contact      contact
+     ;; Material and amount information are mandatory. If the information
+     ;; is not present, the row is not included.
+     :materials    (->> (tools/rows-to-list materials)
+                        (filter (fn->> ((juxt :aines :maara)) (not-any? ss/blank?))))
+     :modified     (max-modified data)
+     :municipality municipality}))
+
 (defn- create-materials-contact-modified-municipality-map [{:keys [municipality documents]}]
   (->>
     documents
     (filter construction-waste-report?)
     (map #(get-materials-info municipality %))))
+
+(defn- valid-materials-info? [{{:keys [name phone email]} :contact
+                               materials                  :materials}]
+  (and (ss/not-blank? name)
+       (or (ss/not-blank? phone) (ss/not-blank? email))
+       (not-empty materials)))
+
+(def max-number-of-ads 100)
 
 (defmethod waste-ads :default [org-id & _]
   (->>
@@ -79,9 +80,6 @@
     (sort-by (comp - :modified))
     ;; 5. Cap the size of the final list
     (take max-number-of-ads)))
-
-(defn- municipality-code-to-text [lang municipality]
-  (i18n/localize lang (str "municipality." municipality)))
 
 (defmethod waste-ads :rss [org-id _ lang]
   (let [ads (waste-ads org-id)
@@ -99,7 +97,7 @@
                       (->> columns (map fun) (concat [:tr]) vec))
         items (for [{:keys [contact materials municipality]} ads
                     :let [{:keys [name phone email]} contact
-                          municipality-text (municipality-code-to-text lang municipality)
+                          municipality-text (i18n/with-lang lang (i18n/loc "municipality" municipality))
                           html (hiccup/html [:div [:span (ss/join " " [name phone email municipality-text])]
                                              [:table
                                               (col-row-map #(vec [:th (loc "available-materials." %)]))
