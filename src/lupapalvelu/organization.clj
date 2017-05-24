@@ -30,6 +30,7 @@
             [lupapalvelu.wfs :as wfs]
             [me.raynes.fs :as fs]
             [lupapalvelu.attachment.stamp-schema :as stmp]
+            [lupapalvelu.attachment.stamps :as stamps]
             [clojure.walk :refer [keywordize-keys]]))
 
 (def scope-skeleton
@@ -586,9 +587,14 @@
 (defn general-handler-id-for-organization [{roles :handler-roles :as organization}]
   (:id (util/find-first :general roles)))
 
-(defn create-handler-role [role-id name]
-  {:id (or role-id (mongo/create-id))
-   :name name})
+(defn create-handler-role
+  ([]
+   (create-handler-role nil {:fi "K\u00e4sittelij\u00e4"
+                             :sv "Handl\u00e4ggare"
+                             :en "Handler"}))
+  ([role-id name]
+   {:id (or role-id (mongo/create-id))
+    :name name}))
 
 (defn upsert-handler-role! [{handler-roles :handler-roles org-id :id} handler-role]
   (let [ind (or (util/position-by-id (:id handler-role) handler-roles)
@@ -637,3 +643,23 @@
   (mongo/update :organizations
                 {:_id org-id :handler-roles.id role-id}
                 {$set {:handler-roles.$.disabled (not enabled?)}}))
+
+(defn get-duplicate-scopes [municipality permit-types]
+  (not-empty (mongo/select :organizations {:scope {$elemMatch {:permitType {$in permit-types} :municipality municipality}}} [:scope])))
+
+(defn new-scope [municipality permit-type & {:keys [inforequest-enabled application-enabled open-inforequest-enabled open-inforequest-email opening]}]
+  (util/assoc-when scope-skeleton
+                   :municipality            municipality
+                   :permitType              permit-type
+                   :inforequest-enabled     inforequest-enabled
+                   :new-application-enabled application-enabled
+                   :open-inforequest        open-inforequest-enabled
+                   :open-inforequest-email  open-inforequest-email
+                   :opening                 (when (number? opening) opening)))
+
+(defn new-organization [org-id municipality name permit-types]
+  {:_id           org-id
+   :name          {:fi name :sv name :en name}
+   :scope         (map (partial new-scope municipality) permit-types)
+   :handler-roles [(create-handler-role)]
+   :stamps        [(assoc stamps/default-stamp-data :id (mongo/create-id))]})

@@ -22,9 +22,43 @@
                   data-test-id="organization-show-all">
             <i class="lupicon-document-list"></i>
             <span>N&auml;yt&auml; kaikki</span></button>
+          <button class="function"
+                  data-bind="click: organizationsModel.createOrganization"
+                  data-test-id="organization-create">
+            <i class="lupicon-circle-plus"></i>
+            <span>Lis&auml;&auml; organisaatio</span></button>
         </form>
         <p data-bind="text: organizationsModel.countText()"
            data-test-id="organization-result-count"></p>
+        <!-- ko if: organizationsModel.newOrganization() -->
+        <div class="container">
+          <h3>Uusi organisaatio</h3>
+          <form data-bind="with: organizationsModel.newOrganization">
+            <div>
+              <input type="text" name="newOrganizationId" placeholder="Tunnus (735-R)" data-bind="value: $data.orgId" class="form-input">
+            </div>
+            <div>
+              <input type="text" name="newOrganizationMunicipality" placeholder="Kuntanumero (753)" data-bind="value: $data.municipality" class="form-input">
+            </div>
+            <div>
+              <input type="text" name="newOrganizationName" placeholder="Nimi (Sipoon rakennusvalvonta)" data-bind="value: $data.name" class="form-input long">
+            </div>
+            <div>
+              <input type="text" name="newOrganizationPermitTypes" placeholder="Lupatyypit (R P YA KT MM YI YL VVVL MAL YM)" data-bind="value: $data.permitTypes" class="form-input long">
+            </div>
+
+            <div class="form-buttons">
+              <button data-bind="click: $data.save, ltext: 'save', enable: $data.isValid()"
+                      data-test-id="save-new-organization"
+                      class="positive btn"></button>
+
+              <button data-bind="click: $parent.organizationsModel.cancelCreate, ltext: 'cancel'"
+                      data-test-id="cancel-new-organization"
+                      class="secondary btn"></button>
+            </div>
+          </form>
+        </div>
+        <!-- /ko -->
         <!-- ko if: _.some( organizationsModel.organizations()) -->
         <table data-test-id="organizations-table"
           <thead>
