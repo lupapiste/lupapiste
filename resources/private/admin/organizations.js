@@ -26,11 +26,11 @@
     var permitTypes = ko.observableArray();
     self.permitTypes = ko.pureComputed({
       read: function() { return _.join(permitTypes(), " "); },
-      write: function(s) { permitTypes(_.split(s, " ")); }
+      write: function(s) { permitTypes(_.split(_.toUpper(s), " ")); }
     });
 
     self.isValid = function() {
-      return !_.isEmpty(self.orgId()) &&
+      return !_.isEmpty(_.toUpper(self.orgId())) &&
         !_.isEmpty(self.municipality()) &&
         !_.isEmpty(self.name()) &&
         !_.isEmpty(permitTypes());
