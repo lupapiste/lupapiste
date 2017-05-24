@@ -157,12 +157,11 @@ LUPAPISTE.StampModel = function(params) {
   });
 
   function stringToDate(dateString) {
-    return new Date (moment(dateString, "DD.MM.YYYY"));
+    return dateString && new Date (moment(dateString, "DD.MM.YYYY"));
   }
 
   function ddmmyyyyDate(date) {
-    var dateSeed = date ? new Date(date) : new Date();
-    return moment(dateSeed).format("DD.MM.YYYY");
+    return date && moment(date).format("DD.MM.YYYY");
   }
 
   function findRowData (type) {
