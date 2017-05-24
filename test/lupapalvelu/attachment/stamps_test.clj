@@ -202,7 +202,7 @@
 
 (facts "Should get rows as strings"
   (let [stamp (first (stamps organization application sonja))]
-    (non-empty-stamp-rows->vec-of-string-value-vecs (:rows stamp))
+    (non-empty-stamp-rows->vec-of-string-value-vecs {:fields (:rows stamp)})
     =>
     [["Hyv\u00e4ksytty" (sade.util/to-local-date (sade.core/now))]
      ["17-0753-R"]
