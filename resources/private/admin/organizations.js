@@ -18,12 +18,44 @@
     });
   }
 
+  function NewOrganizationModel(options) {
+    var self = this;
+    self.orgId = ko.observable("");
+    self.municipality = ko.observable("");
+    self.name = ko.observable("");
+    var permitTypes = ko.observableArray();
+    self.permitTypes = ko.pureComputed({
+      read: function() { return _.join(permitTypes(), " "); },
+      write: function(s) { permitTypes(_.split(s, " ")); }
+    });
+
+    self.isValid = function() {
+      return !_.isEmpty(self.orgId()) &&
+        !_.isEmpty(self.municipality()) &&
+        !_.isEmpty(self.name()) &&
+        !_.isEmpty(permitTypes());
+    };
+
+    self.save = function() {
+      ajax
+        .command("create-organization", {
+          "org-id": self.orgId(),
+          "municipality": self.municipality(),
+          "name": self.name(),
+          "permit-types": permitTypes()
+        })
+        .success( options.onSave || _.noop )
+        .call();
+    };
+  }
+
   function OrganizationsModel() {
     var self = this;
 
     var all = [];
     self.organizations = ko.observableArray([]);
     self.pending = ko.observable();
+    self.newOrganization = ko.observable();
     self.searchTerm = ko.observable();
     self.search = function() {
       self.organizations( _.filter( all,
@@ -62,6 +94,25 @@
     self.showAll = function() {
       self.searchTerm("");
       self.organizations( all );
+    };
+
+    function redirectAfterCreate() {
+      var id = util.getIn(self.newOrganization, ["orgId"]);
+      self.newOrganization(null);
+      self.load();
+      if (id) {
+        pageutil.openPage("organization", id);
+      }
+    }
+
+    self.createOrganization = function() {
+      self.newOrganization(new NewOrganizationModel({
+        onSave: redirectAfterCreate
+      }));
+    };
+
+    self.cancelCreate = function() {
+      self.newOrganization(null);
     };
   }
 

@@ -871,3 +871,6 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
+"error.organization-already-exists" "en" "Organization already exists"
+"error.organization-already-exists" "fi" "Organisaatio on jo olemassa"
+"error.organization-already-exists" "sv" ""
