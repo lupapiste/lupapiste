@@ -202,7 +202,11 @@
                       (partial action/numeric-parameters [:municipality])]
    :user-roles #{:admin}}
   [_]
-  (mongo/insert :organizations (org/new-organization org-id municipality name permit-types))
+  (mongo/insert :organizations {:_id           org-id
+                                :name          {:fi name :sv name :en name}
+                                :scope         (map (partial org/new-scope municipality) permit-types)
+                                :handler-roles [(org/create-handler-role)]
+                                :stamps        [(assoc stamps/default-stamp-data :id (mongo/create-id))]})
   (ok))
 
 (defn- validate-map-with-optional-url-values [param command]

@@ -30,7 +30,6 @@
             [lupapalvelu.wfs :as wfs]
             [me.raynes.fs :as fs]
             [lupapalvelu.attachment.stamp-schema :as stmp]
-            [lupapalvelu.attachment.stamps :as stamps]
             [clojure.walk :refer [keywordize-keys]]))
 
 (def scope-skeleton
@@ -656,10 +655,3 @@
                    :open-inforequest        open-inforequest-enabled
                    :open-inforequest-email  open-inforequest-email
                    :opening                 (when (number? opening) opening)))
-
-(defn new-organization [org-id municipality name permit-types]
-  {:_id           org-id
-   :name          {:fi name :sv name :en name}
-   :scope         (map (partial new-scope municipality) permit-types)
-   :handler-roles [(create-handler-role)]
-   :stamps        [(assoc stamps/default-stamp-data :id (mongo/create-id))]})
