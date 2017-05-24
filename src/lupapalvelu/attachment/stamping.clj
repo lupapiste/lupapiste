@@ -68,7 +68,7 @@
          sort
          first
          (stamps/assoc-tag-by-type fields :building-id))
-    info-fields))
+    fields))
 
 (defn- info-fields->stamp [{:keys [stamp-created transparency qr-code lang]} info-fields]
   {:pre [(pos? stamp-created)]}
