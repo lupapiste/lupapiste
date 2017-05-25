@@ -42,6 +42,21 @@
   (or (not-empty (:id auth-entry))
       (-> auth-entry :invite :user :id)))
 
+(defn- auth-is-user [auth user]
+  (= (:id auth) (:id user)))
+
+(defn- auth-is-company-of-user [auth user]
+  (= (:id auth) (-> user :company :id)))
+
+(defn- auth-role [auth-entry]
+  (or (keyword (-> auth-entry :invite :role))
+      (keyword (-> auth-entry :role))))
+
+(defn non-copyable-auth? [auth user]
+  (or (contains? non-copyable-roles (auth-role auth))
+      (auth-is-user auth user)
+      (auth-is-company-of-user auth user)))
+
 (defn- not-in-auth [auth]
   (let [auth-id-set (set (map auth-id auth))]
     (fn [id]
@@ -53,17 +68,15 @@
      :firstName (:firstName auth-entry)
      :lastName (:lastName auth-entry)
      :email (-> auth-entry :invite :email) ; for cases where invitee is not a registered user and name is not known
-     :role (or (:role party-info)                      ; prefer role dictated by party document
-               (keyword (-> auth-entry :invite :role)) ; but fall back to role in auth
-               (keyword (-> auth-entry :role)))
+     :role (or (:role party-info)      ; prefer role dictated by party document
+               (auth-role auth-entry)) ; but fall back to role in auth
      :roleSource (if (:role party-info)
                    :document :auth)}))
 
 (defn- get-invite-candidates [auth documents user]
   (->> auth
        (map (partial invite-candidate-info (party-infos-from-documents documents)))
-       (remove (comp non-copyable-roles :role))
-       (remove #(= (:id %) (:id user)))))
+       (remove #(non-copyable-auth? % user))))
 
 (defn copy-application-invite-candidates [user source-application-id]
   (if-let [source-application (domain/get-application-as source-application-id user :include-canceled-apps? true)]
@@ -387,8 +400,9 @@
 
 (defn- check-valid-auth-invites
   "Fails if some of the auth invites are not present on the source application"
-  [source-application auth-invites]
-  (let [not-in-source-auths? (not-in-auth (:auth source-application))]
+  [source-application auth-invites user]
+  (let [not-in-source-auths? (not-in-auth (remove #(non-copyable-auth? % user)
+                                                  (:auth source-application)))]
     (when (some not-in-source-auths? auth-invites)
       (fail :error.nonexistent-auths :missing (filter not-in-source-auths? auth-invites)))))
 
@@ -405,7 +419,7 @@
 
       (if-let [check-failed (or (check-valid-source-application source-application)
                                 (check-valid-operation-for-organization source-application organization)
-                                (check-valid-auth-invites source-application auth-invites))]
+                                (check-valid-auth-invites source-application auth-invites user))]
         check-failed
         {:source-application source-application
          :copy-application (new-application-copy (assoc source-application
