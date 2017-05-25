@@ -489,7 +489,8 @@
     :body lannan-varastointi-ilmoitus}
 
    {:info {:name "paatoksen-toimitus"
-           :order 9999}
+           :order 9999
+           :copy-action :clear}
     :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
                    {:name "Postitetaan"}]}]}

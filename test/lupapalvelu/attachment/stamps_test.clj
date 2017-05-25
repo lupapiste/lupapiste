@@ -106,7 +106,7 @@
     (tag-content {:type :organization} context) => {:type :organization :value "Sipoon rakennusvalvonta"}
     (tag-content {:type :application-id} context) => {:type :application-id :value "LP-753-2017-90001"}
     (tag-content {:type :building-id} context) => {:type :building-id :value "Rakennustunnus"}
-    (tag-content {:type :section} context) => {:type :section :value "§ 666"}))
+    (tag-content {:type :section} context) => {:type :section :value "\u00a7 666"}))
 
 (facts "Stamp rows should be formed correctly"
   (fill-rows (first (:stamps organization)) {:organization organization

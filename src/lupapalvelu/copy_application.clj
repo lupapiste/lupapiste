@@ -17,7 +17,9 @@
             [sade.property :as prop]
             [sade.util :refer [merge-in find-first pathwalk]]))
 
+;;;
 ;;; Obtaining the parties to invite for the copied app
+;;;
 
 (defn- party-info-from-document [document]
   {:document-id (:id document)
@@ -82,13 +84,18 @@
     (select-keys source-application (:whitelist copy-options))
     (apply dissoc source-application (:blacklist copy-options))))
 
-
+;;;
 ;;; Updating documents
+;;;
 
 (defn- primary-op-name [application]
   (-> application :primaryOperation :name))
 
-(defn- operation-id-map [source-application]
+(defn- operation-id-map
+  "Creates a map from operation ids of source application to newly
+  generated mongo ids. This is used to have e.g. copied documents refer
+  to the operations of the copied application instead of the source one."
+  [source-application]
   (into {}
         (map #(vector (:id %) (mongo/create-id))
              (conj (:secondaryOperations source-application)
@@ -173,31 +180,62 @@
                        (schemas/get-schema (:schema-version application)
                                            plan-name))))
 
-(defn- location-document? [document]
-  (= (-> document :schema-info :type) :location))
-
 (defn- document-disabled? [document]
   (boolean (-> document :disabled)))
 
-(defn- handle-special-cases [document application organization manual-schema-datas]
-  (let [schema-name (-> document :schema-info :name)]
-    (cond (construction-waste-plan? document)
-            (construction-waste-plan application
-                                     organization
-                                     manual-schema-datas)
-          (location-document? document)
-            (empty-document-copy document application manual-schema-datas)
-          (document-disabled? document)
-            (empty-document-copy document application manual-schema-datas)
+(defn- handle-copy-action
+  "Handle the copy action specified by the document schema"
+  [document application organization manual-schema-datas]
+  (let [schema-info (-> document :schema-info
+                        (schemas/get-schema) :info)
+        copy-action (:copy-action schema-info)]
+    (cond (= copy-action :clear)
+          (empty-document-copy document application manual-schema-datas)
+
+          (or (= copy-action :copy) (nil? copy-action))
+          document
+
           :else document)))
 
-(defn- preprocess-document [document application organization manual-schema-datas]
+(defn- handle-special-cases
+  "Handle special cases not covered by :copy-action in the document
+  schema. If you notice that a subset of the cases could be removed by
+  adding a meaningful :copy-action value, please do."
+  [document application organization manual-schema-datas]
+  (cond (construction-waste-plan? document)
+        (construction-waste-plan application organization manual-schema-datas)
+
+        (document-disabled? document)
+        (empty-document-copy document application manual-schema-datas)
+
+        :else document))
+
+(defn- update-doc-operation-reference
+  "Update the document so that it refers to an operation in the copied
+  application, not the source one"
+  [document op-id-mapping]
+  (if (-> document :schema-info :op)
+    (update-in document [:schema-info :op :id] op-id-mapping)
+    document))
+
+(defn- preprocess-document
+  [document op-id-mapping application organization manual-schema-datas]
   (-> document
+      (handle-copy-action   application organization manual-schema-datas)
       (handle-special-cases application organization manual-schema-datas)
-      (assoc :id (mongo/create-id)
+      (assoc :id      (mongo/create-id)
              :created (:created application))
       (dissoc :meta)
-      (clear-personal-information application manual-schema-datas)))
+      (clear-personal-information application manual-schema-datas)
+      (update-doc-operation-reference op-id-mapping)))
+
+(defn- update-attachment-operation-references
+  "Update the attachment so that it refers to an operation in the copied
+  application, not the source one"
+  [attachment op-id-mapping]
+  (if (:op attachment)
+    (update attachment :op (partial map #(update % :id op-id-mapping)))
+    attachment))
 
 (defn- updated-operation-and-document-ids
   [application source-application organization & [manual-schema-datas]]
@@ -206,19 +244,12 @@
                                op-id-mapping)
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
-     :documents (mapv (fn [doc]
-                        (let [doc (preprocess-document doc
-                                                       application
-                                                       organization
-                                                       manual-schema-datas)]
-                          (if (-> doc :schema-info :op)
-                            (update-in doc [:schema-info :op :id] op-id-mapping)
-                            doc)))
+     :documents (mapv #(preprocess-document % op-id-mapping
+                                            application
+                                            organization
+                                            manual-schema-datas)
                       (:documents application))
-     :attachments (mapv (fn [attachment]
-                          (if (:op attachment)
-                            (update attachment :op (partial map #(update % :id op-id-mapping)))
-                            attachment))
+     :attachments (mapv #(update-attachment-operation-references % op-id-mapping)
                         (:attachments application))}))
 
 ;;; Handling noncopied and nonoverridden keys similarly to creating new application
@@ -256,8 +287,8 @@
 (defn- new-auth-map [{auth           :auth
                      id              :id
                      {op-name :name} :primaryOperation
-                     created          :created}
-                    inviter]
+                     created         :created}
+                     inviter]
   {:auth (concat (app/application-auth inviter op-name)
                  (->> auth
                       (remove #(= (:id inviter) (:id %)))
