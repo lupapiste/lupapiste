@@ -66,10 +66,11 @@
                  :exclude-from-pdf
                  :editable-in-states
                  :accordion-fields
-                 :blacklist})
+                 :blacklist
+                 :copy-action})
 
 (def updateable-keys #{:removable})
-(def immutable-keys (set/difference info-keys updateable-keys) )
+(def immutable-keys (set/difference info-keys updateable-keys))
 
 (def select-one-of-key "_selected")
 
@@ -1563,27 +1564,31 @@
    {:info {:name "rakennuspaikka"
            :approvable true
            :order 2
-           :type :location}
+           :type :location
+           :copy-action :clear}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
 
    {:info {:name "rakennuspaikka-ilman-ilmoitusta"
            :approvable true
            :i18name "rakennuspaikka"
            :order 2
-           :type :location}
+           :type :location
+           :copy-action :clear}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
 
    {:info {:name "toiminnan-sijainti"
            :approvable true
            :i18name "rakennuspaikka"
            :order 2
-           :type :location}
+           :type :location
+           :copy-action :clear}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
 
    {:info {:name "kiinteisto"
            :approvable true
            :order 2
-           :type :location}
+           :type :location
+           :copy-action :clear}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
    {:info {:name "secondary-kiinteistot"
@@ -1593,7 +1598,8 @@
            :repeating true
            :no-repeat-button true
            :removable true
-           :type :location}
+           :type :location
+           :copy-action :clear}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
    {:info {:name "aloitusoikeus" :removable false :approvable true}
@@ -1609,7 +1615,8 @@
            :removable false
            :approvable true
            :order 300
-           :blacklist [:neighbor]}
+           :blacklist [:neighbor]
+           :copy-action :clear}
     :body (body
            [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
            simple-osoite
