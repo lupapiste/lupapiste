@@ -343,6 +343,12 @@
                (opt :localizeFormat) sc/Str}
    :else      [sc/Str])) ;; Shortcut for :type :text, no optional keys.
 
+(defschema CopyAction
+  "Determines what to do with the document when the parent application is being copied"
+  (sc/enum :copy  ; Copy the document as it is
+           :clear ; Replace the document with an empty copy
+           ))
+
 (defschema Doc
   {:info {:name                              sc/Str     ;;
           (opt :version)                     sc/Int     ;;
@@ -370,6 +376,7 @@
           ;; Blacklist only works for :neighbor blacklisting. See neighbors API for details.
           (opt :blacklist)                   [sc/Keyword]
           (opt :accordion-fields)            [AccordionField]
+          (opt :copy-action)                 CopyAction
           }
    (opt :rows) [(sc/cond-pre {sc/Keyword sc/Str} [sc/Str])]
    (opt :template) sc/Str
