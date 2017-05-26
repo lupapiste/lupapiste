@@ -81,38 +81,52 @@
     ;; 5. Cap the size of the final list
     (take max-number-of-ads)))
 
-
 ;; Constructing RSS-feed items
 
+(defn- loc [lang prefix term]
+  (if (ss/blank? term)
+    term
+    (i18n/with-lang lang (i18n/loc (str prefix term)))))
+
+(defn- col-value [lang col-key col-data]
+  (let [k (keyword col-key)
+        v (k col-data)]
+    (case k
+      :yksikko (loc lang "jateyksikko." v)
+      v)))
+
+(defn- col-row-map [fun]
+  (->>
+    (map :name waste-schemas/availableMaterialsRow)
+    (map fun)
+    (concat [:tr])
+    vec))
+
+(defn- item-as-html [lang {:keys [name phone email]} municipality-text materials]
+  (hiccup/html
+    [:div
+     [:span (ss/join " " [name phone email municipality-text])]
+     [:table
+      (col-row-map #(vec [:th (loc lang "available-materials." %)]))
+      (for [m materials]
+        (col-row-map #(vec [:td (col-value lang % m)])))]]))
+
+(defn- rss-feed-item [lang {:keys [contact materials municipality]}]
+  (let [municipality-text (loc lang "municipality." municipality)
+        html (item-as-html lang contact municipality-text materials)]
+    {:title       "Lupapiste"
+     :link        "http://www.lupapiste.fi"
+     :author      (:name contact)
+     :description (str "<![CDATA[ " html " ]]>")}))
+
 (defmethod waste-ads :rss [org-id _ lang]
-  (let [ads (waste-ads org-id)
-        columns (map :name waste-schemas/availableMaterialsRow)
-        loc (fn [prefix term] (if (ss/blank? term)
-                                term
-                                (i18n/with-lang lang (i18n/loc (str prefix term)))))
-        col-value (fn [col-key col-data]
-                    (let [k (keyword col-key)
-                          v (k col-data)]
-                      (case k
-                        :yksikko (loc "jateyksikko." v)
-                        v)))
-        col-row-map (fn [fun]
-                      (->> columns (map fun) (concat [:tr]) vec))
-        items (for [{:keys [contact materials municipality]} ads
-                    :let [{:keys [name phone email]} contact
-                          municipality-text (i18n/with-lang lang (i18n/loc "municipality" municipality))
-                          html (hiccup/html [:div [:span (ss/join " " [name phone email municipality-text])]
-                                             [:table
-                                              (col-row-map #(vec [:th (loc "available-materials." %)]))
-                                              (for [m materials]
-                                                (col-row-map #(vec [:td (col-value % m)])))]])]]
-                {:title       "Lupapiste"
-                 :link        "http://www.lupapiste.fi"
-                 :author      name
-                 :description (str "<![CDATA[ " html " ]]>")})]
-    (rss/channel-xml {:title (str "Lupapiste:" (i18n/with-lang lang (i18n/loc "available-materials.contact")))
-                      :link  "" :description ""}
-                     items)))
+  (let [title (str "Lupapiste:" (loc lang "available-materials." "contact"))]
+    (->>
+      (waste-ads org-id)
+      (map #(rss-feed-item lang %))
+      (rss/channel-xml {:title       title
+                        :link        ""
+                        :description ""}))))
 
 (defmethod waste-ads :json [org-id & _]
   (json/generate-string (waste-ads org-id)))
