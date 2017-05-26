@@ -461,17 +461,22 @@
        (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword))))
 
 (defn- notify-of-invite! [app command invite-type recipients]
-  (->> (map (fn [{{:keys [email user]} :invite}] (or (usr/get-user-by-email email) (assoc user :email email))) recipients)
-         (assoc command :application app :recipients)
-         (notif/notify! invite-type)))
+  (let [recipients (map (fn [{{:keys [email user]} :invite}]
+                          (or (usr/get-user-by-email email)
+                              (assoc user :email email)))
+                        recipients)]
+    (notif/notify! invite-type
+                   (assoc command
+                          :application app
+                          :recipients  recipients))))
 
 
-(defn- user-invite-notifications! [foreman-app command auths]
+(defn- user-invite-notifications! [application command auths]
   (let [[foremen others] ((juxt filter remove) (partial foreman-in-foreman-app?
-                                                        foreman-app)
+                                                        application)
                                                auths)]
-    (notify-of-invite! foreman-app command :invite-foreman foremen)
-    (notify-of-invite! foreman-app command :invite others)))
+    (notify-of-invite! application command :invite-foreman foremen)
+    (notify-of-invite! application command :invite others)))
 
 (defn- invite-company! [app {user :user} auth]
   (let [company-id (get-in auth [:invite :user :id])
