@@ -26,7 +26,6 @@
   (println "full state:" @current-template)
   (when-not (empty? (rum/react service/schemas))
     [:div (verdict-template (assoc matti/default-verdict-template
-                                   :name "Unnamed"
                                    :state current-template
                                    :data matti/default-data))
      [:p (str (rum/react current-template))]]))

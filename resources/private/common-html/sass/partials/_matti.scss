@@ -64,3 +64,12 @@ $matti-grid-margin: 20px;
 @for $i from 1 through 12 {
   @include matti-grid( $i );
 }
+
+// toggle-helper is defined in _inputs.scss
+@include toggle-helper ( matti-checkbox, "e604", "e603", $wrapper-display: inline-block ) {}
+
+.matti-checkbox-wrapper {
+  border: none;
+  $margin-right: $marginS;
+  $margin-bottom: $marginS;
+}

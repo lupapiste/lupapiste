@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.matti.path
   (:require [rum.core :as rum]
+            [lupapalvelu.ui.common :as common]
             [clojure.string :as s]))
 
 (defn state [path state]
@@ -12,4 +13,13 @@
        (map keyword)))
 
 (defn id [path]
-  (s/join "-" path))
+  (s/replace (->> (filter identity path)
+                  (map name)
+                  (s/join "-"))
+             "." "-"))
+
+(defn loc [path]
+  (->> (filter identity path)
+       (map name)
+       (s/join ".")
+       common/loc))
