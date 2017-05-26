@@ -49,14 +49,20 @@
 
 (def verdict-code {:name "matti-verdict-code"
                    :type :select
-                   :i18nkey "matti.verdict"
+                   ;;:i18nkey "matti.verdict"
                    :body (map #(hash-map :name (name %))
                               (keys verdict-code-map))})
 (def verdict-check {:name "matti-verdict-check"
                     :type :checkbox})
 
+(def matti-string {:name "matti-string"
+                   :type :string})
+
+(def verdict-text {:name "matti-verdict-text"
+                   :type :text
+                   :label false})
 (defschemas 1
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [verdict-code verdict-check]))
+       [verdict-code verdict-check matti-string verdict-text]))

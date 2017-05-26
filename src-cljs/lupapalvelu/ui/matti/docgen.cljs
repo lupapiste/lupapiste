@@ -24,7 +24,7 @@
   (if (-> schema :body first :label false?)
     component
     [:div.col--vertical
-     [:label {:for (path/id path)} (docgen-loc options :label)]
+     [:label {:for (path/id path)} (docgen-loc options)]
      component]))
 
 (defmethod docgen-label-wrap :checkbox
@@ -49,7 +49,6 @@
 
 (defmethod docgen-component :select
   [{:keys [schema state path] :as options}]
-  (println "select path:" path)
   (let [state (path/state path state)]
     [:select.dropdown
      (docgen-attr options
@@ -78,3 +77,20 @@
       {:for      input-id
        :on-click #(swap! state not)}
       (docgen-loc options)]]))
+
+(defmethod docgen-component :string
+  [{:keys [schema state path] :as options}]
+  (let [state (path/state path state)]
+    [:input.grid-style-input
+     (docgen-attr options
+                  :type "text"
+                  :value (rum/react state)
+                  :on-change #(reset! state (.. % -target -value)))]))
+
+(defmethod docgen-component :text
+  [{:keys [schema state path] :as options}]
+  (let [state (path/state path state)]
+    [:textarea.grid-style-input
+     (docgen-attr options
+                  :value (rum/react state)
+                  :on-change #(reset! state (.. % -target -value)))]))

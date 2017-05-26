@@ -17432,6 +17432,16 @@ input:disabled + .matti-checkbox-label:hover.matti-checkbox-label:before {
   border: none;
 }
 
+.matti-section {
+  border-top: 1px solid #dddddd;
+  padding-top: 6px;
+}
+
+.matti-section .matti-section-button {
+  margin-top: 6px;
+  float: right;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

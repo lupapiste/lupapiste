@@ -23,7 +23,6 @@
 
 (rum/defc verdict-templates < rum/reactive
   [_]
-  (println "full state:" @current-template)
   (when-not (empty? (rum/react service/schemas))
     [:div (verdict-template (assoc matti/default-verdict-template
                                    :state current-template

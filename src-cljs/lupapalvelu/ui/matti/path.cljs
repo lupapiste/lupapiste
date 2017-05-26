@@ -23,3 +23,6 @@
        (map name)
        (s/join ".")
        common/loc))
+
+(defn ancestor-meta [path state meta-key]
+  )

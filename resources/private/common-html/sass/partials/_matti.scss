@@ -73,3 +73,12 @@ $matti-grid-margin: 20px;
   $margin-right: $marginS;
   $margin-bottom: $marginS;
 }
+
+.matti-section {
+  border-top: 1px solid $grid-border-color;
+  padding-top: $marginS;
+  .matti-section-button {
+    margin-top: $marginS;
+    float: right;
+  }
+}

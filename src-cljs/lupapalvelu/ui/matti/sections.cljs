@@ -50,8 +50,11 @@
       (for [{:keys [col align schema id] :as cell} row]
         [:div {:class [(str "col-" (or col 1))
                        (when align (str "col--" (name align)))]}
-         (instantiate options cell true)])])])
+         (when schema
+           (instantiate options cell true))])])])
 
 (rum/defc section < rum/reactive
   [{:keys [state path id] :as options}]
-  [:div (matti-grid options)])
+  [:div.matti-section
+   [:button.matti-section-button.ghost "Sulje"]
+   (matti-grid options)])

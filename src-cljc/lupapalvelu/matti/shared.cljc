@@ -47,17 +47,18 @@
 (def default-verdict-template
   {:name     ""
    :sections [{:id    "matti.verdict"
-               :grid  {:columns 4
-                       :rows    [[{;;:col    1
-                                   :align  :full
+               :grid  {:columns 5
+                       :rows    [[{}
+                                  {:id "pykala"
+                                   :schema {:docgen "matti-string"}}
+                                  {}
+                                  {:align  :full
                                    :id "paatostieto"
-                                   :schema {:docgen "matti-verdict-code"}}
-                                  #_{:col    2
-                                   :align  :full
-                                   ;;:id "select2"
-                                     :schema "matti-verdict-code"}
-                                  {:id "check1"
-                                   :schema {:docgen "matti-verdict-check"}}]]}}
+                                   :schema {:docgen "matti-verdict-code"}}]
+                                 [{:col 3
+                                   :id "paatosteksti"
+                                   :align :full
+                                   :schema {:docgen "matti-verdict-text"}}]]}}
               {:id "matti.conditions"
                :grid {:columns 4
                       :rows [[{:col 4
