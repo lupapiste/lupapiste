@@ -2,17 +2,19 @@
   (:require [rum.core :as rum]
             [cljsjs.moment]
             [cljsjs.pikaday]
+            [lupapalvelu.ui.common :refer [loc]]
             [camel-snake-kebab.core :refer [->camelCaseString]]
-            [camel-snake-kebab.extras :refer [transform-keys]]))
+            [camel-snake-kebab.extras :refer [transform-keys]]
+            [clojure.string :as string]))
 
 (defonce the-date (atom (js/Date.)))
 
 (defn pikaday-i18n []
-  {:previousMonth "Edellinen"
-   :nextMonth "Seuraava"
-   :months ["Tammikuu","Helmikuu","Maaliskuu","Huhtikuu","Toukokuu","Kesakuu","Heinakuu","Elokuu","Syyskuu","Lokakuu","Marraskuu","Joulukuu"],
-   :weekdays ["Sunnuntai","Maanantai","Tiistai","Keskiviikko","Torstai","Perjantai","Lauantai"],
-   :weekdays-short  ["Su","Ma","Ti","Ke","To","Pe","Su"]})
+  {:previousMonth (loc "previous")
+   :nextMonth (loc "next")
+   :months (string/split (loc "months") #",")
+   :weekdays (string/split (loc "weekdays") #",")
+   :weekdays-short (string/split (loc "short.weekdays") #",")})
 
 (defn- opts-transform [opts]
   (clj->js (transform-keys ->camelCaseString opts)))
@@ -22,15 +24,15 @@
   (let [instance-atom (atom nil)]
     {:did-mount
      (fn [state]
-       (let [comp (:rum/react-component state)
-             args (first (:rum/args state))
-             dom-node (js/ReactDOM.findDOMNode comp)
+       (let [args (first (:rum/args state))
+             dom-node (rum/dom-node state)
              pikaday-attrs (:pikaday-attrs args)
              date-atom (:date-atom args)
              default-opts
              {:field            dom-node
               :default-date     @date-atom
               :set-default-date true
+              :i18n             (pikaday-i18n)
               :on-select        #(when date-atom (reset! date-atom %))}
              opts (opts-transform (merge default-opts pikaday-attrs))
              instance (js/Pikaday. opts)]
@@ -43,16 +45,14 @@
      (fn [this]
        (.destroy @instance-atom)
        (remove-watch instance-atom :update-instance)
-       (remove-watch instance-atom :update-min-date)
-       (remove-watch instance-atom :update-max-date)
-       (reset! instance-atom nil))
-     }))
+       (reset! instance-atom nil))}))
 
 (rum/defcs datepicker < (datepicker-mixin)
-  [state datepicker-args]
-  [:input {:type "text"}])
+  [state datepicker-args commit-fn]
+  [:input {:type    "text"
+           :on-blur #(commit-fn @(:date-atom datepicker-args))}])
 
-(rum/defc basic-datepicker [date]
+(rum/defc basic-datepicker [date commit-fn trigger]
   (let [date-atom (atom date)]
   (datepicker {:date-atom date-atom
                :pikaday-attrs
@@ -60,4 +60,5 @@
                            :i18n           (pikaday-i18n)
                            :showWeekNumber true
                            :firstDay       1
-                           :position       "bottom left"}})))
+                           :position       "bottom left"}}
+              commit-fn)))
