@@ -7,7 +7,9 @@
             [sade.util :as util]
             [cheshire.core :as json]
             [clojure.walk :as walk])
-  (:refer-clojure :exclude [get]))
+  (:refer-clojure :exclude [get])
+  (:import [sun.security.provider.certpath SunCertPathBuilderException]
+           [java.io IOException]))
 
 (def no-cache-headers {"Cache-Control" "no-cache, no-store"
                        "Pragma" "no-cache"})
@@ -43,6 +45,13 @@
       (client req
               #(respond (encode-location %)) raise)))))
 
+(defn- handle-exception [^Throwable e uri connection-error {:keys [throw-fail! throw-exceptions] :as options}]
+  (log (str uri " - " (.getMessage e)) options)
+  (cond
+    throw-fail!               (fail! connection-error :cause (.getMessage e))
+    (false? throw-exceptions) {:status 502, :body (str "I/O exception - " (.getMessage e))}
+    :else                     (throw e)))
+
 (defn- logged-call [f uri {:keys [throw-fail! throw-exceptions] :as options}]
   (let [http-client-opts (update options :throw-exceptions (fn [t?] (if throw-fail! false t?)))
         connection-error (or (:connection-error options) :error.integration.connection)
@@ -54,12 +63,10 @@
           (do
             (log (str uri " returned " status) options)
             (fail! http-error :status status))))
-      (catch java.io.IOException e
-        (log (str uri " - " (.getMessage e)) options)
-        (cond
-          throw-fail!               (fail! connection-error :cause (.getMessage e))
-          (false? throw-exceptions) {:status 502, :body (str "I/O exception - " (.getMessage e))}
-          :else                     (throw e))))))
+      (catch IOException e
+        (handle-exception e uri connection-error options))
+      (catch SunCertPathBuilderException e
+        (handle-exception e uri connection-error options)))))
 
 (defn get [uri & options]
   (http/with-additional-middleware [wrap-location]
