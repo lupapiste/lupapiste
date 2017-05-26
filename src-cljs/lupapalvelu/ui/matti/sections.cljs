@@ -2,31 +2,26 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.matti.path :as path]
             [clojure.string :as s]))
-
-(defn extend-path [path id]
-  (if id
-    (conj path id)
-    path))
-
-(defn path-id [path]
-  (s/join "-" path))
 
 (defn docgen-loc [{:keys [schema path]} & extra]
   (let [{:keys [i18nkey locPrefix]} (-> schema :body first)
         xs (-> (cond
                  i18nkey [i18nkey]
-                 locPrefix (cons locPrefx path)
+                 locPrefix (cons locPrefix path)
                  :else path)
                (concat extra))]
-    (common/loc (s/join "." (filter identity xs)))))
+    (common/loc (->> xs
+                     (map name)
+                     (filter identity)
+                     (s/join ".")))))
 
 (defn docgen-label-wrap [{:keys [schema path] :as options} component]
   (if (-> schema :body first :label false?)
     component
     [:div.col--vertical
-     [:label {:for (path-id path)} (docgen-loc options)]
+     [:label {:for (path/id path)} (docgen-loc options)]
      component]))
 
 (defmulti docgen-component #(-> % :schema :body first :type keyword))
@@ -41,43 +36,38 @@
 
 (defmethod docgen-component :select
   [{:keys [schema state path] :as options}]
-  (->> [:select.dropdown
-        {:value     (rum/react state)
-         :id (path-id path)
-         :on-change #(reset! state (.. % -target -value))}
-        (->> schema :body first
-             :body
-             (map (fn [{n :name}]
-                    {:value n
-                     :text  (common/loc (str "matti.verdict." n))}))
-             (sort-by :text)
-             (cons {:value ""
-                    :text  (common/loc "selectone")})
-             (map (fn [{:keys [value text]}]
-                    [:option {:key value :value value} text])))]
-       (docgen-label-wrap options)))
+  (let [state (path/state path state)]
+    (->> [:select.dropdown
+         {:value     (rum/react state)
+          :id (path/id path)
+          :on-change  #(reset! state (.. % -target -value))}
+         (->> schema :body first
+              :body
+              (map (fn [{n :name}]
+                     {:value n
+                      :text  (common/loc (str "matti.verdict." n))}))
+              (sort-by :text)
+              (cons {:value ""
+                     :text  (common/loc "selectone")})
+              (map (fn [{:keys [value text]}]
+                     [:option {:key value :value value} text])))]
+        (docgen-label-wrap options))))
 
 
-(defn grid [{:keys [grid state path data] :as options}]
-  (letfn [(child-options [col-id schema-name full-schema]
-            (state/state-schema-options {:state state
-                                         :data data
-                                         :path (extend-path path col-id)
-                                         :schema schema-name}
-                                        full-schema))]
-      [:div {:class (str "matti-grid-" (:columns grid))}
-    (for [row (:rows grid)]
-      [:div.row
-       (for [{:keys [col align schema id]} row]
-         [:div {:class [(str "col-" (or col 1))
-                        (when align (str "col--" (name align)))]}
-          (cond
-            (string? schema) (->> (service/schema schema)
-                                  (child-options id schema)
-                                  docgen-component)
-            (keyword? schema) "Not supported.")])])]))
+(defn grid [{:keys [grid state path] :as options}]
+  [:div {:class (str "matti-grid-" (:columns grid))}
+   (for [row (:rows grid)]
+     [:div.row
+      (for [{:keys [col align schema id]} row]
+        [:div {:class [(str "col-" (or col 1))
+                       (when align (str "col--" (name align)))]}
+         (cond
+           (string? schema) (docgen-component {:state state
+                                               :path (path/extend path id schema)
+                                               :schema (service/schema schema)})
+           (keyword? schema) "Not supported.")])])])
 
 (rum/defc section < rum/reactive
-  [{:keys [schema id] :as options}]
+  [{:keys [state path id] :as options}]
   [:div [:h4 (common/loc id)]
-   (grid (assoc options :path [id]))])
+   (grid options)])

@@ -4,27 +4,31 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.sections :as sections]
-            [lupapalvelu.ui.matti.state :as state]))
+            [lupapalvelu.ui.matti.path :as path]))
 
 (defonce current-template (atom {}))
 
 
 (defn verdict-template
-  [{:keys [name sections state]}]
+  [{:keys [name sections state data]}]
+  (when (empty? @state)
+    (reset! state data))
   [:div
    [:h3 name]
-   (for [s sections]
-     [:div {:key (:id s)}
-      (sections/section (assoc s :state (state/data-cursor state
-                                                           (:id s)
-                                                           {(-> s :id keyword) (:data s)})))])])
+   (for [sec sections]
+     [:div {:key (:id sec)}
+      (sections/section (assoc sec
+                               :path (path/extend (:id sec))
+                               :state state))])])
 
 (rum/defc verdict-templates < rum/reactive
   [_]
+  (println "full state:" @current-template)
   (when-not (empty? (rum/react service/schemas))
     [:div (verdict-template (assoc matti/default-verdict-template
                                    :name "Unnamed"
-                                   :state current-template))
+                                   :state current-template
+                                   :data matti/default-data))
      [:p (str (rum/react current-template))]]))
 
 (defonce args (atom {}))

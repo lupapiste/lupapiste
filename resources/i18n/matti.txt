@@ -122,4 +122,4 @@
 "matti.verdict.valituksesta-luovuttu-2" "fi" "Valituksesta luovuttu (oikaisuvaatimus/lupa pysyy evättynä)"
 "matti.verdict.valituksesta-luovuttu-2" "sv" "Från besvär har avståtts (rättelseyrkan/tillståndet förblir avslaget)"
 "matti.verdict" "fi" "Päätös"
-"matti.verdict.select" "fi" "Päätöstieto"
+"matti.verdict.select.matti-verdict-code" "fi" "Päätöstieto"

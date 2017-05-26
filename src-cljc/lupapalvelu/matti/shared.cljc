@@ -15,14 +15,12 @@
 
 (defschema MattiVerdictSection
   {:id     sc/Str  ;; Also title localization key
-   :grid   MattiGrid
-   :data   sc/Any}) ;; Data must conform to the grid contents
+   :grid   MattiGrid}) ;; Data must conform to the grid contents
 
 (defschema MattiVerdict
   {(sc/optional-key :id) sc/Str  ;; Id is created when the verdict is saved the first time
    :name                 sc/Str  ;; Non-localized raw string
    :sections             [MattiVerdictSection]})
-
 
 (def matti-schemas {})
 
@@ -33,7 +31,12 @@
                        :rows    [[{;;:col    1
                                    :align  :full
                                    :id "select"
-                                   :schema "matti-verdict-code"}]]}
-               :data  {:matti-verdict-code "myonnetty"}}]})
+                                   :schema "matti-verdict-code"}
+                                  #_{:col    2
+                                   :align  :full
+                                   ;;:id "select2"
+                                     :schema "matti-verdict-code"}]]}}]})
+
+(def default-data {:matti.verdict {:select {:matti-verdict-code "evatty"}}})
 
 (sc/validate MattiVerdict default-verdict-template)
