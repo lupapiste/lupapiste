@@ -77,8 +77,19 @@ $matti-grid-margin: 20px;
 .matti-section {
   border-top: 1px solid $grid-border-color;
   padding-top: $marginS;
-  .matti-section-button {
-    margin-top: $marginS;
+  .matti-section__buttons {
     float: right;
+    > button {
+      margin-top: $marginS;
+      margin-left: $marginS;
+    }
   }
+}
+
+span.matti-checkbox + span.matti-checkbox:before {
+  content: ", ";
+}
+
+span.formatted {
+  white-space: pre-wrap;
 }

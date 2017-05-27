@@ -94,3 +94,22 @@
      (docgen-attr options
                   :value (rum/react state)
                   :on-change #(reset! state (.. % -target -value)))]))
+
+(defmulti docgen-view docgen-type)
+
+(defmethod docgen-view :default
+  [{:keys [schema state path] :as options}]
+  [:span.formatted (docgen-attr options)
+   (rum/react (path/state path state))])
+
+(defmethod docgen-view :select
+  [{:keys [schema state path] :as options}]
+  [:span (docgen-attr options)
+   (when-let [v (not-empty (rum/react (path/state path state)))]
+     (docgen-loc options v))])
+
+(defmethod docgen-view :checkbox
+  [{:keys [schema state path] :as options}]
+  (when (rum/react (path/state path state))
+    [:span.matti-checkbox (docgen-attr options)
+     (docgen-loc options)]))

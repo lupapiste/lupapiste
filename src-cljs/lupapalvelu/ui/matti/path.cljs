@@ -24,5 +24,15 @@
        (s/join ".")
        common/loc))
 
-(defn ancestor-meta [path state meta-key]
-  )
+(defn latest
+  "The latest non-nil value for the given key in the state* along the
+  path. Path is shortened until the value is found. Nil if value not
+  found. Key can be also be key sequence."
+  [path state* & key]
+  (let [v @(state (extend path key) state*) ]
+    (if (or (some? v) (empty? path))
+      v
+      (latest (drop-last path) state* key))))
+
+(defn meta? [{:keys [state path]} key]
+  (latest path state :_meta key))

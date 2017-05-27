@@ -68,6 +68,7 @@
                              [{:col 4
                                :schema (checkbox-list "reviews" ["paikka" "sijainti" "aloitus" "pohja" "rakenne" "vv" "iv" "loppu"])}]]}}]})
 
-(def default-data {:matti.verdict {:paatostieto "evatty"}})
+(def default-data {:matti.verdict {:paatostieto "evatty"}
+                   :_meta         {:can-edit? true}})
 
 (sc/validate MattiVerdict default-verdict-template)

@@ -144,3 +144,6 @@
 "matti.conditions.reviews.loppu" "fi" "Loppukatselmus"
 "matti.verdict.pykala" "fi" "Pykälä"
 "matti.verdict.paatosteksti" "fi" "Päätösteksti"
+"matti.edit" "en" "Edit"
+"matti.edit" "fi" "Muokkaa"
+"matti.edit" "sv" "Anpassa"

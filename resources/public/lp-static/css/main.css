@@ -17437,9 +17437,21 @@ input:disabled + .matti-checkbox-label:hover.matti-checkbox-label:before {
   padding-top: 6px;
 }
 
-.matti-section .matti-section-button {
-  margin-top: 6px;
+.matti-section .matti-section__buttons {
   float: right;
+}
+
+.matti-section .matti-section__buttons > button {
+  margin-top: 6px;
+  margin-left: 6px;
+}
+
+span.matti-checkbox + span.matti-checkbox:before {
+  content: ", ";
+}
+
+span.formatted {
+  white-space: pre-wrap;
 }
 
 /* VIEWS

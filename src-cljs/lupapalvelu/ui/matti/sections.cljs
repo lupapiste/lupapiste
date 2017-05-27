@@ -20,9 +20,12 @@
   (let [schema-name (:docgen schema)
         options     {:state  state
                      :path   (path/extend path id)
-                     :schema (service/schema schema-name)}]
-    (cond->> (docgen/docgen-component options)
-      wrap-label? (docgen/docgen-label-wrap options ))))
+                     :schema (service/schema schema-name)}
+        editing?    (path/meta? options :editing? )]
+    (cond->> options
+      editing?       docgen/docgen-component
+      (not editing?) docgen/docgen-view
+      wrap-label?    (docgen/docgen-label-wrap options ))))
 
 (defmethod instantiate :default
   [{:keys [state path]} {:keys [schema id] :as cell} & wrap-label?]
@@ -53,8 +56,26 @@
          (when schema
            (instantiate options cell true))])])])
 
+(rum/defc section-buttons < rum/reactive
+  [{:keys [state path] :as options}]
+  (when (path/latest path state :_meta :can-edit?)
+    (let [editing-fn #(swap! (path/state (path/extend path :_meta :editing?)
+                                         state)
+                             not)]
+      [:div.matti-section__buttons
+       (when (path/meta? options :editing?)
+         [:button.matti-section-button.ghost
+          {:on-click editing-fn}
+          (common/loc "close")])
+       (when-not (path/meta? options :editing?)
+         [:button.matti-section-button.ghost
+          {:on-click editing-fn}
+          (common/loc "matti.edit")])
+       (when (path/meta? options :can-remove?)
+         [:button.matti-section-button.ghost (common/loc "remove")])])))
+
 (rum/defc section < rum/reactive
   [{:keys [state path id] :as options}]
   [:div.matti-section
-   [:button.matti-section-button.ghost "Sulje"]
+   (section-buttons options)
    (matti-grid options)])
