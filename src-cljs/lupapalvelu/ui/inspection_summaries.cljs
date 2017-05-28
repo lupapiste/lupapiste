@@ -199,15 +199,13 @@
 
 (defn commit-inspection-date [target-id value]
   (if (some? value)
-    (let [orig-value (tc/to-long value)
-          time-zone-correct-value (+ orig-value (* 3 60 60 1000))]
       (command :set-inspection-date
                refresh
                :id (:applicationId @component-state)
                :summaryId (:id @selected-summary)
                :targetId target-id
-               :date time-zone-correct-value))
-    (refresh)))
+               :date (tc/to-long value)))
+    (refresh))
 
 (rum/defc target-row < rum/reactive
   [idx row-target]
@@ -249,9 +247,8 @@
      [:td
       (if (and editingInspectionDate? (auth/ok? auth-model :add-target-to-inspection-summary))
         (let [date        (tc/to-date (tc/from-long (:inspection-date row-target)))
-              commit-fn   (partial commit-inspection-date target-id)
-              trigger     (.getElementById js/document "testi")]
-          (date/basic-datepicker date commit-fn trigger))
+              commit-fn   (partial commit-inspection-date target-id)]
+          (date/basic-datepicker date commit-fn))
         (when (:inspection-date row-target)
           (tf/unparse date-formatter (tc/from-long (:inspection-date row-target)))))
       (when (and (not editingInspectionDate?) (auth/ok? auth-model :edit-inspection-summary-target) (not targetFinished?))

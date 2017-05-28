@@ -7,8 +7,6 @@
             [camel-snake-kebab.extras :refer [transform-keys]]
             [clojure.string :as string]))
 
-(defonce the-date (atom (js/Date.)))
-
 (defn pikaday-i18n []
   {:previousMonth (loc "previous")
    :nextMonth (loc "next")
@@ -52,7 +50,7 @@
   [:input {:type    "text"
            :on-blur #(commit-fn @(:date-atom datepicker-args))}])
 
-(rum/defc basic-datepicker [date commit-fn trigger]
+(rum/defc basic-datepicker [date commit-fn]
   (let [date-atom (atom date)]
   (datepicker {:date-atom date-atom
                :pikaday-attrs
