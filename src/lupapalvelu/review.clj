@@ -165,7 +165,8 @@
   (let [update-result (update-application (application->command application) updates)
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
     (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
-      (if-let [attachments (vec (get attachments-by-task-id id))]
-        (doseq [att attachments]
-          (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
-        (tasks/generate-task-pdfa updated-application added-task user "fi")))))
+      (let [attachments (get attachments-by-task-id id)]
+        (if-not (empty? attachments)
+          (doseq [att attachments]
+            (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
+          (tasks/generate-task-pdfa updated-application added-task user "fi"))))))
