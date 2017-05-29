@@ -4212,3 +4212,4 @@
 "uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2" "en" "kWh/m²"
 "uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2" "fi" "kWh/m2"
 "uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2" "sv" "kWh/m2"
+"archiving-project._group_label" "fi" "Rakennuksen tiedot arkistointia varten"

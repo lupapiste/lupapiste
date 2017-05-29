@@ -1195,6 +1195,18 @@
                                  :asianhallinta true}
      })
 
+(def- ark-operations
+  {:archiving-project {:schema "archiving-project"
+                       :permit-type permit/ARK
+                       :applicant-doc-schema "hakija-ark"
+                       :required []
+                       :optional #{}
+                       :attachments []
+                       :add-operation-allowed false
+                       :copying-allowed false
+                       :min-outgoing-link-permits 0
+                       :asianhallinta false}})
+
 (def operations
   (merge
     r-operations
@@ -1206,7 +1218,8 @@
     vvvl-operations
     mal-operations
     kt-operations
-    mm-operations))
+    mm-operations
+    ark-operations))
 
 (sc/defschema Operation
   {; Documents

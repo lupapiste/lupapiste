@@ -1,0 +1,120 @@
+(ns lupapalvelu.digitizer
+  (:require [sade.property :as p]
+            [sade.core :refer :all]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.prev-permit :as pp]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.application :as application]
+            [sade.util :as util]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.operations :as op]
+            [sade.property :as prop]
+            [sade.env :as env]
+            [clj-time.core :refer [year]]
+            [clj-time.local :refer [local-now]]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.schemas :as schemas]))
+
+(defn make-application-id [municipality]
+  (let [year (str (year (local-now)))
+        sequence-name (str "archivals-" municipality "-" year)
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
+    (str "LX-" municipality "-" year "-" counter)))
+
+(defn do-create-application
+  [{{:keys [operation x y address propertyId propertyIdSource messages]} :data :keys [user created]} manual-schema-datas permit-type]
+  (let [municipality      (prop/municipality-id-by-property-id propertyId)
+        organization      (org/resolve-organization municipality permit-type)
+        organization-id   (:id organization)]
+
+    (when-not organization-id
+      (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
+
+    (let [id (make-application-id municipality)]
+      (application/make-application id
+                                    operation
+                                    x
+                                    y
+                                    address
+                                    propertyId
+                                    propertyIdSource
+                                    municipality
+                                    organization
+                                    false
+                                    false
+                                    messages
+                                    user
+                                    created
+                                    manual-schema-datas))))
+
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
+  (let [op (app/make-op :archiving-project (now))
+        doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
+        doc (assoc-in doc [:schema-info :op] op)
+        doc-updates (lupapalvelu.document.model/map2updates [] data)]
+    (lupapalvelu.document.model/apply-updates doc doc-updates)))
+
+(defn do-create-application-from-previous-permit [command operation xml app-info location-info permit-type]
+  (let [buildings-and-structures (building-reader/->buildings-and-structures xml)
+        document-datas (pp/schema-datas app-info buildings-and-structures)
+        manual-schema-datas {"archiving-project" (first document-datas)}
+        command (update-in command [:data] merge
+                           {:operation operation :infoRequest false :messages []}
+                           location-info)
+        created-application (do-create-application command manual-schema-datas permit-type)
+
+        structure-descriptions (map :description buildings-and-structures)
+        created-application (assoc-in created-application [:primaryOperation :description] (first structure-descriptions))
+
+        ;; make secondaryOperations for buildings other than the first one in case there are many
+        other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
+        secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
+
+        created-application (update-in created-application [:documents] concat other-building-docs)
+        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+
+        ;; attaches the new application, and its id to path [:data :id], into the command
+        command (util/deep-merge command (action/application->command created-application))]
+    ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
+    (application/insert-application created-application)
+    ;; Get verdicts for the application
+    (when-let [updates (verdict/find-verdicts-from-xml command xml)]
+      (action/update-application command updates))
+
+    (let [fetched-application (mongo/by-id :applications (:id created-application))]
+      (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
+      fetched-application)))
+
+(defn fetch-or-create-archiving-project! [{{:keys [organizationId kuntalupatunnus createAnyway]} :data :as command}]
+  (let [operation         :archiving-project
+        permit-type       "R"                                ; No support for other permit types currently
+        dummy-application {:id "" :permitType permit-type :organization organizationId}
+        xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
+        app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        location-info     (pp/get-location-info command app-info)
+        organization      (when (:propertyId location-info)
+                            (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
+        validation-result (permit/validate-verdict-xml permit-type xml organization)
+        organizations-match?  (= organizationId (:id organization))
+        no-proper-applicants? (not-any? pp/get-applicant-type (:hakijat app-info))]
+    (cond
+      (and (empty? app-info)
+           (not createAnyway))          (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
+      (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
+      (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+      validation-result                 validation-result
+      :else                             (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info permit-type)]
+                                          (if no-proper-applicants?
+                                            (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
+                                            (ok :id id))))))

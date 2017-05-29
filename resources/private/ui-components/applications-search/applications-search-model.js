@@ -161,4 +161,9 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"});
     pageutil.openPage("create-page-prev-permit");
   };
+
+  self.createArchivingProject = function() {
+    hub.send("track-click", {category:"Applications", label:"create", event:"createArchivingProject"});
+    pageutil.openPage("create-archiving-project");
+  };
 };

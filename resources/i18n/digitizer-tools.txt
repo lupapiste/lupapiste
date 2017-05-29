@@ -1,0 +1,2 @@
+"newRequest.createArchivingProject" "fi" "Arkistoi paperilupa"
+"digitizer.prevPermitNotFound" "fi" "Lupatunnuksella ei löytynyt lupaa taustajärjestelmästä. Mikäli haluat silti jatkaa arkistointia, syötä kohteen tiedot käsin."

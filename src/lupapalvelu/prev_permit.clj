@@ -40,7 +40,7 @@
          (info "Prev permit application creation, not inviting the invalid email address received from backing system: " %)
          nil)))))
 
-(defn- get-applicant-type [applicant]
+(defn get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
 
 (defn- applicant-field-values [applicant {:keys [name] :as element}]
@@ -118,11 +118,11 @@
     (= koodi "Rakennusvalvonta-asian laskun maksaja") "maksaja"
     (= koodi "Hakijan asiamies")                      "asiamies"))
 
-(defn- osapuoli->party-document [party]
+(defn osapuoli->party-document [party]
   (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
     (osapuoli->osapuoli-doc party schema-name)))
 
-(defn- suunnittelija->party-document [party]
+(defn suunnittelija->party-document [party]
   (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
     (designer->designer-doc party schema-name)))
 
@@ -193,14 +193,14 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
-(defn- document-data->op-document [{:keys [schema-version] :as application} data]
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
         doc (assoc-in doc [:schema-info :op] op)
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
+(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map
     (fn [{:keys [data]}]
       (remove empty? (conj (doc-model/map2updates [] (select-keys data building-fields))
@@ -212,7 +212,7 @@
                            (when-not (ss/blank? vahainenPoikkeaminen)
                              [["poikkeamat"] vahainenPoikkeaminen])))) buildings))
 
-(defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
+(defn do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (schema-datas app-info buildings-and-structures)
@@ -256,7 +256,7 @@
     (-> x util/->double pos?)
     (-> y util/->double pos?)))
 
-(defn- get-location-info [{data :data :as command} app-info]
+(defn get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
                                       (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))

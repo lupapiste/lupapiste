@@ -375,6 +375,10 @@
                   :html ["copy.html"]
                   :js ["copy.js"]}
 
+   :digitizer    {:depends [:common-html :map :create]
+                  :html ["digitizer.html"]
+                  :js ["digitizer.js"]}
+
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
 
@@ -441,7 +445,7 @@
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
-                             :statement :verdict :neighbors :docgen :create :copy :mypage :header :debug
+                             :statement :verdict :neighbors :docgen :create :copy :digitizer :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}

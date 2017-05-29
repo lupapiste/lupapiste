@@ -6,10 +6,18 @@
       <!-- ko ifnot: noApplications() -->
       <div class="applications-search-top">
         <div class="container">
-
           <div class="applications-search-control">
             <h1 data-bind="ltext: 'navigation'"></h1>
             <div class="button-group">
+              <!-- ko if: authorizationModel.ok('create-archiving-project') -->
+              <button data-bind="click: createArchivingProject"
+                      data-test-id="applications-create-archiving project"
+                      class="positive application-create">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'newRequest.createArchivingProject'"></span>
+              </button>
+              <!-- /ko -->
+
               <button data-bind="click: create"
                       data-test-id="applications-create-new-inforequest"
                       class="positive application-create">

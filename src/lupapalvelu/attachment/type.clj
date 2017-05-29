@@ -32,7 +32,8 @@
    :VVVL 'attachment-types/Ymparistoilmoitukset
    :MAL  'attachment-types/Maa-ainesluvat
    :MM   'attachment-types/Kiinteistotoimitus
-   :KT   'attachment-types/Kiinteistotoimitus})
+   :KT   'attachment-types/Kiinteistotoimitus
+   :ARK  'attachment-types/Rakennusluvat-v2})
 
 (defn equals? [& types]
   (boolean (and (:type-id (first types))

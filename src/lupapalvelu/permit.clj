@@ -144,6 +144,15 @@
    :extra-statement-selection-values false
    :wfs-krysp-ns-name "maankaytonmuutos"})
 
+(defpermit ARK  "Arkistointiprojekti"
+  {:subtypes         []
+   :state-graph      states/full-application-state-graph
+   :allow-state-change []
+   :sftp-directory   ""
+   :allowed-task-schemas #{}
+   :multiple-parties-allowed false
+   :extra-statement-selection-values false})
+
 ;;
 ;; Helpers
 ;;
