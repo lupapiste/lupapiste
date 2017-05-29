@@ -21,7 +21,6 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.building :as building]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -34,13 +33,12 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.tasks-api :as tasks-api]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.verdict-review-util :as verdict-review-util]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
@@ -206,61 +204,7 @@
   attachments. On the other hand, traditional (e.g., R) verdict
   poytakirja can only have one attachment."
   [application user timestamp verdict-id pk]
-  (if-let [attachments (:liite pk)]
-    (let [;; Attachments without link are ignored
-          attachments (->> [attachments] flatten (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
-          ;; There is only one urlHash property in
-          ;; poytakirja. If there are multiple attachments the
-          ;; hash is verdict-id. This is the same approach as
-          ;; used with manually entered verdicts.
-          pk-urlhash (if (= (count attachments) 1)
-                       (-> attachments first :linkkiliitteeseen pandect/sha1)
-                       verdict-id)]
-      (when-not (seq attachments)
-        (warnf "no valid attachment links in poytakirja, verdict-id: %s" verdict-id))
-      (doall
-       (for [att  attachments
-             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi description :kuvaus} att
-                   _ (debug "Download " url)
-                   java-url        (URL. (URL. "http://") url) ; LPK-2903 HTTP is given as default URL context, if protocol is not defined
-                   url-filename    (-> java-url (.getPath) (ss/suffix "/"))
-                   resp            (http/get (.toString java-url) :as :stream :throw-exceptions false)
-                   header-filename (content-disposition-filename resp)
-                   filename        (mime/sanitize-filename (or header-filename url-filename))
-                   content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-                   urlhash         (pandect/sha1 (.toString java-url))
-                   attachment-id      urlhash
-                   attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
-                   contents           (or description (if (= type "lupaehto") "Lupaehto"))
-                   target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
-                   ;; Reload application from DB, attachments have changed
-                   ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)]]
-         ;; If the attachment-id, i.e., hash of the URL matches
-         ;; any old attachment, a new version will be added
-         (files/with-temp-file temp-file
-           (if (= 200 (:status resp))
-             (with-open [in (:body resp)]
-               ; Copy content to a temp file to keep the content close at hand
-               ; during upload and conversion processing.
-               (io/copy in temp-file)
-               (attachment/upload-and-attach! {:application current-application :user user}
-                                              {:attachment-id attachment-id
-                                               :attachment-type attachment-type
-                                               :contents contents
-                                               :target target
-                                               :required false
-                                               :locked true
-                                               :created (or attachment-time timestamp)
-                                               :state :ok}
-                                              {:filename filename
-                                               :size content-length
-                                               :content temp-file}))
-             (error (str (:status resp) " - unable to download " url ": " resp))))))
-      (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
-    (do
-      (warnf "no attachments ('liite' elements) in poytakirja, verdict-id: %s" verdict-id)
-      pk)))
+  (verdict-review-util/get-poytakirja application user timestamp {:type "verdict" :id verdict-id} pk))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}
@@ -483,71 +427,6 @@
        (map (partial tasks/task-attachments application))
        flatten))
 
-(defn- empty-review-task? [t]
-  (let [katselmus-data (-> t :data :katselmus)
-        top-keys [:tila :pitoPvm :pitaja]
-        h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
-        ]
-    (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
-         (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
-
-(defn- katselmuksen-laji [t]
-  (-> t tools/unwrapped :data :katselmuksenLaji))
-
-(defn- reviews-have-same-type-other-than-muu-katselmus? [a b]
-  (let [la (katselmuksen-laji a)
-        lb (katselmuksen-laji b)]
-    (and la (= la lb) (not= la "muu katselmus"))))
-
-(defn- reviews-have-same-name-and-type? [a b]
-  (let [name-a (:taskname a)
-        name-b (:taskname b)
-        la (katselmuksen-laji a)
-        lb (katselmuksen-laji a)]
-    (and name-a (= name-a (or name-b lb)) la (= la lb))))
-
-(defn- bg-id [task]
-  (get-in task [:data :muuTunnus :value]))
-
-(defn- non-empty-review-task? [task]
-  (and (tasks/task-is-review? task) (not (empty-review-task? task))))
-
-(defn- merge-review-tasks
-  "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
-  [from-update from-mongo]
-  (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s" (count from-update) (count from-mongo))
-  (loop [from-update from-update
-         from-mongo from-mongo
-         unchanged []
-         added-or-updated []]
-    (let [current (first from-mongo)
-          bg-id-current (bg-id current)
-          remaining (rest from-mongo)
-          updated-id-match (when-not (ss/empty? bg-id-current)
-                             (util/find-first #(= bg-id-current (bg-id %)) from-update))
-          updated-match (or updated-id-match
-                            (first (filter #(or (reviews-have-same-name-and-type? current %)
-                                                (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
-      (cond
-        (= current nil)
-          ; Recursion end condition
-          (let [added-or-updated (concat added-or-updated (filter non-empty-review-task? from-update))]
-            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
-            [unchanged added-or-updated])
-
-        (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
-          ;non-empty review tasks and all non-review tasks are left unchanged
-          (do
-            (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated))
-
-        (and updated-match (not (empty-review-task? updated-match)))
-          ; matching review found from backend system update => it replaces the existing one
-          (recur (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
-
-        :else
-          ; this existing review is left unchanged
-          (recur from-update remaining (conj unchanged current) added-or-updated)))))
-
 (defn get-state-updates [user created {current-state :state :as application} app-xml]
   (let [new-state (->> (krysp-reader/application-state app-xml)
                        krysp-reader/krysp-state->application-state)]
@@ -556,64 +435,6 @@
       (sm/can-proceed? application new-state)  (application/state-transition-update new-state created application user)
       (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
                                                        (:id application) current-state (name new-state)))))
-
-(defn read-reviews-from-xml
-  "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
-  ;; adapted from save-verdicts-from-xml. called from do-check-for-review
-  [user created application app-xml]
-
-  (let [reviews (review-reader/xml->reviews app-xml)
-        buildings-summary (building-reader/->buildings-summary app-xml)
-        building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
-        source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
-        historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
-                                                            (< pvm (now))))
-        review-tasks (pc/distinct-by (fn [task]
-                                       (-> task ; remove muuTunnus from data before comparison, as source background system...
-                                           (util/dissoc-in [:data :muuTunnus]) ;...might have exactly same data saved with two different IDs
-                                           (select-keys [:taskname :data]))) ; remove duplicates!
-                                     (->> reviews
-                                          (filter historical-timestamp-present?)
-                                          (map review-to-task)))
-        validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) review-tasks))
-        review-tasks (keep-indexed (fn [idx item]
-                                     (if (empty? (get validation-errors idx)) item)) review-tasks)
-        updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
-        updated-tasks (apply concat updated-existing-and-added-tasks)
-        update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
-        added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
-        updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
-        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}
-        state-updates (get-state-updates user created application app-xml)]
-    (doseq [task (filter #(and (tasks/task-is-review? %)
-                               (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]
-      (if-not (= (count buildings-summary)
-                 (-> task :data :rakennus count))
-              (errorf "buildings count %s != task rakennus count %s for id %s"
-                      (count buildings-summary)
-                      (-> task :data :rakennus count) (:id application))))
-    (assert (map? application) "application is map")
-    (assert (every? not-empty updated-tasks) "tasks not empty")
-    (assert (every? map? updated-tasks) "tasks are maps")
-    (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
-    (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
-
-    ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
-    (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
-    (when (some seq validation-errors)
-      (doseq [error (remove empty? validation-errors)]
-        (warnf "Backend task validation error, this was skipped: %s" (pr-str error))))
-    (ok :review-count (count review-tasks)
-        :updated-tasks (map :id updated-tasks)
-        :updates (util/deep-merge task-updates building-updates state-updates)
-        :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
-
-(defn save-review-updates [user application updates added-tasks-with-updated-buildings]
-  (let [update-result (update-application (application->command application) updates)
-        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
-    (doseq [added-task added-tasks-with-updated-buildings]
-      (tasks/generate-task-pdfa updated-application added-task user "fi"))))
 
 (defmethod attachment/edit-allowed-by-target :verdict [{user :user application :application}]
   (when-not (auth/application-authority? application user)

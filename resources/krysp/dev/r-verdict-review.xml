@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rakval:Rakennusvalvonta
   xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset
-                      http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd
+                      http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd
                       http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.5/rakennusvalvonta.xsd
+                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd
                       http://www.opengis.net/wfs
                       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
   xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
@@ -321,6 +321,46 @@
               <rakval:rakentajatyyppi>muu</rakval:rakentajatyyppi>
             </rakval:Rakennus>
           </rakval:rakennustieto>
+          <rakval:katselmustieto>
+              <rakval:Katselmus>
+                  <rakval:katselmuksenRakennustieto>
+                      <rakval:KatselmuksenRakennus>
+                          <rakval:jarjestysnumero>1</rakval:jarjestysnumero>
+                          <rakval:kiinttun>18600303560006</rakval:kiinttun>
+                          <rakval:rakennusnro>001</rakval:rakennusnro>
+                          <rakval:aanestysalue>002</rakval:aanestysalue>
+                          <rakval:katselmusOsittainen>lopullinen</rakval:katselmusOsittainen>
+                          <rakval:kayttoonottoKytkin>false</rakval:kayttoonottoKytkin>
+                      </rakval:KatselmuksenRakennus>
+                  </rakval:katselmuksenRakennustieto>
+                  <rakval:muuTunnustieto>
+                      <rakval:MuuTunnus>
+                          <yht:tunnus>fefefefefefefefefefefefefefefa</yht:tunnus>
+                          <yht:sovellus>Facta</yht:sovellus>
+                      </rakval:MuuTunnus>
+                  </rakval:muuTunnustieto>
+                  <rakval:pitoPvm>2011-11-11Z</rakval:pitoPvm>
+                  <rakval:osittainen>lopullinen</rakval:osittainen>
+                  <rakval:pitaja>Erkki Everest</rakval:pitaja>
+                  <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+                  <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+                  <rakval:huomautukset>
+                      <rakval:huomautus>
+                          <rakval:kuvaus>Aloituskokous LVI+RAK&#xd;
+                              Seurantakatselmus pidetään 11.12.2011 klo 11:11.</rakval:kuvaus>
+                      </rakval:huomautus>
+                  </rakval:huomautukset>
+                  <rakval:liitetieto>
+                    <rakval:Liite>
+                        <yht:kuvaus>Katselmuspöytäkirja</yht:kuvaus>
+                        <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+                        <yht:muokkausHetki>2014-09-17T09:37:06Z</yht:muokkausHetki>
+                        <yht:tyyppi>Päätösote</yht:tyyppi>
+                    </rakval:Liite>
+                  </rakval:liitetieto>
+                  <rakval:tarkastuksenTaiKatselmuksenNimi>aloituskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
+              </rakval:Katselmus>
+          </rakval:katselmustieto>
         </rakval:Toimenpide>
       </rakval:toimenpidetieto>
       <rakval:katselmustieto>
