@@ -192,7 +192,8 @@
 (defcommand set-inspection-date
   {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check
                 inspection-summary/validate-summary-target-found-in-application
-                inspection-summary/validate-summary-not-locked]
+                inspection-summary/validate-summary-not-locked
+                inspection-summary/deny-if-finished]
    :parameters [:id summaryId targetId date]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
