@@ -3223,6 +3223,29 @@
                           :documents {$elemMatch {:schema-info.name "tyomaastaVastaava"}}}
                          {$unset {:documents.$ 1}}))
 
+(defmigration kayttolupa-to-tyolupa-workflow-finished-state-change                ; LPK-2933
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:ya-kayttolupa-nostotyot
+                                                                              :ya-kayttolupa-kattolumien-pudotustyot
+                                                                              :ya-kayttolupa-talon-julkisivutyot
+                                                                              :ya-kayttolupa-talon-rakennustyot
+                                                                              :ya-kayttolupa-muu-tyomaakaytto]}
+                                                 :permitSubtype "kayttolupa"
+                                                 :state "finished"}))}
+  (let [ts (sade.core/now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$in [:ya-kayttolupa-nostotyot ; kayttolupa-with-tyomaastavastaava
+                                                         :ya-kayttolupa-kattolumien-pudotustyot
+                                                         :ya-kayttolupa-talon-julkisivutyot
+                                                         :ya-kayttolupa-talon-rakennustyot
+                                                         :ya-kayttolupa-muu-tyomaakaytto]}
+                            :permitSubtype "kayttolupa"
+                            :state "finished"}
+                           {$set  {:state "closed"
+                                   :closed ts}
+                            $push {:history {:state "closed"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
+
 
 
 ;;
