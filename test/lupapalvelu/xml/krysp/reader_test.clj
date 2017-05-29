@@ -6,6 +6,7 @@
             [sade.xml :as xml]
             [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state]]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url]]
+            [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [sade.common-reader :as cr]
             [lupapalvelu.permit :as permit]
@@ -357,7 +358,7 @@
         katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
-    (fact "xml has 11 reviews" (count reviews) => 11)
+    (fact "xml has 12 reviews" (count reviews) => 12)
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
     (fact "katselmuksenLaji" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
     (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)
