@@ -306,6 +306,7 @@
    :ya-kayttolupa-terassit                                            ya-kayttolupa-general
    :ya-kayttolupa-kioskit                                             ya-kayttolupa-general
    :ya-kayttolupa-muu-kayttolupa                                      ya-kayttolupa-general
+   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-general
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type permit/YA
                                            :subtypes [:kayttolupa]
@@ -319,7 +320,6 @@
                                            :min-outgoing-link-permits 0
                                            :asianhallinta true}
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
-   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava

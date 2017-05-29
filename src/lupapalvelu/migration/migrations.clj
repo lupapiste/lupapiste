@@ -3209,6 +3209,20 @@
                          original-default-stamp-query
                          {$set {:stamps.$.rows updated-default-stamp-rows}}))
 
+(defmigration vaihtolavat-to-kayttolupa-general-documents-cleanup
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name :ya-kayttolupa-vaihtolavat
+                                                 :documents.schema-info.name "tyomaastaVastaava"}))}
+  (mongo/update-by-query :submitted-applications
+                         {:primaryOperation.name :ya-kayttolupa-vaihtolavat
+                          :permitSubtype "kayttolupa"
+                          :documents {$elemMatch {:schema-info.name "tyomaastaVastaava"}}}
+                         {$unset {:documents.$ 1}})
+  (mongo/update-by-query :applications
+                         {:primaryOperation.name :ya-kayttolupa-vaihtolavat
+                          :permitSubtype "kayttolupa"
+                          :documents {$elemMatch {:schema-info.name "tyomaastaVastaava"}}}
+                         {$unset {:documents.$ 1}}))
+
 
 
 ;;
