@@ -112,16 +112,16 @@
     (mapv assoc-in-row rows)))
 
 (def default-stamp-data
-  [{:name "Oletusleima"
-    :position {:x 10 :y 200}
-    :background 0
-    :page :first
-    :qrCode true
-    :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
-           [{:type :backend-id}]
-           [{:type :section}]
-           [{:type :user}]
-           [{:type :building-id}]
-           [{:type :organization}]
-           [{:type :extra-text
-             :text ""}]]}])
+  {:name "Oletusleima"
+   :position {:x 10 :y 200}
+   :background 0
+   :page :first
+   :qrCode true
+   :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
+          [{:type :backend-id}]
+          [{:type :section}]
+          [{:type :user}]
+          [{:type :building-id}]
+          [{:type :organization}]
+          [{:type :extra-text
+            :text ""}]]})
