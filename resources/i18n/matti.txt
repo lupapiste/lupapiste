@@ -147,3 +147,5 @@
 "matti.edit" "en" "Edit"
 "matti.edit" "fi" "Muokkaa"
 "matti.edit" "sv" "Anpassa"
+"matti.verdict" "fi" "Päätös"
+"matti.conditions" "fi" "Lupaehdot ja -määräykset"

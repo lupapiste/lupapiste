@@ -34,5 +34,13 @@
       v
       (latest (drop-last path) state* key))))
 
-(defn meta? [{:keys [state path]} key]
-  (latest path state :_meta key))
+(defn meta?
+  "Truthy if _meta value for the given key is found either within
+  _meta options (from schema) or as latest _meta from the state."
+  [{:keys [state path _meta]} key]
+  (or (get _meta (keyword key))
+      (latest path state :_meta key)))
+
+(defn flip-meta [{state* :state path :path} key]
+  "Flips (toggles boolean) on the path _meta."
+  (swap! (state (extend path :_meta key) state*) not))

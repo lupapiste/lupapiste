@@ -18,3 +18,12 @@
                   (js/util.showSavedIndicator js-result)
                   (success-fn (js->clj js-result :keywordize-keys true))))
       .call))
+
+(defn reset-if-needed!
+  "Resets atom with value if needed."
+  [atom* value]
+  (when (not= @atom* value)
+    (reset! atom* value)))
+
+(defn event->state [state]
+  #(reset-if-needed! state (.. % -target -value)))

@@ -27,8 +27,10 @@
                       })]]})
 
 (defschema MattiVerdictSection
-  {:id     sc/Str  ;; Also title localization key
-   :grid   MattiGrid}) ;; Data must conform to the grid contents
+  {:id     sc/Str     ;; Also title localization key
+   :grid   MattiGrid
+   (sc/optional-key :_meta) {sc/Keyword sc/Bool}
+   })
 
 (defschema MattiVerdict
   {(sc/optional-key :id) sc/Str  ;; Id is created when the verdict is saved the first time
@@ -58,7 +60,8 @@
                                  [{:col 3
                                    :id "paatosteksti"
                                    :align :full
-                                   :schema {:docgen "matti-verdict-text"}}]]}}
+                                   :schema {:docgen "matti-verdict-text"}}]]}
+               :_meta {:can-remove? true}}
               {:id "matti.conditions"
                :grid {:columns 4
                       :rows [[{:col 4
@@ -66,7 +69,8 @@
                              [{:col 4
                                :schema (checkbox-list "plans" ["rakenne" "vv" "piha" "ilma"])}]
                              [{:col 4
-                               :schema (checkbox-list "reviews" ["paikka" "sijainti" "aloitus" "pohja" "rakenne" "vv" "iv" "loppu"])}]]}}]})
+                               :schema (checkbox-list "reviews" ["paikka" "sijainti" "aloitus" "pohja" "rakenne" "vv" "iv" "loppu"])}]]}
+               :_meta {:can-remove? true}}]})
 
 (def default-data {:matti.verdict {:paatostieto "evatty"}
                    :_meta         {:can-edit? true}})

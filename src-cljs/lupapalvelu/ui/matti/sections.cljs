@@ -57,25 +57,26 @@
            (instantiate options cell true))])])])
 
 (rum/defc section-buttons < rum/reactive
-  [{:keys [state path] :as options}]
-  (when (path/latest path state :_meta :can-edit?)
-    (let [editing-fn #(swap! (path/state (path/extend path :_meta :editing?)
-                                         state)
-                             not)]
+  [{:keys [state path id] :as options}]
+  (when (path/meta? options :can-edit?)
+    (letfn [(flip [key] #(path/flip-meta options key))]
       [:div.matti-section__buttons
        (when (path/meta? options :editing?)
          [:button.matti-section-button.ghost
-          {:on-click editing-fn}
+          {:on-click (flip :editing?)}
           (common/loc "close")])
        (when-not (path/meta? options :editing?)
          [:button.matti-section-button.ghost
-          {:on-click editing-fn}
+          {:on-click (flip :editing?)}
           (common/loc "matti.edit")])
        (when (path/meta? options :can-remove?)
-         [:button.matti-section-button.ghost (common/loc "remove")])])))
+         [:button.matti-section-button.ghost
+          {:on-click (flip :removed?)}
+          (common/loc "remove")])])))
 
 (rum/defc section < rum/reactive
   [{:keys [state path id] :as options}]
-  [:div.matti-section
-   (section-buttons options)
-   (matti-grid options)])
+  (when-not (path/meta? options :removed?)
+    [:div.matti-section
+     (section-buttons options)
+     (matti-grid options)]))

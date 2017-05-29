@@ -7,9 +7,9 @@
 (defn docgen-loc [{:keys [schema path]} & extra]
   (let [{:keys [i18nkey locPrefix]} (-> schema :body first)]
     (-> (cond
-          i18nkey [i18nkey]
+          i18nkey   [i18nkey]
           locPrefix (cons locPrefix path)
-          :else path)
+          :else     path)
         (concat extra)
         path/loc)))
 
@@ -35,7 +35,7 @@
   (let [id (path/id path)]
     (assoc (apply hash-map kv)
            :key id
-           :id id)))
+           :id  id)))
 
 (defmulti docgen-component docgen-type)
 
@@ -53,7 +53,7 @@
     [:select.dropdown
      (docgen-attr options
                   :value     (rum/react state)
-                  :on-change  #(reset! state (.. % -target -value)))
+                  :on-change (common/event->state state))
      (->> schema :body first
           :body
           (map (fn [{n :name}]
@@ -78,22 +78,28 @@
        :on-click #(swap! state not)}
       (docgen-loc options)]]))
 
+(rum/defcs text-edit < (rum/local "" ::text)
+  "Update the options model state only on blur. Immediate update does
+  not work reliably."
+  [local-state {:keys [schema state path] :as options} tag & [attr]]
+  (let [text* (::text local-state)
+        state (path/state path state)]
+    (common/reset-if-needed! text* @state)
+    [tag
+     (merge (docgen-attr options
+                         :value     @text*
+                         :on-change (common/event->state text*)
+                         :on-blur   (common/event->state state)
+                         )
+            attr)]))
+
 (defmethod docgen-component :string
   [{:keys [schema state path] :as options}]
-  (let [state (path/state path state)]
-    [:input.grid-style-input
-     (docgen-attr options
-                  :type "text"
-                  :value (rum/react state)
-                  :on-change #(reset! state (.. % -target -value)))]))
+  (text-edit options :input.grid-style-input {:type "text"}))
 
 (defmethod docgen-component :text
   [{:keys [schema state path] :as options}]
-  (let [state (path/state path state)]
-    [:textarea.grid-style-input
-     (docgen-attr options
-                  :value (rum/react state)
-                  :on-change #(reset! state (.. % -target -value)))]))
+  (text-edit options :textarea.grid-style-input))
 
 (defmulti docgen-view docgen-type)
 

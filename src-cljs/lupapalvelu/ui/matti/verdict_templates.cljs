@@ -8,9 +8,33 @@
 
 (defonce current-template (atom {}))
 
+(rum/defcs add-section < (rum/local "" ::selected)
+  [local-state {:keys [sections state] :as options}]
+  (let [removed (filter #(path/meta? (assoc options
+                                            :path [%]
+                                            :state state)
+                                     :removed?)
+                        (map :id sections))
+        selected* (::selected local-state)]
+    (when-not (contains? (set removed) @selected*)
+     (common/reset-if-needed! selected* (first removed)))
+    (when-not (empty? removed)
+      [:span
+       [:select.dropdown
+        {:value @selected*
+         :on-change (common/event->state selected*)}
+        (map (fn [n]
+               [:option {:value n :key n} (common/loc n)])
+             removed)]
+       [:button.primary
+        {:on-click #(path/flip-meta {:path [@selected*]
+                                     :state state}
+                                    :removed?)}
+        [:i.lupicon-circle-plus]
+        [:span (common/loc "add")]]])))
 
 (defn verdict-template
-  [{:keys [name sections state data]}]
+  [{:keys [name sections state data] :as options}]
   (when (empty? @state)
     (reset! state data))
   [:div
@@ -19,7 +43,8 @@
      [:div {:key (:id sec)}
       (sections/section (assoc sec
                                :path (path/extend (:id sec))
-                               :state state))])])
+                               :state state))])
+   (add-section options)])
 
 (rum/defc verdict-templates < rum/reactive
   [_]
