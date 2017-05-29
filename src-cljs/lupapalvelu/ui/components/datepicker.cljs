@@ -54,7 +54,7 @@
   (let [date-atom (atom date)]
   (datepicker {:date-atom date-atom
                :pikaday-attrs
-                          {:format         "DD.MM.YYYY"
+                          {:format         (loc "date.format")
                            :i18n           (pikaday-i18n)
                            :showWeekNumber true
                            :firstDay       1

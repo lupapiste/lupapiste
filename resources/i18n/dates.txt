@@ -13,3 +13,6 @@
 "short.weekdays" "en" "Su, Mo, Tu, We, Th, Fr, Sa"
 "short.weekdays" "fi" "Su, Ma, Ti, Ke, To, Pe, La"
 "short.weekdays" "sv" "Sö, Må, Ti, On, To, Fr, Lö"
+"date.format" "en" "MM.DD.YYYY"
+"date.format" "fi" "DD.MM.YYYY"
+"date.format" "sv" "DD.MM.YYYY"
