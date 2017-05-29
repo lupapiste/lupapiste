@@ -86,6 +86,10 @@
        (map #(apply merge %))))
 
 (defn reviews-preprocessed [app-xml]
+  "Review preprocessing: 1) Duplicate entry prevention (group-by review type, name, date and external id)
+                         2) Collect all related building and attachment elements together
+                         3) Merge into final results in which there are no duplicates by name or type but still
+                            all building details and attachments are still there"
   (let [historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
         grouped-reviews (group-by
