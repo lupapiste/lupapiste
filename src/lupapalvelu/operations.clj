@@ -274,7 +274,9 @@
                              :asianhallinta true})
 
 (def- ya-kayttolupa-with-tyomaastavastaava
-  (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
+  (-> ya-kayttolupa-general
+      (update :required conj "tyomaastaVastaava")
+      (assoc :state-graph-resolver (constantly states/ya-tyolupa-state-graph))))
 
 (defn- sijoittaminen-state-resolver [{:keys [permitSubtype]}]
   (if (= :sijoitussopimus (keyword permitSubtype))
