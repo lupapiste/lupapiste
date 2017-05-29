@@ -883,7 +883,8 @@
                        :selected-operations [:ya-katulupa-vesi-ja-viemarityot
                                              :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
                                              :ya-kayttolupa-mainostus-ja-viitoitus
-                                             :ya-kayttolupa-terassit]
+                                             :ya-kayttolupa-terassit
+                                             :ya-kayttolupa-vaihtolavat]
                        :operations-attachments ya-default-attachments-for-operations
                        :permanent-archive-enabled false
                        :tags [{:id "735001000000000000000000" :label "YA kadut"} {:id "735002000000000000000000" :label "YA ojat"}]}
