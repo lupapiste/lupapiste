@@ -25,7 +25,7 @@ Sonja sees comment indicator on applications list
 Authority assigns an inforequest to herself
   Inforequest is not assigned  ${inforequest-handling}
   Open inforequest  ${inforequest-handling}  ${propertyId}
-  General handler to  Sibbo Sonja
+  General inforequest handler to  Sibbo Sonja
 
 Comment indicator is no longer visible (LPK-454)
   Go to page  applications
@@ -120,6 +120,9 @@ Authority cancels the inforequest
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
+
+Frontend errors
+  There are no frontend errors
 
 
 *** Keywords ***
