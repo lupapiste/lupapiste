@@ -118,6 +118,9 @@
                                  "LPTITLE_VERDICT_GIVEN" (i18n/localize lang "verdict.anto")
                                  "LPVALUE_VERDICT_GIVEN" (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")
 
+                                 "LPTITLE_VERDICT_GIVER" (i18n/localize lang "verdict.name")
+                                 "LPVALUE_VERDICT_GIVER" (or (verdict-paatos-key paatos :paatoksentekija) "-")
+
                                  "LPTITLE_VERDICT_LEGAL" (i18n/localize lang "verdict.lainvoimainen")
                                  "LPVALUE_VERDICT_LEGAL" (or (if (> (get-in paatos [:paivamaarat :lainvoimainen]) 0) (util/to-local-date (get-in paatos [:paivamaarat :lainvoimainen]))) "-")
 

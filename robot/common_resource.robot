@@ -542,13 +542,6 @@ Click by id
   Wait For Condition  return ${selector}.length===1;  10
   Execute Javascript  ${selector}.click();
 
-Click by test id
-  [Arguments]  ${id}
-  ${selector} =   Set Variable  $("[data-test-id='${id}']:visible")
-  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
-  Wait For Condition  return ${selector}.length===1;  10
-  Execute Javascript  ${selector}[0].click();
-
 Element should be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Be Visible  xpath=//*[@data-test-id="${id}"]
@@ -556,6 +549,11 @@ Element should be visible by test id
 Element should not be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
+
+Click by test id
+  [Arguments]  ${id}
+  Element should be visible by test id  ${id}
+  Click element  xpath=//*[@data-test-id="${id}"]
 
 Click enabled by test id
   [Arguments]  ${id}
@@ -1170,6 +1168,11 @@ Is authorized party
   [Arguments]  ${party}
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
 
+Is not authorized party
+  # Party can be either email or username
+  [Arguments]  ${party}
+  Wait Until  Element Should Not Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
+
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
@@ -1530,7 +1533,7 @@ Focus test id
 
 No such test id
   [Arguments]  ${id}
-  Wait until  Element should not be visible  jquery=[data-test-id=${id}]
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
 
 Test id should contain
   [Arguments]  ${id}  ${text}
@@ -1650,8 +1653,8 @@ There are no frontend errors
   ${ERR_COUNT}=    Get Matching Xpath Count  ${ERROR_LOG_XPATH}
   Print frontend error texts  ${FATAL_LOG_XPATH}  FATAL
   Print frontend error texts  ${ERROR_LOG_XPATH}  ERROR
-  Go to  ${LOGIN URL}
-  Logout
+  Go to  ${LOGOUT URL}
+  Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
   # These test cases will fail if errors exist
   Should be equal  ${FATAL_COUNT}  0  Fatal frontend errors
   Should be equal  ${ERR_COUNT}  0  Frontend errors
@@ -1706,4 +1709,3 @@ Permit subtype is
   ${SELECT_VISIBLE}=  Run Keyword And Return Status  Element should be visible  permitSubtypeSelect
   Run keyword If  ${SELECT_VISIBLE}  List Selection Should Be  permitSubtypeSelect  ${localizedPermitSubtype}
   Run keyword unless  ${SELECT_VISIBLE}  Element text should be  xpath=//section[@id='application']//span[@data-test-id='permit-subtype-text']  ${localizedPermitSubtype}
-

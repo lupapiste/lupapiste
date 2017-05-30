@@ -5,7 +5,7 @@
 
 (testable-privates lupapalvelu.attachment.stamps
                    tag-content
-                   rows)
+                   fill-rows)
 
 (def application
   {:id "LP-753-2017-90001"
@@ -109,54 +109,69 @@
     (tag-content {:type :section} context) => {:type :section :value "\u00a7 666"}))
 
 (facts "Stamp rows should be formed correctly"
-  (rows (first (:stamps organization)) {:organization organization
-                                        :application  application
-                                        :user         sonja}) => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                                                                  [{:type :backend-id :value "17-0753-R"}]
-                                                                  [{:type :building-id :value "Rakennustunnus"}]
-                                                                  [{:type :organization :value "Sipoon rakennusvalvonta"}]])
+  (fill-rows (first (:stamps organization)) {:organization organization
+                                             :application  application
+                                             :user         sonja})
+  =>
+  [[{:type :custom-text :value "Hyv\u00e4ksytty"}
+    {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+   [{:type :backend-id :value "17-0753-R"}]
+   [{:type :building-id :value "Rakennustunnus"}]
+   [{:type :organization :value "Sipoon rakennusvalvonta"}]])
 
 (facts "Stamps should be formed correctly"
   (fact "Default stamp is formed ok"
-    (stamps organization application sonja) => [{:id         "123456789012345678901234"
-                                                 :name       "Oletusleima"
-                                                 :position   {:x 10 :y 200}
-                                                 :background 0
-                                                 :page       :first
-                                                 :qrCode    true
-                                                 :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                                                              [{:type :backend-id :value "17-0753-R"}]
-                                                              [{:type :building-id :value "Rakennustunnus"}]
-                                                              [{:type :organization :value "Sipoon rakennusvalvonta"}]]}])
+    (stamps organization application sonja)
+    =>
+    [{:id         "123456789012345678901234"
+      :name       "Oletusleima"
+      :position   {:x 10 :y 200}
+      :background 0
+      :page       :first
+      :qrCode     true
+      :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"}
+                    {:type :current-date
+                     :value (sade.util/to-local-date (sade.core/now))}]
+                   [{:type :backend-id :value "17-0753-R"}]
+                   [{:type :building-id :value "Rakennustunnus"}]
+                   [{:type :organization :value "Sipoon rakennusvalvonta"}]]}])
   (fact "Multiple stamps are formed ok"
-    (stamps (assoc organization :stamps multiple-stamps) application sonja) =>   [{:id         "123456789012345678901234"
-                                                                                   :name       "Oletusleima"
-                                                                                   :position   {:x 10 :y 200}
-                                                                                   :background 0
-                                                                                   :page       :first
-                                                                                   :qrCode    true
-                                                                                   :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                                                                                                [{:type :backend-id :value "17-0753-R"}]
-                                                                                                [{:type :organization :value "Sipoon rakennusvalvonta"}]]}
-                                                                                  {:id         "112233445566778899004567"
-                                                                                   :name       "KV-Leima"
-                                                                                   :position   {:x 15 :y 250}
-                                                                                   :background 10
-                                                                                   :page       :last
-                                                                                   :qrCode    false
-                                                                                   :rows       [[{:type :custom-text :value "Verdict given"} {:type :verdict-date :value "06.04.2017"}]
-                                                                                                [{:type :backend-id :value "17-0753-R"} {:type :user, :value "Sonja Sibbo"}]
-                                                                                                [{:type :organization :value "Sipoon rakennusvalvonta"}]
-                                                                                                [{:type :application-id :value "LP-753-2017-90001"}]]}
-                                                                                  {:id         "999999888887777722223300"
-                                                                                   :name       "YA-Leima"
-                                                                                   :position   {:x 50 :y 50}
-                                                                                   :background 15
-                                                                                   :page       :all
-                                                                                   :qrCode    true
-                                                                                   :rows       [[{:type :current-date :value (sade.util/to-local-date (sade.core/now))} {:type :verdict-date :value "06.04.2017"}]
-                                                                                                [{:type :extra-text :value "Some extra text"}]
-                                                                                                [{:type :application-id :value "LP-753-2017-90001"}]]}]))
+    (stamps (assoc organization :stamps multiple-stamps) application sonja)
+    =>
+    [{:id         "123456789012345678901234"
+      :name       "Oletusleima"
+      :position   {:x 10 :y 200}
+      :background 0
+      :page       :first
+      :qrCode     true
+      :rows       [[{:type :custom-text :value "Hyv\u00e4ksytty"}
+                    {:type :current-date
+                     :value (sade.util/to-local-date (sade.core/now))}]
+                   [{:type :backend-id :value "17-0753-R"}]
+                   [{:type :organization :value "Sipoon rakennusvalvonta"}]]}
+     {:id         "112233445566778899004567"
+      :name       "KV-Leima"
+      :position   {:x 15 :y 250}
+      :background 10
+      :page       :last
+      :qrCode     false
+      :rows       [[{:type :custom-text :value "Verdict given"}
+                    {:type :verdict-date :value "06.04.2017"}]
+                   [{:type :backend-id :value "17-0753-R"}
+                    {:type :user, :value "Sonja Sibbo"}]
+                   [{:type :organization :value "Sipoon rakennusvalvonta"}]
+                   [{:type :application-id :value "LP-753-2017-90001"}]]}
+     {:id         "999999888887777722223300"
+      :name       "YA-Leima"
+      :position   {:x 50 :y 50}
+      :background 15
+      :page       :all
+      :qrCode     true
+      :rows       [[{:type :current-date
+                     :value (sade.util/to-local-date (sade.core/now))}
+                    {:type :verdict-date :value "06.04.2017"}]
+                   [{:type :extra-text :value "Some extra text"}]
+                   [{:type :application-id :value "LP-753-2017-90001"}]]}]))
 
 (facts "Should get row value by type"
     (let [stamp (first (stamps organization application sonja))]
@@ -171,12 +186,19 @@
 
 (facts "Should return rows without tag of given type"
   (let [stamp (first (stamps organization application sonja))]
-    (dissoc-tag-by-type (:rows stamp) :building-id) => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                                                        [{:type :backend-id :value "17-0753-R"}]
-                                                        [{:type :organization :value "Sipoon rakennusvalvonta"}]]
-    (dissoc-tag-by-type (:rows stamp) :backend-id) => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                                                       [{:type :building-id :value "Rakennustunnus"}]
-                                                       [{:type :organization :value "Sipoon rakennusvalvonta"}]]))
+    (dissoc-tag-by-type (:rows stamp) :building-id)
+    =>
+    [[{:type :custom-text :value "Hyv\u00e4ksytty"}
+      {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+     [{:type :backend-id :value "17-0753-R"}]
+     [{:type :organization :value "Sipoon rakennusvalvonta"}]]
+
+    (dissoc-tag-by-type (:rows stamp) :backend-id)
+    =>
+    [[{:type :custom-text :value "Hyv\u00e4ksytty"}
+      {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+     [{:type :building-id :value "Rakennustunnus"}]
+     [{:type :organization :value "Sipoon rakennusvalvonta"}]]))
 
 (facts "Should get rows as strings"
   (let [stamp (first (stamps organization application sonja))]
@@ -187,11 +209,18 @@
 
 (facts "Should update value for given type"
   (let [stamp (first (stamps organization application sonja))]
-    (assoc-tag-by-type (:rows stamp) :building-id "7878787878") => [[{:type :custom-text :value "Hyv\u00e4ksytty"} {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
-                                                                    [{:type :backend-id :value "17-0753-R"}]
-                                                                    [{:type :building-id :value "7878787878"}]
-                                                                    [{:type :organization :value "Sipoon rakennusvalvonta"}]]
-    (assoc-tag-by-type info-fields :building-id "55556666") => [[{:type "custom-text" :value "Hyv\u00e4ksytty"} {:type "current-date" :value "26.04.2017"}]
-                                                                    [{:type "backend-id" :value "KLT-123"}]
-                                                                    [{:type "organization" :value "Sipoon rakennusvalvonta"}]
-                                                                    [{:type "building-id" :value "55556666"}]]))
+    (assoc-tag-by-type (:rows stamp) :building-id "7878787878")
+    =>
+    [[{:type :custom-text :value "Hyv\u00e4ksytty"}
+      {:type :current-date :value (sade.util/to-local-date (sade.core/now))}]
+     [{:type :backend-id :value "17-0753-R"}]
+     [{:type :building-id :value "7878787878"}]
+     [{:type :organization :value "Sipoon rakennusvalvonta"}]]
+
+    (assoc-tag-by-type info-fields :building-id "55556666")
+    =>
+    [[{:type "custom-text" :value "Hyv\u00e4ksytty"}
+      {:type "current-date" :value "26.04.2017"}]
+     [{:type "backend-id" :value "KLT-123"}]
+     [{:type "organization" :value "Sipoon rakennusvalvonta"}]
+     [{:type "building-id" :value "55556666"}]]))

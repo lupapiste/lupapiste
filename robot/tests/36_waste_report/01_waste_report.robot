@@ -11,7 +11,7 @@ Sipoo authority enables extended waste report
   Go to page  applications
   Select checkbox  extended-construction-waste-report-enabled
   Wait until  Positive indicator should be visible
-  [Teardown]  Logout
+  Logout
 
 Pena logs in and creates application
   Pena logs in
@@ -167,6 +167,6 @@ Dig select is
 
 Dig reload
   Reload page
-  Wait test id visible  laajennettuRakennusjateselvitys-accordion-title-text
+  Element should be visible by test id  laajennettuRakennusjateselvitys-accordion-title-text
   Kill dev-box
   Scroll to test id  sum-kaivettavaMaa-ainekset-hyodynnetaan

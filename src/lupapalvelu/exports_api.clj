@@ -103,7 +103,7 @@
    :ya-kayttolupa-nostotyot                                           "D"
    :ya-kayttolupa-vaihtolavat                                         "F"
    :ya-kayttolupa-kattolumien-pudotustyot                             "D"
-   :ya-kayttolupa-muu-liikennealuetyo                                 "D"
+   :ya-katulupa-muu-liikennealuetyo                                   "D"
    :ya-kayttolupa-talon-julkisivutyot                                 "D"
    :ya-kayttolupa-talon-rakennustyot                                  "D"
    :ya-kayttolupa-muu-tyomaakaytto                                    "D"

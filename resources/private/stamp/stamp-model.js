@@ -172,11 +172,6 @@ LUPAPISTE.StampModel = function(params) {
       .value();
   }
 
-  function findRow (type) {
-    var value = findRowData(type);
-    return !_.isUndefined(value) && !_.isNull(value);
-  }
-
   function updateRowData (type, value) {
     return _.map(self.selectedStamp().rows,  function (row) {
       return _.map(row , function(object) {

@@ -91,11 +91,21 @@ List handler is
 # Shortcuts for old tests
 
 General handler to
-  [Arguments]  ${person}
-  Click by test id  edit-handlers
-  Click by test id  add-handler
+  [Arguments]  ${container}  ${person}
+  Wait until  Element should be visible  xpath=//${container}//a[@data-test-id='edit-handlers']
+  Click element  xpath=//${container}//a[@data-test-id='edit-handlers']
+  Wait until  Element should be visible  xpath=//${container}//button[@data-test-id='add-handler']
+  Click element  xpath=//${container}//button[@data-test-id='add-handler']
   Edit handler  0  ${person}  Käsittelijä
-  Click by test id  edit-handlers-back
+  Click element  xpath=//${container}//*[@data-test-id='edit-handlers-back']
+
+General application handler to
+  [Arguments]  ${person}
+  General handler to  section[@id='application']  ${person}
+
+General inforequest handler to
+  [Arguments]  ${person}
+  General handler to  section[@id='inforequest']  ${person}
 
 General handler is
   [Arguments]  ${person}

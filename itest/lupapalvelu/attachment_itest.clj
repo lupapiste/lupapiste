@@ -1062,7 +1062,9 @@
       (count stamps) => 2)))
 
 (facts "editing stamp templates"
-  (let [add-result (command sipoo :upsert-stamp-template :name "zero stamp" :page "first" :background 0 :qrCode false :position {:x 0 :y 0}
+  (let [add-result (command sipoo :upsert-stamp-template
+                            :name "zero stamp" :page "first" :background 0
+                            :qrCode false :position {:x 0 :y 0}
                             :rows [[{:type "custom-text" :text "Hello World"}]])
         stamp-id (:stamp-id add-result)]
     (fact "add new stamp"
@@ -1075,7 +1077,9 @@
         (count stamps) => 3
 
         (fact "stamp data is ok"
-          (keys new-stamp) => (just [:id :name :page :background :qrCode :position :rows] :in-any-order :gaps-ok)
+          (keys new-stamp) => (just [:id :name :page :background
+                                     :qrCode :position :rows]
+                                    :in-any-order :gaps-ok)
           (:id new-stamp) => stamp-id
           (:name new-stamp) => "zero stamp"
           (:page new-stamp) => "first"
@@ -1085,8 +1089,12 @@
           (:rows new-stamp) => [[{:type "custom-text" :text "Hello World"}]])))
 
     (facts "edit existing stamp"
-      (let [edit-result (command sipoo :upsert-stamp-template :stamp-id stamp-id :name "zero stamp" :page "last" :background 20 :qrCode false :position {:x 1 :y 2}
-                                 :rows [[{:type "custom-text" :text "Hello World"}]])]
+      (let [edit-result (command sipoo :upsert-stamp-template
+                                 :stamp-id stamp-id :name "zero stamp"
+                                 :page "last" :background 20 :qrCode false
+                                 :position {:x 1 :y 2}
+                                 :rows [[{:type "custom-text"
+                                          :text "Hello World"}]])]
         (fact "edit ok"
           edit-result => ok?
           (:stamp-id edit-result) => stamp-id)
@@ -1097,7 +1105,9 @@
             (count stamps) => 3
 
             (fact "stamp data is ok"
-              (keys edited-stamp) => (just [:id :name :page :background :qrCode :position :rows] :in-any-order :gaps-ok)
+              (keys edited-stamp) => (just [:id :name :page :background
+                                            :qrCode :position :rows]
+                                           :in-any-order :gaps-ok)
               (:id edited-stamp) => stamp-id
               (:name edited-stamp) => "zero stamp"
               (:page edited-stamp) => "last"

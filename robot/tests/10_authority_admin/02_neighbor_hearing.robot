@@ -31,4 +31,4 @@ Link is was for authority, need to continue to login
   Wait Until  Click by test id  login
   User logs in  mikko@example.com  mikko123  Mikko Intonen
   Wait Until  Application address should be  Naapurikatu
-  [Teardown]  Logout
+  There are no frontend errors
