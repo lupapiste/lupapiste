@@ -74,10 +74,11 @@ Sonja adds five statement givers to application
 
   # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
   Invite 'manual' statement giver  4  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
-
   Statement count is  6
+  Positive indicator should not be visible
 
 Sonja can delete statement
+  Element should be visible by test id  delete-statement-5
   Scroll and click test id  delete-statement-5
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  5

@@ -446,7 +446,7 @@
                             </button>
                             <div class="accordion_content" data-accordion-state="closed">
                                 <div class="accordion-fields">
-                                    <div id="application-summary-statements-table">
+                                    <div id="application-summary-statements-table" data-bind="if: summaryAvailable">
                                       <div data-bind="component: {name: 'statements-table',
                                                                   params: {application: $data,
                                                                            statements: $data.statements,
