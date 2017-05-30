@@ -43,7 +43,7 @@ Foreman continues filling his info
 Foreman history is not visible to applicant
   Page Should Not Contain Element  xpath=//foreman-history
   Page Should Not Contain Element  jquery=foreman-history div.foreman-history-container
-  [Teardown]  logout
+  Logout
 
 Switch to authority
   Sonja logs in
@@ -81,7 +81,7 @@ Foreman submits applications
   Foreman submit application  1
   Foreman submit application  2
   Foreman submit application  3
-  [Teardown]  Logout
+  Logout
 
 Sonja gives verdicts to foreman applications
   Sonja logs in
@@ -113,4 +113,7 @@ There is no reduced history for this application
   Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
   Wait until  Foreman history should have text X times  Sipoo  3
   No such test id  foreman-history-show-all-label
-  [Teardown]  Logout
+
+Frontend errors check
+  There are no frontend errors
+
