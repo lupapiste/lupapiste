@@ -1573,11 +1573,13 @@ Click label by test id
 
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
-  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
+  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
+  Checkbox should be selected  xpath=//input[@data-test-id='${data-test-id}']
 
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
-  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
+  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
+  Checkbox should not be selected  xpath=//input[@data-test-id='${data-test-id}']
 
 Checkbox wrapper selected
   [Arguments]  ${id}
