@@ -38,9 +38,16 @@
     ((case cell-type
        :list matti-list) options)))
 
+(defn- sub-options
+  "Options for the subschema"
+  [{:keys [state path]} subschema]
+  (assoc subschema
+         :state state
+         :path (path/extend path (:id subschema))))
+
 (defn matti-list [{:keys [schema state path] :as options}]
   [:div.matti-list
-      {:class (path/meta-css options)}
+   {:class (path/css (sub-options options schema))}
    ;; TODO: label wrap
    [:h4.matti-label (path/loc path)]
    (for [i    (-> schema :items count range)
@@ -48,27 +55,21 @@
                component (instantiate options item false)]]
      (when component
        [:div.item {:key   (str "item-" i)
-                   :class (path/meta-css (assoc options
-                                                :path (path/extend path (:id item))
-                                                :schema item )
-                                         (when (:align item)
-                                           (str "item--" (-> item :align name))))}
+                   :class (path/css (sub-options options item)
+                                    (when (:align item)
+                                      (str "item--" (-> item :align name))))}
         component]))])
 
 (defn matti-grid [{:keys [grid state path] :as options}]
   [:div
-   {:class (path/meta-css options
-                          (str "matti-grid-" (:columns grid)))}
+   {:class (path/css (sub-options options grid)
+                     (str "matti-grid-" (:columns grid)))}
    (for [row (:rows grid)]
      [:div.row
-      {:class (path/meta-css (assoc options
-                                    :schema row))}
       (for [{:keys [col align schema id] :as cell} row]
-        [:div {:class (path/meta-css (assoc options
-                                            :path (path/extend path id)
-                                            :schema cell)
-                                     (str "col-" (or col 1))
-                                     (when align (str "col--" (name align))))}
+        [:div {:class (path/css (sub-options options cell)
+                                (str "col-" (or col 1))
+                                (when align (str "col--" (name align))))}
          (when schema
            (instantiate options cell true))])])])
 
@@ -91,8 +92,9 @@
           (common/loc "remove")])])))
 
 (rum/defc section < rum/reactive
-  [{:keys [state path id] :as options}]
+  [{:keys [state path id css] :as options}]
   (when-not (path/meta? options :removed?)
     [:div.matti-section
+     {:class (path/css options)}
      (section-buttons options)
      (matti-grid options)]))

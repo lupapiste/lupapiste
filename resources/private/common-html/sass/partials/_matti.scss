@@ -90,7 +90,8 @@ $matti-grid-margin: 20px;
 }
 
 // toggle-helper is defined in _inputs.scss
-@include toggle-helper ( matti-checkbox, "e604", "e603", $wrapper-display: inline-block ) {}
+@include toggle-helper ( matti-checkbox, "e604", "e603",
+                         $wrapper-display: inline-block ) {}
 
 .matti-checkbox-wrapper {
   border: none;
@@ -109,10 +110,6 @@ $matti-grid-margin: 20px;
     }
   }
 }
-
-// span.matti-checkbox + span.matti-checkbox:before {
-//   content: ", ";
-// }
 
 .matti--view {
   .matti-condition-box + .matti-condition-box:before {
