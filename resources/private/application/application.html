@@ -464,7 +464,7 @@
                                 <span class="bar-text" data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
                             </button>
                             <div class="accordion_content" data-accordion-state="closed">
-                                <div class="accordion-fields">
+                                <div class="accordion-fields" data-bind="if: summaryAvailable">
                                     <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing-from-prev-permit'}}}"></div>
                                 </div>
                             </div>

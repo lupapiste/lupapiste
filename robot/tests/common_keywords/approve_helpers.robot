@@ -148,7 +148,7 @@ Press Key Test Id
 
 Reject note is
   [Arguments]  ${prefix}  ${text}
-  Wait test id visible  ${prefix}-note
+  Element should be visible by test id  ${prefix}-note
   Scroll to test id  ${prefix}-note
   Test id text is  ${prefix}-note  ${text}
 
@@ -178,7 +178,7 @@ Reject with note and lose focus
   [Arguments]  ${button}  ${prefix}  ${text}
   Reject and fill note  ${button}  ${prefix}  ${text}
   Press Key test id  ${prefix}-editor  \\9
-  Reject note is  ${prefix}  ${text}  
+  Reject note is  ${prefix}  ${text}
 
 
 Reject with note but cancel
