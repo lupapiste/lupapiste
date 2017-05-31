@@ -94,9 +94,10 @@
       users)))
 
 (defn- safe-local-date [timestamp]
-  (if-let [ts (util/->long timestamp)]
-    (util/to-local-date ts)
-    ""))
+  (let [ts (util/->long timestamp)]
+    (if (and ts (pos? ts))
+      (util/to-local-date ts)
+      "")))
 
 (defn user-report-cell-def [row key]
   (let [defs    {:lastName             "Sukunimi"
