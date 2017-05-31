@@ -38,21 +38,37 @@
     ((case cell-type
        :list matti-list) options)))
 
-
 (defn matti-list [{:keys [schema state path] :as options}]
-  [:div
+  [:div.matti-list
+      {:class (path/meta-css options)}
    ;; TODO: label wrap
-   [:h4 (path/loc path)]
-   (for [item (:items schema)]
-     (instantiate options item false))])
+   [:h4.matti-label (path/loc path)]
+   (for [i    (-> schema :items count range)
+         :let [item (nth (:items schema) i)
+               component (instantiate options item false)]]
+     (when component
+       [:div.item {:key   (str "item-" i)
+                   :class (path/meta-css (assoc options
+                                                :path (path/extend path (:id item))
+                                                :schema item )
+                                         (when (:align item)
+                                           (str "item--" (-> item :align name))))}
+        component]))])
 
 (defn matti-grid [{:keys [grid state path] :as options}]
-  [:div {:class (str "matti-grid-" (:columns grid))}
+  [:div
+   {:class (path/meta-css options
+                          (str "matti-grid-" (:columns grid)))}
    (for [row (:rows grid)]
      [:div.row
+      {:class (path/meta-css (assoc options
+                                    :schema row))}
       (for [{:keys [col align schema id] :as cell} row]
-        [:div {:class [(str "col-" (or col 1))
-                       (when align (str "col--" (name align)))]}
+        [:div {:class (path/meta-css (assoc options
+                                            :path (path/extend path id)
+                                            :schema cell)
+                                     (str "col-" (or col 1))
+                                     (when align (str "col--" (name align))))}
          (when schema
            (instantiate options cell true))])])])
 

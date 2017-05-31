@@ -24,7 +24,8 @@
   (if (-> schema :body first :label false?)
     component
     [:div.col--vertical
-     [:label {:for (path/id path)} (docgen-loc options)]
+     [:label.matti-label {:for (path/id path)}
+      (docgen-loc options)]
      component]))
 
 (defmethod docgen-label-wrap :checkbox
@@ -79,6 +80,7 @@
       (docgen-loc options)]]))
 
 (rum/defcs text-edit < (rum/local "" ::text)
+  {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."
   [local-state {:keys [schema state path] :as options} tag & [attr]]
@@ -89,8 +91,7 @@
      (merge (docgen-attr options
                          :value     @text*
                          :on-change (common/event->state text*)
-                         :on-blur   (common/event->state state)
-                         )
+                         :on-blur   (common/event->state state))
             attr)]))
 
 (defmethod docgen-component :string

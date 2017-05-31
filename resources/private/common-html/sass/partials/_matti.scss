@@ -65,6 +65,30 @@ $matti-grid-margin: 20px;
   @include matti-grid( $i );
 }
 
+.matti-list {
+  > .item {
+    display: inline-block;
+  }
+  > .item.item--full {
+    display: block;
+  }
+  .item--full > * {
+    width: 100%;
+  }
+  .item--right > * {
+    float: right;
+  }
+  .item--left > * {
+    float: left;
+  }
+  .item--center {
+    text-align: center;
+    > * {
+      display: inline-block;
+    }
+  }
+}
+
 // toggle-helper is defined in _inputs.scss
 @include toggle-helper ( matti-checkbox, "e604", "e603", $wrapper-display: inline-block ) {}
 
@@ -86,10 +110,25 @@ $matti-grid-margin: 20px;
   }
 }
 
-span.matti-checkbox + span.matti-checkbox:before {
-  content: ", ";
+// span.matti-checkbox + span.matti-checkbox:before {
+//   content: ", ";
+// }
+
+.matti--view {
+  .matti-condition-box + .matti-condition-box:before {
+    content: ", ";
+  }
 }
 
 span.formatted {
   white-space: pre-wrap;
 }
+
+.matti-label {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+// Meta status classes
+.matti--edit {}
+.matti--view {}

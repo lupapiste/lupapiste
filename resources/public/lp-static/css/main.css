@@ -17345,6 +17345,34 @@ button.rollup-button {
 >>>>>>> LPK-2953 Matti grid.
 }
 
+.matti-list > .item {
+  display: inline-block;
+}
+
+.matti-list > .item.item--full {
+  display: block;
+}
+
+.matti-list .item--full > * {
+  width: 100%;
+}
+
+.matti-list .item--right > * {
+  float: right;
+}
+
+.matti-list .item--left > * {
+  float: left;
+}
+
+.matti-list .item--center {
+  text-align: center;
+}
+
+.matti-list .item--center > * {
+  display: inline-block;
+}
+
 label.matti-checkbox-label {
   width: 100%;
   display: inline-block;
@@ -17446,12 +17474,17 @@ input:disabled + .matti-checkbox-label:hover.matti-checkbox-label:before {
   margin-left: 6px;
 }
 
-span.matti-checkbox + span.matti-checkbox:before {
+.matti--view .matti-condition-box + .matti-condition-box:before {
   content: ", ";
 }
 
 span.formatted {
   white-space: pre-wrap;
+}
+
+.matti-label {
+  font-size: 15px;
+  font-weight: bold;
 }
 
 /* VIEWS

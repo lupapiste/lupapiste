@@ -37,10 +37,24 @@
 (defn meta?
   "Truthy if _meta value for the given key is found either within
   _meta options (from schema) or as latest _meta from the state."
-  [{:keys [state path _meta]} key]
-  (or (get _meta (keyword key))
+  [{:keys [state path schema]} key]
+  (or (get-in schema [:_meta (keyword key)])
       (latest path state :_meta key)))
 
-(defn flip-meta [{state* :state path :path} key]
+(defn flip-meta
   "Flips (toggles boolean) on the path _meta."
+  [{state* :state path :path} key]
   (swap! (state (extend path :_meta key) state*) not))
+
+(defn meta-css
+  "List of CSS classes based on _meta information. Includes
+  status (matti--edit, matti--view) from the latest _meta and
+  explicitly defined classes in the current path _meta. Other classes
+  are added to the list if given."
+  [options & other-classes]
+  (->> [(if (meta? options :editing?) "matti--edit" "matti--view")
+        (get-in options [:schema :_meta :css])
+        other-classes]
+       flatten
+       (remove nil?)
+       (map name)))
