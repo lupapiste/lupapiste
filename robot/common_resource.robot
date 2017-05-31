@@ -1573,13 +1573,13 @@ Click label by test id
 
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
-  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
-  Checkbox should be selected  xpath=//input[@data-test-id='${data-test-id}']
+  Wait until  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
+  Wait until  Checkbox should be selected  xpath=//input[@data-test-id='${data-test-id}']
 
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
-  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
-  Checkbox should not be selected  xpath=//input[@data-test-id='${data-test-id}']
+  Wait until  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
+  Wait until  Checkbox should not be selected  xpath=//input[@data-test-id='${data-test-id}']
 
 Checkbox wrapper selected
   [Arguments]  ${id}
