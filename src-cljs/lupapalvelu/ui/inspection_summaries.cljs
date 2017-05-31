@@ -246,17 +246,16 @@
       (when (and target-id (not locked?) (not targetFinished?))
         [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
-      (if (and editingInspectionDate? (auth/ok? auth-model :add-target-to-inspection-summary))
+      (if (and editingInspectionDate? (auth/ok? auth-model :set-inspection-date))
         (let [date        (tc/to-date (tc/from-long (:inspection-date row-target)))
               commit-fn   (partial commit-inspection-date target-id)]
-          (date/basic-datepicker date commit-fn))
+          (date/basic-datepicker date commit-fn idx))
         (when (:inspection-date row-target)
           (tf/unparse date-formatter (doto (t/time-now) (.setTime (tc/to-long (:inspection-date row-target)))))))
-      (when (and (not editingInspectionDate?) (auth/ok? auth-model :edit-inspection-summary-target) (not targetFinished?))
+      (when (and (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
         [:a.inspection-summary-link
          {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editingInspectionDate?] true))
-          :data-test-id (str "choose-inspection-date-" idx)
-          :id (str "testi")}
+          :data-test-id (str "choose-inspection-date-" idx)}
          (if (:inspection-date row-target)
            [:i.lupicon-pen.inspection-summary-edit]
            (js/loc "choose"))])]

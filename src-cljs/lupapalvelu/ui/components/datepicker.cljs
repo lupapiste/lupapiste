@@ -46,11 +46,12 @@
        (reset! instance-atom nil))}))
 
 (rum/defcs datepicker < (datepicker-mixin)
-  [state datepicker-args commit-fn]
+  [state datepicker-args commit-fn test-id]
   [:input {:type    "text"
-           :on-blur #(commit-fn @(:date-atom datepicker-args))}])
+           :on-blur #(commit-fn @(:date-atom datepicker-args))
+           :data-test-id test-id}])
 
-(rum/defc basic-datepicker [date commit-fn]
+(rum/defc basic-datepicker [date commit-fn idx]
   (let [date-atom (atom date)]
   (datepicker {:date-atom date-atom
                :pikaday-attrs
@@ -59,4 +60,5 @@
                            :showWeekNumber true
                            :firstDay       1
                            :position       "bottom left"}}
-              commit-fn)))
+              commit-fn
+              (str "inspection-date-input-" idx))))
