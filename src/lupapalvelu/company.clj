@@ -128,14 +128,19 @@
 
 (defn find-company
   "Returns company mathing the provided query, or nil"
-  [q]
-  (when (seq q)
-    (some->> q (mongo/with-_id) (mongo/select-one :companies))))
+  ([q]
+   (when (seq q)
+     (some->> q (mongo/with-_id) (mongo/select-one :companies))))
+  ([query projection]
+   (when (seq query)
+     (mongo/select-one :companies (mongo/with-_id query) projection))))
 
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
-  [q]
-  (or (find-company q) (fail! :company.not-found)))
+  ([q]
+   (or (find-company q) (fail! :company.not-found)))
+  ([query projection]
+   (or (find-company query projection) (fail! :company.not-found))))
 
 (defn find-company-by-id
   "Returns company by given ID, or nil"

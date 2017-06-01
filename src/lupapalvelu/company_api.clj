@@ -20,6 +20,14 @@
       :users       (and users (com/find-company-users company))
       :invitations (and users (com/find-user-invitations company))))
 
+(defquery company-tags
+  {:user-roles #{:applicant :authority}
+   :input-validators [(some-pre-check com/validate-is-admin
+                                      com/validate-belongs-to-company)]
+   :parameters [company]}
+  [{{:keys [users]} :data}]
+  (ok :tags (:tags (com/find-company! {:id company} [:tags]))))
+
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
   [{user :user created :created}]
