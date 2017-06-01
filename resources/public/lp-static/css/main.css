@@ -15499,6 +15499,11 @@ span.icon_clear:before {
   display: table-cell;
 }
 
+.info-line span a {
+  display: inline;
+  padding: 0;
+}
+
 .info-line a {
   padding-left: 12px;
 }
