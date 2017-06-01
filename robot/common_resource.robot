@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        Selenium2Library   timeout=12  run_on_failure=Nothing
+Library        CustomSelenium2Library.py  timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 Library        DebugLibrary
@@ -47,7 +47,7 @@ Browser
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there
-  Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
+  Open custom browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
   Set DB cookie
 
 Reload page and kill dev-box
@@ -165,7 +165,7 @@ Go to page
 Open tab
   [Arguments]  ${name}
   ${is-visible}=  Run Keyword and Return Status  Element should be visible  application-${name}-tab
-  Run keyword unless  ${is-visible}  Run keywords  Click by test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
+  Run keyword unless  ${is-visible}  Run keywords  Scroll and click test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
 
 Tab should be visible
   [Arguments]  ${name}
@@ -559,7 +559,7 @@ Click enabled by test id
   [Arguments]  ${id}
   Element should be visible by test id  ${id}
   Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
-  Click by test id  ${id}
+  Scroll and click test id  ${id}
 
 # Workaround for HTML5 inputs
 Value should be
@@ -1044,7 +1044,7 @@ Confirm notification dialog
 Open the request
   [Arguments]  ${address}  ${tab}=all
   Go to page  applications
-  Click by test id  search-tab-${tab}
+  Run Keyword And Ignore Error  Click by test id  search-tab-${tab}
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
   Wait for jQuery
 
@@ -1494,6 +1494,7 @@ Scroll and click input
 
 Scroll and click test id
   [Arguments]  ${id}
+  Sleep  1s
   Scroll to  [data-test-id=${id}]
   Click by test id  ${id}
 
