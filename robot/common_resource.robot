@@ -479,7 +479,7 @@ Select From Autocomplete
   Wait until  Element should be visible  jquery=${container} span.autocomplete-selection
 
   ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
-  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} span.autocomplete-selection
+  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} div.autocomplete-selection-wrapper
 
   Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
