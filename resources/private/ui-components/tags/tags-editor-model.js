@@ -37,18 +37,7 @@ LUPAPISTE.TagsEditorModel = function() {
       .call();
   }, 500);
 
-  var saveSubscription;
-
-  function onSave() {
-    saveSubscription = self.tags.subscribe(function() {
-      self.save();
-    });
-  }
-
   self.refresh = function() {
-    if (saveSubscription) {
-      saveSubscription.dispose();
-    }
     var orgId = _(lupapisteApp.models.currentUser.orgAuthz()).keys().first();
     ajax
       .query("get-organization-tags")
@@ -60,7 +49,6 @@ LUPAPISTE.TagsEditorModel = function() {
           });
         }
         self.tags(tags);
-        onSave();
       })
       .call();
   };
@@ -69,55 +57,50 @@ LUPAPISTE.TagsEditorModel = function() {
   self.addTag = function() {
     var model = new TagModel({id: null, label: ""}, self.save);
     model.edit(true);
-    saveSubscription.dispose();
     self.tags.push(model);
-    onSave();
   };
 
-  self.removeTag = function(item) {
-    var removeFn = function() {
-      item.edit(false);
-      item.dispose();
-      self.tags.remove(item);
-    };
+  function remove(tag) {
+    tag.edit(false);
+    tag.dispose();
+    self.tags.remove(tag);
+    if (tag.id) {
+      self.save();
+    }
+  }
 
-    if (item.id) {
+  self.confirmRemoveTagDialog = function(tag, message) {
+    hub.send("show-dialog",
+             {ltitle: "tags.deleting",
+              size: "medium",
+              component: "yes-no-dialog",
+              componentParams: {text: message, yesFn: _.partial(remove, tag)}});
+  };
+
+  self.removeTagFromApplicationsWarning = function(tag, data) {
+    var applications = _.map(data.applications, "id");
+    var dialogTextPrefix = loc("tags.removing-from-applications.prefix", tag.label());
+
+    var dialogBody = _.reduce(applications, function(resultStr, idStr) {
+      return resultStr + "<div><i>" + idStr + "</i></div>";
+    }, "<div class='spacerM'>");
+    dialogBody = dialogBody + "</div>";
+
+    var dialogTextSuffix = loc("tags.removing-from-applications.suffix");
+
+    self.confirmRemoveTagDialog(tag, dialogTextPrefix + dialogBody + dialogTextSuffix);
+  };
+
+  self.removeTag = function(tag) {
+    if (tag.id) {
       ajax
-        .query("remove-tag-ok", {tagId: item.id})
-        .onError("warning.tags.removing-from-applications", function(data) {
-          var applications = _.map(data.applications, "id");
-          var dialogTextPrefix = loc("tags.removing-from-applications.prefix", item.label());
-
-          var dialogBody = _.reduce(applications, function(resultStr, idStr) {
-            return resultStr + "<div><i>" + idStr + "</i></div>";
-          }, "<div class='spacerM'>");
-          dialogBody = dialogBody + "</div>";
-
-          var dialogTextSuffix = loc("tags.removing-from-applications.suffix");
-
-          hub.send("show-dialog",
-                   {ltitle: "tags.deleting",
-                    size: "medium",
-                    component: "yes-no-dialog",
-                    componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
-                                      yesFn: removeFn}});
-        })
-        .success(function() {
-          hub.send("show-dialog",
-                   {ltitle: "tags.deleting",
-                    size: "medium",
-                    component: "yes-no-dialog",
-                    componentParams: {text: loc("tags.deleting.confirmation", item.label()), yesFn: removeFn}});
-        })
+        .query("remove-tag-ok", {tagId: tag.id})
+        .onError("warning.tags.removing-from-applications", _.partial(self.removeTagFromApplicationsWarning, tag))
+        .success(_.partial(self.confirmRemoveTagDialog, tag, loc("tags.deleting.confirmation", tag.label())))
         .call();
-      } else { // no ID
-        item.edit(false);
-        item.dispose();
-        saveSubscription.dispose();
-        self.tags.remove(item);
-        onSave();
-      }
-
+    } else {
+      remove(tag);
+    }
   };
 
   self.editTag = function(item) {
