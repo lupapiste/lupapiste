@@ -259,6 +259,9 @@
             <span data-bind="ltext: 'company.delete-all'"></span>
           </button>
         </div>
+        <div data-bind="visible: tabs.visible('tags')">
+          <div data-bind="component: {name: 'company-tags-editor', params: {companyId: id()}}"></div>
+        </div>
       </div>
     </div>
 

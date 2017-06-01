@@ -13,7 +13,7 @@ function TagModel(tag, saveFn) {
   };
 }
 
-LUPAPISTE.TagsEditorModel = function() {
+LUPAPISTE.TagsEditorBaseModel = function() {
   "use strict";
 
   var self = this;
@@ -22,59 +22,27 @@ LUPAPISTE.TagsEditorModel = function() {
 
   self.indicator = ko.observable().extend({notify: "always"});
 
-  self.save = _.debounce(function() {
-    self.tags.remove(function(item) {
-      return _.isEmpty(ko.unwrap(item.label));
-    });
-    var tags = _(self.tags()).map(function(t) { return _.pick(ko.toJS(t), "id", "label"); }).uniq("label").value();
-    ajax
-      .command("save-organization-tags", {tags: tags})
-      .success(function(res) {
-        util.showSavedIndicator(res);
-        self.refresh();
-      })
-      .error(util.showSavedIndicator)
-      .call();
-  }, 500);
-
-  self.refresh = function() {
-    var orgId = _(lupapisteApp.models.currentUser.orgAuthz()).keys().first();
-    ajax
-      .query("get-organization-tags")
-      .success(function(res) {
-        var tags = [];
-        if (!_.isEmpty(res.tags)) {
-          tags = _.map(res.tags[orgId].tags, function(t) {
-            return new TagModel(t, self.save);
-          });
-        }
-        self.tags(tags);
-      })
-      .call();
-  };
-  self.refresh();
-
   self.addTag = function() {
     var model = new TagModel({id: null, label: ""}, self.save);
     model.edit(true);
     self.tags.push(model);
   };
 
-  function remove(tag) {
+  self.remove = function(tag) {
     tag.edit(false);
     tag.dispose();
     self.tags.remove(tag);
     if (tag.id) {
       self.save();
     }
-  }
+  };
 
   self.confirmRemoveTagDialog = function(tag, message) {
     hub.send("show-dialog",
              {ltitle: "tags.deleting",
               size: "medium",
               component: "yes-no-dialog",
-              componentParams: {text: message, yesFn: _.partial(remove, tag)}});
+              componentParams: {text: message, yesFn: _.partial(self.remove, tag)}});
   };
 
   self.removeTagFromApplicationsWarning = function(tag, data) {
@@ -91,18 +59,6 @@ LUPAPISTE.TagsEditorModel = function() {
     self.confirmRemoveTagDialog(tag, dialogTextPrefix + dialogBody + dialogTextSuffix);
   };
 
-  self.removeTag = function(tag) {
-    if (tag.id) {
-      ajax
-        .query("remove-tag-ok", {tagId: tag.id})
-        .onError("warning.tags.removing-from-applications", _.partial(self.removeTagFromApplicationsWarning, tag))
-        .success(_.partial(self.confirmRemoveTagDialog, tag, loc("tags.deleting.confirmation", tag.label())))
-        .call();
-    } else {
-      remove(tag);
-    }
-  };
-
   self.editTag = function(item) {
     item.edit(true);
   };
@@ -113,4 +69,105 @@ LUPAPISTE.TagsEditorModel = function() {
     }
     return true;
   };
+
+};
+
+LUPAPISTE.TagsEditorModel = function() {
+  "use strict";
+
+  var self = this;
+
+  ko.utils.extend(self, new LUPAPISTE.TagsEditorBaseModel());
+
+  self.refresh = function() {
+    var orgId = _(lupapisteApp.models.currentUser.orgAuthz()).keys().first();
+    ajax
+      .query("get-organization-tags")
+      .success(function(res) {
+        self.tags(_.map(_.get(res, ["tags", orgId, "tags"]), function(tag) {
+          return new TagModel(tag, self.save);
+        }));
+      })
+      .call();
+  };
+
+  self.save = _.debounce(function() {
+    self.tags.remove(function(item) {
+      return _.isEmpty(ko.unwrap(item.label));
+    });
+    var tags = _(self.tags()).map(function(t) { return _.pick(ko.toJS(t), "id", "label"); }).uniq("label").value();
+    ajax
+      .command("save-organization-tags", {tags: tags})
+      .success(function(res) {
+        util.showSavedIndicator(res);
+        self.refresh();
+      })
+      .error(util.showSavedIndicator)
+      .call();
+  }, 500);
+
+  self.removeTag = function(tag) {
+    if (tag.id) {
+      ajax
+        .query("remove-tag-ok", {tagId: tag.id})
+        .onError("warning.tags.removing-from-applications", _.partial(self.removeTagFromApplicationsWarning, tag))
+        .success(_.partial(self.confirmRemoveTagDialog, tag, loc("tags.deleting.confirmation", tag.label())))
+        .call();
+    } else {
+      self.remove(tag);
+    }
+  };
+
+  self.refresh();
+};
+
+
+LUPAPISTE.CompanyTagsEditorModel = function(params) {
+  "use strict";
+
+  var self = this;
+
+  ko.utils.extend(self, new LUPAPISTE.TagsEditorBaseModel());
+
+  var companyId = params.companyId;
+
+  self.refresh = function() {
+    ajax
+      .query("company-tags", {company: companyId})
+      .success(function(res) {
+        self.tags(_.map(res.tags, function(tag) {
+          return new TagModel(tag, self.save);
+        }));
+      })
+      .call();
+  };
+
+  self.save = _.debounce(function() {
+    self.tags.remove(function(item) {
+      return _.isEmpty(ko.unwrap(item.label));
+    });
+    var tags = _(self.tags()).map(function(tag) { return _.pick(ko.toJS(tag), "id", "label"); }).uniq("label").value();
+    ajax
+      .command("save-company-tags", {tags: tags})
+      .success(function(res) {
+        util.showSavedIndicator(res);
+        self.refresh();
+      })
+      .error(util.showSavedIndicator)
+      .call();
+  }, 500);
+
+  self.removeTag = function(tag) {
+    if (tag.id) {
+      ajax
+        .query("remove-company-tag-ok", {tagId: tag.id})
+        .onError("warning.tags.removing-from-applications", _.partial(self.removeTagFromApplicationsWarning, tag))
+        .success(_.partial(self.confirmRemoveTagDialog, tag, loc("tags.deleting.confirmation", tag.label())))
+        .call();
+    } else {
+      self.remove(tag);
+    }
+  };
+
+  self.refresh();
 };

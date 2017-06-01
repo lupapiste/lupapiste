@@ -46,6 +46,7 @@ jQuery(document).ready(function() {
     {name: "company-edit"},
     {name: "organization-name-editor"},
     {name: "tags-editor"},
+    {name: "company-tags-editor", template: "tags-editor-template"},
     {name: "area-upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
