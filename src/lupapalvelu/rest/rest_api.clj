@@ -56,7 +56,7 @@
 
 (defendpoint "/rest/submitted-applications"
   {:summary          "Organisaation kaikki j\u00e4tetyt hakemukset."
-   :description      "Palauttaa kaikki organisaatiolle osoitetut hakemukset, jotka ovat Lupapisteess\u00e4 tilassa Hakemus j\u00e4tetty. Toimenpiteet-taulukko sis\u00e4lt\u00e4\u00e4 hakemuksen tarkemmat tiedot (Rakennusvalvonta: toimenpiteet rakennuksittain, Yleisten alueiden k\u00e4ytt\u00f6luvat: toimenpiteen kuvaus sek\u00e4 karttakuviot) KRYSP-skeemaa noudattelevassa muodossa."
+   :description      "Palauttaa kaikki organisaatiolle osoitetut hakemukset, jotka ovat Lupapisteess\u00e4 tilassa Hakemus j\u00e4tetty. Toimenpiteet-taulukko sis\u00e4lt\u00e4\u00e4 hakemuksen tarkemmat tiedot (Rakennusvalvonta: toimenpiteet rakennuksittain, Yleisten alueiden k\u00e4ytt\u00f6luvat: toimenpiteen kuvaus sek\u00e4 karttakuviot) KuntaGML-skeemaa noudattelevassa muodossa."
    :parameters       [:organization OrganizationId]
    :returns          JatetytHakemuksetResponse}
   (if (usr/user-is-authority-in-organization? user organization)
