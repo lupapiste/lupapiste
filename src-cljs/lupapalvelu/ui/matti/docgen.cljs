@@ -48,13 +48,19 @@
   (println v)
   v)
 
+(defn- state-change [{:keys [state path] :as options}]
+  (let [handler (common/event->state (path/state path state))]
+    (fn [event]
+      (when (handler event)
+        (path/meta-updated options)))))
+
 (defmethod docgen-component :select
   [{:keys [schema state path] :as options}]
-  (let [state (path/state path state)]
+  (let [local-state (path/state path state)]
     [:select.dropdown
      (docgen-attr options
-                  :value     (rum/react state)
-                  :on-change (common/event->state state))
+                  :value     (rum/react local-state)
+                  :on-change (state-change options))
      (->> schema :body first
           :body
           (map (fn [{n :name}]

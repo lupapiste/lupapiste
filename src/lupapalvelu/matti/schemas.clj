@@ -1,8 +1,7 @@
 (ns lupapalvelu.matti.schemas
   (:require [lupapalvelu.document.schemas :refer [defschemas]]
             [lupapalvelu.document.tools :refer [body] :as tools]
-            [lupapalvelu.matti.shared :as shared]
-            [sade.util :as util]
+            [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
@@ -61,6 +60,17 @@
 (def verdict-text {:name "matti-verdict-text"
                    :type :text
                    :label false})
+
+(defschema MattiSavedTemplate
+  {:id       ssc/ObjectIdStr
+   :name     sc/Str
+   :deleted  sc/Bool
+   :draft    sc/Any ;; draft is copied to version data on publish.
+   :modified ssc/Timestamp
+   :versions [{:id        ssc/ObjectIdStr
+               :published ssc/Timestamp
+               :data      sc/Any}]})
+
 (defschemas 1
   (map (fn [m]
          {:info {:name (:name m)}

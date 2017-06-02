@@ -8,8 +8,7 @@
 (def meta-flags (zipmap (map sc/optional-key
                              [:can-edit?
                               :editing?
-                              :can-remove?
-                              :removed?])
+                              :can-remove?])
                         (repeat sc/Bool)))
 
 (defschema MattiBase
@@ -42,9 +41,10 @@
 
 (defschema MattiVerdictSection
   (merge MattiBase
-         {:id     sc/Str     ;; Also title localization key
-          :grid   MattiGrid
-          (sc/optional-key :_meta) {sc/Keyword sc/Bool}}))
+         {:id                        sc/Str ;; Also title localization key
+          (sc/optional-key :removed) sc/Bool
+          :grid                      MattiGrid
+          (sc/optional-key :_meta)   {sc/Keyword sc/Bool}}))
 
 (defschema MattiVerdict
   {(sc/optional-key :id) sc/Str  ;; Id is created when the verdict is saved the first time

@@ -56,3 +56,9 @@
        flatten
        (remove nil?)
        (map name)))
+
+(defn meta-updated
+  "Calls _meta :updated if defined."
+  [{:keys [state path] :as options}]
+  (when-let [fun (latest path state :_meta :updated)]
+    (fun options)))

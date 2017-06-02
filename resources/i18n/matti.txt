@@ -149,3 +149,5 @@
 "matti.edit" "sv" "Anpassa"
 "matti.verdict" "fi" "Päätös"
 "matti.conditions" "fi" "Lupaehdot ja -määräykset"
+"matti.verdict-template" "fi" "Päätöspohja"
+"matti.verdict-template.published" "fi" "Julkaistu"

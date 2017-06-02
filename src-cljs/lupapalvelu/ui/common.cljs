@@ -20,10 +20,11 @@
       .call))
 
 (defn reset-if-needed!
-  "Resets atom with value if needed."
+  "Resets atom with value if needed. True if reset."
   [atom* value]
   (when (not= @atom* value)
-    (reset! atom* value)))
+    (do (reset! atom* value)
+        true)))
 
 (defn event->state [state]
   #(reset-if-needed! state (.. % -target -value)))
