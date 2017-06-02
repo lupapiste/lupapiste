@@ -3209,7 +3209,31 @@
                          original-default-stamp-query
                          {$set {:stamps.$.rows updated-default-stamp-rows}}))
 
+(defn tos-function-query [tos-function]
+  {:organization "680-R"
+   :created {$lt 1495530000000}
+   :tosFunction tos-function})
 
+(defmigration change-tos-functions-for-680
+  (let [tf01 (doall (mongo/select :applications (tos-function-query "10 03 00 01") [:id]))
+        tf02 (doall (mongo/select :applications (tos-function-query "10 03 00 02") [:id]))
+        tf03 (doall (mongo/select :applications (tos-function-query "10 03 00 03") [:id]))
+        tf04 (doall (mongo/select :applications (tos-function-query "10 03 00 04") [:id]))
+        tf05 (doall (mongo/select :applications (tos-function-query "10 03 00 05") [:id]))
+        tf06 (doall (mongo/select :applications (tos-function-query "10 03 00 06") [:id]))
+        tf07 (doall (mongo/select :applications (tos-function-query "10 03 00 07") [:id]))
+        tf08 (doall (mongo/select :applications (tos-function-query "10 03 00 08") [:id]))
+        tf09 (doall (mongo/select :applications (tos-function-query "10 03 00 09") [:id]))]
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 03"}})) tf01))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 05"}})) tf02))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 07"}})) tf03))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 09"}})) tf04))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 11"}})) tf05))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 01"}})) tf06))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 02"}})) tf07))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 10"}})) tf08))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 04"}})) tf09))
+    ))
 
 ;;
 ;; ****** NOTE! ******
