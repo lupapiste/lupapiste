@@ -441,8 +441,7 @@ Quote
   ${s}=  Convert to string  ${s}
   ${s}=  Strip string  ${s}
   ${s}=  Replace String  ${s}  "  '  # " Fix highlight
-
-  ${quoted}=  Execute Javascript  return sprintf( '"%s"', _.unquote( "${s}", "'") )
+  ${quoted}=  Execute Javascript  return '"' + (("${s}".charAt(0) === "'" && "${s}".charAt("${s}".length-1) === "'") ? "${s}".substr(1, "${s}".length-2) : "${s}") + '"';
   [Return]  ${quoted}
 
 Input text with jQuery
@@ -1574,13 +1573,13 @@ Click label by test id
 
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
-  Wait until  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
-  Wait until  Checkbox should be selected  xpath=//input[@data-test-id='${data-test-id}']
+  Wait until  Element should be visible  xpath=//label[@data-test-id='${data-test-id}-label']
+  Wait until  Checkbox should be selected  xpath=//input[@data-test-id='${data-test-id}-input']
 
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
-  Wait until  Element should be visible  xpath=//input[@data-test-id='${data-test-id}']
-  Wait until  Checkbox should not be selected  xpath=//input[@data-test-id='${data-test-id}']
+  Wait until  Element should be visible  xpath=//label[@data-test-id='${data-test-id}-label']
+  Wait until  Checkbox should not be selected  xpath=//input[@data-test-id='${data-test-id}-input']
 
 Checkbox wrapper selected
   [Arguments]  ${id}
@@ -1596,14 +1595,15 @@ Checkbox wrapper disabled
 
 Toggle selected
   [Arguments]  ${tid}
-  Checkbox wrapper selected by test id  ${tid}-input
+  Checkbox wrapper selected by test id  ${tid}
 
 Toggle not selected
   [Arguments]  ${tid}
-  Checkbox wrapper not selected by test id  ${tid}-input
+  Checkbox wrapper not selected by test id  ${tid}
 
 Toggle toggle
   [Arguments]  ${tid}
+  Wait until  Element should be visible  xpath=//label[@data-test-id='${tid}-label']
   Click label by test id  ${tid}-label
 
 Select from test id
