@@ -364,3 +364,55 @@
              (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
        (fact "Kaino is no longer Solitan"
              (query kaino :company :company "solita" :users true) => unauthorized?))
+
+(apply-remote-minimal)
+
+(facts "query company tags"
+  (fact "tags are returned for company user"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 1
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti1"))
+
+  (fact "fail for non company user"
+    (query pena "company-tags" :company "solita") => (partial expected-failure? :error.unauthorized)))
+
+(facts "edit company tags"
+
+  (fact "add new tag"
+    (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"} {:label "Uusi tagi"}]) => ok?)
+
+  (fact "tag is added"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 2
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti1"
+
+      (get-in resp [:tags 1 :id]) => truthy
+      (get-in resp [:tags 1 :label]) => "Uusi tagi"))
+
+  (fact "fail for non company user"
+    (command pena "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"} {:label "Uusi tagi"}]) => (partial expected-failure? :error.unauthorized))
+
+
+  (fact "remove tag"
+    (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"}]) => ok?)
+
+  (fact "tag is removed"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 1
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti1"))
+
+  (fact "edit existing tag"
+    (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti666"}]) => ok?)
+
+  (fact "tag is removed"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 1
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti666")))

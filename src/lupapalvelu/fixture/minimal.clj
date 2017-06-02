@@ -1276,7 +1276,9 @@
                  :ovt "003710601555"
                  :pop "BAWCFI22"
                  :reference "Lupis"
-                 :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"}
+                 :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"
+                 :tags [{:id "7a67a67a67a67a67a67a67a6"
+                         :label "Projekti1"}]}
                 {:_id "esimerkki"
                  :accountType "account5"
                  :customAccountLimit nil
