@@ -8,7 +8,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.schemas :as ssc]
+            [schema.core :as sc]))
 
 (defquery company
   {:user-roles #{:applicant :authority}
@@ -199,3 +201,28 @@
       (fail! :forbidden)))
   (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))
+
+(defcommand save-company-tags
+  {:parameters [tags]
+   :input-validators [(partial action/parameters-matching-schema
+                               [:tags]
+                               [{(sc/optional-key :id) (sc/maybe ssc/ObjectIdStr)
+                                 :label                sc/Str}])]
+   :user-roles #{:applicant}
+   :pre-checks [(com/validate-has-company-role :admin)]}
+  [{{:keys [company] :as user} :user :as command}]
+  (com/update-company! (:id company) {:tags (map mongo/ensure-id tags)} user)
+  (ok))
+
+
+(defquery remove-company-tag-ok
+  {:parameters [tagId]
+   :input-validators [(partial action/non-blank-parameters [:tagId])]
+   :user-roles #{:applicant :authority}}
+  [{{{company-id :id} :company} :user}]
+  (if-let [tag-applications (seq (mongo/select :applications
+                                               {:company-notes {$elemMatch {:companyId company-id
+                                                                            :tags      tagId}}}
+                                               [:_id]))]
+    (fail :warning.tags.removing-from-applications :applications tag-applications)
+    (ok)))

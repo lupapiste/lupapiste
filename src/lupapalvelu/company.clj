@@ -56,7 +56,8 @@
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     ssc/Timestamp
               (sc/optional-key :campaign)    sc/Str
-              (sc/optional-key :locked)      ssc/Timestamp})
+              (sc/optional-key :locked)      ssc/Timestamp
+              (sc/optional-key :tags)        [{:id ssc/ObjectIdStr :label sc/Str}]})
 
 (def company-skeleton ; required keys
   {:name nil
@@ -79,10 +80,12 @@
     :ovt      (fail! :error.illegal-ovt-tunnus)
     :pop      (fail! "error.illegal-value:select")
     :accountType (fail! :error.illegal-company-account)
+    :tags     (fail! :error.illegal-tags)
     (fail! :error.unknown)))
 
 (defn validate! [company]
   (when-let [errors (sc/check Company company)]
+    (debug "Company schema validation: " errors)
     (fail-property! (first (keys errors)))))
 
 (defn custom-account? [{type :accountType}]
