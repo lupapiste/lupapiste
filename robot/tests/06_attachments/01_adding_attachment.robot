@@ -100,7 +100,6 @@ Mikko opens attachment details again
 # Tests against bug fix LPK-1042
 Mikko returns to application right away
   [Tags]  attachments
-  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
   Return to application
   Wait Until Page Contains  ${propertyId}
 
@@ -150,7 +149,7 @@ Remove version, not needed selectable
 
 Checking not needed in attachment page affects attachment listing
   [Tags]  attachments
-  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
+  Toggle toggle  is-not-needed
   Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
   Return to application
   Wait until  Not needed should be visible  muut.muu
@@ -290,8 +289,6 @@ Sonja goes to conversation tab
 
 Sonja goes to attachments tab
   [Tags]  attachments
-  Wait Until  Element should be visible  jquery=a[data-test-id='back-to-application-from-attachment']
-  Scroll to test id  back-to-application-from-attachment
   Return to application
   Open tab  attachments
 
@@ -379,9 +376,7 @@ Approve-button should be disabled
 
 Attachment state should be ok
   [Tags]  attachments
-  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
-  Scroll to test id  back-to-application-from-attachment
-  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Scroll and click test id  back-to-application-from-attachment
   Tab should be visible  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
@@ -469,11 +464,13 @@ Not needed should not be selected
 
 Not needed should be visible
   [Arguments]  ${type}
-  Not needed matches  ${type}  visible  1
+  #Not needed matches  ${type}  visible  1
+  Element Should Be Visible  xpath=//tr[@data-test-type='${type}']//label[@data-test-id='not-needed-label']
 
 Not needed should not be visible
   [Arguments]  ${type}
-  Not needed matches  ${type}  visible  0
+  #Not needed matches  ${type}  visible  0
+  Element Should Not Be Visible  xpath=//tr[@data-test-type='${type}']//label[@data-test-id='not-needed-label']
 
 Not needed should be disabled
   [Arguments]  ${type}

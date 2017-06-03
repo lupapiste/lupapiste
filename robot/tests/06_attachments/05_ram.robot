@@ -87,7 +87,7 @@ Sonja clicks RAM link and opens old attachment details
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
 
 Sonja returns to attachments and sees RAM filter
-  Scroll and click test id  back-to-application-from-attachment
+  Return to application
   Wait test id visible  ram-filter-label
   Checkbox wrapper selected by test id  ram-filter
   #Scroll and click test id  ram-filter-label

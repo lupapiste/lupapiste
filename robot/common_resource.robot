@@ -820,7 +820,9 @@ Add attachment
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
 Return to application
-  Wait Until  Click by test id  back-to-application-from-attachment
+  # The button might be behind a save indicator, so wait for it to clear
+  Sleep  2s
+  Wait Until  Scroll and click test id  back-to-application-from-attachment
 
 Delete attachment
   [Arguments]  ${type}
@@ -1342,6 +1344,7 @@ Submit empty verdict
   Go to give new verdict
   Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
+  Sleep  1s
   Confirm  dynamic-yes-no-confirm-dialog
   Wait for jQuery
   Wait until  Application state should be  ${targetState}
@@ -1494,13 +1497,14 @@ Scroll and click input
 Scroll and click test id
   [Arguments]  ${id}
   Sleep  1s
+  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Scroll to  [data-test-id=${id}]
   Click by test id  ${id}
 
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
+  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
 
 Wait test id hidden
   [Arguments]  ${id}
