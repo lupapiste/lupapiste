@@ -142,6 +142,9 @@
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]})
 
+(sc/defschema SimpleOrg
+  (select-keys Organization [:id :name :scope]))
+
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
   "Reader role has access to every application within org."

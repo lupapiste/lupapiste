@@ -45,21 +45,22 @@
 ;; some utils
 ;;
 
+(defn- and-2-pre-check [check1 check2]
+  (fn [x]
+    (let [result1 (check1 x)]
+      (if (nil? result1)
+        (check2 x)
+        result1))))
+
 
 (defn and-pre-check
   "Returns a pre-check that fails if any of the given pre-checks fail.
    The returned pre-check return the first failing pre-checks failure,
    or nil in case all succeed."
   [& pre-checks]
-  (let [and-2-pre-check (fn [check1 check2]
-                          (fn [x]
-                            (let [result1 (check1 x)]
-                              (if (nil? result1)
-                                (check2 x)
-                                result1))))]
-    (reduce and-2-pre-check
-            (constantly nil)
-            pre-checks)))
+  (reduce and-2-pre-check
+          (constantly nil)
+          pre-checks))
 
 (defn not-pre-check
   "Pre-check fails if given pre-check succeeds."
@@ -399,17 +400,20 @@
 (defn- company-authz? [command-meta-data application user]
   (auth/has-auth? application (get-in user [:company :id])))
 
+(defn user-is-allowed-to-access?
+  [{user :user :as command} application]
+  (let [meta-data (meta-data command)]
+    (or
+      (user-authz? meta-data application user)
+      (organization-authz? meta-data application user)
+      (company-authz? meta-data application user))))
+
 (defn- user-is-not-allowed-to-access?
   "Current user must have correct role in application.auth, work in
   the organization or company that has been invited"
-  [{user :user :as command} application]
-  (let [meta-data (meta-data command)]
-    (when-not (or
-                (user-authz? meta-data application user)
-                (organization-authz? meta-data application user)
-                (company-authz? meta-data application user))
-
-     unauthorized)))
+  [command application]
+  (when-not (user-is-allowed-to-access? command application)
+    unauthorized))
 
 (defn- not-authorized-to-application [{:keys [application] :as command}]
   (when (-> command :data :id)
@@ -637,7 +641,33 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-(defn action->command [{:keys [user data] :as skeleton} action-name]
+(sc/defschema ActionType
+  (sc/enum [:command
+            :raw
+            :action
+            :query
+            :export]))
+
+(sc/defschema ActionData
+  ;;TODO: needs an actual schema
+  sc/Any)
+
+(sc/defschema ActionBase
+  "Has the bare minimum fields of an action that allow it to be run without
+   executing."
+  {:user usr/User
+   :type ActionType
+   :data ActionData
+   sc/Any sc/Any})
+
+(sc/defschema ActionSkeleton
+  {:user usr/User
+   :data ActionData
+   sc/Any sc/Any})
+
+(sc/defn build-action :- ActionBase
+  [action-name :- sc/Str
+   {:keys [user data] :as skeleton} :- ActionSkeleton]
   (let [meta (get-meta action-name)]
     (when meta
       (merge skeleton
@@ -649,7 +679,7 @@
 
 (defn foreach-action [command-skeleton]
   (for [action-name (remove nil? (keys @actions))
-        :let [result (action->command command-skeleton action-name)]
+        :let [result (build-action action-name command-skeleton)]
         :when result]
     result))
 

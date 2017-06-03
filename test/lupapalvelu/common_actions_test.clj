@@ -12,8 +12,11 @@
             [slingshot.slingshot :refer [try+]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.generators.organization :as org-gen]
             [lupapalvelu.generators.user :as user-gen]
-            [lupapalvelu.organization :as org]
+            [lupapalvelu.mock.organization :as mock-org
+             :refer [with-all-mocked-orgs with-mocked-orgs]]
+            [lupapalvelu.mock.user :as mock-usr]
             [lupapalvelu.user :as user]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
@@ -21,229 +24,136 @@
             [lupapalvelu.actions-api :as ca]
             ;; ensure all actions are registered by requiring server ns
             [lupapalvelu.server]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.authorization :as auth]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
-(def user-is-allowed-to-access?
-  (complement user-is-not-allowed-to-access?))
+(facts "enable-accordions"
+  (with-all-mocked-orgs
+    (let [application (merge lupapalvelu.domain/application-skeleton
+                             {:permitType "YA"
+                              :organization (keyword (:id mock-org/sipoo-ya))})
+          action-skeleton {:user (usr/with-org-auth mock-usr/sonja)
+                           :application application
+                           :data {:id ""}}
+          command (build-action "enable-accordions" action-skeleton)]
+      (facts "permitType YA"
+        (fact "authority that has orgAuthz in applications org"
+          (validate command) => ok?)
+        (fact "authority without orgAuthz in applications org"
+          (validate (build-action
+                      "enable-accordions"
+                      (assoc action-skeleton :user (usr/with-org-auth mock-usr/ronja))))
+          => fail?))
+      (fact "other permitType"
+        (validate (build-action
+                    "enable accordions"
+                    (assoc-in action-skeleton [:application :permitType] "R")))
+        => fail?))))
 
 (def permit-type-generator
   (-> (lupapalvelu.permit/permit-types)
       keys
       gen/elements))
 
-(defn silly-application-generator
-  [organization-id-generator]
-  (gen/let [permit-type permit-type-generator
-            org-id organization-id-generator]
-    (merge lupapalvelu.domain/application-skeleton
-           {:permitType permit-type
-            :organization org-id})))
+(def YA-biased-permit-type
+  (gen/frequency [[1 (gen/return "YA")]
+                  [1 permit-type-generator]]))
 
-(defn set-of? [member-check]
-  (fn [x]
-    (and (set? x)
-         (every? member-check x))))
+(def authority-biased-user-role
+  (gen/frequency [[1 (gen/return "authority")]
+                  [1 (ssg/generator usr/Role)]]))
 
-(defn user-and-application-generator
-  [org-id-set]
-  {:pre [(set-of? keyword?)]}
-  (let [org-id-generator (gen/elements org-id-set)
-        str-org-id-generator (gen/fmap name org-id-generator)]
-    (gen/let [user (ssg/generator user/User
-                                  {user/OrgId org-id-generator})
-              application (silly-application-generator str-org-id-generator)]
-      {:user user
-       :application application})))
+(def user-id-gen (ssg/generator usr/Id))
 
-(def org-ids-atom (atom nil))
+(def application-role-gen (gen/elements roles/all-authz-roles))
 
-(defn with-limited-org-id-pool
-  []
-  (let [org-id-set (gen/sample (ssg/generator user/OrgId) 10)]
-    (reset! org-ids-atom org-id-set)
-    (user-and-application-generator org-id-set)))
+(defn single-auth-gen [& {:keys [user-id-gen application-role-gen]
+                          :or {user-id-gen          user-id-gen
+                               application-role-gen application-role-gen}}]
+  (gen/let [user-id user-id-gen
+            role application-role-gen]
+    {:role role
+     :id user-id}))
 
-(defn test-with-input [user application]
-  (let [command (action->command
-                  {:user user
-                   :data {:id "100"}
-                   :application application}
-                  "enable-accordions")]
-    (validate command)))
+(defn application-auths-gen [user]
+  (gen/let [auths (gen/vector (single-auth-gen))
+            give-user-auths? gen/boolean
+            users-auths (single-auth-gen :user-id-gen (gen/return (:id user)))]
+    (if give-user-auths?
+      (conj auths users-auths)
+      auths)))
 
-(defn power-set [a-seq]
-  (if (empty? a-seq)
-    [#{}]
-    (let [fst (first a-seq)
-          rst (rest a-seq)
-          smaller-sets (power-set rst)
-          with-fst (for [a-set smaller-sets]
-                     (conj a-set fst))]
-      (concat smaller-sets with-fst))))
+(defn application-gen [orgs user]
+  (let [org-ids (map (comp keyword :id) orgs)]
+    (gen/let [permit-type YA-biased-permit-type
+              org-id (gen/elements org-ids)
+              application-auths (application-auths-gen user)]
+      (merge lupapalvelu.domain/application-skeleton
+             {:permitType permit-type
+              :organization org-id
+              :auths application-auths}))))
 
-(def asdf (atom []))
+(defn user-gen [orgs]
+  (let [org-ids    (map (comp keyword :id) orgs)
+        org-id-gen (gen/elements org-ids)
+        base-user-gen (ssg/generator usr/User
+                                     {usr/OrgId org-id-gen
+                                      usr/Role authority-biased-user-role})]
+    (gen/fmap usr/with-org-auth base-user-gen)))
 
-(def asdf-2 (atom []))
+(def org-with-const-id
+  (gen/fmap (fn [org] (assoc org :id "100"))
+            (ssg/generator org/Organization)))
 
-#_(facts "user-is-allowed-to-access?")
+(def orgs-gen
+  "Generates a set of organizations with different ids"
+  (gen/let [org-ids (gen/set (ssg/generator org/OrgId) {:num-elements 10})
+            orgs (gen/set org-with-const-id {:num-elements 10})]
+    (let [fix-id (fn [id org] (assoc org :id id))
+          with-fixed-ids (map fix-id org-ids orgs)]
+      (set with-fixed-ids))))
 
-(defn- map-vals [f a-map]
-  (reduce-kv (fn [acc k v]
-               (assoc acc k (f v)))
-             {}
-             a-map))
+(def enable-accordions-gen
+  (gen/let [orgs orgs-gen
+            user (user-gen orgs)
+            application (application-gen orgs user)]
+    {:orgs orgs
+     :application application
+     :user user}))
 
-(facts "map-vals"
-  (map-vals inc {:hip 2, :hep 4 :hop 1})
-  =>
-  {:hip 3, :hep 5, :hop 2})
+(defn enable-accordions-test [{:keys [orgs application user]}]
+  (let [action-skeleton {:user (usr/with-org-auth user)
+                         :application application
+                         :data {:id ""}}
+        action (build-action "enable-accordions" action-skeleton)
+        org-id (:organization application)
+        permit-type (:permitType application)
+        authority? (usr/authority? user)
+        allowed-to-access? (action/user-is-allowed-to-access?
+                             action application)
+        authority-in-org? (usr/user-is-authority-in-organization? user (name org-id))
+        auths-in-application? (auth/user-authz? roles/all-authenticated-user-roles
+                                                application
+                                                user)]
+    (with-mocked-orgs orgs
+      (cond (not allowed-to-access?)   (is (fail? (validate action)))
+            (and authority?
+                 authority-in-org?
+                 (= permit-type "YA")) (is (ok? (validate action)))
+            authority?                 (is (fail? (validate action)))
+            :else                      (is (ok? (validate action)))))))
 
-(defn- group-by-unique-key [a-key coll]
-  (->> (group-by a-key coll)
-       (map-vals first)))
+(def enable-accordions-prop
+  (prop/for-all [gen-data enable-accordions-gen]
+    (enable-accordions-test gen-data)))
 
-(facts "group-by-unique-key"
-  (group-by-unique-key :id [{:id 3, :name "Hemuli"}
-                            {:id 2, :name "Lissu"}])
-  =>
-  {3 {:id 3, :name "Hemuli"}
-   2 {:id 2, :name "Lissu"}})
-
-(defn- mongerify [x]
-  "transforms values into ones that could be returned by monger,
-
-     keyword             -> string
-     lists and lazy seqs -> vector
-
-   applied recursively into sequences and values of maps"
-  (cond (keyword? x)     (name x)
-        (map? x)         (map-vals mongerify x)
-        (or (seq? x)
-            (vector? x)) (mapv mongerify x)
-        :else            x))
-
-(facts "mongerify"
-  (mongerify {:id :186-R
-              :names (list :hemuli :hei)
-              :valid? true
-              :age 20
-              :substructure [{:hip :hep, :hop "laa"}]})
-  =>
-  {:id "186-R"
-   :names ["hemuli" "hei"]
-   :valid? true
-   :age 20
-   :substructure [{:hip "hep", :hop "laa"}]})
-
-(defn mock-get-org [orgs]
-  (let [org-map (group-by-unique-key :id orgs)]
-    (fn [org-id]
-      (mongerify (get org-map org-id)))))
-
-(def all-orgs-minimal-by-id (group-by-unique-key :id minimal/organizations))
-(def all-orgs-minimal (vals all-orgs-minimal-by-id))
-
-(def jarvenpaa-r (get all-orgs-minimal "186-R"))
-(def sipoo-r (get all-orgs-minimal "753-R"))
-(def sipoo-ya (get all-orgs-minimal "753-YA"))
-(def kuopio-ya (get all-orgs-minimal "297-YA"))
-(def tampere-r (get all-orgs-minimal "837-R"))
-(def tampere-ya (get all-orgs-minimal "837-YA"))
-(def porvoo-r (get all-orgs-minimal "638-R"))
-(def oulu-r (get all-orgs-minimal "564-R"))
-(def oulu-ya (get all-orgs-minimal "564-YA"))
-(def naantali-r (get all-orgs-minimal "529-R"))
-(def selanne-r (get all-orgs-minimal "069-R"))
-(def loppi-r (get all-orgs-minimal "433-R"))
-(def turku-r (get all-orgs-minimal "853-R"))
-(def kuopio-r (get all-orgs-minimal "297-R"))
-(def helsinki-r (get all-orgs-minimal "091-R"))
-(def oulu-ymp (get all-orgs-minimal "564-YMP"))
-(def sipoo-r-new-application-disabled (get all-orgs-minimal "997-R-TESTI-1"))
-(def sipoo-r-inforequest-disabled (get all-orgs-minimal "998-R-TESTI-2"))
-(def sipoo-r-both-new-application-and-inforequest-disabled
-  (get all-orgs-minimal "999-R-TESTI-3"))
-
-(defmacro with-mocked-orgs [orgs & body]
-  `(with-redefs [org/get-organization (mock-get-org ~orgs)]
-     ~@body))
-
-(defmacro with-all-mocked-orgs [& body]
-  `(with-mocked-orgs all-orgs-minimal ~@body))
-
-(defn runnn []
-  (with-all-mocked-orgs
-    (let [user :sonja-sibbo-here
-          application (merge lupapalvelu.domain/application-skeleton
-                             {:permitType "YA"
-                              :organization :752-YA})
-          command (action->command
-                    {:user user
-                     :application application
-                     :data {:id ""}}
-                    "enable-accordions")]
-      (validate command))))
-
-
-(defn run-asdf []
-  (for [user-role lupapalvelu.roles/all-user-roles
-        authz-roles (power-set (map name lupapalvelu.roles/all-org-authz-roles))
-        permit-type (keys (lupapalvelu.permit/permit-types))
-        org-id ["100-YA" "200-R"]
-        :let [user {:role user-role
-                    :orgAuthz {:100-YA (vec authz-roles)}}
-              application (merge lupapalvelu.domain/application-skeleton
-                                 {:permitType permit-type
-                                  :organization org-id})
-              command (action->command
-                        {:user user
-                         :data {:id ""}
-                         :application application}
-                        "enable-accordions")
-              result (validate command)
-              user-is-authority (user/authority? user)
-              user-is-authority-in-org (user/user-is-authority-in-organization? user :100-YA)
-              application-is-YA (= "YA" (:permitType application))]]
-    (do  (swap! asdf conj {:user-is-authority user-is-authority
-                           :user-is-authority-in-organization user-is-authority-in-org
-                           :application-is-YA application-is-YA})
-         ()
-         (cond (and user-is-authority
-                    user-is-authority-in-org
-                    application-is-YA)
-               (fact result => nil?)
-
-               ))))
-
-(def user-is-allowed-to-access?-prop
-  (prop/for-all [{:keys [user application]} (with-limited-org-id-pool)]
-    (let [command (action->command
-                    {:user user
-                     :data {:id ""}
-                     :application application}
-                    "enable-accordions")
-          applications-org (-> application :organization keyword)
-          result (validate command)]
-      (cond (and (user/authority? user)
-                 (user/user-is-authority-in-organization? user applications-org)
-                 (= "YA" (:permitType application)))
-            (ok? result)
-
-            (user/authority? user)
-            (fail? result)
-
-            (user/user-is-authority-in-organization? user applications-org)
-            (fail? result)
-
-            :else
-            (fail? result)))))
-
-(fact user-is-allowed-to-access?-spec
-  (tc/quick-check 200
-    user-is-allowed-to-access?-prop :max-size 50)
-  => passing-quick-check)
+(fact "enable-accordions-spec"
+  (tc/quick-check 200 enable-accordions-prop :max-size 10))
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement

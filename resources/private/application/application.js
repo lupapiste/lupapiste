@@ -265,7 +265,7 @@
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
-        var collapseAccordion = !lupapisteApp.models.applicationAuthModel.getData()["enable-accordions"].ok;
+        var collapseAccordion = !lupapisteApp.models.applicationAuthModel.ok("enable-accordions");
 
         // Parties are always visible
         docgen.displayDocuments("partiesDocgen",

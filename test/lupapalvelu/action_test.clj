@@ -17,7 +17,7 @@
 (def ok-status   {:ok true})
 (def fail-status {:ok false})
 
-(testable-privates lupapalvelu.action has-required-user-role)
+(testable-privates lupapalvelu.action has-required-user-role and-2-pre-check)
 
 (timbre/with-level :fatal
 
@@ -289,6 +289,7 @@
       => [...c1... ...c2... ...f1... ...f2...])
 
 
+
   (facts "some-pre-check"
     ((some-pre-check (constantly {:ok false :error "ok"}) (constantly nil)) {}) => nil?
     ((some-pre-check (constantly nil) (constantly {:ok false :error "ok"})) {}) => nil?
@@ -297,3 +298,32 @@
                      (constantly {:ok false :error "ok"})) {}) => nil?
     ((some-pre-check (constantly {:ok false :error "fail1"}) (constantly {:ok false :error "fail2"})) {}) => (contains {:error "fail2"})
     ((some-pre-check (constantly nil) (constantly nil)) {})=> nil?))
+
+(facts "and-pre-check"
+  (let [allways-fail (constantly {:ok false :error "error"})
+        allways-pass (constantly nil)]
+    (facts "and-2-pre-check"
+      ((and-2-pre-check allways-pass allways-pass) {}) => nil?
+      ((and-2-pre-check allways-fail allways-pass) {}) => fail?
+      ((and-2-pre-check allways-pass allways-fail) {}) => fail?
+      ((and-2-pre-check allways-fail allways-fail) {}) => fail?)
+
+    (facts "and-pre-check"
+      ((and-pre-check allways-pass allways-pass allways-pass) {}) => nil?
+      ((and-pre-check allways-fail allways-pass allways-pass) {}) => fail?
+      ((and-pre-check allways-pass allways-fail allways-pass) {}) => fail?
+      ((and-pre-check allways-fail allways-fail allways-pass) {}) => fail?
+      ((and-pre-check allways-pass allways-pass allways-fail) {}) => fail?
+      ((and-pre-check allways-fail allways-pass allways-fail) {}) => fail?
+      ((and-pre-check allways-pass allways-fail allways-fail) {}) => fail?
+      ((and-pre-check allways-fail allways-fail allways-fail) {}) => fail?)
+
+    (fact "and-pre-check failure propagation"
+      ((and-pre-check (constantly nil)
+                      (constantly {:ok false :error "error1"})
+                      (constantly {:ok false :error "error2"}))
+       {}) => {:ok false :error "error1"})))
+
+(facts "not-pre-check"
+  ((not-pre-check (constantly {:ok false :error "error"})) {}) => nil?
+  ((not-pre-check (constantly nil)) {}) => fail?)

@@ -250,6 +250,19 @@
   (assoc-when-pred {:a nil :b :b} not-empty-or-nil? :a :a, :b nil, :c :c, :d false)
   => {:a :a, :b :b, :c :c, :d false})
 
+(facts "mongerify"
+  (mongerify {:id :186-R
+              :names (list :hemuli :hei)
+              :valid? true
+              :age 20
+              :substructure [{:hip :hep, :hop "laa"}]})
+  =>
+  {:id "186-R"
+   :names ["hemuli" "hei"]
+   :valid? true
+   :age 20
+   :substructure [{:hip "hep", :hop "laa"}]})
+
 (facts upsert
   (fact "one item with match"
     (upsert {:id ..id-1.. :val ..new-value..} [{:id ..id-1.. :val ..bar..}])

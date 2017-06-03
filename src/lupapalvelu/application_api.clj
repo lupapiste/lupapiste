@@ -96,6 +96,15 @@
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
+(defn validate-authority-in-applications-org
+  [command]
+  (let [org (get-in command [:application :organization])
+        org (keyword org)
+        org-authz (get-in command [:user :orgAuthz org])]
+    (when-not (contains? org-authz :authority)
+      (fail :error.unauthorized
+            :source ::validate-authority-in-applications-org))))
+
 (defquery enable-accordions
   {:description "Pseudo-query for checking if accordions should be open or
                  closed"
@@ -103,9 +112,10 @@
    :pre-checks [(action/some-pre-check
                   (action/and-pre-check
                     (permit/validate-permit-type-is :YA)
-                    usr/validate-authority)
-                  (action/not-pre-check
                     usr/validate-authority
+                    validate-authority-in-applications-org)
+                  (action/not-pre-check
+                     usr/validate-authority
                     :error.unauthorized :source ::enable-accordions))]}
   [_])
 
