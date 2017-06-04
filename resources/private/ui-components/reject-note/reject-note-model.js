@@ -39,6 +39,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   // Editor related
 
   self.showEditor = ko.observable( false );
+  self.parentDisabled = _.isFunction(params.disabled) ? params.disabled : ko.observable(false);
 
   self.editorNote = ko.observable();
 

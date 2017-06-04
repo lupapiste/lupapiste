@@ -8,7 +8,7 @@
     </span>
   </div>
   <!-- /ko -->
-  <!-- ko if: showEditor -->
+  <!-- ko if: showEditor() && !parentDisabled() -->
   <div data-bind="event: {keydown: closeEditor,
                   focusout: closeEditor},
                   css: editorCss">
