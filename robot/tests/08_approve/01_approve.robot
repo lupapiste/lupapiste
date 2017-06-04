@@ -122,7 +122,7 @@ Authority opens integration message monitor
   Click enabled by test id  show-integration-messages
 
 At least one message is displayed in the monitor
-  Wait Until  Page Should Contain Element  //div[@data-test-id="integration-message-monitor"]/ul/li
+  Wait Until  Element should be visible  xpath=//div[@data-test-id="integration-message-monitor"]/ul/li
   Close message monitor
 
 Party tab indicators have been reset

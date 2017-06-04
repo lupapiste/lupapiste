@@ -8,7 +8,7 @@ Resource       ../common_keywords/approve_helpers.robot
 *** Test Cases ***
 
 Sonja logs in and creates application
-  Sonja logs in
+  Sonja logs in  False
   Create application with state  Post verdict party  753-416-25-30  pientalo  verdictGiven
 
 Sonja adds removes old designer and adds new one
