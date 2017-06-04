@@ -97,8 +97,6 @@ Mikko logs in and goes to attachments table
   Open tab  attachments
 
 Pre and post verdict filters are set
-  Import Library  DebugLibrary
-  Debug
   Wait until  Checkbox wrapper selected by test id  postVerdict-filter
   Checkbox wrapper selected by test id  preVerdict-filter
   Checkbox wrapper not selected by test id  parties-filter
@@ -113,7 +111,7 @@ Mikko sees construction time checkbox is checked and disabled
   Checkbox wrapper selected by test id  ${ct-checkbox-tid}
 
 Mikko goes back to attachments listing and sees filters are set as they were
-  Click by test id  back-to-application-from-attachment
+  Return to application
   Wait until  Checkbox wrapper selected by test id  postVerdict-filter
   Checkbox wrapper selected by test id  preVerdict-filter
   Checkbox wrapper not selected by test id  parties-filter
@@ -121,7 +119,7 @@ Mikko goes back to attachments listing and sees filters are set as they were
   Checkbox wrapper not selected by test id  other-filter
 
 Mikko toggles all filters on
-  Click by test id  toggle-all-filters-label
+  Scroll and click test id  toggle-all-filters-label
   Wait until  Toggle all filters is selected
   Checkbox wrapper selected by test id  postVerdict-filter
   Checkbox wrapper selected by test id  preVerdict-filter
@@ -130,7 +128,7 @@ Mikko toggles all filters on
   Checkbox wrapper selected by test id  other-filter
 
 Mikko toggles all filters off
-  Click by test id  toggle-all-filters-label
+  Scroll and click test id  toggle-all-filters-label
   Wait until  Toggle all filters is not selected
   Checkbox wrapper not selected by test id  postVerdict-filter
   Checkbox wrapper not selected by test id  preVerdict-filter
