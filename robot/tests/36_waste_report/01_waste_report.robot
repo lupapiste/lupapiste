@@ -24,7 +24,8 @@ The other text field for mineral waste is not visible
 Pena selects other for mineral waste
   Test id select is  'purkaminen.mineraalisenPurkujatteenKasittely.kasittelytapa'  ${EMPTY}
   Select from test id  'purkaminen.mineraalisenPurkujatteenKasittely.kasittelytapa'  muu
-  Wait test id visible  'purkaminen.mineraalisenPurkujatteenKasittely.muuKasittelytapa'
+  Scroll to xpath  //*[@data-test-id="purkaminen.mineraalisenPurkujatteenKasittely.muuKasittelytapa"]
+  Element should be visible by test id  purkaminen.mineraalisenPurkujatteenKasittely.muuKasittelytapa
 
 Pena fills dangerous materials table first row
   Scroll to  table.muuJate-table

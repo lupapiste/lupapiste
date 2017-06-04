@@ -1088,7 +1088,7 @@ Active search tab is
 Open search tab
   [Arguments]  ${tab}
   Wait until  Element should be visible  xpath=//section[@id='applications']//li[@data-test-id='search-tab-${tab}']
-  Click by test id  search-tab-${tab}
+  Run Keyword And Ignore Error  Scroll and click test id  search-tab-${tab}
 
 Show all applications
   ${tab}=  Run Keyword and Return Status  Wait test id visible  search-tab-all
@@ -1483,6 +1483,12 @@ Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]
 
+Scroll to xpath
+  [Arguments]  ${xpath}
+  ${q}=  Quote  ${xpath}
+  ${xfn}=  Set Variable  document.evaluate(${q}, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+  Execute javascript  var result = ${xfn}; var node = result.iterateNext(); if (node) node.scrollIntoView(false);
+
 Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
@@ -1510,7 +1516,8 @@ Scroll to and click xpath results
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
+  ${q}=  Quote  ${id}
+  Wait Until  Element should be visible  xpath=//*[@data-test-id=${q}]
 
 Wait test id hidden
   [Arguments]  ${id}
