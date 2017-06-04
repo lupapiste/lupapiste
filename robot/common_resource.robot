@@ -1092,7 +1092,7 @@ Open search tab
 
 Show all applications
   ${tab}=  Run Keyword and Return Status  Wait test id visible  search-tab-all
-  Run Keyword If  ${tab}  Scroll and click test id  search-tab-all
+  Run Keyword If  ${tab}  Run Keyword And Ignore Error  Scroll and click test id  search-tab-all
 
 
 #
