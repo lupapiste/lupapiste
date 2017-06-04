@@ -67,6 +67,7 @@ Frontend errors check
 *** Keywords ***
 
 Test scenario
+  Run Keyword And Ignore Error  Kill dev-box
   Open tab  parties
   No remove button
   Add hakija-r
@@ -74,12 +75,14 @@ Test scenario
   Scroll to  ${remove-button}:first
   Sleep  0.5s
   Wait until  Element should be visible  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[1]
+  Scroll to  button[data-test-class='delete-schemas.hakija-r']  0
   Click element  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[1]
   Wait until  Element should be visible  modal-dialog-content
   Deny yes no dialog
   Scroll to  ${remove-button}:last
   Sleep  0.5s
   Wait until  Element should be visible  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[2]
+  Scroll to  button[data-test-class='delete-schemas.hakija-r']  1
   Click element  xpath=(//button[@data-test-class='delete-schemas.hakija-r'])[2]
   Confirm yes no dialog
   No remove button
