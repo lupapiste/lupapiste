@@ -1465,9 +1465,9 @@ Clear mocks
 # -------------------------------
 
 Scroll to
-  [Arguments]  ${selector}
+  [Arguments]  ${selector}  ${index}=0
   ${q}=  Quote  ${selector}
-  Wait Until  Execute Javascript  $(${q})[0].scrollIntoView(false);
+  Wait Until  Execute Javascript  $(${q})[${index}].scrollIntoView(false);
 
 Scroll to top
   Execute javascript  window.scrollTo(0,0)
