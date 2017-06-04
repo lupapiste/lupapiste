@@ -35,7 +35,7 @@ Open foreman application
 Open foreman accordions
   Open accordions  parties
   ${toggled}=  Run Keyword And Return Status  Element should be visible  xpath=//button[@data-test-id='accordion-application-foreman-header' and contains(@class,'toggled')]
-  Run keyword unless  ${toggled}  Click element  xpath=//button[@data-test-id='accordion-application-foreman-header' and not(contains(@class,'toggled'))]
+  Run keyword unless  ${toggled}  Scroll to and click xpath results  //button[@data-test-id='accordion-application-foreman-header' and not(contains(@class,'toggled'))]
   Wait until  Element should be visible  xpath=//section[@id='accordion-application-foreman']//div[@data-test-id='application-foreman-template']
 
 Sonja invites foreman to application

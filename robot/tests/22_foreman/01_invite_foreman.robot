@@ -275,7 +275,7 @@ Frontend errors check
 
 Invite Mikko
   Invite count is  0
-  Click by test id  application-invite-paasuunnittelija
+  Scroll and click test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
@@ -283,6 +283,6 @@ Invite Mikko
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
   Input Text  invite-email  mikko@example.com
   Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
-  Click by test id  application-invite-submit
+  Scroll and click test id  application-invite-submit
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1

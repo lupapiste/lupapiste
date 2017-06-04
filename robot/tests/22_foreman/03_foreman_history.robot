@@ -99,7 +99,7 @@ Authority sees reduced foreman history
   Wait test id visible  tyonjohtaja-historia-otsikko
 
 Sonja toggles show all of the history
-  Toggle not selected  foreman-history-show-all-input
+  Toggle not selected  foreman-history-show-all
   Toggle toggle  foreman-history-show-all
   Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
   Wait until  Foreman history should have text X times  Sipoo  4
