@@ -557,7 +557,7 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   Element should be visible by test id  ${id}
-  Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
+  Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id="${id}"]
   Scroll and click test id  ${id}
 
 # Workaround for HTML5 inputs
@@ -1498,8 +1498,14 @@ Scroll and click test id
   [Arguments]  ${id}
   Sleep  1s
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
-  Scroll to  [data-test-id=${id}]
+  Scroll to  [data-test-id="${id}"]
   Click by test id  ${id}
+
+Scroll to and click xpath results
+  [Arguments]  ${xpath}
+  Sleep  2s
+  ${xfn}=  Set Variable  document.evaluate("${xpath}", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+  Execute javascript  var result = ${xfn}; var node = result.iterateNext(); while (node) { node.scrollIntoView(false); node.click(); try {node = result.iterateNext();} catch(e){node = null;}}
 
 Wait test id visible
   [Arguments]  ${id}
