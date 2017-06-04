@@ -37,22 +37,22 @@ Automatic assignment with the attachment as the target has been created
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
 
 Sonja sees filters 'Ei tehtäviä' and 'Aita ja asema'
-  Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
-  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter
+  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter
   Wait until  Total attachments row count is  4
-  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
+  Toggle toggle  assignment-dead1111111111111112beef-filter
   Wait until  Total attachments row count is  1
-  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
-  Scroll and click test id  assignment-not-targeted-filter-checkbox
+  Toggle toggle  assignment-dead1111111111111112beef-filter
+  Toggle toggle  assignment-not-targeted-filter
   Wait until  Total attachments row count is  3
-  Scroll and click test id  assignment-not-targeted-filter-checkbox
+  Toggle toggle  assignment-not-targeted-filter
 
 Sonja opens the attachments targeted by the automatic assignment
   Wait until  Total attachments row count is  4
   Click by test id  filter-link-dead1111111111111112beef
-  Wait until  Checkbox wrapper selected by test id  assignment-dead1111111111111112beef-filter-checkbox
+  Wait until  Checkbox wrapper selected by test id  assignment-dead1111111111111112beef-filter
   Wait until  Total attachments row count is  1
-  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
+  Toggle toggle  assignment-dead1111111111111112beef-filter
   Wait until  Total attachments row count is  4
 
 Sonja adds handler to application
@@ -74,7 +74,7 @@ Assignments are assigned to Sonja
   As Sonja
   Open assignments search
   Open search tab  all
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
@@ -103,22 +103,22 @@ Sonja opens attachments tab and sees 'ELY ja naapuri' filter
   As Sonja
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
-  Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter-checkbox
-  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter-checkbox
-  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111111beef-filter-checkbox
+  Wait until  Checkbox wrapper not selected by test id  assignment-not-targeted-filter
+  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111112beef-filter
+  Wait until  Checkbox wrapper not selected by test id  assignment-dead1111111111111111beef-filter
   Wait until  Total attachments row count is  8
   Click by test id  filter-link-dead1111111111111112beef
   Wait until  Total attachments row count is  1
-  Scroll and click test id  assignment-dead1111111111111112beef-filter-checkbox
-  Click by test id  filter-link-dead1111111111111111beef
+  Toggle toggle  assignment-dead1111111111111112beef-filter
+  Scroll and click test id  filter-link-dead1111111111111111beef
   Wait until  Total attachments row count is  1
-  Scroll and click test id  assignment-dead1111111111111111beef-filter-checkbox
+  Toggle toggle  assignment-dead1111111111111111beef-filter
   Wait until  Total attachments row count is  8
 
 Sonja has two assignments
   Open assignments search
   Open search tab  all
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
@@ -138,7 +138,7 @@ Sonja deletes ELY:n tai kunnan poikkeamapäätös attachment, and the associated
   Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment-1']
 
 Sonja completes the Aita ja asema assignment
-  Click by test id  mark-assignment-complete
+  Scroll and click test id  mark-assignment-complete
   Wait until  Element should not be visible  xpath=//div[@data-test-id='automatic-assignment-1']
   Logout
 
@@ -167,19 +167,19 @@ Sonja opens the application and sees that changing the type has created a new au
   Wait until  Element should contain  xpath=//div[@data-test-id='automatic-assignment-0']//div[@data-test-id='assignment-text']//a  Aita ja asema
 
 The assignment targets the 'Aitapiirustus' attachment
-  Click by test id  filter-link-dead1111111111111112beef
+  Scroll and click test id  filter-link-dead1111111111111112beef
   Wait until  Total attachments row count is  1
   Wait until  Element should be visible  xpath=//tr[@data-test-type='paapiirustus.aitapiirustus']
 
 Sonja changes handler
-  Click by test id  edit-handlers
+  Scroll and click test id  edit-handlers
   Wait test id visible  add-handler
-  Click by test id  add-handler
+  Scroll and click test id  add-handler
   Edit handler  0  Sibbo Ronja  Käsittelijä
 
 Sonja has no open assignments
   Open assignments search
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
   Logout
@@ -188,7 +188,7 @@ Ronja has one assignment
   As Ronja
   Open assignments search
   Open search tab  all
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
   Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
   Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
