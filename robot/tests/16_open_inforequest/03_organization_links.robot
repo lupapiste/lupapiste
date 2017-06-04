@@ -53,8 +53,9 @@ Open inforequest tree
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
   Wait Until  Selected Municipality Is  753
   Wait until element is enabled  create-location-continue
-  Click by test id  create-continue
+  Click element  xpath=//div[@id="create-map"]//button[@data-test-id="create-continue"]
   Set animations off
+  Sleep  2sgi
   Wait until  Element should be visible  xpath=//section[@id='create-part-2']//div[@class='tree-page']
 
 
