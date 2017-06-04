@@ -167,6 +167,7 @@ Set attachment back to needed
 
 Upload new version for muut.muu (attachment page opens)
   [Tags]  attachments
+  Sleep  2s
   Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}  Muu liite
   Scroll and click test id  batch-ready
 
