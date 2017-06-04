@@ -200,6 +200,7 @@ Mikko see that attachment is for authority
 
 Mikko adds comment
   [Tags]  attachments
+  Sleep  2s
   Open attachment details  muut.muu
   Input comment  mahtava liite!
 
