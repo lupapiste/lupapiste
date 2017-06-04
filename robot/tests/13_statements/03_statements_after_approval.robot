@@ -54,7 +54,6 @@ Ronja logs in and adds attachment to statement draft
   Open tab  statement
   Open statement  ronja.sibbo@sipoo.fi
   Wait test id visible  statement-attachments-no-attachments
-  Scroll and click test id  add-statement-attachment
   Add attachment  statement  ${TXT_TESTFILE_PATH}  Important note
   Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
   [Teardown]  Logout
@@ -88,7 +87,6 @@ Ronja can delete and add attachment
   Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element Should Not Be Visible  jquery=table[data-test-id=statement-attachments-table]
-  Scroll and click test id  add-statement-attachment
   Add attachment  statement  ${TXT_TESTFILE_PATH}  New information
   Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  New information
 

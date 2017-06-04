@@ -107,7 +107,8 @@ Sonja types in draft
 
 Sonja adds attachment to statement draft
   Wait test id visible  statement-attachments-no-attachments
-  Scroll and click test id  add-statement-attachment
+  Import Library  DebugLibrary
+  Debug
   Add attachment  statement  ${PDF_TESTFILE_PATH}  Important note
 
 Attachment comment appears
