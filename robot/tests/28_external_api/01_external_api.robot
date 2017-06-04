@@ -99,9 +99,12 @@ Fill review info
   Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ei
 
 Transfering task emits LupapisteApi.integrationSent function call
-  Click enabled by test id  review-done
+  Scroll and click test id  review-done
+  Sleep  2s
   Confirm yes no dialog
+  Sleep  2s
   Confirm  dynamic-ok-confirm-dialog
+  Sleep  2s
   Permit properties should be visible in dialog
 
 Button not visible if parent function isnt implemented
