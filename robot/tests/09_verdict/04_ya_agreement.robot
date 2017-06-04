@@ -36,7 +36,7 @@ Sonja prepares agreement
 
 Permit subtype has changed to sijoitussopimus
   # This happens in sijoituslupa when verdict-agreement checkbox is selected
-  Click by test id  return-from-verdict
+  Scroll and click test id  return-from-verdict
   Wait until  Permit subtype is  Sijoitussopimus
 
 Publish agreement
