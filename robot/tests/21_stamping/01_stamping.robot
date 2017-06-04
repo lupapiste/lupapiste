@@ -212,8 +212,7 @@ Open stamping page
 Mark attachment as verdict attachment
   Open attachment details  muut.muu
   Wait until  Element should be visible  xpath=//label[@data-test-id='is-verdict-attachment-label']
-  Scroll to test id  is-verdict-attachment-input
-  Select checkbox  xpath=//input[@data-test-id='is-verdict-attachment-input']
+  Toggle toggle  is-verdict-attachment
   Positive indicator icon should be visible
   Return to application
 
