@@ -55,7 +55,7 @@ Open inforequest tree
   Wait until element is enabled  create-location-continue
   Click element  xpath=//div[@id="create-map"]//button[@data-test-id="create-continue"]
   Set animations off
-  Sleep  2sgi
+  Sleep  2s
   Wait until  Element should be visible  xpath=//section[@id='create-part-2']//div[@class='tree-page']
 
 
