@@ -19,6 +19,7 @@
       [:th#name]
       [:th#attachments]
       [:th#finished]
+      [:th#inspection-date]
       [:th#finished-date]
       [:th#finished-by]]]
     [:tbody
@@ -26,6 +27,7 @@
       [:td#name]
       [:td#attachments]
       [:td#finished]
+      [:td#inspection-date]
       [:td#finished-date]
       [:td#finished-by]]]]])
 
@@ -45,13 +47,15 @@
       [:#name]          (enlive/content (i18n/localize lang "inspection-summary.targets.table.target-name"))
       [:#attachments]   (enlive/content (i18n/localize lang "inspection-summary.targets.table.attachments"))
       [:#finished]      (enlive/content (i18n/localize lang "inspection-summary.targets.table.finished"))
-      [:#finished-date] (enlive/content (i18n/localize lang "inspection-summary.targets.table.date"))
+      [:#inspection-date] (enlive/content (i18n/localize lang "inspection-summary.targets.table.inspection-date"))
+      [:#finished-date] (enlive/content (i18n/localize lang "inspection-summary.targets.table.finished-date"))
       [:#finished-by]   (enlive/content (i18n/localize lang "inspection-summary.targets.table.marked-by")))
      [:#inspection-summary-targets :#target-data]
-     (enlive/clone-for [{:keys [target-name finished finished-date finished-by] :as target} (:targets summary)]
+     (enlive/clone-for [{:keys [target-name finished inspection-date finished-date finished-by] :as target} (:targets summary)]
                        [:#name]          (enlive/content target-name)
                        [:#attachments]   (enlive/content (->> (target-attachments application target) (common/wrap-map :div)))
                        [:#finished]      (enlive/content (when finished (i18n/localize lang "yes")))
+                       [:#inspection-date] (enlive/content (util/to-local-date inspection-date))
                        [:#finished-date] (enlive/content (util/to-local-date finished-date))
                        [:#finished-by]   (enlive/content (->> ((juxt :firstName :lastName) finished-by) (remove nil?) (ss/join " ")))))))
 
