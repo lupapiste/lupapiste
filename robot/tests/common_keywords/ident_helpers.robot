@@ -5,7 +5,7 @@ Authenticate via dummy page
   Sleep  1s
   Fill test id  dummy-login-userid  210281-9988
   Wait test id visible  submit-button
-  Click by test id  submit-button
+  Submit Form
 
 Start authentication but cancel it
   [Arguments]  ${init-button-id}
