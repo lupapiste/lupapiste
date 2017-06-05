@@ -41,8 +41,9 @@ Open foreman accordions
 Sonja invites foreman to application
   Open tab  parties
   Open foreman accordions
-  Click by test id  invite-foreman-button
-  Input Text  invite-foreman-email  teppo@example.com
+  Wait until  Click by test id  invite-foreman-button
+  Sleep  1s
+  Wait until  Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
@@ -67,16 +68,17 @@ Submit foreman base app
 
 
 Foreman accepts invitation and fills info
-  Wait until  Click by test id  accept-invite-button
+  Wait until  Scroll and click test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
   Wait for jQuery
-  Wait until  Click by test id  fill-info-button
+  Wait until  Scroll and click test id  fill-info-button
   Wait for jQuery
 
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman application  ${index}
   Deny yes no dialog
+  Sleep  1s
   Open tab  parties
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
