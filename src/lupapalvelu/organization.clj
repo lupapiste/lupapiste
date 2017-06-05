@@ -79,8 +79,11 @@
    (sc/optional-key :handlerRole) HandlerRole
    :description sc/Str})
 
+(sc/defschema OrgId
+  (sc/pred string?))
+
 (sc/defschema Organization
-  {:id sc/Str
+  {:id OrgId
    :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
@@ -138,6 +141,9 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]})
+
+(sc/defschema SimpleOrg
+  (select-keys Organization [:id :name :scope]))
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles

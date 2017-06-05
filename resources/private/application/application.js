@@ -265,19 +265,22 @@
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+        var collapseAccordion = !lupapisteApp.models.applicationAuthModel.ok("enable-accordions");
 
         // Parties are always visible
         docgen.displayDocuments("partiesDocgen",
                                 app,
                                 partyDocs,
-                                {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                {dataTestSpecifiers: devMode,
+                                 accordionCollapsed: collapseAccordion});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
                                   app,
                                   applicationModel.summaryAvailable() ? [] : nonpartyDocs,
-                                  {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: collapseAccordion});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -285,9 +288,10 @@
         // summary tab is visible in post-verdict and canceled states
         if (applicationModel.summaryAvailable()) {
           docgen.displayDocuments("applicationAndPartiesDocgen",
-              app,
-              applicationModel.summaryAvailable() ? uneditableDocs : [],
-              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                  app,
+                                  applicationModel.summaryAvailable() ? uneditableDocs : [],
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: collapseAccordion});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
@@ -298,7 +302,7 @@
                                   app,
                                   editableDocs,
                                   {dataTestSpecifiers: devMode,
-                                   accordionCollapsed: isAuthority});
+                                   accordionCollapsed: collapseAccordion});
         } else {
           docgen.clear("constructionTimeDocgen");
         }
