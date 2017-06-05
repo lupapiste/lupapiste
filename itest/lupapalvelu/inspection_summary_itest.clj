@@ -166,7 +166,31 @@
           (command pena :set-attachment-meta :id id1 :attachmentId (:id summary-attachment) :meta {:contents "Tarkastuskohde"}) => (partial expected-failure? :error.inspection-summary-target.finished))
         (fact "Can't delete attachment"
           (command pena :delete-attachment :id id1 :attachmentId (:id summary-attachment)) => (partial expected-failure? :error.inspection-summary-target.finished))
-        ))))
+        )))
+
+  (facts "Seting isnpection date"
+    (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id :address "Jarvikatu 27")
+          verdict (give-verdict raktark-jarvenpaa app-id :verdictId "2222")
+          {summaries :summaries} (query pena :inspection-summaries-for-application :id app-id)
+          {summary-id :id targets :targets} (first summaries)
+          target (first targets)]
+      verdict => ok?
+      (fact "Inspection date can be set"
+        (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date 1500000000000) => ok?
+        (let [modified-target (->> (query pena :inspection-summaries-for-application :id app-id)
+                                  :summaries
+                                  (util/find-by-id summary-id)
+                                  :targets
+                                  (util/find-by-id (:id target)))]
+          (:inspection-date modified-target) => 1500000000000))
+      (fact "Inspection date should be valid timestamp"
+        (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date "15000ABC00000") => (partial expected-failure? :error.illegal-number))
+      (fact "Inpection date can't be set to finished target"
+        (command pena :set-target-status :id app-id :summaryId summary-id :targetId (:id target) :status true) => ok?
+        (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date 1500000000000) => (partial expected-failure? :error.inspection-summary-target.finished))
+      (fact "Inspection date can't be set to locked summary"
+        (command raktark-jarvenpaa :toggle-inspection-summary-locking :id app-id :summaryId summary-id :isLocked true) => ok?
+        (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date 1500000000000) => (partial expected-failure? :error.inspection-summary.locked)))))
 
 (facts "Inspection summary locking"
   (let [app               (create-and-submit-application pena :propertyId sipoo-property-id :address "Peltomaankatu 9")

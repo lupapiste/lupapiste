@@ -188,3 +188,18 @@
                   :unset {:finished-date 1 :finished-by 1}})]
     (inspection-summary/edit-target application summaryId targetId params)
     (ok)))
+
+(defcommand set-inspection-date
+  {:pre-checks [inspection-summary/inspection-summary-api-applicant-pre-check
+                inspection-summary/validate-summary-target-found-in-application
+                inspection-summary/validate-summary-not-locked
+                inspection-summary/deny-if-finished]
+   :parameters [:id summaryId targetId date]
+   :categories #{:inspection-summaries}
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
+                      (partial action/number-parameters [:date])]
+   :user-authz-roles #{:writer :owner :foreman}
+   :user-roles #{:applicant :authority}}
+  [{application :application user :user}]
+  (inspection-summary/edit-target application summaryId targetId {:set {:inspection-date date}})
+  (ok))
