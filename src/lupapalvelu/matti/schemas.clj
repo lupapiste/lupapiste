@@ -48,7 +48,6 @@
 
 (def verdict-code {:name "matti-verdict-code"
                    :type :select
-                   ;;:i18nkey "matti.verdict"
                    :body (map #(hash-map :name (name %))
                               (keys verdict-code-map))})
 (def verdict-check {:name "matti-verdict-check"

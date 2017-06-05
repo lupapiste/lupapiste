@@ -99,17 +99,22 @@ $matti-grid-margin: 20px;
   $margin-bottom: $marginS;
 }
 
+.matti-buttons {
+    float: right;
+    > button {
+      margin-left: $marginS;
+    }
+}
+
 .matti-section {
   border-top: 1px solid $grid-border-color;
   padding-top: $marginS;
-  .matti-section__buttons {
-    float: right;
-    > button {
-      margin-top: $marginS;
-      margin-left: $marginS;
-    }
+  > .matti-buttons {
+    margin-top: $marginS;
   }
 }
+
+
 
 .matti--view {
   .matti-condition-box + .matti-condition-box:before {
@@ -129,3 +134,9 @@ span.formatted {
 // Meta status classes
 .matti--edit {}
 .matti--view {}
+
+.row-text {
+  line-height: $btn-height;
+  display: inline-block;
+  vertical-align: middle;
+}

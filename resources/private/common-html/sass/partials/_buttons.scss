@@ -544,7 +544,10 @@ i.toggle {
   padding-left: $icon-pad;
 }
 
-
+button.no-border,
+btn.no-border {
+  border: none;
+}
 
 // DataTable tweaks.
 

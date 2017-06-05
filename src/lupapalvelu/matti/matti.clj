@@ -9,7 +9,7 @@
   (let [data {:id (mongo/create-id)
               :draft {}
               :name (i18n/localize lang
-                                   :matti.verdict-template)}]
+                                   :matti-verdict-template)}]
     (mongo/update-by-id :organizations
                         org-id
                         {$push {:verdict-templates
@@ -25,19 +25,22 @@
 (defn latest-version [organization template-id]
   (-> (verdict-template organization template-id) :versions last))
 
-(defn template-update [organization template-id update]
+(defn template-update [organization template-id timestamp update]
   (mongo/update :organizations
                 {:_id               (:id organization)
                  :verdict-templates {$elemMatch {:id template-id}}}
-                update))
+                (assoc-in update
+                          [$set :verdict-templates.$.modified]
+                          timestamp )))
 
 (defn save-draft-value [organization template-id timestamp path value]
   (let [template (verdict-template organization template-id)
-        draft    (assoc-in (:draft template) path value)]
+        _ (>pprint template)
+        draft    (assoc-in (:draft template) (map keyword path) value)]
     (template-update organization
                      template-id
-                     {$set {:verdict-templates.$.draft    draft
-                            :verdict-templates.$.modified timestamp}})))
+                     timestamp
+                     {$set {:verdict-templates.$.draft draft}})))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (mongo/update organization
@@ -47,7 +50,8 @@
                          :published timestamp
                          :data      (:draft (verdict-template organization
                                                               template-id))}}}))
-(defn set-name [organization template-id name]
+(defn set-name [organization template-id timestamp name]
   (template-update organization
                    template-id
+                   timestamp
                    {$set {:verdict-templates.$.name name}}))

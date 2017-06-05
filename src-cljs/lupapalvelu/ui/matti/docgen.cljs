@@ -82,8 +82,14 @@
               :id      input-id}]
      [:label.matti-checkbox-label
       {:for      input-id
-       :on-click #(swap! state not)}
+       :on-click (fn [_]
+                   (swap! state not)
+                   (path/meta-updated options))}
       (docgen-loc options)]]))
+
+(defn change-test [state]
+  (fn [event]
+    (println "State:" @state "Event:" event)))
 
 (rum/defcs text-edit < (rum/local "" ::text)
   {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
@@ -96,8 +102,8 @@
     [tag
      (merge (docgen-attr options
                          :value     @text*
-                         :on-change (common/event->state text*)
-                         :on-blur   (common/event->state state))
+                         :on-change identity ;; A function is needed
+                         :on-blur   (state-change options))
             attr)]))
 
 (defmethod docgen-component :string

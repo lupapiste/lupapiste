@@ -1,8 +1,6 @@
 (ns lupapalvelu.matti.shared
   (:require [schema.core :refer [defschema] :as sc]))
 
-
-
 (declare MattiList)
 
 (def meta-flags (zipmap (map sc/optional-key
@@ -47,9 +45,10 @@
           (sc/optional-key :_meta)   {sc/Keyword sc/Bool}}))
 
 (defschema MattiVerdict
-  {(sc/optional-key :id) sc/Str  ;; Id is created when the verdict is saved the first time
-   :name                 sc/Str  ;; Non-localized raw string
-   :sections             [MattiVerdictSection]})
+  {(sc/optional-key :id)        sc/Str ;; Id is created when the verdict is saved the first time
+   (sc/optional-key :modified) sc/Int
+   :name                        sc/Str ;; Non-localized raw string
+   :sections                    [MattiVerdictSection]})
 
 
 
@@ -64,7 +63,7 @@
 
 (def default-verdict-template
   {:name     ""
-   :sections [{:id    "matti.verdict"
+   :sections [{:id    "matti-verdict"
                :grid  {:columns 5
                        :rows    [[{}
                                   {:id     "pykala"
@@ -84,8 +83,8 @@
                                                             :schema {:docgen "matti-verdict-text"}}]}}}]]
                        :css     [:grid-class]}
                :css   [:section-class]
-               :_meta {:can-remove? true}}
-              {:id    "matti.conditions"
+               :_meta {:can-remove? false}}
+              {:id    "matti-conditions"
                :grid  {:columns 4
                        :rows    [[{:col    4
                                    :schema (checkbox-list "foremen" ["vastaava-tj" "vv-tj" "iv-tj" "erityis-tj"])}]
@@ -94,8 +93,5 @@
                                  [{:col    4
                                    :schema (checkbox-list "reviews" ["paikka" "sijainti" "aloitus" "pohja" "rakenne" "vv" "iv" "loppu"])}]]}
                :_meta {:can-remove? true}}]})
-
-(def default-data {:matti.verdict {:paatostieto "evatty"}
-                   :_meta         {:can-edit? true}})
 
 (sc/validate MattiVerdict default-verdict-template)

@@ -62,3 +62,6 @@
   [{:keys [state path] :as options}]
   (when-let [fun (latest path state :_meta :updated)]
     (fun options)))
+
+(defn set-top-meta [state* k v]
+  (reset! (state [:_meta k] state*) v))

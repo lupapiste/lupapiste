@@ -8,9 +8,8 @@
             [sade.util :as util]))
 
 
-(defn- command->organization [{:keys [user user-organizations]}]
-  (util/find-by-id (usr/authority-admins-organization-id user)
-                   user-organizations))
+(defn- command->organization [{user :user}]
+  (usr/authority-admins-organization user))
 
 (defn- verdict-template-editable
   "Template exists and is editable (not deleted)."
@@ -31,26 +30,27 @@
   {:description "Creates new empty template. Returns template id, name and draft."
    :user-roles  #{:authorityAdmin}}
   [{:keys [created user lang]}]
-  (let [{:keys [id draft]}
+  (let [{:keys [id draft name]}
         (matti/new-verdict-template (usr/authority-admins-organization-id user)
                                     created
                                     lang)]
-    (ok :id id :draft draft)))
+    (ok :id id :name name :draft draft)))
 
 (defcommand set-verdict-template-name
   {:parameters [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])
                       verdict-template-editable]
    :user-roles #{:authorityAdmin}}
-  [command]
+  [{created :created :as command}]
   (matti/set-name (command->organization command)
                   template-id
-                  name))
+                  created
+                  name)
+  (ok :modified created))
 
 (defcommand save-verdict-template-draft-value
   {:description      "Incremental save support for verdict template
-  drafts. Creates automatically a new version if the latest version
-  has already been published."
+  drafts. Returns modified timestamp."
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id path value]
    :input-validators [(partial action/vector-parameters [:path])
@@ -60,7 +60,8 @@
                           template-id
                           created
                           path
-                          value))
+                          value)
+  (ok :modified created))
 
 (defcommand publish-verdict-template
   {:description "Creates new verdict template version."
@@ -73,14 +74,23 @@
                                   template-id
                                   created))
 (defquery verdict-templates
-  {:description "Ids and names for every editable verdict
+  {:description "Id, name, published maps for every editable verdict
   template."
    :user-roles #{:authorityAdmin :authority}}
   [command]
   (ok :verdict-templates (->> (command->organization command)
                               :verdict-templates
                               (remove :deleted)
-                              (map (fn [{:keys [id name versions]}]
+                              (map (fn [{:keys [id modified name versions]}]
                                      {:id id
                                       :name name
                                       :published (-> versions last :published)})))))
+(defquery verdict-template-draft
+  {:description "Draft data for the given template. Template must be
+  editable."
+   :user-roles #{:authorityAdmin}
+   :parameters [template-id]
+   :input-validators [verdict-template-editable]}
+  [command]
+  (ok :draft (:draft (matti/verdict-template (command->organization command)
+                                             template-id))))

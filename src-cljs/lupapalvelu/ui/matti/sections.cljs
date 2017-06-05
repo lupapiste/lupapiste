@@ -77,7 +77,7 @@
   [{:keys [state path id] :as options}]
   (when (path/meta? options :can-edit?)
     (letfn [(flip [key] #(path/flip-meta options key))]
-      [:div.matti-section__buttons
+      [:div.matti-buttons
        (when (path/meta? options :editing?)
          [:button.matti-section-button.ghost
           {:on-click (flip :editing?)}
