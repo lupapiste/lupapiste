@@ -10,7 +10,7 @@ Resource        ../common_keywords/email_helpers.robot
 
 Authority creates an application
   [Tags]  integration
-  As Sonja
+  Sonja logs in  False
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  email-change-app${secs}
   Set Suite Variable  ${propertyId}  753-416-30-1
