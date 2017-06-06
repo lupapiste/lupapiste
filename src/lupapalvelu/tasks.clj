@@ -29,7 +29,7 @@
                  "loppukatselmus"
                  "ei tiedossa"])
 
-(def task-states #{:requires_user_action :requires_authority_action :ok :sent})
+(def task-states #{:requires_user_action :requires_authority_action :ok :sent :faulty_review_task})
 
 (defn all-states-but [& states]
   (apply disj task-states states))

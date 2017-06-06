@@ -15638,6 +15638,10 @@ div.review-tasks {
   margin-top: 20px;
 }
 
+div.review-tasks .faulty {
+  text-decoration: line-through;
+}
+
 .assignment-creator {
   margin-bottom: 12px;
 }

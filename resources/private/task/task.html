@@ -19,6 +19,7 @@
       <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
       <!-- /ko -->
+      <button data-test-id="mark-faulty" data-bind="ltext: 'task.mark-faulty', click: markFaulty, visible: $root.authorization.ok('mark-review-faulty')" class="negative">
 
       <button data-test-id="delete-task"
               data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"

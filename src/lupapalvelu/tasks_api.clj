@@ -18,6 +18,13 @@
 
 ;; Helpers
 
+(defn- task-source-type-assertion [types]
+  (fn [{{task-id :taskId} :data app :application}]
+    (if-let [task (util/find-by-id task-id (:tasks app))]
+      (when-not ((set types) (keyword (-> task :source :type)))
+        (fail :error.command-illegal-state))
+      (fail :error.task-not-found))))
+
 (defn- task-state-assertion [states]
   (fn [{{task-id :taskId} :data app :application}]
     (if-let [task (util/find-by-id task-id (:tasks app))]
@@ -241,6 +248,19 @@
       :nop)
 
     (ok :integrationAvailable sent-to-krysp?)))
+
+(defcommand mark-review-faulty
+  {:description "Marks review done, generates PDF/A and sends data to backend"
+   :parameters  [id taskId]
+   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :pre-checks  [validate-task-is-review
+                 (task-source-type-assertion #{:background})
+                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
+                 (task-state-assertion #{:sent})]
+   :user-roles  #{:authority}
+   :states      valid-states}
+  [command]
+  (set-state command taskId :faulty_review_task))
 
 (defquery is-end-review
   {:description "Pseudo query that fails if the task is neither
