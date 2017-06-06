@@ -132,6 +132,10 @@
       return self.authModel.ok("convert-to-pdfa");
     });
 
+    self.showArchivalError = self.disposedPureComputed(function() {
+      return !self.archivable() && !self.archived() && !_.isEmpty(self.archivabilityError());
+    });
+
     self.retentionDescription = self.disposedPureComputed(function() {
       var retention = util.getIn(self.metadata, ["sailytysaika"], {});
       if (ko.unwrap(retention.arkistointi)) {
