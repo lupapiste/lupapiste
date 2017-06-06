@@ -15,13 +15,16 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
+  self.showCompanyNotesPanel = ko.observable(false);
   self.unseenNotice = self.sidePanelService.unseenNotice;
+  self.unseenCompanyNote = self.sidePanelService.unseenCompanyNote;
   self.showInfoPanel = ko.observable( false );
   // Info panel can exist before services (e.g., logout page).
   self.showStar = _.get( lupapisteApp, "services.infoService.showStar" );
 
   var panelFlags = [self.showConversationPanel,
                     self.showNoticePanel,
+                    self.showCompanyNotesPanel,
                     self.showInfoPanel];
 
   function flagOff( obs ) {
@@ -34,16 +37,23 @@ LUPAPISTE.SidePanelModel = function(params) {
                               event: event});
   }
 
-  self.showConversationPanel.subscribe( function() {
-    if( self.showNoticePanel()) {
+  self.showConversationPanel.subscribe( function(flag) {
+    if(flag) {
       track( "openConversation");
     }
   });
 
-  self.showNoticePanel.subscribe( function() {
-    if( self.showNoticePanel()) {
+  self.showNoticePanel.subscribe( function(flag) {
+    if(flag) {
       hub.send( "SidePanelService::NoticeSeen");
       track( "openNotice");
+    }
+  });
+
+  self.showCompanyNotesPanel.subscribe( function(flag) {
+    if(flag) {
+      hub.send( "SidePanelService::CompanyNotesSeen");
+      track( "openCompanyNotes");
     }
   });
 
@@ -98,6 +108,11 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
     closeOtherPanels( self.showNoticePanel );
+  };
+
+  self.toggleCompanyNotesPanel = function() {
+    self.showCompanyNotesPanel(!self.showCompanyNotesPanel());
+    closeOtherPanels( self.showCompanyNotesPanel );
   };
 
   self.closeSidePanel = function() {

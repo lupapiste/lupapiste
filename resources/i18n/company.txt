@@ -526,3 +526,6 @@
 "register.company.vismasign.title" "en" "What Is Visma Sign?"
 "register.company.vismasign.title" "fi" "Mikä on Visma Sign?"
 "register.company.vismasign.title" "sv" "Vad är Visma Sign?"
+"company-notes.title" "en" "Company notes"
+"company-notes.title" "fi" "Yrityksen huomiot"
+"company-notes.title" "sv" ""
