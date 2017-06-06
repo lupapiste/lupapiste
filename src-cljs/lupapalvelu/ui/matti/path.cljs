@@ -12,6 +12,9 @@
        (remove nil?)
        (map keyword)))
 
+(defn value [path state* & extra]
+  @(state (extend path extra) state*))
+
 (defn id [path]
   (s/replace (->> (filter identity path)
                   (map name)

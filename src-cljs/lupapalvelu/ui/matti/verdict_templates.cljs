@@ -10,31 +10,6 @@
 
 (defonce current-template (atom nil))
 
-#_(rum/defcs add-section < (rum/local "" ::selected)
-  [local-state {:keys [sections state] :as options}]
-  (let [removed (filter #(path/meta? (assoc options
-                                            :path [%]
-                                            :state state)
-                                     :removed?)
-                        (map :id sections))
-        selected* (::selected local-state)]
-    (when-not (contains? (set removed) @selected*)
-     (common/reset-if-needed! selected* (first removed)))
-    (when-not (empty? removed)
-      [:span
-       [:select.dropdown
-        {:value @selected*
-         :on-change (common/event->state selected*)}
-        (map (fn [n]
-               [:option {:value n :key n} (common/loc n)])
-             removed)]
-       [:button.primary
-        {:on-click #(path/flip-meta {:path [@selected*]
-                                     :state state}
-                                    :removed?)}
-        [:i.lupicon-circle-plus]
-        [:span (common/loc "add")]]])))
-
 (defn response->state [state kw]
   (fn [response]
     (swap! state #(assoc % kw (kw response)))))
@@ -85,11 +60,9 @@
       [:span.saved-info (common/loc :matti.last-saved
                                     (js/util.finnishDateAndTime @(path/state [:modified] state)))]]]]
    (for [sec sections]
-     [:div {:key (:id sec)}
-      (sections/section (assoc sec
-                               :path (path/extend (:id sec))
-                               :state state))])
-   #_(add-section options)])
+     (sections/section (assoc sec
+                              :path (path/extend (:id sec))
+                              :state state)))])
 
 (defn reset-template [{:keys [id name modified published draft]}]
   (reset! current-template
@@ -100,7 +73,8 @@
                  :published published
                  :_meta
                  {:updated   updater
-                  :can-edit? true?})))
+                  :can-edit? true?
+                  :editing? true})))
 
 (defn new-template [options]
   (reset-template options))
@@ -141,9 +115,7 @@
         [:button.positive
          {:on-click #(service/new-template new-template)}
          [:i.lupicon-circle-plus]
-         [:span (common/loc "add")]]])
-     [:p (str (rum/react current-template))]
-     [:p (str (rum/react service/template-list))]]))
+         [:span (common/loc "add")]]])]))
 
 (defonce args (atom {}))
 

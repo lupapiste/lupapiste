@@ -64,3 +64,18 @@
          [:button.ghost.no-border
           {:on-click #(swap! editing? not)}
           [:i.lupicon-pen]]])))
+
+(rum/defc checkbox
+  [{:keys [label value handler-fn disabled negate?]}]
+  (let [input-id (str "input-" (rand-int 10000))
+        value-fn (if negate? not identity)
+        value (value-fn value)]
+    [:div.matti-checkbox-wrapper
+     [:input {:type     "checkbox"
+              :disabled disabled
+              :checked  value
+              :id       input-id}]
+     [:label.matti-checkbox-label
+      {:for      input-id
+       :on-click #(handler-fn (not (value-fn value)))}
+      (common/loc label)]]))

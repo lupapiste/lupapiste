@@ -157,3 +157,6 @@
 "matti.publish" "fi" "Julkaise"
 "matti.last-saved" "fi" "Tallennettu viimeksi {0}"
 "matti.last-published" "fi" "Julkaistu viimeksi {0}"
+"matti.always-in-verdict" "fi" "Aina päätöksessä"
+"matti.template-removed" "fi" "Kirjataan päätökseen"
+"matti.template-pdf" "fi" "Kirjataan PDF:ään"

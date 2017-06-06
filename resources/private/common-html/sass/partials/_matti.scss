@@ -30,7 +30,7 @@ $matti-grid-margin: 20px;
     color: $gray51;
     .row {
       @include clearfix;
-      margin: $matti-grid-margin 0;
+      padding: $matti-grid-margin 0;
       @for $i from 1 through $columns {
         .col-#{$i} {
           @include matti-column($i, $columns);
@@ -57,17 +57,17 @@ $matti-grid-margin: 20px;
           display: inline-block;
         }
       }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
     }
   }
 }
 
 @for $i from 1 through 12 {
   @include matti-grid( $i );
-}
-
-.row.row--tight {
-  margin-top: $marginS;
-  margin-bottom: $marginS;
 }
 
 .matti-list {
@@ -112,10 +112,36 @@ $matti-grid-margin: 20px;
 }
 
 .matti-section {
-  border-top: 1px solid $grid-border-color;
-  padding-top: $marginS;
+  $section-border: 1px solid $gray51;
+  div.section-header {
+    padding-left: $marginM;
+    padding-right: $marginM;
+    border: $section-border;
+    background-color: transparentize( $orange-dark, 0.6);
+    .section-title {
+      font-size: 17px;
+      font-weight: bold;
+    }
+  }
   > .matti-buttons {
     margin-top: $marginS;
+  }
+  div.section-body {
+    padding: {
+      left: $marginM;
+      right: $marginM;
+    }
+    border: {
+      left: $section-border;
+      right: $section-border;
+      bottom: $section-border;
+    }
+  }
+}
+
+.matti-section + .matti-section {
+  .section-header {
+    border-top: none;
   }
 }
 

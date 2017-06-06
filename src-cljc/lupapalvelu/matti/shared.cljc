@@ -40,17 +40,16 @@
 (defschema MattiVerdictSection
   (merge MattiBase
          {:id                        sc/Str ;; Also title localization key
+          ;; Section removed from the template. Note: the data is not cleared.
           (sc/optional-key :removed) sc/Bool
-          :grid                      MattiGrid
-          (sc/optional-key :_meta)   {sc/Keyword sc/Bool}}))
+          (sc/optional-key :pdf)     sc/Bool ;; Section included in the verdict pdf.
+          :grid                      MattiGrid}))
 
 (defschema MattiVerdict
   {(sc/optional-key :id)        sc/Str ;; Id is created when the verdict is saved the first time
    (sc/optional-key :modified) sc/Int
    :name                        sc/Str ;; Non-localized raw string
    :sections                    [MattiVerdictSection]})
-
-
 
 (defn checkbox-list [id checks]
   {:list {:id id
