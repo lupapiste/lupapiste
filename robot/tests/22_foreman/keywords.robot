@@ -23,7 +23,8 @@ Create project application
   Append To List  ${applicationIds}  ${newApplicationId}
 
 Go back to project application
-  Click by test id  test-application-link-permit-lupapistetunnus
+  Wait test id visible  test-application-link-permit-lupapistetunnus
+  Scroll and click test id  test-application-link-permit-lupapistetunnus
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
 Open foreman application
@@ -62,7 +63,7 @@ Foreman applies personal information to the foreman application
 Submit foreman base app
   [Arguments]  ${index}
   Open foreman application  ${index}
-  Click by test id  test-application-link-permit-lupapistetunnus
+  Scroll and click test id  test-application-link-permit-lupapistetunnus
   Wait until  Primary operation is  kerrostalo-rivitalo
   Submit application
 
