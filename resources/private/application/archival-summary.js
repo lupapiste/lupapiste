@@ -345,6 +345,7 @@
 
     self.selectAllPostAttachments = function() {
       _.forEach(archivedPostAttachments(), selectIfArchivable);
+      selectDocuments();
     };
 
     var updateState = function(docs, newStateMap) {
