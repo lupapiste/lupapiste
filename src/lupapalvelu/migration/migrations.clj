@@ -3216,13 +3216,13 @@
   (mongo/update-by-query :submitted-applications
                          {:primaryOperation.name :ya-kayttolupa-vaihtolavat
                           :permitSubtype "kayttolupa"
-                          :documents {$elemMatch {:schema-info.name "tyomaastaVastaava"}}}
-                         {$unset {:documents.$ 1}})
+                          :documents.schema-info.name "tyomaastaVastaava"}
+                         {$pull {:documents {:schema-info.name "tyomaastaVastaava"}}})
   (mongo/update-by-query :applications
                          {:primaryOperation.name :ya-kayttolupa-vaihtolavat
                           :permitSubtype "kayttolupa"
-                          :documents {$elemMatch {:schema-info.name "tyomaastaVastaava"}}}
-                         {$unset {:documents.$ 1}}))
+                          :documents.schema-info.name "tyomaastaVastaava"}
+                         {$pull {:documents {:schema-info.name "tyomaastaVastaava"}}}))
 
 ; For certain kayttolupa subtypes, state machine is changed, thus deprecating "finished" state.
 (defmigration kayttolupa-to-tyolupa-workflow-finished-state-change                ; LPK-2933
