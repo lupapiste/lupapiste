@@ -1,6 +1,9 @@
 (ns lupapalvelu.ya-digging-permit-test
   (:require [lupapalvelu.ya-digging-permit :refer :all]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.mock.organization :as mock-org]
+            [lupapalvelu.mock.user :as mock-usr]))
 
 (fact "digging-permit-can-be-created?"
   (digging-permit-can-be-created? {:permitType "not YA"}) => false
@@ -21,3 +24,54 @@
        [["katulupa"
          [["liikennealueen-rajaaminen-tyokayttoon"
            [["muu-liikennealuetyo" :ya-katulupa-muu-liikennealuetyo]]]]]]]])
+
+(facts "new-digging-permit"
+  (mock-org/with-all-mocked-orgs
+    (with-redefs [app/make-application-id (constantly "LP-123")]
+      (let [invalid-source-application (app/do-create-application {:data {:operation "kerrostalo-rivitalo"
+                                                                          :x 0 :y 0
+                                                                          :address "Latokuja 1"
+                                                                          :propertyId "75342600060211"
+                                                                          :messages []}
+                                                                   :user mock-usr/pena
+                                                                   :created 12345})
+            source-application (-> (app/do-create-application {:data {:operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"
+                                                                      :x 0 :y 0
+                                                                      :address "Latokuja 1"
+                                                                      :propertyId "75342600060211"
+                                                                      :messages []}
+                                                               :user mock-usr/pena
+                                                               :created 12345})
+                                   (assoc :state :verdictGiven))]
+
+        (fact "source application must be sijoituslupa"
+          (new-digging-permit invalid-source-application
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+          => (throws #"digging-permit-can-be-created?")
+          (new-digging-permit source-application mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+          => truthy)
+
+        (fact "source application must be in post verdict state"
+          (new-digging-permit (assoc source-application :state :draft)
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+          => (throws #"digging-permit-can-be-created?")
+
+          (new-digging-permit (assoc source-application :state :open)
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+          => (throws #"digging-permit-can-be-created?")
+
+          (new-digging-permit (assoc source-application :state :submitted)
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+          => (throws #"digging-permit-can-be-created?"))
+
+        (fact "digging permit has the same location, property id and address as the source application"
+          (-> (new-digging-permit source-application
+                                  mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+              (select-keys [:location :location-wgs84 :propertyId :propertyIdSource :address]))
+          => (select-keys source-application [:location :location-wgs84 :propertyId :propertyIdSource :address]))
+
+        (fact "digging permit has correct primary operation"
+          (-> (new-digging-permit source-application
+                                  mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+              :primaryOperation :name)
+          => "ya-katulupa-vesi-ja-viemarityot")))))

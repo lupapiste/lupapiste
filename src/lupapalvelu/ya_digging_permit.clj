@@ -19,3 +19,17 @@
   [organization]
   (op/selected-operations-for-organizations [organization]
                                             digging-permit-operation?))
+
+(defn new-digging-permit [{:keys [address propertyId propertyIdSource] [x y] :location :as sijoitus-application}
+                          user created digging-operation]
+  {:pre [(digging-permit-can-be-created? sijoitus-application)]}
+  (app/do-create-application {:data {:address          address
+                                     :operation        digging-operation
+                                     :propertyId       propertyId
+                                     :propertyIdSource propertyIdSource
+                                     :x                x
+                                     :y                y
+                                     :infoRequest      false
+                                     :messages         []}
+                              :user user
+                              :created created}))
