@@ -311,15 +311,19 @@
       return _.some(params.application.tosFunction());
     });
 
-    self.selectAll = function() {
-      _.forEach(archivedPreAttachments(), selectIfArchivable);
-      _.forEach(archivedPostAttachments(), selectIfArchivable);
+    function selectDocuments() {
       _.forEach(self.archivedDocuments(), function(doc) {
         var tila = util.getIn(doc, ["metadata", "tila"]);
         if (tila !== "arkistoitu") {
           doc.sendToArchive(!doc.sendToArchive());
         }
       });
+    }
+
+    self.selectAll = function() {
+      _.forEach(archivedPreAttachments(), selectIfArchivable);
+      _.forEach(archivedPostAttachments(), selectIfArchivable);
+      selectDocuments();
     };
 
     self.unselectAll = function() {
@@ -336,6 +340,7 @@
 
     self.selectAllPreAttachments = function() {
       _.forEach(archivedPreAttachments(), selectIfArchivable);
+      selectDocuments();
     };
 
     self.selectAllPostAttachments = function() {
