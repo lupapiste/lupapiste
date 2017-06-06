@@ -283,7 +283,10 @@
                                  [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
                                    [["vesi-ja-viemarijohtojen-sijoittaminen" "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"]]]]]
                                 ["katulupa" [["kaivaminen-yleisilla-alueilla"
-                                              [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]]]]]
+                                              [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]]]
+                                             ["liikennealueen-rajaaminen-tyokayttoon"
+                                              [["nostotyot" "ya-kayttolupa-nostotyot"]
+                                               ["vaihtolavat" "ya-kayttolupa-vaihtolavat"]]]]]
                                 ["kayttolupa" [["mainokset" "ya-kayttolupa-mainostus-ja-viitoitus"]
                                                ["terassit" "ya-kayttolupa-terassit"]]]]]]))
 
