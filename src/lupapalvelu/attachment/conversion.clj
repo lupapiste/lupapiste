@@ -8,7 +8,8 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation]
             [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper]
-            [taoensso.timbre :as timbre])
+            [taoensso.timbre :as timbre]
+            [sade.env :as env])
   (:import (java.io File InputStream))
   (:import (org.apache.commons.io FilenameUtils)))
 
@@ -49,19 +50,23 @@
       (try
         (io/copy content original-content)
         (let [processing-result (pdf-conversion/convert-to-pdf-a original-content pdf-file {:application application :filename filename})
-              {:keys [output-file missing-fonts] auto-conversion :autoConversion :or {missing-fonts []}} processing-result]
+              {:keys [output-file missing-fonts conversionLog] auto-conversion :autoConversion :or {missing-fonts []}} processing-result
+              archivability-error (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)]
           (when-not auto-conversion (io/delete-file pdf-file :silently))
           (cond
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
 
             ; If we tried with pdf2pdf and failed, try with LibreOffice next
             (and pdf-conversion/pdf2pdf-enabled?
+                 (env/feature? :convert-pdfs-with-libre)
                  (not (:pdfa? processing-result))) (do (timbre/info "File" filename "in application" (:id application) "could not be converted with pdf2pdf, will try libreoffice")
                                                        (->libre-pdfa! filename (files/temp-file-input-stream original-content)))
 
             ; pdf2pdf tool is not enabled, no checking occurs
             (not (:pdfa? processing-result)) {:archivable false
-                                              :archivabilityError :not-validated}
+                                              :missing-fonts missing-fonts
+                                              :archivabilityError archivability-error
+                                              :conversionLog conversionLog}
 
             (:pdfa? processing-result) {:archivable true
                                         :filename (files/filename-for-pdfa filename)
