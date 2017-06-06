@@ -1,10 +1,11 @@
 (ns lupapalvelu.ui.matti.verdict-templates
-  (:require [rum.core :as rum]
+  (:require [clojure.string :as s]
             [lupapalvelu.matti.shared :as matti]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.ui.matti.service :as service]
+            [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.sections :as sections]
-            [lupapalvelu.ui.matti.path :as path]))
+            [lupapalvelu.ui.matti.service :as service]
+            [rum.core :as rum]))
 
 
 (defonce current-template (atom nil))
@@ -52,18 +53,20 @@
               (swap! state #(assoc % :name @name))
               (service/set-template-name @(path/state [:id] state)
                                          @name
-                                         (partial success-fn)))]
+                                         success-fn))]
       [:span
        [:input.grid-style-input.row-text
-        {:type "text"
-         :value @name
+        {:type      "text"
+         :value     @name
          :on-change (common/event->state name)
-         :on-key-up #(case (.-keyCode %)
-                       13 (save-fn) ;; Save on Enter
-                       27 (reset! editing? false) ;; Cancel on Esc
-                       :default)}]
+         :on-key-up #(when-not (s/blank? @name)
+                       (case (.-keyCode %)
+                         13 (save-fn)               ;; Save on Enter
+                         27 (reset! editing? false) ;; Cancel on Esc
+                         :default))}]
        [:button.primary
-        {:on-click save-fn}
+        {:disabled (s/blank? @name)
+         :on-click save-fn}
         [:i.lupicon-save]]])
     (do (common/reset-if-needed! name @(path/state [:name] state))
         [:span @name
