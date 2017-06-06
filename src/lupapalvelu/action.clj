@@ -427,9 +427,12 @@
                                                                      (delay (mongo/select :assignments {:application.id (:id application)
                                                                                                         :status {$ne "canceled"}})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
+            company (when-let [company-id (get-in command [:user :company :id])]
+                      (delay (mongo/by-id :companies company-id)))
             command (merge {:application application
                             :organization organization
                             :user-organizations user-organizations
+                            :company company
                             :application-assignments assignments}
                            command)]
         (or

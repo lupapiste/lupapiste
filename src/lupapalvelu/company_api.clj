@@ -23,7 +23,7 @@
       :invitations (and users (com/find-user-invitations company))))
 
 (defquery company-tags
-  {:user-roles #{:applicant :authority}
+  {:user-roles #{:applicant :authority :admin}
    :input-validators [(some-pre-check com/validate-is-admin
                                       com/validate-belongs-to-company)]
    :parameters [company]}
@@ -226,3 +226,28 @@
                                                [:_id]))]
     (fail :warning.tags.removing-from-applications :applications tag-applications)
     (ok)))
+
+(defquery company-notes
+  {:parameters [id]
+   :user-roles #{:applicant :authority}
+   :pre-checks [com/validate-company-is-authorized]}
+  [{{notes :company-notes} :application {{company-id :id} :company} :user}]
+  (ok :notes (util/find-by-key :companyId company-id notes)))
+
+(defcommand update-application-company-notes
+  {:parameters [id]
+   :optional-parameters [tags note]
+   :states states/all-application-states
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
+   :pre-checks [(com/validate-has-company-role :any)
+                com/validate-tag-ids]
+   :user-roles #{:authority :applicant}}
+  [{{notes :company-notes} :application {{company-id :id} :company} :user}]
+  (if (util/find-by-key :companyId company-id notes)
+    (mongo/update :applications
+                  {:_id id :company-notes {$elemMatch {:companyId company-id}}}
+                  {$set (util/assoc-when {} :company-notes.$.tags tags :company-notes.$.note note)})
+    (mongo/update :applications
+                  {:_id id}
+                  {$push {:company-notes (util/assoc-when {:companyId company-id} :tags tags :note note)}}))
+  (ok))

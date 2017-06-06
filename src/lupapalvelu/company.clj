@@ -115,6 +115,15 @@
                (:company data))
     unauthorized))
 
+(defn validate-company-is-authorized [{{{company-id :id} :company} :user {auth :auth} :application}]
+  (when-not (util/find-by-id company-id auth)
+    unauthorized))
+
+(defn validate-tag-ids [{company :company {tags :tags} :data}]
+  (some->> (remove (set (map :id (:tags @company))) tags)
+           not-empty
+           (fail :error.unknown-tag :tags)))
+
 ;;
 ;; API:
 ;;
