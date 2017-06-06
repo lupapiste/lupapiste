@@ -153,7 +153,7 @@
 "matti-verdict-template.published" "fi" "Julkaistu"
 "matti.copy" "fi" "Kopioi"
 "matti.edit-verdict-template" "fi" "Muokkaa päätöspohjaa:"
-"matti.template-not-published" "fi" "Päätöspohjaa ei olla vielä julkaistu"
+"matti.template-not-published" "fi" "Päätöspohjaa ei olla vielä julkaistu."
 "matti.publish" "fi" "Julkaise"
 "matti.last-saved" "fi" "Tallennettu viimeksi {0}"
 "matti.last-published" "fi" "Julkaistu viimeksi {0}"

@@ -19,11 +19,15 @@
   (common/query "verdict-templates"
                 #(reset! template-list (:verdict-templates %))))
 
-(defn publish-template [template]
-  (let [data (walk/postwalk #(if (map? %)
-                               (dissoc % :_meta)
-                               %) template)]
-    ))
+(defn- list-update-response [callback]
+  (fn [response]
+    (fetch-template-list)
+    (callback response)))
+
+(defn publish-template [template-id callback]
+  (common/command {:command "publish-verdict-template"
+                   :success (list-update-response callback)}
+                  :template-id template-id))
 
 (defn save-draft-value [template-id path value callback]
   (common/command {:command "save-verdict-template-draft-value"
@@ -32,21 +36,17 @@
                   :path path
                   :value value))
 
-(defn fetch-template-draft [template-id callback]
-  (common/query "verdict-template-draft"
+(defn fetch-template [template-id callback]
+  (common/query "verdict-template"
                 callback
                 :template-id template-id))
 
 (defn new-template [callback]
   (common/command {:command "new-verdict-template"
-                   :success (fn [response]
-                              (fetch-template-list)
-                              (callback response))}))
+                   :success (list-update-response callback)}))
 
 (defn set-template-name [template-id name callback]
   (common/command {:command "set-verdict-template-name"
-                   :success (fn [response]
-                              (fetch-template-list)
-                              (callback response))}
+                   :success (list-update-response callback)}
                   :template-id template-id
                   :name name))

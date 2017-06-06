@@ -1,7 +1,7 @@
 (ns lupapalvelu.ui.matti.verdict-templates
-  (:require [clojure.string :as s]
-            [lupapalvelu.matti.shared :as matti]
+  (:require [lupapalvelu.matti.shared :as matti]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
@@ -35,65 +35,55 @@
         [:i.lupicon-circle-plus]
         [:span (common/loc "add")]]])))
 
-(defn updater [template-id {:keys [state path]}]
-  (service/save-draft-value template-id
+(defn response->state [state kw]
+  (fn [response]
+    (swap! state #(assoc % kw (kw response)))))
+
+(defn updater [{:keys [state path]}]
+  (service/save-draft-value @(path/state [:id] state)
                             path
                             @(path/state path state)
-                            (fn [{modified :modified}]
-                              (path/set-top-meta state :modified modified))))
+                            (response->state state :modified)))
 
-(rum/defcs verdict-name < (rum/local "" ::name)
-                          (rum/local false ::editing?)
-  [{name ::name editing? ::editing?} {state :state}]
-  (if @editing?
-    (letfn [(success-fn [{modified :modified}]
-              (swap! state #(assoc % :modified modified)))
-            (save-fn []
-              (reset! editing? false)
-              (swap! state #(assoc % :name @name))
-              (service/set-template-name @(path/state [:id] state)
-                                         @name
-                                         success-fn))]
-      [:span
-       [:input.grid-style-input.row-text
-        {:type      "text"
-         :value     @name
-         :on-change (common/event->state name)
-         :on-key-up #(when-not (s/blank? @name)
-                       (case (.-keyCode %)
-                         13 (save-fn)               ;; Save on Enter
-                         27 (reset! editing? false) ;; Cancel on Esc
-                         :default))}]
-       [:button.primary
-        {:disabled (s/blank? @name)
-         :on-click save-fn}
-        [:i.lupicon-save]]])
-    (do (common/reset-if-needed! name @(path/state [:name] state))
-        [:span @name
-         [:button.ghost.no-border
-          {:on-click #(swap! editing? not)}
-          [:i.lupicon-pen]]])))
+
+(defn verdict-name [{state :state}]
+  "Called from pen-input component."
+  (letfn [(handler-fn [value]
+            (reset! (path/state [:name] state) value)
+            (service/set-template-name @(path/state [:id] state)
+                                       value
+                                       (response->state state :modified)))]
+    (components/pen-input {:value      @(path/state [:name] state)
+                           :handler-fn handler-fn})))
+
 
 (defn verdict-template
   [{:keys [sections state] :as options}]
-  [:div
+  [:div.verdict-template
    [:button.ghost
     {:on-click #(reset! current-template nil)}
     [:i.lupicon-chevron-left]
     [:span (common/loc "back")]]
    [:div.matti-grid-2
-    [:div.row
+    [:div.row.row--tight
      [:div.col-1
-      [:span.row-text
+      [:span.row-text.header
        (common/loc "matti.edit-verdict-template")
        (verdict-name options)]]
      [:div.col-1.col--right
-      [:div [:span.row-text
+      [:div [:span.row-text.row-text--margin
              (if-let [published @(path/state [:published] state)]
                (common/loc :matti.last-published
-                           (js/util.finnishDateTime published))
+                           (js/util.finnishDateAndTime published))
                (common/loc :matti.template-not-published))]
-       [:button.ghost (common/loc :matti.publish)]]]]]
+       [:button.ghost
+        {:on-click #(service/publish-template @(path/state [:id] state)
+                                              (response->state state :published))}
+        (common/loc :matti.publish)]]]]
+    [:div.row.row--tight
+     [:div.col-2.col--right
+      [:span.saved-info (common/loc :matti.last-saved
+                                    (js/util.finnishDateAndTime @(path/state [:modified] state)))]]]]
    (for [sec sections]
      [:div {:key (:id sec)}
       (sections/section (assoc sec
@@ -101,17 +91,19 @@
                                :state state))])
    #_(add-section options)])
 
-(defn reset-template [template-id template-name {data :draft}]
+(defn reset-template [{:keys [id name modified published draft]}]
   (reset! current-template
-          (assoc data
-                 :name template-name
-                 :id template-id
+          (assoc draft
+                 :name name
+                 :id id
+                 :modified modified
+                 :published published
                  :_meta
-                 {:updated   (partial updater template-id)
+                 {:updated   updater
                   :can-edit? true?})))
 
-(defn new-template [{:keys [id name] :as options}]
-  (reset-template id name options))
+(defn new-template [options]
+  (reset-template options))
 
 (defn template-list
   [templates]
@@ -131,8 +123,7 @@
         [:td
          [:div.matti-buttons
           [:button.ghost
-           {:on-click #(service/fetch-template-draft id
-                                                     (partial reset-template id name))}
+           {:on-click #(service/fetch-template id reset-template)}
            (common/loc "edit")]
           [:button.ghost (common/loc "matti.copy")]
           [:button.ghost (common/loc "remove")]]]])]]])

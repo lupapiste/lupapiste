@@ -17350,6 +17350,11 @@ button.rollup-button {
 >>>>>>> LPK-2953 Matti grid.
 }
 
+.row.row--tight {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
 .matti-list > .item {
   display: inline-block;
 }
@@ -17499,6 +17504,23 @@ span.formatted {
   line-height: 40px;
   display: inline-block;
   vertical-align: middle;
+}
+
+.row-text--margin {
+  margin-right: 24px;
+}
+
+div.verdict-template span.pen-input--edit, div.verdict-template span.pen-input--view {
+  margin-left: 6px;
+}
+
+div.verdict-template span.header {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+div.verdict-template span.saved-info {
+  color: #999999;
 }
 
 /* VIEWS

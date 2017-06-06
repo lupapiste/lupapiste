@@ -35,7 +35,6 @@
 
 (defn save-draft-value [organization template-id timestamp path value]
   (let [template (verdict-template organization template-id)
-        _ (>pprint template)
         draft    (assoc-in (:draft template) (map keyword path) value)]
     (template-update organization
                      template-id
@@ -43,15 +42,21 @@
                      {$set {:verdict-templates.$.draft draft}})))
 
 (defn publish-verdict-template [organization template-id timestamp]
-  (mongo/update organization
-                template-id
-                {$push {:verdict-templates.$.versions
-                        {:id        (mongo/create-id)
-                         :published timestamp
-                         :data      (:draft (verdict-template organization
+  (template-update organization
+                   template-id
+                   timestamp
+                   {$push {:verdict-templates.$.versions
+                           {:id        (mongo/create-id)
+                            :published timestamp
+                            :data      (:draft (verdict-template organization
                                                               template-id))}}}))
 (defn set-name [organization template-id timestamp name]
   (template-update organization
                    template-id
                    timestamp
                    {$set {:verdict-templates.$.name name}}))
+
+(defn verdict-template-summary [{versions :versions :as template}]
+  (assoc (select-keys template
+                      [:id :name :modified])
+         :published (-> versions last :published)))

@@ -65,6 +65,11 @@ $matti-grid-margin: 20px;
   @include matti-grid( $i );
 }
 
+.row.row--tight {
+  margin-top: $marginS;
+  margin-bottom: $marginS;
+}
+
 .matti-list {
   > .item {
     display: inline-block;
@@ -139,4 +144,21 @@ span.formatted {
   line-height: $btn-height;
   display: inline-block;
   vertical-align: middle;
+}
+
+.row-text--margin {
+  margin-right: $marginL;
+}
+
+div.verdict-template {
+  span.pen-input--edit, span.pen-input--view {
+    margin-left: $marginS;
+  }
+  span.header {
+    font-size: 17px;
+    font-weight: bold;
+  }
+  span.saved-info {
+    color: $gray153;
+  }
 }

@@ -72,25 +72,26 @@
   [{:keys [created user user-organizations] :as command}]
   (matti/publish-verdict-template (command->organization command)
                                   template-id
-                                  created))
+                                  created)
+  (ok :published created))
+
 (defquery verdict-templates
-  {:description "Id, name, published maps for every editable verdict
+  {:description "Id, name, modifed, published maps for every editable verdict
   template."
    :user-roles #{:authorityAdmin :authority}}
   [command]
   (ok :verdict-templates (->> (command->organization command)
                               :verdict-templates
                               (remove :deleted)
-                              (map (fn [{:keys [id modified name versions]}]
-                                     {:id id
-                                      :name name
-                                      :published (-> versions last :published)})))))
-(defquery verdict-template-draft
-  {:description "Draft data for the given template. Template must be
-  editable."
+                              (map matti/verdict-template-summary))))
+(defquery verdict-template
+  {:description "Verdict template summary plus draft data. The
+  template must be editable."
    :user-roles #{:authorityAdmin}
    :parameters [template-id]
    :input-validators [verdict-template-editable]}
   [command]
-  (ok :draft (:draft (matti/verdict-template (command->organization command)
-                                             template-id))))
+  (let [template (matti/verdict-template (command->organization command)
+                                         template-id)]
+    (ok (assoc (matti/verdict-template-summary template)
+               :draft (:draft template)))))
