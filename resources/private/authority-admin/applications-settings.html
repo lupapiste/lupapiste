@@ -12,6 +12,13 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.title'"></h2>
+        <input type="checkbox" class="form-input" id="automatic-ok-for-attachments-enabled" data-test-id="automatic-ok-for-attachments-enabled"
+               data-bind="checked: organization.automaticOkForAttachments, enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-ok-for-attachments')"/>
+        <label for="automatic-ok-for-attachments-enabled" class="form-label" data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.enabled'"></label>
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.extended-construction-waste-report.title'"></h2>
         <input type="checkbox" class="form-input" id="extended-construction-waste-report-enabled" data-test-id="extended-construction-waste-report-enabled"
                data-bind="checked: organization.extendedConstructionWasteReportEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report')" />
