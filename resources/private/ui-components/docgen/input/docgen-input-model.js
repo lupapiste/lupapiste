@@ -90,7 +90,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.readonly = self.disposedPureComputed(function () {
     var doc = service.findDocumentById( self.documentId );
-    var readOnlyAfterSent = params.schema["readonly-after-sent"] && doc.state === "sent";
+    var readOnlyAfterSent = params.schema["readonly-after-sent"] && (doc.state === "sent" || doc.state === "faulty_review_task");
     return readOnlyAfterSent || params.schema.readonly || params.readonly;
   });
   self.inputOptions = {maxLength: params.schema["max-len"] || LUPAPISTE.config.inputMaxLength,
