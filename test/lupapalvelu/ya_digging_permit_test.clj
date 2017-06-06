@@ -64,6 +64,10 @@
                               mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
           => (throws #"digging-permit-can-be-created?"))
 
+        (fact "operation must be a digging operation selected by the organization of the source application"
+          (new-digging-permit source-application mock-usr/pena 12345 "kerrostalo-rivitalo")
+          => (throws #"digging-permit-operation?"))
+
         (fact "digging permit has the same location, property id and address as the source application"
           (-> (new-digging-permit source-application
                                   mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")

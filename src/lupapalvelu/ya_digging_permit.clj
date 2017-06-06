@@ -8,7 +8,7 @@
   (and (ya/sijoittaminen? application)
        (app/verdict-given? application)))
 
-(defn- digging-permit-operation? [operation-name]
+(defn digging-permit-operation? [operation-name]
   (let [{:keys [permit-type subtypes]} (op/get-operation-metadata operation-name)]
     (and (= permit/YA permit-type)
          (boolean (some #(= :tyolupa %) subtypes)))))
@@ -22,7 +22,8 @@
 
 (defn new-digging-permit [{:keys [address propertyId propertyIdSource] [x y] :location :as sijoitus-application}
                           user created digging-operation]
-  {:pre [(digging-permit-can-be-created? sijoitus-application)]}
+  {:pre [(digging-permit-can-be-created? sijoitus-application)
+         (digging-permit-operation? digging-operation)]}
   (app/do-create-application {:data {:address          address
                                      :operation        digging-operation
                                      :propertyId       propertyId
