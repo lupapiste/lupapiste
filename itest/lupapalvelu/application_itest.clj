@@ -253,6 +253,27 @@
     (:state (query-application sonja id)) => "submitted"
     resp => ok?))
 
+(facts "enable-accordions pseudo-query"
+  (let [{id :id :as app} (create-and-open-application
+                           pena
+                           :propertyId tampere-property-id
+                           :operation "ya-sijoituslupa-ilmajohtojen-sijoittaminen")]
+    (fact "accordions are enabled for applicant"
+      (query pena :enable-accordions :id id) => ok?)
+    (fact "accordions are enabled for authorities in the applications organization"
+      (query jussi :enable-accordions :id id) => ok?)
+    (fact "accordions are not enabled for other authorities"
+      (query veikko :enable-accordions :id id) =not=> ok?))
+
+  (let [{id :id :as app} (create-and-open-application
+                           pena
+                           :propertyId tampere-property-id)]
+    (fact "accordions are not enabled for authorities on non-YA applications"
+      (query jussi :enable-accordions :id id) =not=> ok?
+      (query veikko :enable-accordions :id id) =not=> ok?)
+    (fact "accordions are enabled for applicants on non-YA applications"
+      (query pena :enable-accordions :id id) => ok?)))
+
 (facts* "cancel application authority"
   (last-email) ; Inbox zero
 

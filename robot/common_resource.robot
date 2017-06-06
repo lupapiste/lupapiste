@@ -151,6 +151,47 @@ Language Is
   [Arguments]  ${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
 
+#
+# Accordions
+#
+
+Current page id
+  ${page_xpath}=  Set Variable  //section[contains(@class, 'visible')]
+  Xpath should match X times  ${page_xpath}  1
+  ${page_id}=  Get Element Attribute  ${page_xpath}@id
+  [return]  ${page_id}
+
+Current tab id
+  ${current_page_id}=  Current page id
+  ${tab_xpath}=  Set Variable  //section[@id='${current_page_id}']//div[contains(@class, 'tab-content')][contains(@style, 'display: block')]
+  Xpath should match X times  ${tab_xpath}  1
+  ${current_tab_id}=  Get Element Attribute  ${tab_xpath}@id
+  [return]  ${current_tab_id}
+
+Visible accordions Xpath
+  ${tab_id}=  Current tab id
+  ${visible_accordions_xpath}=  Set Variable  //div[@id='${tab_id}']//section[contains(@class,'accordion')]
+  ${count}=  Get Matching Xpath Count  ${visible_accordions_xpath}
+  Should Be True  0 < ${count}
+  [return]  ${visible_accordions_xpath}
+
+Visible accordion count
+  ${path}=  Visible accordions Xpath
+  ${count}=  Get Matching Xpath Count  ${path}
+  [return]  ${count}
+
+All visible accordions should be
+  [Arguments]  ${state}
+  ${path}=  Visible accordions Xpath
+  ${visible_count}=  Visible accordion count
+  ${matching_accordions_path}=  Set Variable  ${path}//div[@data-accordion-state='${state}']
+  Xpath Should Match X Times  ${matching_accordions_path}  ${visible_count}
+
+All visible accordions should be open
+  All visible accordions should be  open
+
+All visible accordions should be closed
+  All visible accordions should be  closed
 
 #
 # Navigation

@@ -3,11 +3,9 @@ Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Keywords ***
 
-Ident button is visible
-  Wait until page contains element  vetuma-init
-
 Authenticate via dummy page
-  Click by test id  vetuma-init
+  Wait until page contains element  vetuma-init-email
+  Click element  vetuma-init-email
   Fill test id  dummy-login-userid  210281-9988
   Wait test id visible  submit-button
   Click by test id  submit-button
@@ -33,8 +31,8 @@ Open last email and click the email change link
   Click link  xpath=//a
 
 Identify for email change via dummy page
-  Ident button is visible
-  Click by test id  vetuma-init
+  Wait until page contains element  vetuma-init-email
+  Click element  vetuma-init-email
   Fill test id  dummy-login-userid  210281-9988
   Wait test id visible  submit-button
   Click by test id  submit-button

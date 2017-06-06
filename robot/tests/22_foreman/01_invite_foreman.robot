@@ -165,6 +165,7 @@ All foremen table is shown on the Construction tab
   Logout
 
 Applicant can create foreman applications after verdict is given for the original application
+  Sleep  2s
   Pena logs in
   Open project application
   Open tab  parties
@@ -202,9 +203,9 @@ Applicant can clear the link and change the foreman role
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
 
 Applicant can move to linked foreman application and back
-  Click by test id  foreman-application-link-${foremanAppId}
+  Scroll and click test id  foreman-application-link-${foremanAppId}
   Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
-  Click by test id  test-application-link-permit-lupapistetunnus
+  Scroll and click test id  test-application-link-permit-lupapistetunnus
 
 Applicant can start invite flow from tasks tab
   Open tab  tasks

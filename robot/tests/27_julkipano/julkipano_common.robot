@@ -7,7 +7,7 @@ Variables  ../../common_variables.py
 *** Keywords ***
 Create bulletins
   [Arguments]  ${count}
-  As Olli
+  Olli logs in  False
   Create bulletins the fast way  ${count}
 
 Create a bulletin and go to bulletin page

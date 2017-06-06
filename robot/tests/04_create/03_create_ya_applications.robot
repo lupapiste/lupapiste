@@ -12,8 +12,21 @@ Mikko creates a kaivulupa
   #Create application the fast way  authority-cant-see-drafts  753-416-25-30  kerrostalo-rivitalo
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}
-  Create application  ${appname}  753  753-423-2-162  YA-kaivulupa
+  Set Suite Variable  ${propertyId}  753-423-2-162
+  Create application  ${appname}  753  ${propertyId}  YA-kaivulupa
   Wait until  Permit subtype is  Työlupa
+  Open to authorities  viesti
+
+Accordions are open for Mikko
+  All visible accordions should be open
+
+Accordions are open for Sonja
+  Logout
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  All visible accordions should be open
+  Logout
+  Mikko logs in
 
 Mikko creates a kayttolupa
   [Tags]  firefox
@@ -36,4 +49,3 @@ Mikko creates a sijoituslupa
   Create application  ${appname}  753  753-423-2-160  YA-sijoituslupa
   Wait until  Permit subtype is  Sijoituslupa
   [Teardown]  logout
-

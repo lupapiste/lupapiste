@@ -25,18 +25,24 @@
 
 (def pages [:first :last :all])
 
+(sc/defschema SimpleTagType
+  (apply sc/enum simple-field-types))
+
+(sc/defschema TextTagType
+  (apply sc/enum text-field-types))
+
 (sc/defschema SimpleTag
               (sc/conditional #(keyword? (:type %))
-                              {:type sc/Keyword}
+                              {:type SimpleTagType}
                               #(string? (:type %))
-                              {:type sc/Str}))
+                              {:type (apply sc/enum (map name simple-field-types))}))
 
 (sc/defschema TextTag
               (sc/conditional #(keyword? (:type %))
-                              {:type sc/Keyword
+                              {:type TextTagType
                                :text sc/Str}
                               #(string? (:type %))
-                              {:type sc/Str
+                              {:type (apply sc/enum (map name text-field-types))
                                :text sc/Str}))
 
 (sc/defschema Tag

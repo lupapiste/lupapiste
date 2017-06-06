@@ -24,7 +24,7 @@ Comment bulletin without any additional form fields
 
 Comment bulletin with alternate contact info
   [Tags]  integration
-  Click element  xpath=//label[@for="otherReceiver"]
+  Scroll to and click xpath results  //label[@for='otherReceiver']
   Fill out alternate receiver form
   Fill out alternate receiver email field
   Write comment for bulletin  Toinen kommentti

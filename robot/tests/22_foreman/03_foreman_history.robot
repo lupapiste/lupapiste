@@ -12,7 +12,7 @@ Sonja invites foreman and goes back to application
 
 *** Test Cases ***
 Sonja creates applications
-  Sonja logs in
+  Sonja logs in  False
   Create project application  submitted
 
   Repeat Keyword  5  Sonja invites foreman and goes back to application

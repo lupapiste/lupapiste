@@ -18666,6 +18666,14 @@ label.batch-required {
   display: inline;
 }
 
+.inspection-summary-edit {
+  margin-left: 10px;
+}
+
+.inspection-summary-link:hover {
+  text-decoration: none;
+}
+
 .create-summary-bubble .container-bubble {
   margin: 0px;
   padding: 0px 24px;
