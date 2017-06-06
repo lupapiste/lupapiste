@@ -13,7 +13,7 @@ Mikko needs to place roll-off on the street
   Mikko logs in
   ${secs} =  Get Time  epoch
   ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
-  Set Suite Variable  ${appname}  Vaihtolava${secs}
+  Set Suite Variable  ${appname}  Nostotyöt-${secs}
   Set Suite Variable  ${today}  ${TODAY_DD_MM_YYYY}
   Create application  ${appname}  753  753-416-25-30  YA-sijoituslupa-tyolupa
   Wait until  Permit subtype is  Käyttölupa

@@ -931,7 +931,7 @@ Select operations path YA sijoituslupa-tyolupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
   Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
   Click tree item by text  "Liikennealueen rajaaminen työkäyttöön"
-  Click tree item by text  "Vaihtolavan sijoittaminen"
+  Click tree item by text  "Nostotyöt"
 
 Click tree item by text
   [Arguments]  ${itemName}
