@@ -934,6 +934,7 @@ Select operation path by permit type
   ...  ELSE IF  '${permitType}' == 'YA-kayttolupa'  Select operations path YA kayttolupa
   ...  ELSE IF  '${permitType}' == 'YA-kayttolupa-mainostus-viitoitus'  Select operations path YA kayttolupa mainostus-viitoitus
   ...  ELSE IF  '${permitType}' == 'YA-sijoituslupa'  Select operations path YA sijoituslupa
+  ...  ELSE IF  '${permitType}' == 'YA-sijoituslupa-tyolupa'  Select operations path YA sijoituslupa-tyolupa
   ...  ELSE  Select operations path R
 
 Select operations path R
@@ -967,6 +968,12 @@ Select operations path YA sijoituslupa
   Click tree item by text  "Rakenteiden sijoittaminen yleiselle alueelle (Sijoittamissopimus)"
   Click tree item by text  "Pysyvien maanalaisten rakenteiden sijoittaminen"
   Click tree item by text  "Vesi- ja viemärijohtojen sijoittaminen"
+
+Select operations path YA sijoituslupa-tyolupa
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
+  Click tree item by text  "Liikennealueen rajaaminen työkäyttöön"
+  Click tree item by text  "Nostotyöt"
 
 Click tree item by text
   [Arguments]  ${itemName}
@@ -1364,7 +1371,7 @@ Go to give new verdict
   Wait Until  Element Should Be Enabled  backend-id
 
 Input verdict
-  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
+  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}  ${agreement}=True
   ## Disable date picker
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text  backend-id  ${backend-id}
@@ -1372,7 +1379,7 @@ Input verdict
   Input text  verdict-given  ${verdict-given-date}
   Input text  verdict-official  ${verdict-official-date}
   Input text  verdict-name  ${verdict-giver-name}
-  Select Checkbox  verdict-agreement
+  Run keyword if  ${agreement}  Select Checkbox  verdict-agreement
   ## Trigger change manually
   Execute JavaScript  $("#backend-id").change();
   Execute JavaScript  $("#verdict-type-select").change();
