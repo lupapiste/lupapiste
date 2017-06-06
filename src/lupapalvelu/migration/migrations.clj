@@ -5,7 +5,7 @@
             [clj-time.core :as cljt]
             [clj-time.coerce :as cljtc]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
-            [sade.core :refer [def-]]
+            [sade.core :refer [def- now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
@@ -3209,6 +3209,7 @@
                          original-default-stamp-query
                          {$set {:stamps.$.rows updated-default-stamp-rows}}))
 
+; LPK-2933 When comparing ya-kayttolupa-general and ya-kayttolupa-with-tyomaastavastaava, latter has tyomaastaVastaava schema
 (defmigration vaihtolavat-to-kayttolupa-general-documents-cleanup
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name :ya-kayttolupa-vaihtolavat
                                                  :documents.schema-info.name "tyomaastaVastaava"}))}
@@ -3223,6 +3224,7 @@
                           :documents {$elemMatch {:schema-info.name "tyomaastaVastaava"}}}
                          {$unset {:documents.$ 1}}))
 
+; For certain kayttolupa subtypes, state machine is changed, thus deprecating "finished" state.
 (defmigration kayttolupa-to-tyolupa-workflow-finished-state-change                ; LPK-2933
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:ya-kayttolupa-nostotyot
                                                                               :ya-kayttolupa-kattolumien-pudotustyot
@@ -3231,7 +3233,7 @@
                                                                               :ya-kayttolupa-muu-tyomaakaytto]}
                                                  :permitSubtype "kayttolupa"
                                                  :state "finished"}))}
-  (let [ts (sade.core/now)]
+  (let [ts (now)]
     (mongo/update-by-query :applications
                            {:primaryOperation.name {$in [:ya-kayttolupa-nostotyot ; kayttolupa-with-tyomaastavastaava
                                                          :ya-kayttolupa-kattolumien-pudotustyot
