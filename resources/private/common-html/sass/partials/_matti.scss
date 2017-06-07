@@ -97,11 +97,16 @@ $matti-grid-margin: 12px;
 // toggle-helper is defined in _inputs.scss
 @include toggle-helper ( matti-checkbox, "e604", "e603",
                          $wrapper-display: inline-block ) {}
+@include toggle-helper (matti-radio, "e635", "e634", $wrapper-display: block) {}
 
 .matti-checkbox-wrapper {
   border: none;
   $margin-right: $marginS;
   $margin-bottom: $marginS;
+}
+
+.matti-radio-wrapper {
+  border: none;
 }
 
 .matti-buttons {

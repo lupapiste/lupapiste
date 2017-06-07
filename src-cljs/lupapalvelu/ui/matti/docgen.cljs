@@ -90,6 +90,30 @@
                    (path/meta-updated options))}
       (docgen-loc options)]]))
 
+(defmethod docgen-component :radioGroup
+  [{:keys [schema state path] :as options}]
+  (let [state (path/state path state)
+        checked (rum/react state)]
+    [:div
+     (->> schema
+          :body first :body
+          (map (fn [{n :name}]
+                 (let [radio-path (path/extend path n)
+                       radio-id   (str (path/id radio-path) "radio")]
+                   [:div.matti-radio-wrapper
+                    (docgen-attr {:path radio-path})
+                    [:input {:type    "radio"
+                             :checked  (= n checked)
+                             :value    n
+                             :name     (path/id path)
+                             :id       radio-id}]
+                   [:label.matti-radio-label
+                    {:for      radio-id
+                     :on-click (fn [_]
+                                 (when (common/reset-if-needed! state n)
+                                   (path/meta-updated options)))}
+                    (docgen-loc options n)]]))))]))
+
 (defn change-test [state]
   (fn [event]
     (println "State:" @state "Event:" event)))

@@ -17533,7 +17533,94 @@ input:disabled + .matti-checkbox-label:hover.matti-checkbox-label:before {
   background-color: #f6f6f6;
 }
 
+label.matti-radio-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+.matti-radio-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e634";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+.matti-radio-label:hover.matti-radio-label:before,
+input:checked + .matti-radio-label:hover.matti-radio-label:before {
+  color: #fbc732;
+}
+
+input:checked + .matti-radio-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "\e635";
+  color: #f39129;
+}
+
+input:disabled + .matti-radio-label:before,
+input:disabled + .matti-radio-label:hover.matti-radio-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+.no-label-text.matti-radio-label:before {
+  margin-right: 0;
+}
+
+.matti-radio-wrapper {
+  display: block;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+
+.matti-radio-wrapper input[type=checkbox], .matti-radio-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  position: absolute;
+  font-size: 0;
+}
+
+.matti-radio-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
 .matti-checkbox-wrapper {
+  border: none;
+}
+
+.matti-radio-wrapper {
   border: none;
 }
 

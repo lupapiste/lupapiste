@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.matti.path
   (:require [rum.core :as rum]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.matti.shared :as shared]
             [clojure.string :as s]))
 
 (defn state [path state]
@@ -21,11 +22,27 @@
                   (s/join "-"))
              "." "-"))
 
-(defn loc [path]
-  (->> (filter identity path)
-       (map name)
-       (s/join ".")
-       common/loc))
+(defn loc
+  ([path]
+   (->> (filter identity path)
+        (map name)
+        (s/join ".")
+        common/loc))
+  ([path {:keys [i18nkey locPrefix] :as schema} & extra]
+   (let [loc-prefix (or locPrefix
+                        (shared/parent-value schema :loc-prefix))
+         i18nkey (and i18nkey (flatten [i18nkey]))]
+     (if (> (count i18nkey) 1)
+       (->> (concat i18nkey extra)
+            (remove nil?)
+            (reduce #(common/loc %2 (common/loc %1))))
+       (-> (cond
+            i18nkey    i18nkey
+            loc-prefix (flatten (concat [loc-prefix] [(last path)]))
+            :else      path)
+          (concat extra)
+          loc)))))
+
 
 (defn latest
   "The latest non-nil value for the given key in the state* along the

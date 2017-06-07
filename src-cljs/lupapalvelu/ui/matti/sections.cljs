@@ -13,6 +13,7 @@
   (-> schema-type :schema keys first keyword))
 
 (declare matti-list)
+(declare matti-loc-text)
 
 (defmulti instantiate (fn [_ cell & _]
                       (schema-type cell)))
@@ -44,6 +45,10 @@
     ((case cell-type
        :list matti-list) options)))
 
+(defmethod instantiate :loc-text
+  [_ {:keys [schema]} & wrap-label?]
+  [:span (common/loc (name (:loc-text schema)))])
+
 (defn- sub-options
   "Options for the subschema"
   [{:keys [state path]} subschema]
@@ -55,7 +60,7 @@
   [:div.matti-list
    {:class (path/css (sub-options options schema))}
    ;; TODO: label wrap
-   [:h4.matti-label (path/loc path)]
+   [:h4.matti-label (path/loc path schema)]
    (for [i    (-> schema :items count range)
          :let [item (nth (:items schema) i)
                component (instantiate options

@@ -57,8 +57,18 @@
                    :type :string})
 
 (def verdict-text {:name "matti-verdict-text"
-                   :type :text
-                   :label false})
+                   :type :text})
+
+(def verdict-giver {:name "matti-verdict-giver"
+                    :type :select
+                    :body [{:name "viranhaltija"}
+                           {:name "lautakunta"}]})
+
+(def automatic-vs-manual {:name "automatic-vs-manual"
+                          :type :radioGroup
+                          :label false
+                          :body  [{:name "automatic"}
+                                  {:name "manual"}]})
 
 (defschema MattiSavedTemplate
   {:id       ssc/ObjectIdStr
@@ -74,4 +84,5 @@
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [verdict-code verdict-check matti-string verdict-text]))
+       [verdict-code verdict-check matti-string verdict-text
+        verdict-giver automatic-vs-manual]))
