@@ -1,5 +1,5 @@
 (ns sade.util-test
-  (:refer-clojure :exclude [max-key])
+  (:refer-clojure :exclude [pos? neg? zero? max-key])
   (:require [lupapalvelu.util :refer :all]
             [midje.sweet :refer :all]))
 

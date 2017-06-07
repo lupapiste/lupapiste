@@ -3,6 +3,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [lupapalvelu.util :as lutil]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
@@ -200,7 +201,7 @@
                              :municipality (:municipality application)
                              :infoRequest false
                              :messages []}))
-      (assoc :opened (if (util/pos? (:opened application)) created nil))))
+      (assoc :opened (if (lutil/pos? (:opened application)) created nil))))
 
 (defn- cleanup-hakija-doc [{info :schema-info :as doc}]
   (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)]

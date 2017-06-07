@@ -1,5 +1,4 @@
 (ns sade.util-test
-  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [sade.strings :as ss]
             [sade.env :as env]

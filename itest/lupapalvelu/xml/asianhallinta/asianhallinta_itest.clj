@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.factlet :as fl]
+            [lupapalvelu.util :as lutil]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.asianhallinta.core :as ah]
@@ -61,10 +62,10 @@
           (fact "Application is sent and timestamp is there"
             (-> updated-application :history last :state) => "sent"
             (:state updated-application) => "sent"
-            (:sent updated-application) => util/pos?)
+            (:sent updated-application) => lutil/pos?)
 
           (fact "Attachments have sent timestamp"
-            (every? #(-> % :sent util/pos?) (:attachments updated-application)) => true)
+            (every? #(-> % :sent lutil/pos?) (:attachments updated-application)) => true)
 
           (facts "XML file"
             (let [output-dir (str (resolve-output-directory scope) "/")

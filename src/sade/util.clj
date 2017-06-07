@@ -1,5 +1,4 @@
 (ns sade.util
-  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
@@ -13,25 +12,6 @@
             [me.raynes.fs :as fs])
   (:import [org.joda.time LocalDateTime]
            [java.util.jar JarFile]))
-
-;;
-;; Nil-safe number utilities
-;;
-
-(defn pos?
-  "Like clojure.core/pos?, but nil returns false instead of NPE"
-  [n]
-  (if n (clojure.core/pos? n) false))
-
-(defn neg?
-  "Like clojure.core/neg?, but nil returns false instead of NPE"
-  [n]
-  (if n (clojure.core/neg? n) false))
-
-(defn zero?
-  "Like clojure.core/zero?, but nil returns false instead of NPE"
-  [n]
-  (if n (clojure.core/zero? n) false))
 
 ;; Map utilities
 
