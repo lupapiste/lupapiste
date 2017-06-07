@@ -15,9 +15,9 @@
     (swap! state #(assoc % kw (kw response)))))
 
 (defn updater [{:keys [state path]}]
-  (service/save-draft-value @(path/state [:id] state)
+  (service/save-draft-value (path/value [:id] state)
                             path
-                            @(path/state path state)
+                            (path/value path state)
                             (response->state state :modified)))
 
 
@@ -47,7 +47,7 @@
        (verdict-name options)]]
      [:div.col-1.col--right
       [:div [:span.row-text.row-text--margin
-             (if-let [published @(path/state [:published] state)]
+             (if-let [published (path/value [:published] state)]
                (common/loc :matti.last-published
                            (js/util.finnishDateAndTime published))
                (common/loc :matti.template-not-published))]
@@ -58,7 +58,7 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       [:span.saved-info (common/loc :matti.last-saved
-                                    (js/util.finnishDateAndTime @(path/state [:modified] state)))]]]]
+                                    (js/util.finnishDateAndTime (path/value [:modified] state)))]]]]
    (for [sec sections]
      (sections/section (assoc sec
                               :path (path/extend (:id sec))

@@ -32,7 +32,7 @@
   path. Path is shortened until the value is found. Nil if value not
   found. Key can be also be key sequence."
   [path state* & key]
-  (let [v @(state (extend path key) state*) ]
+  (let [v (value path state* key)]
     (if (or (some? v) (empty? path))
       v
       (latest (drop-last path) state* key))))

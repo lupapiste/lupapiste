@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.matti.sections
   (:require [clojure.string :as s]
+            [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.docgen :as docgen]
@@ -19,9 +20,11 @@
 (defmethod instantiate :docgen
   [{:keys [state path]} {:keys [schema id]} & wrap-label?]
   (let [schema-name (:docgen schema)
-        options     {:state  state
-                     :path   (path/extend path id)
-                     :schema (service/schema schema-name)}
+        options     (shared/child-schema {:state  state
+                                          :path   (path/extend path id)
+                                          :schema (service/schema schema-name)}
+                                         :schema
+                                         schema)
         editing?    (path/meta? options :editing? )]
     (cond->> options
       editing?       docgen/docgen-component
@@ -32,9 +35,11 @@
   [{:keys [state path]} {:keys [schema id] :as cell} & wrap-label?]
   (let [cell-type    (schema-type cell)
         schema-value (-> schema vals first)
-        options      {:state  state
-                      :path   (path/extend path id (:id schema-value))
-                      :schema schema-value}]
+        options      (shared/child-schema {:state  state
+                                           :path   (path/extend path id (:id schema-value))
+                                           :schema schema-value}
+                                          :schema
+                                          schema)]
     ;; TODO: label wrap
     ((case cell-type
        :list matti-list) options)))
@@ -53,7 +58,9 @@
    [:h4.matti-label (path/loc path)]
    (for [i    (-> schema :items count range)
          :let [item (nth (:items schema) i)
-               component (instantiate options item false)]]
+               component (instantiate options
+                                      (shared/child-schema item :schema schema)
+                                      false)]]
      (when component
        [:div.item {:key   (str "item-" i)
                    :class (path/css (sub-options options item)
@@ -72,7 +79,7 @@
                                 (str "col-" (or col 1))
                                 (when align (str "col--" (name align))))}
          (when schema
-           (instantiate options cell true))])])])
+           (instantiate options (shared/child-schema cell :schema grid) true))])])])
 
 (defn section-checkbox [{:keys [state path]} kw & [{:keys [disabled negate?]}]]
   (let [path       (path/extend path kw)
@@ -107,4 +114,4 @@
    {:class (path/css options)}
    (section-header options)
    (when-not (path/value path state :removed)
-     [:div.section-body (matti-grid options)])])
+     [:div.section-body (matti-grid (shared/child-schema options :grid options))])])

@@ -10,8 +10,11 @@
                         (repeat sc/Bool)))
 
 (defschema MattiBase
-  {(sc/optional-key :_meta) (merge meta-flags)
-   (sc/optional-key :css)   [sc/Keyword]})
+  {(sc/optional-key :_meta) meta-flags
+   (sc/optional-key :css)   [sc/Keyword]
+   ;; If an schema ancestor has :loc-prefix then localization term is
+   ;; loc-prefix + last, where last is the last path part.
+   (sc/optional-key :loc-prefix) sc/Keyword})
 
 (defschema SchemaType
   {(sc/optional-key :docgen) sc/Str
@@ -52,13 +55,12 @@
    :sections                    [MattiVerdictSection]})
 
 (defn checkbox-list [id checks]
-  {:list {:id id
-          :items (map (fn [check]
-                        {:id check
-                         :schema {:docgen "matti-verdict-check"}
-                         :css [:matti-condition-box]})
-                      checks)
-          :css [:list-class]}})
+  {:list (merge {:id id
+                 :items (map (fn [check]
+                               {:id check
+                                :schema {:docgen "matti-verdict-check"}
+                                :css [:matti-condition-box]})
+                             checks)})})
 
 (def default-verdict-template
   {:name     ""
@@ -83,6 +85,12 @@
                        :css     [:grid-class]}
                :css   [:section-class]
                :_meta {:can-remove? false}}
+              {:id    "matti-foremen"
+               :loc-prefix :matti-foremen
+               :grid  {:columns 4
+                       :rows    [[{:col    4
+                                   :schema (checkbox-list "foremen" ["vastaava-tj" "vv-tj" "iv-tj" "erityis-tj"])}]]}
+               :_meta {:can-remove? true}}
               {:id    "matti-conditions"
                :grid  {:columns 4
                        :rows    [[{:col    4
@@ -94,3 +102,17 @@
                :_meta {:can-remove? true}}]})
 
 (sc/validate MattiVerdict default-verdict-template)
+
+;; Schema utils
+
+(defn child-schema
+  ([options child-key parent]
+   (assoc-in options [child-key :_parent] parent))
+  ([child parent]
+   (assoc child :_parent parent)))
+
+(defn parent-value [schema kw]
+  (let [v (kw schema)]
+    (if (or (nil? schema) v)
+      v
+      (parent-value (:_parent schema) kw))))

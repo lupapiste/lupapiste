@@ -2,14 +2,17 @@
   "Rudimentary support for docgen subset in the Matti context."
   (:require [rum.core :as rum]
             [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.common :as common]))
+            [lupapalvelu.ui.common :as common]
+            [lupapalvelu.matti.shared :as shared]))
 
-(defn docgen-loc [{:keys [schema path]} & extra]
-  (let [{:keys [i18nkey locPrefix]} (-> schema :body first)]
+(defn docgen-loc [{:keys [schema path state]} & extra]
+  (let [{:keys [i18nkey locPrefix]} (-> schema :body first)
+        loc-prefix                  (or locPrefix
+                                        (shared/parent-value schema :loc-prefix))]
     (-> (cond
-          i18nkey   [i18nkey]
-          locPrefix (cons locPrefix path)
-          :else     path)
+          i18nkey    [i18nkey]
+          loc-prefix (flatten (concat [loc-prefix] [(last path)]))
+          :else      path)
         (concat extra)
         path/loc)))
 
