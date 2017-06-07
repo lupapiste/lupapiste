@@ -273,6 +273,13 @@
   {:pre [(map? type)]}
   (filter #(= (:type %) type) attachments))
 
+(defn get-attachments-by-target-type-and-id
+  [{:keys [attachments]} {:keys [type id] :as target}]
+  {:pre [(string? type)
+         (string? id)]}
+  (filter #(and (= (get-in % [:target :type]) type)
+                (= (get-in % [:target :id])   id))  attachments))
+
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 

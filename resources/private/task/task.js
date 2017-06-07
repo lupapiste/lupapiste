@@ -130,24 +130,8 @@ var taskPageController = (function() {
       .success(function(resp) {
         var permit = externalApiTools.toExternalPermit(applicationModel._js);
         applicationModel.lightReload();
-
-        if (!resp.integrationAvailable) {
-          hub.send("show-dialog", {ltitle: "integration.title",
-                                   size: "medium",
-                                   component: "ok-dialog",
-                                   componentParams: {ltext: "integration.unavailable"}});
-        } else {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
-          if (applicationModel.externalApi.enabled()) {
-            hub.send("external-api::integration-sent", permit);
-          }
-        }
       })
       .onError("error.invalid-task-type", notify.ajaxError)
-      .error(function(e){
-        applicationModel.lightReload();
-        LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
-      })
       .call();
   }
 
@@ -159,7 +143,6 @@ var taskPageController = (function() {
                                                yesFn: reviewDoneAjax,
                                                lyesTitle: "yes",
                                                lnoTitle: "no"}});
-
   }
 
   function markFaulty() {
@@ -170,7 +153,6 @@ var taskPageController = (function() {
                                                yesFn: markFaultyAjax,
                                                lyesTitle: "yes",
                                                lnoTitle: "no"}});
-
   }
 
   /**

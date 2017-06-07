@@ -260,8 +260,19 @@
                  (task-state-assertion #{:sent})]
    :user-roles  #{:authority}
    :states      valid-states}
-  [command]
-  (set-state command taskId :faulty_review_task))
+  [{application :application created :created :as command}]
+  (let [review-attachments (attachment/get-attachments-by-target-type-and-id application {:type "task" :id taskId})]
+    (doseq [att review-attachments]
+      (attachment/update-attachment-data! command
+                                          (:id att)
+                                          {:metadata.sailytysaika.arkistointi :ei
+                                           :metadata.sailytysaika.perustelu "Virheellinen katselmuspöytäkirja"
+                                           :metadata.myyntipalvelu false
+                                           :metadata.tila :ei-arkistoida-virheellinen}
+                                          created
+                                          :set-app-modified? false
+                                          :set-attachment-modified? false))
+    (set-state command taskId :faulty_review_task)))
 
 (defquery is-end-review
   {:description "Pseudo query that fails if the task is neither
