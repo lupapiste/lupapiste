@@ -81,6 +81,7 @@
             [lupapalvelu.verdict-api]
             [lupapalvelu.vetuma]
             [lupapalvelu.web :as web]
+            [lupapalvelu.ya-digging-permit-api]
             [lupapalvelu.ya-extension-api]
             [lupapalvelu.admin-reports-api]
             [lupapalvelu.campaign-api])

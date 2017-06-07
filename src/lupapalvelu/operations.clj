@@ -1344,6 +1344,14 @@
                                                [])]
      (sort-operation-tree op-trees-for-orgs-with-selected-ops))))
 
+(defn selected-operation-for-organization?
+  "Has the organization selected the given operation?"
+  [organization operation-name]
+  {:pre [(or (string? operation-name) (keyword? operation-name))]}
+  (let [selected-operations (->> organization :selected-operations (map keyword) (set))]
+    (or (empty? selected-operations)
+        (contains? selected-operations (keyword operation-name)))))
+
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
         filtering-fn (fn [node] (and

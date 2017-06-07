@@ -2,7 +2,10 @@
   (:require [lupapalvelu.application :as app]
             [lupapalvelu.operations :as op]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.ya :as ya]))
+            [lupapalvelu.ya :as ya]
+            [sade.core :refer [fail]]))
+
+;;; Helper functions
 
 (defn digging-permit-can-be-created? [application]
   (and (ya/sijoittaminen? application)
@@ -19,6 +22,24 @@
   [organization]
   (op/selected-operations-for-organizations [organization]
                                             digging-permit-operation?))
+
+;;; Validators
+
+(defn validate-digging-permit-source [{:keys [application]}]
+  (when (and application
+             (not (digging-permit-can-be-created? application)))
+    (fail :error.invalid-digging-permit-source
+          {:id (:id application)
+           :state (:state application)
+           :primaryOperationName (-> application :primaryOperation :name)})))
+
+(defn validate-digging-permit-operation [{{:keys [operation]} :data}]
+  (when (and operation
+             (not (digging-permit-operation? operation)))
+    (fail :error.not-digging-permit-operation
+          {:operation operation})))
+
+;;; Creating digging permits
 
 (defn new-digging-permit [{:keys [address propertyId propertyIdSource] [x y] :location :as sijoitus-application}
                           user created digging-operation]
