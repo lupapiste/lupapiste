@@ -37,10 +37,10 @@
   or list of parts."
   [m]
   (cond
-    (:modified m) (:modified m)
-    (map? m) (max-modified (vals m))
+    (:modified m)   (:modified m)
+    (map? m)        (max-modified (vals m))
     (sequential? m) (apply max (map max-modified (cons 0 m)))
-    :default 0))
+    :default        0))
 
 (defn- get-materials-info [municipality {data :data :as doc}]
   (let [{contact :contact materials :availableMaterials} (-> (select-keys data [:contact :availableMaterials])
