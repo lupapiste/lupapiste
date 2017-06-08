@@ -1,4 +1,5 @@
 (ns sade.util-test
+  (:refer-clojure :exclude [pos? neg? zero? max-key])
   (:require [sade.util :refer :all]
             [sade.strings :as ss]
             [sade.env :as env]
@@ -6,6 +7,25 @@
             [schema.core :as sc]
             [lupapalvelu.document.schemas :as schema])
   (:import [org.apache.commons.io.output NullWriter]))
+
+(facts max-key
+  (fact "single arity"
+    (max-key :foo) => nil?)
+
+  (fact "key not found"
+    (max-key :foo {:bar 1} {:bar 3} {:bar 3}) => nil?)
+
+  (fact "one element"
+    (max-key :foo {:foo 1}) => {:foo 1})
+
+  (fact "multiple elements"
+    (max-key :foo {:foo 1} {:foo 3} {:foo 2}) => {:foo 3})
+
+  (fact "multiple elements - nil included in values"
+    (max-key :foo {:foo 1} {:foo 3} {:foo nil}) => {:foo 3})
+
+  (fact "multiple elements - key not found in every map"
+    (max-key :foo {:foo 1} {:foo 3} {:bar 9}) => {:foo 3}))
 
 (facts "strip-nils"
   (fact "Removes the whole key-value pair when value is nil"
