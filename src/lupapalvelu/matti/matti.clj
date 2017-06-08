@@ -25,38 +25,44 @@
 (defn latest-version [organization template-id]
   (-> (verdict-template organization template-id) :versions last))
 
-(defn template-update [organization template-id timestamp update]
+(defn- template-update [organization template-id update  & [timestamp]]
   (mongo/update :organizations
                 {:_id               (:id organization)
                  :verdict-templates {$elemMatch {:id template-id}}}
-                (assoc-in update
-                          [$set :verdict-templates.$.modified]
-                          timestamp )))
+                (if timestamp
+                  (assoc-in update
+                            [$set :verdict-templates.$.modified]
+                            timestamp)
+                  update)))
 
 (defn save-draft-value [organization template-id timestamp path value]
   (let [template (verdict-template organization template-id)
         draft    (assoc-in (:draft template) (map keyword path) value)]
     (template-update organization
                      template-id
-                     timestamp
-                     {$set {:verdict-templates.$.draft draft}})))
+                     {$set {:verdict-templates.$.draft draft}}
+                     timestamp)))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (template-update organization
                    template-id
-                   timestamp
                    {$push {:verdict-templates.$.versions
                            {:id        (mongo/create-id)
                             :published timestamp
                             :data      (:draft (verdict-template organization
-                                                              template-id))}}}))
+                                                                 template-id))}}}))
 (defn set-name [organization template-id timestamp name]
   (template-update organization
                    template-id
-                   timestamp
-                   {$set {:verdict-templates.$.name name}}))
+                   {$set {:verdict-templates.$.name name}}
+                   timestamp))
 
 (defn verdict-template-summary [{versions :versions :as template}]
   (assoc (select-keys template
-                      [:id :name :modified])
+                      [:id :name :modified :deleted])
          :published (-> versions last :published)))
+
+(defn set-deleted [organization template-id deleted?]
+  (template-update organization
+                   template-id
+                   {$set {:verdict-templates.$.deleted deleted?}}))

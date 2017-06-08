@@ -205,3 +205,5 @@
 "matti-verdict.lainvoimainen" "fi" "Lainvoimainen"
 "matti-verdict.aloitettava" "fi" "Aloitettava viim."
 "matti-verdict.voimassa" "fi" "Lupa voimassa"
+"matti-restore-template" "fi" "Palauta"
+"matti-restore-template" "en" "Restore"

@@ -11,9 +11,14 @@
 (defn- command->organization [{user :user}]
   (usr/authority-admins-organization user))
 
+(defn- verdict-template-exists [{data :data :as command}]
+  (when-not (matti/verdict-template (command->organization command)
+                                    (:template-id data))
+    (fail :error.verdict-template-not-found)))
+
 (defn- verdict-template-editable
   "Template exists and is editable (not deleted)."
-  [{data :data :as command}]
+    [{data :data :as command}]
   (if-let [template (matti/verdict-template (command->organization command)
                                             (:template-id data))]
     (when (:deleted template)
@@ -76,13 +81,12 @@
   (ok :published created))
 
 (defquery verdict-templates
-  {:description "Id, name, modifed, published maps for every editable verdict
-  template."
-   :user-roles #{:authorityAdmin :authority}}
+  {:description "Id, name, modified, published and deleted maps for
+  every verdict template."
+   :user-roles #{:authorityAdmin}}
   [command]
   (ok :verdict-templates (->> (command->organization command)
                               :verdict-templates
-                              (remove :deleted)
                               (map matti/verdict-template-summary))))
 (defquery verdict-template
   {:description "Verdict template summary plus draft data. The
@@ -95,3 +99,14 @@
                                          template-id)]
     (ok (assoc (matti/verdict-template-summary template)
                :draft (:draft template)))))
+
+(defcommand toggle-delete-verdict-template
+  {:description "Toggle template's deletion status"
+   :user-roles #{:authorityAdmin}
+   :parameters [template-id delete]
+   :input-validators [verdict-template-exists
+                      (partial action/boolean-parameters [:delete])]}
+  [command]
+  (matti/set-deleted (command->organization command)
+                     template-id
+                     delete))

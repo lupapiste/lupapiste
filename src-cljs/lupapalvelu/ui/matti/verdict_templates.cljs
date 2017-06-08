@@ -88,28 +88,54 @@
 (defn new-template [options]
   (reset-template options))
 
-(defn template-list
-  [templates]
-  [:div
-   [:h4 (common/loc "matti.verdict-templates")]
-   [:table
-    [:thead
-     [:tr
-      [:th (common/loc "matti-verdict-template")]
-      [:th (common/loc "matti-verdict-template.published")]
-      [:th]]]
-    [:tbody
-     (for [{:keys [id name published]} (rum/react templates)]
-       [:tr
-        [:td name]
-        [:td (js/util.finnishDate published)]
-        [:td
-         [:div.matti-buttons
-          [:button.ghost
-           {:on-click #(service/fetch-template id reset-template)}
-           (common/loc "edit")]
-          [:button.ghost (common/loc "matti.copy")]
-          [:button.ghost (common/loc "remove")]]]])]]])
+(defn toggle-delete [id deleted]
+  [:button.ghost
+   {:on-click #(service/toggle-delete-template id (not deleted) identity)}
+   (common/loc (if deleted "matti-restore-template" "remove"))])
+
+(rum/defcs verdict-template-list < rum/reactive
+  (rum/local false ::show-deleted)
+  [{show-deleted ::show-deleted}]
+  (let [templates (rum/react service/template-list)]
+    [:div
+     [:h4 (common/loc "matti.verdict-templates")]
+     (when (some :deleted templates)
+       [:div.checkbox-wrapper
+        [:input {:type "checkbox"
+                 :id "show-deleted"
+                 :value @show-deleted}]
+        [:label.checkbox-label
+         {:for "show-deleted"
+          :on-click #(swap! show-deleted not)}
+         (common/loc :handler-roles.show-all)]])
+     (let [filtered (if @show-deleted
+                      templates
+                      (remove :deleted templates))]
+       (when (seq filtered)
+         [:table
+          [:thead
+           [:tr
+            [:th (common/loc "matti-verdict-template")]
+            [:th (common/loc "matti-verdict-template.published")]
+            [:th]]]
+          [:tbody
+           (for [{:keys [id name published deleted]} filtered]
+             [:tr {:key id}
+              [:td name]
+              [:td (js/util.finnishDate published)]
+              [:td
+               [:div.matti-buttons
+                (when-not deleted
+                  [:button.ghost
+                   {:on-click #(service/fetch-template id reset-template)}
+                   (common/loc "edit")])
+                (when-not deleted
+                  [:button.ghost (common/loc "matti.copy")])
+                (toggle-delete id deleted)]]])]]))
+     [:button.positive
+      {:on-click #(service/new-template new-template)}
+      [:i.lupicon-circle-plus]
+      [:span (common/loc "add")]]]))
 
 (rum/defc verdict-templates < rum/reactive
   [_]
@@ -118,13 +144,7 @@
      (if (rum/react (rum/cursor-in current-template [:_meta :editing?]))
        (verdict-template (assoc  matti/default-verdict-template
                                  :state current-template))
-       [:div
-        (when (not-empty (rum/react service/template-list))
-          (template-list service/template-list))
-        [:button.positive
-         {:on-click #(service/new-template new-template)}
-         [:i.lupicon-circle-plus]
-         [:span (common/loc "add")]]])]))
+       (verdict-template-list))]))
 
 (defonce args (atom {}))
 

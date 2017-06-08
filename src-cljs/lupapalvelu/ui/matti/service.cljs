@@ -3,7 +3,7 @@
             [clojure.walk :as walk]))
 
 (defonce schemas (atom {}))
-;; List of id, name, published maps.
+;; List of id, name, published, deleted maps.
 (defonce template-list (atom []))
 
 (defn fetch-schemas []
@@ -50,3 +50,9 @@
                    :success (list-update-response callback)}
                   :template-id template-id
                   :name name))
+
+(defn toggle-delete-template [template-id delete callback]
+  (common/command {:command "toggle-delete-verdict-template"
+                   :success (list-update-response callback)}
+                  :template-id template-id
+                  :delete delete))
