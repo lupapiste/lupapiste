@@ -46,36 +46,43 @@
 
         (fact "source application must be sijoituslupa"
           (new-digging-permit invalid-source-application
-                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                              mock-org/sipoo-ya)
           => (throws #"digging-permit-can-be-created?")
-          (new-digging-permit source-application mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+          (new-digging-permit source-application mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                              mock-org/sipoo-ya)
           => truthy)
 
         (fact "source application must be in post verdict state"
           (new-digging-permit (assoc source-application :state :draft)
-                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                              mock-org/sipoo-ya)
           => (throws #"digging-permit-can-be-created?")
 
           (new-digging-permit (assoc source-application :state :open)
-                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                              mock-org/sipoo-ya)
           => (throws #"digging-permit-can-be-created?")
 
           (new-digging-permit (assoc source-application :state :submitted)
-                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+                              mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                              mock-org/sipoo-ya)
           => (throws #"digging-permit-can-be-created?"))
 
         (fact "operation must be a digging operation selected by the organization of the source application"
-          (new-digging-permit source-application mock-usr/pena 12345 "kerrostalo-rivitalo")
+          (new-digging-permit source-application mock-usr/pena 12345 "kerrostalo-rivitalo" mock-org/sipoo-ya)
           => (throws #"digging-permit-operation?"))
 
         (fact "digging permit has the same location, property id and address as the source application"
           (-> (new-digging-permit source-application
-                                  mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+                                  mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                                  mock-org/sipoo-ya)
               (select-keys [:location :location-wgs84 :propertyId :propertyIdSource :address]))
           => (select-keys source-application [:location :location-wgs84 :propertyId :propertyIdSource :address]))
 
         (fact "digging permit has correct primary operation"
           (-> (new-digging-permit source-application
-                                  mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot")
+                                  mock-usr/pena 23456 "ya-katulupa-vesi-ja-viemarityot"
+                                  mock-org/sipoo-ya)
               :primaryOperation :name)
           => "ya-katulupa-vesi-ja-viemarityot")))))

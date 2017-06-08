@@ -231,16 +231,16 @@
     (update-in document [:schema-info :op :id] op-id-mapping)
     document))
 
-(defn- preprocess-document
-  [document op-id-mapping application organization manual-schema-datas]
+(defn preprocess-document
+  "Preprocess document taken from another application so that it is valid for the target application"
+  [document application organization manual-schema-datas]
   (-> document
       (handle-copy-action   application organization manual-schema-datas)
       (handle-special-cases application organization manual-schema-datas)
       (assoc :id      (mongo/create-id)
              :created (:created application))
       (dissoc :meta)
-      (clear-personal-information application manual-schema-datas)
-      (update-doc-operation-reference op-id-mapping)))
+      (clear-personal-information application manual-schema-datas)))
 
 (defn- update-attachment-operation-references
   "Update the attachment so that it refers to an operation in the copied
@@ -257,10 +257,11 @@
                                op-id-mapping)
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
-     :documents (mapv #(preprocess-document % op-id-mapping
-                                            application
-                                            organization
-                                            manual-schema-datas)
+     :documents (mapv (comp #(update-doc-operation-reference % op-id-mapping)
+                            #(preprocess-document %
+                                                  application
+                                                  organization
+                                                  manual-schema-datas))
                       (:documents application))
      :attachments (mapv #(update-attachment-operation-references % op-id-mapping)
                         (:attachments application))}))

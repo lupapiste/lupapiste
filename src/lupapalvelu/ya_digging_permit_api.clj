@@ -21,7 +21,8 @@
            :organization (:id @organization)
            :operation operation))
   (let [digging-permit-app (ya-digging/new-digging-permit application
-                                                          user created operation)]
+                                                          user created operation
+                                                          @organization)]
     (logging/with-logging-context {:applicationId (:id digging-permit-app)}
       (app/do-add-link-permit digging-permit-app (:id application))
       (app/insert-application digging-permit-app)

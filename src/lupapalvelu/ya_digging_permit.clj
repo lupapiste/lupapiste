@@ -1,5 +1,8 @@
 (ns lupapalvelu.ya-digging-permit
   (:require [lupapalvelu.application :as app]
+            [lupapalvelu.copy-application :as copy-app]
+            [lupapalvelu.document.tools :as doc-tools]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as op]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.ya :as ya]
@@ -41,17 +44,30 @@
 
 ;;; Creating digging permits
 
+(defn- copy-document [doc-name sijoitus-app digging-app organization]
+  (-> (domain/get-document-by-name sijoitus-app doc-name)
+      (copy-app/preprocess-document digging-app organization nil)))
+
 (defn new-digging-permit [{:keys [address propertyId propertyIdSource] [x y] :location :as sijoitus-application}
-                          user created digging-operation]
+                          user created digging-operation organization]
   {:pre [(digging-permit-can-be-created? sijoitus-application)
          (digging-permit-operation? digging-operation)]}
-  (app/do-create-application {:data {:address          address
-                                     :operation        digging-operation
-                                     :propertyId       propertyId
-                                     :propertyIdSource propertyIdSource
-                                     :x                x
-                                     :y                y
-                                     :infoRequest      false
-                                     :messages         []}
-                              :user user
-                              :created created}))
+  (let [digging-app (app/do-create-application {:data {:address          address
+                                                       :operation        digging-operation
+                                                       :propertyId       propertyId
+                                                       :propertyIdSource propertyIdSource
+                                                       :x                x
+                                                       :y                y
+                                                       :infoRequest      false
+                                                       :messages         []}
+                                                :user user
+                                                :created created})]
+    (update digging-app :documents
+            (partial map (fn [document]
+                           (if (contains? #{"yleiset-alueet-maksaja" "hakija-ya"}
+                                          (doc-tools/doc-name document))
+                             (copy-document (doc-tools/doc-name document)
+                                            sijoitus-application
+                                            digging-app
+                                            organization)
+                               document))))))
