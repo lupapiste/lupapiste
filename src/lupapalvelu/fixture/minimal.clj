@@ -451,6 +451,17 @@
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
     :orgAuthz {:186-R #{:authority}}}
 
+   {:id "porvoo-backend"
+    :username "porvoo-backend"
+    :email "porvoo@example.com"
+    :firstName "Porvoo"
+    :lastName "Taustaj\u00E4rjestelm\u00E4"
+    :enabled true
+    :language "fi"
+    :role "rest-api"
+    :private {}                                             ; testing autologin
+    :orgAuthz {:638-R #{:authority}}}
+
    ;; Loppi
 
    ;; Arto Viranomainen - Lopen R lupa-arkkitehti:  arto / arto

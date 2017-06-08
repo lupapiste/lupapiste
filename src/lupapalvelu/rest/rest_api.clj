@@ -1,19 +1,19 @@
 (ns lupapalvelu.rest.rest-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
-            [ring.swagger.swagger2 :as rs]
             [noir.core :refer [defpage]]
+            [noir.request :as request]
             [noir.response :as resp]
-            [schema.core :as sc]
-            [ring.swagger.ui :as ui]
             [noir.server :as server]
+            [ring.swagger.swagger2 :as rs]
+            [ring.swagger.ui :as ui]
+            [schema.core :as sc]
             [sade.core :refer [fail!]]
             [sade.util :as util]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.api-common :refer :all]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
-            [lupapalvelu.api-common :refer :all]
-            [noir.request :as request]
-            [lupapalvelu.action :as action]
-            [ring.swagger.json-schema :as rjs]
             [lupapalvelu.user :as usr]))
 
 (defonce endpoints (atom []))
@@ -36,7 +36,8 @@
                               :path   p#
                               :meta   ~meta-data})
        (defpage ~path {:keys ~letkeys :as request#}
-         (if-let [~'user (basic-authentication (request/ring-request))]
+         (if-let [~'user (or (basic-authentication (request/ring-request))
+                             (autologin/autologin (request/ring-request)))]
            (if (usr/rest-user? ~'user)
              ; Input schema validation
              (if (valid-inputs? request# ~params)
