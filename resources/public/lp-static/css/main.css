@@ -14777,7 +14777,7 @@ span.icon_clear:before {
   display: none;
 }
 
-.application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box, .application_summary .application_summary_info .state-indication div.verdictGiven .constructionStarted-box, .application_summary .application_summary_info .state-indication div.verdictGiven .inUse-box, .application_summary .application_summary_info .state-indication div.verdictGiven .closed-box, .application_summary .application_summary_info .state-indication div.verdictGiven .final-box {
+.application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box, .application_summary .application_summary_info .state-indication div.verdictGiven .constructionStarted-box, .application_summary .application_summary_info .state-indication div.verdictGiven .inUse-box, .application_summary .application_summary_info .state-indication div.verdictGiven .closed-box, .application_summary .application_summary_info .state-indication div.verdictGiven .final-box, .application_summary .application_summary_info .state-indication div.verdictGiven .finished-box {
   display: inline-block;
 }
 

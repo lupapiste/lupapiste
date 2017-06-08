@@ -279,7 +279,7 @@ $preamble-min-height: 280px; // at least the size of the map container
             @include active-state;
           }
           @include hide-pre-verdict-states;
-          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box, .final-box {
+          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box, .final-box, .finished-box {
             display: inline-block;
           }
         }
