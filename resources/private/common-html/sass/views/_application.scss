@@ -522,6 +522,7 @@ $preamble-min-height: 280px; // at least the size of the map container
   i.lupicon-lock {
     color: $primary;
   }
+  i.lupicon-circle-minus,
   i.lupicon-circle-attention {
     color: $negative
   }
@@ -900,7 +901,6 @@ $preamble-min-height: 280px; // at least the size of the map container
   .foreman {
     display: table-row;
     span {
-      display: table-cell;
       padding-right: $marginS;
     }
   }
