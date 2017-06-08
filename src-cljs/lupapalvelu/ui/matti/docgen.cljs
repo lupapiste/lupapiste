@@ -41,23 +41,17 @@
            :key id
            :id  id)))
 
-(defmulti docgen-component docgen-type)
-
-(defmethod docgen-component :default
-  [options]
-  (println "default options:" options))
-
-(defn thread-log [v]
-  (println v)
-  v)
-
 (defn- state-change [{:keys [state path] :as options}]
   (let [handler (common/event->state (path/state path state))]
     (fn [event]
       (when (handler event)
         (path/meta-updated options)))))
 
-(defmethod docgen-component :select
+;; ---------------------------------------
+;; Components
+;; ---------------------------------------
+
+(rum/defc docgen-select < rum/reactive
   [{:keys [schema state path] :as options}]
   (let [local-state (path/state path state)]
     [:select.dropdown
@@ -75,7 +69,7 @@
           (map (fn [{:keys [value text]}]
                  [:option {:key value :value value} text])))]))
 
-(defmethod docgen-component :checkbox
+(rum/defc docgen-checkbox < rum/reactive
   [{:keys [schema state path] :as options}]
   (let [state    (path/state path state)
         input-id (str (path/id path) "input")]
@@ -88,9 +82,10 @@
        :on-click (fn [_]
                    (swap! state not)
                    (path/meta-updated options))}
-      (docgen-loc options)]]))
+      (when-not (false? (:label schema))
+        (docgen-loc options))]]))
 
-(defmethod docgen-component :radioGroup
+(rum/defc docgen-radio-group < rum/reactive
   [{:keys [schema state path] :as options}]
   (let [state (path/state path state)
         checked (rum/react state)]
@@ -114,9 +109,6 @@
                                    (path/meta-updated options)))}
                     (docgen-loc options n)]]))))]))
 
-(defn change-test [state]
-  (fn [event]
-    (println "State:" @state "Event:" event)))
 
 (rum/defcs text-edit < (rum/local "" ::text)
   {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
@@ -133,13 +125,23 @@
                          :on-blur   (state-change options))
             attr)]))
 
-(defmethod docgen-component :string
-  [{:keys [schema state path] :as options}]
-  (text-edit options :input.grid-style-input {:type "text"}))
 
-(defmethod docgen-component :text
-  [{:keys [schema state path] :as options}]
-  (text-edit options :textarea.grid-style-input))
+;; ---------------------------------------
+;; Component dispatch
+;; ---------------------------------------
+
+(defn docgen-component [options]
+  (case (docgen-type options)
+    :select     (docgen-select options)
+    :checkbox   (docgen-checkbox options)
+    :radioGroup (docgen-radio-group options)
+    :string     (text-edit options :input.grid-style-input {:type "text"})
+    :text       (text-edit options :textarea.grid-style-input)))
+
+;; ---------------------------------------
+;; Multimethods
+;; ---------------------------------------
+
 
 (defmulti docgen-view docgen-type)
 

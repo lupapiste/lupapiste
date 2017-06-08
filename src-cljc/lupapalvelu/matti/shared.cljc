@@ -21,9 +21,12 @@
    (sc/optional-key :i18nkey)    [sc/Keyword]})
 
 (defschema SchemaType
-  {(sc/optional-key :docgen)   sc/Str
-   (sc/optional-key :list)     (sc/recursive #'MattiList)
-   (sc/optional-key :loc-text) sc/Keyword ;; Localisation term shown as text.
+  {(sc/optional-key :docgen)     sc/Str
+   (sc/optional-key :list)       (sc/recursive #'MattiList)
+   (sc/optional-key :loc-text)   sc/Keyword ;; Localisation term shown as text.
+   (sc/optional-key :date-delta) {(sc/optional-key :enabled) sc/Bool
+                                  (sc/optional-key :delta)   sc/Int
+                                  :unit   (sc/enum :days :years)}
    })
 
 (defschema MattiItem
@@ -39,12 +42,17 @@
          {(sc/optional-key :id) sc/Str  ;; List has label if id is given.
           :items                [MattiItem]}))
 
+(def matti-row [(merge MattiItem
+                       {(sc/optional-key :col)    sc/Int ;; Column width (.col-n). Default 1.
+                        })] )
+
 (defschema MattiGrid
   (merge MattiBase
          {:columns (apply sc/enum (range 1 13)) ;; Grid size (.matti-grid-n)
-          :rows    [[(merge MattiItem
-                            {(sc/optional-key :col)    sc/Int ;; Column width (.col-n). Default 1.
-                             })]]}))
+          :rows    [(sc/conditional
+                     :css {:css [sc/Keyword]
+                           :row matti-row}
+                     :else matti-row)]}))
 
 (defschema MattiVerdictSection
   (merge MattiBase
@@ -90,7 +98,23 @@
   {:name     ""
    :sections [{:id    "matti-verdict"
                :grid  {:columns 6
-                       :rows    [[{:id     "giver"
+                       :rows    [{:css [:row--date-delta-title]
+                                  :row [{:col 6
+                                         :css [:matti-label]
+                                         :schema {:loc-text :matti-verdict-dates}}]}
+                                 [{:id "julkipano"
+                                   :schema {:date-delta {:unit :days}}}
+                                  {:id "anto"
+                                   :schema {:date-delta {:unit :days}}}
+                                  {:id "valitus"
+                                   :schema {:date-delta {:unit :days}}}
+                                  {:id "lainvoimainen"
+                                   :schema {:date-delta {:unit :days}}}
+                                  {:id "aloitettava"
+                                   :schema {:date-delta {:unit :years}}}
+                                  {:id "voimassa"
+                                   :schema {:date-delta {:unit :years}}}]
+                                 [{:id     "giver"
                                    :col    2
                                    :schema {:docgen "matti-verdict-giver"}}
                                   {:align  :full
@@ -109,8 +133,9 @@
               {:id "matti-appeal"
                :grid {:columns 6
                       :rows [[{:col 6
+                               :id "type"
                                :schema {:docgen "automatic-vs-manual"}}]]}
-               :_meta {:can-remove? false}}
+               :_meta {:can-remove? true}}
               (text-section :matti-collateral)
               (text-section :matti-rights)
               (text-section :matti-purpose)

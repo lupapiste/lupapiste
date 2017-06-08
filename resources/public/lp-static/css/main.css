@@ -14656,7 +14656,7 @@ button.rollup-button {
 
 .matti-grid-1 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-1 .row:before, .matti-grid-1 .row:after {
@@ -14675,7 +14675,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-1 .row .col-1 label.required:after {
@@ -14733,7 +14733,7 @@ button.rollup-button {
 
 .matti-grid-2 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-2 .row:before, .matti-grid-2 .row:after {
@@ -14752,7 +14752,7 @@ button.rollup-button {
   min-width: 50%;
   max-width: 50%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-2 .row .col-1 label.required:after {
@@ -14780,7 +14780,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-2 .row .col-2 label.required:after {
@@ -14838,7 +14838,7 @@ button.rollup-button {
 
 .matti-grid-3 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-3 .row:before, .matti-grid-3 .row:after {
@@ -14857,7 +14857,7 @@ button.rollup-button {
   min-width: 33.33333333%;
   max-width: 33.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-3 .row .col-1 label.required:after {
@@ -14885,7 +14885,7 @@ button.rollup-button {
   min-width: 66.66666667%;
   max-width: 66.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-3 .row .col-2 label.required:after {
@@ -14913,7 +14913,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-3 .row .col-3 label.required:after {
@@ -14971,7 +14971,7 @@ button.rollup-button {
 
 .matti-grid-4 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-4 .row:before, .matti-grid-4 .row:after {
@@ -14990,7 +14990,7 @@ button.rollup-button {
   min-width: 25%;
   max-width: 25%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-4 .row .col-1 label.required:after {
@@ -15018,7 +15018,7 @@ button.rollup-button {
   min-width: 50%;
   max-width: 50%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-4 .row .col-2 label.required:after {
@@ -15046,7 +15046,7 @@ button.rollup-button {
   min-width: 75%;
   max-width: 75%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-4 .row .col-3 label.required:after {
@@ -15074,7 +15074,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-4 .row .col-4 label.required:after {
@@ -15132,7 +15132,7 @@ button.rollup-button {
 
 .matti-grid-5 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-5 .row:before, .matti-grid-5 .row:after {
@@ -15151,7 +15151,7 @@ button.rollup-button {
   min-width: 20%;
   max-width: 20%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-5 .row .col-1 label.required:after {
@@ -15179,7 +15179,7 @@ button.rollup-button {
   min-width: 40%;
   max-width: 40%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-5 .row .col-2 label.required:after {
@@ -15207,7 +15207,7 @@ button.rollup-button {
   min-width: 60%;
   max-width: 60%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-5 .row .col-3 label.required:after {
@@ -15235,7 +15235,7 @@ button.rollup-button {
   min-width: 80%;
   max-width: 80%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-5 .row .col-4 label.required:after {
@@ -15263,7 +15263,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-5 .row .col-5 label.required:after {
@@ -15321,7 +15321,7 @@ button.rollup-button {
 
 .matti-grid-6 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-6 .row:before, .matti-grid-6 .row:after {
@@ -15340,7 +15340,7 @@ button.rollup-button {
   min-width: 16.66666667%;
   max-width: 16.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-6 .row .col-1 label.required:after {
@@ -15368,7 +15368,7 @@ button.rollup-button {
   min-width: 33.33333333%;
   max-width: 33.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-6 .row .col-2 label.required:after {
@@ -15396,7 +15396,7 @@ button.rollup-button {
   min-width: 50%;
   max-width: 50%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-6 .row .col-3 label.required:after {
@@ -15424,7 +15424,7 @@ button.rollup-button {
   min-width: 66.66666667%;
   max-width: 66.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-6 .row .col-4 label.required:after {
@@ -15452,7 +15452,7 @@ button.rollup-button {
   min-width: 83.33333333%;
   max-width: 83.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-6 .row .col-5 label.required:after {
@@ -15480,7 +15480,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-6 .row .col-6 label.required:after {
@@ -15538,7 +15538,7 @@ button.rollup-button {
 
 .matti-grid-7 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-7 .row:before, .matti-grid-7 .row:after {
@@ -15557,7 +15557,7 @@ button.rollup-button {
   min-width: 14.28571429%;
   max-width: 14.28571429%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-1 label.required:after {
@@ -15585,7 +15585,7 @@ button.rollup-button {
   min-width: 28.57142857%;
   max-width: 28.57142857%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-2 label.required:after {
@@ -15613,7 +15613,7 @@ button.rollup-button {
   min-width: 42.85714286%;
   max-width: 42.85714286%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-3 label.required:after {
@@ -15641,7 +15641,7 @@ button.rollup-button {
   min-width: 57.14285714%;
   max-width: 57.14285714%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-4 label.required:after {
@@ -15669,7 +15669,7 @@ button.rollup-button {
   min-width: 71.42857143%;
   max-width: 71.42857143%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-5 label.required:after {
@@ -15697,7 +15697,7 @@ button.rollup-button {
   min-width: 85.71428571%;
   max-width: 85.71428571%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-6 label.required:after {
@@ -15725,7 +15725,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-7 .row .col-7 label.required:after {
@@ -15783,7 +15783,7 @@ button.rollup-button {
 
 .matti-grid-8 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-8 .row:before, .matti-grid-8 .row:after {
@@ -15802,7 +15802,7 @@ button.rollup-button {
   min-width: 12.5%;
   max-width: 12.5%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-1 label.required:after {
@@ -15830,7 +15830,7 @@ button.rollup-button {
   min-width: 25%;
   max-width: 25%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-2 label.required:after {
@@ -15858,7 +15858,7 @@ button.rollup-button {
   min-width: 37.5%;
   max-width: 37.5%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-3 label.required:after {
@@ -15886,7 +15886,7 @@ button.rollup-button {
   min-width: 50%;
   max-width: 50%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-4 label.required:after {
@@ -15914,7 +15914,7 @@ button.rollup-button {
   min-width: 62.5%;
   max-width: 62.5%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-5 label.required:after {
@@ -15942,7 +15942,7 @@ button.rollup-button {
   min-width: 75%;
   max-width: 75%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-6 label.required:after {
@@ -15970,7 +15970,7 @@ button.rollup-button {
   min-width: 87.5%;
   max-width: 87.5%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-7 label.required:after {
@@ -15998,7 +15998,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-8 .row .col-8 label.required:after {
@@ -16056,7 +16056,7 @@ button.rollup-button {
 
 .matti-grid-9 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-9 .row:before, .matti-grid-9 .row:after {
@@ -16075,7 +16075,7 @@ button.rollup-button {
   min-width: 11.11111111%;
   max-width: 11.11111111%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-1 label.required:after {
@@ -16103,7 +16103,7 @@ button.rollup-button {
   min-width: 22.22222222%;
   max-width: 22.22222222%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-2 label.required:after {
@@ -16131,7 +16131,7 @@ button.rollup-button {
   min-width: 33.33333333%;
   max-width: 33.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-3 label.required:after {
@@ -16159,7 +16159,7 @@ button.rollup-button {
   min-width: 44.44444444%;
   max-width: 44.44444444%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-4 label.required:after {
@@ -16187,7 +16187,7 @@ button.rollup-button {
   min-width: 55.55555556%;
   max-width: 55.55555556%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-5 label.required:after {
@@ -16215,7 +16215,7 @@ button.rollup-button {
   min-width: 66.66666667%;
   max-width: 66.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-6 label.required:after {
@@ -16243,7 +16243,7 @@ button.rollup-button {
   min-width: 77.77777778%;
   max-width: 77.77777778%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-7 label.required:after {
@@ -16271,7 +16271,7 @@ button.rollup-button {
   min-width: 88.88888889%;
   max-width: 88.88888889%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-8 label.required:after {
@@ -16299,7 +16299,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-9 .row .col-9 label.required:after {
@@ -16357,7 +16357,7 @@ button.rollup-button {
 
 .matti-grid-10 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-10 .row:before, .matti-grid-10 .row:after {
@@ -16376,7 +16376,7 @@ button.rollup-button {
   min-width: 10%;
   max-width: 10%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-1 label.required:after {
@@ -16404,7 +16404,7 @@ button.rollup-button {
   min-width: 20%;
   max-width: 20%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-2 label.required:after {
@@ -16432,7 +16432,7 @@ button.rollup-button {
   min-width: 30%;
   max-width: 30%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-3 label.required:after {
@@ -16460,7 +16460,7 @@ button.rollup-button {
   min-width: 40%;
   max-width: 40%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-4 label.required:after {
@@ -16488,7 +16488,7 @@ button.rollup-button {
   min-width: 50%;
   max-width: 50%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-5 label.required:after {
@@ -16516,7 +16516,7 @@ button.rollup-button {
   min-width: 60%;
   max-width: 60%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-6 label.required:after {
@@ -16544,7 +16544,7 @@ button.rollup-button {
   min-width: 70%;
   max-width: 70%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-7 label.required:after {
@@ -16572,7 +16572,7 @@ button.rollup-button {
   min-width: 80%;
   max-width: 80%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-8 label.required:after {
@@ -16600,7 +16600,7 @@ button.rollup-button {
   min-width: 90%;
   max-width: 90%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-9 label.required:after {
@@ -16628,7 +16628,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-10 .row .col-10 label.required:after {
@@ -16686,7 +16686,7 @@ button.rollup-button {
 
 .matti-grid-11 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-11 .row:before, .matti-grid-11 .row:after {
@@ -16705,7 +16705,7 @@ button.rollup-button {
   min-width: 9.09090909%;
   max-width: 9.09090909%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-1 label.required:after {
@@ -16733,7 +16733,7 @@ button.rollup-button {
   min-width: 18.18181818%;
   max-width: 18.18181818%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-2 label.required:after {
@@ -16761,7 +16761,7 @@ button.rollup-button {
   min-width: 27.27272727%;
   max-width: 27.27272727%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-3 label.required:after {
@@ -16789,7 +16789,7 @@ button.rollup-button {
   min-width: 36.36363636%;
   max-width: 36.36363636%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-4 label.required:after {
@@ -16817,7 +16817,7 @@ button.rollup-button {
   min-width: 45.45454545%;
   max-width: 45.45454545%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-5 label.required:after {
@@ -16845,7 +16845,7 @@ button.rollup-button {
   min-width: 54.54545455%;
   max-width: 54.54545455%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-6 label.required:after {
@@ -16873,7 +16873,7 @@ button.rollup-button {
   min-width: 63.63636364%;
   max-width: 63.63636364%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-7 label.required:after {
@@ -16901,7 +16901,7 @@ button.rollup-button {
   min-width: 72.72727273%;
   max-width: 72.72727273%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-8 label.required:after {
@@ -16929,7 +16929,7 @@ button.rollup-button {
   min-width: 81.81818182%;
   max-width: 81.81818182%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-9 label.required:after {
@@ -16957,7 +16957,7 @@ button.rollup-button {
   min-width: 90.90909091%;
   max-width: 90.90909091%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-10 label.required:after {
@@ -16985,7 +16985,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-11 .row .col-11 label.required:after {
@@ -17043,7 +17043,7 @@ button.rollup-button {
 
 .matti-grid-12 .row {
   *zoom: 1;
-  padding: 12px 0;
+  padding: 10px 0;
 }
 
 .matti-grid-12 .row:before, .matti-grid-12 .row:after {
@@ -17062,7 +17062,7 @@ button.rollup-button {
   min-width: 8.33333333%;
   max-width: 8.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-1 label.required:after {
@@ -17090,7 +17090,7 @@ button.rollup-button {
   min-width: 16.66666667%;
   max-width: 16.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-2 label.required:after {
@@ -17118,7 +17118,7 @@ button.rollup-button {
   min-width: 25%;
   max-width: 25%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-3 label.required:after {
@@ -17146,7 +17146,7 @@ button.rollup-button {
   min-width: 33.33333333%;
   max-width: 33.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-4 label.required:after {
@@ -17174,7 +17174,7 @@ button.rollup-button {
   min-width: 41.66666667%;
   max-width: 41.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-5 label.required:after {
@@ -17202,7 +17202,7 @@ button.rollup-button {
   min-width: 50%;
   max-width: 50%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-6 label.required:after {
@@ -17230,7 +17230,7 @@ button.rollup-button {
   min-width: 58.33333333%;
   max-width: 58.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-7 label.required:after {
@@ -17258,7 +17258,7 @@ button.rollup-button {
   min-width: 66.66666667%;
   max-width: 66.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-8 label.required:after {
@@ -17286,7 +17286,7 @@ button.rollup-button {
   min-width: 75%;
   max-width: 75%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-9 label.required:after {
@@ -17314,7 +17314,7 @@ button.rollup-button {
   min-width: 83.33333333%;
   max-width: 83.33333333%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-10 label.required:after {
@@ -17342,7 +17342,7 @@ button.rollup-button {
   min-width: 91.66666667%;
   max-width: 91.66666667%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-11 label.required:after {
@@ -17370,7 +17370,7 @@ button.rollup-button {
   min-width: 100%;
   max-width: 100%;
   min-height: 1px;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 
 .matti-grid-12 .row .col-12 label.required:after {
@@ -17694,6 +17694,21 @@ div.verdict-template span.header {
 
 div.verdict-template span.saved-info {
   color: #999999;
+}
+
+div.matti-date-delta > div.delta-editor {
+  white-space: nowrap;
+}
+
+div.matti-date-delta > div.delta-editor input.grid-style-input {
+  max-width: 5em;
+  margin-left: 0.5em;
+  margin-right: 0.2em;
+}
+
+.row.row--date-delta-title {
+  margin: 0;
+  padding-bottom: 0;
 }
 
 /* VIEWS

@@ -16,6 +16,9 @@
 (defn value [path state* & extra]
   @(state (extend path extra) state*))
 
+(defn react [path state* & extra]
+  (rum/react (state (extend path extra) state*)))
+
 (defn id [path]
   (s/replace (->> (filter identity path)
                   (map name)
@@ -82,6 +85,3 @@
   [{:keys [state path] :as options}]
   (when-let [fun (latest path state :_meta :updated)]
     (fun options)))
-
-(defn set-top-meta [state* k v]
-  (reset! (state [:_meta k] state*) v))

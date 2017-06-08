@@ -13,7 +13,23 @@
   (-> schema-type :schema keys first keyword))
 
 (declare matti-list)
-(declare matti-loc-text)
+
+(rum/defc matti-date-delta < rum/reactive
+  [{:keys [state path schema] :as options}]
+  (let [enabled-path (path/extend path :enabled)]
+    [:div.matti-date-delta
+     [:div.delta-label (path/loc path)]
+     [:div.delta-editor
+      (docgen/docgen-checkbox (assoc options
+                                     :path enabled-path
+                                     :schema (assoc schema :label false)))
+      "+"
+      (docgen/text-edit (assoc options :path (path/extend path :delta))
+                        :input.grid-style-input
+                        {:type "number"
+                         :disabled (not (path/react enabled-path state))})
+      (common/loc (str "matti-date-delta." (-> schema :unit name)))]]))
+
 
 (defmulti instantiate (fn [_ cell & _]
                       (schema-type cell)))
@@ -43,11 +59,13 @@
                                           schema)]
     ;; TODO: label wrap
     ((case cell-type
-       :list matti-list) options)))
+       :list       matti-list
+       :date-delta matti-date-delta) options)))
 
 (defmethod instantiate :loc-text
   [_ {:keys [schema]} & wrap-label?]
-  [:span (common/loc (name (:loc-text schema)))])
+  [:span
+   (common/loc (name (:loc-text schema)))])
 
 (defn- sub-options
   "Options for the subschema"
@@ -78,15 +96,16 @@
    {:class (path/css (sub-options options grid)
                      (str "matti-grid-" (:columns grid)))}
    (for [row (:rows grid)]
-     [:div.row
-      (for [{:keys [col align schema id] :as cell} row]
+     [:div.row {:class (some->> row :css (map name) s/join )}
+      (for [{:keys [col align schema id] :as cell} (get row :row row)]
         [:div {:class (path/css (sub-options options cell)
                                 (str "col-" (or col 1))
                                 (when align (str "col--" (name align))))}
          (when schema
            (instantiate options (shared/child-schema cell :schema grid) true))])])])
 
-(defn section-checkbox [{:keys [state path]} kw & [{:keys [disabled negate?]}]]
+(rum/defc section-checkbox < rum/reactive
+  [{:keys [state path]} kw & [{:keys [disabled negate?]}]]
   (let [path       (path/extend path kw)
         state*     (path/state path state)
         handler-fn (fn [flag]
@@ -94,12 +113,13 @@
                      (path/meta-updated {:path  path
                                          :state state}))]
     (components/checkbox {:label      (str "matti.template-" (name kw))
-                          :value      @state*
+                          :value      (rum/react state*)
                           :handler-fn handler-fn
                           :disabled   disabled
                           :negate?    negate?})))
 
-(defn section-header [{:keys [state path] :as options}]
+(defn section-header
+  [{:keys [state path] :as options}]
   [:div.section-header.matti-grid-2
    [:div.row.row--tight
     [:div.col-1
@@ -118,5 +138,5 @@
   [:div.matti-section
    {:class (path/css options)}
    (section-header options)
-   (when-not (path/value path state :removed)
+   (when-not (path/react path state :removed)
      [:div.section-body (matti-grid (shared/child-schema options :grid options))])])

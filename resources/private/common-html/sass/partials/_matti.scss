@@ -1,4 +1,4 @@
-$matti-grid-margin: 12px;
+$matti-grid-margin: 10px;
 
 @mixin matti-column ($size, $columns) {
   position: relative;
@@ -192,4 +192,19 @@ div.verdict-template {
   span.saved-info {
     color: $gray153;
   }
+}
+
+div.matti-date-delta {
+  > div.delta-editor {
+    white-space: nowrap;
+    input.grid-style-input {
+      max-width: 5em;
+      margin-left: 0.5em;
+      margin-right: 0.2em;
+    }
+  }}
+
+.row.row--date-delta-title {
+  margin: 0;
+  padding-bottom: 0;
 }

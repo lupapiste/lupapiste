@@ -8,7 +8,7 @@
             [rum.core :as rum]))
 
 
-(defonce current-template (atom nil))
+(defonce current-template (atom {}))
 
 (defn response->state [state kw]
   (fn [response]
@@ -21,16 +21,34 @@
                             (response->state state :modified)))
 
 
-(defn verdict-name [{state :state}]
-  "Called from pen-input component."
+(rum/defc verdict-template-name < rum/reactive
+  [{state :state}]
   (letfn [(handler-fn [value]
             (reset! (path/state [:name] state) value)
             (service/set-template-name @(path/state [:id] state)
                                        value
                                        (response->state state :modified)))]
-    (components/pen-input {:value      @(path/state [:name] state)
+    (components/pen-input {:value      (rum/react (path/state [:name] state))
                            :handler-fn handler-fn})))
 
+
+(rum/defc verdict-template-publish < rum/reactive
+  [{state :state}]
+  [:div [:span.row-text.row-text--margin
+         (if-let [published (path/react [:published] state)]
+           (common/loc :matti.last-published
+                       (js/util.finnishDateAndTime published))
+           (common/loc :matti.template-not-published))]
+   [:button.ghost
+    {:on-click #(service/publish-template (path/value [:id] state)
+                                          (response->state state :published))}
+        (common/loc :matti.publish)]])
+
+(rum/defc verdict-template-saved < rum/reactive
+  [{state :state}]
+  [:span.saved-info
+   (common/loc :matti.last-saved
+               (js/util.finnishDateAndTime (path/react [:modified] state)))])
 
 (defn verdict-template
   [{:keys [sections state] :as options}]
@@ -44,21 +62,12 @@
      [:div.col-1
       [:span.row-text.header
        (common/loc "matti.edit-verdict-template")
-       (verdict-name options)]]
+       (verdict-template-name options)]]
      [:div.col-1.col--right
-      [:div [:span.row-text.row-text--margin
-             (if-let [published (path/value [:published] state)]
-               (common/loc :matti.last-published
-                           (js/util.finnishDateAndTime published))
-               (common/loc :matti.template-not-published))]
-       [:button.ghost
-        {:on-click #(service/publish-template @(path/state [:id] state)
-                                              (response->state state :published))}
-        (common/loc :matti.publish)]]]]
+      (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-2.col--right
-      [:span.saved-info (common/loc :matti.last-saved
-                                    (js/util.finnishDateAndTime (path/value [:modified] state)))]]]]
+      (verdict-template-saved options)]]]
    (for [sec sections]
      (sections/section (assoc sec
                               :path (path/extend (:id sec))
@@ -106,7 +115,7 @@
   [_]
   (when-not (empty? (rum/react service/schemas))
     [:div
-     (if (rum/react current-template)
+     (if (rum/react (rum/cursor-in current-template [:_meta :editing?]))
        (verdict-template (assoc  matti/default-verdict-template
                                  :state current-template))
        [:div
