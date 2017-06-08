@@ -275,7 +275,7 @@
       ;; Received the two selected R operations plus 4 YA operations.
       (:operations resp) =>  [["Rakentaminen ja purkaminen"
                                [["Uuden rakennuksen rakentaminen"
-                                 [["pxientalo" "pientalo"]]]
+                                 [["pientalo" "pientalo"]]]
                                 ["Rakennelman rakentaminen"
                                  [["Aita" "aita"]]]]]
                               ["yleisten-alueiden-luvat"
