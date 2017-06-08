@@ -134,6 +134,7 @@
 (defn- select-latest-verdict-status [{:keys [verdicts]}]
   (->> (mapcat :paatokset verdicts)
        (mapcat :poytakirjat)
+       (filter (util/fn-> :paatospvm (< (now))))
        (apply util/max-key :paatospvm)
        :paatoskoodi))
 
