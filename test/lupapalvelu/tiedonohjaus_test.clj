@@ -432,7 +432,10 @@
                                                            :salassapitoperuste  "peruste"
                                                            :henkilotiedot       :sisaltaa
                                                            :julkisuusluokka     :salainen
-                                                           :kayttajaryhmakuvaus :muokkausoikeus})))
+                                                           :kayttajaryhmakuvaus :muokkausoikeus})
+
+      (fact "ei-arkistoida-virheellinen state is not changed"
+        (document-with-updated-metadata {:metadata {:tila :ei-arkistoida-virheellinen}} "753-R" "10" application "hakemus") => {:metadata {:tila :ei-arkistoida-virheellinen}})))
 
   (fact "process metadata retention is calculated based on longest document retention"
     (let [metadata {:tila            :valmis

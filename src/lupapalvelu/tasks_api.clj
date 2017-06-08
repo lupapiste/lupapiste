@@ -266,7 +266,7 @@
       (attachment/update-attachment-data! command
                                           (:id att)
                                           {:metadata.sailytysaika.arkistointi :ei
-                                           :metadata.sailytysaika.perustelu "Virheellinen katselmuspöytäkirja"
+                                           :metadata.sailytysaika.perustelu (i18n/loc "review.faulty-document")
                                            :metadata.myyntipalvelu false
                                            :metadata.tila :ei-arkistoida-virheellinen}
                                           created
