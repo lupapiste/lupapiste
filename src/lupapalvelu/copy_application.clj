@@ -38,15 +38,15 @@
                   (juxt :id vector)))
        (apply merge-with concat)))
 
-(defn- auth-id [auth-entry]
+(defn auth-id [auth-entry]
   (or (not-empty (:id auth-entry))
       (-> auth-entry :invite :user :id)))
 
-(defn- auth-is-user [auth user]
-  (= (:id auth) (:id user)))
+(defn- auth-is-user? [auth user]
+  (= (auth-id auth) (:id user)))
 
 (defn- auth-is-company-of-user [auth user]
-  (= (:id auth) (-> user :company :id)))
+  (= (auth-id auth) (-> user :company :id)))
 
 (defn- auth-role [auth-entry]
   (or (keyword (-> auth-entry :invite :role))
@@ -54,10 +54,10 @@
 
 (defn non-copyable-auth? [auth user]
   (or (contains? non-copyable-roles (auth-role auth))
-      (auth-is-user auth user)
+      (auth-is-user? auth user)
       (auth-is-company-of-user auth user)))
 
-(defn- not-in-auth [auth]
+(defn not-in-auth [auth]
   (let [auth-id-set (set (map auth-id auth))]
     (fn [id]
       (not (get auth-id-set id)))))
