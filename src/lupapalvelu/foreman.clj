@@ -134,9 +134,9 @@
 (defn- select-latest-verdict-status [{:keys [verdicts]}]
   (->> (mapcat :paatokset verdicts)
        (mapcat :poytakirjat)
-       (filter (util/fn-> :paatospvm (< (now))))
+       (filter #(some-> % :paatospvm (< (now))))
        (apply util/max-key :paatospvm)
-       :paatoskoodi))
+       (#(or (:status %) (:paatoskoodi %)))))
 
 (defn foreman-application-info [application]
   (-> (select-keys application [:id :state :auth :documents])

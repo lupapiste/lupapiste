@@ -114,11 +114,20 @@
       (f/allow-foreman-only-in-foreman-app non-fm-command) => unauthorized?)))
 
 (facts select-latest-verdict-status
+  (fact "one verdict with status"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :status "some status"}]}]}]}) => "some status")
+
   (fact "one verdict with paatoskoodi"
     (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :paatoskoodi "some koodi"}]}]}]}) => "some koodi")
 
+  (fact "one verdict with status and paatoskoodi - prefer status"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :status "some status" :paatoskoodi "some koodi"}]}]}]}) => "some status")
+
   (fact "one verdict without poytakirja"
     (select-latest-verdict-status {:verdicts [{:paatokset []}]}) => nil)
+
+  (fact "one verdict with empty poytakirja"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{}]}]}]}) => nil)
 
   (fact "one verdict with multiple paatoskoodi"
     (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :paatoskoodi "oldest koodi"}
