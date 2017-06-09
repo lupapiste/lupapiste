@@ -13802,10 +13802,21 @@ div.search i {
 
 .application-search-component input[type=text].hasDatepicker {
   min-width: 100px;
-  width: 30%;
   display: inline;
   margin-top: 0px;
   margin-right: 0px;
+  width: initial;
+  vertical-align: top;
+  border-right: none;
+}
+
+.application-search-component field-reset-button button.function {
+  border: 1px solid #bbbbbb;
+  border-left: none;
+}
+
+.application-search-component input:focus + field-reset-button button.function {
+  border-color: #fbc732;
 }
 
 .applications-search-filters-list .applications-search-filters-list__filters {
