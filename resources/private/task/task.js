@@ -127,8 +127,7 @@ var taskPageController = (function() {
     ajax.command("mark-review-faulty", { id: applicationModel.id(), taskId: currentTaskId })
       .pending(pending)
       .processing(processing)
-      .success(function(resp) {
-        var permit = externalApiTools.toExternalPermit(applicationModel._js);
+      .success(function() {
         applicationModel.lightReload();
       })
       .onError("error.invalid-task-type", notify.ajaxError)
