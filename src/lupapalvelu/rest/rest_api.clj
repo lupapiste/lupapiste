@@ -37,7 +37,7 @@
                               :meta   ~meta-data})
        (defpage ~path {:keys ~letkeys :as request#}
          (if-let [~'user (or (basic-authentication (request/ring-request))
-                             (autologin/autologin (request/ring-request)))]
+                             (autologin/autologin  (request/ring-request)))]
            (if (usr/rest-user? ~'user)
              ; Input schema validation
              (if (valid-inputs? request# ~params)
@@ -89,7 +89,8 @@
     (rs/swagger-json {:paths (into {} (map mapper @endpoints))})))
 
 (defpage "/rest/swagger.json" []
-  (if-let [user (basic-authentication (request/ring-request))]
+  (if-let [user (or (basic-authentication (request/ring-request))
+                    (autologin/autologin  (request/ring-request)))]
     (if (usr/rest-user? user)
       (resp/status 200 (resp/json (paths)))
       (resp/status 401 "Unauthorized"))
