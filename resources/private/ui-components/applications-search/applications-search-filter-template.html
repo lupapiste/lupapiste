@@ -59,9 +59,11 @@
             </div>
             <div class="col-2" data-test-id="event-filter-dates">
               <label data-bind="ltext: 'applications.filter.event.dates'" /><br/>
-              <input type="text" data-bind="datepicker: dataProvider.searchStartDate" class="form-input" data-test-id="event-search-start-date">
-              &nbsp;&#8211;&nbsp;
-              <input type="text" data-bind="datepicker: dataProvider.searchEndDate" class="form-input" data-test-id="event-search-end-date">
+              <div>
+                <input type="text" data-bind="datepicker: dataProvider.searchStartDate" data-test-id="event-search-start-date"><field-reset-button params="field: dataProvider.searchStartDate"></field-reset-button>
+                &nbsp;&#8211;&nbsp;
+                <input type="text" data-bind="datepicker: dataProvider.searchEndDate" class="form-input" data-test-id="event-search-end-date"><field-reset-button params="field: dataProvider.searchEndDate"></field-reset-button>
+              </div>
             </div>
           </div>
           <!-- /ko -->
