@@ -17,7 +17,8 @@ LUPAPISTE.statusIcon = function( status ) {
   var cls = {
     missing: "attention",
     "new": "star",
-    ok: "check"
+    ok: "check",
+    rejected: "minus"
   }[status];
 
   return cls ? "lupicon-circle-" + cls : "";

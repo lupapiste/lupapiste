@@ -30,6 +30,16 @@ LUPAPISTE.ForemanModel = function() {
   self.canSelect = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "link-foreman-task"));
   self.indicator = ko.observable();
 
+  function resolveStatusName(app) {
+    if (app.state === "acknowledged") {
+      return "ok";
+    } else if (_.includes(LUPAPISTE.config.postVerdictStates, app.state)) {
+      return app["latest-verdict-status"] > 20 ? "rejected" : "ok"; // Rough separation between verdict status codes
+    } else {
+      return "new";
+    }
+  }
+
   self.refresh = function(application) {
     function foremanApplications(applications) {
       _.forEach(applications, function(app) {
@@ -44,6 +54,7 @@ LUPAPISTE.ForemanModel = function() {
         var phone = util.getIn(foremanDoc, ["data", "yhteystiedot", "puhelin", "value"]);
         var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
         var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
+        var verdictStatus  = util.getIn(app, ["latest-verdict-status"]);
 
         if (!(username || firstname || lastname)) {
           username = util.getIn(foreman, ["username"]);
@@ -66,7 +77,8 @@ LUPAPISTE.ForemanModel = function() {
                     "firstName":   firstname,
                     "lastName":    lastname,
                     "name":        name,
-                    "statusName":  app.state === "acknowledged" || _.includes(LUPAPISTE.config.postVerdictStates, app.state) ? "ok" : "new",
+                    "statusName":  resolveStatusName(app),
+                    verdictStatus: verdictStatus,
                     "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : "",
                     isSubstitute:  isSubstitute};
 

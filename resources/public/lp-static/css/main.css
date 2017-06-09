@@ -15145,6 +15145,7 @@ span.icon_clear:before {
   color: #f39129;
 }
 
+#application-tasks-tab i.lupicon-circle-minus,
 #application-tasks-tab i.lupicon-circle-attention {
   color: #df3215;
 }
@@ -15540,7 +15541,6 @@ span.icon_clear:before {
 }
 
 .invited-foremans .foreman span {
-  display: table-cell;
   padding-right: 6px;
 }
 
