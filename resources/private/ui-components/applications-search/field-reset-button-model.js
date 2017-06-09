@@ -1,3 +1,8 @@
+// component for reseting input fields
+//
+// Params:
+// field: observale to reset
+//
 LUPAPISTE.FieldResetButtonModel = function(params) {
   "use strict";
 
