@@ -5,19 +5,22 @@
             [monger.operators :refer :all]
             [sade.util :as util]))
 
-(defn new-verdict-template [org-id timestamp lang]
-  (let [data {:id (mongo/create-id)
-              :draft {}
-              :name (i18n/localize lang
-                                   :matti-verdict-template)}]
-    (mongo/update-by-id :organizations
-                        org-id
-                        {$push {:verdict-templates
-                                (merge data
-                                       {:deleted false
-                                        :modified timestamp
-                                        :versions []})}})
-    data))
+(defn new-verdict-template
+  ([org-id timestamp lang draft name]
+   (let [data {:id    (mongo/create-id)
+               :draft draft
+               :name  name}]
+     (mongo/update-by-id :organizations
+                         org-id
+                         {$push {:verdict-templates
+                                 (merge data
+                                        {:deleted  false
+                                         :modified timestamp
+                                         :versions []})}})
+     data))
+  ([org-id timestamp lang]
+   (new-verdict-template org-id timestamp lang {}
+                         (i18n/localize lang :matti-verdict-template))))
 
 (defn verdict-template [{templates :verdict-templates} template-id]
   (util/find-by-id template-id templates))
@@ -66,3 +69,16 @@
   (template-update organization
                    template-id
                    {$set {:verdict-templates.$.deleted deleted?}}))
+
+(defn copy-verdict-template [organization template-id timestamp lang]
+  (let [{:keys [draft name]} (verdict-template organization
+                                               template-id)
+        {:keys [id name]} (new-verdict-template
+                           (:id organization)
+                           timestamp
+                           lang
+                           draft
+                           (format "%s (%s)"
+                                   name
+                                   (i18n/localize lang :matti-copy-postfix)))]
+    {:id id :name name :draft draft :modified timestamp}))

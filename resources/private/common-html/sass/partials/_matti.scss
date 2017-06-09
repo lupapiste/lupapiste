@@ -208,3 +208,15 @@ div.matti-date-delta {
   margin: 0;
   padding-bottom: 0;
 }
+
+div.matti-template-list {
+  .checkbox-wrapper {
+    margin-top: $marginL;
+  }
+  table.matti-templates-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+    margin-top: $marginL;
+  }
+
+}

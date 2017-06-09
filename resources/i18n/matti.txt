@@ -207,3 +207,5 @@
 "matti-verdict.voimassa" "fi" "Lupa voimassa"
 "matti-restore-template" "fi" "Palauta"
 "matti-restore-template" "en" "Restore"
+"matti-copy-postfix" "fi" "kopio"
+"matti-copy-postfix" "en" "copy"

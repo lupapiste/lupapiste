@@ -89,7 +89,7 @@
   (reset-template options))
 
 (defn toggle-delete [id deleted]
-  [:button.ghost
+  [:button.primary.outline
    {:on-click #(service/toggle-delete-template id (not deleted) identity)}
    (common/loc (if deleted "matti-restore-template" "remove"))])
 
@@ -97,8 +97,8 @@
   (rum/local false ::show-deleted)
   [{show-deleted ::show-deleted}]
   (let [templates (rum/react service/template-list)]
-    [:div
-     [:h4 (common/loc "matti.verdict-templates")]
+    [:div.matti-template-list
+     [:h2 (common/loc "matti.verdict-templates")]
      (when (some :deleted templates)
        [:div.checkbox-wrapper
         [:input {:type "checkbox"
@@ -112,7 +112,7 @@
                       templates
                       (remove :deleted templates))]
        (when (seq filtered)
-         [:table
+         [:table.matti-templates-table
           [:thead
            [:tr
             [:th (common/loc "matti-verdict-template")]
@@ -126,11 +126,12 @@
               [:td
                [:div.matti-buttons
                 (when-not deleted
-                  [:button.ghost
+                  [:button.primary.outline
                    {:on-click #(service/fetch-template id reset-template)}
                    (common/loc "edit")])
-                (when-not deleted
-                  [:button.ghost (common/loc "matti.copy")])
+                [:button.primary.outline
+                 {:on-click #(service/copy-template id reset-template)}
+                 (common/loc "matti.copy")]
                 (toggle-delete id deleted)]]])]]))
      [:button.positive
       {:on-click #(service/new-template new-template)}

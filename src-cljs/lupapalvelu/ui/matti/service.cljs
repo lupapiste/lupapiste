@@ -56,3 +56,8 @@
                    :success (list-update-response callback)}
                   :template-id template-id
                   :delete delete))
+
+(defn copy-template [template-id callback]
+  (common/command {:command "copy-verdict-template"
+                   :success (list-update-response callback)}
+                  :template-id template-id))

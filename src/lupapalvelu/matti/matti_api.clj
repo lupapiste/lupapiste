@@ -110,3 +110,16 @@
   (matti/set-deleted (command->organization command)
                      template-id
                      delete))
+
+(defcommand copy-verdict-template
+  {:description "Makes copy of the template. The new template does not
+  have any published versions. In other words, the draft of the
+  original is copied."
+   :user-roles #{:authorityAdmin}
+   :parameters [template-id]
+   :input-validators [verdict-template-exists]}
+  [{:keys [created lang] :as command}]
+  (ok (matti/copy-verdict-template (command->organization command)
+                                    template-id
+                                    created
+                                    lang)))

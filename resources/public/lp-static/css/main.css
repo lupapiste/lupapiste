@@ -5214,14 +5214,26 @@ label.btn.ghost:active, .dataTables_paginate label.ghost.paginate_disabled_previ
   border-color: #fbc732;
 }
 
-.ghost:disabled, ghost.disabled, .ghost.waiting {
+.ghost:disabled, ghost.disabled, .ghost.waiting,
+.btn.ghost.disabled,
+.dataTables_paginate .ghost.disabled.paginate_disabled_previous,
+.dataTables_paginate .ghost.disabled.paginate_disabled_next, .btn.ghost.waiting, .dataTables_paginate .ghost.waiting.paginate_disabled_previous, .dataTables_paginate .ghost.waiting.paginate_disabled_next {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
   border-color: #dddddd !important;
 }
 
-.ghost:disabled:hover, .ghost:disabled:active, .ghost:disabled:disabled, ghost.disabled:hover, ghost.disabled:active, ghost.disabled:disabled, .ghost.waiting:hover, .ghost.waiting:active, .ghost.waiting:disabled {
+.ghost:disabled:hover, .ghost:disabled:active, .ghost:disabled:disabled, ghost.disabled:hover, ghost.disabled:active, ghost.disabled:disabled, .ghost.waiting:hover, .ghost.waiting:active, .ghost.waiting:disabled,
+.btn.ghost.disabled:hover,
+.dataTables_paginate .ghost.disabled.paginate_disabled_previous:hover,
+.dataTables_paginate .ghost.disabled.paginate_disabled_next:hover,
+.btn.ghost.disabled:active,
+.dataTables_paginate .ghost.disabled.paginate_disabled_previous:active,
+.dataTables_paginate .ghost.disabled.paginate_disabled_next:active,
+.btn.ghost.disabled:disabled,
+.dataTables_paginate .ghost.disabled.paginate_disabled_previous:disabled,
+.dataTables_paginate .ghost.disabled.paginate_disabled_next:disabled, .btn.ghost.waiting:hover, .dataTables_paginate .ghost.waiting.paginate_disabled_previous:hover, .dataTables_paginate .ghost.waiting.paginate_disabled_next:hover, .btn.ghost.waiting:active, .dataTables_paginate .ghost.waiting.paginate_disabled_previous:active, .dataTables_paginate .ghost.waiting.paginate_disabled_next:active, .btn.ghost.waiting:disabled, .dataTables_paginate .ghost.waiting.paginate_disabled_previous:disabled, .dataTables_paginate .ghost.waiting.paginate_disabled_next:disabled {
   border-color: #dddddd !important;
 }
 
@@ -5481,6 +5493,7 @@ label.btn.ghost.positive:active, .dataTables_paginate label.ghost.positive.pagin
   border-color: #61b72f;
 }
 
+<<<<<<< HEAD
 button.sidebar-button {
   color: #f39129;
   background-color: #eeeeee;
@@ -5881,6 +5894,285 @@ label.btn.sidebar-button-light:disabled, .dataTables_paginate label.sidebar-butt
 .sidebar-button-light.sidebar-button--icon {
   min-width: 118px;
   max-width: 118px;
+=======
+.outline:disabled, outline.disabled, .outline.waiting,
+.btn.outline.disabled,
+.dataTables_paginate .outline.disabled.paginate_disabled_previous,
+.dataTables_paginate .outline.disabled.paginate_disabled_next, .btn.outline.waiting, .dataTables_paginate .outline.waiting.paginate_disabled_previous, .dataTables_paginate .outline.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+  border-color: #dddddd !important;
+}
+
+.outline:disabled:hover, .outline:disabled:active, .outline:disabled:disabled, outline.disabled:hover, outline.disabled:active, outline.disabled:disabled, .outline.waiting:hover, .outline.waiting:active, .outline.waiting:disabled,
+.btn.outline.disabled:hover,
+.dataTables_paginate .outline.disabled.paginate_disabled_previous:hover,
+.dataTables_paginate .outline.disabled.paginate_disabled_next:hover,
+.btn.outline.disabled:active,
+.dataTables_paginate .outline.disabled.paginate_disabled_previous:active,
+.dataTables_paginate .outline.disabled.paginate_disabled_next:active,
+.btn.outline.disabled:disabled,
+.dataTables_paginate .outline.disabled.paginate_disabled_previous:disabled,
+.dataTables_paginate .outline.disabled.paginate_disabled_next:disabled, .btn.outline.waiting:hover, .dataTables_paginate .outline.waiting.paginate_disabled_previous:hover, .dataTables_paginate .outline.waiting.paginate_disabled_next:hover, .btn.outline.waiting:active, .dataTables_paginate .outline.waiting.paginate_disabled_previous:active, .dataTables_paginate .outline.waiting.paginate_disabled_next:active, .btn.outline.waiting:disabled, .dataTables_paginate .outline.waiting.paginate_disabled_previous:disabled, .dataTables_paginate .outline.waiting.paginate_disabled_next:disabled {
+  border-color: #dddddd !important;
+}
+
+button.outline:disabled, button.outline:disabled:hover {
+  border-color: #dddddd !important;
+}
+
+button.primary.outline {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+
+button.primary.outline:link, button.primary.outline:visited {
+  color: #f39129;
+  background-color: white;
+}
+
+button.primary.outline:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+
+button.primary.outline:active, button.primary.outline.active {
+  color: #fbc732;
+  background-color: white;
+}
+
+button.primary.outline:disabled, button.primary.outline.disabled, button.primary.outline.waiting {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: white !important;
+}
+
+button.primary.outline:link, button.primary.outline:visited {
+  border-color: #f39129;
+}
+
+button.primary.outline:hover {
+  border-color: #f7ac2e;
+}
+
+button.primary.outline:active {
+  border-color: #fbc732;
+}
+
+div.btn.primary.outline, .dataTables_paginate div.primary.outline.paginate_disabled_previous, .dataTables_paginate div.primary.outline.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+
+div.btn.primary.outline:link, .dataTables_paginate div.primary.outline.paginate_disabled_previous:link, .dataTables_paginate div.primary.outline.paginate_disabled_next:link, div.btn.primary.outline:visited, .dataTables_paginate div.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate div.primary.outline.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+
+div.btn.primary.outline:hover, .dataTables_paginate div.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate div.primary.outline.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+
+div.btn.primary.outline:active, .dataTables_paginate div.primary.outline.paginate_disabled_previous:active, .dataTables_paginate div.primary.outline.paginate_disabled_next:active, div.btn.primary.outline.active, .dataTables_paginate div.primary.outline.active.paginate_disabled_previous, .dataTables_paginate div.primary.outline.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+
+div.btn.primary.outline:disabled, .dataTables_paginate div.primary.outline.paginate_disabled_previous:disabled, .dataTables_paginate div.primary.outline.paginate_disabled_next:disabled, div.btn.primary.outline.disabled, .dataTables_paginate div.primary.outline.disabled.paginate_disabled_previous, .dataTables_paginate div.primary.outline.disabled.paginate_disabled_next, div.btn.primary.outline.waiting, .dataTables_paginate div.primary.outline.waiting.paginate_disabled_previous, .dataTables_paginate div.primary.outline.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: white !important;
+}
+
+div.btn.primary.outline:link, .dataTables_paginate div.primary.outline.paginate_disabled_previous:link, .dataTables_paginate div.primary.outline.paginate_disabled_next:link, div.btn.primary.outline:visited, .dataTables_paginate div.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate div.primary.outline.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+
+div.btn.primary.outline:hover, .dataTables_paginate div.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate div.primary.outline.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+
+div.btn.primary.outline:active, .dataTables_paginate div.primary.outline.paginate_disabled_previous:active, .dataTables_paginate div.primary.outline.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+a.btn.primary.outline, .dataTables_paginate a.primary.outline.paginate_disabled_previous, .dataTables_paginate a.primary.outline.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+
+a.btn.primary.outline:link, .dataTables_paginate a.primary.outline.paginate_disabled_previous:link, .dataTables_paginate a.primary.outline.paginate_disabled_next:link, a.btn.primary.outline:visited, .dataTables_paginate a.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate a.primary.outline.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+
+a.btn.primary.outline:hover, .dataTables_paginate a.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate a.primary.outline.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+
+a.btn.primary.outline:active, .dataTables_paginate a.primary.outline.paginate_disabled_previous:active, .dataTables_paginate a.primary.outline.paginate_disabled_next:active, a.btn.primary.outline.active, .dataTables_paginate a.primary.outline.active.paginate_disabled_previous, .dataTables_paginate a.primary.outline.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+
+a.btn.primary.outline:disabled, .dataTables_paginate a.primary.outline.paginate_disabled_previous:disabled, .dataTables_paginate a.primary.outline.paginate_disabled_next:disabled, a.btn.primary.outline.disabled, .dataTables_paginate a.primary.outline.disabled.paginate_disabled_previous, .dataTables_paginate a.primary.outline.disabled.paginate_disabled_next, a.btn.primary.outline.waiting, .dataTables_paginate a.primary.outline.waiting.paginate_disabled_previous, .dataTables_paginate a.primary.outline.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: white !important;
+}
+
+a.btn.primary.outline:link, .dataTables_paginate a.primary.outline.paginate_disabled_previous:link, .dataTables_paginate a.primary.outline.paginate_disabled_next:link, a.btn.primary.outline:visited, .dataTables_paginate a.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate a.primary.outline.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+
+a.btn.primary.outline:hover, .dataTables_paginate a.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate a.primary.outline.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+
+a.btn.primary.outline:active, .dataTables_paginate a.primary.outline.paginate_disabled_previous:active, .dataTables_paginate a.primary.outline.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+i.btn.primary.outline, .dataTables_paginate i.primary.outline.paginate_disabled_previous, .dataTables_paginate i.primary.outline.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+
+i.btn.primary.outline:link, .dataTables_paginate i.primary.outline.paginate_disabled_previous:link, .dataTables_paginate i.primary.outline.paginate_disabled_next:link, i.btn.primary.outline:visited, .dataTables_paginate i.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate i.primary.outline.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+
+i.btn.primary.outline:hover, .dataTables_paginate i.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate i.primary.outline.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+
+i.btn.primary.outline:active, .dataTables_paginate i.primary.outline.paginate_disabled_previous:active, .dataTables_paginate i.primary.outline.paginate_disabled_next:active, i.btn.primary.outline.active, .dataTables_paginate i.primary.outline.active.paginate_disabled_previous, .dataTables_paginate i.primary.outline.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+
+i.btn.primary.outline:disabled, .dataTables_paginate i.primary.outline.paginate_disabled_previous:disabled, .dataTables_paginate i.primary.outline.paginate_disabled_next:disabled, i.btn.primary.outline.disabled, .dataTables_paginate i.primary.outline.disabled.paginate_disabled_previous, .dataTables_paginate i.primary.outline.disabled.paginate_disabled_next, i.btn.primary.outline.waiting, .dataTables_paginate i.primary.outline.waiting.paginate_disabled_previous, .dataTables_paginate i.primary.outline.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: white !important;
+}
+
+i.btn.primary.outline:link, .dataTables_paginate i.primary.outline.paginate_disabled_previous:link, .dataTables_paginate i.primary.outline.paginate_disabled_next:link, i.btn.primary.outline:visited, .dataTables_paginate i.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate i.primary.outline.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+
+i.btn.primary.outline:hover, .dataTables_paginate i.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate i.primary.outline.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+
+i.btn.primary.outline:active, .dataTables_paginate i.primary.outline.paginate_disabled_previous:active, .dataTables_paginate i.primary.outline.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+span.btn.primary.outline, .dataTables_paginate span.primary.outline.paginate_disabled_previous, .dataTables_paginate span.primary.outline.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+
+span.btn.primary.outline:link, .dataTables_paginate span.primary.outline.paginate_disabled_previous:link, .dataTables_paginate span.primary.outline.paginate_disabled_next:link, span.btn.primary.outline:visited, .dataTables_paginate span.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate span.primary.outline.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+
+span.btn.primary.outline:hover, .dataTables_paginate span.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate span.primary.outline.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+
+span.btn.primary.outline:active, .dataTables_paginate span.primary.outline.paginate_disabled_previous:active, .dataTables_paginate span.primary.outline.paginate_disabled_next:active, span.btn.primary.outline.active, .dataTables_paginate span.primary.outline.active.paginate_disabled_previous, .dataTables_paginate span.primary.outline.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+
+span.btn.primary.outline:disabled, .dataTables_paginate span.primary.outline.paginate_disabled_previous:disabled, .dataTables_paginate span.primary.outline.paginate_disabled_next:disabled, span.btn.primary.outline.disabled, .dataTables_paginate span.primary.outline.disabled.paginate_disabled_previous, .dataTables_paginate span.primary.outline.disabled.paginate_disabled_next, span.btn.primary.outline.waiting, .dataTables_paginate span.primary.outline.waiting.paginate_disabled_previous, .dataTables_paginate span.primary.outline.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: white !important;
+}
+
+span.btn.primary.outline:link, .dataTables_paginate span.primary.outline.paginate_disabled_previous:link, .dataTables_paginate span.primary.outline.paginate_disabled_next:link, span.btn.primary.outline:visited, .dataTables_paginate span.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate span.primary.outline.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+
+span.btn.primary.outline:hover, .dataTables_paginate span.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate span.primary.outline.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+
+span.btn.primary.outline:active, .dataTables_paginate span.primary.outline.paginate_disabled_previous:active, .dataTables_paginate span.primary.outline.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+label.btn.primary.outline, .dataTables_paginate label.primary.outline.paginate_disabled_previous, .dataTables_paginate label.primary.outline.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+
+label.btn.primary.outline:link, .dataTables_paginate label.primary.outline.paginate_disabled_previous:link, .dataTables_paginate label.primary.outline.paginate_disabled_next:link, label.btn.primary.outline:visited, .dataTables_paginate label.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate label.primary.outline.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+
+label.btn.primary.outline:hover, .dataTables_paginate label.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate label.primary.outline.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+
+label.btn.primary.outline:active, .dataTables_paginate label.primary.outline.paginate_disabled_previous:active, .dataTables_paginate label.primary.outline.paginate_disabled_next:active, label.btn.primary.outline.active, .dataTables_paginate label.primary.outline.active.paginate_disabled_previous, .dataTables_paginate label.primary.outline.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+
+label.btn.primary.outline:disabled, .dataTables_paginate label.primary.outline.paginate_disabled_previous:disabled, .dataTables_paginate label.primary.outline.paginate_disabled_next:disabled, label.btn.primary.outline.disabled, .dataTables_paginate label.primary.outline.disabled.paginate_disabled_previous, .dataTables_paginate label.primary.outline.disabled.paginate_disabled_next, label.btn.primary.outline.waiting, .dataTables_paginate label.primary.outline.waiting.paginate_disabled_previous, .dataTables_paginate label.primary.outline.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: white !important;
+}
+
+label.btn.primary.outline:link, .dataTables_paginate label.primary.outline.paginate_disabled_previous:link, .dataTables_paginate label.primary.outline.paginate_disabled_next:link, label.btn.primary.outline:visited, .dataTables_paginate label.primary.outline.paginate_disabled_previous:visited, .dataTables_paginate label.primary.outline.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+
+label.btn.primary.outline:hover, .dataTables_paginate label.primary.outline.paginate_disabled_previous:hover, .dataTables_paginate label.primary.outline.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+
+label.btn.primary.outline:active, .dataTables_paginate label.primary.outline.paginate_disabled_previous:active, .dataTables_paginate label.primary.outline.paginate_disabled_next:active {
+  border-color: #fbc732;
+>>>>>>> LPK-2953 Verdict template copy support.
 }
 
 a.link-btn {
@@ -17709,6 +18001,22 @@ div.matti-date-delta > div.delta-editor input.grid-style-input {
 .row.row--date-delta-title {
   margin: 0;
   padding-bottom: 0;
+}
+
+div.matti-template-list .checkbox-wrapper {
+  margin-top: 24px;
+}
+
+div.matti-template-list table.matti-templates-table {
+  margin-top: 24px;
+}
+
+div.matti-template-list table.matti-templates-table tr:hover {
+  background-color: white;
+}
+
+div.matti-template-list table.matti-templates-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
 }
 
 /* VIEWS
