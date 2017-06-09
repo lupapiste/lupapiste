@@ -146,6 +146,14 @@
               <i class="lupicon-copy"></i>
               <span data-bind="ltext: 'application.copy'"></span>
             </button>
-      <!-- /ko -->
+       <!-- /ko -->
+       <!-- ko if: $root.authorization.ok('create-digging-permit') -->
+            <button class="function"
+                    data-bind="click: createDiggingPermit"
+                    data-test-id="create-digging-permit-button">
+              <i class="lupicon-copy"></i>
+              <span data-bind="ltext: 'application.createDiggingPermit'"></span>
+            </button>
+       <!-- /ko -->
     </div>
 </script>
