@@ -98,3 +98,11 @@
 
         (fact "drawings are copied"
               (:drawings digging-app) => (:drawings source-app))))))
+
+(fact "selected-digging-operations-for-organization"
+      (-> (query pena :selected-digging-operations-for-organization :organization"753-YA")
+          :operations)
+      => [["yleisten-alueiden-luvat"
+           [["katulupa"
+             [["kaivaminen-yleisilla-alueilla"
+               [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]]]]]]]])

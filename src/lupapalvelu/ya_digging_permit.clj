@@ -22,6 +22,8 @@
     (and (= permit/YA permit-type)
          (boolean (some #(= :tyolupa %) subtypes)))))
 
+;;; Digging operation tree
+
 (defn organization-digging-operations
   "Return an operation tree containing only the digging operations
   selected by the given organization"

@@ -4,6 +4,7 @@
             [lupapalvelu.application-api :as app-api]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.ya-digging-permit :as ya-digging]
             [sade.core :refer :all]))
 
@@ -27,3 +28,13 @@
       (app/do-add-link-permit digging-permit-app (:id application))
       (app/insert-application digging-permit-app)
       (ok :id (:id digging-permit-app)))))
+
+(defquery selected-digging-operations-for-organization
+  {:description "Returns selected digging operations for the given organization"
+   :parameters [:organization]
+   :user-roles #{:applicant :authority}
+   :input-validators [(partial action/non-blank-parameters [:organization])]}
+  [{{:keys [organization]} :data}]
+  (if-let [organization (org/get-organization organization)]
+    (ok :operations (ya-digging/organization-digging-operations organization))
+    (fail! :error.organization-not-found :organization organization)))
