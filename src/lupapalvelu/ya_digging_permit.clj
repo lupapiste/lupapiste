@@ -95,7 +95,8 @@
                      document-pairs)]
     ;; Add invites for those who are not already authorized
     (update digging-app :auth
-            concat (filter (comp (copy-app/not-in-auth (:auth digging-app))
+            concat (filter (comp #(and (some? %)
+                                       ((copy-app/not-in-auth (:auth digging-app)) %))
                                  copy-app/auth-id)
                            invites))))
 
