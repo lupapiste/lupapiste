@@ -35,11 +35,9 @@
   {:description "Creates new empty template. Returns template id, name and draft."
    :user-roles  #{:authorityAdmin}}
   [{:keys [created user lang]}]
-  (let [{:keys [id draft name]}
-        (matti/new-verdict-template (usr/authority-admins-organization-id user)
-                                    created
-                                    lang)]
-    (ok :id id :name name :draft draft)))
+  (ok (matti/new-verdict-template (usr/authority-admins-organization-id user)
+                                   created
+                                   lang)))
 
 (defcommand set-verdict-template-name
   {:parameters [template-id name]

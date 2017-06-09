@@ -7,15 +7,15 @@
 
 (defn new-verdict-template
   ([org-id timestamp lang draft name]
-   (let [data {:id    (mongo/create-id)
-               :draft draft
-               :name  name}]
+   (let [data {:id       (mongo/create-id)
+               :draft    draft
+               :name     name
+               :modified timestamp}]
      (mongo/update-by-id :organizations
                          org-id
                          {$push {:verdict-templates
                                  (merge data
                                         {:deleted  false
-                                         :modified timestamp
                                          :versions []})}})
      data))
   ([org-id timestamp lang]
@@ -72,13 +72,11 @@
 
 (defn copy-verdict-template [organization template-id timestamp lang]
   (let [{:keys [draft name]} (verdict-template organization
-                                               template-id)
-        {:keys [id name]} (new-verdict-template
-                           (:id organization)
-                           timestamp
-                           lang
-                           draft
-                           (format "%s (%s)"
-                                   name
-                                   (i18n/localize lang :matti-copy-postfix)))]
-    {:id id :name name :draft draft :modified timestamp}))
+                                               template-id)]
+    (new-verdict-template (:id organization)
+                          timestamp
+                          lang
+                          draft
+                          (format "%s (%s)"
+                                  name
+                                  (i18n/localize lang :matti-copy-postfix)))))
