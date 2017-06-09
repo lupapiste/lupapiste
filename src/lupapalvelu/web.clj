@@ -14,7 +14,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
-            [monger.operators :refer [$set $push]]
+            [monger.operators :refer [$set $push $elemMatch]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
             [sade.http :as http]
@@ -49,7 +49,8 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
-            [clj-time.local :as local])
+            [clj-time.local :as local]
+            [lupapalvelu.tasks :as tasks])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -798,6 +799,20 @@
         strip-xml-namespaces
         yax/update-application-extensions)
     (resp/status 200 "YA extension KRYSP processed."))
+
+  (defpage [:post "/dev/review-from-background/:appId/:taskId"] {appId :appId taskId :taskId}
+    (mongo/update-by-query :applications
+                           {:_id appId :tasks {$elemMatch {:id taskId}}}
+                           (util/deep-merge
+                             {$set {:tasks.$.state "sent"}}
+                             {$set {:tasks.$.source {:type "background"}}}
+                             {$set {:tasks.$.data.katselmus.pitoPvm.value "1.1.2017"}}))
+    (let [application (domain/get-application-no-access-checking appId)]
+      (tasks/generate-task-pdfa application
+                                (util/find-by-id taskId (:tasks application))
+                                (usr/batchrun-user [(:organization application)])
+                                "fi")
+      (resp/status 200 "PROCESSED")))
 
   (defpage [:get "/dev/filecho/:filename"] {filename :filename}
     (->> filename

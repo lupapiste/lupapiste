@@ -123,6 +123,18 @@ var taskPageController = (function() {
       .call();
   }
 
+  function markFaultyAjax() {
+    ajax.command("mark-review-faulty", { id: applicationModel.id(), taskId: currentTaskId })
+      .pending(pending)
+      .processing(processing)
+      .success(function(resp) {
+        var permit = externalApiTools.toExternalPermit(applicationModel._js);
+        applicationModel.lightReload();
+      })
+      .onError("error.invalid-task-type", notify.ajaxError)
+      .call();
+  }
+
   function reviewDone() {
     hub.send("show-dialog", {ltitle: "areyousure",
                              size: "medium",
@@ -131,7 +143,16 @@ var taskPageController = (function() {
                                                yesFn: reviewDoneAjax,
                                                lyesTitle: "yes",
                                                lnoTitle: "no"}});
+  }
 
+  function markFaulty() {
+    hub.send("show-dialog", {ltitle: "areyousure",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "areyousure.mark-review-faulty",
+                                               yesFn: markFaultyAjax,
+                                               lyesTitle: "yes",
+                                               lnoTitle: "no"}});
   }
 
   /**
@@ -164,6 +185,7 @@ var taskPageController = (function() {
         t.approve = _.partial(runTaskCommand, "approve-task");
         t.reject = _.partial(runTaskCommand, "reject-task");
         t.reviewDone = reviewDone;
+        t.markFaulty = markFaulty;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
         t.addedToService = ko.observable();
         task(t);

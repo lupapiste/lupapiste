@@ -5,7 +5,8 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.util :refer [fn->>]]))
+            [sade.util :refer [fn->>]]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -185,3 +186,25 @@
 
             (fact "the original task was marked final too"
               (get-in (second tasks) [:data :katselmus :tila :value]) => "lopullinen")))))))
+
+(facts "mark review faulty"
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+       application-id (:id application)
+       _ (command sonja :check-for-verdict :id application-id)
+       application (query-application pena application-id)
+       tasks (:tasks application)
+       katselmukset (filter (partial task-by-type "katselmus") tasks)
+       loppukatselmus (util/find-by-key :taskname "loppukatselmus" katselmukset)]
+    (fact "final review template exists from verdict"
+      loppukatselmus => truthy)
+    (http-post (str (server-address) "/dev/review-from-background/" application-id "/" (:id loppukatselmus)) {}) => http200?
+    (fact "review can be marked faulty"
+      (command sonja :mark-review-faulty :id application-id :taskId (:id loppukatselmus)) => ok?)
+    (let [updated-application (query-application pena application-id)
+          updated-loppukatselmus (util/find-by-id (:id loppukatselmus) (:tasks updated-application))
+          targeted-attachment (util/find-by-key :target {:id (:id loppukatselmus) :type "task"} (:attachments updated-application))]
+      (fact "review state is faulty"
+        (:state updated-loppukatselmus) => "faulty_review_task"
+        (fact "review attachment is not to be archived"
+          (-> targeted-attachment :metadata :tila) => "ei-arkistoida-virheellinen"
+          (-> targeted-attachment :metadata :sailytysaika :arkistointi) => "ei")))))

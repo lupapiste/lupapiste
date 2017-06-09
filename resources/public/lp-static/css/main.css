@@ -15649,6 +15649,10 @@ div.review-tasks {
   margin-top: 20px;
 }
 
+div.review-tasks .faulty {
+  text-decoration: line-through;
+}
+
 .assignment-creator {
   margin-bottom: 12px;
 }
@@ -18675,14 +18679,6 @@ label.batch-required {
 .inspection-summary-template-editor label.required:after {
   content: "*";
   display: inline;
-}
-
-.inspection-summary-edit {
-  margin-left: 10px;
-}
-
-.inspection-summary-link:hover {
-  text-decoration: none;
 }
 
 .create-summary-bubble .container-bubble {

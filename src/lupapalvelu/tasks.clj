@@ -29,7 +29,7 @@
                  "loppukatselmus"
                  "ei tiedossa"])
 
-(def task-states #{:requires_user_action :requires_authority_action :ok :sent})
+(def task-states #{:requires_user_action :requires_authority_action :ok :sent :faulty_review_task})
 
 (defn all-states-but [& states]
   (apply disj task-states states))
@@ -357,6 +357,7 @@
 
 (defn generate-task-pdfa [application task user lang]
   (assert (map? application))
+  (println "GENERATING TASK PDFA" (:id application) task)
   (when (task-is-review? task)
     (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
