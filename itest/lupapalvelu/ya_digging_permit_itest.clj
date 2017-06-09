@@ -34,24 +34,45 @@
       => (partial expected-failure? "error.operations.hidden")))
 
   (facts "copied data from sijoitus application"
+
+    ;; Setup
     (let [source-app (create-and-submit-application pena :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen")
           app-id (:id source-app)
           maksaja-doc-id (:id (domain/get-document-by-name (:documents source-app) "yleiset-alueet-maksaja"))
           hakija-doc-id (:id (domain/get-applicant-document (:documents source-app)))]
+
+      ;; Invite Mikko
       (command pena :invite-with-role :id app-id :email (email-for-key mikko)
                :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
       (command mikko :approve-invite :id app-id) => ok?
+
+      ;; Add Pena's personal information to applicant document
       (command pena :update-doc :id app-id :doc hakija-doc-id :collection "documents"
                :updates [["_selected" "henkilo"]
                          ["henkilo.henkilotiedot.etunimi" (:firstName pena-user)]
                          ["henkilo.henkilotiedot.sukunimi" (:lastName pena-user)]
                          ["henkilo.userId" (:id pena-user)]])
+
+      ;; Add Mikko's personal information to payer document
       (command pena :update-doc :id app-id :doc maksaja-doc-id :collection "documents"
                :updates [["_selected" "henkilo"]
                          ["henkilo.henkilotiedot.etunimi" (:firstName mikko-user)]
                          ["henkilo.henkilotiedot.sukunimi" (:lastName mikko-user)]
                          ["henkilo.userId" (:id mikko-user)]]) => ok?
+
+      ;; Add drawings
+      (command pena :save-application-drawings
+               :id app-id
+               :drawings [{:id 1,
+                           :name "A",
+                           :desc "A desc",
+                           :category "123",
+                           :geometry "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
+                           :area "2686992",
+                           :height "1"}])
+
       (give-verdict sonja app-id) => ok?
+
       (let [{digging-app-id :id} (command pena :create-digging-permit :id (:id source-app)
                                           :operation "ya-katulupa-vesi-ja-viemarityot")
             digging-app (query-application pena digging-app-id)
@@ -76,5 +97,4 @@
             (-> mikko-auth :invite :documentName) => "yleiset-alueet-maksaja"))
 
         (fact "drawings are copied"
-              ;; TODO add drawings so this can be tested
-              )))))
+              (:drawings digging-app) => (:drawings source-app))))))

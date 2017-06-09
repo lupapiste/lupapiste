@@ -65,6 +65,8 @@
     (when-let [invited-auth-entry (util/find-first #(= (copy-app/auth-id %)
                                                        invited-id)
                                                    sijoitus-auth)]
+      ;; Copy user information from auth instead of from db to be
+      ;; consistent between sijoitus and digging permits
       (auth/create-invite-auth inviter (auth->user-summary invited-auth-entry)
                                app-id :writer timestamp nil
                                (-> digging-document :schema-info :name)
