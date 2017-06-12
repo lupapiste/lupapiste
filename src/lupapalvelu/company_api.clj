@@ -214,7 +214,6 @@
   (com/update-company! (:id company) {:tags (map mongo/ensure-id tags)} user)
   (ok))
 
-
 (defquery remove-company-tag-ok
   {:parameters [tagId]
    :input-validators [(partial action/non-blank-parameters [:tagId])]
@@ -238,7 +237,6 @@
   {:parameters [id]
    :optional-parameters [tags note]
    :states states/all-application-states
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
    :pre-checks [(com/validate-has-company-role :any)
                 com/validate-tag-ids]
    :user-roles #{:authority :applicant}}
