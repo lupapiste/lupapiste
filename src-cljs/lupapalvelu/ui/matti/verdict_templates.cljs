@@ -9,6 +9,10 @@
 
 
 (defonce current-template (atom {}))
+(defonce settings         (atom {"paatostieto" [:annettu-lausunto
+                                               :asiakirjat-palautettu
+                                               :ehdollinen
+                                               :ei-lausuntoa]}))
 
 (defn response->state [state kw]
   (fn [response]
@@ -51,7 +55,7 @@
                (js/util.finnishDateAndTime (path/react [:modified] state)))])
 
 (defn verdict-template
-  [{:keys [sections state] :as options}]
+  [{:keys [sections state settings] :as options}]
   [:div.verdict-template
    [:button.ghost
     {:on-click #(reset! current-template nil)}
@@ -71,7 +75,8 @@
    (for [sec sections]
      (sections/section (assoc sec
                               :path (path/extend (:id sec))
-                              :state state)))])
+                              :state state
+                              :settings settings)))])
 
 (defn reset-template [{:keys [id name modified published draft]}]
   (reset! current-template
@@ -144,7 +149,8 @@
     [:div
      (if (rum/react (rum/cursor-in current-template [:_meta :editing?]))
        (verdict-template (assoc  matti/default-verdict-template
-                                 :state current-template))
+                                 :state current-template
+                                 :settings settings))
        (verdict-template-list))]))
 
 (defonce args (atom {}))

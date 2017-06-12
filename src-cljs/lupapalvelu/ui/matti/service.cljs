@@ -1,6 +1,6 @@
 (ns lupapalvelu.ui.matti.service
-  (:require [lupapalvelu.ui.common :as common]
-            [clojure.walk :as walk]))
+  (:require [clojure.walk :as walk]
+            [lupapalvelu.ui.common :as common]))
 
 (defonce schemas (atom {}))
 ;; List of id, name, published, deleted maps.

@@ -20,14 +20,33 @@
    ;; earlier localisations are arguments to the latter.
    (sc/optional-key :i18nkey)    [sc/Keyword]})
 
-(defschema SchemaType
-  {(sc/optional-key :docgen)     sc/Str
-   (sc/optional-key :list)       (sc/recursive #'MattiList)
-   (sc/optional-key :loc-text)   sc/Keyword ;; Localisation term shown as text.
-   (sc/optional-key :date-delta) {(sc/optional-key :enabled) sc/Bool
-                                  (sc/optional-key :delta)   sc/Int
-                                  :unit   (sc/enum :days :years)}
-   })
+(defschema MattiFromSettings
+  "Component that builds schema from the settings."
+  (merge MattiBase
+         {:settings-id          sc/Str
+          :type                 (sc/enum :select :multi-select)
+          (sc/optional-key :id) sc/Str}))
+
+(defschema MattiMultiSelect
+  (merge MattiBase
+         {:items [sc/Str]}))
+
+(def schema-type-alternatives
+  {:docgen        sc/Str
+   :list          (sc/recursive #'MattiList)
+   :from-settings MattiFromSettings
+   :loc-text      sc/Keyword ;; Localisation term shown as text.
+   :date-delta    {(sc/optional-key :enabled) sc/Bool
+                   (sc/optional-key :delta)   sc/Int
+                   :unit                      (sc/enum :days :years)}
+   :multi-select  MattiMultiSelect})
+
+(defn make-conditional [m]
+  (->> (reduce (fn [a [k v]]
+                 (concat a [k (hash-map k v)]))
+               []
+               m)
+       (apply sc/conditional)))
 
 (defschema MattiItem
   (merge MattiBase
@@ -35,7 +54,7 @@
           ;; mandatory if an explicit resolution is needed.
           (sc/optional-key :id)     sc/Str
           (sc/optional-key :align)  (sc/enum :left :right :center :full)
-          (sc/optional-key :schema) SchemaType}))
+          (sc/optional-key :schema) (make-conditional schema-type-alternatives)}))
 
 (defschema MattiList
   (merge MattiBase
@@ -99,20 +118,20 @@
    :sections [{:id    "matti-verdict"
                :grid  {:columns 6
                        :rows    [{:css [:row--date-delta-title]
-                                  :row [{:col 6
-                                         :css [:matti-label]
+                                  :row [{:col    6
+                                         :css    [:matti-label]
                                          :schema {:loc-text :matti-verdict-dates}}]}
-                                 [{:id "julkipano"
+                                 [{:id     "julkipano"
                                    :schema {:date-delta {:unit :days}}}
-                                  {:id "anto"
+                                  {:id     "anto"
                                    :schema {:date-delta {:unit :days}}}
-                                  {:id "valitus"
+                                  {:id     "valitus"
                                    :schema {:date-delta {:unit :days}}}
-                                  {:id "lainvoimainen"
+                                  {:id     "lainvoimainen"
                                    :schema {:date-delta {:unit :days}}}
-                                  {:id "aloitettava"
+                                  {:id     "aloitettava"
                                    :schema {:date-delta {:unit :years}}}
-                                  {:id "voimassa"
+                                  {:id     "voimassa"
                                    :schema {:date-delta {:unit :years}}}]
                                  [{:id     "giver"
                                    :col    2
@@ -120,34 +139,44 @@
                                   {:align  :full
                                    :col    2
                                    :id     "paatostieto"
-                                   :schema {:docgen "matti-verdict-code"}}]
+                                   :schema {:docgen "matti-verdict-code"}}
+                                  {:align  :full
+                                   :col    2
+                                   :id     "paatostieto2"
+                                   :schema {:from-settings {:settings-id "paatostieto"
+                                                            :type        :multi-select}}}]
                                  [{:col    5
                                    :id     "paatosteksti"
                                    :align  :full
-                                   :schema {:docgen "matti-verdict-text"}}]]}
+                                   :schema {:docgen "matti-verdict-text"}}]
+                                 [{:col 6
+                                   :id "foremen"
+                                   :schema {:multi-select {:items ["vastaava-tj" "vv-tj" "iv-tj" "erityis-tj"]}}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen ["vastaava-tj" "vv-tj" "iv-tj" "erityis-tj"] )
+              (complexity-section :matti-foremen ["vastaava-tj" "vv-tj"
+                                                  "iv-tj" "erityis-tj"] )
               (complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (complexity-section :matti-reviews ["paikka" "sijainti" "aloitus" "pohja" "rakenne" "vv" "iv" "loppu"])
+              (complexity-section :matti-reviews ["paikka" "sijainti" "aloitus" "pohja"
+                                                  "rakenne" "vv" "iv" "loppu"])
               (text-section :matti-neighbours)
-              {:id "matti-appeal"
-               :grid {:columns 6
-                      :rows [[{:col 6
-                               :id "type"
-                               :schema {:docgen "automatic-vs-manual"}}]]}
+              {:id    "matti-appeal"
+               :grid  {:columns 6
+                       :rows    [[{:col    6
+                                   :id     "type"
+                                   :schema {:docgen "automatic-vs-manual"}}]]}
                :_meta {:can-remove? true}}
               (text-section :matti-collateral)
               (text-section :matti-rights)
               (text-section :matti-purpose)
               (text-section :matti-statements)
-              {:id "matti-buildings"
-               :grid {:columns 1
-                      :rows [[{:schema {:list {:id "info"
-                                               :items (mapv (fn [check]
-                                                              {:id check
-                                                               :schema {:docgen "matti-verdict-check"}
-                                                               :css [:matti-condition-box]})
-                                                            ["autopaikat" "vss-luokka" "paloluokka"])}}}]]}
+              {:id    "matti-buildings"
+               :grid  {:columns 1
+                       :rows    [[{:schema {:list {:id    "info"
+                                                   :items (mapv (fn [check]
+                                                                  {:id     check
+                                                                   :schema {:docgen "matti-verdict-check"}
+                                                                   :css    [:matti-condition-box]})
+                                                                ["autopaikat" "vss-luokka" "paloluokka"])}}}]]}
                :_meta {:can-remove? true}}]})
 
 (sc/validate MattiVerdict default-verdict-template)

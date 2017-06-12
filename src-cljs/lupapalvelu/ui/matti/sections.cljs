@@ -15,10 +15,11 @@
 (declare matti-list)
 
 (rum/defc matti-date-delta < rum/reactive
-  [{:keys [state path schema] :as options}]
+  [{:keys [state path schema] :as options}  & [wrap-label?]]
   (let [enabled-path (path/extend path :enabled)]
     [:div.matti-date-delta
-     [:div.delta-label (path/loc path)]
+     (when wrap-label?
+       [:div.delta-label (path/loc path)])
      [:div.delta-editor
       (docgen/docgen-checkbox (assoc options
                                      :path enabled-path
@@ -31,11 +32,53 @@
       (common/loc (str "matti-date-delta." (-> schema :unit name)))]]))
 
 
+(rum/defc matti-multi-select < rum/reactive
+  [{:keys [state path schema] :as options}  & [wrap-label?]]
+  [:div.matti-multi-select
+   (when wrap-label?
+     [:h4.matti-label (path/loc path)])
+   (let [state (path/state path state)]
+     (for [item (:items schema)
+           :let [item-id (path/id (path/extend path item))
+                 checked (contains? (set (rum/react state)) item)]]
+       [:div.matti-checkbox-wrapper
+        {:key     item-id}
+        [:input {:type "checkbox"
+                 :id      item-id
+                 :checked checked}]
+        [:label.matti-checkbox-label
+         {:for item-id
+          :on-click (fn [_]
+                      (swap! state
+                             (if checked
+                               (partial remove #(= item %))
+                               #(cons item %)))
+                      (path/meta-updated options))}
+         (path/loc path options item)]]))])
+
+(rum/defc select-from-settings < rum/reactive
+  [{:keys [state path schema settings] :as options} & [wrap-label?]]
+  (let [options   (assoc options
+                         :schema (assoc schema
+                                        :body [{:body (map #(hash-map :name %)
+                                                           (get (rum/react settings)
+                                                                (:settings-id schema)))}]))
+        component (docgen/docgen-select options)]
+    (if wrap-label?
+      (docgen/docgen-label-wrap options component)
+      component)))
+
+(rum/defc multi-select-from-settings < rum/reactive
+  [{:keys [state path schema settings] :as options} & [wrap-label?]]
+  (matti-multi-select (assoc-in options [:schema :items] (get (rum/react settings)
+                                                              (:settings-id schema)))
+                      wrap-label?))
+
 (defmulti instantiate (fn [_ cell & _]
                       (schema-type cell)))
 
 (defmethod instantiate :docgen
-  [{:keys [state path]} {:keys [schema id]} & wrap-label?]
+  [{:keys [state path]} {:keys [schema id]} & [wrap-label?]]
   (let [schema-name (:docgen schema)
         options     (shared/child-schema {:state  state
                                           :path   (path/extend path id)
@@ -49,18 +92,22 @@
       wrap-label?    (docgen/docgen-label-wrap options ))))
 
 (defmethod instantiate :default
-  [{:keys [state path]} {:keys [schema id] :as cell} & wrap-label?]
+  [{:keys [state path] :as options} {:keys [schema id] :as cell} & [wrap-label?]]
   (let [cell-type    (schema-type cell)
         schema-value (-> schema vals first)
-        options      (shared/child-schema {:state  state
-                                           :path   (path/extend path id (:id schema-value))
-                                           :schema schema-value}
+        options      (shared/child-schema (assoc options
+                                                 :state  state
+                                                 :path   (path/extend path id (:id schema-value))
+                                                 :schema schema-value)
                                           :schema
                                           schema)]
-    ;; TODO: label wrap
     ((case cell-type
-       :list       matti-list
-       :date-delta matti-date-delta) options)))
+       :list          matti-list
+       :date-delta    matti-date-delta
+       :from-settings (if (= :select (:type schema-value))
+                        select-from-settings
+                        multi-select-from-settings)
+       :multi-select  matti-multi-select) options wrap-label?)))
 
 (defmethod instantiate :loc-text
   [_ {:keys [schema]} & wrap-label?]
@@ -74,16 +121,16 @@
          :state state
          :path (path/extend path (:id subschema))))
 
-(defn matti-list [{:keys [schema state path] :as options}]
+(defn matti-list [{:keys [schema state path] :as options} & [wrap-label?]]
   [:div.matti-list
    {:class (path/css (sub-options options schema))}
-   ;; TODO: label wrap
-   [:h4.matti-label (path/loc path schema)]
+   (when wrap-label?
+     [:h4.matti-label (path/loc path schema)])
    (for [i    (-> schema :items count range)
          :let [item (nth (:items schema) i)
                component (instantiate options
                                       (shared/child-schema item :schema schema)
-                                      false)]]
+                                      wrap-label?)]]
      (when component
        [:div.item {:key   (str "item-" i)
                    :class (path/css (sub-options options item)
