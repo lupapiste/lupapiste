@@ -2,13 +2,21 @@ LUPAPISTE.AutocompleteApplicationCompanyTagsModel = function(params) {
   "use strict";
   var self = this;
 
+  var selectedIds = params.selectedValues;
+
+  var companyTags = ko.observableArray();
+
   self.lPlaceholder = params.lPlaceholder;
-  self.selected = params.selectedValues;
   self.disable = params.disable || false;
+  self.selected = ko.pureComputed(function() {
+    return _.filter(companyTags(), function(tag) {
+      return _.includes(selectedIds(), tag.id);
+    });
+  });
+  self.selected.remove = function(item) {  selectedIds.remove(item.id); };
+  self.selected.push = function(item) { selectedIds.push(item.id); };
 
   self.query = ko.observable("");
-
-  var companyTags = ko.observable();
 
   var companyId = util.getIn(lupapisteApp.models.currentUser, ["company","id"]);
 

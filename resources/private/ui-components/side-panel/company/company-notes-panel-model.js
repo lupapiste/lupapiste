@@ -25,11 +25,11 @@ LUPAPISTE.CompanyNotesPanelModel = function(params) {
   });
 
   self.registerApplyableSubscription(self.tags, function(val) {
-    self.sendEvent("SidePanelService", "CompanyTagsChanged", {tags: _.map(val, "id")});
+    self.sendEvent("SidePanelService", "CompanyTagsChanged", {tags: val});
   });
 
   // Show when any of the values have been processed
-  self.addEventListener("SidePanelService", "CompanyNoteChangeProcessed", function(event) {
+  self.addEventListener("SidePanelService", "NoticeChangeProcessed", function(event) {
     if (event.status === "success") {
       hub.send("indicator-icon", {style: "positive"});
     } else {

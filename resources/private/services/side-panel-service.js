@@ -43,17 +43,20 @@ LUPAPISTE.SidePanelService = function() {
 
 
   var companyNotes = ko.pureComputed(function() {
-    return _.find(ko.unwrap(self.application["company-notes"]), function(item) {
-      return ko.unwrap(item.companyId) === util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
-    });
+    return _.merge({tags: ko.observable(), note: ko.observable()},
+                   _.find(ko.unwrap(self.application["company-notes"]), function(item) {
+                     return ko.unwrap(item.companyId) === util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
+                   }));
   });
 
-  self.companyNote = ko.pureComputed(function() {
-    return util.getIn(companyNotes,["note"]);
+  self.companyNote = ko.pureComputed({
+    read: function() { return util.getIn(companyNotes,["note"]); },
+    write: function(value) { companyNotes().note(value); }
   });
 
-  self.companyTags = ko.pureComputed(function() {
-    return util.getIn(companyNotes,["tags"]);
+  self.companyTags = ko.pureComputed({
+    read: function() { return util.getIn(companyNotes,["tags"]); },
+    write: function(value) { companyNotes().tags(value); }
   });
 
   var companyNoteSeenAppId = ko.observable();
