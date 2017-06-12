@@ -21,8 +21,6 @@ function TagsEditorBaseModel(options) {
   self.rawTags = ko.observableArray();
   self.tags = ko.observableArray();
 
-  self.indicator = ko.observable().extend({notify: "always"});
-
   self.save = _.debounce(function() {
     self.tags.remove(function(item) {
       return _.isEmpty(ko.unwrap(item.label));
