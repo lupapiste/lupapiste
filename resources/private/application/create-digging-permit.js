@@ -56,7 +56,7 @@
         .pending(self.pending)
         .success(function(resp) {
           // TODO route to newly created application
-          pageutil.openApplicationPage(resp.id);
+          pageutil.openApplicationPage({id: resp.id});
           hub.send("indicator", {style: "positive",
                                  message: "application.createDiggingPermit.success.text",
                                  sticky: true});
