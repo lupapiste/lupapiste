@@ -24,11 +24,10 @@
 
 (defquery company-tags
   {:user-roles #{:applicant :authority :admin}
-   :input-validators [(some-pre-check com/validate-is-admin
-                                      com/validate-belongs-to-company)]
-   :parameters [company]}
-  [{{:keys [users]} :data}]
-  (ok :tags (:tags (com/find-company! {:id company} [:tags]))))
+   :pre-checks [(com/validate-has-company-role :any)]
+   :parameters []}
+  [{{{company-id :id} :company} :user}]
+  (ok :tags (:tags (com/find-company! {:id company-id} [:tags]))))
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}

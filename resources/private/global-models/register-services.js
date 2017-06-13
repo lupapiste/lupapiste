@@ -4,6 +4,7 @@
   lupapisteApp.services.commentService = new LUPAPISTE.CommentService();
 
   lupapisteApp.services.organizationTagsService = new LUPAPISTE.OrganizationTagsService();
+  lupapisteApp.services.companyTagsService = new LUPAPISTE.CompanyTagsService();
   lupapisteApp.services.applicationFiltersService = new LUPAPISTE.ApplicationFiltersService();
   lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.handlerFilterService = new LUPAPISTE.HandlerFilterService(lupapisteApp.services.applicationFiltersService);

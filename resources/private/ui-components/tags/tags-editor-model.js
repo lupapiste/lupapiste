@@ -18,8 +18,10 @@ function TagModel(tag, saveFn) {
 function TagsEditorBaseModel(options) {
   var self = this;
 
-  self.rawTags = ko.observableArray();
+  self.rawTags = options.data;
   self.tags = ko.observableArray();
+
+  self.indicator = ko.observable().extend({notify: "always"});
 
   self.save = _.debounce(function() {
     self.tags.remove(function(item) {
@@ -36,14 +38,7 @@ function TagsEditorBaseModel(options) {
       .call();
   }, 500);
 
-  self.refresh = function() {
-    ajax
-      .query(options.tagQueryName, options.tagQueryParams)
-      .success(function(res) {
-        self.rawTags(res.tags);
-      })
-      .call();
-  };
+  self.refresh = options.refresh;
 
   self.addTag = function() {
     var tag = new TagModel({id: null, label: ""}, self.save);
@@ -111,7 +106,8 @@ LUPAPISTE.TagsEditorModel = function() {
 
   var self = this;
 
-  ko.utils.extend(self, new TagsEditorBaseModel({tagQueryName: "get-organization-tags",
+  ko.utils.extend(self, new TagsEditorBaseModel({data: lupapisteApp.services.organizationTagsService.data,
+                                                 refresh: lupapisteApp.services.organizationTagsService.refresh,
                                                  saveCommandName: "save-organization-tags",
                                                  removeTagOkQueryName: "remove-tag-ok"}));
 
@@ -132,12 +128,12 @@ LUPAPISTE.TagsEditorModel = function() {
 };
 
 
-LUPAPISTE.CompanyTagsEditorModel = function(params) {
+LUPAPISTE.CompanyTagsEditorModel = function() {
 
   var self = this;
 
-  ko.utils.extend(self, new TagsEditorBaseModel({tagQueryName: "company-tags",
-                                                 tagQueryParams: {company: params.companyId},
+  ko.utils.extend(self, new TagsEditorBaseModel({data: lupapisteApp.services.companyTagsService.currentCompanyTags,
+                                                 refresh: lupapisteApp.services.companyTagsService.refresh,
                                                  saveCommandName: "save-company-tags",
                                                  removeTagOkQueryName: "remove-company-tag-ok"}));
 
