@@ -24,7 +24,7 @@
 (defn- party-info-from-document [document]
   {:document-id (:id document)
    :document-name (tools/doc-name document)
-   :id (tools/party-doc-user-id document)
+   :id (tools/party-doc-selected-id document)
    :role (tools/party-doc->user-role document)})
 
 (def ^:private non-copyable-roles #{:tyonjohtaja :statementGiver})
@@ -45,8 +45,11 @@
 (defn- auth-is-user? [auth user]
   (= (auth-id auth) (:id user)))
 
-(defn- auth-is-company-of-user [auth user]
+(defn- auth-is-company-of-user? [auth user]
   (= (auth-id auth) (-> user :company :id)))
+
+(defn- auth-is-invite? [auth]
+  (boolean (:invite auth)))
 
 (defn- auth-role [auth-entry]
   (or (keyword (-> auth-entry :invite :role))
@@ -55,7 +58,7 @@
 (defn non-copyable-auth? [auth user]
   (or (contains? non-copyable-roles (auth-role auth))
       (auth-is-user? auth user)
-      (auth-is-company-of-user auth user)))
+      (auth-is-company-of-user? auth user)))
 
 (defn not-in-auth [auth]
   (let [auth-id-set (set (map auth-id auth))]
@@ -151,8 +154,11 @@
                (not-in-auth? (id-from-personal-information element))))
       (building-selector-element? element)))
 
-(defn- clear-user-and-company-ids [element]
-  (if (map? element)
+(defn- clear-user-and-company-ids [element auth]
+  (if (and (map? element)
+           (auth-is-invite? (find-first #(= (:id %)
+                                            (id-from-personal-information element))
+                                        auth)))
     (cond (contains? element :userId)    (assoc-in element [:userId :value] "")
           (contains? element :companyId) (assoc-in element [:companyId :value] "")
           :else element)
@@ -173,7 +179,7 @@
                   ; clear user and company id's in any case because
                   ; document is invalid if an unauthorized id is found, and
                   ; invites are not considered authorizations
-                  (clear-user-and-company-ids v)))
+                  (clear-user-and-company-ids v (:auth application))))
               document)))
 
 (defn- construction-waste-plan? [doc]
@@ -278,7 +284,7 @@
   (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
 
-(defn- create-company-auth [old-company-auth]
+(defn create-company-auth [old-company-auth]
   (when-let [company-id (auth-id old-company-auth)]
     (when-let [company (company/find-company-by-id company-id)]
       (assoc
@@ -293,7 +299,9 @@
                              (:role old-user-auth)
                              timestamp)))
 
-(defn- new-auth [old-auth inviter application-id timestamp]
+(defn auth->invite
+  "Create an invite from existing auth entry."
+  [old-auth inviter application-id timestamp]
   (if (= (:type old-auth) "company")
     (create-company-auth old-auth)
     (create-user-auth old-auth inviter application-id timestamp )))
@@ -309,7 +317,7 @@
                       (map #(if (= (keyword (:role %)) :owner)
                               (assoc % :role :writer)
                               %))
-                      (mapv #(new-auth % inviter id created))))})
+                      (mapv #(auth->invite % inviter id created))))})
 
 
 (def default-copy-options

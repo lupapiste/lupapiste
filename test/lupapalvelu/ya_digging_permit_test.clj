@@ -1,9 +1,11 @@
 (ns lupapalvelu.ya-digging-permit-test
   (:require [lupapalvelu.ya-digging-permit :refer :all]
             [midje.sweet :refer :all]
+
             [lupapalvelu.application :as app]
             [lupapalvelu.mock.organization :as mock-org]
-            [lupapalvelu.mock.user :as mock-usr]))
+            [lupapalvelu.mock.user :as mock-usr]
+            [lupapalvelu.user :as usr]))
 
 (fact "digging-permit-can-be-created?"
   (digging-permit-can-be-created? {:permitType "not YA"}) => false
@@ -27,7 +29,8 @@
 
 (facts "new-digging-permit"
   (mock-org/with-all-mocked-orgs
-    (with-redefs [app/make-application-id (constantly "LP-123")]
+    (with-redefs [app/make-application-id (constantly "LP-123")
+                  usr/get-user-by-id mock-usr/users-by-id]
       (let [invalid-source-application (app/do-create-application {:data {:operation "kerrostalo-rivitalo"
                                                                           :x 0 :y 0
                                                                           :address "Latokuja 1"

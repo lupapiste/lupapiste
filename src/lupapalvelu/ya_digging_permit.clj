@@ -63,16 +63,18 @@
             (doc-tools/doc-name sijoitus-document))]}
 
   ;; Find id from sijoitus document since ids cannot be copied to digging document
-  (when-let [invited-id (doc-tools/party-doc-user-id sijoitus-document)]
+  (when-let [invited-id (doc-tools/party-doc-selected-id sijoitus-document)]
     (when-let [invited-auth-entry (util/find-first #(= (copy-app/auth-id %)
                                                        invited-id)
                                                    sijoitus-auth)]
       ;; Copy user information from auth instead of from db to be
       ;; consistent between sijoitus and digging permits
-      (auth/create-invite-auth inviter (auth->user-summary invited-auth-entry)
-                               app-id :writer timestamp nil
-                               (-> digging-document :schema-info :name)
-                               (:id digging-document)))))
+      (if (= (:type invited-auth-entry) "company")
+        (copy-app/create-company-auth invited-auth-entry)
+        (auth/create-invite-auth inviter (auth->user-summary invited-auth-entry)
+                                 app-id :writer timestamp nil
+                                 (-> digging-document :schema-info :name)
+                                 (:id digging-document))))))
 
 (defn- add-applicant-and-payer-auth [digging-app sijoitus-app user timestamp]
   (let [digging-documents (:documents digging-app)
@@ -100,15 +102,20 @@
                                  copy-app/auth-id)
                            invites))))
 
-(defn- copy-document [doc-name sijoitus-app digging-app organization]
+(defn- copy-document [doc-name sijoitus-app digging-app user organization timestamp]
   (-> (domain/get-document-by-name sijoitus-app doc-name)
       ;; Use auth from sijoitus application since the required auth
       ;; entry is not yet added to digging application
       (copy-app/preprocess-document (assoc digging-app :auth
-                                           (:auth sijoitus-app))
+                                           (concat [(first (:auth digging-app))]
+                                                   (map #(copy-app/auth->invite %
+                                                                                user
+                                                                                (:id digging-app)
+                                                                                timestamp)
+                                                        (:auth sijoitus-app))))
                                     organization nil)))
 
-(defn- copy-applicant-and-payer-documents [digging-app sijoitus-app organization]
+(defn- copy-applicant-and-payer-documents [digging-app sijoitus-app user organization timestamp]
   (update digging-app :documents
           (partial map (fn [document]
                          (if (contains? (set copied-document-names)
@@ -116,7 +123,9 @@
                            (copy-document (doc-tools/doc-name document)
                                           sijoitus-app
                                           digging-app
-                                          organization)
+                                          user
+                                          organization
+                                          timestamp)
                            document)))))
 
 (defn- copy-applicant-and-payer-information
@@ -125,7 +134,7 @@
   information. Add invites to parties in said documents."
   [digging-app sijoitus-app organization user timestamp]
   (-> digging-app
-      (copy-applicant-and-payer-documents sijoitus-app organization)
+      (copy-applicant-and-payer-documents sijoitus-app user organization timestamp)
       (add-applicant-and-payer-auth sijoitus-app user timestamp)))
 
 (defn new-digging-permit

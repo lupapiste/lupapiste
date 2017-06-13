@@ -79,13 +79,13 @@
             source-app  (query-application pena (:id source-app))]
 
         (fact "applicant and payer documents are copied"
-         (-> (domain/get-document-by-name digging-app "hakija-ya") :data)
-         => (-> (domain/get-document-by-name source-app "hakija-ya") :data
-                (assoc-in [:henkilo :userId :value] ""))
+          ;; Pena's id is present since he is the one creating the application
+          (-> (domain/get-document-by-name digging-app "hakija-ya") :data)
+          => (-> (domain/get-document-by-name source-app "hakija-ya") :data)
 
-         (-> (domain/get-document-by-name digging-app "yleiset-alueet-maksaja") :data)
-         => (-> (domain/get-document-by-name source-app "yleiset-alueet-maksaja") :data
-                (assoc-in [:henkilo :userId :value] "")))
+          (-> (domain/get-document-by-name digging-app "yleiset-alueet-maksaja") :data)
+          => (-> (domain/get-document-by-name source-app "yleiset-alueet-maksaja") :data
+                 (assoc-in [:henkilo :userId :value] "")))
 
         (fact "applicant and payer parties are invited"
           (count (:auth digging-app)) => 2
