@@ -357,7 +357,6 @@
 
 (defn generate-task-pdfa [application task user lang]
   (assert (map? application))
-  (println "GENERATING TASK PDFA" (:id application) task)
   (when (task-is-review? task)
     (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
