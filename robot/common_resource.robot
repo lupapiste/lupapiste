@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        Selenium2Library   timeout=12  run_on_failure=Nothing
+Library        CustomSelenium2Library.py  timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 Library        DebugLibrary
@@ -47,7 +47,7 @@ Browser
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there
-  Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
+  Open custom browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
   Set DB cookie
 
 Reload page and kill dev-box
@@ -151,6 +151,47 @@ Language Is
   [Arguments]  ${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
 
+#
+# Accordions
+#
+
+Current page id
+  ${page_xpath}=  Set Variable  //section[contains(@class, 'visible')]
+  Xpath should match X times  ${page_xpath}  1
+  ${page_id}=  Get Element Attribute  ${page_xpath}@id
+  [return]  ${page_id}
+
+Current tab id
+  ${current_page_id}=  Current page id
+  ${tab_xpath}=  Set Variable  //section[@id='${current_page_id}']//div[contains(@class, 'tab-content')][contains(@style, 'display: block')]
+  Xpath should match X times  ${tab_xpath}  1
+  ${current_tab_id}=  Get Element Attribute  ${tab_xpath}@id
+  [return]  ${current_tab_id}
+
+Visible accordions Xpath
+  ${tab_id}=  Current tab id
+  ${visible_accordions_xpath}=  Set Variable  //div[@id='${tab_id}']//section[contains(@class,'accordion')]
+  ${count}=  Get Matching Xpath Count  ${visible_accordions_xpath}
+  Should Be True  0 < ${count}
+  [return]  ${visible_accordions_xpath}
+
+Visible accordion count
+  ${path}=  Visible accordions Xpath
+  ${count}=  Get Matching Xpath Count  ${path}
+  [return]  ${count}
+
+All visible accordions should be
+  [Arguments]  ${state}
+  ${path}=  Visible accordions Xpath
+  ${visible_count}=  Visible accordion count
+  ${matching_accordions_path}=  Set Variable  ${path}//div[@data-accordion-state='${state}']
+  Xpath Should Match X Times  ${matching_accordions_path}  ${visible_count}
+
+All visible accordions should be open
+  All visible accordions should be  open
+
+All visible accordions should be closed
+  All visible accordions should be  closed
 
 #
 # Navigation
@@ -165,7 +206,7 @@ Go to page
 Open tab
   [Arguments]  ${name}
   ${is-visible}=  Run Keyword and Return Status  Element should be visible  application-${name}-tab
-  Run keyword unless  ${is-visible}  Run keywords  Click by test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
+  Run keyword unless  ${is-visible}  Run keywords  Scroll and click test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
 
 Tab should be visible
   [Arguments]  ${name}
@@ -441,8 +482,7 @@ Quote
   ${s}=  Convert to string  ${s}
   ${s}=  Strip string  ${s}
   ${s}=  Replace String  ${s}  "  '  # " Fix highlight
-
-  ${quoted}=  Execute Javascript  return sprintf( '"%s"', _.unquote( "${s}", "'") )
+  ${quoted}=  Execute Javascript  return '"' + (("${s}".charAt(0) === "'" && "${s}".charAt("${s}".length-1) === "'") ? "${s}".substr(1, "${s}".length-2) : "${s}") + '"';
   [Return]  ${quoted}
 
 Input text with jQuery
@@ -479,7 +519,7 @@ Select From Autocomplete
   Wait until  Element should be visible  jquery=${container} span.autocomplete-selection
 
   ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
-  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} span.autocomplete-selection
+  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} div.autocomplete-selection-wrapper
 
   Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
@@ -558,8 +598,8 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   Element should be visible by test id  ${id}
-  Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
-  Click by test id  ${id}
+  Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id="${id}"]
+  Scroll and click test id  ${id}
 
 # Workaround for HTML5 inputs
 Value should be
@@ -821,7 +861,9 @@ Add attachment
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
 Return to application
-  Wait Until  Click by test id  back-to-application-from-attachment
+  # The button might be behind a save indicator, so wait for it to clear
+  Sleep  2s
+  Wait Until  Scroll and click test id  back-to-application-from-attachment
 
 Delete attachment
   [Arguments]  ${type}
@@ -892,6 +934,7 @@ Select operation path by permit type
   ...  ELSE IF  '${permitType}' == 'YA-kayttolupa'  Select operations path YA kayttolupa
   ...  ELSE IF  '${permitType}' == 'YA-kayttolupa-mainostus-viitoitus'  Select operations path YA kayttolupa mainostus-viitoitus
   ...  ELSE IF  '${permitType}' == 'YA-sijoituslupa'  Select operations path YA sijoituslupa
+  ...  ELSE IF  '${permitType}' == 'YA-sijoituslupa-tyolupa'  Select operations path YA sijoituslupa-tyolupa
   ...  ELSE  Select operations path R
 
 Select operations path R
@@ -925,6 +968,12 @@ Select operations path YA sijoituslupa
   Click tree item by text  "Rakenteiden sijoittaminen yleiselle alueelle (Sijoittamissopimus)"
   Click tree item by text  "Pysyvien maanalaisten rakenteiden sijoittaminen"
   Click tree item by text  "Vesi- ja viemärijohtojen sijoittaminen"
+
+Select operations path YA sijoituslupa-tyolupa
+  Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
+  Click tree item by text  "Työskentely yleisellä alueella (Katulupa)"
+  Click tree item by text  "Liikennealueen rajaaminen työkäyttöön"
+  Click tree item by text  "Nostotyöt"
 
 Click tree item by text
   [Arguments]  ${itemName}
@@ -1044,7 +1093,7 @@ Confirm notification dialog
 Open the request
   [Arguments]  ${address}  ${tab}=all
   Go to page  applications
-  Click by test id  search-tab-${tab}
+  Run Keyword And Ignore Error  Click by test id  search-tab-${tab}
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
   Wait for jQuery
 
@@ -1087,11 +1136,11 @@ Active search tab is
 Open search tab
   [Arguments]  ${tab}
   Wait until  Element should be visible  xpath=//section[@id='applications']//li[@data-test-id='search-tab-${tab}']
-  Click by test id  search-tab-${tab}
+  Run Keyword And Ignore Error  Scroll and click test id  search-tab-${tab}
 
 Show all applications
   ${tab}=  Run Keyword and Return Status  Wait test id visible  search-tab-all
-  Run Keyword If  ${tab}  Scroll and click test id  search-tab-all
+  Run Keyword If  ${tab}  Run Keyword And Ignore Error  Scroll and click test id  search-tab-all
 
 
 #
@@ -1322,7 +1371,7 @@ Go to give new verdict
   Wait Until  Element Should Be Enabled  backend-id
 
 Input verdict
-  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
+  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}  ${agreement}=True
   ## Disable date picker
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text  backend-id  ${backend-id}
@@ -1330,7 +1379,7 @@ Input verdict
   Input text  verdict-given  ${verdict-given-date}
   Input text  verdict-official  ${verdict-official-date}
   Input text  verdict-name  ${verdict-giver-name}
-  Select Checkbox  verdict-agreement
+  Run keyword if  ${agreement}  Select Checkbox  verdict-agreement
   ## Trigger change manually
   Execute JavaScript  $("#backend-id").change();
   Execute JavaScript  $("#verdict-type-select").change();
@@ -1343,6 +1392,7 @@ Submit empty verdict
   Go to give new verdict
   Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
+  Sleep  1s
   Confirm  dynamic-yes-no-confirm-dialog
   Wait for jQuery
   Wait until  Application state should be  ${targetState}
@@ -1463,9 +1513,9 @@ Clear mocks
 # -------------------------------
 
 Scroll to
-  [Arguments]  ${selector}
+  [Arguments]  ${selector}  ${index}=0
   ${q}=  Quote  ${selector}
-  Wait Until  Execute Javascript  $(${q})[0].scrollIntoView(false);
+  Wait Until  Execute Javascript  $(${q})[${index}].scrollIntoView(false);
 
 Scroll to top
   Execute javascript  window.scrollTo(0,0)
@@ -1481,6 +1531,12 @@ Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]
 
+Scroll to xpath
+  [Arguments]  ${xpath}
+  ${q}=  Quote  ${xpath}
+  ${xfn}=  Set Variable  document.evaluate(${q}, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+  Execute javascript  var result = ${xfn}; var node = result.iterateNext(); if (node) node.scrollIntoView(false);
+
 Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
@@ -1494,13 +1550,22 @@ Scroll and click input
 
 Scroll and click test id
   [Arguments]  ${id}
-  Scroll to  [data-test-id=${id}]
+  Sleep  1s
+  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
+  Scroll to  [data-test-id="${id}"]
   Click by test id  ${id}
+
+Scroll to and click xpath results
+  [Arguments]  ${xpath}
+  Sleep  2s
+  ${xfn}=  Set Variable  document.evaluate("${xpath}", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
+  Execute javascript  var result = ${xfn}; var node = result.iterateNext(); while (node) { node.scrollIntoView(false); node.click(); try {node = result.iterateNext();} catch(e){node = null;}}
 
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
+  ${q}=  Quote  ${id}
+  Wait Until  Element should be visible  xpath=//*[@data-test-id=${q}]
 
 Wait test id hidden
   [Arguments]  ${id}
@@ -1573,11 +1638,13 @@ Click label by test id
 
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
-  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
+  Wait until  Element should be visible  xpath=//label[@data-test-id='${data-test-id}-label']
+  Wait until  Checkbox should be selected  xpath=//input[@data-test-id='${data-test-id}-input']
 
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
-  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
+  Wait until  Element should be visible  xpath=//label[@data-test-id='${data-test-id}-label']
+  Wait until  Checkbox should not be selected  xpath=//input[@data-test-id='${data-test-id}-input']
 
 Checkbox wrapper selected
   [Arguments]  ${id}
@@ -1593,14 +1660,15 @@ Checkbox wrapper disabled
 
 Toggle selected
   [Arguments]  ${tid}
-  Checkbox wrapper selected by test id  ${tid}-input
+  Checkbox wrapper selected by test id  ${tid}
 
 Toggle not selected
   [Arguments]  ${tid}
-  Checkbox wrapper not selected by test id  ${tid}-input
+  Checkbox wrapper not selected by test id  ${tid}
 
 Toggle toggle
   [Arguments]  ${tid}
+  Wait until  Element should be visible  xpath=//label[@data-test-id='${tid}-label']
   Click label by test id  ${tid}-label
 
 Select from test id

@@ -8,10 +8,14 @@ Suite Teardown  Logout
 
 *** Test Cases ***
 
-Kaino creates and submits application
+Kaino creates application
   Kaino logs in
   Create application the fast way  source-application  753-416-25-30  kerrostalo-rivitalo
+
+Kaino invites Mikko to the application
   Invite mikko@example.com to application
+
+Kaino submits application
   Submit application
 
 Kaino starts copying the application
@@ -26,10 +30,11 @@ Kaino enters the address for the copied application
   Wait until  Element should be visible by test id  copy-selected-location
   Element text should be  //section[@id='copy']//span[@data-test-id='copy-selected-location-text']  753-416-25-28, Latokuja 10, Sipoo
 
+Solita Oy is not listed in the invite candidates
+  Xpath Should Match X Times  //section[@id='copy']//div[@id='copy-auths']//input  1
+  Element text should be  //section[@id='copy']//div[@id='copy-auths']/div[1]//label  Mikko Intonen, Kirjoitusoikeus
+
 Kaino does not invite Mikko to the copied application
-  Xpath Should Match X Times  //section[@id='copy']//div[@id='copy-auths']//input  2
-  Element text should be  //section[@id='copy']//div[@id='copy-auths']/div[1]/label  Solita Oy, Kirjoitusoikeus
-  Element text should be  //section[@id='copy']//div[@id='copy-auths']/div[2]//label  Mikko Intonen, Kirjoitusoikeus
   Click by test id  copy-button-next
   Wait until  Xpath Should Match X Times  //section[@id='copy']//div[@id='copy-auths']/div  0
 

@@ -40,7 +40,10 @@
       <a data-bind="attr: {href: '#!/application/' + $data.id}">
         <span class="foreman-application" data-bind="text: $data.id"></span>
       </a>
-      <span class="foreman-state" data-bind="ltext: $data.state"></span>
+      <span class="foreman-state">
+        <span data-bind="ltext: $data.state"></span>
+        <i data-bind="if: $data.verdictStatus"><span class="foreman-verdict-status" data-bind="ltext: 'verdict.status.' + $data.verdictStatus"></span></i>
+      </span>
     </li>
   </ul>
 </script>
@@ -73,6 +76,10 @@
                 <div class="like-btn">
                   <i class="lupicon-circle-star"></i>
                   <span data-bind="ltext: 'foreman.task.new.title'"></span>
+                </div>
+                <div class="like-btn">
+                  <i class="lupicon-circle-minus"></i>
+                  <span data-bind="ltext: 'foreman.task.rejected.title'"></span>
                 </div>
                 <div class="like-btn">
                   <i class="lupicon-circle-attention"></i>

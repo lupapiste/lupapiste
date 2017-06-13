@@ -75,9 +75,11 @@ Can not add the same user again
   Click enabled by test id  company-search-email
   Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-in'"]
   Click enabled by test id  company-add-user-already-in-close
+  Wait until  Element should not be visible  dialog-company-new-user
 
 Delete Duff3
-  Click by test id  company-user-delete-0
+  Element should be visible by test id  company-user-delete-0
+  Click element  xpath=//section[@id='company']//a[@data-test-id="company-user-delete-0"]
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Page should not contain  dummy3@example.com
 

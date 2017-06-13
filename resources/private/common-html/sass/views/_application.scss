@@ -279,7 +279,7 @@ $preamble-min-height: 280px; // at least the size of the map container
             @include active-state;
           }
           @include hide-pre-verdict-states;
-          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box, .final-box {
+          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box, .final-box, .finished-box {
             display: inline-block;
           }
         }
@@ -522,6 +522,7 @@ $preamble-min-height: 280px; // at least the size of the map container
   i.lupicon-lock {
     color: $primary;
   }
+  i.lupicon-circle-minus,
   i.lupicon-circle-attention {
     color: $negative
   }
@@ -904,7 +905,6 @@ $preamble-min-height: 280px; // at least the size of the map container
   .foreman {
     display: table-row;
     span {
-      display: table-cell;
       padding-right: $marginS;
     }
   }
@@ -1001,6 +1001,9 @@ h2 > i.is-right {
 
 div.review-tasks {
   margin-top: 20px;
+  .faulty {
+    text-decoration: line-through;
+  }
 }
 
 

@@ -99,10 +99,25 @@ div.search {
 .application-search-component {
   input[type=text].hasDatepicker {
     min-width: 100px;
-    width: 30%;
     display: inline;
     margin-top: 0px;
     margin-right: 0px;
+    width: initial;
+    vertical-align: top;
+    border-right: none;
+  }
+
+  field-reset-button {
+    button.function {
+      border: 1px solid $input-border-color;
+      border-left: none;
+    }
+  }
+
+  input:focus + field-reset-button {
+    button.function {
+      border-color: $input-focus-border-color;
+    }
   }
 }
 

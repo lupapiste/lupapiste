@@ -2,11 +2,11 @@
    (:require [midje.sweet :refer :all]
              [midje.util :refer [testable-privates]]
              [clojure.data :refer [diff]]
-             [lupapalvelu.verdict :refer :all]
+             [lupapalvelu.review :refer :all]
              [lupapalvelu.tasks :as tasks]
              [sade.util :as util]))
 
-(testable-privates lupapalvelu.verdict merge-review-tasks)
+(testable-privates lupapalvelu.review merge-review-tasks)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
                                                     :rakennusnro "001",

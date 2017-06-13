@@ -45,7 +45,7 @@ Copy own attachments button is not shown to non-architect
   Wait for Page to Load  Mikko  Intonen
   Wait until  Click Label  architect
   Save User Data
-  Click by test id  back-button
+  Scroll and click test id  back-button
   Wait until  Page should contain element  jquery=label[data-test-id=add-attachments-label]
   Wait until  Element should not be visible  jquery=button[data-test-id=copy-user-attachments]
 
@@ -76,7 +76,7 @@ Mikko can't copy own attachments yet
 Mikko sets himself architect
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
-  Wait until  Click Element  architect
+  Wait until  Scroll and click test id  architect-label
   Save User Data
 
 Mikko returns to application
@@ -112,6 +112,8 @@ Mikko can add his attachments in post verdict state
 Save User Data
   Click enabled by test id  save-my-userinfo
   Positive indicator should be visible
+  # Wait for indicator to clear to prevent misclicks
+  Sleep  2s
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}

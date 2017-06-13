@@ -36,6 +36,7 @@ Rollup neutral
 
 Approve row
   [Arguments]  ${row}
+  Wait until  Element should be visible  jquery=${row} button.approve
   Scroll and click  ${row} button.approve
   Wait until  Element should be visible  jquery=${row} i[data-test-icon='approved-icon']
 
@@ -56,9 +57,9 @@ Delete attachment version
   Wait until  Element should not be visible  show-attachment-versions
 
 Unselect post verdict filter
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper selected by test id  postVerdict-filter
   Scroll and click test id  postVerdict-filter-label
-  Wait until  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
+  Wait until  Checkbox wrapper not selected by test id  postVerdict-filter
 
 Total attachments row count is
   [Arguments]  ${count}

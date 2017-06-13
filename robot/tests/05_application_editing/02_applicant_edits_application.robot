@@ -182,7 +182,7 @@ Mikko toggles applicant to company, company's name is updated to accordion
 Mikko changes application address
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
-  Click by test id  change-location-link
+  Scroll and click test id  change-location-link
   Input text by test id  application-new-address  ${newName}
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}

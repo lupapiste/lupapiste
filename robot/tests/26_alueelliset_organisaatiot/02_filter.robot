@@ -22,7 +22,7 @@ Sonja logs in and creates an application
 Sonja opens search page
   Go to page  applications
   Show all applications
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Handler filter should contain text  ${all handlers}
   Filter item should contain X number of tags  areas  0
@@ -57,12 +57,12 @@ Sonja selects application sorting
   Save advanced filter  MEGA
 
 ...sets MEGA as default
-  Click by test id  set-MEGA-as-default-filter
+  Scroll and click test id  set-MEGA-as-default-filter
 
 Sonja reloads the page and expects that saved filter is applied as default
   Reload page and kill dev-box
   Show all applications
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
 
 ...filter setup should be shown as default
@@ -91,8 +91,8 @@ Sonja removes all but operations filter
   Sorting Should Be Set As Ascending  Tyyppi
 
 Sonja closes and opens advanced filters
-  Click by test id  toggle-advanced-filters
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Handler filter should contain text  ${all handlers}
   Filter item should contain X number of tags  areas  0
@@ -133,7 +133,7 @@ Sonja saves sort-by-location filter
   Wait Until  Element Should Be Visible  //div[@data-test-id="saved-filter-row-MEGA"]
 
 Sonja sets sort-by-location filter as default
-  Wait Until  Click by test id  set-sort-by-location-as-default-filter
+  Wait Until  Scroll and click test id  set-sort-by-location-as-default-filter
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
 Sonja closes saved filters
@@ -149,7 +149,7 @@ Default filter should be sort-by-location filter
   Wait Until  Element should Not be visible  xpath=//div[@data-test-id="advanced-filters"]
 
 ...filters and sorting are set
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Handler filter should contain text  ${all handlers}
   Filter item should contain X number of tags  areas  0

@@ -7,7 +7,7 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Olli-ya prepares the application
-  Olli-ya logs in
+  Olli-ya logs in  False
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Warranty_app_${secs}
   Create application the fast way   ${appname}  564-423-2-162  ya-katulupa-vesi-ja-viemarityot

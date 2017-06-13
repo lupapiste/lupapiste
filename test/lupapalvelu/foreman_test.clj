@@ -5,13 +5,15 @@
             [lupapalvelu.foreman :as f]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.data-schema :as dds]
+            [sade.core :refer [now]]
             [sade.schema-generators :as ssg]))
 
 (testable-privates lupapalvelu.foreman
                    validate-notice-or-application
                    validate-notice-submittable
                    henkilo-invite
-                   yritys-invite)
+                   yritys-invite
+                   select-latest-verdict-status)
 
 (def foreman-app {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
                   :permitSubtype "tyonjohtaja-ilmoitus"
@@ -110,3 +112,42 @@
     (fact "other user ok" (f/allow-foreman-only-in-foreman-app (assoc fm-command :user {:id "2"})) => nil)
     (fact "no access to other kind of application"
       (f/allow-foreman-only-in-foreman-app non-fm-command) => unauthorized?)))
+
+(facts select-latest-verdict-status
+  (fact "one verdict with status"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :status "some status"}]}]}]}) => "some status")
+
+  (fact "one verdict with paatoskoodi"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :paatoskoodi "some koodi"}]}]}]}) => "some koodi")
+
+  (fact "one verdict with status and paatoskoodi - prefer status"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :status "some status" :paatoskoodi "some koodi"}]}]}]}) => "some status")
+
+  (fact "one verdict without poytakirja"
+    (select-latest-verdict-status {:verdicts [{:paatokset []}]}) => nil)
+
+  (fact "one verdict with empty poytakirja"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{}]}]}]}) => nil)
+
+  (fact "one verdict with multiple paatoskoodi"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :paatoskoodi "oldest koodi"}
+                                                                          {:paatospvm 3 :paatoskoodi "some other koodi"}
+                                                                          {:paatospvm 4 :paatoskoodi "newest koodi"}
+                                                                          {:paatospvm 2 :paatoskoodi "some koodi"}]}]}]}) => "newest koodi")
+
+  (fact "one verdict with multiple paatos"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :paatoskoodi "oldest koodi"}]}
+                                                           {:poytakirjat [{:paatospvm 3 :paatoskoodi "some other koodi"}
+                                                                          {:paatospvm 4 :paatoskoodi "newest koodi"}]}
+                                                           {:poytakirjat [{:paatospvm 2 :paatoskoodi "some koodi"}]}]}]}) => "newest koodi")
+
+  (fact "one verdict with multiple verdicts"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1 :paatoskoodi "oldest koodi"}]}]}
+                                              {:paatokset [{:poytakirjat [{:paatospvm 3 :paatoskoodi "some other koodi"}
+                                                                          {:paatospvm 4 :paatoskoodi "newest koodi"}]}
+                                                           {:poytakirjat [{:paatospvm 2 :paatoskoodi "some koodi"}]}]}]}) => "newest koodi")
+
+  (fact "one verdict with future paatoskoodi"
+    (select-latest-verdict-status {:verdicts [{:paatokset [{:poytakirjat [{:paatospvm (- (now) 9999) :paatoskoodi "oldest koodi"}
+                                                                          {:paatospvm (- (now) 999)  :paatoskoodi "newest effective koodi"}
+                                                                          {:paatospvm (+ (now) 9999) :paatoskoodi "future koodi"}]}]}]}) => "newest effective koodi"))

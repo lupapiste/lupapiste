@@ -203,6 +203,14 @@
 (defn authority? [{role :role}]
   (contains? #{:authority :oirAuthority} (keyword role)))
 
+(defn validate-authority
+  "Validator: current user must be an authority. To be used in commands'
+   :pre-check vectors."
+  [command]
+  (if (authority? (:user command))
+    nil
+    (fail :error.unauthorized :desc "user is not an authority")))
+
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
 

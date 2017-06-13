@@ -270,7 +270,10 @@
                        :closed                (ts->iso-8601-date closed)
                        :drawing-wgs84         (seq (map :geometry-wgs84 drawings))
                        :ramLink               (:ramLink attachment)
-                       :projectDescription    (:_projectDescriptionIndex application)}]
+                       :projectDescription    (:_projectDescriptionIndex application)
+                       ; case-file metadata does not include these, but archival schema requires them
+                       :myyntipalvelu         false
+                       :nakyvyys              :julkinen}]
     (-> base-metadata
         su/remove-blank-keys
         (merge s2-metadata))))
@@ -343,7 +346,7 @@
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]
-  {:pre [(contains? (ssu/keys archived-ts-keys-schema) archived-ts-key)]}
+  {:pre [(contains? (set (ssu/keys archived-ts-keys-schema)) archived-ts-key)]}
   (action/update-application
     (action/application->command application)
     {$set {(str "archived." (name archived-ts-key)) now}}))

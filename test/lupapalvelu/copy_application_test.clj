@@ -19,6 +19,7 @@
             [sade.util :as util]))
 
 (testable-privates lupapalvelu.copy-application
+                   handle-copy-action
                    handle-special-cases
                    clear-personal-information
                    check-valid-source-application)
@@ -46,7 +47,10 @@
 (when (env/feature? :copy-applications)
  (with-redefs [coord/convert (fn [_ _ _ coords] (str "converted " coords))
                usr/get-user-by-id (fn [id] (get users id))
-               lupapalvelu.copy-application/empty-document-copy (fn [document _ & _] document)]
+               lupapalvelu.copy-application/empty-document-copy
+               (fn [document _ & _]
+                 document)]
+
    (let [source-user (get users "source-user")
          user        (get users "copying-user")
          source-created 12345
@@ -68,7 +72,8 @@
                                                                          [{:type (ssg/generate attachment/Type)}
                                                                           {:type (ssg/generate attachment/Type)}]
                                                                          nil false true true))
-                        (update :documents conj {:id "extra-document"}))]
+                        (update :documents conj {:id "extra-document"
+                                                 :schema-info {:name "lisatiedot"}}))]
      (facts new-application-copy
        (facts "No options specified"
          (let [new-app (new-application-copy source-app user organization created {})
@@ -168,6 +173,24 @@
                                  nil)
            :schema-info :name)
        => waste-schemas/basic-construction-waste-plan-name))
+
+   (facts "handle-copy-action"
+     (with-redefs [lupapalvelu.copy-application/empty-document-copy
+                   (fn [document _ & _]
+                     {:cleared? true})]
+       (let [application {:created 12345
+                          :schema-version 1
+                          :primaryOperation {:name "kerrostalo-rivitalo"}}
+             hakija-document {:schema-info {:name "hakija-r"}
+                              :data (tools/create-document-data (schemas/get-schema 1 "hakija-r"))}
+             pt-document {:schema-info {:name "paatoksen-toimitus-rakval"}
+                          :data (tools/create-document-data (schemas/get-schema 1 "hakija-r"))}]
+         (fact "documents with :copy-action defined as :clear in their schema are cleared"
+           (-> (handle-copy-action pt-document application {} {}) :cleared?)
+           => true)
+
+         (fact "documents with no specified :copy-action are copied as such"
+           (handle-copy-action hakija-document application {} {}) => hakija-document))))
 
    (facts "clear-personal-information"
      (let [application {:created 12345

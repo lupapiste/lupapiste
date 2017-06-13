@@ -53,13 +53,19 @@
         (query kaino :copy-application-invite-candidates :source-application-id app-id) => ok?
         (query sonja :copy-application-invite-candidates :source-application-id app-id) => ok?)
 
-      (fact "Pena, Mikko and Solita are candidates"
+      (fact "For Sonja, invite candidates are Pena, Mikko and Solita"
         (:candidates (query sonja :copy-application-invite-candidates :source-application-id app-id))
         => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
                   (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")
                   (assoc {:firstName (:name solita-company)
                           :lastName ""
                           :id (:_id solita-company)} :email nil :role "writer" :roleSource "auth")]
+                 :in-any-order))
+
+      (fact "For Kaino, invite candidates are Pena and Mikko, but not Solita (automatically invited)"
+        (:candidates (query kaino :copy-application-invite-candidates :source-application-id app-id))
+        => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
+                  (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")]
                  :in-any-order))))
 
   (facts "copying application"

@@ -171,6 +171,7 @@
                         (when-not (contains? muni/municipality-codes municipality)
                           (fail :error.invalid-municipality)))]
    :user-roles #{:admin}}
+  [_]
   (org/update-organization
    organization
    {$push {:scope

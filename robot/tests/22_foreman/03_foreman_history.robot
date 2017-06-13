@@ -12,7 +12,7 @@ Sonja invites foreman and goes back to application
 
 *** Test Cases ***
 Sonja creates applications
-  Sonja logs in
+  Sonja logs in  False
   Create project application  submitted
 
   Repeat Keyword  5  Sonja invites foreman and goes back to application
@@ -43,7 +43,7 @@ Foreman continues filling his info
 Foreman history is not visible to applicant
   Page Should Not Contain Element  xpath=//foreman-history
   Page Should Not Contain Element  jquery=foreman-history div.foreman-history-container
-  [Teardown]  logout
+  Logout
 
 Switch to authority
   Sonja logs in
@@ -81,7 +81,7 @@ Foreman submits applications
   Foreman submit application  1
   Foreman submit application  2
   Foreman submit application  3
-  [Teardown]  Logout
+  Logout
 
 Sonja gives verdicts to foreman applications
   Sonja logs in
@@ -99,7 +99,7 @@ Authority sees reduced foreman history
   Wait test id visible  tyonjohtaja-historia-otsikko
 
 Sonja toggles show all of the history
-  Toggle not selected  foreman-history-show-all-input
+  Toggle not selected  foreman-history-show-all
   Toggle toggle  foreman-history-show-all
   Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
   Wait until  Foreman history should have text X times  Sipoo  4
@@ -113,4 +113,7 @@ There is no reduced history for this application
   Wait test id visible  tyonjohtaja-historia-otsikko-kaikki
   Wait until  Foreman history should have text X times  Sipoo  3
   No such test id  foreman-history-show-all-label
-  [Teardown]  Logout
+
+Frontend errors check
+  There are no frontend errors
+

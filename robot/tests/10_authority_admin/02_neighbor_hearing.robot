@@ -16,11 +16,12 @@ Mikko asks municipality to hear neighbors
   Mikko logs in
   Create application the fast way  Naapurikatu  753-1-1-2  teollisuusrakennus
   Open tab  requiredFieldSummary
-  Select Checkbox  optionMunicipalityHearsNeighbors
+  Toggle toggle  optionMunicipalityHearsNeighbors
   Positive indicator should be visible
   Submit application
 
 Kirjaamo got email
+  Sleep  1s
   Open last email
   Wait Until  Page Should Contain  ${email}
 

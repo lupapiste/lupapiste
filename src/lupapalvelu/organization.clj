@@ -79,8 +79,11 @@
    (sc/optional-key :handlerRole) HandlerRole
    :description sc/Str})
 
+(sc/defschema OrgId
+  (sc/pred string?))
+
 (sc/defschema Organization
-  {:id sc/Str
+  {:id OrgId
    :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
@@ -138,6 +141,9 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]})
+
+(sc/defschema SimpleOrg
+  (select-keys Organization [:id :name :scope]))
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -646,12 +652,12 @@
 (defn get-duplicate-scopes [municipality permit-types]
   (not-empty (mongo/select :organizations {:scope {$elemMatch {:permitType {$in permit-types} :municipality municipality}}} [:scope])))
 
-(defn new-scope [municipality permit-type & {:keys [inforequest-enabled application-enabled open-inforequest-enabled open-inforequest-email opening]}]
+(defn new-scope [municipality permit-type & {:keys [inforequest-enabled new-application-enabled open-inforequest open-inforequest-email opening]}]
   (util/assoc-when scope-skeleton
                    :municipality            municipality
                    :permitType              permit-type
                    :inforequest-enabled     inforequest-enabled
-                   :new-application-enabled application-enabled
-                   :open-inforequest        open-inforequest-enabled
+                   :new-application-enabled new-application-enabled
+                   :open-inforequest        open-inforequest
                    :open-inforequest-email  open-inforequest-email
                    :opening                 (when (number? opening) opening)))

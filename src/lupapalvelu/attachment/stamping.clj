@@ -61,14 +61,24 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
-(defn update-buildings [lang {:keys [buildings fields] :as info-fields}]
-  (if (seq buildings)
-    (->> buildings
-         (map (partial building->str lang))
-         sort
-         first
-         (stamps/assoc-tag-by-type fields :building-id))
-    fields))
+(defn update-buildings [lang {:keys [buildings fields]}]
+  (let [building-strs (->> buildings (map (partial building->str lang)) sort)]
+    (reduce (fn [result row]
+              (if (some #(= :building-id (keyword (:type %))) row)
+                (concat
+                  result
+                  ; First building id is set normally in the building-id tag
+                  [(mapv (fn [field]
+                           (if (= :building-id (keyword (:type field)))
+                             (assoc field :value (first building-strs))
+                             field))
+                         row)]
+                  ; Possible additional ids are added as new stamp rows
+                  (when (seq (rest building-strs))
+                    (mapv #(identity [{:type :building-id :value %}]) (rest building-strs))))
+                (concat result [row])))
+            []
+            fields)))
 
 (defn- info-fields->stamp [{:keys [stamp-created transparency qr-code lang]} info-fields]
   {:pre [(pos? stamp-created)]}

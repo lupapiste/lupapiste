@@ -6,11 +6,13 @@
             [lupapalvelu.ui.authorization :as auth]
             [lupapalvelu.ui.common :refer [query command] :as common]
             [lupapalvelu.ui.components :as uc]
+            [lupapalvelu.ui.components.datepicker :as date]
             [lupapalvelu.ui.util :as jsutil]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
             [cljs-time.coerce :as tc]
-            [cljs-time.format :as tf]))
+            [cljs-time.format :as tf]
+            [cljs-time.core :as t]))
 
 (enable-console-print!)
 
@@ -134,7 +136,7 @@
            :summaryId (:id @selected-summary)))
 
 (rum/defc remove-link [target-id index]
-  [:a.lupicon-remove.primary
+  [:a.lupicon-remove.primary.inspection-summary-link
    {:on-click (fn [_]
                 (uc/confirm-dialog
                   "inspection-summary.targets.remove-confirm.title"
@@ -196,14 +198,30 @@
              "inspection-summary.targets.mark-finished.undo"
              "inspection-summary.targets.mark-finished"))])
 
+(defn commit-inspection-date [target-id value]
+    (command :set-inspection-date
+             refresh
+             :id (:applicationId @component-state)
+             :summaryId (:id @selected-summary)
+             :targetId target-id
+             :date (tc/to-long value))
+    (refresh))
+
+(rum/defc remove-inspection-date [target-id index]
+  [:a.lupicon-remove.primary.inspection-summary-link
+   {:on-click (fn [_]
+                (commit-inspection-date target-id nil))
+    :data-test-id (str "remove-inspection-date-" index)}])
+
 (rum/defc target-row < rum/reactive
   [idx row-target]
-  (let [editing?        (:editing? row-target)
-        application-id  (:applicationId @component-state)
-        summary-id      (:id @selected-summary)
-        target-id       (:id row-target)
-        auth-model      (rum/react (rum-util/derived-atom [component-state] (partial auth/get-auth-model :inspection-summaries summary-id)))
-        locked?         (:locked @selected-summary)
+  (let [editing? (:editing? row-target)
+        editingInspectionDate? (:editingInspectionDate? row-target)
+        application-id (:applicationId @component-state)
+        summary-id (:id @selected-summary)
+        target-id (:id row-target)
+        auth-model (rum/react (rum-util/derived-atom [component-state] (partial auth/get-auth-model :inspection-summaries summary-id)))
+        locked? (:locked @selected-summary)
         targetFinished? (:finished row-target)
         remove-attachment-success (fn [resp] (.showSavedIndicator js/util resp) (refresh))]
     [:tr
@@ -216,31 +234,48 @@
         (uc/autofocus-input-field (:target-name row-target)
                                   (str "edit-target-field-" idx)
                                   (partial commit-target-name-edit target-id))
-        (:target-name row-target))]
+        (:target-name row-target))
+      (when (and (not editing?) (auth/ok? auth-model :edit-inspection-summary-target) (not targetFinished?))
+        [:a.inspection-summary-link
+         {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
+          :data-test-id (str "edit-link-" idx)}
+         [:i.lupicon-pen.inspection-summary-edit]])]
      [:td
       (for [attachment (rum/react (rum/cursor-in selected-summary [:targets idx :attachments]))
             :let [latest (:latestVersion attachment)]]
         [:div {:data-test-id (str "target-row-attachment")
-               :key (str "target-row-attachment-" (:id attachment))}
+               :key          (str "target-row-attachment-" (:id attachment))}
          (attc/view-with-download-small-inline latest)
          (when-not (or locked? targetFinished?)
            (attc/delete-attachment-link attachment remove-attachment-success))])
-     (when (and target-id (not locked?) (not targetFinished?))
-       [:div (attc/upload-link (partial got-files (:id row-target)))])]
+      (when (and target-id (not locked?) (not targetFinished?))
+        [:div (attc/upload-link (partial got-files (:id row-target)))])]
+     [:td
+      [:div.inspection-date-row
+       (if (and editingInspectionDate? (auth/ok? auth-model :set-inspection-date))
+         (let [date (tc/to-date (tc/from-long (:inspection-date row-target)))
+               commit-fn (partial commit-inspection-date target-id)]
+           (date/basic-datepicker date commit-fn idx))
+         (when (:inspection-date row-target)
+           (tf/unparse date-formatter (doto (t/time-now) (.setTime (tc/to-long (:inspection-date row-target)))))))
+       (when (and (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
+         [:a.inspection-summary-link
+          {:on-click     (fn [_] (swap! selected-summary assoc-in [:targets idx :editingInspectionDate?] true))
+           :data-test-id (str "choose-inspection-date-" idx)}
+          (if (:inspection-date row-target)
+            [:i.lupicon-pen.inspection-summary-edit]
+            (js/loc "choose"))])
+       (when (and editingInspectionDate? (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
+         (remove-inspection-date target-id idx))]]
      [:td
       (when (:finished-date row-target)
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]
      [:td (when (:finished-by row-target)
             (js/util.partyFullName (clj->js (:finished-by row-target))))]
      [:td.functions
-      (when (and (not editing?) (auth/ok? auth-model :set-target-status))
+      (when (and (not editing?) (not editingInspectionDate?) (auth/ok? auth-model :set-target-status))
         (change-status-link target-id targetFinished? idx))
-      (when (and (not editing?) (auth/ok? auth-model :edit-inspection-summary-target) (not targetFinished?))
-        [:a
-         {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editing?] true))
-          :data-test-id (str "edit-link-" idx)}
-         (js/loc "edit")])
-      (when (and (auth/ok? auth-model :remove-target-from-inspection-summary) (not editing?) (not targetFinished?))
+      (when (and (auth/ok? auth-model :remove-target-from-inspection-summary) (not editing?) (not editingInspectionDate?) (not targetFinished?))
         (remove-link target-id idx))]]))
 
 (defn init
@@ -370,7 +405,8 @@
             [:th (js/loc "inspection-summary.targets.table.state")]
             [:th (js/loc "inspection-summary.targets.table.target-name")]
             [:th (js/loc "inspection-summary.targets.table.attachment")]
-            [:th (js/loc "inspection-summary.targets.table.date")]
+            [:th (js/loc "inspection-summary.targets.table.inspection-date")]
+            [:th (js/loc "inspection-summary.targets.table.finished-date")]
             [:th (js/loc "inspection-summary.targets.table.marked-by")]
             [:th ""]]]
           [:tbody

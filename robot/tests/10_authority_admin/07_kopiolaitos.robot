@@ -23,7 +23,7 @@ Auth admin opens Kopiolaitos dialog, inputs values and submits
   Set Suite Variable  ${orderer-phone}  0501231234
   Set Suite Variable  ${orderer-email}  tilaaja@example.com
 
-  Click by test id  authadmin-edit-button-kopiolaitos-info
+  Scroll and click test id  authadmin-edit-button-kopiolaitos-info
   Element should be visible  dialog-edit-kopiolaitos-info
   Element should be enabled  kopiolaitos-info-submit
 

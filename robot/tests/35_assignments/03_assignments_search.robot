@@ -107,7 +107,7 @@ Ronja can complete both assignments
   Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  3
 
 Completed assignments are not visible in application
-  Select Radio Button  searchType  searchTypeApplications
+  Scroll to and click xpath results  //label[@for='searchTypeApplications']
   Open application  ${appname}  ${propertyid}
   Tab should be visible  info
   Wait until  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  0

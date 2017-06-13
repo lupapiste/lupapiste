@@ -150,6 +150,7 @@ Sonja could delete every version
 
 Sonja returns the attachments tab and opens the other attachment
   Return to application
+  Tab should be visible  attachments
   Reject note is  muut-muu  Bad version
   Open attachment details  paatoksenteko.muistio
   Reject attachment with note  test-attachment-reject  details-reject  Bad memorandum
@@ -271,6 +272,8 @@ Sonja logs in and invites neighbor
   Add neighbor  753-416-22-22  Penade Linju  linju@example.com
   Scroll and click test id  manager-neighbors-done
   Wait test id visible  manage-neighbors
+  Xpath should match X times  //a[@data-test-id='neighbor-row-invite']  1
+  Wait test id visible  neighbor-row-invite
   Scroll and click test id  neighbor-row-invite
   Wait test id visible  neighbors-sendemail-send
   Scroll and click test id  neighbors-sendemail-send

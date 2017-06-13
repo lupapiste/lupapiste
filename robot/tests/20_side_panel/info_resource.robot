@@ -17,9 +17,11 @@ No info panel stars
 Open info panel
   Click element  open-info-side-panel
   Wait Until  Star is not shown
+  Sleep  1s
 
 Close info panel
   Click element  open-info-side-panel
+  Sleep  1s
 
 Clear stars and close panel
   Click element  open-conversation-side-panel

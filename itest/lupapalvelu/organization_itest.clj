@@ -283,7 +283,10 @@
                                  [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
                                    [["vesi-ja-viemarijohtojen-sijoittaminen" "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"]]]]]
                                 ["katulupa" [["kaivaminen-yleisilla-alueilla"
-                                              [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]]]]]
+                                              [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]]]
+                                             ["liikennealueen-rajaaminen-tyokayttoon"
+                                              [["nostotyot" "ya-kayttolupa-nostotyot"]
+                                               ["vaihtolavat" "ya-kayttolupa-vaihtolavat"]]]]]
                                 ["kayttolupa" [["mainokset" "ya-kayttolupa-mainostus-ja-viitoitus"]
                                                ["terassit" "ya-kayttolupa-terassit"]]]]]]))
 
@@ -616,6 +619,7 @@
     (mongo/insert :applications
                   {:_id          "LP-1"
                    :organization "753-R"
+                   :municipality "753"
                    :documents    [
                                   {:schema-info {:name "rakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value    "Bob"
@@ -637,15 +641,17 @@
                                                  }}]})
     (fact "Waste ads: one row"
       (waste-ads/waste-ads "753-R") => '({:modified  2222,
-                                              :materials ({:kuvaus     "Rouheaa",
-                                                           :saatavilla "17.12.2015",
-                                                           :yksikko    "kg", :maara "2", :aines "Sora"}),
-                                              :contact   {:email "bob@reboot.tv", :phone "12345", :name "Bob"}}))
+                                          :materials ({:kuvaus     "Rouheaa",
+                                                       :saatavilla "17.12.2015",
+                                                       :yksikko    "kg", :maara "2", :aines "Sora"}),
+                                          :contact   {:email "bob@reboot.tv", :phone "12345", :name "Bob"},
+                                          :municipality "753"}))
     (fact "No ads for 753-YA"
       (waste-ads/waste-ads "753-YA") => '())
     (mongo/insert :applications
                   {:_id          "LP-NO-NAME"
                    :organization "753-R"
+                   :municipality "753"
                    :documents    [
                                   {:schema-info {:name "rakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value ""}
@@ -667,6 +673,7 @@
     (mongo/insert :applications
                   {:_id          "LP-NO-PHONE-EMAIL"
                    :organization "753-R"
+                   :municipality "753"
                    :documents    [
                                   {:schema-info {:name "rakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value    "Bob"
@@ -687,6 +694,7 @@
     (mongo/insert :applications
                   {:_id          "LP-NO-AINES"
                    :organization "753-R"
+                   :municipality "753"
                    :documents    [
                                   {:schema-info {:name "rakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value    "Bob"
@@ -708,6 +716,7 @@
     (mongo/insert :applications
                   {:_id          "LP-NO-MAARA"
                    :organization "753-R"
+                   :municipality "753"
                    :documents    [
                                   {:schema-info {:name "rakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value    "Bob"
@@ -731,6 +740,7 @@
     (mongo/insert :applications
                   {:_id          "LP-2"
                    :organization "753-R"
+                   :municipality "753"
                    :documents    [
                                   {:schema-info {:name "laajennettuRakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value    "Dot"
@@ -773,15 +783,18 @@
             :materials
                       ({:kuvaus "Rouheaa", :saatavilla "17.12.2015", :yksikko "tonni", :maara "100", :aines "Kivi"}
                         {:kuvaus "", :saatavilla "20.12.2015", :yksikko "m3", :maara "8", :aines "Puu"}),
-            :contact  {:email "dot@reboot.tv", :phone "12345", :name "Dot"}}
+            :contact  {:email "dot@reboot.tv", :phone "12345", :name "Dot"},
+            :municipality "753"}
             {:modified  2222,
              :materials ({:kuvaus "Rouheaa", :saatavilla "17.12.2015", :yksikko "kg", :maara "2", :aines "Sora"}),
-             :contact   {:email "bob@reboot.tv", :phone "12345", :name "Bob"}}))
+             :contact   {:email "bob@reboot.tv", :phone "12345", :name "Bob"},
+             :municipality "753"}))
     (fact "Ad list size limit"
       (doseq [id (range 110)]
         (mongo/insert :applications
                       {:_id          (str "LP-FILL-" id)
                        :organization "753-R"
+                       :municipality "753"
                        :documents    [
                                       {:schema-info {:name "rakennusjateselvitys"}
                                        :data        {:contact            {:name  {:value    "Bob"

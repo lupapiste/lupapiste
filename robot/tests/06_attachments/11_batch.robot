@@ -148,17 +148,17 @@ Checking one signbox reveals password field
   Scroll and click test id  sign-all
   Test id text is  sign-all  Valitse kaikki
   Wait until  Element should not be visible  batch-password
-  Checkbox wrapper not selected by test id  batch-sign-0-input
-  Checkbox wrapper not selected by test id  batch-sign-1-input
-  Checkbox wrapper not selected by test id  batch-sign-2-input
-  Checkbox wrapper not selected by test id  batch-sign-3-input
+  Checkbox wrapper not selected by test id  batch-sign-0
+  Checkbox wrapper not selected by test id  batch-sign-1
+  Checkbox wrapper not selected by test id  batch-sign-2
+  Checkbox wrapper not selected by test id  batch-sign-3
   Scroll and click test id  sign-all
   Test id text is  sign-all  Tyhjennä kaikki
   Wait until  Element should be visible  batch-password
-  Checkbox wrapper selected by test id  batch-sign-0-input
-  Checkbox wrapper selected by test id  batch-sign-1-input
-  Checkbox wrapper selected by test id  batch-sign-2-input
-  Checkbox wrapper selected by test id  batch-sign-3-input
+  Checkbox wrapper selected by test id  batch-sign-0
+  Checkbox wrapper selected by test id  batch-sign-1
+  Checkbox wrapper selected by test id  batch-sign-2
+  Checkbox wrapper selected by test id  batch-sign-3
 
 Password checking
   Element should be visible  jquery=div.batch-password i.lupicon-flag
@@ -244,7 +244,7 @@ Sonja is readey
 
 New attachment is not visible when post verdict filter is off
   Click label by test id  postVerdict-filter-label
-  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  postVerdict-filter
   Element should not be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta']
 
 New attachment is a post-verdict attachment and automatically approved

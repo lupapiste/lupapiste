@@ -51,7 +51,7 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  General handler to  Sibbo Sonja
+  General application handler to  Sibbo Sonja
 
 Assignee has changed
   General handler is  Sibbo Sonja
@@ -118,7 +118,7 @@ Sonja logs in and clears authority
   No such test id  handler-0
 
 Sonja assigns application to Ronja
-  General handler to  Sibbo Ronja
+  General application handler to  Sibbo Ronja
   [Teardown]  Logout
 
 Sipoo admin logs in and removes Ronja
@@ -136,7 +136,7 @@ Sonja logs in and sees Ronja still assigned
 
 Sonja removes Ronja handler and assigns application to herself
   Remove first handler
-  General handler to  Sibbo Sonja
+  General application handler to  Sibbo Sonja
   Reload page and kill dev-box
   General handler is  Sibbo Sonja
 

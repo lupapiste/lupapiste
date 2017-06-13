@@ -19,6 +19,7 @@ ${DEF_STAMP_ORGANIZATION}  Sipoon rakennusvalvonta
 ${DEF_STAMP_USER}          Sonja Sibbo
 ${appname1}                Stamping One
 ${appname2}                Stamping Two
+${stamp-info-fields-path}  //div[@id="stamping-container"]//form[@id="stamp-info"]
 
 *** Test Cases ***
 
@@ -81,31 +82,31 @@ Sonja prepares for stamping
   Mark attachment as verdict attachment
   Open stamping page  ${appname1}
   One attachment is selected
-  Stamping info fields visible
-  Default stamp fields status
+  Default Stamping Info Fields status
 
 Sonja change stamp info
   Select From List by test id and index  stamp-selected  1
   KV stamp fields status
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]  ${DEF_STAMP_USER}
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]  ${DEF_STAMP_USER}
   Input text by test id  stamp-info-organization  Changed organization
   Input text by test id  stamp-info-user  Changed user
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  Changed organization
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]  Changed user
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]  Changed organization
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]  Changed user
 
 Stamp values should be saved when changing stamp
   Select From List by test id and index  stamp-selected  0
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
   Select From List by test id and index  stamp-selected  1
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  Changed organization
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]  Changed user
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]  Changed organization
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]  Changed user
 
 Sonja revert changes
   Scroll and click test id  stamp-reload
+  Wait until  List selection should be  xpath=//select[@data-test-id="stamp-selected"]  Oletusleima
   Select From List by test id and index  stamp-selected  1
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]  ${DEF_STAMP_USER}
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]  ${DEF_STAMP_USER}
   Select From List by test id and index  stamp-selected  0
   Input stamping info values
 
@@ -116,12 +117,12 @@ Sonja goes back to the second application
 Sonja opens stamping page and sees info fields initialized
   Open stamping page  ${appname2}
   One attachment is selected
-  Stamping info fields visible
-  Default stamp fields status
-  Test id input is  stamp-info-extratext  ${EMPTY}
+  Default Stamping Info Fields status
+  Test id input is  stamp-info-organization  Sipoon rakennusvalvonta
 
 Sonja inputs info values
   Input stamping info values
+  Test id input is  stamp-info-organization  LupaRobot
 
 Sonja can go to attachments tab. When she returns, only extra text field is persistent
   Select From List by test id and index  stamp-selected  1
@@ -130,9 +131,11 @@ Sonja can go to attachments tab. When she returns, only extra text field is pers
   Wait until  Element should be visible  application-attachments-tab
   Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
+  List selection should be  xpath=//select[@data-test-id="stamp-selected"]  KV-leima
   One attachment is selected
-  Select From List by test id and index  stamp-selected  1
-  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
+  # Note: stamp-organization has changed from LupaRobot:
+  Test id input is  stamp-info-organization  Sipoon rakennusvalvonta
+  Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
 
 
 Sonja can toggle selection of attachments by group/all/none
@@ -209,53 +212,45 @@ Open stamping page
 Mark attachment as verdict attachment
   Open attachment details  muut.muu
   Wait until  Element should be visible  xpath=//label[@data-test-id='is-verdict-attachment-label']
-  Scroll to test id  is-verdict-attachment-input
-  Select checkbox  xpath=//input[@data-test-id='is-verdict-attachment-input']
+  Toggle toggle  is-verdict-attachment
   Positive indicator icon should be visible
   Return to application
 
 One attachment is selected
   Javascript?  $("div.stampbox-wrapper input:checked").length === 1
 
-Stamping info fields visible
-  Element should be visible  stamp-info
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-applicationId"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-verdict-date"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]
-  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-transparency"]
+Default stamping info fields status
+  Wait until  Element should be visible  stamp-info
+  Wait until  Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-date"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-date"]
+  Wait until   Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-extratext"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-applicationId"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-verdict-date"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]
+  Wait until  Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-section"]
+  Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-xmargin"]
+  Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-ymargin"]
+  Element should be visible  xpath=${stamp-info-fields-path}//select[@data-test-id="stamp-info-transparency"]
 
-Default stamp fields status
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-verdict-date"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-applicationId"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
 
 KV stamp fields status
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-applicationId"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-user"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]
-  Element should be enabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-verdict-date"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
-  Element should be disabled  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-extratext"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-applicationId"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-date"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-verdict-date"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-section"]
 
 Input stamping info values
   ## Disable date picker
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text by test id  stamp-info-date  ${STAMP_DATE}
   Input text by test id  stamp-info-organization  ${STAMP_ORGANIZATION}
-  Input text by test id  stamp-info-verdict-date  ${STAMP_DATE}
   Input text by test id  stamp-info-xmargin  ${STAMP_XMARGIN}
   Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}

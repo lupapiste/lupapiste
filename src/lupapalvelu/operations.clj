@@ -274,7 +274,9 @@
                              :asianhallinta true})
 
 (def- ya-kayttolupa-with-tyomaastavastaava
-  (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
+  (-> ya-kayttolupa-general
+      (update :required conj "tyomaastaVastaava")
+      (assoc :state-graph-resolver (constantly states/ya-tyolupa-state-graph))))
 
 (defn- sijoittaminen-state-resolver [{:keys [permitSubtype]}]
   (if (= :sijoitussopimus (keyword permitSubtype))
@@ -304,6 +306,7 @@
    :ya-kayttolupa-terassit                                            ya-kayttolupa-general
    :ya-kayttolupa-kioskit                                             ya-kayttolupa-general
    :ya-kayttolupa-muu-kayttolupa                                      ya-kayttolupa-general
+   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-general
    :ya-kayttolupa-mainostus-ja-viitoitus  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                            :permit-type permit/YA
                                            :subtypes [:kayttolupa]
@@ -317,7 +320,6 @@
                                            :min-outgoing-link-permits 0
                                            :asianhallinta true}
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
-   :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-julkisivutyot                                 ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-talon-rakennustyot                                  ya-kayttolupa-with-tyomaastavastaava

@@ -3,13 +3,158 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [clojure.test.check :as tc]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]
+            [clojure.test :refer [is]]
+            [sade.schema-generators :as ssg]
+            [slingshot.slingshot :refer [try+]]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.generators.organization :as org-gen]
+            [lupapalvelu.generators.user :as user-gen]
+            [lupapalvelu.mock.organization :as mock-org
+             :refer [with-all-mocked-orgs with-mocked-orgs]]
+            [lupapalvelu.mock.user :as mock-usr]
+            [lupapalvelu.user :as user]
             [lupapalvelu.itest-util :refer [unauthorized?]]
+            [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.actions-api :as ca]
             ;; ensure all actions are registered by requiring server ns
-            [lupapalvelu.server]))
+            [lupapalvelu.server]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.authorization :as auth]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
+
+(facts "enable-accordions"
+  (with-all-mocked-orgs
+    (let [application (merge lupapalvelu.domain/application-skeleton
+                             {:permitType "YA"
+                              :organization (keyword (:id mock-org/sipoo-ya))})
+          action-skeleton {:user (usr/with-org-auth mock-usr/sonja)
+                           :application application
+                           :data {:id ""}}
+          command (build-action "enable-accordions" action-skeleton)]
+      (facts "permitType YA"
+        (fact "authority that has orgAuthz in applications org"
+          (validate command) => ok?)
+        (fact "authority without orgAuthz in applications org"
+          (validate (build-action
+                      "enable-accordions"
+                      (assoc action-skeleton :user (usr/with-org-auth mock-usr/ronja))))
+          => fail?))
+      (fact "other permitType"
+        (validate (build-action
+                    "enable accordions"
+                    (assoc-in action-skeleton [:application :permitType] "R")))
+        => fail?))))
+
+(def permit-type-generator
+  (-> (lupapalvelu.permit/permit-types)
+      keys
+      gen/elements))
+
+(def YA-biased-permit-type
+  (gen/frequency [[1 (gen/return "YA")]
+                  [1 permit-type-generator]]))
+
+(def authority-biased-user-role
+  (gen/frequency [[1 (gen/return "authority")]
+                  [1 (ssg/generator usr/Role)]]))
+
+(def user-id-gen (ssg/generator usr/Id))
+
+(def application-role-gen (gen/elements roles/all-authz-roles))
+
+(defn single-auth-gen [& {:keys [user-id-gen application-role-gen]
+                          :or {user-id-gen          user-id-gen
+                               application-role-gen application-role-gen}}]
+  (gen/let [user-id user-id-gen
+            role application-role-gen]
+    {:role role
+     :id user-id}))
+
+(defn application-auths-gen [user]
+  (gen/let [auths (gen/vector (single-auth-gen))
+            give-user-auths? gen/boolean
+            users-auths (single-auth-gen :user-id-gen (gen/return (:id user)))]
+    (if give-user-auths?
+      (conj auths users-auths)
+      auths)))
+
+(defn application-gen [orgs user]
+  (let [org-ids (map (comp keyword :id) orgs)]
+    (gen/let [permit-type YA-biased-permit-type
+              org-id (gen/elements org-ids)
+              application-auths (application-auths-gen user)]
+      (merge lupapalvelu.domain/application-skeleton
+             {:permitType permit-type
+              :organization org-id
+              :auths application-auths}))))
+
+(defn user-gen [orgs]
+  (let [org-ids    (map (comp keyword :id) orgs)
+        org-id-gen (gen/elements org-ids)
+        base-user-gen (ssg/generator usr/User
+                                     {usr/OrgId org-id-gen
+                                      usr/Role authority-biased-user-role})]
+    (gen/fmap usr/with-org-auth base-user-gen)))
+
+(def org-with-const-id
+  (gen/fmap (fn [org] (assoc org :id "100"))
+            (ssg/generator org/Organization)))
+
+(def orgs-gen
+  "Generates a set of organizations with different ids"
+  (gen/let [org-ids (gen/set (ssg/generator org/OrgId) {:num-elements 10
+                                                        :max-tries 50})
+            orgs (gen/vector org-with-const-id 10)]
+    (let [fix-id (fn [id org] (assoc org :id id))
+          with-fixed-ids (map fix-id org-ids orgs)]
+      (set with-fixed-ids))))
+
+(def enable-accordions-gen
+  (gen/let [orgs orgs-gen
+            user (user-gen orgs)
+            application (application-gen orgs user)]
+    {:orgs orgs
+     :application application
+     :user user}))
+
+(defn enable-accordions-test [{:keys [orgs application user]}]
+  (let [action-skeleton {:user (usr/with-org-auth user)
+                         :application application
+                         :data {:id ""}}
+        action (build-action "enable-accordions" action-skeleton)
+        org-id (:organization application)
+        permit-type (:permitType application)
+        authority? (usr/authority? user)
+        allowed-to-access? (action/user-is-allowed-to-access?
+                             action application)
+        authority-in-org? (usr/user-is-authority-in-organization? user (name org-id))
+        auths-in-application? (auth/user-authz? roles/all-authenticated-user-roles
+                                                application
+                                                user)]
+    (with-mocked-orgs orgs
+      (cond (not allowed-to-access?)   (is (fail? (validate action)))
+            (and authority?
+                 authority-in-org?
+                 (= permit-type "YA")) (is (ok? (validate action)))
+            authority?                 (is (fail? (validate action)))
+            :else                      (is (ok? (validate action)))))))
+
+(def enable-accordions-prop
+  (prop/for-all [gen-data enable-accordions-gen]
+    (enable-accordions-test gen-data)))
+
+(fact "enable-accordions-spec"
+  (tc/quick-check 200 enable-accordions-prop :max-size 10))
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
