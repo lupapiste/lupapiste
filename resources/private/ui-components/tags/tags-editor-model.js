@@ -111,14 +111,16 @@ LUPAPISTE.TagsEditorModel = function() {
                                                  saveCommandName: "save-organization-tags",
                                                  removeTagOkQueryName: "remove-tag-ok"}));
 
-  var rawTagsSubscription = self.rawTags.subscribe(function(raw) {
+  function initModels(raw) {
     var orgId = _(lupapisteApp.models.currentUser.orgAuthz()).keys().first();
     self.tags(_.map(_.get(raw, [orgId, "tags"]), function(tag) {
       return new TagModel(tag, self.save);
     }));
-  });
+  }
 
-  self.refresh();
+  initModels(lupapisteApp.services.organizationTagsService.data());
+
+  var rawTagsSubscription = self.rawTags.subscribe(initModels);
 
   var baseDispose = self.dispose || _.noop;
   self.dispose = function() {
@@ -137,13 +139,15 @@ LUPAPISTE.CompanyTagsEditorModel = function() {
                                                  saveCommandName: "save-company-tags",
                                                  removeTagOkQueryName: "remove-company-tag-ok"}));
 
-  var rawTagsSubscription = self.rawTags.subscribe(function(raw) {
+  function initModels(raw) {
     self.tags(_.map(raw, function(tag) {
       return new TagModel(tag, self.save);
     }));
-  });
+  }
 
-  self.refresh();
+  initModels(lupapisteApp.services.companyTagsService.currentCompanyTags());
+
+  var rawTagsSubscription = self.rawTags.subscribe(initModels);
 
   var baseDispose = self.dispose || _.noop;
   self.dispose = function() {
