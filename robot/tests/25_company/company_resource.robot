@@ -8,8 +8,7 @@ Resource       ../../common_resource.robot
 Kaino logs in
   [Arguments]  ${password}=kaino123
   Go to login page
-  Login  kaino@solita.fi  ${password}
-  User should be logged in  Kaino Solita
+  User logs in  kaino@solita.fi  ${password}  Kaino Solita
 
 Invite existing dummy user
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
@@ -41,6 +40,7 @@ Invite existing user
   Click enabled by test id  company-search-email
   Test id disabled  company-new-user-email
 
+  Wait until  Element should be visible  companyUserDetails
   Textfield should contain  jquery=[data-test-id=company-new-user-firstname]  ${firstname}
   Test id disabled  company-new-user-firstname
   Textfield should contain  jquery=[data-test-id=company-new-user-lastname]  ${lastname}

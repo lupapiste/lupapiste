@@ -28,7 +28,7 @@
   (case (keyword type)
     :radioGroup       default
     :select           default
-    :checkbox         false
+    :checkbox         (or default false)
     :string           (or default "")
     :text             (or default "")
     :fillMyInfoButton nil

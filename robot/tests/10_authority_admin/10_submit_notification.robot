@@ -18,6 +18,7 @@ Mikko submits an application
   Submit application
 
 Kirjaamo got email
+  Sleep  1s
   Open last email
   Wait Until  Page Should Contain  ${email}
 

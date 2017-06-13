@@ -63,3 +63,17 @@
 
    status => 403
    (count body) => (count "User not enabled")))
+
+(fact "rest-api user can login with autologin"
+  (let [email "porvoo@example.com"
+        password (password-hash email)
+        url #(str (target-server-or-localhost-address) "/rest/submitted-applications?organization=" %)
+        {:keys [status body]} (decoded-get (url "638-R") {:basic-auth [email password] :throw-exceptions false})]
+
+    status => 200
+    (fact "organization OK" body => (just {:ok true :data []}))
+
+    (fact "not authorized to organization"
+      (-> (url "753-R")
+          (decoded-get {:basic-auth [email password] :throw-exceptions false})
+          :body) => (contains {:ok false :text "error.unauthorized"}))))

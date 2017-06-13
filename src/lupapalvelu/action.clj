@@ -45,12 +45,31 @@
 ;; some utils
 ;;
 
+(defn- and-2-pre-check [check1 check2]
+  (fn [x]
+    (let [result1 (check1 x)]
+      (if (nil? result1)
+        (check2 x)
+        result1))))
+
+
+(defn and-pre-check
+  "Returns a pre-check that fails if any of the given pre-checks fail.
+   The returned pre-check return the first failing pre-checks failure,
+   or nil in case all succeed."
+  [& pre-checks]
+  (reduce and-2-pre-check
+          (constantly nil)
+          pre-checks))
+
 (defn not-pre-check
   "Pre-check fails if given pre-check succeeds."
-  [pre-check]
-  (fn [command]
-    (when-not (pre-check command)
-      (fail :error.pre-check))))
+  [pre-check & fail-args]
+  (let [fail-args (or fail-args
+                      [:error.pre-check])]
+    (fn [command]
+      (when-not (pre-check command)
+        (apply fail fail-args)))))
 
 (defn some-pre-check
   "Return pre-check that fails if none of the given pre-checks succeeds.
@@ -365,7 +384,10 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
+  (and id
+       user
+       (or application
+           (domain/get-application-as id user :include-canceled-apps? true))))
 
 (defn- user-authz? [command-meta-data application user]
   (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
@@ -378,17 +400,20 @@
 (defn- company-authz? [command-meta-data application user]
   (auth/has-auth? application (get-in user [:company :id])))
 
+(defn user-is-allowed-to-access?
+  [{user :user :as command} application]
+  (let [meta-data (meta-data command)]
+    (or
+      (user-authz? meta-data application user)
+      (organization-authz? meta-data application user)
+      (company-authz? meta-data application user))))
+
 (defn- user-is-not-allowed-to-access?
   "Current user must have correct role in application.auth, work in
   the organization or company that has been invited"
-  [{user :user :as command} application]
-  (let [meta-data (meta-data command)]
-    (when-not (or
-                (user-authz? meta-data application user)
-                (organization-authz? meta-data application user)
-                (company-authz? meta-data application user))
-
-     unauthorized)))
+  [command application]
+  (when-not (user-is-allowed-to-access? command application)
+    unauthorized))
 
 (defn- not-authorized-to-application [{:keys [application] :as command}]
   (when (-> command :data :id)
@@ -421,11 +446,14 @@
     (or
       (some #(% command) validators)
       (let [application (get-application command)
-            ^{:doc "Organization as delay"} organization (when application
-                                                           (delay (org/get-organization (:organization application))))
-            ^{:doc "Application assignments as delay"} assignments (when application
-                                                                     (delay (mongo/select :assignments {:application.id (:id application)
-                                                                                                        :status {$ne "canceled"}})))
+            ^{:doc "Organization as delay"}
+            organization (when application
+                           (delay (org/get-organization (:organization application))))
+            ^{:doc "Application assignments as delay"}
+            assignments (when application
+                          (delay (mongo/select :assignments
+                                               {:application.id (:id application)
+                                                :status {$ne "canceled"}})))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             command (merge {:application application
                             :organization organization
@@ -613,11 +641,47 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-(defn foreach-action [{:keys [user data] :as command}]
-  (map
-    #(when-let [{type :type categories :categories} (get-meta %)]
-       (merge command (action % :type type :data data :user user) {:categories categories}))
-   (remove nil? (keys @actions))))
+(sc/defschema ActionType
+  (sc/enum [:command
+            :raw
+            :action
+            :query
+            :export]))
+
+(sc/defschema ActionData
+  ;;TODO: needs an actual schema
+  sc/Any)
+
+(sc/defschema ActionBase
+  "Has the bare minimum fields of an action that allow it to be run without
+   executing."
+  {:user usr/User
+   :type ActionType
+   :data ActionData
+   sc/Any sc/Any})
+
+(sc/defschema ActionSkeleton
+  {:user usr/User
+   :data ActionData
+   sc/Any sc/Any})
+
+(sc/defn build-action :- ActionBase
+  [action-name :- sc/Str
+   {:keys [user data] :as skeleton} :- ActionSkeleton]
+  (let [meta (get-meta action-name)]
+    (when meta
+      (merge skeleton
+             (action action-name
+                     :type (:type meta)
+                     :data data
+                     :user user)
+             {:categories (:categories meta)}))))
+
+(defn foreach-action [command-skeleton]
+  (for [action-name (remove nil? (keys @actions))
+        :let [result (build-action action-name command-skeleton)]
+        :when result]
+    result))
 
 (defn- validated [command]
   {(:action command) (validate command)})

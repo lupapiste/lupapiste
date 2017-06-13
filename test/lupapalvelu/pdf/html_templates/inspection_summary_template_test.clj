@@ -70,6 +70,7 @@
                                                 {:finished true,
                                                  :id ..target-id-2..,
                                                  :target-name "second target",
+                                                 :inspection-date 1488528634011,
                                                  :finished-date 1488528634011,
                                                  :finished-by {:id "..user-id.."
                                                                :username  "pena"
@@ -95,7 +96,9 @@
       (->> [:#attachments] (enlive/select html) (map :content))   => [["Liitteet"] [] [] [{:tag :div :attrs {} :content ["liite.pdf"]}] []])
     (fact "finished column"
       (->> [:#finished] (enlive/select html) (map :content))      => [["Merkitty tehdyksi"] [] ["Kyll\u00e4"] [] []])
+    (fact "inspection date column"
+      (->> [:#inspection-date] (enlive/select html) (map :content)) => [["Tarkastus pvm"] [] ["03.03.2017"] [] []])
     (fact "finished date column"
-      (->> [:#finished-date] (enlive/select html) (map :content)) => [["P\u00e4iv\u00e4m\u00e4\u00e4r\u00e4"] [] ["03.03.2017"] [] []])
+      (->> [:#finished-date] (enlive/select html) (map :content)) => [["Kuittaus pvm"] [] ["03.03.2017"] [] []])
     (fact "finished by column"
       (->> [:#finished-by] (enlive/select html) (map :content))   => [["Merkitsij\u00e4"] [""] ["Pena Banaani"] [""] [""]])))

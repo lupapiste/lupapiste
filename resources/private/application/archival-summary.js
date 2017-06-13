@@ -132,6 +132,10 @@
       return self.authModel.ok("convert-to-pdfa");
     });
 
+    self.showArchivalError = self.disposedPureComputed(function() {
+      return !self.archivable() && !self.archived() && !_.isEmpty(self.archivabilityError());
+    });
+
     self.retentionDescription = self.disposedPureComputed(function() {
       var retention = util.getIn(self.metadata, ["sailytysaika"], {});
       if (ko.unwrap(retention.arkistointi)) {
@@ -307,15 +311,19 @@
       return _.some(params.application.tosFunction());
     });
 
-    self.selectAll = function() {
-      _.forEach(archivedPreAttachments(), selectIfArchivable);
-      _.forEach(archivedPostAttachments(), selectIfArchivable);
+    function selectDocuments() {
       _.forEach(self.archivedDocuments(), function(doc) {
         var tila = util.getIn(doc, ["metadata", "tila"]);
         if (tila !== "arkistoitu") {
           doc.sendToArchive(!doc.sendToArchive());
         }
       });
+    }
+
+    self.selectAll = function() {
+      _.forEach(archivedPreAttachments(), selectIfArchivable);
+      _.forEach(archivedPostAttachments(), selectIfArchivable);
+      selectDocuments();
     };
 
     self.unselectAll = function() {
@@ -332,10 +340,12 @@
 
     self.selectAllPreAttachments = function() {
       _.forEach(archivedPreAttachments(), selectIfArchivable);
+      selectDocuments();
     };
 
     self.selectAllPostAttachments = function() {
       _.forEach(archivedPostAttachments(), selectIfArchivable);
+      selectDocuments();
     };
 
     var updateState = function(docs, newStateMap) {

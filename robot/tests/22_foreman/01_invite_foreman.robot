@@ -165,6 +165,7 @@ All foremen table is shown on the Construction tab
   Logout
 
 Applicant can create foreman applications after verdict is given for the original application
+  Sleep  2s
   Pena logs in
   Open project application
   Open tab  parties
@@ -202,9 +203,9 @@ Applicant can clear the link and change the foreman role
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
 
 Applicant can move to linked foreman application and back
-  Click by test id  foreman-application-link-${foremanAppId}
+  Scroll and click test id  foreman-application-link-${foremanAppId}
   Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
-  Click by test id  test-application-link-permit-lupapistetunnus
+  Scroll and click test id  test-application-link-permit-lupapistetunnus
 
 Applicant can start invite flow from tasks tab
   Open tab  tasks
@@ -275,7 +276,7 @@ Frontend errors check
 
 Invite Mikko
   Invite count is  0
-  Click by test id  application-invite-paasuunnittelija
+  Scroll and click test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
@@ -283,6 +284,6 @@ Invite Mikko
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
   Input Text  invite-email  mikko@example.com
   Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
-  Click by test id  application-invite-submit
+  Scroll and click test id  application-invite-submit
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1

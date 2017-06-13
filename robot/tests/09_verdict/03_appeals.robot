@@ -227,6 +227,8 @@ There is only one appeal in the Attachments tab
 Fetching new verdicts will nuke appeals
   Scroll and click test id  fetch-verdict
   Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should be visible  dynamic-ok-confirm-dialog
+  Confirm  dynamic-ok-confirm-dialog
   Wait Until  Element should not be visible  jquery=table.appeals-table
 
 There are no appeals attachments in the Attachments tab

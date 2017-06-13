@@ -270,7 +270,10 @@
                        :closed                (ts->iso-8601-date closed)
                        :drawing-wgs84         (seq (map :geometry-wgs84 drawings))
                        :ramLink               (:ramLink attachment)
-                       :projectDescription    (:_projectDescriptionIndex application)}]
+                       :projectDescription    (:_projectDescriptionIndex application)
+                       ; case-file metadata does not include these, but archival schema requires them
+                       :myyntipalvelu         false
+                       :nakyvyys              :julkinen}]
     (-> base-metadata
         su/remove-blank-keys
         (merge s2-metadata))))

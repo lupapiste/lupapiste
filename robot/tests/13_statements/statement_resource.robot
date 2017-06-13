@@ -39,6 +39,7 @@ Invite 'manual' statement giver
   [Arguments]  ${index}  ${roletext}  ${name}  ${email}  ${date}
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
   Wait Until  Test id enabled  statement-giver-role-text-${index}
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
   Input text  xpath=//*[@data-test-id='statement-giver-role-text-${index}']  ${roletext}
   Input text  xpath=//*[@data-test-id='statement-giver-name-${index}']  ${name}
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
@@ -46,13 +47,15 @@ Invite 'manual' statement giver
   Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  something@
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
   Element should be disabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
+  Wait until  Textfield value should be  xpath=//*[@data-test-id='statement-giver-email-${index}']  something@
   Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  ${email}
+  Wait until  Textfield value should be  xpath=//*[@data-test-id='statement-giver-email-${index}']  ${email}
   # Statement giver's checkbox can be selected only when all his info fields have content and the email field has a valid email address.
   Wait until  Element should be enabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
   Select Checkbox  statement-giver-checkbox-${index}
   # Send button comes enabled only when all fields have content and some user is selected.
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
-  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
+  Click element  xpath=//*[@data-test-id='add-statement-giver']
   Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
   Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
 

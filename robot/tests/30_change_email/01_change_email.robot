@@ -10,7 +10,7 @@ Resource        ../common_keywords/email_helpers.robot
 
 Auhtority can not change email
   [Tags]  integration
-  Sonja logs in
+  Sonja logs in  False
   Navigate to email change
   Wait Until  Textfield Value Should Be  oldEmail  sonja.sibbo@sipoo.fi
   Page Should Contain  Sähköpostiosoitteen vaihtaminen ei onnistu
@@ -50,7 +50,6 @@ Got email
 
 Go through vetuma
   [Tags]  integration
-  Ident button is visible
   Authenticate via dummy page
 
 Got info that email is changed

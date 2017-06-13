@@ -27,7 +27,6 @@ Teppo logs in and creates some applications
 Teppo navigates to application page
   Go to page  applications
   Active search tab is  all
-  Wait until  Click by test id  search-tab-all
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  13
 
 Teppo selects 10 as the paging limit

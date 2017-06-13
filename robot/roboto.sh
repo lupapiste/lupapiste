@@ -9,7 +9,7 @@ RESOLUTION=1400x1200
 TIMEOUT=600
 TESTS=
 NOENV=
-BROWSER=firefox
+BROWSER=chrome
 SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
@@ -265,7 +265,7 @@ check_env() {
          ;;
       "chrome" )
          CG=$(google-chrome --version)
-         echo "$CG" | grep -q "^Google Chrome 55\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
+         echo "$CG" | grep -q "^Google Chrome 5[6-8]\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          # Clean up old Chrome temp files if there
          rm -rf /tmp/.com.google.Chrome.*
          rm -rf /tmp/.org.chromium*

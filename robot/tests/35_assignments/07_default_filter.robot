@@ -18,17 +18,17 @@ Pena logs in, creates and submits application
 
 Sonja logs in saves default filter
   Sonja logs in
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Select from autocomplete by test id  areas-filter-component  Keskusta
   Select from autocomplete by test id  operations-filter-component  Asuinkerrostalon tai rivitalon rakentaminen
   Save advanced filter  myfilter
-  Click by test id  set-myfilter-as-default-filter
+  Scroll and click test id  set-myfilter-as-default-filter
 
 Sonja reloads page and sees that myfilter is the default filter
   Reload page and kill dev-box
   Show all applications
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "myfilter")]
   Filter should contain tag  areas  Keskusta
   Filter should contain tag  operations  Asuinkerrostalon tai rivitalon rakentaminen
@@ -37,7 +37,7 @@ Sonja reloads page and sees that myfilter is the default filter
 
 Sonja selects assignments tab and sees empty filter settings
   Open assignments search
-  Click by test id  toggle-advanced-filters
+  Scroll and click test id  toggle-advanced-filters
   Filter item should contain X number of tags  areas  0
   Filter item should contain X number of tags  operations  0
   [Teardown]  Logout

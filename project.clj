@@ -124,7 +124,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.105"]
+                 [lupapiste/commons "0.7.109"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -136,7 +136,9 @@
 
                  [org.clojure/clojurescript "1.9.473"]
                  [rum "0.10.8"]
-                 [com.andrewmcveigh/cljs-time "0.4.0"]]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
+                 ; JS Pikaday for cljs datepicker (https://github.com/dbushell/Pikaday)
+                 [cljs-pikaday "0.1.4"]]
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-shell "0.5.0"]
             [deraen/lein-sass4clj "0.3.0"]]

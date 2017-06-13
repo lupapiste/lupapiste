@@ -78,7 +78,8 @@ Can not add the same user again
   Wait until  Element should not be visible  dialog-company-new-user
 
 Delete Duff3
-  Click by test id  company-user-delete-0
+  Element should be visible by test id  company-user-delete-0
+  Click element  xpath=//section[@id='company']//a[@data-test-id="company-user-delete-0"]
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Page should not contain  dummy3@example.com
 

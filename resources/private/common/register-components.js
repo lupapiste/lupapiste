@@ -97,6 +97,7 @@ jQuery(document).ready(function() {
     {name: "group-approval", synchronous: true},
     {name: "submit-button"},
     {name: "remove-button"},
+    {name: "field-reset-button"},
     {name: "publish-application"},
     {name: "move-to-proclaimed"},
     {name: "move-to-verdict-given"},

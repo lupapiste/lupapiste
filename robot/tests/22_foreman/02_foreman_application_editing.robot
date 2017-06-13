@@ -4,7 +4,6 @@ Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
 Suite Setup     Initialize foreman
-Suite Teardown  Logout
 
 *** Keywords ***
 Sonja creates an application and invites foreman
@@ -22,7 +21,7 @@ Sonja inits applications
   Sonja logs in
   Sonja creates an application and invites foreman
   Sonja creates an application and invites foreman
-  [Teardown]  Logout
+  Logout
 
 Foreman fills personal information
   Foreman logs in
@@ -89,12 +88,12 @@ Foreman can not add parties to the project application
 Foreman could add attachment to project application
   Open tab  attachments
   Element should be visible by test id  add-attachments-label
-  [Teardown]  Logout
+  Logout
 
 Sonja logs in and gets verdict for the first foreman application
   Sonja logs in
   Verdict for foreman application  0
-  [Teardown]  Logout
+  Logout
 
 Foreman logs in and checks related projects on the second foreman application
   Foreman logs in
@@ -226,3 +225,6 @@ Foreman state has reset again on base app
   Go back to project application
   Open tab  tasks
   Wait Until  Required foreman state is  Vastaava työnjohtaja  new
+
+Frontend errors
+  There are no frontend errors

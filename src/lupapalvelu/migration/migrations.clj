@@ -5,7 +5,7 @@
             [clj-time.core :as cljt]
             [clj-time.coerce :as cljtc]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
-            [sade.core :refer [def-]]
+            [sade.core :refer [def- now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
@@ -3232,8 +3232,46 @@
     (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 01"}})) tf06))
     (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 02"}})) tf07))
     (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 10"}})) tf08))
-    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 04"}})) tf09))
-    ))
+    (doall (map (fn [app] (mongo/update :applications {:_id (:id app)} {$set {:tosFunction "10 03 00 04"}})) tf09))))
+
+; LPK-2933 When comparing ya-kayttolupa-general and ya-kayttolupa-with-tyomaastavastaava, latter has tyomaastaVastaava schema
+(defmigration vaihtolavat-to-kayttolupa-general-documents-cleanup
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name :ya-kayttolupa-vaihtolavat
+                                                 :documents.schema-info.name "tyomaastaVastaava"}))}
+  (mongo/update-by-query :submitted-applications
+                         {:primaryOperation.name :ya-kayttolupa-vaihtolavat
+                          :permitSubtype "kayttolupa"
+                          :documents.schema-info.name "tyomaastaVastaava"}
+                         {$pull {:documents {:schema-info.name "tyomaastaVastaava"}}})
+  (mongo/update-by-query :applications
+                         {:primaryOperation.name :ya-kayttolupa-vaihtolavat
+                          :permitSubtype "kayttolupa"
+                          :documents.schema-info.name "tyomaastaVastaava"}
+                         {$pull {:documents {:schema-info.name "tyomaastaVastaava"}}}))
+
+; For certain kayttolupa subtypes, state machine is changed, thus deprecating "finished" state.
+(defmigration kayttolupa-to-tyolupa-workflow-finished-state-change                ; LPK-2933
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name {$in [:ya-kayttolupa-nostotyot
+                                                                              :ya-kayttolupa-kattolumien-pudotustyot
+                                                                              :ya-kayttolupa-talon-julkisivutyot
+                                                                              :ya-kayttolupa-talon-rakennustyot
+                                                                              :ya-kayttolupa-muu-tyomaakaytto]}
+                                                 :permitSubtype "kayttolupa"
+                                                 :state "finished"}))}
+  (let [ts (now)]
+    (mongo/update-by-query :applications
+                           {:primaryOperation.name {$in [:ya-kayttolupa-nostotyot ; kayttolupa-with-tyomaastavastaava
+                                                         :ya-kayttolupa-kattolumien-pudotustyot
+                                                         :ya-kayttolupa-talon-julkisivutyot
+                                                         :ya-kayttolupa-talon-rakennustyot
+                                                         :ya-kayttolupa-muu-tyomaakaytto]}
+                            :permitSubtype "kayttolupa"
+                            :state "finished"}
+                           {$set  {:state "closed"
+                                   :closed ts}
+                            $push {:history {:state "closed"
+                                             :ts ts
+                                             :user usr/migration-user-summary}}})))
 
 ;;
 ;; ****** NOTE! ******

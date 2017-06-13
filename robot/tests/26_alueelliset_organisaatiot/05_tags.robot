@@ -3,6 +3,8 @@
 Documentation  Authority admin edits municipality tags and authority tests them
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Suite Setup  Apply minimal fixture now
+
 
 *** Test Cases ***
 
@@ -20,7 +22,7 @@ Admin adds new tags
 # Using tags in application
 
 Sonja logs in and creates another application
-  Sonja logs in
+  Sonja logs in  False
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  notice${secs}
   Set Suite Variable  ${propertyId}  753-423-2-41

@@ -87,9 +87,9 @@ Sonja clicks RAM link and opens old attachment details
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
 
 Sonja returns to attachments and sees RAM filter
-  Scroll and click test id  back-to-application-from-attachment
+  Return to application
   Wait test id visible  ram-filter-label
-  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Checkbox wrapper selected by test id  ram-filter
   #Scroll and click test id  ram-filter-label
   Javascript?  $("tr[data-test-type]:visible").length === 1
   Wait test id visible  ram-indicator
@@ -100,8 +100,8 @@ Mikko logs in and unselects post verdict filter
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   # RAM and postverdict filters are selected by default
-  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Wait until  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter
+  Wait until  Checkbox wrapper selected by test id  ram-filter
   Unselect post verdict filter
   # Now only RAM attachments are visible
 
@@ -163,7 +163,7 @@ Mikko logs in and goes to attachment tab
   Unselect post verdict filter
 
 RAM filter enabled and one attachment row is visible
-  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Checkbox wrapper selected by test id  ram-filter
   Wait until  Total attachments row count is  1
 
 Mikko opens RAM
@@ -197,7 +197,7 @@ Sonja goes to attachments tab
   Unselect post verdict filter
 
 RAM filter enabled and two attachment rows are visible
-  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Checkbox wrapper selected by test id  ram-filter
   Wait until  Total attachments row count is  2
 
 Sonja rejects the first RAM but cannot delete it
@@ -215,7 +215,7 @@ Mikko goes to attachments tab
   Unselect post verdict filter
 
 Two RAM attachment rows are visible
-  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Checkbox wrapper selected by test id  ram-filter
   Wait until  Total attachments row count is  2
 
 Mikko deletes RAM
@@ -243,8 +243,8 @@ Sonja logs in to test filters
 Unselects filters
   Unselect post verdict filter
   Scroll and click test id  ram-filter-label
-  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
-  Checkbox wrapper not selected by test id  ram-filter-checkbox
+  Checkbox wrapper not selected by test id  postVerdict-filter
+  Checkbox wrapper not selected by test id  ram-filter
   Wait until  Total attachments row count is  6
 
 Add shelter file and approve it
@@ -263,7 +263,7 @@ Approve first Pohjapiirustus
 Hide RAM attachments
   Scroll and click test id  preVerdict-filter-label
   Scroll and click test id  postVerdict-filter-label
-  Checkbox wrapper not selected by test id  ram-filter-checkbox
+  Checkbox wrapper not selected by test id  ram-filter
 
 Rollup states
   Rollup rejected  PÄÄPIIRUSTUKSET
@@ -275,7 +275,7 @@ Sonja removes asemapiirros
 
 Sonja approves RAM
   Scroll and click test id  ram-filter-label
-  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Checkbox wrapper selected by test id  ram-filter
   Approve row  tr[data-test-type='${type}']:last
   Rollup approved  PÄÄPIIRUSTUKSET
   Rollup approved  MUUT SUUNNITELMAT

@@ -84,7 +84,8 @@ Sonja logs in and can edit handlers
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   No such test id  handler-0
-  Click by test id  edit-handlers
+  Click element  xpath=//section[@id='application']//a[@data-test-id='edit-handlers']
+  Wait until  Element should be visible  xpath=//section[@id='application']//button[@data-test-id='add-handler']
   Wait test id visible  add-handler
   No such test id  edit-person-0
 
@@ -189,8 +190,10 @@ Sonja opens inforequest and changes language to English
   Open inforequest  ${appname}-info  ${propertyId}
   Language to  EN
   No such test id  handler-0
-  Click by test id  edit-handlers
-  Click by test id  add-handler
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='edit-handlers']
+  Click element  xpath=//section[@id='inforequest']//a[@data-test-id='edit-handlers']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//button[@data-test-id='add-handler']
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='add-handler']
 
 Ronja cannot be selected
   Test id autocomplete options check  edit-person-0  false  Sibbo Ronja
@@ -200,7 +203,7 @@ Removed role cannot be selected
 
 Sonja assigns handler
   Edit handler  0  Sibbo Sonja  Handy
-  Click by test id  edit-handlers-back
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='edit-handlers-back']
   List handler is  0  Sibbo Sonja  Handy
   [Teardown]  Logout
 

@@ -34,8 +34,8 @@ Sonja goes to attachments tab
 
 Sonja sets attachment to be a verdict attachment
   Open attachment details  muut.muu
-  Checkbox should not be selected  jquery=section#attachment input[data-test-id=is-verdict-attachment-input]
-  Select checkbox  jquery=section#attachment input[data-test-id=is-verdict-attachment-input]
+  Toggle not selected  is-verdict-attachment
+  Toggle toggle  is-verdict-attachment
   Positive indicator icon should be visible
   Positive indicator icon should not be visible
 
@@ -44,29 +44,29 @@ Sonja sets contents description for the attachment
   Input text by test id  attachment-contents-input  Muu muu muu liite
   Positive indicator icon should be visible
   Positive indicator icon should not be visible
-  Click by test id  back-to-application-from-attachment
+  Return to application
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=mark-verdict-attachments]
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 Sonja disables verdict attachment using multiselect view, one is selected
-  Click by test id  mark-verdict-attachments
+  Scroll and click test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'selected')]  1
   Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
-  Click by test id  multiselect-action-button
+  Scroll and click test id  multiselect-action-button
 
 There should be no verdict attachments
   Wait until  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] i[data-test-icon=for-printing-icon]
 
 Sonja marks one attachment as verdict attachment using multiselect view
-  Click by test id  mark-verdict-attachments
+  Scroll and click test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Element should be visible  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
   Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
   Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
-  Click by test id  multiselect-action-button
+  Scroll and click test id  multiselect-action-button
   Wait for jQuery
 
 There should be now one verdict attachment
@@ -81,7 +81,7 @@ Order verdict attachments button has appeared into Attachments tab
   Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 The print order dialog can be opened by selecting from the dropdown
-  Click by test id  order-attachment-prints
+  Scroll and click test id  order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
 
 Sonja cancels ordering prints
@@ -92,7 +92,7 @@ Sonja opens the kopiolaitos order dialog on Verdict tab
   Open tab  verdict
   Wait Until  Element should be visible  xpath=//div[@id='application-verdict-tab']
   Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
-  Click by test id  test-order-attachment-prints
+  Scroll and click test id  test-order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
 
 There is one attachment marked as verdict attachment
@@ -120,7 +120,7 @@ Sonja checks the kopiolaitos order
 
 Sonja sends the kopiolaitos order
   Element should be enabled  xpath=//div[@id='dialog-verdict-attachment-prints-order']//button[@data-test-id='test-order-verdict-attachment-prints']
-  Click by test id  test-order-verdict-attachment-prints
+  Scroll and click test id  test-order-verdict-attachment-prints
   Wait until  Element should not be visible  dialog-verdict-attachment-prints-order
   Confirm  dynamic-ok-confirm-dialog
   Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
@@ -134,7 +134,7 @@ Sonja checks that email was sent
 
 Sonja opens the kopiolaitos order history dialog
   Wait until  Element should be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
-  Click by test id  test-open-prints-order-history
+  Scroll and click test id  test-open-prints-order-history
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order-history
   Element should be visible  //div[@id='dialog-verdict-attachment-prints-order-history']//button[@data-test-id='verdict-attachment-prints-history-ok']
 
@@ -149,7 +149,7 @@ The history dialog includes the order item
   Textfield value should be  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//input[@data-test-id='test-order-amount']  2
 
 Sonja closes the order history dialog
-  Click by test id  verdict-attachment-prints-history-ok
+  Scroll and click test id  verdict-attachment-prints-history-ok
   Wait until  Element should not be visible  dialog-verdict-attachment-prints-order-history
   Logout
 

@@ -11,7 +11,8 @@ Variables      variables.py
 
 Mikko creates application and goes to attachments tab
   [Tags]  attachments
-  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
+  Set Suite Variable  ${ct-checkbox-tid}  attachment-is-manually-set-construction-time
+  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=${ct-checkbox-tid}-input]
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Set Suite Variable  ${propertyId}  753-416-6-1
@@ -52,14 +53,14 @@ Sonja sets attachment as construction time
 Sonja goes to attachments tab and sees attachment is visible as post verdict filter is on by default
   [Tags]  attachments
   Return to application
-  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter
+  Checkbox wrapper selected by test id  preVerdict-filter
   Element should be visible  jquery=tr[data-test-type='muut.muu']
 
 Sonja sets post verdict filter off
   [Tags]  attachments
-  Click by test id  postVerdict-filter-label
-  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
+  Toggle toggle  postVerdict-filter
+  Toggle not selected  postVerdict-filter
 
 Attachment is not visible
   [Tags]  attachments
@@ -68,7 +69,7 @@ Attachment is not visible
 Sonja opens the attachment and unsets construction time checkbox
   [Tags]  attachments
   Click by test id  postVerdict-filter-label
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper selected by test id  postVerdict-filter
   Open attachment details  muut.muu
   Wait until  Checkbox should be selected  ${construction-time-checkbox}
   Unselect construction time checkbox
@@ -82,8 +83,7 @@ Application state filters are hidden
 Sonja sets construction time checkbox again
   [Tags]  attachments
   Open attachment details  muut.muu
-  Wait until  Page should contain element  ${construction-time-checkbox}
-  Checkbox should not be selected  ${construction-time-checkbox}
+  Toggle not selected  ${ct-checkbox-tid}
   Select construction time checkbox
 
 Sonja logs out
@@ -97,46 +97,44 @@ Mikko logs in and goes to attachments table
   Open tab  attachments
 
 Pre and post verdict filters are set
-  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
-  Checkbox wrapper not selected by test id  general-filter-checkbox
-  Checkbox wrapper not selected by test id  parties-filter-checkbox
-  Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
-  Checkbox wrapper not selected by test id  other-filter-checkbox
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter
+  Checkbox wrapper selected by test id  preVerdict-filter
+  Checkbox wrapper not selected by test id  parties-filter
+  Checkbox wrapper not selected by test id  paapiirustus-filter
+  Checkbox wrapper not selected by test id  other-filter
 
 Mikko sees construction time checkbox is checked and disabled
   [Tags]  attachments
   Open attachment details  muut.muu
   Wait until  Page should contain element  ${construction-time-checkbox}
   Element should be disabled  ${construction-time-checkbox}
-  Checkbox should be selected  ${construction-time-checkbox}
+  Checkbox wrapper selected by test id  ${ct-checkbox-tid}
 
 Mikko goes back to attachments listing and sees filters are set as they were
-  Click by test id  back-to-application-from-attachment
-  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
-  Checkbox wrapper not selected by test id  general-filter-checkbox
-  Checkbox wrapper not selected by test id  parties-filter-checkbox
-  Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
-  Checkbox wrapper not selected by test id  other-filter-checkbox
+  Return to application
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter
+  Checkbox wrapper selected by test id  preVerdict-filter
+  Checkbox wrapper not selected by test id  parties-filter
+  Checkbox wrapper not selected by test id  paapiirustus-filter
+  Checkbox wrapper not selected by test id  other-filter
 
 Mikko toggles all filters on
-  Click by test id  toggle-all-filters-label
+  Scroll and click test id  toggle-all-filters-label
   Wait until  Toggle all filters is selected
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
-  Checkbox wrapper selected by test id  parties-filter-checkbox
-  Checkbox wrapper selected by test id  paapiirustus-filter-checkbox
-  Checkbox wrapper selected by test id  other-filter-checkbox
+  Checkbox wrapper selected by test id  postVerdict-filter
+  Checkbox wrapper selected by test id  preVerdict-filter
+  Checkbox wrapper selected by test id  parties-filter
+  Checkbox wrapper selected by test id  paapiirustus-filter
+  Checkbox wrapper selected by test id  other-filter
 
 Mikko toggles all filters off
-  Click by test id  toggle-all-filters-label
+  Scroll and click test id  toggle-all-filters-label
   Wait until  Toggle all filters is not selected
-  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
-  Checkbox wrapper not selected by test id  preVerdict-filter-checkbox
-  Checkbox wrapper not selected by test id  parties-filter-checkbox
-  Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
-  Checkbox wrapper not selected by test id  other-filter-checkbox
+  Checkbox wrapper not selected by test id  postVerdict-filter
+  Checkbox wrapper not selected by test id  preVerdict-filter
+  Checkbox wrapper not selected by test id  parties-filter
+  Checkbox wrapper not selected by test id  paapiirustus-filter
+  Checkbox wrapper not selected by test id  other-filter
 
 
 Mikko logs out
@@ -146,11 +144,13 @@ Mikko logs out
 *** Keywords ***
 
 Select construction time checkbox
-  Select checkbox  ${construction-time-checkbox}
+  Toggle toggle  ${ct-checkbox-tid}
+  Toggle selected  ${ct-checkbox-tid}
   Positive indicator icon should be visible
 
 Unselect construction time checkbox
-  Unselect checkbox  ${construction-time-checkbox}
+  Toggle toggle  ${ct-checkbox-tid}
+  Toggle not selected  ${ct-checkbox-tid}
   Positive indicator icon should be visible
 
 Toggle all filters is selected

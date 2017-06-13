@@ -56,7 +56,7 @@
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :state-graph          states/default-application-state-graph
-   :allow-state-change []
+   :allow-state-change :all
    :sftp-directory       "/yleiset_alueet"
    :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false

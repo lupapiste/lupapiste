@@ -47,38 +47,40 @@
 (defn- merge-review-tasks
   "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
   [from-update from-mongo]
-  (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s" (count from-update) (count from-mongo))
-  (loop [from-update from-update
-         from-mongo from-mongo
-         unchanged []
-         added-or-updated []]
-    (let [current (first from-mongo)
-          bg-id-current (bg-id current)
-          remaining (rest from-mongo)
-          updated-id-match (when-not (ss/empty? bg-id-current)
-                             (util/find-first #(= bg-id-current (bg-id %)) from-update))
-          updated-match (or updated-id-match
-                            (first (filter #(or (reviews-have-same-name-and-type? current %)
-                                                (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
-      (cond
-        (= current nil)
-        ; Recursion end condition
-        (let [added-or-updated (concat added-or-updated (filter non-empty-review-task? from-update))]
-          (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
-          [unchanged added-or-updated])
+  (let [faulty-tasks (filter #(= (:state %) :faulty_review_task) from-mongo)
+        from-mongo   (remove #(= (:state %) :faulty_review_task) from-mongo)]
+    (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s (+faulty: %s)" (count from-update) (count from-mongo) (count faulty-tasks))
+    (loop [from-update from-update
+           from-mongo from-mongo
+           unchanged []
+           added-or-updated []]
+      (let [current (first from-mongo)
+            bg-id-current (bg-id current)
+            remaining (rest from-mongo)
+            updated-id-match (when-not (ss/empty? bg-id-current)
+                               (util/find-first #(= bg-id-current (bg-id %)) from-update))
+            updated-match (or updated-id-match
+                              (first (filter #(or (reviews-have-same-name-and-type? current %)
+                                                  (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
+        (cond
+          (= current nil)
+          ; Recursion end condition
+          (let [added-or-updated (concat added-or-updated (filter non-empty-review-task? from-update))]
+            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
+            [(concat faulty-tasks unchanged) added-or-updated])
 
-        (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
-        ;non-empty review tasks and all non-review tasks are left unchanged
-        (do
-          (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated))
+          (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
+          ;non-empty review tasks and all non-review tasks are left unchanged
+          (do
+            (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated))
 
-        (and updated-match (not (empty-review-task? updated-match)))
-        ; matching review found from backend system update => it replaces the existing one
-        (recur (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
+          (and updated-match (not (empty-review-task? updated-match)))
+          ; matching review found from backend system update => it replaces the existing one
+          (recur (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
 
-        :else
-        ; this existing review is left unchanged
-        (recur from-update remaining (conj unchanged current) added-or-updated)))))
+          :else
+          ; this existing review is left unchanged
+          (recur from-update remaining (conj unchanged current) added-or-updated))))))
 
 (defn merge-maps-that-are-distinct-by [pred map-coll]
   (->> (group-by pred map-coll)

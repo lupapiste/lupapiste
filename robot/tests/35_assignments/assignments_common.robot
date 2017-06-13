@@ -44,12 +44,12 @@ Create attachment assignment
 Open assignments search
   Go to page  applications
   Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
-  Select Radio Button  searchType  searchTypeAssignments
+  Scroll to and click xpath results  //label[@for='searchTypeAssignments']
 
 Open applications search
   Go to page  applications
-  Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
-  Select Radio Button  searchType  applications
+  Wait until  Element should be visible  xpath=//label[@for='searchTypeApplications']
+  Scroll to and click xpath results  //label[@for='searchTypeApplications']
 
 Count of open assignments is
   [Arguments]  ${count}

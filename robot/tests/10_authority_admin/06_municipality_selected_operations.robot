@@ -77,4 +77,5 @@ Go to operation tree
   Wait Until  Selected Municipality Is  ${municipality}
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
-  Click by test id  create-continue
+  Wait Until  Element Should Be Visible  xpath=//div[@id="create-map"]//button[@data-test-id="create-continue"]
+  Click element  xpath=//div[@id="create-map"]//button[@data-test-id="create-continue"]

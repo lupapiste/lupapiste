@@ -1,5 +1,5 @@
 (ns sade.util
-  (:refer-clojure :exclude [pos? neg? zero?])
+  (:refer-clojure :exclude [pos? neg? zero? max-key])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
@@ -32,6 +32,12 @@
   "Like clojure.core/zero?, but nil returns false instead of NPE"
   [n]
   (if n (clojure.core/zero? n) false))
+
+(defn max-key
+  "Like clojure.core/max-key, but has single arity and is nil safe.
+  Ignores elements without key."
+  [key & ms]
+  (some->> (filter key ms) not-empty (apply clojure.core/max-key key)))
 
 ;; Map utilities
 
@@ -428,6 +434,19 @@
   {:pre [(map? x)]}
   (merge x (apply f x args)))
 
+(defn mongerify [x]
+  "Transforms values into ones that could be returned by monger,
+   applied recursively into sequences and values of maps.
+
+   Turns keywords into strings (except for keys of maps).
+   Turns lists, sets and vectors into vectors."
+  (cond (keyword? x)     (name x)
+        (map? x)         (map-values mongerify x)
+        (or (seq? x)
+            (vector? x)
+            (set? x))    (mapv mongerify x)
+        :else            x))
+
 (defn upsert
   [{id :id :as item} coll]
   (if id
@@ -616,11 +635,6 @@
 
 (defn read-edn-resource [file-path]
   (->> file-path io/resource slurp edn/read-string))
-
-(defn call-in
-  "Takes a function, a path and a datastructure"
-  [f path x]
-  (f (get-in x path)))
 
 (defn distinct-by
   "Given a function comparable-fn and collection coll, builds a new

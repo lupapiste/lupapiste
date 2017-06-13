@@ -75,7 +75,7 @@ Add other task
   Task count is  task-lupamaarays  1
 
 Return to application and check total task numbers
-  Click by test id  return-from-verdict
+  Scroll and click test id  return-from-verdict
   Open tab  tasks
   Task count is  task-katselmus  4
   Foreman count is  4

@@ -99,9 +99,10 @@ Mikko selects not needed for valtakirja attachment
 Mikko follows missing attachment link
   Open tab  requiredFieldSummary
   Scroll and click test id  missing-muut-muu
-  
+
 Mikko adds pdf attachment to the template requested by Sonja
   Add attachment version  ${PDF_TESTFILE_PATH}
+  Positive indicator should not be visible
   Scroll and click test id  back-to-application-from-attachment
   Wait Until  Tab should be visible  attachments
 

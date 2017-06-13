@@ -23,9 +23,9 @@ Kaino toggles between tabs but back button still works as expected
   Wait test id visible  company-info-tab
   Company tab  users
   No such test id  company-info-tab
-  Click by test id  company-back
+  Scroll and click test id  company-back
   Wait until  Element should be visible  own-info-form
-  Click by test id  back-button
+  Scroll and click test id  back-button
   Wait until  Applications page should be open
 
 Kaino invites Pena to Solita
@@ -48,7 +48,7 @@ Kaino invites Teppo to Solita
 # -------------------
 Admin admin locks Solita
   SolitaAdmin logs in
-  Click by test id  companies
+  Scroll and click test id  companies
   ${today}=  Execute Javascript  return moment().format("D.M.YYYY");
   Lock company  solita  ${today}
   [Teardown]  Logout
@@ -74,8 +74,8 @@ Pena locks in but locking status is not visible to him
 # -------------------
 Admin admin locks Solita in the future
   SolitaAdmin logs in
-  Click by test id  companies
-  Click by test id  unlock-company-solita
+  Scroll and click test id  companies
+  Scroll and click test id  unlock-company-solita
   ${tomorrow}=  Execute Javascript  return moment().add( 1, "days").format("D.M.YYYY");
   Lock company  solita  ${tomorrow}
   [Teardown]  Logout
@@ -93,8 +93,8 @@ Kaino logs in and sees Solita unlocked
 # -------------------
 Admin admin locks Solita in the past
   SolitaAdmin logs in
-  Click by test id  companies
-  Click by test id  unlock-company-solita
+  Scroll and click test id  companies
+  Scroll and click test id  unlock-company-solita
   ${yesterday}=  Execute Javascript  return moment().subtract( 1, "days").format("D.M.YYYY");
   Lock company  solita  ${yesterday}
   [Teardown]  Logout
@@ -107,11 +107,11 @@ Kaino logs in and sees Solita again locked
   Company is locked for admin
 
 Kaino nukes company
-  Click by test id  company-nuke-all
-  Click by test id  confirm-no
+  Scroll and click test id  company-nuke-all
+  Scroll and click test id  confirm-no
   Company is locked for admin
-  Click by test id  company-nuke-all
-  Click by test id  confirm-yes
+  Scroll and click test id  company-nuke-all
+  Scroll and click test id  confirm-yes
   User should not be logged in
 
 # -------------------
@@ -191,7 +191,7 @@ Reset password
   [Arguments]  ${email}  ${password}
   Click link  jquery=div.passwd-reset a
   Input text with jQuery  input.form-input:visible  ${email}
-  Click by test id  reset-send
+  Scroll and click test id  reset-send
   Wait until  Test id disabled  reset-send
   Open last email
   Page Should Contain  /app/fi/welcome#!/setpw
