@@ -91,6 +91,11 @@
     application
     (dissoc application :urgency :authorityNotice)))
 
+(defn- pick-user-company-notes
+  "Filters company notes for user without changing original :company-notes structure (notes returned in a seq)."
+  [{{company-id :id} :company :as user} company-notes]
+  (filter (comp #{company-id} :companyId) company-notes))
+
 (defn- relates-to-draft-verdict? [{verdicts :verdicts} {target :target source :source}]
   (or (and (= (:type target) "verdict") (:draft (util/find-by-id (:id target) verdicts)))
       (and (= (:type source) "verdict") (:draft (util/find-by-id (:id source) verdicts)))))
@@ -128,6 +133,7 @@
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
+        (update-in [:company-notes] (partial pick-user-company-notes user))
         (filter-notice-from-application user))))
 
 (defn with-participants-info

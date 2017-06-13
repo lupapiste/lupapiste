@@ -364,3 +364,111 @@
              (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
        (fact "Kaino is no longer Solitan"
              (query kaino :company :company "solita" :users true) => unauthorized?))
+
+(apply-remote-minimal)
+
+(facts "query company tags"
+  (fact "tags are returned for company user"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 1
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti1"))
+
+  (fact "fail for non company user"
+    (query pena "company-tags" :company "solita") => (partial expected-failure? :error.unauthorized)))
+
+(facts "edit company tags"
+
+  (fact "add new tag"
+    (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"} {:label "Uusi tagi"}]) => ok?)
+
+  (fact "tag is added"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 2
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti1"
+
+      (get-in resp [:tags 1 :id]) => truthy
+      (get-in resp [:tags 1 :label]) => "Uusi tagi"))
+
+  (fact "fail for non company user"
+    (command pena "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"} {:label "Uusi tagi"}]) => (partial expected-failure? :error.unauthorized))
+
+
+  (fact "remove tag"
+    (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"}]) => ok?)
+
+  (fact "tag is removed"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 1
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti1"))
+
+  (fact "edit existing tag"
+    (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti666"}]) => ok?)
+
+  (fact "tag is removed"
+    (let [resp (query kaino "company-tags" :company "solita")]
+      resp => ok?
+      (-> resp :tags count) => 1
+      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:tags 0 :label]) => "Projekti666")))
+
+(facts "adding company tags to application"
+
+  (fact "set company tags for solita"
+    (command kaino "save-company-tags" :tags [{:label "Projekti1"} {:label "Projekti2"} {:label "Projekti3"} {:label "Projekti4"}]) => ok?)
+
+  (fact "set company tags for esimerkki"
+    (command erkki "save-company-tags" :tags [{:label "Raksa"} {:label "Paksa"}]) => ok?)
+
+  (let [app  (create-and-open-application kaino)
+        solita-tags (:tags (query kaino "company-tags" :company "solita"))
+        tag-ids (map :id solita-tags)
+        esimerkki-tags (:tags (query erkki "company-tags" :company "esimerkki"))]
+    (count solita-tags) => 4
+
+    (fact "add tags to application"
+      (->> (take 2 tag-ids)
+           (command kaino :update-application-company-notes :id (:id app) :tags)) => ok?)
+
+    (fact "cannot add another company's tags"
+      (->> [(:id (last esimerkki-tags))]
+           (command kaino :update-application-company-notes :id (:id app) :tags)) => (partial expected-failure? :error.unknown-tag))
+
+    (fact "tags are added"
+      (let [app (query-application kaino (:id app))]
+        (:company-notes app) => [{:companyId "solita" :tags (take 2 tag-ids)}]))
+
+    (fact "add note to application"
+      (command kaino :update-application-company-notes :id (:id app) :note "foo my app") => ok?)
+
+    (fact "note is added - tags still exist"
+      (let [app (query-application kaino (:id app))]
+        (:company-notes app) => [{:companyId "solita" :tags (take 2 tag-ids) :note "foo my app"}]))
+
+    (fact "company notes are not visible for non-company user"
+      (let [app (query-application sonja (:id app))]
+        (:company-notes app) => []))
+
+    (fact "kaino invites another company"
+      (command kaino :company-invite :id (:id app) :company-id "esimerkki") => ok?)
+
+    (fact "Invitation is accepted"
+      (let [resp (accept-company-invitation)]
+        (:status resp) => 200))
+
+    (fact "solita company notes are not visible for another company user"
+      (let [app (query-application erkki (:id app))]
+        (:company-notes app) => []))
+
+    (fact "add tags to application for esimerkki"
+      (->> [(:id (last esimerkki-tags))]
+           (command erkki :update-application-company-notes :id (:id app) :tags)) => ok?)
+
+    (fact "erkki sees tag he just added"
+      (let [app (query-application erkki (:id app))]
+        (:company-notes app) => [{:companyId "esimerkki" :tags [(:id (last esimerkki-tags))]}]))))

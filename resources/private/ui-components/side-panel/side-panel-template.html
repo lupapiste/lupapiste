@@ -33,6 +33,16 @@
                 <i data-bind="attr: {'class': noticeIcon}"></i>
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
             </button>
+            <button id="open-company-notes-side-panel"
+                    class="vertical caps btn-notice"
+                    data-bind="click: toggleCompanyNotesPanel,
+                               visible: authorization.ok('company-notes'),
+                               css: {active: showCompanyNotesPanel,
+                               primary: !unseenCompanyNote(),
+                               positive: unseenCompanyNote}">
+                <i data-bind="attr: {'class': noticeIcon}"></i>
+                <span class="btn-title" data-bind="lspaced: 'company-notes.title'"></span>
+            </button>
             <button id="open-info-side-panel"
                     class="vertical caps btn-notice"
                     data-bind="click: toggleInfoPanel,
@@ -75,6 +85,18 @@
                                                        urgency: sidePanelService.urgency,
                                                        tags: sidePanelService.tags,
                                                        authorityNotice: sidePanelService.authorityNotice}}"></div>
+              </div>
+              <!-- /ko -->
+              <!-- ko if: authorization.ok('company-notes')-->
+              <div id="notice-panel" data-bind="if: showCompanyNotesPanel">
+                  <div class="header">
+                      <h1 data-bind="ltext: 'company-notes.title'"></h1>
+                  </div>
+                  <div class="notice-component"
+                       data-bind="component: {name: 'company-notes-panel',
+                                              params: {authorization: sidePanelService.authorization,
+                                                       tags: sidePanelService.companyTags,
+                                                       note: sidePanelService.companyNote}}"></div>
               </div>
               <!-- /ko -->
               <side-panel-info data-bind="visible: showInfoPanel"></side-panel-info>
