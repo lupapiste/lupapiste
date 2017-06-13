@@ -183,8 +183,8 @@
                                   :targets
                                   (util/find-by-id (:id target)))]
           (:inspection-date modified-target) => 1500000000000))
-      (fact "Inspection date should be valid timestamp"
-        (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date "15000ABC00000") => (partial expected-failure? :error.illegal-number))
+      (fact "Inspection date should be valid with value nil"
+        (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date nil) => ok?)
       (fact "Inpection date can't be set to finished target"
         (command pena :set-target-status :id app-id :summaryId summary-id :targetId (:id target) :status true) => ok?
         (command pena :set-inspection-date :id app-id :summaryId summary-id :targetId (:id target) :date 1500000000000) => (partial expected-failure? :error.inspection-summary-target.finished))
