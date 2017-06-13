@@ -60,6 +60,15 @@
   text-decoration: none;
 }
 
+.inspection-date-input {
+  min-width: 100px;
+}
+
+.inspection-date-row {
+  width: 85%;
+  white-space: nowrap;
+}
+
 .create-summary-bubble {
   .container-bubble {
     margin: 0px;

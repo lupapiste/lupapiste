@@ -196,8 +196,7 @@
                 inspection-summary/deny-if-finished]
    :parameters [:id summaryId targetId date]
    :categories #{:inspection-summaries}
-   :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])
-                      (partial action/number-parameters [:date])]
+   :input-validators [(partial action/non-blank-parameters [:summaryId :targetId])]
    :user-authz-roles #{:writer :owner :foreman}
    :user-roles #{:applicant :authority}}
   [{application :application user :user}]
