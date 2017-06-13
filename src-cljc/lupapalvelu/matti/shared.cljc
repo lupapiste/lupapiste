@@ -23,13 +23,13 @@
 (defschema MattiFromSettings
   "Component that builds schema from the settings."
   (merge MattiBase
-         {:settings-id          sc/Str
+         {:path                 [sc/Keyword]  ;; Path within settings
           :type                 (sc/enum :select :multi-select)
           (sc/optional-key :id) sc/Str}))
 
 (defschema MattiMultiSelect
   (merge MattiBase
-         {:items [sc/Str]}))
+         {:items [sc/Keyword]}))
 
 (def schema-type-alternatives
   {:docgen        sc/Str
@@ -100,11 +100,17 @@
                                        checks)}}}])
        [:small :medium :large :extra-large]))
 
-(defn complexity-section [id items]
+(defn complexity-section [id settings-path]
   {:id (name id)
-   :loc-prefix (keyword id)
-   :grid  {:columns 4
-           :rows (checkbox-rows items)}
+   :grid  {:columns 1
+           :rows (mapv (fn [complexity]
+                         [{:schema {:from-settings {:id (name complexity)
+                                                    ;; :i18nkey [(->> complexity name (str "matti.complexity.") keyword)
+                                                    ;;           :matti.complexity.label]
+                                                    :type :multi-select
+                                                    :loc-prefix (-> settings-path first keyword)
+                                                    :path settings-path}}}])
+                       [:small :medium :large :extra-large])}
    :_meta {:can-remove? true}})
 
 (defn text-section [id]
@@ -138,25 +144,21 @@
                                    :schema {:docgen "matti-verdict-giver"}}
                                   {:align  :full
                                    :col    2
-                                   :id     "paatostieto"
-                                   :schema {:docgen "matti-verdict-code"}}
-                                  {:align  :full
-                                   :col    2
-                                   :id     "paatostieto2"
-                                   :schema {:from-settings {:settings-id "paatostieto"
-                                                            :type        :multi-select}}}]
+                                   :id     "verdict-code"
+                                   :schema {:from-settings {:path       [:matti-rp :verdict-code]
+                                                            :type       :select
+                                                            :loc-prefix :matti-rp}}}
+                                  {:col 2
+                                   :id "foobar"
+                                   :schema {:multi-select {:items [:foo :bar :baz]}}}]
                                  [{:col    5
                                    :id     "paatosteksti"
                                    :align  :full
-                                   :schema {:docgen "matti-verdict-text"}}]
-                                 [{:col 6
-                                   :id "foremen"
-                                   :schema {:multi-select {:items ["vastaava-tj" "vv-tj" "iv-tj" "erityis-tj"]}}}]]}
+                                   :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen ["vastaava-tj" "vv-tj"
-                                                  "iv-tj" "erityis-tj"] )
-              (complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (complexity-section :matti-reviews ["paikka" "sijainti" "aloitus" "pohja"
+              (complexity-section :matti-foremen [:matti-rp :foremen] )
+              #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
+              #_(complexity-section :matti-reviews ["paikka" "sijainti" "aloitus" "pohja"
                                                   "rakenne" "vv" "iv" "loppu"])
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
@@ -180,6 +182,58 @@
                :_meta {:can-remove? true}}]})
 
 (sc/validate MattiVerdict default-verdict-template)
+
+(defschema MattiSettings
+  {:id   sc/Str
+   :grid MattiGrid})
+
+(def rp-settings
+  {:id "matti-rp"
+   :grid {:columns 1
+          :rows [[{:id "foremen"
+                   :schema {:multi-select {:items [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]
+                 [{:id "verdict-code"
+                   :schema {:multi-select {:items [:annettu-lausunto
+                                                   :asiakirjat-palautettu
+                                                   :ehdollinen
+                                                   :ei-lausuntoa
+                                                   :ei-puollettu
+                                                   :ei-tiedossa
+                                                   :ei-tutkittu-1
+                                                   :ei-tutkittu-2
+                                                   :ei-tutkittu-3
+                                                   :evatty
+                                                   :hallintopakko
+                                                   :hyvaksytty
+                                                   :ilmoitus-tiedoksi
+                                                   :konversio
+                                                   :lautakunta-palauttanut
+                                                   :lautakunta-poistanut
+                                                   :lautakunta-poydalle
+                                                   :maarays-peruutettu
+                                                   :muutti-evatyksi
+                                                   :muutti-maaraysta
+                                                   :muutti-myonnetyksi
+                                                   :myonnetty
+                                                   :myonnetty-aloitusoikeudella
+                                                   :osittain-myonnetty
+                                                   :peruutettu
+                                                   :puollettu
+                                                   :pysytti-evattyna
+                                                   :pysytti-maarayksen-2
+                                                   :pysytti-myonnettyna
+                                                   :pysytti-osittain
+                                                   :siirretty-maaoikeudelle
+                                                   :suunnitelmat-tarkastettu
+                                                   :tehty-hallintopakkopaatos-1
+                                                   :tehty-hallintopakkopaatos-2
+                                                   :tehty-uhkasakkopaatos
+                                                   :tyohon-ehto
+                                                   :valituksesta-luovuttu-1
+                                                   :valituksesta-luovuttu-2]}}}]]}})
+
+(sc/validate MattiSettings rp-settings)
+
 
 ;; Schema utils
 

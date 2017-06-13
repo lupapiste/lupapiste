@@ -34,11 +34,12 @@
 
 (rum/defc matti-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
+  (println "Items:" (:items schema))
   [:div.matti-multi-select
    (when wrap-label?
      [:h4.matti-label (path/loc path)])
    (let [state (path/state path state)]
-     (for [item (:items schema)
+     (for [item (map name (:items schema))
            :let [item-id (path/id (path/extend path item))
                  checked (contains? (set (rum/react state)) item)]]
        [:div.matti-checkbox-wrapper
@@ -50,9 +51,10 @@
          {:for item-id
           :on-click (fn [_]
                       (swap! state
-                             (if checked
-                               (partial remove #(= item %))
-                               #(cons item %)))
+                            (fn [xs]
+                              (distinct (if checked
+                                          (remove #(= item %) xs)
+                                          (cons item xs)))))
                       (path/meta-updated options))}
          (path/loc path options item)]]))])
 
@@ -61,8 +63,8 @@
   (let [options   (assoc options
                          :schema (assoc schema
                                         :body [{:body (map #(hash-map :name %)
-                                                           (get (rum/react settings)
-                                                                (:settings-id schema)))}]))
+                                                           (distinct (path/react (:path schema)
+                                                                                 settings)))}]))
         component (docgen/docgen-select options)]
     (if wrap-label?
       (docgen/docgen-label-wrap options component)
@@ -70,8 +72,8 @@
 
 (rum/defc multi-select-from-settings < rum/reactive
   [{:keys [state path schema settings] :as options} & [wrap-label?]]
-  (matti-multi-select (assoc-in options [:schema :items] (get (rum/react settings)
-                                                              (:settings-id schema)))
+  (matti-multi-select (assoc-in options [:schema :items] (distinct (path/react (:path schema)
+                                                                               settings)))
                       wrap-label?))
 
 (defmulti instantiate (fn [_ cell & _]

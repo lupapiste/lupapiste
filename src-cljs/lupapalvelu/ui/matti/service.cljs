@@ -61,3 +61,15 @@
   (common/command {:command "copy-verdict-template"
                    :success (list-update-response callback)}
                   :template-id template-id))
+
+(defn settings [category callback]
+  (common/query "verdict-template-settings"
+                callback
+                :category category))
+
+(defn save-settings-value [category path value callback]
+  (common/command {:command "save-verdict-template-settings-value"
+                   :success callback}
+                  :category category
+                  :path path
+                  :value value))

@@ -44,3 +44,7 @@
 
 (defn event->state [state]
   #(reset-if-needed! state (.. % -target -value)))
+
+(defn response->state [state kw]
+  (fn [response]
+    (swap! state #(assoc % kw (kw response)))))

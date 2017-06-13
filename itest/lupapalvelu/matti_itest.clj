@@ -15,10 +15,27 @@
           {}
           m))
 
+(facts "Settings"
+  (fact "No settings"
+    (query sipoo :verdict-template-settings
+           :category "foo") => (just {:ok true}))
+  (fact "Save settings draft"
+    (let [{modified :modified}
+          (command sipoo :save-verdict-template-settings-value
+                   :category "foo"
+                   :path [:one :two]
+                   :value ["a" "b" "c"])]
+      modified => pos?
+      (fact "Query settings"
+        (query sipoo :verdict-template-settings
+               :category "foo")
+        => (contains {:settings {:draft    {:one {:two ["a" "b" "c"]}}
+                                 :modified modified}})))))
+
 (fact "Create new template"
   (let [{:keys [id name draft modified]} (command sipoo :new-verdict-template)]
     id => string?
-    name => "Päätöspohja"
+    name => "P\u00e4\u00e4t\u00f6spohja"
     draft => {}
     modified => pos?
     (fact "Fetch draft"

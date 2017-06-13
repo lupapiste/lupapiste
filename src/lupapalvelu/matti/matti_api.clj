@@ -11,6 +11,9 @@
 (defn- command->organization [{user :user}]
   (usr/authority-admins-organization user))
 
+;; ----------------------------------
+;; Pre-checks for verdict templates
+;; ----------------------------------
 (defn- verdict-template-exists [{data :data :as command}]
   (when-not (matti/verdict-template (command->organization command)
                                     (:template-id data))
@@ -30,6 +33,10 @@
                                         (:template-id data))
                 :name ss/not-blank?)
     (fail :error.verdict-template-name-missing)))
+
+;; ----------------------------------
+;; Verdict template API
+;; ----------------------------------
 
 (defcommand new-verdict-template
   {:description "Creates new empty template. Returns template id, name and draft."
@@ -85,6 +92,7 @@
   [command]
   (ok :verdict-templates (->> (command->organization command)
                               :verdict-templates
+                              :templates
                               (map matti/verdict-template-summary))))
 (defquery verdict-template
   {:description "Verdict template summary plus draft data. The
@@ -121,3 +129,32 @@
                                     template-id
                                     created
                                     lang)))
+
+;; ----------------------------------
+;; Verdict template settings API
+;; ----------------------------------
+
+(defquery verdict-template-settings
+  {:description "Settings matching the id or empty response."
+   :user-roles #{:authorityAdmin}
+   :parameters [category]
+   :input-validators [(partial action/non-blank-parameters [:category])]}
+  [command]
+  (when-let [settings (matti/settings (command->organization command)
+                                      category)]
+    (ok :settings settings)))
+
+(defcommand save-verdict-template-settings-value
+  {:description      "Incremental save support for verdict template
+  settings. Returns modified timestamp. Creates settings if needed."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category path value]
+   :input-validators [(partial action/vector-parameters [:path])
+                      (partial action/non-blank-parameters [:category])]}
+  [{:keys [created] :as command}]
+  (matti/save-settings-value (command->organization command)
+                             category
+                             created
+                             path
+                             value)
+  (ok :modified created))
