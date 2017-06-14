@@ -34,23 +34,31 @@
                 :name ss/not-blank?)
     (fail :error.verdict-template-name-missing)))
 
+(defn- valid-category [{data :data :as command}]
+  (when-not (contains? (matti/organization-categories (command->organization command))
+                       (-> data :category keyword))
+    (fail :error.invalid-category)))
+
 ;; ----------------------------------
 ;; Verdict template API
 ;; ----------------------------------
 
 (defcommand new-verdict-template
-  {:description "Creates new empty template. Returns template id, name and draft."
-   :user-roles  #{:authorityAdmin}}
+  {:description      "Creates new empty template. Returns template id, name and draft."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category]
+   :input-validators [valid-category]}
   [{:keys [created user lang]}]
   (ok (matti/new-verdict-template (usr/authority-admins-organization-id user)
                                    created
-                                   lang)))
+                                   lang
+                                   category)))
 
 (defcommand set-verdict-template-name
-  {:parameters [template-id name]
+  {:parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])
                       verdict-template-editable]
-   :user-roles #{:authorityAdmin}}
+   :user-roles       #{:authorityAdmin}}
   [{created :created :as command}]
   (matti/set-name (command->organization command)
                   template-id
@@ -74,9 +82,9 @@
   (ok :modified created))
 
 (defcommand publish-verdict-template
-  {:description "Creates new verdict template version."
-   :user-roles #{:authorityAdmin}
-   :parameters [template-id]
+  {:description      "Creates new verdict template version."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [template-id]
    :input-validators [verdict-template-editable
                       verdict-template-has-name]}
   [{:keys [created user user-organizations] :as command}]
@@ -87,13 +95,20 @@
 
 (defquery verdict-templates
   {:description "Id, name, modified, published and deleted maps for
-  every verdict template."
+  every verdict template. The response also includes category list."
    :user-roles #{:authorityAdmin}}
   [command]
   (ok :verdict-templates (->> (command->organization command)
                               :verdict-templates
                               :templates
                               (map matti/verdict-template-summary))))
+
+(defquery verdict-template-categories
+  {:description "Categories for the user's organization"
+   :user-roles #{:authorityAdmin}}
+  [command]
+  (ok :categories (matti/organization-categories (command->organization command))))
+
 (defquery verdict-template
   {:description "Verdict template summary plus draft data. The
   template must be editable."
@@ -138,7 +153,7 @@
   {:description "Settings matching the id or empty response."
    :user-roles #{:authorityAdmin}
    :parameters [category]
-   :input-validators [(partial action/non-blank-parameters [:category])]}
+   :input-validators [valid-category]}
   [command]
   (when-let [settings (matti/settings (command->organization command)
                                       category)]
@@ -150,7 +165,7 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category path value]
    :input-validators [(partial action/vector-parameters [:path])
-                      (partial action/non-blank-parameters [:category])]}
+                      valid-category]}
   [{:keys [created] :as command}]
   (matti/save-settings-value (command->organization command)
                              category

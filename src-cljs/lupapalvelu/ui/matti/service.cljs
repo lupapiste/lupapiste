@@ -5,6 +5,7 @@
 (defonce schemas (atom {}))
 ;; List of id, name, published, deleted maps.
 (defonce template-list (atom []))
+(defonce categories (atom []))
 
 (defn fetch-schemas []
   (common/query "schemas"
@@ -24,6 +25,12 @@
     (fetch-template-list)
     (callback response)))
 
+(defn fetch-categories [callback]
+  (common/query "verdict-template-categories"
+                #(do
+                   (reset! categories (:categories %))
+                   (callback @categories))))
+
 (defn publish-template [template-id callback]
   (common/command {:command "publish-verdict-template"
                    :success (list-update-response callback)}
@@ -41,9 +48,10 @@
                 callback
                 :template-id template-id))
 
-(defn new-template [callback]
+(defn new-template [category callback]
   (common/command {:command "new-verdict-template"
-                   :success (list-update-response callback)}))
+                   :success (list-update-response callback)}
+                  :category category))
 
 (defn set-template-name [template-id name callback]
   (common/command {:command "set-verdict-template-name"

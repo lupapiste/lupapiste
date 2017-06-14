@@ -5,7 +5,6 @@
             [schema.core :refer [defschema] :as sc]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
-;; Identifier localization is matti.verdict.identifier (see matti.txt).
 (def verdict-code-map
   {:annettu-lausunto            "annettu lausunto"
    :asiakirjat-palautettu       "asiakirjat palautettu korjauskehotuksin"
@@ -46,12 +45,19 @@
    :valituksesta-luovuttu-1     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy puollettuna)"
    :valituksesta-luovuttu-2     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"})
 
-(def verdict-code {:name "matti-verdict-code"
-                   :type :select
-                   :body (map #(hash-map :name (name %))
-                              (keys verdict-code-map))})
-(def verdict-check {:name "matti-verdict-check"
-                    :type :checkbox})
+(def review-type-map
+  {:muu-katselmus             "muu katselmus"
+   :muu-tarkastus             "muu tarkastus"
+   :aloituskokous             "aloituskokous"
+   :paikan-merkitseminen      "rakennuksen paikan merkitseminen"
+   :paikan-tarkastaminen      "rakennuksen paikan tarkastaminen"
+   :pohjakatselmus            "pohjakatselmus"
+   :rakennekatselmus          "rakennekatselmus"
+   :lvi-katselmus             "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+   :osittainen-loppukatselmus "osittainen loppukatselmus"
+   :loppukatselmus            "loppukatselmus"
+   :ei-tiedossa               "ei tiedossa"
+   })
 
 (def matti-string {:name "matti-string"
                    :type :string})
@@ -70,19 +76,35 @@
                           :body  [{:name "automatic"}
                                   {:name "manual"}]})
 
+(defschema MattiSettingsReview
+  {:id      ssc/ObjectIdStr
+   :name    {:fi sc/Str
+             :sv sc/Str
+             :en sc/Str}
+   :type    (apply sc/enum (keys review-type-map))
+   :deleted sc/Bool})
+
+(defschema MattiSavedSettings
+  {:id sc/Str
+   :modified ssc/Timestamp
+   :draft sc/Any
+   :reviews [MattiSettingsReview]})
+
 (defschema MattiSavedTemplate
   {:id       ssc/ObjectIdStr
    :name     sc/Str
+   :category (sc/enum :r :p :ya :kt :ymp)
    :deleted  sc/Bool
    :draft    sc/Any ;; draft is copied to version data on publish.
    :modified ssc/Timestamp
    :versions [{:id        ssc/ObjectIdStr
                :published ssc/Timestamp
-               :data      sc/Any}]})
+               :data      sc/Any
+               :settings  MattiSavedSettings}]})
 
 (defschemas 1
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [verdict-code verdict-check matti-string verdict-text
+       [verdict-code matti-string verdict-text
         verdict-giver automatic-vs-manual]))

@@ -3,13 +3,23 @@
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
+            [sade.strings :as ss]
             [sade.util :as util]))
 
+(defn organization-categories [{scope :scope}]
+  (->> (map (comp keyword ss/lower-case :permitType) scope)
+       (map #(cond
+               (#{:r :p :ya} %) %
+               (#{:kt :mm} %)   :kt
+               :else            :ymp))
+       set))
+
 (defn new-verdict-template
-  ([org-id timestamp lang draft name]
+  ([org-id timestamp lang category draft name]
    (let [data {:id       (mongo/create-id)
                :draft    draft
                :name     name
+               :category category
                :modified timestamp}]
      (mongo/update-by-id :organizations
                          org-id
@@ -18,8 +28,8 @@
                                         {:deleted  false
                                          :versions []})}})
      data))
-  ([org-id timestamp lang]
-   (new-verdict-template org-id timestamp lang {}
+  ([org-id timestamp lang category]
+   (new-verdict-template org-id timestamp lang category {}
                          (i18n/localize lang :matti-verdict-template))))
 
 (defn verdict-template [{templates :verdict-templates} template-id]
@@ -62,7 +72,7 @@
 
 (defn verdict-template-summary [{versions :versions :as template}]
   (assoc (select-keys template
-                      [:id :name :modified :deleted])
+                      [:id :name :modified :deleted :category])
          :published (-> versions last :published)))
 
 (defn set-deleted [organization template-id deleted?]
@@ -71,11 +81,12 @@
                    {$set {:verdict-templates.templates.$.deleted deleted?}}))
 
 (defn copy-verdict-template [organization template-id timestamp lang]
-  (let [{:keys [draft name]} (verdict-template organization
-                                               template-id)]
+  (let [{:keys [draft name category]} (verdict-template organization
+                                                        template-id)]
     (new-verdict-template (:id organization)
                           timestamp
                           lang
+                          category
                           draft
                           (format "%s (%s)"
                                   name

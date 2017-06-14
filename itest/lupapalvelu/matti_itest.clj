@@ -16,28 +16,37 @@
           m))
 
 (facts "Settings"
+  (fact "Bad category"
+    (query sipoo :verdict-template-settings
+           :category "foo") => (err :error.invalid-category))
   (fact "No settings"
     (query sipoo :verdict-template-settings
-           :category "foo") => (just {:ok true}))
+           :category "r")=> (just {:ok true}))
   (fact "Save settings draft"
     (let [{modified :modified}
           (command sipoo :save-verdict-template-settings-value
-                   :category "foo"
+                   :category "r"
                    :path [:one :two]
                    :value ["a" "b" "c"])]
       modified => pos?
       (fact "Query settings"
         (query sipoo :verdict-template-settings
-               :category "foo")
+               :category "r")
         => (contains {:settings {:draft    {:one {:two ["a" "b" "c"]}}
                                  :modified modified}})))))
 
+(fact "Sipoo categories"
+  (:categories (query sipoo :verdict-template-categories))
+  => (contains ["r" "p" "ymp" "kt"] :in-any-order))
+
 (fact "Create new template"
-  (let [{:keys [id name draft modified]} (command sipoo :new-verdict-template)]
+  (let [{:keys [id name draft modified category]}
+        (command sipoo :new-verdict-template :category "r")]
     id => string?
     name => "P\u00e4\u00e4t\u00f6spohja"
     draft => {}
     modified => pos?
+    category => "r"
     (fact "Fetch draft"
       (query sipoo :verdict-template :template-id id)
       => (contains {:id       id
@@ -50,6 +59,7 @@
                                          :name      name
                                          :modified  modified
                                          :deleted   false
+                                         :category  "r"
                                          :published nil}]}))
     (fact "Change the name"
       (let [{later :modified}
@@ -85,6 +95,7 @@
                                                      :name      "Uusi nimi"
                                                      :modified  even-later
                                                      :deleted   true
+                                                     :category  "r"
                                                      :published published}]}))
                 (fact "Name change not allowed for deleted template"
                   (command sipoo :set-verdict-template-name
@@ -107,13 +118,15 @@
                   => (err :error.verdict-template-deleted))
                 (fact "Copying is allowed also for deleted templates"
                   (let [{:keys [copy-id copy-modified copy-published
-                                copy-deleted copy-draft copy-name]}
+                                copy-deleted copy-draft copy-name
+                                copy-category]}
                         (prefix-keys (command sipoo :copy-verdict-template
                                               :template-id id)
                                      :copy-)]
                     copy-id =not=> id
                     (- copy-modified published) => pos?
                     copy-published => nil
+                    copy-category => "r"
                     copy-name => "Uusi nimi (kopio)"
                     copy-draft => {:one {:two "hello"}}
                     (fact "Editing copy draft does not affect original"

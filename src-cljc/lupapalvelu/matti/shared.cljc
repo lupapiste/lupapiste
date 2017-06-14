@@ -153,18 +153,17 @@
                                   {:align  :full
                                    :col    2
                                    :id     "verdict-code"
-                                   :schema {:from-settings {:path       [:matti-rp :verdict-code]
+                                   :schema {:from-settings {:path       [:matti-r :verdict-code]
                                                             :type       :select
-                                                            :loc-prefix :matti-rp}}}]
+                                                            :loc-prefix :matti-r}}}]
                                  [{:col    5
                                    :id     "paatosteksti"
                                    :align  :full
                                    :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen [:matti-rp :foremen] )
+              (complexity-section :matti-foremen [:matti-r :foremen] )
               #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              #_(complexity-section :matti-reviews ["paikka" "sijainti" "aloitus" "pohja"
-                                                  "rakenne" "vv" "iv" "loppu"])
+              (complexity-section :matti-reviews [:matti-r :reviews])
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
                :grid  {:columns 6
@@ -192,12 +191,10 @@
   {:id   sc/Str
    :grid MattiGrid})
 
-(def rp-settings
-  {:id "matti-rp"
+(def r-settings
+  {:id "matti-r"
    :grid {:columns 1
-          :rows [[{:id "foremen"
-                   :schema {:multi-select {:items [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]
-                 [{:id "verdict-code"
+          :rows [[{:id "verdict-code"
                    :schema {:multi-select {:items [:annettu-lausunto
                                                    :asiakirjat-palautettu
                                                    :ehdollinen
@@ -235,9 +232,16 @@
                                                    :tehty-uhkasakkopaatos
                                                    :tyohon-ehto
                                                    :valituksesta-luovuttu-1
-                                                   :valituksesta-luovuttu-2]}}}]]}})
+                                                   :valituksesta-luovuttu-2]}}}]
+                 [{:id "foremen"
+                   :schema {:multi-select {:items [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]
+                 [{:id "reviews"
+                   :schema {:multi-select {:items [:paikka :sijainti :aloitus :pohja :rakenne :vv :iv :loppu]}}}]]}})
 
-(sc/validate MattiSettings rp-settings)
+(def settings-schemas
+  {:r r-settings})
+
+(sc/validate MattiSettings r-settings)
 
 
 ;; Schema utils

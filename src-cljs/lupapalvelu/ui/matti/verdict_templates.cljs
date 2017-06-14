@@ -10,7 +10,8 @@
 
 
 (defonce current-template (atom {}))
-(defonce current-view (atom ::list))
+(defonce current-view     (atom ::list))
+(defonce current-category (atom nil))
 
 (defn updater [{:keys [state path]}]
   (service/save-draft-value (path/value [:id] state)
@@ -99,12 +100,40 @@
    {:on-click #(service/toggle-delete-template id (not deleted) identity)}
    (common/loc (if deleted "matti-restore-template" "remove"))])
 
+(defn set-category [category]
+  (reset! current-category category)
+  (settings/fetch-settings category ))
+
+
+(rum/defc category-select < rum/reactive
+  []
+  [:div.matti-grid-6
+   [:div.row
+    [:div.col-2.col--full
+     [:select.dropdown
+      {:value (rum/react current-category)
+       :on-change #(set-category (.. % -target -value))}
+      (->> (rum/react service/categories)
+           (map (fn [cid]
+                  {:value cid
+                   :text (common/loc (str "matti-" cid))}))
+           (sort-by :text)
+           (map (fn [{:keys [value text]}]
+                  [:option {:key value :value value} text])))]]
+    [:div.col-4.col--right
+     [:button.ghost
+      {:on-click #(reset! current-view ::settings)}
+      [:span (common/loc :auth-admin.organization.properties)]]]]])
+
 (rum/defcs verdict-template-list < rum/reactive
   (rum/local false ::show-deleted)
   [{show-deleted ::show-deleted}]
-  (let [templates (rum/react service/template-list)]
+  (let [templates (filter #(= (rum/react current-category)
+                              (:category %))
+                          (rum/react service/template-list))]
     [:div.matti-template-list
      [:h2 (common/loc "matti.verdict-templates")]
+     (category-select)
      (when (some :deleted templates)
        [:div.checkbox-wrapper
         [:input {:type "checkbox"
@@ -140,23 +169,21 @@
                  (common/loc "matti.copy")]
                 (toggle-delete id deleted)]]])]]))
      [:button.positive
-      {:on-click #(service/new-template new-template)}
+      {:on-click #(service/new-template @current-category new-template)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc "add")]]
-     [:button.ghost
-      {:on-click #(reset! current-view ::settings)}
-      [:span (common/loc :auth-admin.organization.properties)]]]))
+      [:span (common/loc "add")]]]))
 
 (rum/defc verdict-templates < rum/reactive
   [_]
-  (when-not (empty? (rum/react service/schemas))
+  (when-not (or (empty? (rum/react service/schemas))
+                (empty? (rum/react service/categories)))
     [:div
      (case (rum/react current-view)
        ::template (with-back-button (verdict-template (assoc shared/default-verdict-template
                                             :state current-template
                                             :settings settings/settings*)))
        ::list     (verdict-template-list)
-       ::settings (with-back-button (settings/verdict-template-settings shared/rp-settings)))]))
+       ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @current-category)))))]))
 
 (defonce args (atom {}))
 
@@ -170,5 +197,6 @@
          :dom-id (name domId))
   (service/fetch-schemas)
   (service/fetch-template-list)
-  (settings/fetch-settings "rp")
+  (service/fetch-categories (fn [categories]
+                              (set-category (first categories))))
   (mount-component))
