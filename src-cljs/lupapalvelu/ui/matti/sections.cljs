@@ -37,8 +37,17 @@
   [:div.matti-multi-select
    (when wrap-label?
      [:h4.matti-label (path/loc path schema)])
-   (let [state (path/state path state)]
-     (for [item (map name (:items schema))
+   (let [state (path/state path state)
+         items (->> (:items schema)
+                    (map name)
+                    (map (fn [item]
+                           {:item item
+                            :text (if-let [item-loc (:item-loc-prefix schema)]
+                                    (path/loc [item-loc item])
+                                    (path/loc path schema item))}))
+                    (sort-by :text))]
+
+     (for [{:keys [item text]} items
            :let [item-id (path/id (path/extend path item))
                  checked (contains? (set (rum/react state)) item)]]
        [:div.matti-checkbox-wrapper
@@ -55,9 +64,7 @@
                                           (remove #(= item %) xs)
                                           (cons item xs)))))
                       (path/meta-updated options))}
-         (if-let [item-loc (:item-loc-prefix schema)]
-           (path/loc [item-loc item])
-           (path/loc path schema item))]]))])
+         text]]))])
 
 (rum/defc select-from-settings < rum/reactive
   [{:keys [state path schema settings] :as options} & [wrap-label?]]
