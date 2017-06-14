@@ -284,7 +284,7 @@
 
 (defn delete-user!
   [user-id]
-  (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}}))
+  (mongo/update-by-id :users user-id {$set {:role "dummy"}, $unset {:company 1, :private.password 1}}))
 
 (defn delete-every-user! [company-id]
   (mongo/update-by-query :users
