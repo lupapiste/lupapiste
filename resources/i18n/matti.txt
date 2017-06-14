@@ -206,6 +206,7 @@
 "matti-copy-postfix" "en" "copy"
 "matti-rp" "fi" "Asetukset: Rakennusvalvonnan päätöspohjat (R, P)"
 "matti-rp.foremen" "fi" "Työnjohtajat"
+"matti-foremen" "fi" "Työnjohtajat"
 "matti-rp.foremen.vastaava-tj" "fi" "Vastaava työnjohtaja"
 "matti-rp.foremen.vv-tj" "fi" "Vesi- viemärityönjohtaja"
 "matti-rp.foremen.iv-tj" "fi" "Ilmanvaihtotyönjohtaja"

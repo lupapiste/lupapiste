@@ -34,10 +34,9 @@
 
 (rum/defc matti-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
-  (println "Items:" (:items schema))
   [:div.matti-multi-select
    (when wrap-label?
-     [:h4.matti-label (path/loc path)])
+     [:h4.matti-label (path/loc path schema)])
    (let [state (path/state path state)]
      (for [item (map name (:items schema))
            :let [item-id (path/id (path/extend path item))
@@ -56,7 +55,9 @@
                                           (remove #(= item %) xs)
                                           (cons item xs)))))
                       (path/meta-updated options))}
-         (path/loc path options item)]]))])
+         (if-let [item-loc (:item-loc-prefix schema)]
+           (path/loc [item-loc item])
+           (path/loc path schema item))]]))])
 
 (rum/defc select-from-settings < rum/reactive
   [{:keys [state path schema settings] :as options} & [wrap-label?]]
@@ -75,6 +76,10 @@
   (matti-multi-select (assoc-in options [:schema :items] (distinct (path/react (:path schema)
                                                                                settings)))
                       wrap-label?))
+
+;; -------------------------------
+;; Component instantiation
+;; -------------------------------
 
 (defmulti instantiate (fn [_ cell & _]
                       (schema-type cell)))

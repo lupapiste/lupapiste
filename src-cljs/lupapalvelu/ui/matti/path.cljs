@@ -43,8 +43,9 @@
             i18nkey    i18nkey
             loc-prefix (flatten (concat [loc-prefix] [(last path)]))
             :else      path)
-          (concat extra)
-          loc)))))
+           (concat extra)
+           flatten
+           loc)))))
 
 
 (defn latest

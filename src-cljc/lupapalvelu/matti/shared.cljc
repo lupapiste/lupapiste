@@ -1,5 +1,6 @@
 (ns lupapalvelu.matti.shared
-  (:require [schema.core :refer [defschema] :as sc]))
+  (:require [clojure.string :as s]
+            [schema.core :refer [defschema] :as sc]))
 
 (declare MattiList)
 
@@ -25,11 +26,15 @@
   (merge MattiBase
          {:path                 [sc/Keyword]  ;; Path within settings
           :type                 (sc/enum :select :multi-select)
+          (sc/optional-key :item-loc-prefix) sc/Keyword
           (sc/optional-key :id) sc/Str}))
 
 (defschema MattiMultiSelect
   (merge MattiBase
-         {:items [sc/Keyword]}))
+         ;; Sometimes is useful to finetune item localisations
+         ;; separately from the label.
+         {(sc/optional-key :item-loc-prefix) sc/Keyword
+          :items           [sc/Keyword]}))
 
 (def schema-type-alternatives
   {:docgen        sc/Str
@@ -62,7 +67,7 @@
           :items                [MattiItem]}))
 
 (def matti-row [(merge MattiItem
-                       {(sc/optional-key :col)    sc/Int ;; Column width (.col-n). Default 1.
+                       {(sc/optional-key :col) sc/Int ;; Column width (.col-n). Default 1.
                         })] )
 
 (defschema MattiGrid
@@ -105,10 +110,13 @@
    :grid  {:columns 1
            :rows (mapv (fn [complexity]
                          [{:schema {:from-settings {:id (name complexity)
-                                                    ;; :i18nkey [(->> complexity name (str "matti.complexity.") keyword)
-                                                    ;;           :matti.complexity.label]
+                                                    :i18nkey [(->> complexity name (str "matti.complexity.") keyword)
+                                                              :matti.complexity.label]
                                                     :type :multi-select
-                                                    :loc-prefix (-> settings-path first keyword)
+                                                    :item-loc-prefix (->> settings-path
+                                                                          (map name)
+                                                                          (s/join ".")
+                                                                          keyword)
                                                     :path settings-path}}}])
                        [:small :medium :large :extra-large])}
    :_meta {:can-remove? true}})
@@ -147,10 +155,7 @@
                                    :id     "verdict-code"
                                    :schema {:from-settings {:path       [:matti-rp :verdict-code]
                                                             :type       :select
-                                                            :loc-prefix :matti-rp}}}
-                                  {:col 2
-                                   :id "foobar"
-                                   :schema {:multi-select {:items [:foo :bar :baz]}}}]
+                                                            :loc-prefix :matti-rp}}}]
                                  [{:col    5
                                    :id     "paatosteksti"
                                    :align  :full
