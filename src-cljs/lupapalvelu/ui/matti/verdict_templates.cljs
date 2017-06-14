@@ -2,6 +2,7 @@
   (:require [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
+            [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
@@ -43,11 +44,6 @@
                                           (common/response->state state :published))}
         (common/loc :matti.publish)]])
 
-(rum/defc verdict-template-saved < rum/reactive
-  [{state :state}]
-  [:span.saved-info
-   (common/loc :matti.last-saved
-               (js/util.finnishDateAndTime (path/react [:modified] state)))])
 
 (defn reset-template [{:keys [id name modified published draft] :as template}]
   (reset! current-template
@@ -85,7 +81,7 @@
       (verdict-template-publish options)]]
     [:div.row.row--tight
      [:div.col-2.col--right
-      (verdict-template-saved options)]]]
+      (layout/last-saved options)]]]
    (for [sec sections]
      (sections/section (assoc sec
                               :path (path/extend (:id sec))

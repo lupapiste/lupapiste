@@ -471,7 +471,7 @@ var util = (function($) {
   }
 
   function finnishDateAndTime( timestamp ) {
-    return moment( timestamp ).format( "D.M.YYYY, H:m:s");
+    return moment( timestamp ).format( "D.M.YYYY, HH:mm:ss");
   }
 
   return {

@@ -1,8 +1,8 @@
 (ns lupapalvelu.ui.matti.settings
   (:require [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
-            [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [rum.core :as rum]))
 
@@ -29,7 +29,12 @@
                        :path [id]
                        :state settings*)]
     [:div
-     [:h2 (common/loc id)]
-     (sections/matti-grid (shared/child-schema options
-                                               :grid
-                                               options))]))
+     [:div.matti-grid-2
+      [:div.row
+       [:div.col-1
+        [:h2 (common/loc id)]]
+       [:div.col-1.col--right
+        (layout/last-saved options)]]]
+     (layout/matti-grid (shared/child-schema options
+                                             :grid
+                                             options))]))
