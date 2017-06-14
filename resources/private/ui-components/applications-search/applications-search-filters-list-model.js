@@ -25,6 +25,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
     var filter = {
       handlers:      _.map(ko.unwrap(lupapisteApp.services.handlerFilterService.selected), "id"), //util.getIn(self.dataProvider, ["handler", "id"]),
       tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
+      companyTags:   _.map(ko.unwrap(lupapisteApp.services.companyTagFilterService.selected), "id"),
       operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
       organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
       event:         _.map(ko.unwrap(lupapisteApp.services.eventFilterService.selected), "id"),

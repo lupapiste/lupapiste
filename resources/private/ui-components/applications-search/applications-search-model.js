@@ -47,6 +47,19 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     var data = self.authorizationModel.getData();
     if (!_.isEmpty(data) && !self.initialized) {
       self.initialized = true;
+      if (self.authorizationModel.ok("enable-company-search")) {
+        self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+          type:             "company",
+          label:            "applications.search.company",
+          dataProvider:     self.dataProvider,
+          externalApi:      null,
+          limits:           self.limits,
+          filterComponent:  "applications-company-search-filter",
+          resultsComponent: "applications-search-results",
+          pagingComponent:  "applications-search-paging",
+          tabsComponent:    "applications-company-search-tabs"
+        }));
+      }
       if (self.authorizationModel.ok("enable-foreman-search")) {
         self.searchModels.push(new LUPAPISTE.SearchSectionModel({
           type:             "foreman",

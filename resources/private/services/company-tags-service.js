@@ -2,20 +2,22 @@ LUPAPISTE.CompanyTagsService = function() {
   "use strict";
   var self = this;
 
-  self.data = ko.observableArray();
+  var _data = ko.observableArray();
+
+  self.data = ko.pureComputed(function() {
+    return _data();
+  });
 
   self.currentCompanyTags = ko.pureComputed(function() {
-    if (self.data()) {
-      return self.data();
-    }
-    return [];
+    var companyId = util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
+    return util.getIn(self.data, [companyId, "tags"]) || [];
   });
 
   function load(){
     if (lupapisteApp.models.globalAuthModel.ok("company-tags")) {
       ajax.query("company-tags")
         .success(function(res) {
-          self.data(res.tags);
+          _data(_.set({}, _.get(res, "company.id"), _.get(res, "company")));
         })
         .call();
       return true;

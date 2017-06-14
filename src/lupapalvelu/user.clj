@@ -41,6 +41,7 @@
               :asc    sc/Bool}
    :filter   {(sc/optional-key :handlers)      [sc/Str]
               (sc/optional-key :tags)          [sc/Str]
+              (sc/optional-key :companyTags)   [sc/Str]
               (sc/optional-key :operations)    [sc/Str]
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]
