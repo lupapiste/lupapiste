@@ -1,7 +1,9 @@
 (ns lupapalvelu.matti.schemas
   (:require [lupapalvelu.document.schemas :refer [defschemas]]
             [lupapalvelu.document.tools :refer [body] :as tools]
+            [lupapalvelu.matti.shared :as shared]
             [sade.schemas :as ssc]
+            [sade.util :as util]
             [schema.core :refer [defschema] :as sc]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
@@ -108,3 +110,20 @@
           :body (body m)})
        [verdict-code matti-string verdict-text
         verdict-giver automatic-vs-manual]))
+
+;; Schema utils
+
+(defn get-in-schema [schema [x & xs]]
+  (if (nil? x)
+    schema
+    (let [x (name x)]
+      (cond
+        (re-matches #"\d+" x) (get-in-schema (nth (get schema :row schema)
+                                                  (util/->int x))
+                                             xs)
+        (= (:id schema) x) (get-in-schema (:schema schema) xs)))))
+
+(defn get-in-section [schema [section & path]]
+  (get-in-schema (-> (util/find-by-id section (:sections schema))
+                     :grid :rows)
+                 path))

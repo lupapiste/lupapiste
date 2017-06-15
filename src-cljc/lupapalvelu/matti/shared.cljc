@@ -115,6 +115,7 @@
                                                     :type :multi-select
                                                     :item-loc-prefix (->> settings-path
                                                                           (map name)
+                                                                          (remove #(re-matches #"\d+" %))
                                                                           (s/join ".")
                                                                           keyword)
                                                     :path settings-path}}}])
@@ -153,7 +154,7 @@
                                   {:align  :full
                                    :col    2
                                    :id     "verdict-code"
-                                   :schema {:from-settings {:path       [:matti-r :verdict-code]
+                                   :schema {:from-settings {:path       [:matti-r :0 :0 :verdict-code]
                                                             :type       :select
                                                             :loc-prefix :matti-r}}}]
                                  [{:col    5
@@ -161,9 +162,9 @@
                                    :align  :full
                                    :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen [:matti-r :foremen] )
+              (complexity-section :matti-foremen [:matti-r :1 :0 :foremen] )
               #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (complexity-section :matti-reviews [:matti-r :reviews])
+              (complexity-section :matti-reviews [:matti-r :2 :0 :reviews])
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
                :grid  {:columns 6

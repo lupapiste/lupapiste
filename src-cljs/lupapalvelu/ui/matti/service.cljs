@@ -1,24 +1,19 @@
 (ns lupapalvelu.ui.matti.service
-  (:require [clojure.walk :as walk]
-            [lupapalvelu.ui.common :as common]))
-
-(defonce schemas (atom {}))
-;; List of id, name, published, deleted maps.
-(defonce template-list (atom []))
-(defonce categories (atom []))
+  (:require [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.matti.state :as state]))
 
 (defn fetch-schemas []
   (common/query "schemas"
-                #(reset! schemas (:schemas %))))
+                #(reset! state/schemas (:schemas %))))
 (defn schema
   ([schema-name version]
-   (get-in @schemas [(-> version str keyword) (keyword schema-name)]))
+   (get-in @state/schemas [(-> version str keyword) (keyword schema-name)]))
   ([schema-name]
    (schema schema-name 1)))
 
 (defn fetch-template-list []
   (common/query "verdict-templates"
-                #(reset! template-list (:verdict-templates %))))
+                #(reset! state/template-list (:verdict-templates %))))
 
 (defn- list-update-response [callback]
   (fn [response]
@@ -28,8 +23,8 @@
 (defn fetch-categories [callback]
   (common/query "verdict-template-categories"
                 #(do
-                   (reset! categories (:categories %))
-                   (callback @categories))))
+                   (reset! state/categories (:categories %))
+                   (callback @state/categories))))
 
 (defn publish-template [template-id callback]
   (common/command {:command "publish-verdict-template"

@@ -7,12 +7,9 @@
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.settings :as settings]
+            [lupapalvelu.ui.matti.state :as state]
             [rum.core :as rum]))
 
-
-(defonce current-template (atom {}))
-(defonce current-view     (atom ::list))
-(defonce current-category (atom nil))
 
 (defn updater [{:keys [state path]}]
   (service/save-draft-value (path/value [:id] state)
@@ -46,7 +43,7 @@
 
 
 (defn reset-template [{:keys [id name modified published draft] :as template}]
-  (reset! current-template
+  (reset! state/current-template
           (if template
             (assoc draft
                    :name name
@@ -58,7 +55,7 @@
                     :can-edit? true?
                     :editing? true})
             nil))
-  (reset! current-view (if template ::template ::list)))
+  (reset! state/current-view (if template ::template ::list)))
 
 (defn with-back-button [component]
   [:div
@@ -97,7 +94,7 @@
    (common/loc (if deleted "matti-restore-template" "remove"))])
 
 (defn set-category [category]
-  (reset! current-category category)
+  (reset! state/current-category category)
   (settings/fetch-settings category ))
 
 
@@ -107,9 +104,9 @@
    [:div.row
     [:div.col-2.col--full
      [:select.dropdown
-      {:value (rum/react current-category)
+      {:value (rum/react state/current-category)
        :on-change #(set-category (.. % -target -value))}
-      (->> (rum/react service/categories)
+      (->> (rum/react state/categories)
            (map (fn [cid]
                   {:value cid
                    :text (common/loc (str "matti-" cid))}))
@@ -118,15 +115,15 @@
                   [:option {:key value :value value} text])))]]
     [:div.col-4.col--right
      [:button.ghost
-      {:on-click #(reset! current-view ::settings)}
+      {:on-click #(reset! state/current-view ::settings)}
       [:span (common/loc :auth-admin.organization.properties)]]]]])
 
 (rum/defcs verdict-template-list < rum/reactive
   (rum/local false ::show-deleted)
   [{show-deleted ::show-deleted}]
-  (let [templates (filter #(= (rum/react current-category)
+  (let [templates (filter #(= (rum/react state/current-category)
                               (:category %))
-                          (rum/react service/template-list))]
+                          (rum/react state/template-list))]
     [:div.matti-template-list
      [:h2 (common/loc "matti.verdict-templates")]
      (category-select)
@@ -165,21 +162,21 @@
                  (common/loc "matti.copy")]
                 (toggle-delete id deleted)]]])]]))
      [:button.positive
-      {:on-click #(service/new-template @current-category new-template)}
+      {:on-click #(service/new-template @state/current-category new-template)}
       [:i.lupicon-circle-plus]
       [:span (common/loc "add")]]]))
 
 (rum/defc verdict-templates < rum/reactive
   [_]
-  (when-not (or (empty? (rum/react service/schemas))
-                (empty? (rum/react service/categories)))
+  (when (and (rum/react state/schemas)
+             (rum/react state/categories))
     [:div
-     (case (rum/react current-view)
+     (case (rum/react state/current-view)
        ::template (with-back-button (verdict-template (assoc shared/default-verdict-template
-                                            :state current-template
-                                            :settings settings/settings*)))
+                                            :state state/current-template
+                                            :settings state/settings)))
        ::list     (verdict-template-list)
-       ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @current-category)))))]))
+       ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @state/current-category)))))]))
 
 (defonce args (atom {}))
 
@@ -195,4 +192,5 @@
   (service/fetch-template-list)
   (service/fetch-categories (fn [categories]
                               (set-category (first categories))))
+  (reset-template nil)
   (mount-component))

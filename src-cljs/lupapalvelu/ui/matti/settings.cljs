@@ -4,6 +4,7 @@
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.service :as service]
+            [lupapalvelu.ui.matti.state :as state]
             [rum.core :as rum]))
 
 (defn settings-updater [{:keys [path state]}]
@@ -12,12 +13,10 @@
                                (path/value path state)
                                (common/response->state state :modified)))
 
-(defonce settings* (atom {}))
-
 (defn fetch-settings [category]
   (service/settings category
                     (fn [{settings :settings}]
-                      (reset! settings*
+                      (reset! state/settings
                               (assoc (:draft settings)
                                      :modified (:modified settings)
                                      :category category
@@ -27,7 +26,7 @@
   [{id :id :as options}]
   (let [options (assoc options
                        :path [id]
-                       :state settings*)]
+                       :state state/settings)]
     [:div
      [:div.matti-grid-2
       [:div.row
