@@ -1485,7 +1485,8 @@
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            :accordion-fields hakija-accordion-paths
            }
-    :body [henkilotiedot-minimal]}
+    :body (henkilo-yritys-select-group :henkilo-body [henkilotiedot-minimal]
+                                       :yritys-body [{:name "yritysnimi" :type :string :required true :size :l}])}
 
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"

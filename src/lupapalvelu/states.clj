@@ -53,6 +53,8 @@
 (def ya-jatkoaika-state-graph common-states/ya-jatkoaika-state-graph)
 (def ya-tyolupa-state-graph default-application-state-graph)
 
+(def ark-state-graph common-states/ark-state-graph)
+
 ; TODO draft versions this forward
 
 (def
@@ -130,6 +132,7 @@
 (def verdict-given-states #{:verdictGiven                   ; R + others
                             :foremanVerdictGiven :acknowledged ; foreman applications
                             :finished :agreementPrepared :agreementSigned  ; YA cases
+                            :underReview :archived ; Archiving projects (ARK)
                             })
 
 (def post-verdict-states
@@ -155,7 +158,8 @@
 
 (def all-states (->> all-graphs (map keys) (apply concat) set))
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
-(def all-application-states (difference all-states all-inforequest-states))
+(def all-archiving-project-states (-> ark-state-graph keys set (disj :canceled :open)))
+(def all-application-states (difference all-states all-inforequest-states all-archiving-project-states))
 
 (defn terminal-state? [graph state]
   {:pre [(map? graph) (keyword? state)]}

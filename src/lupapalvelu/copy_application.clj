@@ -326,7 +326,7 @@
                {:created          created
                 :id               (app/make-application-id municipality)
                 :schema-version   (or schema-version    (schemas/get-latest-schema-version))
-                :state            (or (not-empty state) (app/application-state user org-id infoRequest))
+                :state            (or (not-empty state) (app/application-state user org-id infoRequest false))
                 :title            (or (not-empty title) address)
                 :tosFunction      (or tosFunction       (tos-function org-id op-name))}
                (app/location-map  location))

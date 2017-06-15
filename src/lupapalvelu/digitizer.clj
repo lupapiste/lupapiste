@@ -21,7 +21,32 @@
             [clj-time.local :refer [local-now]]
             [lupapalvelu.application :as app]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.operations :as operations]))
+
+(defn- get-applicant-type [applicant]
+  (-> applicant (select-keys [:henkilo :yritys]) keys first))
+
+(defn- add-applicant-documents [{:keys [created application] :as command} applicants]
+  (let [applicants (filter get-applicant-type applicants)]
+    (dorun
+      (->> applicants
+           (map-indexed
+             (fn [i applicant]
+               ;; Set applicants' user info to Hakija documents
+               (let [document (if (zero? i)
+                                (domain/get-applicant-document (:documents application))
+                                (doc-persistence/do-create-doc! command (operations/get-applicant-doc-schema-name application)))
+                     applicant-type (get-applicant-type applicant)
+                     user-info (case applicant-type
+                                 :henkilo {:firstName (get-in applicant [:henkilo :nimi :etunimi])
+                                           :lastName (get-in applicant [:henkilo :nimi :sukunimi])
+                                           :turvakieltokytkin (:turvakieltoKytkin applicant)}
+
+                                 :yritys {:name (get-in applicant [:yritys :nimi])})]
+
+                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created))))))))
 
 (defn make-application-id [municipality]
   (let [year (str (year (local-now)))
@@ -65,7 +90,8 @@
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
 (defn do-create-application-from-previous-permit [command operation xml app-info location-info permit-type]
-  (let [buildings-and-structures (building-reader/->buildings-and-structures xml)
+  (let [{:keys [hakijat]} app-info
+        buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (pp/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
         command (update-in command [:data] merge
@@ -87,9 +113,8 @@
         command (util/deep-merge command (action/application->command created-application))]
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
-    ;; Get verdicts for the application
-    (when-let [updates (verdict/find-verdicts-from-xml command xml)]
-      (action/update-application command updates))
+
+    (add-applicant-documents command hakijat)
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
