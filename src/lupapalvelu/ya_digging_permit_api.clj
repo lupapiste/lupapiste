@@ -10,7 +10,7 @@
             [sade.core :refer :all]))
 
 (defcommand create-digging-permit
-  {:description "Create a digging permit from an existing sijoituslupa application"
+  {:description "Creates a digging permit from an existing sijoituslupa application"
    :parameters [:id :operation]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:id :operation])

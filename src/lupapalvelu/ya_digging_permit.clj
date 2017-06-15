@@ -11,7 +11,8 @@
             [sade.core :refer [fail]]
             [sade.util :as util]))
 
-;;; Helper functions
+
+;;; Predicate functions
 
 (defn digging-permit-can-be-created? [application]
   (and (ya/sijoittaminen? application)
@@ -22,6 +23,7 @@
     (and (= permit/YA permit-type)
          (boolean (some #(= :tyolupa %) subtypes)))))
 
+
 ;;; Digging operation tree
 
 (defn organization-digging-operations
@@ -30,6 +32,7 @@
   [organization]
   (op/selected-operations-for-organizations [organization]
                                             digging-permit-operation?))
+
 
 ;;; Validators
 
@@ -47,7 +50,8 @@
     (fail :error.not-digging-permit-operation
           {:operation operation})))
 
-;;; Creating digging permits
+
+;;; Copying authorizations
 
 (def copied-document-names ["yleiset-alueet-maksaja" "hakija-ya"])
 
@@ -88,13 +92,14 @@
                                         sijoitus-documents])))
 
         ;; Create invites using the document pairs
-        invites (map (fn [[digging-doc sijoitus-doc]]
-                       (party-document->auth-invite digging-doc sijoitus-doc
-                                                    (:id digging-app)
-                                                    (:auth sijoitus-app)
-                                                    user
-                                                    timestamp))
-                     document-pairs)]
+        invites (->> document-pairs
+                     (map (fn [[digging-doc sijoitus-doc]]
+                            (party-document->auth-invite digging-doc sijoitus-doc
+                                                         (:id digging-app)
+                                                         (:auth sijoitus-app)
+                                                         user
+                                                         timestamp)))
+                     (util/distinct-by copy-app/auth-id))]
     ;; Add invites for those who are not already authorized
     (update digging-app :auth
             concat (filter (comp #(and (some? %)
@@ -102,31 +107,42 @@
                                  copy-app/auth-id)
                            invites))))
 
-(defn- copy-document [doc-name sijoitus-app digging-app user organization timestamp]
+
+;;; Copying documents
+
+(defn- temporary-copy-auth
+  "A temporary auth needed for preprocessing copied documents
+  correctly. Proper auth can be created only after we have the document
+  copies which are added to the authorization invites."
+  [digging-app sijoitus-app user timestamp]
+  (concat [(first (:auth digging-app))]
+          (map #(copy-app/auth->invite %
+                                       user
+                                       (:id digging-app)
+                                       timestamp)
+               (:auth sijoitus-app))))
+
+(defn- copy-document [doc-name digging-app sijoitus-app copy-auth organization]
   (-> (domain/get-document-by-name sijoitus-app doc-name)
-      ;; Use auth from sijoitus application since the required auth
-      ;; entry is not yet added to digging application
       (copy-app/preprocess-document (assoc digging-app :auth
-                                           (concat [(first (:auth digging-app))]
-                                                   (map #(copy-app/auth->invite %
-                                                                                user
-                                                                                (:id digging-app)
-                                                                                timestamp)
-                                                        (:auth sijoitus-app))))
+                                           copy-auth)
                                     organization nil)))
 
-(defn- copy-applicant-and-payer-documents [digging-app sijoitus-app user organization timestamp]
-  (update digging-app :documents
-          (partial map (fn [document]
-                         (if (contains? (set copied-document-names)
-                                        (doc-tools/doc-name document))
-                           (copy-document (doc-tools/doc-name document)
-                                          sijoitus-app
-                                          digging-app
-                                          user
-                                          organization
-                                          timestamp)
-                           document)))))
+(defn- copy-applicant-and-payer-documents
+  "Copy the personal information from applicant and payer documents,
+  with same restrictions as when copying an application."
+  [digging-app sijoitus-app user organization timestamp]
+  (let [auth-for-copying (temporary-copy-auth digging-app sijoitus-app user timestamp)]
+    (update digging-app :documents
+            (partial map (fn [document]
+                           (if (contains? (set copied-document-names)
+                                          (doc-tools/doc-name document))
+                             (copy-document (doc-tools/doc-name document)
+                                            digging-app
+                                            sijoitus-app
+                                            auth-for-copying
+                                            organization)
+                             document))))))
 
 (defn- copy-applicant-and-payer-information
   "Copy the contents of applicant and payer documents from the sijoitus
@@ -136,6 +152,9 @@
   (-> digging-app
       (copy-applicant-and-payer-documents sijoitus-app user organization timestamp)
       (add-applicant-and-payer-auth sijoitus-app user timestamp)))
+
+
+;;; Creating a digging permit from sijoituslupa
 
 (defn new-digging-permit
   [{:keys [address propertyId propertyIdSource] [x y] :location :as sijoitus-application}
