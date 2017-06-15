@@ -276,7 +276,7 @@
                                   <!-- /ko -->
                             </li>
 
-                            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'statement'}">
+                            <li data-bind="if: !inPostVerdictState() && permitType() !== 'ARK', css: {'active': $parent.selectedTabName() === 'statement'}">
                                 <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.tabStatement'"></span>
