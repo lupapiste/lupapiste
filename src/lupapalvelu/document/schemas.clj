@@ -686,6 +686,10 @@
                             ei-tiedossa]}
                     kayttotarkoitus]})
 
+(def kaytto-minimal {:name "kaytto"
+                     :type :group
+                     :body [kayttotarkoitus]})
+
 (def mitat {:name "mitat"
             :type :group
             :body [{:name "tilavuus" :type :string :size :s :unit :m3 :subtype :number :min 0 :max 9999999}
@@ -1323,7 +1327,7 @@
            :accordion-fields buildingid-accordion-paths}
     :body (body kuvaus
                 tunnus
-                kaytto
+                kaytto-minimal
                 rakennustunnus)}
 
    {:info {:name "uusiRakennus"
