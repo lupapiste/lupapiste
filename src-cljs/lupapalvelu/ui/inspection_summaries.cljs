@@ -199,14 +199,19 @@
              "inspection-summary.targets.mark-finished"))])
 
 (defn commit-inspection-date [target-id value]
-  (if (some? value)
-      (command :set-inspection-date
-               refresh
-               :id (:applicationId @component-state)
-               :summaryId (:id @selected-summary)
-               :targetId target-id
-               :date (tc/to-long value)))
+    (command :set-inspection-date
+             refresh
+             :id (:applicationId @component-state)
+             :summaryId (:id @selected-summary)
+             :targetId target-id
+             :date (tc/to-long value))
     (refresh))
+
+(rum/defc remove-inspection-date [target-id index]
+  [:a.lupicon-remove.primary.inspection-summary-link
+   {:on-click (fn [_]
+                (commit-inspection-date target-id nil))
+    :data-test-id (str "remove-inspection-date-" index)}])
 
 (rum/defc target-row < rum/reactive
   [idx row-target]
@@ -246,19 +251,22 @@
       (when (and target-id (not locked?) (not targetFinished?))
         [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
-      (if (and editingInspectionDate? (auth/ok? auth-model :set-inspection-date))
-        (let [date        (tc/to-date (tc/from-long (:inspection-date row-target)))
-              commit-fn   (partial commit-inspection-date target-id)]
-          (date/basic-datepicker date commit-fn idx))
-        (when (:inspection-date row-target)
-          (tf/unparse date-formatter (doto (t/time-now) (.setTime (tc/to-long (:inspection-date row-target)))))))
-      (when (and (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
-        [:a.inspection-summary-link
-         {:on-click (fn [_] (swap! selected-summary assoc-in [:targets idx :editingInspectionDate?] true))
-          :data-test-id (str "choose-inspection-date-" idx)}
-         (if (:inspection-date row-target)
-           [:i.lupicon-pen.inspection-summary-edit]
-           (js/loc "choose"))])]
+      [:div.inspection-date-row
+       (if (and editingInspectionDate? (auth/ok? auth-model :set-inspection-date))
+         (let [date (tc/to-date (tc/from-long (:inspection-date row-target)))
+               commit-fn (partial commit-inspection-date target-id)]
+           (date/basic-datepicker date commit-fn idx))
+         (when (:inspection-date row-target)
+           (tf/unparse date-formatter (doto (t/time-now) (.setTime (tc/to-long (:inspection-date row-target)))))))
+       (when (and (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
+         [:a.inspection-summary-link
+          {:on-click     (fn [_] (swap! selected-summary assoc-in [:targets idx :editingInspectionDate?] true))
+           :data-test-id (str "choose-inspection-date-" idx)}
+          (if (:inspection-date row-target)
+            [:i.lupicon-pen.inspection-summary-edit]
+            (js/loc "choose"))])
+       (when (and editingInspectionDate? (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
+         (remove-inspection-date target-id idx))]]
      [:td
       (when (:finished-date row-target)
         (tf/unparse date-formatter (tc/from-long (:finished-date row-target))))]

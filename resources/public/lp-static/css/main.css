@@ -13802,10 +13802,21 @@ div.search i {
 
 .application-search-component input[type=text].hasDatepicker {
   min-width: 100px;
-  width: 30%;
   display: inline;
   margin-top: 0px;
   margin-right: 0px;
+  width: initial;
+  vertical-align: top;
+  border-right: none;
+}
+
+.application-search-component field-reset-button button.function {
+  border: 1px solid #bbbbbb;
+  border-left: none;
+}
+
+.application-search-component input:focus + field-reset-button button.function {
+  border-color: #fbc732;
 }
 
 .applications-search-filters-list .applications-search-filters-list__filters {
@@ -14766,7 +14777,7 @@ span.icon_clear:before {
   display: none;
 }
 
-.application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box, .application_summary .application_summary_info .state-indication div.verdictGiven .constructionStarted-box, .application_summary .application_summary_info .state-indication div.verdictGiven .inUse-box, .application_summary .application_summary_info .state-indication div.verdictGiven .closed-box, .application_summary .application_summary_info .state-indication div.verdictGiven .final-box {
+.application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box, .application_summary .application_summary_info .state-indication div.verdictGiven .constructionStarted-box, .application_summary .application_summary_info .state-indication div.verdictGiven .inUse-box, .application_summary .application_summary_info .state-indication div.verdictGiven .closed-box, .application_summary .application_summary_info .state-indication div.verdictGiven .final-box, .application_summary .application_summary_info .state-indication div.verdictGiven .finished-box {
   display: inline-block;
 }
 
@@ -15134,6 +15145,7 @@ span.icon_clear:before {
   color: #f39129;
 }
 
+#application-tasks-tab i.lupicon-circle-minus,
 #application-tasks-tab i.lupicon-circle-attention {
   color: #df3215;
 }
@@ -15529,7 +15541,6 @@ span.icon_clear:before {
 }
 
 .invited-foremans .foreman span {
-  display: table-cell;
   padding-right: 6px;
 }
 
@@ -15636,6 +15647,10 @@ h2 > i.is-right {
 
 div.review-tasks {
   margin-top: 20px;
+}
+
+div.review-tasks .faulty {
+  text-decoration: line-through;
 }
 
 .assignment-creator {

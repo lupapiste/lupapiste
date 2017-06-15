@@ -83,7 +83,7 @@
   (tracef "   generate-attachment-from-children lang=%s, type=%s, child-id=%s,org: %s, child: %s" lang child-type child-id (:organization app) (get-child app child-type child-id))
   (let [attachment-id (get-child-attachment-id app child-type child-id)]
     (case child-type
-      :statements (libre-client/generate-statment-pdfa-to-file! app child-id lang pdf-file)
+      :statements (libre-client/generate-statement-pdfa-to-file! app child-id lang pdf-file)
       :verdicts   (libre-client/generate-verdict-pdfa app child-id 0 lang pdf-file)
       (pdf-export/generate-pdf-with-child app child-type child-id lang (FileOutputStream. pdf-file)))
 

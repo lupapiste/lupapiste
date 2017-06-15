@@ -164,7 +164,8 @@
 
 (defschema Checkbox
   (merge GenInput
-         {:type       (sc/eq :checkbox)}))
+         {:type          (sc/eq :checkbox)
+          (opt :default) sc/Bool}))
 
 (defschema Option
   "Option for select and radiogroup types."

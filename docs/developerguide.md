@@ -6,7 +6,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
 
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - [Leiningen](https://github.com/technomancy/leiningen) 2.5+
-- [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 - 3.2 versioilla)
+- [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 - 3.4 versioilla)
     - Mac: `brew install mongodb` (`brew tap homebrew/services` + `brew services start mongodb`)
     - Tarkista, että mongon kantakansiolla ja lokikansiolla on asetettu permissionit
     - Macillä saattaa tulla avoimien tiedostojen raja vastaan: [How to persist ulimit settings in osx](http://unix.stackexchange.com/questions/108174/how-to-persist-ulimit-settings-in-osx-mavericks)
@@ -14,10 +14,11 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
   - `pip install robotframework-debuglibrary`
+  - Chromella ajettavia testejä varten [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/)-ajuri (löytyy myös Homebrewstä).
+  - Firefoxilla ajettavia testejä varten [geckodriver](https://github.com/mozilla/geckodriver)-ajuri (löytyy myös Homebrewstä).
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
-  - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
-  PDF-tiedostojen kääntämistä ja korjaamista varten. [Apuja OS X -ongelmiin](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
+  PDF-tiedostojen kääntämistä ja korjaamista varten. macOS:llä asenna [tämä versio](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg).
 - Aseta itsellesi paikallisesti IP-ohjaus 127.0.0.1 lupapiste.local (tätä käytetään cljsbuildissä dev-profiililla)
 
 Valinnaisesti:

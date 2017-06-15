@@ -3,6 +3,7 @@
 Documentation   On application, construction is set started and ready
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../common_keywords/construction_time_helpers.robot
 
 *** Test Cases ***
 
@@ -60,15 +61,3 @@ Sonja goes to the Rakentaminen tab and sets construction ready via a dialog
   Element should be visible  //*[@data-test-id='construction-state-change-info-closed']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Tab should be visible  tasks
-
-*** Keywords ***
-
-Sets construction started/ready via modal datepicker dialog
-  [Arguments]  ${openDialogButtonId}  ${date}
-  Click enabled by test id  ${openDialogButtonId}
-  Wait until  element should be visible  modal-datepicker-date
-  Element Should Be Enabled  modal-datepicker-date
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text by test id  modal-datepicker-date  ${date}
-  Click enabled by test id  modal-datepicker-continue
-  Confirm  dynamic-yes-no-confirm-dialog

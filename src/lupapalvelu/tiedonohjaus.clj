@@ -94,8 +94,8 @@
             security-end (assoc :security-period-end security-end))))
 
 (defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function application & [type]]
-  (if (#{:arkistoidaan :arkistoitu} (keyword (:tila metadata)))
-    ; Do not update metadata for documents that are already archived
+  (if (#{:arkistoidaan :arkistoitu :ei-arkistoida-virheellinen} (keyword (:tila metadata)))
+    ; Do not update metadata for documents that are already archived (or generated review documents that have been marked as faulty by the authority)
     document
     (let [document-type (or type (:type document))
           existing-tila (:tila metadata)

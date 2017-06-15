@@ -131,9 +131,17 @@
         grouped-history (group-by (juxt :municipality :jobDescription :limitedApproval) history-data)]
     (mapcat (fn [[_ group]] (reduce-to-highlights group)) grouped-history)))
 
+(defn- select-latest-verdict-status [{:keys [verdicts]}]
+  (->> (mapcat :paatokset verdicts)
+       (mapcat :poytakirjat)
+       (filter #(some-> % :paatospvm (< (now))))
+       (apply util/max-key :paatospvm)
+       (#(or (:status %) (:paatoskoodi %)))))
+
 (defn foreman-application-info [application]
   (-> (select-keys application [:id :state :auth :documents])
-      (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
+      (assoc :latest-verdict-status (select-latest-verdict-status application))
+      (update :documents (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
 (defn get-linked-foreman-applications [id]
   (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})
@@ -315,5 +323,5 @@
                                      (filter (comp #{"linkpermit"} :type (keyword id)))
                                      (filter (comp #{"tyonjohtajan-nimeaminen-v2"} :apptype #((->> % :link first keyword) %)))
                                      (map (comp first :link)))]
-    (->> (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents])
+    (->> (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents :verdicts])
          (map foreman-application-info))))
