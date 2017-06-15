@@ -63,6 +63,10 @@ Mikko and Solita Oy are authorized
   Is authorized party  mikko@example.com
   Is authorized party  Solita Oy
 
+The contact information of Mikko and Solita Oy is present in payer and applicant documents
+  Check accordion text  hakija-ya  HAKIJA  - Solita Oy
+  Check accordion text  yleiset-alueet-maksaja  LUVAN MAKSAJA (HAKEMUSTEN JA ILMOITUSTEN MAKSULLISUUS MÄÄRÄYTYY KUNNAN OMAN TAKSAN MUKAAN.)  - Mikko Intonen
+
 *** Keywords ***
 
 Click digging tree item by text
