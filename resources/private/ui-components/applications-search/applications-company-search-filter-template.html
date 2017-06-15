@@ -12,7 +12,9 @@
         </div>
         <div class="col-1">
           <label data-bind="ltext: 'application.filter.search.select.saved.filter'"></label>
-          <div data-test-id="select-advanced-filter" data-bind="component: {name: 'autocomplete-saved-filters', params: {lPlaceholder: 'application.filter.search.placeholder.saved-filter'}}"></div>
+          <div data-test-id="select-advanced-filter" data-bind="component: {name: 'autocomplete-saved-filters',
+                                                                            params: {lPlaceholder: 'application.filter.search.placeholder.saved-filter',
+                                                                                     savedFilters: lupapisteApp.services.applicationFiltersService.savedCompanyFilters}}"></div>
         </div>
         <div class="col-1 col--full">
           <br/>
@@ -57,7 +59,7 @@
           <!-- /ko -->
         </div>
 
-        <div data-bind="component: {name: 'applications-search-filters-list', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
+        <div data-bind="component: {name: 'applications-company-search-filters-list', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
       </div>
 
       <div class="help-box light">

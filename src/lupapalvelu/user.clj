@@ -105,9 +105,11 @@
                                                    (sc/optional-key :message)        sc/Str
                                                    (sc/optional-key :title)          sc/Str}
            (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
-                                                   (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
+                                                   (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)
+                                                   (sc/optional-key :companyFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
+           (sc/optional-key :companyFilters)      [SearchFilter]
            (sc/optional-key :language)            i18n/supported-language-schema
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
            (sc/optional-key :firstLogin)          sc/Bool})

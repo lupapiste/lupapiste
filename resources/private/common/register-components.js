@@ -64,6 +64,7 @@ jQuery(document).ready(function() {
     {name: "applications-company-search-filter"},
     {name: "applications-company-search-tabs", template: "applications-search-tabs-template"},
     {name: "applications-foreman-search-filters-list", template: "applications-search-filters-list-template"},
+    {name: "applications-company-search-filters-list", template: "applications-search-filters-list-template"},
     {name: "applications-foreman-search-results"},
     {name: "assignments-search-tabs", template: "applications-search-tabs-template"},
     {name: "assignments-search-results"},
