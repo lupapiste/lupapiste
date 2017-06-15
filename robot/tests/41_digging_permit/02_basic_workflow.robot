@@ -66,6 +66,9 @@ Mikko and Solita Oy are authorized
 The contact information of Mikko and Solita Oy is present in payer and applicant documents
   Check accordion text  hakija-ya  HAKIJA  - Solita Oy
   Check accordion text  yleiset-alueet-maksaja  LUVAN MAKSAJA (HAKEMUSTEN JA ILMOITUSTEN MAKSULLISUUS MÄÄRÄYTYY KUNNAN OMAN TAKSAN MUKAAN.)  - Mikko Intonen
+  Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-ya"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
+  Wait Until  Textfield Value Should Be  //section[@data-doc-type="yleiset-alueet-maksaja"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
+  Wait Until  Textfield Value Should Be  //section[@data-doc-type="yleiset-alueet-maksaja"]//input[@data-docgen-path="henkilo.henkilotiedot.sukunimi"]  Intonen
 
 *** Keywords ***
 
