@@ -75,13 +75,15 @@
         (util/convert-values (partial filter selected-ops-set)))))
 
 (defquery get-application-operations
-  {:user-roles #{:authority}}
-  [{organizations :user-organizations}]
-  (let [is-R?  (some #(= (:permitType %) "R") (mapcat :scope organizations))]
-    (->> (if is-R? ["tyonjohtajan-nimeaminen-v2"] [])
-         (concat (mapcat :selected-operations organizations))
-         selected-ops-by-permit-type
-         (ok :operationsByPermitType))))
+  {:user-roles #{:authority :applicant}}
+  [{organizations :user-organizations user :user}]
+  (if (usr/authority? user)
+    (let [is-R?  (some #(= (:permitType %) "R") (mapcat :scope organizations))]
+      (->> (if is-R? ["tyonjohtajan-nimeaminen-v2"] [])
+           (concat (mapcat :selected-operations organizations))
+           selected-ops-by-permit-type
+           (ok :operationsByPermitType)))
+    (ok :operationsByPermitType operations/operation-names-by-permit-type)))
 
 (defn- localize-operation [op]
   (let [keys [:id :created :name :description]
