@@ -53,7 +53,15 @@ Mikko creates the application
 
 Mikko is directed to the digging permit
   Wait until  Element Should Be Visible  application
-  # TODO Check that application data is valid
+
+Mikko inspects that the application has correct information
+  Wait until  Application state should be  draft
+  Application address should be  sijoitus-app
+
+Mikko and Solita Oy are authorized
+  Open tab  parties
+  Is authorized party  mikko@example.com
+  Is authorized party  Solita Oy
 
 *** Keywords ***
 
@@ -62,11 +70,9 @@ Click digging tree item by text
   Wait and click  //section[@id="create-digging-permit"]//div[@class="tree-content"]//*[text()=${itemName}]
 
 Select digging operations path YA kayttolupa kaivu
+  Set animations off
   Click digging tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
-  Sleep  1s
   Click digging tree item by text  "Työskentely yleisellä alueella (Katulupa)"
-  Sleep  1s
   Click digging tree item by text  "Kaivaminen yleisellä alueella"
-  Sleep  1s
   Click digging tree item by text  "Vesi- ja viemäritöiden tekeminen"
-  Sleep  1s
+  Set animations on
