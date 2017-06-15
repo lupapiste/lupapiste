@@ -250,6 +250,6 @@
   (ok))
 
 (defquery enable-company-search
-  {:user-roles #{:applicant :authority}
+  {:user-roles #{:applicant}
    :pre-checks [(com/validate-has-company-role :any)]}
   [_])
