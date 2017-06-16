@@ -371,9 +371,10 @@
   (fact "tags are returned for company user"
     (let [resp (query kaino "company-tags" :company "solita")]
       resp => ok?
-      (-> resp :tags count) => 1
-      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
-      (get-in resp [:tags 0 :label]) => "Projekti1"))
+      (-> resp :company :id) => "solita"
+      (-> resp :company :name) => "Solita Oy"
+      (get-in resp [:company :tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:company :tags 0 :label]) => "Projekti1"))
 
   (fact "fail for non company user"
     (query pena "company-tags" :company "solita") => (partial expected-failure? :error.unauthorized)))
@@ -386,12 +387,12 @@
   (fact "tag is added"
     (let [resp (query kaino "company-tags" :company "solita")]
       resp => ok?
-      (-> resp :tags count) => 2
-      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
-      (get-in resp [:tags 0 :label]) => "Projekti1"
+      (-> resp :company :tags count) => 2
+      (get-in resp [:company :tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:company :tags 0 :label]) => "Projekti1"
 
-      (get-in resp [:tags 1 :id]) => truthy
-      (get-in resp [:tags 1 :label]) => "Uusi tagi"))
+      (get-in resp [:company :tags 1 :id]) => truthy
+      (get-in resp [:company :tags 1 :label]) => "Uusi tagi"))
 
   (fact "fail for non company user"
     (command pena "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti1"} {:label "Uusi tagi"}]) => (partial expected-failure? :error.unauthorized))
@@ -403,9 +404,9 @@
   (fact "tag is removed"
     (let [resp (query kaino "company-tags" :company "solita")]
       resp => ok?
-      (-> resp :tags count) => 1
-      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
-      (get-in resp [:tags 0 :label]) => "Projekti1"))
+      (-> resp :company :tags count) => 1
+      (get-in resp [:company :tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:company :tags 0 :label]) => "Projekti1"))
 
   (fact "edit existing tag"
     (command kaino "save-company-tags" :tags [{:id "7a67a67a67a67a67a67a67a6" :label "Projekti666"}]) => ok?)
@@ -413,9 +414,9 @@
   (fact "tag is removed"
     (let [resp (query kaino "company-tags" :company "solita")]
       resp => ok?
-      (-> resp :tags count) => 1
-      (get-in resp [:tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
-      (get-in resp [:tags 0 :label]) => "Projekti666")))
+      (-> resp :company :tags count) => 1
+      (get-in resp [:company :tags 0 :id]) => "7a67a67a67a67a67a67a67a6"
+      (get-in resp [:company :tags 0 :label]) => "Projekti666")))
 
 (facts "adding company tags to application"
 
@@ -426,9 +427,9 @@
     (command erkki "save-company-tags" :tags [{:label "Raksa"} {:label "Paksa"}]) => ok?)
 
   (let [app  (create-and-open-application kaino)
-        solita-tags (:tags (query kaino "company-tags" :company "solita"))
+        solita-tags (get-in (query kaino "company-tags" :company "solita") [:company :tags])
         tag-ids (map :id solita-tags)
-        esimerkki-tags (:tags (query erkki "company-tags" :company "esimerkki"))]
+        esimerkki-tags (get-in (query erkki "company-tags" :company "esimerkki") [:company :tags])]
     (count solita-tags) => 4
 
     (fact "add tags to application"

@@ -243,6 +243,7 @@
                                :toggle-guest-subscription :application-guests :decline-invitation
                                :suti-update-id :suti-update-added
                                :cancel-application :info-links :organization-links
+                               :update-application-company-notes
                                :redirect-to-3d-map}]
     (doseq [[action data] (get-actions)
             :when (and
