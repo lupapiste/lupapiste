@@ -3275,6 +3275,13 @@
                                              :ts ts
                                              :user usr/migration-user-summary}}})))
 
+; LPK-2917 add new attribute :automatic-ok-for-attachments-enabled which is true by default
+(defmigration add-automatic-ok-for-attachments-attribute-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:automatic-ok-for-attachments-enabled {$exists false}}))}
+   (doseq [organization (mongo/select :organizations {:automatic-ok-for-attachments-enabled {$exists false}})]
+     (mongo/update-by-id :organizations (:id organization)
+                         {$set {:automatic-ok-for-attachments-enabled true}})))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
