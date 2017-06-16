@@ -5,7 +5,8 @@
             [lupapalvelu.action :as action :refer [defcommand]]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.roles :as roles]))
 
 (defcommand create-archiving-project
             {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway]
@@ -29,3 +30,16 @@
     ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
     (ok :id (:id app-with-verdict))
     (d/fetch-or-create-archiving-project! command)))
+
+(defcommand submit-archiving-project
+  {:parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:authority}
+   :user-authz-roles roles/default-authz-writer-roles
+   :states           #{:open}}
+  [{:keys [application created] :as command}]
+  (action/update-application command
+                             {$set {:state     :submitted
+                                    :modified  created
+                                    :opened    (:opened application)
+                                    :submitted (or (:submitted application) created)}}))

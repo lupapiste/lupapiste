@@ -128,6 +128,10 @@ LUPAPISTE.ApplicationModel = function() {
     return lupapisteApp.models.applicationAuthModel.ok("application-summary-tab-visible");
   });
 
+  self.isArchivingProject = ko.pureComputed(function() {
+    return self.permitType() === "ARK";
+  });
+
   self.openTask = function( taskId ) {
     hub.send( "scrollService::push");
     taskPageController.setApplicationModelAndTaskId(self._js, taskId);
@@ -347,6 +351,22 @@ LUPAPISTE.ApplicationModel = function() {
             }},
             {title: loc("no")}
       );
+      hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
+    }
+    return false;
+  };
+
+  self.submitArchivingProject = function() {
+    if (!self.stateChanged()) {
+      hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
+      ajax.command("submit-archiving-project", {id: self.id()})
+        .success( self.reload)
+        .onError("error.cannot-submit-application", cannotSubmitResponse)
+        .onError("error.command-illegal-state", self.lightReload)
+        .fuse(self.stateChanged)
+        .processing(self.processing)
+        .call();
+      hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
       hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     }
     return false;

@@ -123,6 +123,15 @@
               <span data-bind="ltext: 'application.submitApplication'"></span>
           </button>
 
+          <button class="positive top-marginM"
+                  data-test-id="application-submit-btn"
+                  data-bind="click: submitArchivingProject,
+                             visible: $root.authorization.ok('submit-archiving-project'),
+                             enable: submitButtonEnabled">
+              <i class="lupicon-download"></i>
+              <span data-bind="ltext: 'digitizer.submitProject'"></span>
+          </button>
+
 
           <!-- missing information -->
 
