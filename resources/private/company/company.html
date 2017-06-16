@@ -39,7 +39,7 @@
         <!-- info:              -->
         <!-- =================== -->
 
-        <div data-bind="visible: tabs.visible('info')">
+        <div data-bind="if: tabs.visible('info')">
           <div data-bind="with: info" data-test-id="company-info-tab">
             <div class="form-entry account-type-selector">
               <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
@@ -132,7 +132,7 @@
         <!-- users:              -->
         <!-- =================== -->
 
-        <div data-bind="visible: tabs.visible('users')">
+        <div data-bind="if: tabs.visible('users')">
 
           <span data-bind="text: loc('company.users.count',
                                       invitations().length + users().length,
@@ -258,6 +258,9 @@
             <i class="lupicon-warning"></i>
             <span data-bind="ltext: 'company.delete-all'"></span>
           </button>
+        </div>
+        <div data-bind="if: tabs.visible('tags')">
+          <div data-bind="component: {name: 'company-tags-editor', params: {companyId: id()}}"></div>
         </div>
       </div>
     </div>
