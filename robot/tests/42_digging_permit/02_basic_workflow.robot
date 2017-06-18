@@ -70,6 +70,18 @@ The contact information of Mikko and Solita Oy is present in payer and applicant
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="yleiset-alueet-maksaja"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="yleiset-alueet-maksaja"]//input[@data-docgen-path="henkilo.henkilotiedot.sukunimi"]  Intonen
 
+Mikko creates another digging application from the same sijoitus application
+  Open the request at index  sijoitus-app  2
+  Wait until  Element should be visible by test id  create-digging-permit-button
+  Click by test id  create-digging-permit-button
+  Select digging operations path YA kayttolupa kaivu
+  Click by test id  create-digging-permit
+  Wait until  Element Should Be Visible  application
+
+Sijoitus application now has two links
+  Open the request at index  sijoitus-app  3
+  Wait until  Xpath Should Match X Times  //span[@class="link-permit"]  2
+
 *** Keywords ***
 
 Click digging tree item by text
