@@ -58,7 +58,7 @@
           // TODO route to newly created application
           pageutil.openApplicationPage({id: resp.id});
           hub.send("indicator", {style: "positive",
-                                 message: "application.createDiggingPermit.success.text",
+                                 message: "application.createDiggingPermit.success",
                                  sticky: true});
 
         })
