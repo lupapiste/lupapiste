@@ -481,9 +481,8 @@
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
-        version-index            (or (util/position-by-key :originalFileId (or replaceable-original-file-id originalFileId)
-                                                           (:versions attachment))
-                                     (count (:versions attachment)))
+        version-index            (util/position-by-key :originalFileId (or replaceable-original-file-id originalFileId)
+                                                       (:versions attachment))
         user-role                (if stamped :stamper :uploader)]
     (util/deep-merge
      (when target
@@ -503,13 +502,16 @@
                                                           originalFileId)) {:state :requires_authority_action})]
        {$set {(version-approval-path originalFileId) approval}})
 
-     {$set      {:modified                            created
-                 :attachments.$.modified              created
-                 :attachments.$.notNeeded             false ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
-                 (ss/join "."
-                          ["attachments" "$"
-                           "versions" version-index]) version-model}
-      $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
+     (merge
+       {$set      (merge
+                    {:modified                            created
+                     :attachments.$.modified              created
+                     :attachments.$.notNeeded             false}
+                    (when version-index
+                      {(ss/join "." ["attachments" "$" "versions" version-index]) version-model}))
+        $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}}
+       (when-not version-index
+         {$push {:attachments.$.versions version-model}})))))
 
 (defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
