@@ -199,6 +199,7 @@
                    "operation-filter-service.js"
                    "organization-filter-service.js"
                    "organization-tags-service.js"
+                   "company-tags-service.js"
                    "handler-filter-service.js"
                    "publish-bulletin-service.js"
                    "application-filters-service.js"

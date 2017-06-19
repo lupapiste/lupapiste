@@ -31,22 +31,38 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   };
 
   self.initialized = false;
-  self.searchModels = ko.observableArray([new LUPAPISTE.SearchSectionModel({
-      type:             "applications",
-      lLabel:           "navigation",
-      dataProvider:     self.dataProvider,
-      externalApi:      self.externalApi,
-      limits:           self.limits,
-      filterComponent:  "applications-search-filter",
-      resultsComponent: "applications-search-results",
-      pagingComponent:  "applications-search-paging",
-      tabsComponent:    "applications-search-tabs"
-    })]);
+  self.searchModels = ko.observableArray();
 
   ko.computed(function() {
     var data = self.authorizationModel.getData();
     if (!_.isEmpty(data) && !self.initialized) {
       self.initialized = true;
+      if (!self.authorizationModel.ok("enable-company-search")) {
+        self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+          type:             "applications",
+          lLabel:           "navigation",
+          dataProvider:     self.dataProvider,
+          externalApi:      self.externalApi,
+          limits:           self.limits,
+          filterComponent:  "applications-search-filter",
+          resultsComponent: "applications-search-results",
+          pagingComponent:  "applications-search-paging",
+          tabsComponent:    "applications-search-tabs"
+        }));
+      } else {
+        self.searchType("company");
+        self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+          type:             "company",
+          lLabel:           "navigation",
+          dataProvider:     self.dataProvider,
+          externalApi:      null,
+          limits:           self.limits,
+          filterComponent:  "applications-company-search-filter",
+          resultsComponent: "applications-search-results",
+          pagingComponent:  "applications-search-paging",
+          tabsComponent:    "applications-company-search-tabs"
+        }));
+      }
       if (self.authorizationModel.ok("enable-foreman-search")) {
         self.searchModels.push(new LUPAPISTE.SearchSectionModel({
           type:             "foreman",

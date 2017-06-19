@@ -77,6 +77,9 @@
 (defn ^{:perfmon-exclude true} create-id []
   (str (ObjectId.)))
 
+(defn ensure-id [m]
+  (if (:id m) m (assoc m :id (create-id))))
+
 ; http://docs.mongodb.org/manual/reference/limits/#Restrictions-on-Field-Names
 (def key-pattern #"^[^\.\$\u0000]+$")
 

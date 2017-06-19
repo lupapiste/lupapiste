@@ -10,7 +10,7 @@
             [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper]
             [taoensso.timbre :as timbre]
             [sade.env :as env])
-  (:import (java.io File InputStream))
+  (:import (java.io File InputStream ByteArrayOutputStream ByteArrayInputStream))
   (:import (org.apache.commons.io FilenameUtils)))
 
 
@@ -45,38 +45,50 @@
 
 (defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
-    (let [pdf-file (files/temp-file "lupapiste-attach-converted-pdf-file" ".pdf")
-          original-content (files/temp-file "lupapiste-attach-conversion-input" ".pdf")] ; deleted via temp-file-input-stream, when input was not converted or in catch
-      (try
-        (io/copy content original-content)
-        (let [processing-result (pdf-conversion/convert-to-pdf-a original-content pdf-file {:application application :filename filename})
-              {:keys [output-file missing-fonts conversionLog] auto-conversion :autoConversion :or {missing-fonts []}} processing-result
-              archivability-error (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)]
-          (when-not auto-conversion (io/delete-file pdf-file :silently))
-          (cond
-            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
+    (let [pdf-file (files/temp-file "lupapiste-attach-converted-pdf-file" ".pdf")] ; This is the output target of pdf2pdf
+      (with-open [is (io/input-stream content)
+                  bos (ByteArrayOutputStream.)]
+        (try
+          ; Copy input to a byte array for safe reuse
+          (io/copy is bos)
+          (let [original-bytes  (.toByteArray bos)
+                processing-result (pdf-conversion/convert-to-pdf-a (ByteArrayInputStream. original-bytes)
+                                                                   pdf-file
+                                                                   {:application application :filename filename})
+                ; output-file here is the same file as pdf-file
+                {:keys [output-file missing-fonts conversionLog autoConversion] :or {missing-fonts []}} processing-result
+                archivability-error (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)]
+            (when-not autoConversion
+              ; If the PDF/A was not actually converted, the temp file can be deleted immediately
+              (io/delete-file pdf-file :silently))
+            (cond
+              (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
 
-            ; If we tried with pdf2pdf and failed, try with LibreOffice next
-            (and pdf-conversion/pdf2pdf-enabled?
-                 (env/feature? :convert-pdfs-with-libre)
-                 (not (:pdfa? processing-result))) (do (timbre/info "File" filename "in application" (:id application) "could not be converted with pdf2pdf, will try libreoffice")
-                                                       (->libre-pdfa! filename (files/temp-file-input-stream original-content)))
+              ; If we tried with pdf2pdf and failed, try with LibreOffice next
+              (and pdf-conversion/pdf2pdf-enabled?
+                   (env/feature? :convert-pdfs-with-libre)
+                   (not (:pdfa? processing-result))) (do (timbre/info "File"
+                                                                      filename
+                                                                      "in application"
+                                                                      (:id application)
+                                                                      "could not be converted with pdf2pdf, will try libreoffice")
+                                                         (->libre-pdfa! filename (ByteArrayInputStream. original-bytes)))
 
-            ; pdf2pdf tool is not enabled, no checking occurs
-            (not (:pdfa? processing-result)) {:archivable false
-                                              :missing-fonts missing-fonts
-                                              :archivabilityError archivability-error
-                                              :conversionLog conversionLog}
+              ; pdf2pdf tool is not enabled, no checking occurs
+              (not (:pdfa? processing-result)) {:archivable false
+                                                :missing-fonts missing-fonts
+                                                :archivabilityError archivability-error
+                                                :conversionLog conversionLog}
 
-            (:pdfa? processing-result) {:archivable true
-                                        :filename (files/filename-for-pdfa filename)
-                                        :archivabilityError nil
-                                        :content (when output-file (files/temp-file-input-stream output-file))
-                                        :autoConversion auto-conversion}))
-        (catch Throwable t
-          (io/delete-file pdf-file :silently)
-          (io/delete-file original-content :silently)
-          (throw t))))
+              (:pdfa? processing-result) {:archivable true
+                                          :filename (files/filename-for-pdfa filename)
+                                          :archivabilityError nil
+                                          ; This is
+                                          :content (when output-file (files/temp-file-input-stream output-file))
+                                          :autoConversion autoConversion}))
+          (catch Throwable t
+            (io/delete-file pdf-file :silently)
+            (throw t)))))
     {:archivable false :archivabilityError :permanent-archive-disabled}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]

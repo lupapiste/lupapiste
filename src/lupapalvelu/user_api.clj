@@ -196,11 +196,13 @@
 
 (def filter-storage-key
   {"application" :applicationFilters
+   "company" :companyApplicationFilters
    "foreman" :foremanFilters})
 
 (def default-filter-storage-key
   {"application" "id"
-   "foreman" "foremanFilterId"})
+   "foreman" "foremanFilterId"
+   "company" "companyFilterId"})
 
 (defn- validate-filter-type [{{filter-type :filterType} :data}]
   (when-not (contains? filter-storage-key filter-type)
@@ -208,7 +210,7 @@
 
 (defcommand update-default-application-filter
   {:parameters       [filterId filterType]
-   :user-roles       #{:authority}
+   :user-roles       #{:authority :applicant}
    :input-validators [validate-filter-type
                       (fn [{{filter-id :filterId filter-type :filterType} :data {user-id :id} :user}]
                         (let [user (usr/get-user-by-id user-id)
@@ -223,7 +225,7 @@
 
 (defcommand save-application-filter
   {:parameters       [title :filter sort filterType]
-   :user-roles       #{:authority}
+   :user-roles       #{:authority :applicant}
    :input-validators [validate-filter-type
                       (partial action/non-blank-parameters [:title])
                       (partial action/map-parameters [:filter])
@@ -267,7 +269,7 @@
 
 (defcommand remove-application-filter
   {:parameters [filterId filterType]
-   :user-roles #{:authority}
+   :user-roles #{:authority :applicant}
    :input-validators [validate-filter-type
                       (partial action/non-blank-parameters [:filterId])]
    :description "Removes users application filter"}

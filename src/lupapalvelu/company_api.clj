@@ -8,7 +8,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.schemas :as ssc]
+            [schema.core :as sc]))
 
 (defquery company
   {:user-roles #{:applicant :authority}
@@ -19,6 +21,13 @@
   (ok :company     (com/find-company! {:id company})
       :users       (and users (com/find-company-users company))
       :invitations (and users (com/find-user-invitations company))))
+
+(defquery company-tags
+  {:user-roles #{:applicant :authority :admin}
+   :pre-checks [(com/validate-has-company-role :any)]
+   :parameters []}
+  [{{{company-id :id} :company} :user}]
+  (ok :company (com/find-company! {:id company-id} [:tags :name])))
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
@@ -191,3 +200,56 @@
       (fail! :forbidden)))
   (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))
+
+(defcommand save-company-tags
+  {:parameters [tags]
+   :input-validators [(partial action/parameters-matching-schema
+                               [:tags]
+                               [{(sc/optional-key :id) (sc/maybe ssc/ObjectIdStr)
+                                 :label                sc/Str}])]
+   :user-roles #{:applicant}
+   :pre-checks [(com/validate-has-company-role :admin)]}
+  [{{:keys [company] :as user} :user :as command}]
+  (com/update-company! (:id company) {:tags (map mongo/ensure-id tags)} user)
+  (ok))
+
+(defquery remove-company-tag-ok
+  {:parameters [tagId]
+   :input-validators [(partial action/non-blank-parameters [:tagId])]
+   :user-roles #{:applicant :authority}}
+  [{{{company-id :id} :company} :user}]
+  (if-let [tag-applications (seq (mongo/select :applications
+                                               {:company-notes {$elemMatch {:companyId company-id
+                                                                            :tags      tagId}}}
+                                               [:_id]))]
+    (fail :warning.tags.removing-from-applications :applications tag-applications)
+    (ok)))
+
+(defquery company-notes
+  {:parameters [id]
+   :user-roles #{:applicant :authority}
+   :pre-checks [com/validate-company-is-authorized]}
+  [{{notes :company-notes} :application {{company-id :id} :company} :user}]
+  (ok :notes (util/find-by-key :companyId company-id notes)))
+
+(defcommand update-application-company-notes
+  {:parameters [id]
+   :optional-parameters [tags note]
+   :states states/all-application-states
+   :pre-checks [(com/validate-has-company-role :any)
+                com/validate-tag-ids]
+   :user-roles #{:authority :applicant}}
+  [{{notes :company-notes} :application {{company-id :id} :company} :user}]
+  (if (util/find-by-key :companyId company-id notes)
+    (mongo/update :applications
+                  {:_id id :company-notes {$elemMatch {:companyId company-id}}}
+                  {$set (util/assoc-when {} :company-notes.$.tags tags :company-notes.$.note note)})
+    (mongo/update :applications
+                  {:_id id}
+                  {$push {:company-notes (util/assoc-when {:companyId company-id} :tags tags :note note)}}))
+  (ok))
+
+(defquery enable-company-search
+  {:user-roles #{:applicant}
+   :pre-checks [(com/validate-has-company-role :any)]}
+  [_])

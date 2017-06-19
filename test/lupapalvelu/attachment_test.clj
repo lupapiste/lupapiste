@@ -374,7 +374,7 @@
                   (is (= (get-in updates [$set :attachments.$.latestVersion]) version-model))
                   (is (= (:state (get-in updates [$set (version-approval-path (:originalFileId version-model))]))
                          (or (:state options) :requires_authority_action)))
-                  (is (= (get-in updates [$set "attachments.$.versions.0"]) version-model)))))
+                  (is (= (get-in updates [$push :attachments.$.versions]) version-model)))))
 
 (defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment version-model] (gen/fmap (fn [[att fids]]

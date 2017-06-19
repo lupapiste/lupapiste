@@ -143,7 +143,7 @@
       (assoc :latest-verdict-status (select-latest-verdict-status application))
       (update :documents (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
-(defn get-linked-foreman-applications [id]
+(defn get-linked-foreman-applications-by-id [id]
   (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})
         apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
         foreman-application-links (filter #(= "tyonjohtajan-nimeaminen-v2"
