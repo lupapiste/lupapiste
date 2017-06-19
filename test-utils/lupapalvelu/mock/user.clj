@@ -4,9 +4,15 @@
              [midje.sweet :as midje]))
 
 
-(def users-by-username
+(defn users-by-key [k]
   (let [mongerified-users (map mongerify minimal/users)]
-    (key-by :username mongerified-users)))
+    (key-by k mongerified-users)))
+
+(def users-by-username
+  (users-by-key :username))
+
+(def users-by-id
+  (users-by-key :id))
 
 (def kaino       (users-by-username "kaino@solita.fi"))
 (def erkki       (users-by-username "erkki@example.com"))

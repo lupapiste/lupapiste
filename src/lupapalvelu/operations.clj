@@ -1329,18 +1329,30 @@
        (map (juxt (comp keyword key) (comp keys val)))
        (into {})))
 
-(defn selected-operations-for-organizations [organizations]
-  (let [orgs-with-selected-ops (filter (comp seq :selected-operations) organizations)
-        ;; Resolving operation tree for organizations with "selected-operations" defined in db
-        op-trees-for-orgs-with-selected-ops (if-not (empty? orgs-with-selected-ops)
-                                              (let [selected-operations (->> orgs-with-selected-ops
-                                                                          (map :selected-operations)
-                                                                          flatten
-                                                                          (map keyword)
-                                                                          set)]
-                                                (operations-filtered selected-operations false))
-                                              [])]
-    (sort-operation-tree op-trees-for-orgs-with-selected-ops)))
+(defn selected-operations-for-organizations
+  ([organizations] (selected-operations-for-organizations organizations (constantly true)))
+  ([organizations filter-fn]
+   (let [orgs-with-selected-ops (filter (comp seq :selected-operations) organizations)
+         ;; Resolving operation tree for organizations with "selected-operations" defined in db
+         op-trees-for-orgs-with-selected-ops (if-not (empty? orgs-with-selected-ops)
+                                               (let [selected-operations (->> orgs-with-selected-ops
+                                                                              (map :selected-operations)
+                                                                              flatten
+                                                                              (map keyword)
+                                                                              set)]
+                                                 (operations-filtered #(and (selected-operations %)
+                                                                            (filter-fn %))
+                                                                      false))
+                                               [])]
+     (sort-operation-tree op-trees-for-orgs-with-selected-ops))))
+
+(defn selected-operation-for-organization?
+  "Has the organization selected the given operation?"
+  [organization operation-name]
+  {:pre [(or (string? operation-name) (keyword? operation-name))]}
+  (let [selected-operations (->> organization :selected-operations (map keyword) (set))]
+    (or (empty? selected-operations)
+        (contains? selected-operations (keyword operation-name)))))
 
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
