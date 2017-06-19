@@ -36,14 +36,17 @@
          {(sc/optional-key :item-loc-prefix) sc/Keyword
           :items           [sc/Keyword]}))
 
+(defschema MattiDateDelta
+  {(sc/optional-key :enabled) sc/Bool
+   (sc/optional-key :delta)   sc/Int
+   :unit                      (sc/enum :days :years)})
+
 (def schema-type-alternatives
   {:docgen        sc/Str
    :list          (sc/recursive #'MattiList)
    :from-settings MattiFromSettings
    :loc-text      sc/Keyword ;; Localisation term shown as text.
-   :date-delta    {(sc/optional-key :enabled) sc/Bool
-                   (sc/optional-key :delta)   sc/Int
-                   :unit                      (sc/enum :days :years)}
+   :date-delta    MattiDateDelta
    :multi-select  MattiMultiSelect})
 
 (defn make-conditional [m]

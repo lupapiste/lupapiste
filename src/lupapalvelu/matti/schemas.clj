@@ -1,10 +1,11 @@
 (ns lupapalvelu.matti.schemas
-  (:require [lupapalvelu.document.schemas :refer [defschemas]]
+  (:require [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.matti.shared :as shared]
             [sade.schemas :as ssc]
             [sade.util :as util]
-            [schema.core :refer [defschema] :as sc]))
+            [schema.core :refer [defschema] :as sc]
+            [schema-tools.core :as st]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
 (def verdict-code-map
@@ -78,6 +79,9 @@
                           :body  [{:name "automatic"}
                                   {:name "manual"}]})
 
+(def verdict-check {:name "matti-verdict-check"
+                    :type :checkbox})
+
 (defschema MattiSettingsReview
   {:id      ssc/ObjectIdStr
    :name    {:fi sc/Str
@@ -104,26 +108,60 @@
                :data      sc/Any
                :settings  MattiSavedSettings}]})
 
-(defschemas 1
+(doc-schemas/defschemas 1
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [verdict-code matti-string verdict-text
+       [matti-string verdict-text verdict-check
         verdict-giver automatic-vs-manual]))
 
 ;; Schema utils
 
-(defn get-in-schema [schema [x & xs]]
-  (if (nil? x)
-    schema
-    (let [x (name x)]
-      (cond
-        (re-matches #"\d+" x) (get-in-schema (nth (get schema :row schema)
-                                                  (util/->int x))
-                                             xs)
-        (= (:id schema) x) (get-in-schema (:schema schema) xs)))))
+(defn- resolve-path-schema [data xs]
+  (let [path   (mapv keyword xs)
+        docgen (some-> data :schema :docgen)]
+    (assoc (cond
+             (:grid data)       {:schema shared/MattiVerdictSection}
+             docgen             {:docgen (doc-schemas/get-schema {:name docgen})}
+             (:date-delta data) {:schema shared/MattiDateDelta})
+           :path path
+           :data data)))
 
-(defn get-in-section [schema [section & path]]
-  (get-in-schema (-> (util/find-by-id section (:sections schema))
-                     :grid :rows)
-                 path))
+(defn- schema-array
+  "[key value] if successful."
+  [data]
+  (when-let [m (not-empty (select-keys data [:sections :rows :row :items]))]
+    (assert (= (count m) 1))
+    (first m)))
+
+(defn- resolve-index [xs x]
+  (if (re-matches #"\d+" x)
+    (util/->int x)
+    (first (keep-indexed (fn [i data]
+                           (when (= x (or (:id data) (:id (first data))))
+                             i))
+                         xs))))
+
+(defn schema-data
+  "Data is the reference schema instantiation (e.g.,
+  shared/default-verdict-template). The second argument is path into
+  data. Returns map with remaining path and resolved schema (:schema or :docgen key)"
+  [data [x & xs :as path]]
+  (if (nil? xs)
+    (resolve-path-schema data path)
+    (let [x      (name x)
+          [k v]  (schema-array data)
+          grid   (get-in data [:grid :rows])
+          list   (get-in data [:list :items])
+          schema (:schema data)
+          id     (:id data)
+          id-ok? (or (nil? id) (= (:id data) x))]
+      (cond
+        (sequential? data)  (let [i    (resolve-index data x)
+                                  item (nth data i)]
+                              (when item
+                                (schema-data item xs)))
+        (and id-ok? k)      (schema-data v path)
+        grid                (schema-data grid path)
+        (and id-ok? list)   (schema-data list path)
+        (and id-ok? schema) (schema-data schema xs)))))
