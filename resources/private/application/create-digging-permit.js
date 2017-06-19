@@ -44,6 +44,9 @@
               self.operations(data.operations);
             }
           })
+          .error(function(data) {
+            notify.ajaxError(data);
+          })
           .call();
       }
       return self;
@@ -61,6 +64,9 @@
                                  message: "application.createDiggingPermit.success",
                                  sticky: true});
 
+        })
+        .error(function(data) {
+          notify.ajaxError(data);
         })
         .call();
         hub.send("track-click", {category:"Application", label:"", event:"createDiggingPermit"});
