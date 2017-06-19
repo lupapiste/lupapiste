@@ -6,7 +6,8 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [monger.operators :refer :all]
-            [lupapalvelu.roles :as roles]))
+            [lupapalvelu.roles :as roles]
+            [lupapalvelu.application :as app]))
 
 (defcommand create-archiving-project
             {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway]
@@ -37,9 +38,10 @@
    :user-roles       #{:authority}
    :user-authz-roles roles/default-authz-writer-roles
    :states           #{:open}}
-  [{:keys [application created] :as command}]
+  [{:keys [application created user] :as command}]
   (action/update-application command
-                             {$set {:state     :submitted
-                                    :modified  created
-                                    :opened    (:opened application)
-                                    :submitted (or (:submitted application) created)}}))
+                             {$set  {:state     :underReview
+                                     :modified  created
+                                     :opened    (:opened application)
+                                     :submitted (or (:submitted application) created)}
+                              $push {:history (app/history-entry :underReview created user)}}))
