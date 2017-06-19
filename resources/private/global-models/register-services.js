@@ -4,10 +4,12 @@
   lupapisteApp.services.commentService = new LUPAPISTE.CommentService();
 
   lupapisteApp.services.organizationTagsService = new LUPAPISTE.OrganizationTagsService();
+  lupapisteApp.services.companyTagsService = new LUPAPISTE.CompanyTagsService();
   lupapisteApp.services.applicationFiltersService = new LUPAPISTE.ApplicationFiltersService();
   lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.handlerFilterService = new LUPAPISTE.HandlerFilterService(lupapisteApp.services.applicationFiltersService);
-  lupapisteApp.services.tagFilterService = new LUPAPISTE.TagFilterService(lupapisteApp.services.organizationTagsService, lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.tagFilterService = new LUPAPISTE.TagFilterService(lupapisteApp.services.organizationTagsService, lupapisteApp.services.applicationFiltersService, "tags");
+  lupapisteApp.services.companyTagFilterService = new LUPAPISTE.TagFilterService(lupapisteApp.services.companyTagsService, lupapisteApp.services.applicationFiltersService, "companyTags");
   lupapisteApp.services.organizationFilterService = new LUPAPISTE.OrganizationFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.operationFilterService = new LUPAPISTE.OperationFilterService(lupapisteApp.services.applicationFiltersService);
   lupapisteApp.services.publishBulletinService = new LUPAPISTE.PublishBulletinService();

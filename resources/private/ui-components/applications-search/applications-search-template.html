@@ -6,55 +6,57 @@
       <!-- ko ifnot: noApplications() -->
       <div class="applications-search-top">
         <div class="container">
-          <h1 data-bind="ltext: 'navigation'"></h1>
 
-          <div class="button-group">
-            <button data-bind="click: create"
-                    data-test-id="applications-create-new-inforequest"
-                    class="positive application-create">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'newRequest.newInforequest'"></span>
-            </button>
-
-            <button data-bind="click: create"
-                    data-test-id="applications-create-new-application"
-                    class="positive application-create">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'newRequest.newApplication'"></span>
-            </button>
-
-            <!-- ko if: features.enabled('ajanvaraus') && lupapisteApp.models.currentUser.isApplicant -->
-            <a href="#!/new-appointment">
-              <button data-test-id="applications-goto-new-appointment"
-                    class="positive application-create">
+          <div class="applications-search-control">
+            <h1 data-bind="ltext: 'navigation'"></h1>
+            <div class="button-group">
+              <button data-bind="click: create"
+                      data-test-id="applications-create-new-inforequest"
+                      class="positive application-create">
                 <i class="lupicon-circle-plus"></i>
-                <span data-bind="ltext: 'new-appointment.page-title'"></span>
+                <span data-bind="ltext: 'newRequest.newInforequest'"></span>
               </button>
-            </a>
-            <!-- /ko -->
 
-            <!-- ko if: authorizationModel.ok('create-application-from-previous-permit') -->
-            <button data-bind="click: createWithPrevPermit"
-                    data-test-id="applications-create-new-with-prev-permit"
-                    class="positive application-create">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
-            </button>
+              <button data-bind="click: create"
+                      data-test-id="applications-create-new-application"
+                      class="positive application-create">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'newRequest.newApplication'"></span>
+              </button>
+
+              <!-- ko if: features.enabled('ajanvaraus') && lupapisteApp.models.currentUser.isApplicant -->
+              <a href="#!/new-appointment">
+                <button data-test-id="applications-goto-new-appointment"
+                        class="positive application-create">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'new-appointment.page-title'"></span>
+                </button>
+              </a>
+              <!-- /ko -->
+
+              <!-- ko if: authorizationModel.ok('create-application-from-previous-permit') -->
+              <button data-bind="click: createWithPrevPermit"
+                      data-test-id="applications-create-new-with-prev-permit"
+                      class="positive application-create">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
+              </button>
+              <!-- /ko -->
+            </div>
+
+            <!-- No spaces since we do now want any gaps in the radio button group -->
+            <!-- ko if: searchModels().length > 1 -->
+            <div class="form-grid form-grid--no-border"
+                 data-bind="foreach: searchModels"><span
+                                                     data-bind="component: {name: 'radio-field',
+                                                                params: {value: $data.type,
+                                                                selectedValue: $parent.searchType,
+                                                                id: 'searchType' + _.capitalize($data.type),
+                                                                name: 'searchType',
+                                                                label: $data.label,
+                                                                lLabel: $data.lLabel}}"></span></div>
             <!-- /ko -->
           </div>
-
-          <!-- No spaces since we do now want any gaps in the radio button group -->
-          <!-- ko if: searchModels().length > 1 -->
-          <div class="form-grid form-grid--no-border"
-               data-bind="foreach: searchModels"><span
-                 data-bind="component: {name: 'radio-field',
-                                        params: {value: $data.type,
-                                                 selectedValue: $parent.searchType,
-                                                 id: 'searchType' + _.capitalize($data.type),
-                                                 name: 'searchType',
-                                                 label: $data.label,
-                                                 lLabel: $data.lLabel}}"></span></div>
-          <!-- /ko -->
 
           <!-- Filters -->
           <div data-bind="component: searchModel().filter"

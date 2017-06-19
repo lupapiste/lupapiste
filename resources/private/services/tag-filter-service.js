@@ -1,4 +1,4 @@
-LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
+LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService, filterKey) {
   "use strict";
   var self = this;
 
@@ -7,7 +7,7 @@ LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
   self.selected = ko.observableArray([]);
 
   var savedFilter = ko.pureComputed(function() {
-    return util.getIn(applicationFiltersService.selected(), ["filter", "tags"]);
+    return util.getIn(applicationFiltersService.selected(), ["filter", filterKey]);
   });
 
   ko.computed(function() {

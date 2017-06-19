@@ -25,9 +25,10 @@ LUPAPISTE.CurrentUser = function() {
       message:        undefined,
       messageI18nkey: undefined
     },
-    defaultFilter: {id: "", foremanFilterId: ""},
+    defaultFilter: {id: "", foremanFilterId: "",  companyFilterId: ""},
     applicationFilters: [],
-    foremanFilters: []
+    foremanFilters: [],
+    companyApplicationFilters: []
   };
 
   var fbPixel = null;

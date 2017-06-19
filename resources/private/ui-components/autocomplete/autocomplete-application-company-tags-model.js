@@ -4,7 +4,7 @@ LUPAPISTE.AutocompleteApplicationCompanyTagsModel = function(params) {
 
   var selectedIds = params.selectedValues;
 
-  var companyTags = ko.observableArray();
+  var companyTags = lupapisteApp.services.companyTagsService.currentCompanyTags;
 
   self.lPlaceholder = params.lPlaceholder;
   self.disable = params.disable || false;
@@ -17,14 +17,6 @@ LUPAPISTE.AutocompleteApplicationCompanyTagsModel = function(params) {
   self.selected.push = function(item) { selectedIds.push(item.id); };
 
   self.query = ko.observable("");
-
-  var companyId = util.getIn(lupapisteApp.models.currentUser, ["company","id"]);
-
-  ajax.query("company-tags", {company: companyId})
-    .success(function(resp) {
-      companyTags(resp.tags);
-    })
-    .call();
 
   self.data = ko.pureComputed(function() {
     var q = self.query() || "";

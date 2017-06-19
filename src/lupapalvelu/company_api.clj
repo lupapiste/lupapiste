@@ -24,11 +24,10 @@
 
 (defquery company-tags
   {:user-roles #{:applicant :authority :admin}
-   :input-validators [(some-pre-check com/validate-is-admin
-                                      com/validate-belongs-to-company)]
-   :parameters [company]}
-  [{{:keys [users]} :data}]
-  (ok :tags (:tags (com/find-company! {:id company} [:tags]))))
+   :pre-checks [(com/validate-has-company-role :any)]
+   :parameters []}
+  [{{{company-id :id} :company} :user}]
+  (ok :company (com/find-company! {:id company-id} [:tags :name])))
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
@@ -249,3 +248,8 @@
                   {:_id id}
                   {$push {:company-notes (util/assoc-when {:companyId company-id} :tags tags :note note)}}))
   (ok))
+
+(defquery enable-company-search
+  {:user-roles #{:applicant}
+   :pre-checks [(com/validate-has-company-role :any)]}
+  [_])
