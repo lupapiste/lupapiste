@@ -340,7 +340,7 @@
           schema (schemas/get-schema (:schema-info document))
           company (tools/unwrapped (model/->yritys (company-fields application
                                                                    company-id user)
-                                                   :with-empty-defaults true))
+                                                   :with-empty-defaults? true))
           model (if (seq path-arr)
                   (assoc-in {} (map keyword path-arr) company)
                   company)

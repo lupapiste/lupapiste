@@ -647,7 +647,7 @@
     :username "erkki@example.com" ;
     :firstName "Erkki"
     :lastName "Esimerkki"
-    :phone "5566677"
+    :phone "556677"
     :email "erkki@example.com"
     :street "Merkintie 88"
     :zip "12345"
