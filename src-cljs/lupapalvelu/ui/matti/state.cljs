@@ -12,4 +12,5 @@
 (def schemas          (state-cursor :schemas))
 (def template-list    (state-cursor :template-list))
 (def categories       (state-cursor :categories))
-(def settings         (state-cursor :settings))
+(def references       (state-cursor :references))
+(def settings         (rum/cursor-in references [:settings]))

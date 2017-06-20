@@ -1,11 +1,12 @@
 (ns lupapalvelu.matti.schemas
-  (:require [lupapalvelu.document.schemas :as doc-schemas]
+  (:require [clojure.set :as set]
+            [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.matti.shared :as shared]
             [sade.schemas :as ssc]
             [sade.util :as util]
-            [schema.core :refer [defschema] :as sc]
-            [schema-tools.core :as st]))
+            [schema-tools.core :as st]
+            [schema.core :refer [defschema] :as sc]))
 
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
 (def verdict-code-map
@@ -117,15 +118,25 @@
 
 ;; Schema utils
 
-(defn- resolve-path-schema [data xs]
-  (let [path   (mapv keyword xs)
-        docgen (some-> data :schema :docgen)]
-    (assoc (cond
-             (:grid data)       {:schema shared/MattiVerdictSection}
-             docgen             {:docgen (doc-schemas/get-schema {:name docgen})}
-             (:date-delta data) {:schema shared/MattiDateDelta})
-           :path path
-           :data data)))
+(defn- resolve-path-schema
+  "Resolution result is map with two fixed keys (:path, :data) and one
+  depending on the schema type (:schema, :docgen, :reference-list)."
+  [data xs]
+  (let [path         (mapv keyword xs)
+        docgen       (some-> data :schema :docgen)
+        reflist      (some-> data :schema :reference-list)
+        date-delta   (:date-delta data)
+        multi-select (some-> data :schema :multi-select)
+        wrap         (fn [id schema data]
+                       {id {:schema schema
+                            :path   path
+                            :data   data}})]
+    (cond
+      (:grid data) (wrap :section shared/MattiVerdictSection data)
+      docgen       (wrap :docgen (doc-schemas/get-schema {:name docgen}) docgen)
+      date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
+      reflist      (wrap :reference-list shared/MattiReferenceList reflist)
+      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select))))
 
 (defn- schema-array
   "[key value] if successful."
@@ -143,9 +154,10 @@
                          xs))))
 
 (defn schema-data
-  "Data is the reference schema instantiation (e.g.,
+  "Data is the reference schema instance (e.g.,
   shared/default-verdict-template). The second argument is path into
-  data. Returns map with remaining path and resolved schema (:schema or :docgen key)"
+  data. Returns map with remaining path and resolved schema (see
+  resolve-path-schema)."
   [data [x & xs :as path]]
   (if (nil? xs)
     (resolve-path-schema data path)
@@ -158,10 +170,61 @@
           id-ok? (or (nil? id) (= (:id data) x))]
       (cond
         (sequential? data)  (let [i    (resolve-index data x)
-                                  item (nth data i)]
+                                  item (and i (nth data i))]
                               (when item
                                 (schema-data item xs)))
         (and id-ok? k)      (schema-data v path)
         grid                (schema-data grid path)
         (and id-ok? list)   (schema-data list path)
         (and id-ok? schema) (schema-data schema xs)))))
+
+(defmulti validate-resolution :type)
+
+(defmethod validate-resolution :default
+  [_]
+  :error.invalid-value-path)
+
+(defn schema-error [schema path value]
+  (when (sc/check (st/get-in schema path) value)
+    :error.invalid-value))
+
+(defmethod validate-resolution :section
+  [{:keys [path schema value]}]
+  (cond
+    (coll? value) :error.invalid-value
+    :else (schema-error schema path value)))
+
+(defmethod validate-resolution :date-delta
+  [{:keys [path schema value]}]
+  (schema-error schema path value))
+
+(defmethod validate-resolution :docgen
+  [_]
+  ;; TODO: Use the old-school docgen validation if possible
+  )
+
+(defn check-items [items data-items]
+  (let [v-set (set items)
+        d-set (set data-items)]
+    (cond
+      (not= (count items) (count v-set)) :error.duplicate-items
+      (not (set/subset? v-set d-set))    :error.invalid-items)))
+
+(defmethod validate-resolution :multi-select
+  [{:keys [path schema data value]}]
+  (or (schema-error schema path value)
+      (check-items value (:items data))))
+
+(defmethod validate-resolution :reference-list
+  [{:keys [path schema data value references]}]
+  (or (schema-error schema path value)
+      (check-items value (get-in references (:path data)))))
+
+(defn validate-path-value
+  "Error message if not valid, nil otherwise."
+  [schema-instance data-path value & [references]]
+  (let [resolution (schema-data schema-instance data-path)]
+    (validate-resolution (assoc  (some-> resolution vals first)
+                                 :type (some-> resolution keys first)
+                                 :value value
+                                 :references references))))

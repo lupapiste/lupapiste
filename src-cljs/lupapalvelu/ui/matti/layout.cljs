@@ -6,6 +6,7 @@
             [lupapalvelu.ui.matti.docgen :as docgen]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.service :as service]
+            [lupapalvelu.ui.matti.state :as state]
             [rum.core :as rum]))
 
 
@@ -70,22 +71,24 @@
                       (path/meta-updated options))}
          text]]))])
 
-(rum/defc select-from-settings < rum/reactive
-  [{:keys [state path schema settings] :as options} & [wrap-label?]]
+(rum/defc select-reference-list < rum/reactive
+  [{:keys [state path schema ] :as options} & [wrap-label?]]
+    (println "Select path:" (:path schema))
   (let [options   (assoc options
                          :schema (assoc schema
                                         :body [{:body (map #(hash-map :name %)
                                                            (distinct (path/react (:path schema)
-                                                                                 settings)))}]))
+                                                                                 state/references)))}]))
         component (docgen/docgen-select options)]
     (if wrap-label?
       (docgen/docgen-label-wrap options component)
       component)))
 
-(rum/defc multi-select-from-settings < rum/reactive
-  [{:keys [state path schema settings] :as options} & [wrap-label?]]
+(rum/defc multi-select-reference-list < rum/reactive
+  [{:keys [state path schema] :as options} & [wrap-label?]]
+  (println "Multi-select path:" (:path schema))
   (matti-multi-select (assoc-in options [:schema :items] (distinct (path/react (:path schema)
-                                                                               settings)))
+                                                                               state/references)))
                       wrap-label?))
 
 (rum/defc last-saved < rum/reactive
@@ -126,12 +129,12 @@
                                           :schema
                                           schema)]
     ((case cell-type
-       :list          matti-list
-       :date-delta    matti-date-delta
-       :from-settings (if (= :select (:type schema-value))
-                        select-from-settings
-                        multi-select-from-settings)
-       :multi-select  matti-multi-select) options wrap-label?)))
+       :list           matti-list
+       :date-delta     matti-date-delta
+       :reference-list (if (= :select (:type schema-value))
+                         select-reference-list
+                         multi-select-reference-list)
+       :multi-select   matti-multi-select) options wrap-label?)))
 
 (defmethod instantiate :loc-text
   [_ {:keys [schema]} & wrap-label?]

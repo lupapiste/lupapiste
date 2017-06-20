@@ -173,8 +173,7 @@
     [:div
      (case (rum/react state/current-view)
        ::template (with-back-button (verdict-template (assoc shared/default-verdict-template
-                                            :state state/current-template
-                                            :settings state/settings)))
+                                                             :state state/current-template)))
        ::list     (verdict-template-list)
        ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @state/current-category)))))]))
 
