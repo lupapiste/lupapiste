@@ -66,7 +66,8 @@
                    (util/dissoc-in [:data :tempfile]) ; Temporary java.io.File set by ring
                    (update-in [:data :files] (partial map #(if (:tempfile %)
                                                              (dissoc % :tempfile)
-                                                             %)))) ; data in multipart/form-data w/ POST
+                                                             %))) ; data in multipart/form-data w/ POST
+                   (update :data (fn [m] (if-not (seq (:files m)) (dissoc m :files) m)))) ; strip empty "files"
         jsoned   (json/generate-string stripped)]
     (try
       (unsecure-log-event level jsoned {:ns (str (:ns event))})
