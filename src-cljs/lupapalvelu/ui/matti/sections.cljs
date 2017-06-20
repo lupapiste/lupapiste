@@ -38,10 +38,10 @@
 
 (rum/defc section < rum/reactive
   {:key-fn (fn [{path :path}] (path/id path))}
-  [{:keys [state path id css] :as options}]
+  [{:keys [state path id css] :as options} & [header-fn]]
   [:div.matti-section
    {:class (path/css options)}
-   (section-header options)
+   ((or header-fn section-header) options)
    (when-not (path/react path state :removed)
      [:div.section-body (layout/matti-grid (shared/child-schema options
                                                                 :grid

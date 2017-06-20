@@ -132,7 +132,7 @@
                             :path   path
                             :data   data}})]
     (cond
-      (:grid data) (wrap :section shared/MattiVerdictSection data)
+      (:grid data) (wrap :section shared/MattiSection data)
       docgen       (wrap :docgen (doc-schemas/get-schema {:name docgen}) docgen)
       date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
@@ -146,7 +146,7 @@
     (first m)))
 
 (defn- resolve-index [xs x]
-  (if (re-matches #"\d+" x)
+  (if (re-matches #"^\d+$" x)
     (util/->int x)
     (first (keep-indexed (fn [i data]
                            (when (= x (or (:id data) (:id (first data))))
@@ -184,19 +184,19 @@
   [_]
   :error.invalid-value-path)
 
-(defn schema-error [schema path value]
-  (when (sc/check (st/get-in schema path) value)
+(defn schema-error [{:keys [schema path value schema-overrides]}]
+  (when (sc/check (st/get-in (get schema-overrides :type schema) path) value)
     :error.invalid-value))
 
 (defmethod validate-resolution :section
-  [{:keys [path schema value]}]
+  [{:keys [path schema value] :as options}]
   (cond
     (coll? value) :error.invalid-value
-    :else (schema-error schema path value)))
+    :else (schema-error options)))
 
 (defmethod validate-resolution :date-delta
-  [{:keys [path schema value]}]
-  (schema-error schema path value))
+  [{:keys [path schema value] :as options}]
+  (schema-error options))
 
 (defmethod validate-resolution :docgen
   [_]
@@ -211,20 +211,21 @@
       (not (set/subset? v-set d-set))    :error.invalid-items)))
 
 (defmethod validate-resolution :multi-select
-  [{:keys [path schema data value]}]
-  (or (schema-error schema path value)
+  [{:keys [path schema data value] :as options}]
+  (or (schema-error options)
       (check-items value (:items data))))
 
 (defmethod validate-resolution :reference-list
-  [{:keys [path schema data value references]}]
-  (or (schema-error schema path value)
+  [{:keys [path schema data value references] :as options}]
+  (or (schema-error options)
       (check-items value (get-in references (:path data)))))
 
 (defn validate-path-value
   "Error message if not valid, nil otherwise."
-  [schema-instance data-path value & [references]]
+  [schema-instance data-path value & [{:keys [references schema-overrides]}]]
   (let [resolution (schema-data schema-instance data-path)]
     (validate-resolution (assoc  (some-> resolution vals first)
                                  :type (some-> resolution keys first)
                                  :value value
-                                 :references references))))
+                                 :references references
+                                 :schema-overrides schema-overrides))))

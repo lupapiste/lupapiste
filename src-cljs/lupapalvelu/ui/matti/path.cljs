@@ -30,7 +30,7 @@
    (->> (filter identity path)
         (map name)
         ;; Index (number) path parts are ignored.
-        (filter #(re-matches #"\D+" %))
+        (remove #(re-matches #"^\d+$" %))
         (s/join ".")
         common/loc))
   ([path {:keys [i18nkey locPrefix] :as schema} & extra]

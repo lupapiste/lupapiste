@@ -73,7 +73,6 @@
 
 (rum/defc select-reference-list < rum/reactive
   [{:keys [state path schema ] :as options} & [wrap-label?]]
-    (println "Select path:" (:path schema))
   (let [options   (assoc options
                          :schema (assoc schema
                                         :body [{:body (map #(hash-map :name %)
@@ -86,7 +85,6 @@
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [state path schema] :as options} & [wrap-label?]]
-  (println "Multi-select path:" (:path schema))
   (matti-multi-select (assoc-in options [:schema :items] (distinct (path/react (:path schema)
                                                                                state/references)))
                       wrap-label?))
@@ -94,8 +92,8 @@
 (rum/defc last-saved < rum/reactive
   [{state :state}]
   [:span.saved-info
-   (common/loc :matti.last-saved
-               (js/util.finnishDateAndTime (path/react [:modified] state)))])
+   (when-let [ts (path/react [:modified] state)]
+     (common/loc :matti.last-saved (js/util.finnishDateAndTime ts)))])
 
 ;; -------------------------------
 ;; Component instantiation

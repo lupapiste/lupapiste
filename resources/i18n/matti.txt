@@ -216,3 +216,4 @@
 "matti-p" "fi" "Poikkeuslupien päätöspohjat (P)"
 "matti-kt" "fi" "Kiinteistötoimitusten ja maa-alueiden muutosten päätöspohjat (KT, MM)"
 "matti-ymp" "fi" "Ympäristötoimen päätöspohjat (YI, YL, YM, VVVL, MAL)"
+"matti-settings" "fi" "Asetukset: {0}"

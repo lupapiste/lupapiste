@@ -3,6 +3,7 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
             [rum.core :as rum]))
@@ -22,18 +23,20 @@
                                      :category category
                                      :_meta {:updated settings-updater})))))
 
+(defn last-saved-header [options]
+  [:div.matti-grid-1.matti-settings-last-saved
+   [:div.row.row--tight
+    [:div.col-1.col--right
+     (layout/last-saved (assoc options :state state/settings))]]])
+
 (rum/defc verdict-template-settings < rum/reactive
-  [{id :id :as options}]
-  (let [options (assoc options
-                       :path [id]
-                       :state state/settings)]
-    [:div
-     [:div.matti-grid-2
-      [:div.row
-       [:div.col-1
-        [:h2 (common/loc id)]]
-       [:div.col-1.col--right
-        (layout/last-saved options)]]]
-     (layout/matti-grid (shared/child-schema options
-                                             :grid
-                                             options))]))
+  [{:keys [title sections] :as options}]
+  [:div
+   [:h2 (common/loc :matti-settings (common/loc title))]
+   (for [{id :id :as sec} sections]
+     (sections/section (assoc sec
+                              :path [id]
+                              :state state/settings)
+                       (case (keyword id)
+                         :verdict (partial last-saved-header options)
+                         #())))])

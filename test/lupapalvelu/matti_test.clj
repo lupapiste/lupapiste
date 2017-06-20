@@ -40,15 +40,18 @@
     (:reference-list (schemas/schema-data shared/default-verdict-template
                                           ["matti-verdict" "2" "1" "verdict-code"]))
     => (contains {:path [:verdict-code],
-                  :data (contains {:path [:settings :matti-r :0 :0 :verdict-code]
+                  :data (contains {:path [:settings :verdict :0 :0 :verdict-code]
                                    :type :select})}))
 
   (fact "reference-list: multi-select"
     (:reference-list (schemas/schema-data shared/default-verdict-template
                                           ["matti-reviews" "0" "0" "small"]))
     => (contains {:path [:small],
-                  :data (contains {:path [:settings :matti-r :2 :0 :reviews]
+                  :data (contains {:path [:settings :reviews :0 :0 :reviews]
                                    :type :multi-select})})))
 
 (facts "Settings template schema data"
-  )
+  (fact "multi-select"
+    (:multi-select (schemas/schema-data shared/r-settings
+                                ["verdict" :0 :0 "verdict-code"]))
+    => (contains {:path [:verdict-code]})))

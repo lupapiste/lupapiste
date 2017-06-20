@@ -83,19 +83,23 @@
                            :row matti-row}
                      :else matti-row)]}))
 
-(defschema MattiVerdictSection
+(defschema MattiSection
   (merge MattiBase
-         {:id                        sc/Str ;; Also title localization key
-          ;; Section removed from the template. Note: the data is not cleared.
+         {:id   sc/Str ;; Also title localization key
+          :grid MattiGrid}))
+
+(defschema MattiVerdictSection
+  (merge MattiSection
+         {;; Section removed from the template. Note: the data is not cleared.
           (sc/optional-key :removed) sc/Bool
           (sc/optional-key :pdf)     sc/Bool ;; Section included in the verdict pdf.
-          :grid                      MattiGrid}))
+          }))
 
 (defschema MattiVerdict
-  {(sc/optional-key :id)        sc/Str ;; Id is created when the verdict is saved the first time
+  {(sc/optional-key :id)       sc/Str ;; Id is created when the verdict is saved the first time
    (sc/optional-key :modified) sc/Int
-   :name                        sc/Str ;; Non-localized raw string
-   :sections                    [MattiVerdictSection]})
+   :name                       sc/Str ;; Non-localized raw string
+   :sections                   [MattiVerdictSection]})
 
 (defn checkbox-rows [checks]
   (mapv (fn [complexity]
@@ -110,18 +114,22 @@
                                        checks)}}}])
        [:small :medium :large :extra-large]))
 
-(defn complexity-section [id settings-path]
+(defn complexity-section [id settings-path loc-prefix]
   {:id (name id)
    :grid  {:columns 1
            :rows (mapv (fn [complexity]
                          [{:schema {:reference-list {:id (name complexity)
-                                                     :i18nkey [(->> complexity name (str "matti.complexity.") keyword)
+                                                     :i18nkey [(->> complexity
+                                                                    name
+                                                                    (str "matti.complexity.")
+                                                                    keyword)
                                                                :matti.complexity.label]
                                                      :type :multi-select
-                                                     :item-loc-prefix (->> settings-path
+                                                     :item-loc-prefix loc-prefix
+                                                     #_(->> settings-path
                                                                            (drop 1)
                                                                            (map name)
-                                                                           (remove #(re-matches #"\d+" %))
+                                                                           (remove #(re-matches #"^\d+$" %))
                                                                            (s/join ".")
                                                                            keyword)
                                                      :path settings-path}}}])
@@ -160,17 +168,17 @@
                                   {:align  :full
                                    :col    2
                                    :id     "verdict-code"
-                                   :schema {:reference-list {:path       [:settings :matti-r :0 :0 :verdict-code]
-                                                            :type       :select
-                                                            :loc-prefix :matti-r}}}]
+                                   :schema {:reference-list {:path       [:settings :verdict :0 :0 :verdict-code]
+                                                             :type       :select
+                                                             :loc-prefix :matti-r}}}]
                                  [{:col    5
                                    :id     "paatosteksti"
                                    :align  :full
                                    :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen [:settings :matti-r :1 :0 :foremen] )
+              (complexity-section :matti-foremen [:settings :foremen :0 :0 :foremen] :matti-r.foremen )
               #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (complexity-section :matti-reviews [:settings :matti-r :2 :0 :reviews])
+              (complexity-section :matti-reviews [:settings :reviews :0 :0 :reviews] :matti-r.reviews)
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
                :grid  {:columns 6
@@ -195,55 +203,64 @@
 (sc/validate MattiVerdict default-verdict-template)
 
 (defschema MattiSettings
-  {:id   sc/Str
-   :grid MattiGrid})
+  {:title    sc/Str
+   :sections [MattiSection]})
 
 (def r-settings
-  {:id "matti-r"
-   :grid {:columns 1
-          :rows [[{:id "verdict-code"
-                   :schema {:multi-select {:items [:annettu-lausunto
-                                                   :asiakirjat-palautettu
-                                                   :ehdollinen
-                                                   :ei-lausuntoa
-                                                   :ei-puollettu
-                                                   :ei-tiedossa
-                                                   :ei-tutkittu-1
-                                                   :ei-tutkittu-2
-                                                   :ei-tutkittu-3
-                                                   :evatty
-                                                   :hallintopakko
-                                                   :hyvaksytty
-                                                   :ilmoitus-tiedoksi
-                                                   :konversio
-                                                   :lautakunta-palauttanut
-                                                   :lautakunta-poistanut
-                                                   :lautakunta-poydalle
-                                                   :maarays-peruutettu
-                                                   :muutti-evatyksi
-                                                   :muutti-maaraysta
-                                                   :muutti-myonnetyksi
-                                                   :myonnetty
-                                                   :myonnetty-aloitusoikeudella
-                                                   :osittain-myonnetty
-                                                   :peruutettu
-                                                   :puollettu
-                                                   :pysytti-evattyna
-                                                   :pysytti-maarayksen-2
-                                                   :pysytti-myonnettyna
-                                                   :pysytti-osittain
-                                                   :siirretty-maaoikeudelle
-                                                   :suunnitelmat-tarkastettu
-                                                   :tehty-hallintopakkopaatos-1
-                                                   :tehty-hallintopakkopaatos-2
-                                                   :tehty-uhkasakkopaatos
-                                                   :tyohon-ehto
-                                                   :valituksesta-luovuttu-1
-                                                   :valituksesta-luovuttu-2]}}}]
-                 [{:id "foremen"
-                   :schema {:multi-select {:items [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]
-                 [{:id "reviews"
-                   :schema {:multi-select {:items [:paikka :sijainti :aloitus :pohja :rakenne :vv :iv :loppu]}}}]]}})
+  {:title    "matti-r"
+   :sections [{:id   "verdict"
+               :grid {:columns 1
+                      :rows    [[{:id     "verdict-code"
+                                  :schema {:multi-select {:loc-prefix :matti-r
+                                                          :items      [:annettu-lausunto
+                                                                       :asiakirjat-palautettu
+                                                                       :ehdollinen
+                                                                       :ei-lausuntoa
+                                                                       :ei-puollettu
+                                                                       :ei-tiedossa
+                                                                       :ei-tutkittu-1
+                                                                       :ei-tutkittu-2
+                                                                       :ei-tutkittu-3
+                                                                       :evatty
+                                                                       :hallintopakko
+                                                                       :hyvaksytty
+                                                                       :ilmoitus-tiedoksi
+                                                                       :konversio
+                                                                       :lautakunta-palauttanut
+                                                                       :lautakunta-poistanut
+                                                                       :lautakunta-poydalle
+                                                                       :maarays-peruutettu
+                                                                       :muutti-evatyksi
+                                                                       :muutti-maaraysta
+                                                                       :muutti-myonnetyksi
+                                                                       :myonnetty
+                                                                       :myonnetty-aloitusoikeudella
+                                                                       :osittain-myonnetty
+                                                                       :peruutettu
+                                                                       :puollettu
+                                                                       :pysytti-evattyna
+                                                                       :pysytti-maarayksen-2
+                                                                       :pysytti-myonnettyna
+                                                                       :pysytti-osittain
+                                                                       :siirretty-maaoikeudelle
+                                                                       :suunnitelmat-tarkastettu
+                                                                       :tehty-hallintopakkopaatos-1
+                                                                       :tehty-hallintopakkopaatos-2
+                                                                       :tehty-uhkasakkopaatos
+                                                                       :tyohon-ehto
+                                                                       :valituksesta-luovuttu-1
+                                                                       :valituksesta-luovuttu-2]}}}]]}}
+              {:id   "foremen"
+               :grid {:columns 1
+                      :rows    [[{:id     "foremen"
+                                  :schema {:multi-select {:loc-prefix :matti-r
+                                                          :items      [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]]}}
+              {:id   "reviews"
+               :grid {:columns 1
+                      :rows    [[{:id     "reviews"
+                                  :schema {:multi-select {:loc-prefix :matti-r
+                                                          :items      [:paikka :sijainti :aloitus :pohja
+                                                                       :rakenne :vv :iv :loppu]}}}]]}}]})
 
 (def settings-schemas
   {:r r-settings})

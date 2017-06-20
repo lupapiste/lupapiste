@@ -116,8 +116,9 @@ $matti-grid-margin: 10px;
     }
 }
 
+$section-border: 1px solid $gray51;
+
 .matti-section {
-  $section-border: 1px solid $gray51;
   div.section-header {
     padding-left: $marginM;
     padding-right: $marginM;
@@ -148,6 +149,10 @@ $matti-grid-margin: 10px;
   .section-header {
     border-top: none;
   }
+}
+
+.matti-settings-last-saved {
+  border-bottom: $section-border;
 }
 
 
@@ -189,9 +194,10 @@ div.verdict-template {
     font-size: 17px;
     font-weight: bold;
   }
-  span.saved-info {
-    color: $gray153;
-  }
+}
+
+span.saved-info {
+  color: $gray153;
 }
 
 div.matti-date-delta {

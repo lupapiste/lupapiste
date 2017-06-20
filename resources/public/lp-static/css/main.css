@@ -17952,6 +17952,10 @@ input:disabled + .matti-radio-label:hover.matti-radio-label:before {
   border-top: none;
 }
 
+.matti-settings-last-saved {
+  border-bottom: 1px solid #333333;
+}
+
 .matti--view .matti-condition-box + .matti-condition-box:before {
   content: ", ";
 }
@@ -17984,7 +17988,7 @@ div.verdict-template span.header {
   font-weight: bold;
 }
 
-div.verdict-template span.saved-info {
+span.saved-info {
   color: #999999;
 }
 
