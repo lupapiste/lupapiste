@@ -208,7 +208,7 @@
                                [{(sc/optional-key :id) (sc/maybe ssc/ObjectIdStr)
                                  :label                sc/Str}])]
    :user-roles #{:applicant}
-   :pre-checks [(com/validate-has-company-role :admin)]}
+   :pre-checks [(com/validate-has-company-role :any)]}
   [{{:keys [company] :as user} :user :as command}]
   (com/update-company! (:id company) {:tags (map mongo/ensure-id tags)} user)
   (ok))
