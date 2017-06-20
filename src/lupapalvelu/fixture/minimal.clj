@@ -900,7 +900,8 @@
                                              :ya-kayttolupa-nostotyot]
                        :operations-attachments ya-default-attachments-for-operations
                        :permanent-archive-enabled false
-                       :tags [{:id "735001000000000000000000" :label "YA kadut"} {:id "735002000000000000000000" :label "YA ojat"}]}
+                       :tags [{:id "735001000000000000000000" :label "YA kadut"} {:id "735002000000000000000000" :label "YA ojat"}]
+                       :automatic-ok-for-attachments-enabled true}
 
                       ;; Kuopio YA
                       {:id "297-YA"
@@ -925,7 +926,8 @@
                                         :general true}]
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :automatic-ok-for-attachments-enabled true}
 
 
                       ;; Tampere R
@@ -980,7 +982,8 @@
                                         :general true}]
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :automatic-ok-for-attachments-enabled true}
 
                       ;; Porvoo R
                       {:id "638-R"
@@ -1019,7 +1022,8 @@
                                                :en "Handler"}
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :automatic-ok-for-attachments-enabled true}
 
                       ;; Oulu YA
                       {:id "564-YA"
@@ -1039,7 +1043,8 @@
                                      "http://www.ouka.fi")]
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled true}
+                       :permanent-archive-enabled true
+                       :automatic-ok-for-attachments-enabled true}
 
                       ;; Naantali R
                       {:id "529-R"
@@ -1069,7 +1074,8 @@
                                                :en "Handler"}
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :automatic-ok-for-attachments-enabled true}
 
 
                       ;; Loppi R
@@ -1210,7 +1216,8 @@
                                                :en "Handler"}
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :automatic-ok-for-attachments-enabled true}
 
                       ;;
                       ;; Testeissa kaytettavia organisaatioita
