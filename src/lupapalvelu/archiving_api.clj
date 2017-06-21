@@ -29,7 +29,7 @@
   {:parameters       [:id]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
-   :states           (states/all-application-states-but :draft)}
+   :states           states/all-application-or-archiving-project-states}
   [{:keys [application]}]
   (let [app-doc-id (str (:id application) "-application")
         case-file-doc-id (str (:id application) "-case-file")
@@ -54,7 +54,7 @@
 (defquery archiving-operations-enabled
   {:user-roles      #{:authority}
    :org-authz-roles (with-meta #{:archivist} {:skip-validation true})
-   :states          states/all-application-states
+   :states          states/all-application-or-archiving-project-states
    :pre-checks      [(fn [{:keys [user application]}]
                        (when-not (or application (usr/user-is-archivist? user nil)) ; If application, :org-authz-roles works as validator
                          unauthorized))]}

@@ -623,7 +623,7 @@
       (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
       (info "4/4 deleted meta-data of attachments" ids-str)))
   (when (org/some-organization-has-archive-enabled? #{(:organization application)})
-    (archiving-util/mark-application-archived-if-done application (now))))
+    (archiving-util/mark-application-archived-if-done application (now) nil)))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."

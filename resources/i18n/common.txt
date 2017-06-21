@@ -3758,3 +3758,4 @@
 "hakija-ark._group_label" "en" "Applicant"
 "hakija-ark._group_label" "fi" "Hakija"
 "hakija-ark._group_label" "sv" "Sökande"
+"ARK" "fi" "Digitoidun luvan arkistointi"

@@ -162,7 +162,7 @@
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states states/all-application-states}
+   :states states/all-application-or-archiving-project-states}
   [{application :application user :user assignments :application-assignments}]
   (ok :attachmentsFilters
       (att-tags/attachments-filters application
@@ -176,7 +176,7 @@
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states states/all-application-states}
+   :states states/all-application-or-archiving-project-states}
   [{application :application}]
   (ok :tagGroups (att-tag-groups/attachment-tag-groups application)))
 

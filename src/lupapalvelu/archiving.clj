@@ -105,9 +105,14 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
+(defn- do-post-archival-ops [state-update-fn id application now user]
+  (state-update-fn :arkistoitu application now id)
+  (mark-first-time-archival application now)
+  (mark-application-archived-if-done application now user))
+
 (defn- upload-and-set-state
   "Does the actual archiving in a different thread pool"
-  [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn]
+  [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn user]
   (info "Trying to archive attachment id" id "from application" app-id)
   (do (state-update-fn :arkistoidaan application now id)
       (.submit
@@ -121,17 +126,13 @@
             (cond
               (= 200 status)
               (do
-                (state-update-fn :arkistoitu application now id)
                 (info "Archived attachment id" id "from application" app-id)
-                (mark-first-time-archival application now)
-                (mark-application-archived-if-done application now))
+                (do-post-archival-ops state-update-fn id application now user))
 
               (and (= status 409) (string/includes? body "already exists"))
               (do
                 (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
-                (state-update-fn :arkistoitu application now id)
-                (mark-first-time-archival application now)
-                (mark-application-archived-if-done application now))
+                (do-post-archival-ops state-update-fn id application now user))
 
               :else
               (do
@@ -172,6 +173,9 @@
 (defn valid-ya-state? [application]
   (and (= "YA" (:permitType application))
        (contains? states/ya-post-verdict-states (keyword (:state application)))))
+
+(defn archiving-project? [application]
+  (= :ARK (keyword (:permitType application))))
 
 (defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
@@ -284,7 +288,8 @@
   [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
   (if (or (get-paatospvm application)
           (foreman/foreman-app? application)
-          (valid-ya-state? application))
+          (valid-ya-state? application)
+          (archiving-project? application))
     (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                          (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                        attachments)
@@ -305,7 +310,8 @@
                                 metadata-fn
                                 application
                                 created
-                                set-application-state)))
+                                set-application-state
+                                user)))
       (when (and (document-ids case-file-archive-id)
                  (not (archival-states (keyword (get-in application [:processMetadata :tila])))))
         (files/with-temp-file libre-file
@@ -323,14 +329,16 @@
                                   metadata-fn
                                   application
                                   created
-                                  set-process-state)
+                                  set-process-state
+                                  user)
             (upload-and-set-state case-file-xml-id
                                   xml-fn
                                   "text/xml"
                                   xml-metadata-fn
                                   application
                                   created
-                                  set-process-state))))
+                                  set-process-state
+                                  user))))
       (doseq [attachment selected-attachments
               :when (not (archival-states (keyword (get-in attachment [:metadata :tila]))))]
         (let [file-id (get-in attachment [:latestVersion :fileId])
@@ -342,7 +350,8 @@
                                 metadata-fn
                                 application
                                 created
-                                set-attachment-state))))
+                                set-attachment-state
+                                user))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]

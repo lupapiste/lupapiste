@@ -160,6 +160,7 @@
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
 (def all-archiving-project-states (-> ark-state-graph keys set (disj :canceled :open)))
 (def all-application-states (difference all-states all-inforequest-states all-archiving-project-states))
+(def all-application-or-archiving-project-states (difference all-states all-inforequest-states))
 
 (defn terminal-state? [graph state]
   {:pre [(map? graph) (keyword? state)]}
@@ -187,6 +188,10 @@
 
 (def post-verdict-but-terminal (difference post-verdict-states terminal-states))
 
+(def archival-final-states (-> terminal-states
+                               (disj :extinct :canceled :answered :registered)
+                               (conj :foremanVerdictGiven :underReview)))
+
 (defn- drop-state-set [drop-states]
   (cond
     (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))
@@ -202,6 +207,8 @@
 (defn all-inforequest-states-but [& drop-states]
   (difference all-inforequest-states (drop-state-set drop-states)))
 
+(defn all-application-or-archiving-project-states-but [& drop-states]
+  (difference all-application-or-archiving-project-states (drop-state-set drop-states)))
 
 (comment
   (require ['rhizome.viz :as 'viz])
