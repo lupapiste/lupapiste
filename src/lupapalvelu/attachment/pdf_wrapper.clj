@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment.pdf-wrapper
   (:require [clojure.java.io :as io])
   (:import [org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream]
-           [org.apache.pdfbox.pdmodel.graphics.image JPEGFactory]
+           [org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory PDImageXObject CCITTFactory]
            [java.io File ByteArrayOutputStream]
            [org.apache.pdfbox.pdmodel.common PDRectangle PDMetadata]
            [javax.imageio.stream FileImageInputStream]
@@ -9,12 +9,46 @@
            [org.apache.xmpbox XMPMetadata]
            [org.apache.xmpbox.xml XmpSerializer]
            [org.apache.pdfbox.pdmodel.graphics.color PDOutputIntent]
-           [javax.imageio.metadata IIOMetadataFormatImpl IIOMetadataNode]))
+           [javax.imageio.metadata IIOMetadataFormatImpl IIOMetadataNode]
+           [com.github.jaiimageio.impl.plugins.tiff TIFFImageMetadata]
+           [java.awt.image BufferedImage]))
 
 (def color-profile "sRGB Color Space Profile.icm")
 (def color-space "sRGB IEC61966-2.1")
 (def color-registry "http://www.color.org")
 (def pdf-ppi 72)
+
+(def width-field 256)
+(def length-field 257)
+(def x-resolution 282)
+(def y-resolution 283)
+
+(defn- tag-value [ifd tag]
+  (-> (.getTIFFField ifd tag) (.getAsInt 0)))
+
+(defn- tiff->pd-image-x-object [^PDDocument doc ^BufferedImage image]
+  (if (and (= BufferedImage/TYPE_BYTE_BINARY (.getType image)) (= (-> image .getColorModel .getPixelSize) 1))
+    ; Only B&W images can be compressed
+    (CCITTFactory/createFromImage doc image)
+    (LosslessFactory/createFromImage doc image)))
+
+(defn- read-tiff-images
+  ([reader doc]
+    (read-tiff-images reader doc 0 []))
+  ([reader doc index images]
+   (try
+     (let [image (.read reader index)
+           ^TIFFImageMetadata metadata (.getImageMetadata reader index)
+           ifd (.getRootIFD metadata)]
+       (->> {:pd-image-x-object (tiff->pd-image-x-object doc image)
+             :width (tag-value ifd width-field)
+             :length (tag-value ifd length-field)
+             :width-ppi (tag-value ifd x-resolution)
+             :length-ppi (tag-value ifd y-resolution)}
+            (conj images)
+            (read-tiff-images reader doc (inc index))))
+     (catch IndexOutOfBoundsException _
+       images))))
 
 (defn- pixels-per-inch [^IIOMetadataNode dimension element-name]
   (let [pixel-sizes (.getElementsByTagName dimension element-name)
@@ -26,31 +60,31 @@
       (->> (Double/parseDouble pixel-size)
            (/ 25.4)))))
 
-(defn- read-image-ppi [^File file]
-  (with-open [in (FileImageInputStream. file)]
-    (let [readers (ImageIO/getImageReadersByFormatName "jpeg")
-          ^ImageReader reader (.next readers)
-          _ (.setInput reader in false false)
-          metadata (.getImageMetadata reader 0)
-          tree ^IIOMetadataNode (.getAsTree metadata IIOMetadataFormatImpl/standardMetadataFormatName)
-          dimension ^IIOMetadataNode (-> tree (.getElementsByTagName "Dimension") (.item 0))]
-      {:width-ppi (or (pixels-per-inch dimension "HorizontalPixelSize") 72.0)
-       :height-ppi (or (pixels-per-inch dimension "VerticalPixelSize") 72.0)})))
-
-(defn- jpeg-to-pdf [doc jpeg-file]
+(defn- read-jpeg-image [^ImageReader reader ^File jpeg-file ^PDDocument doc]
   (with-open [is (io/input-stream jpeg-file)]
     (let [pd-image-x-object (JPEGFactory/createFromStream doc is)
           width (.getWidth pd-image-x-object)
           height (.getHeight pd-image-x-object)
-          {:keys [width-ppi height-ppi]} (read-image-ppi jpeg-file)
-          intended-width (float (* pdf-ppi (/ width width-ppi)))
-          intended-height (float (* pdf-ppi (/ height height-ppi)))
-          page (PDPage. (PDRectangle. intended-width intended-height))]
-      (with-open [contents (PDPageContentStream. ^PDDocument doc page)]
-        (.addPage doc page)
-        (.drawImage contents pd-image-x-object 0.0 0.0 intended-width intended-height)))))
+          metadata (.getImageMetadata reader 0)
+          tree ^IIOMetadataNode (.getAsTree metadata IIOMetadataFormatImpl/standardMetadataFormatName)
+          dimension ^IIOMetadataNode (-> tree (.getElementsByTagName "Dimension") (.item 0))]
+      [{:width-ppi (or (pixels-per-inch dimension "HorizontalPixelSize") 72.0)
+        :length-ppi (or (pixels-per-inch dimension "VerticalPixelSize") 72.0)
+        :width width
+        :length height
+        :pd-image-x-object pd-image-x-object}])))
 
-(defn- metadata-to-pdf [^PDDocument doc pdf-title]
+(defn- read-images [^File file image-format ^PDDocument doc]
+  {:post [(sequential? %)]}
+  (with-open [in (FileImageInputStream. file)]
+    (let [readers (ImageIO/getImageReadersByFormatName (name image-format))
+          ^ImageReader reader (.next readers)]
+      (.setInput reader in false false)
+      (case image-format
+        :jpeg (read-jpeg-image reader file doc)
+        :tiff (doall (read-tiff-images reader doc))))))
+
+(defn- set-metadata-to-pdf! [^PDDocument doc pdf-title]
   (with-open [xmp-os (ByteArrayOutputStream.)
               color-is (io/input-stream (io/resource color-profile))]
     ;; Add the metadata and output intent to make the file PDF/A-1b compliant
@@ -75,8 +109,18 @@
           (.setMetadata metadata)
           (.addOutputIntent intent))))))
 
-(defn wrap! [^File jpeg-file ^File output-file pdf-title]
+(defn wrap! [image-format ^File image-file ^File output-file pdf-title]
+  {:pre [(keyword? image-format) (some? image-file) (some? output-file)]}
+
   (with-open [doc (PDDocument.)]
-    (jpeg-to-pdf doc jpeg-file)
-    (metadata-to-pdf doc pdf-title)
+    (doseq [{:keys [width length width-ppi length-ppi ^PDImageXObject pd-image-x-object]} (read-images image-file image-format doc)]
+      (let [intended-width (float (* pdf-ppi (/ width width-ppi)))
+            intended-length (float (* pdf-ppi (/ length length-ppi)))
+            page (PDPage. (PDRectangle. intended-width intended-length))]
+        (println (type pd-image-x-object))
+        (with-open [contents (PDPageContentStream. doc page)]
+          (.addPage doc page)
+          (.drawImage contents pd-image-x-object 0.0 0.0 intended-width intended-length))))
+
+    (set-metadata-to-pdf! doc pdf-title)
     (.save doc output-file)))

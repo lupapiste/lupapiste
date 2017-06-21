@@ -9,17 +9,23 @@
 (testable-privates lupapalvelu.pdf.pdfa-conversion pdf2pdf-key)
 
 (facts "about wrapping JPEGs into PDFs"
-  (let [jpeg-file (io/file "dev-resources/cake.jpg")]
-    (files/with-temp-file target-file
-      (wrap! jpeg-file target-file "test")
+  (let [jpeg-file (io/file "dev-resources/cake.jpg")
+        color-tiff-file (io/file "dev-resources/cake-lzw.tif")
+        bw-tiff-file (io/file "dev-resources/drawing.tif")
+        files [[:jpeg jpeg-file] [:tiff color-tiff-file] [:tiff bw-tiff-file]]
+        use-pdf2pdf? (and (pdf2pdf-executable) (pdf2pdf-key))]
 
-      (fact "JPG and PDF file sizes should be similar"
-        (< (- (.length target-file) (.length jpeg-file)) 10000) => true)
+    (doseq [[file-format file] files]
+      (files/with-temp-file target-file
+        (wrap! file-format file target-file "test")
 
-      (when (and (pdf2pdf-executable) (pdf2pdf-key))
-        (against-background [(#'lupapalvelu.pdf.pdfa-conversion/store-converted-page-count anything anything) => nil]
-                            (files/with-temp-file output-file
-                              (fact "The generated PDF file is in valid PDF/A form"
-                                (convert-to-pdf-a target-file output-file) => (contains {:already-valid-pdfa? true
-                                                                                         :autoConversion false
-                                                                                         :output-file output-file}))))))))
+        (fact "Original image and PDF file sizes should be within 20 %"
+          (< (- (.length target-file) (.length file)) (* 0.2 (.length file))) => true)
+
+        (when use-pdf2pdf?
+          (against-background [(#'lupapalvelu.pdf.pdfa-conversion/store-converted-page-count anything anything) => nil]
+                              (files/with-temp-file output-file
+                                (fact "The generated PDF file is in valid PDF/A form"
+                                  (convert-to-pdf-a target-file output-file) => (contains {:already-valid-pdfa? true
+                                                                                           :autoConversion false
+                                                                                           :output-file output-file})))))))))
