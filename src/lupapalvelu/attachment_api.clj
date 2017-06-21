@@ -679,7 +679,8 @@
                    (when-not (pos? (count (:attachments application)))
                      (fail :application.attachmentsEmpty)))
                  app/validate-authority-in-drafts
-                 any-attachment-has-version]
+                 any-attachment-has-version
+                 (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])]
    :states      (states/all-application-states-but states/terminal-states)
    :categories  #{:attachments}}
   [_])
@@ -700,8 +701,10 @@
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [domain/validate-owner-or-write-access
+                (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
                 app/validate-authority-in-drafts]
-   :user-roles #{:applicant :authority}}
+   :user-roles #{:applicant :authority}
+   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (usr/get-user-with-password (:username u) password)
