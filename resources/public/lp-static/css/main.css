@@ -17542,74 +17542,78 @@ ul.appeals-files li span.appeals-files__size {
   height: 100%;
 }
 
-#side-panel #notice-panel {
+#side-panel .notice-panel {
   height: 100%;
 }
 
-#side-panel #notice-panel .notice-component {
+#side-panel .notice-panel .notice-component {
   height: 100%;
 }
 
-#side-panel #notice-panel .application-urgency {
+#side-panel .notice-panel .application-urgency {
   width: 215px;
   position: relative;
 }
 
-#side-panel #notice-panel .application-tags {
+#side-panel .notice-panel .application-tags {
   z-index: 1;
   position: relative;
 }
 
-#side-panel #notice-panel .icon.urgent {
+#side-panel .notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
 
-#side-panel #notice-panel .icon.hold {
+#side-panel .notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
 
-#side-panel #notice-panel label {
+#side-panel .notice-panel label {
   vertical-align: bottom;
 }
 
-#side-panel #notice-panel .form-grid {
+#side-panel .notice-panel .form-grid {
   display: table;
   height: 100%;
 }
 
-#side-panel #notice-panel .form-grid .row {
+#side-panel .notice-panel .form-grid .row {
   display: table-row;
   margin-bottom: 6px;
 }
 
-#side-panel #notice-panel .form-grid .row .col-1 {
+#side-panel .notice-panel .form-grid .row .col-1 {
   display: table-cell;
   margin-bottom: 20px;
 }
 
-#side-panel #notice-panel .form-grid .row .col-1 label {
+#side-panel .notice-panel .form-grid .row .col-1 label {
   color: #fff;
 }
 
-#side-panel #notice-panel .form-grid .row.textarea-wrapper {
+#side-panel .notice-panel .form-grid .row.textarea-wrapper {
   height: 100%;
 }
 
-#side-panel #notice-panel .form-grid .row.textarea-wrapper .col--vertical {
+#side-panel .notice-panel .form-grid .row.textarea-wrapper .col--vertical {
   height: 100%;
   padding-bottom: 60px;
 }
 
-#side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 {
+#side-panel .notice-panel .form-grid .row.textarea-wrapper .col-1 {
   height: 100%;
 }
 
-#side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
+#side-panel .notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
   height: 100%;
   height: 300px\9;
   box-sizing: border-box;
+}
+
+#side-panel #company-notes-panel.notice-panel .form-grid .row.textarea-wrapper textarea {
+  height: 50%;
 }
 
 #side-panel.show-side-panel {
@@ -18696,6 +18700,15 @@ label.batch-required {
 
 .inspection-summary-link:hover {
   text-decoration: none;
+}
+
+.inspection-date-input {
+  min-width: 100px;
+}
+
+.inspection-date-row {
+  width: 85%;
+  white-space: nowrap;
 }
 
 .create-summary-bubble .container-bubble {
