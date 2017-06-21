@@ -255,7 +255,6 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :pre-checks  [validate-task-is-review
-                 (task-source-type-assertion #{:background})
                  (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
                  (task-state-assertion #{:sent})]
    :user-roles  #{:authority}
