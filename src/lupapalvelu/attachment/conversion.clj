@@ -91,28 +91,28 @@
             (throw t)))))
     {:archivable false :archivabilityError :permanent-archive-disabled}))
 
-(defmethod convert-file :image/tiff [_ {:keys [content]}]
-  (files/with-temp-file tmp-file
-    (io/copy content tmp-file)
-    (let [valid? (tiff-validation/valid-tiff? tmp-file)]
-      {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})))
-
-(defmethod convert-file :image/jpeg [application {:keys [content filename]}]
+(defn- convert-image [image-format application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
     (files/with-temp-file tmp-file
-      (let [pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf") ] ; deleted via temp-file-input-stream
+      (let [pdf-file (files/temp-file "lupapiste-attach-wrapped-image-file" ".pdf") ] ; deleted via temp-file-input-stream
         (try
           (io/copy content tmp-file)
-          (pdf-wrapper/wrap! tmp-file pdf-file filename)
+          (pdf-wrapper/wrap! image-format tmp-file pdf-file filename)
           {:archivable true
            :archivabilityError nil
            :autoConversion true
            :content (files/temp-file-input-stream pdf-file)
            :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
           (catch Exception e
-            (timbre/error "Could not wrap JPEG" e)
+            (timbre/error e "Could not wrap" (name image-format) "image file to PDF/A")
             {:archivable false :archivabilityError :not-validated}))))
     {:archivable false :archivabilityError :permanent-archive-disabled}))
+
+(defmethod convert-file :image/tiff [application filedata]
+  (convert-image :tiff application filedata))
+
+(defmethod convert-file :image/jpeg [application filedata]
+  (convert-image :jpeg application filedata))
 
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]
   (if (libreoffice-conversion-required? filedata)
