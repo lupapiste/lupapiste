@@ -704,7 +704,7 @@
                 (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
                 app/validate-authority-in-drafts]
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj roles/all-authz-writer-roles :foreman)}
+   :user-authz-roles (conj roles/default-authz-writer-roles :foreman)}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (usr/get-user-with-password (:username u) password)
