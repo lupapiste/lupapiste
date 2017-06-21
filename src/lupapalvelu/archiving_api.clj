@@ -65,3 +65,8 @@
    :categories #{:attachments}
    :pre-checks [validate-permanent-archive-enabled]}
   [_])
+
+(defquery application-in-final-archiving-state
+  {:user-roles #{:authority}
+   :states     states/archival-final-states}
+  (ok))
