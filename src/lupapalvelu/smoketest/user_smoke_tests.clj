@@ -12,6 +12,12 @@
   user-keys)
 
 (mongocheck :users
+            (fn [{pid :personId source :personIdSource :as user}]
+              (when (and pid (not (sc/check usr/PersonIdSource (keyword source))))
+                (format "User % has invalid person id source" (:username user))))
+            :personId :personIdSource :username)
+
+(mongocheck :users
   #(when (and (= "dummy" (:role %)) (not (:enabled %)) (-> % :private :password))
      (format "Dummy user %s has password" (:username %)))
   :role :private)

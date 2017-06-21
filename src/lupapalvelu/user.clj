@@ -65,6 +65,7 @@
 (defschema OrgId (sc/pred keyword? "Organization ID"))
 (defschema Authz (sc/pred string? "Authz access right"))
 (defschema OrgAuthz {OrgId [Authz]})
+(defschema PersonIdSource (sc/enum :identification-service :user))
 
 (defschema User
           {:id                                    Id
@@ -78,6 +79,7 @@
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            OrgAuthz
            (sc/optional-key :personId)            (sc/maybe ssc/Hetu)
+           (sc/optional-key :personIdSource)      PersonIdSource
            (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :zip)                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)

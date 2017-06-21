@@ -3280,6 +3280,13 @@
      (mongo/update-by-id :organizations (:id organization)
                          {$set {:automatic-ok-for-attachments-enabled true}})))
 
+(defmigration add-person-id-source-for-users-with-person-id
+  {:apply-when (pos? (mongo/count :users {:personId {$type :string} :personIdSource {$exists false}}))}
+  (mongo/update :users
+                {:personId {$type :string} :personIdSource {$exists false}}
+                {$set {:personIdSource :identification-service}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
