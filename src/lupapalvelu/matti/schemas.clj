@@ -184,38 +184,47 @@
 (defmulti validate-resolution :type)
 
 (defmethod validate-resolution :default
-  [_]
+  [options]
   :error.invalid-value-path)
 
-(defn schema-error [{:keys [schema path value schema-overrides]}]
-  (when (sc/check (st/get-in (get schema-overrides :type schema) path) value)
-    :error.invalid-value))
+(defn schema-error [{:keys [schema path value schema-overrides type]}]
+  (if-let [schema (st/get-in (get schema-overrides type schema) path)]
+    (when (sc/check schema value)
+      :error.invalid-value)
+    :error.invalid-value-path))
 
 (defmethod validate-resolution :section
   [{:keys [path schema value] :as options}]
   (cond
     (coll? value) :error.invalid-value
-    :else (schema-error options)))
+    :else         (schema-error options)))
 
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
-  (schema-error options))
+  (if (contains? #{:enabled :delta} (first path))
+    (schema-error options)
+    :error.invalid-value-path))
 
 (defmethod validate-resolution :docgen
   [_]
   ;; TODO: Use the old-school docgen validation if possible
   )
 
+(defn keyword-set [xs]
+  (set (map keyword xs)))
+
 (defn check-items [items data-items]
-  (let [v-set (set items)
-        d-set (set data-items)]
+  (let [v-set (keyword-set items)
+        d-set (keyword-set data-items)]
     (cond
       (not= (count items) (count v-set)) :error.duplicate-items
       (not (set/subset? v-set d-set))    :error.invalid-items)))
 
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
-  (or (schema-error options)
+  ;; Items should not be part of the original path.
+  (or (schema-error (assoc options
+                           :path (conj path :items)))
       (check-items value (:items data))))
 
 (defmethod validate-resolution :reference-list

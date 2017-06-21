@@ -31,16 +31,20 @@
           (sc/optional-key :item-loc-prefix) sc/Keyword
           (sc/optional-key :id) sc/Str}))
 
+(def keyword-or-string (sc/conditional
+                        keyword? sc/Keyword
+                        :else    sc/Str))
+
 (defschema MattiMultiSelect
   (merge MattiBase
          ;; Sometimes it is useful to finetune item localisations
          ;; separately from the label.
          {(sc/optional-key :item-loc-prefix) sc/Keyword
-          :items           [sc/Keyword]}))
+          :items           [keyword-or-string]}))
 
 (defschema MattiDateDelta
   {(sc/optional-key :enabled) sc/Bool
-   (sc/optional-key :delta)   sc/Int
+   (sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
    :unit                      (sc/enum :days :years)})
 
 (def schema-type-alternatives

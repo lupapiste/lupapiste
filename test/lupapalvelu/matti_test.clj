@@ -1,4 +1,4 @@
-(ns lupapalvelu.matti_test
+(ns lupapalvelu.matti-test
   (:require [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared  :as shared]
             [midje.sweet :refer :all]
@@ -155,3 +155,66 @@
       (schemas/schema-data test-template ["one" "row" "bad"]) => nil
       (schemas/schema-data test-template ["one" "row" 40]) => nil
       (schemas/schema-data test-template ["one" "row" -1]) => nil))
+
+(facts "Path value validation"
+  (fact "Bad paths"
+    (schemas/validate-path-value test-template ["foo" "bar"] 88)
+    => :error.invalid-value-path
+    (schemas/validate-path-value test-template [] 88)
+    => :error.invalid-value-path
+    (schemas/validate-path-value test-template nil 88)
+    => :error.invalid-value-path)
+  (facts "Section data"
+    (fact "No schema override"
+      (schemas/validate-path-value test-template ["one" :pdf] true)
+      => :error.invalid-value-path)
+    (fact "Section schema override"
+      (schemas/validate-path-value test-template ["one" :pdf] true {:schema-overrides {:section shared/MattiVerdictSection}})
+      => nil)
+    (fact "Section schema override, but bad value"
+      (schemas/validate-path-value test-template ["one" :pdf] "bad" {:schema-overrides {:section shared/MattiVerdictSection}})
+      => :error.invalid-value)
+    (fact "No schema override, non-primitive value"
+      (schemas/validate-path-value test-template ["one" :pdf] {:foo "bar"})
+      => :error.invalid-value
+      (schemas/validate-path-value test-template ["one" :pdf] [:foo "bar"])
+      => :error.invalid-value
+      (schemas/validate-path-value test-template ["one" :pdf] #{1 2})
+      => :error.invalid-value
+      (schemas/validate-path-value test-template ["one" :pdf] '(1 2))
+      => :error.invalid-value))
+  (facts "Date delta"
+    (schemas/validate-path-value test-template [:one :row :b :delta] 4)
+    => nil
+    (schemas/validate-path-value test-template [:one :row :b :delta] 0)
+    => nil
+    (schemas/validate-path-value test-template [:one :row :b :enabled] true)
+    => nil
+    (schemas/validate-path-value test-template [:one :row :b :enabled] false)
+    => nil
+    (fact "Bad paths"
+      (schemas/validate-path-value test-template [:one :row :b :delta :foobar] 4)
+      => :error.invalid-value-path
+      (schemas/validate-path-value test-template [:one :row :b :bad] 4)
+      => :error.invalid-value-path
+      (schemas/validate-path-value test-template [:one :row :b] 4)
+      => :error.invalid-value-path)
+    (fact "Bad value"
+      (schemas/validate-path-value test-template [:one :row :b :delta] -4)
+      => :error.invalid-value
+      (schemas/validate-path-value test-template [:one :row :b :delta] "hiihoo")
+      => :error.invalid-value
+      (schemas/validate-path-value test-template [:one :row :b :enabled] "hiihoo")
+      => :error.invalid-value)
+    (fact "Unit cannot be changed"
+      (schemas/validate-path-value test-template [:one :row :b :unit] :years)
+      => :error.invalid-value-path))
+  (facts "Multi select"
+    (schemas/validate-path-value test-template ["two" 0 "c"] [])
+    => nil
+    (schemas/validate-path-value test-template ["two" 0 "c"] [:foo])
+    => nil
+    (schemas/validate-path-value test-template ["two" 0 "c"] ["bar"])
+    => nil
+    (schemas/validate-path-value test-template ["two" 0 "c"] ["foo" :bar])
+    => nil))
