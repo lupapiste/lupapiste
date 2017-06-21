@@ -138,6 +138,16 @@
     (when (contains-primary-operation? application operation-set)
       (fail :error.unsupported-primary-operation))))
 
+(defn allow-roles-only-in-operations
+  "Prechecker (factory, no partial needed) that fails if the user has
+  one of the given roles in the application but the current primary
+  operation is not in the given operations"
+  [roles operations]
+  (fn [{:keys [user application]}]
+    (when (and (auth/has-some-auth-role? application (:id user) roles)
+               (not (contains-primary-operation? application (set operations))))
+      (fail :error.unauthorized :source ::allow-roles-in-operations))))
+
 ;;
 ;; Helpers
 ;;
