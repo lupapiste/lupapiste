@@ -104,8 +104,8 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.6" :exclusions [org.freemarker/freemarker]]
 
                  ; Apache pdfbox for PDF/A wrapper
-                 [org.apache.pdfbox/pdfbox "2.0.3"]
-                 [org.apache.pdfbox/xmpbox "2.0.3"]
+                 [org.apache.pdfbox/pdfbox "2.0.6"]
+                 [org.apache.pdfbox/xmpbox "2.0.6"]
 
                  ; JavaScript and CSS compression
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
@@ -153,7 +153,7 @@
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.7"]
-                                  [pdfboxing "0.1.10"]
+                                  [pdfboxing "0.1.13"]
                                   [com.cemerick/piggieback "0.2.1"]]
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]

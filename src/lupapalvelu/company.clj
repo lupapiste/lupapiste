@@ -257,7 +257,7 @@
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
         updated (->> (merge company updates)
-                  (ensure-custom-limit id))
+                     (ensure-custom-limit id))
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)

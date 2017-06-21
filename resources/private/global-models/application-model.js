@@ -913,6 +913,10 @@ LUPAPISTE.ApplicationModel = function() {
     pageutil.openPage("copy",  self.id());
   };
 
+  self.createDiggingPermit = function() {
+    pageutil.openPage("create-digging-permit",  self.id());
+  };
+
   self.canBeCopied = ko.observable(false);
   hub.subscribe("application-model-updated", function() {
     ajax

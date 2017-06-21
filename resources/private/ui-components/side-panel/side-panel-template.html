@@ -75,7 +75,7 @@
                   </div>
               </div>
               <!-- ko if: authorization.ok('authority-notice')-->
-              <div id="notice-panel" data-bind="visible: showNoticePanel">
+              <div id="notice-panel" class="notice-panel" data-bind="visible: showNoticePanel">
                   <div class="header">
                       <h1 data-bind="ltext: 'notice.title'"></h1>
                   </div>
@@ -88,7 +88,7 @@
               </div>
               <!-- /ko -->
               <!-- ko if: authorization.ok('company-notes')-->
-              <div id="notice-panel" data-bind="if: showCompanyNotesPanel">
+              <div id="company-notes-panel" class="notice-panel" data-bind="if: showCompanyNotesPanel">
                   <div class="header">
                       <h1 data-bind="ltext: 'company-notes.title'"></h1>
                   </div>

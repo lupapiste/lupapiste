@@ -126,7 +126,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   self.noApplications = ko.pureComputed(function(){
     return self.dataProvider.initialized()
         && self.searchModel().userTotalCount() <= 0
-        && self.searchModel().type === "applications";
+        && _.includes(["applications", "company"], self.searchModel().type);
   });
 
   self.missingTitle = ko.pureComputed(function() {

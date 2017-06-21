@@ -52,7 +52,7 @@
                 (some-pre-check com/validate-is-admin
                                 (com/validate-has-company-role :admin))]}
   [{caller :user}]
-  (ok :company (com/update-company! company updates caller)))
+  (ok :company (com/update-company! company (dissoc updates :tags) caller)))
 
 (defcommand company-lock
   {:description      "Set/unset company lock timestamp. If timestamp is not positive
@@ -208,7 +208,7 @@
                                [{(sc/optional-key :id) (sc/maybe ssc/ObjectIdStr)
                                  :label                sc/Str}])]
    :user-roles #{:applicant}
-   :pre-checks [(com/validate-has-company-role :admin)]}
+   :pre-checks [(com/validate-has-company-role :any)]}
   [{{:keys [company] :as user} :user :as command}]
   (com/update-company! (:id company) {:tags (map mongo/ensure-id tags)} user)
   (ok))

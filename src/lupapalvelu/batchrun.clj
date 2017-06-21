@@ -316,10 +316,10 @@
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
                       (notifications/notify! :application-state-change command))
-                    (when (fail? result)
+                    (when (or (nil? result) (fail? result))
                       (logging/log-event :error {:run-by "Automatic verdicts checking"
                                                  :event "Failed to check verdict"
-                                                 :failure result
+                                                 :failure (if (nil? result) :error.no-app-xml result)
                                                  :organization {:id organization :permit-type permitType}
                                                  })))
 
