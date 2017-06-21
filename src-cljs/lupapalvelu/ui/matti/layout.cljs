@@ -149,12 +149,13 @@
 (defn matti-list [{:keys [schema state path] :as options} & [wrap-label?]]
   [:div.matti-list
    {:class (path/css (sub-options options schema))}
-   (when wrap-label?
-     [:h4.matti-label (path/loc path schema)])
+   (when (and wrap-label? (:title schema))
+     [:h4.matti-label (common/loc (:title schema))])
    (map-indexed (fn [i item]
                   (when-let [component (instantiate (assoc options
                                                            :path (path/extend path
-                                                                   (str i)))
+                                                                   (when-not (:id item)
+                                                                     (str i))))
                                                     (shared/child-schema item
                                                                          :schema
                                                                          schema)
@@ -171,16 +172,18 @@
    {:class (path/css (sub-options options grid)
                      (str "matti-grid-" (:columns grid)))}
    (map-indexed (fn [row-index row]
-                  [:div.row {:class (some->> row :css (map name) s/join )}
-                   (map-indexed (fn [col-index {:keys [col align schema id] :as cell}]
-                                  [:div {:class (path/css (sub-options options cell)
-                                                          (str "col-" (or col 1))
-                                                          (when align (str "col--" (name align))))}
-                                   (when schema
-                                     (instantiate (assoc options
-                                                         :path (path/extend path
-                                                                 (str row-index)
-                                                                 (str col-index)))
-                                                  (shared/child-schema cell :schema grid) true))])
-                                (get row :row row))])
+                  (let [row-index (get row :id row-index)]
+                    [:div.row {:class (some->> row :css (map name) s/join )}
+                    (map-indexed (fn [col-index {:keys [col align schema id] :as cell}]
+                                   [:div {:class (path/css (sub-options options cell)
+                                                           (str "col-" (or col 1))
+                                                           (when align (str "col--" (name align))))}
+                                    (when schema
+                                      (instantiate (assoc options
+                                                          :path (path/extend path
+                                                                  (str row-index)
+                                                                  (when-not id
+                                                                    (str col-index))))
+                                                   (shared/child-schema cell :schema grid) true))])
+                                 (get row :row row))]))
                 (:rows grid))])

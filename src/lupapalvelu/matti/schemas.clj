@@ -123,10 +123,10 @@
   depending on the schema type (:schema, :docgen, :reference-list)."
   [data xs]
   (let [path         (mapv keyword xs)
-        docgen       (some-> data :schema :docgen)
-        reflist      (some-> data :schema :reference-list)
+        docgen       (:docgen data)
+        reflist      (:reference-list data)
         date-delta   (:date-delta data)
-        multi-select (some-> data :schema :multi-select)
+        multi-select (:multi-select data)
         wrap         (fn [id schema data]
                        {id {:schema schema
                             :path   path
@@ -138,45 +138,48 @@
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
       multi-select (wrap :multi-select shared/MattiMultiSelect multi-select))))
 
-(defn- schema-array
-  "[key value] if successful."
-  [data]
-  (when-let [m (not-empty (select-keys data [:sections :rows :row :items]))]
-    (assert (= (count m) 1))
-    (first m)))
-
 (defn- resolve-index [xs x]
   (if (re-matches #"^\d+$" x)
     (util/->int x)
     (first (keep-indexed (fn [i data]
-                           (when (= x (or (:id data) (:id (first data))))
+                           (when (= x (:id data))
                              i))
                          xs))))
+
+(defn- pick-item [xs x]
+  (when-let [i (resolve-index xs x)]
+    (when (contains? (vec xs) i)
+      (nth xs i))))
+
+(declare schema-data-helper)
+
+(defn item-data [items [x & xs]]
+  (when-let [item (pick-item items x)]
+    (schema-data-helper item xs)))
+
+(defn cell-data [grid [x & xs]]
+  (when-let [row (pick-item (:rows grid) x)]
+    (when-let [col (pick-item (get row :row row) (first xs))]
+      (schema-data-helper col (drop 1 xs)))))
+
+(defn schema-data-helper
+  [data [x & xs :as path]]
+  (cond
+    (some-> data :schema :list) (item-data (get-in data [:schema :list :items]) path)
+    (:schema data)              (resolve-path-schema (:schema data) path) ;; Leaf
+    (:sections data)            (item-data (:sections data) path)
+    ;; Must be before grid for section properties (pdf, removed)
+    (nil? xs)                   (resolve-path-schema data path)
+    (:grid data)                (cell-data (:grid data) path)))
 
 (defn schema-data
   "Data is the reference schema instance (e.g.,
   shared/default-verdict-template). The second argument is path into
   data. Returns map with remaining path and resolved schema (see
   resolve-path-schema)."
-  [data [x & xs :as path]]
-  (if (nil? xs)
-    (resolve-path-schema data path)
-    (let [x      (name x)
-          [k v]  (schema-array data)
-          grid   (get-in data [:grid :rows])
-          list   (get-in data [:list :items])
-          schema (:schema data)
-          id     (:id data)
-          id-ok? (or (nil? id) (= (:id data) x))]
-      (cond
-        (sequential? data)  (let [i    (resolve-index data x)
-                                  item (and i (nth data i))]
-                              (when item
-                                (schema-data item xs)))
-        (and id-ok? k)      (schema-data v path)
-        grid                (schema-data grid path)
-        (and id-ok? list)   (schema-data list path)
-        (and id-ok? schema) (schema-data schema xs)))))
+  [data path]
+  (when (seq path)
+    (schema-data-helper data (map #(name (if (number? %) (str %) %)) path))))
 
 (defmulti validate-resolution :type)
 

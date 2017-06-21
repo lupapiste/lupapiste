@@ -63,25 +63,26 @@
          {;; Id is used as a path part within the state. Thus, it is
           ;; mandatory if an explicit resolution is needed.
           (sc/optional-key :id)     sc/Str
-          (sc/optional-key :align)  (sc/enum :left :right :center :full)
           (sc/optional-key :schema) (make-conditional schema-type-alternatives)}))
+
+(defschema MattiCell
+  (merge MattiItem
+         {(sc/optional-key :col) sc/Int ;; Column width (.col-n). Default 1.
+          (sc/optional-key :align)  (sc/enum :left :right :center :full)}))
 
 (defschema MattiList
   (merge MattiBase
-         {(sc/optional-key :id) sc/Str  ;; List has label if id is given.
+         {(sc/optional-key :title) sc/Str
           :items                [MattiItem]}))
-
-(def matti-row [(merge MattiItem
-                       {(sc/optional-key :col) sc/Int ;; Column width (.col-n). Default 1.
-                        })] )
 
 (defschema MattiGrid
   (merge MattiBase
          {:columns (apply sc/enum (range 1 13)) ;; Grid size (.matti-grid-n)
           :rows    [(sc/conditional
-                     :css {:css [sc/Keyword]
-                           :row matti-row}
-                     :else matti-row)]}))
+                     :row {(sc/optional-key :id)  sc/Str
+                           (sc/optional-key :css) [sc/Keyword]
+                           :row                   [MattiCell]}
+                     :else [MattiCell])]}))
 
 (defschema MattiSection
   (merge MattiBase
@@ -115,25 +116,19 @@
        [:small :medium :large :extra-large]))
 
 (defn complexity-section [id settings-path loc-prefix]
-  {:id (name id)
+  {:id    (name id)
    :grid  {:columns 1
-           :rows (mapv (fn [complexity]
-                         [{:schema {:reference-list {:id (name complexity)
-                                                     :i18nkey [(->> complexity
-                                                                    name
-                                                                    (str "matti.complexity.")
-                                                                    keyword)
-                                                               :matti.complexity.label]
-                                                     :type :multi-select
-                                                     :item-loc-prefix loc-prefix
-                                                     #_(->> settings-path
-                                                                           (drop 1)
-                                                                           (map name)
-                                                                           (remove #(re-matches #"^\d+$" %))
-                                                                           (s/join ".")
-                                                                           keyword)
-                                                     :path settings-path}}}])
-                       [:small :medium :large :extra-large])}
+           :rows    (mapv (fn [complexity]
+                            [{:schema {:reference-list {:id      (name complexity)
+                                                        :i18nkey [(->> complexity
+                                                                       name
+                                                                       (str "matti.complexity.")
+                                                                       keyword)
+                                                                  :matti.complexity.label]
+                                                        :type    :multi-select
+                                                        :item-loc-prefix loc-prefix
+                                                        :path    settings-path}}}])
+                          [:small :medium :large :extra-large])}
    :_meta {:can-remove? true}})
 
 (defn text-section [id]
@@ -168,7 +163,7 @@
                                   {:align  :full
                                    :col    2
                                    :id     "verdict-code"
-                                   :schema {:reference-list {:path       [:settings :verdict :0 :0 :verdict-code]
+                                   :schema {:reference-list {:path       [:settings :verdict :0 :verdict-code]
                                                              :type       :select
                                                              :loc-prefix :matti-r}}}]
                                  [{:col    5
@@ -176,9 +171,9 @@
                                    :align  :full
                                    :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen [:settings :foremen :0 :0 :foremen] :matti-r.foremen )
+              (complexity-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
               #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (complexity-section :matti-reviews [:settings :reviews :0 :0 :reviews] :matti-r.reviews)
+              (complexity-section :matti-reviews [:settings :reviews :0 :reviews] :matti-r.reviews)
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
                :grid  {:columns 6
@@ -192,7 +187,8 @@
               (text-section :matti-statements)
               {:id    "matti-buildings"
                :grid  {:columns 1
-                       :rows    [[{:schema {:list {:id    "info"
+                       :rows    [[{:schema {:list {:title    "matti-buildings.info"
+                                                   :loc-prefix :matti-buildings.info
                                                    :items (mapv (fn [check]
                                                                   {:id     check
                                                                    :schema {:docgen "matti-verdict-check"}
