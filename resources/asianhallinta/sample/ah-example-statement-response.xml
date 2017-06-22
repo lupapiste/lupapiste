@@ -4,9 +4,9 @@
     <ah:HakemusTunnus>LP-297-2015-00001</ah:HakemusTunnus>
     <ah:AsianTunnus>2015-1234</ah:AsianTunnus>
     <ah:Lausunto>
-        <ah:LausuntoTunnus>321</ah:LausuntoTunnus>
+        <ah:LausuntoTunnus>321</ah:LausuntoTunnus><!-- Lupapisteen ID lausunnolle -->
         <ah:Saateteksti>Lausuisitko lausunnon, plz</ah:Saateteksti>
-        <ah:Pyytaja>Sonja Sibbo</ah:Pyytaja>
+        <ah:Pyytaja>Sipoon rakennusvalvonta (Sonja Sibbo)</ah:Pyytaja>
         <ah:PyyntoPvm>2017-05-05</ah:PyyntoPvm>
         <ah:Maaraaika>2017-05-10</ah:Maaraaika>
         <ah:AsianTunnus>L1234-2017</ah:AsianTunnus>

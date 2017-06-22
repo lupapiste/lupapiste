@@ -2,6 +2,7 @@
 <ah:UusiAsia xmlns:ah="http://www.lupapiste.fi/asianhallinta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lupapiste.fi/asianhallinta asianhallinta.xsd"
              version="1.3" messageId="statement-request_1">
     <ah:Tyyppi>Lausuntopyyntö</ah:Tyyppi>
+    <ah:TyypinTarkenne>Lausuntopyyntö rakennusluvasta</ah:TyypinTarkenne>
     <ah:Kuvaus>Testi lausuntoyyntö</ah:Kuvaus>
     <ah:Kuntanumero>753</ah:Kuntanumero>
     <ah:Hakijat>
@@ -21,10 +22,10 @@
             <ah:Tyyppi>Liitteen tyyppi</ah:Tyyppi>
             <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment.pdf</ah:LinkkiLiitteeseen>
         </ah:Liite>
-        <ah:Liite>
+        <ah:Liite> <!-- Liitteiden linkki voidaan konfiguroida joko SFTP tai HTTPS -->
             <ah:Kuvaus>Liitteen 2 kuvaus</ah:Kuvaus>
             <ah:Tyyppi>Liitteen 2 tyyppi</ah:Tyyppi>
-            <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment2.txt</ah:LinkkiLiitteeseen>
+            <ah:LinkkiLiitteeseen>https://www.lupapiste.fi/api/download-attachment/ah-example-attachment2.txt</ah:LinkkiLiitteeseen>
         </ah:Liite>
     </ah:Liitteet>
     <ah:Asiointikieli>fi</ah:Asiointikieli>
@@ -35,9 +36,9 @@
         </ah:Toimenpide>
     </ah:Toimenpiteet>
     <ah:Lausuntopyynto>
-        <ah:LausuntoTunnus>321</ah:LausuntoTunnus>
+        <ah:LausuntoTunnus>321</ah:LausuntoTunnus><!-- Lupapisteen ID lausunnolle -->
         <ah:Saateteksti>Lausuisitko lausunnon, plz</ah:Saateteksti>
-        <ah:Pyytaja>Sonja Sibbo</ah:Pyytaja>
+        <ah:Pyytaja>Sipoon rakennusvalvonta (Sonja Sibbo)</ah:Pyytaja>
         <ah:PyyntoPvm>2017-05-05</ah:PyyntoPvm>
         <ah:Maaraaika>2017-05-10</ah:Maaraaika>
     </ah:Lausuntopyynto>
