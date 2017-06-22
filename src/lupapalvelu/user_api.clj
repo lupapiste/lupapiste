@@ -43,7 +43,8 @@
   (if (usr/virtual-user? user)
     user
     (let [full-user (usr/get-user-by-id (:id user))]
-      (dissoc full-user :private :personId))))
+      (cond-> (dissoc full-user :private)
+        (usr/verified-person-id? full-user) (dissoc :personId)))))
 
 (defquery user
   {:on-success (fn [_ {user :user}]

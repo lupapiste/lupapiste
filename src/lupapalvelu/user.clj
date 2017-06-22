@@ -78,7 +78,7 @@
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            OrgAuthz
-           (sc/optional-key :personId)            (sc/maybe ssc/Hetu)
+           (sc/optional-key :personId)            (sc/if ss/blank? ssc/BlankStr ssc/Hetu)
            (sc/optional-key :personIdSource)      PersonIdSource
            (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
