@@ -11,6 +11,7 @@
     <complexType name="AsiaType">
         <sequence>
             <element name="Tyyppi" type="ah:AsianTyyppiType" maxOccurs="1" minOccurs="1"></element>
+            <element name="TyypinTarkenne" type="ah:AsianTyypinTarkenneType" maxOccurs="1" minOccurs="0"></element>
             <element name="Kuvaus" type="string" maxOccurs="1" minOccurs="1">
                 <annotation>
                     <documentation>Esimerkiksi hakemuksen nimi</documentation>
@@ -288,6 +289,61 @@
             <enumeration value="KasiteltavaHakemus"></enumeration>
             <enumeration value="Tiedoksianto"></enumeration>
             <enumeration value="Lausuntopyyntö"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="AsianTyypinTarkenneType">
+        <annotation>
+            <documentation>ELY-keskusten asiointityyppi</documentation>
+        </annotation>
+        <restriction base="string">
+            <!-- 07.00.06 Ympäristönsuojelulain valvontamenettely -->
+            <enumeration value="Lausuntopyyntö ympäristönsuojelulain valvontamenettelystä"></enumeration>
+            <enumeration value="Tiedoksi päätös ympäristönsuojelulain valvontamenettelystä"></enumeration>
+            <!-- 07.00.13 Pohjavesien suojelu -->
+            <enumeration value="Lausuntopyyntö pohjavesien suojelusuunnitelmasta"></enumeration>
+            <enumeration value="Tiedoksi päätös pohjavesien suojelusuunnitelmasta"></enumeration>
+            <!-- 07.00.32 Maa-ainesten otto ja käsittely -->
+            <enumeration value="Lausuntopyyntö maa-ainesten otosta ja käsittelystä"></enumeration>
+            <enumeration value="Tiedoksi päätös maa-ainesten otosta ja käsittelystä"></enumeration>
+            <!-- 07.01.01 Maakuntakaavoituksen ohjaus -->
+            <enumeration value="Lausuntopyyntö maakuntakaavasta"></enumeration>
+            <!-- 07.01.02 Yleiskaavamenettely -->
+            <enumeration value="Ilmoitus yleiskaavan vireilletulosta"></enumeration>
+            <enumeration value="Lausuntopyyntö yleiskaavasta"></enumeration>
+            <enumeration value="Yleiskaavapäätös tiedoksi"></enumeration>
+            <enumeration value="Tiedoksi yleiskaavapäätöksen täytäntöönpanomääräys"></enumeration>
+            <enumeration value="Ilmoitus yleiskaavan voimaantulosta"></enumeration>
+            <!-- 07.01.03 Asemakaavoitusmenettely -->
+            <enumeration value="Ilmoitus asemakaavan vireilletulosta"></enumeration>
+            <enumeration value="Lausuntopyyntö asemakaavasta"></enumeration>
+            <enumeration value="Asemakaavapäätös tiedoksi"></enumeration>
+            <enumeration value="Tiedoksi asemakaavan täytäntöönpanomääräys"></enumeration>
+            <enumeration value="Ilmoitus asemakaavan voimaantulosta"></enumeration>
+            <!-- 07.01.05 Poikkeamisluvat tai poikkeamis-, suunnittelutarveratkaisu- ja rakennusjärjestyspäätökset; rakennus-, toimenpide-, purkamis- ja maisematyöluvat -->
+            <enumeration value="Ilmoitus poikkeamislupahakemuksesta"></enumeration>
+            <enumeration value="Lausuntopyyntö poikkeamishakemuksesta"></enumeration>
+            <enumeration value="Tiedoksi päätös poikkeamisluvasta"></enumeration>
+            <enumeration value="Lausuntopyyntö maisematyöluvasta"></enumeration>
+            <enumeration value="Tiedoksi maisematyölupapäätökset"></enumeration>
+            <enumeration value="Lausuntopyyntö purkamisaikomuksesta"></enumeration>
+            <enumeration value="Lausuntopyyntö purkamislupahakemuksesta"></enumeration>
+            <enumeration value="Tiedoksi purkamislupapäätös"></enumeration>
+            <enumeration value="Lausuntopyyntö rakennusluvasta"></enumeration>
+            <enumeration value="Tiedoksi päätös rakennusluvasta"></enumeration>
+            <enumeration value="Lausuntopyyntö rakennusjärjestyksestä"></enumeration>
+            <enumeration value="Tiedoksi päätös rakennusjärjestyksestä"></enumeration>
+            <enumeration value="Lausuntopyyntö suunnittelutarveratkaisusta"></enumeration>
+            <enumeration value="Tiedoksi päätös suunnittelutarveratkaisusta"></enumeration>
+            <!-- 07.01.09 Rakennussuojelu -->
+            <enumeration value="Lausuntopyyntö suojeluesityksestä"></enumeration>
+            <enumeration value="Tiedoksi päätös rakennussuojelusta"></enumeration>
+            <!-- 06.05.09  Teiden suoja- ja näkemäalueelle rakentaminen (poikkeamisluvat) -->
+            <enumeration value="Lausuntopyyntö teiden suoja- ja näkemäalueelle takentamisen poikkeamishakemuksesta"></enumeration>
+            <enumeration value="Tiedoksi päätös teiden suoja- ja näkemäalueelle rakentamisen poikkeamisluvasta"></enumeration>
+            <!-- 06.05.10 Teiden suoja- ja näkemäalueen ulkopuolelle rakentaminen (naapurin kuuleminen) -->
+            <enumeration value="Lausuntopyyntö naapurin kuulemisesta teiden suoja- ja näkemäalueen ulkopuolelle rakentamisesta"></enumeration>
+            <enumeration value="Tiedoksi päätös suoja- ja näkemäalueelle rakentamisen poikkeamisluvasta"></enumeration>
         </restriction>
     </simpleType>
 
