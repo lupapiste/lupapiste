@@ -217,8 +217,8 @@
   (let [v-set (keyword-set items)
         d-set (keyword-set data-items)]
     (cond
-      (not= (count items) (count v-set)) :error.duplicate-items
-      (not (set/subset? v-set d-set))    :error.invalid-items)))
+      (not (set/subset? v-set d-set))    :error.invalid-items
+      (not= (count items) (count v-set)) :error.duplicate-items)))
 
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
@@ -229,8 +229,9 @@
 
 (defmethod validate-resolution :reference-list
   [{:keys [path schema data value references] :as options}]
-  (or (schema-error options)
-      (check-items value (get-in references (:path data)))))
+  (cond
+    (not-empty path) :error.invalid-value-path
+    :else            (check-items value (get-in references (:path data)))))
 
 (defn validate-path-value
   "Error message if not valid, nil otherwise."

@@ -217,4 +217,48 @@
     (schemas/validate-path-value test-template ["two" 0 "c"] ["bar"])
     => nil
     (schemas/validate-path-value test-template ["two" 0 "c"] ["foo" :bar])
-    => nil))
+    => nil
+    (fact "Items cannot be part of the path"
+      (schemas/validate-path-value test-template ["two" 0 "c" :items] [])
+      => :error.invalid-value-path)
+    (fact "Invalid items"
+      (schemas/validate-path-value test-template ["two" 0 "c"] ["foo" :bar :baz])
+      => :error.invalid-items
+      (schemas/validate-path-value test-template ["two" 0 "c"] [:baz])
+      => :error.invalid-items
+      (schemas/validate-path-value test-template ["two" 0 "c"] [:baz :doh])
+      => :error.invalid-items)
+    (fact "Duplicate items"
+      (schemas/validate-path-value test-template ["two" 0 "c"] ["foo" :foo])
+      => :error.duplicate-items
+      (schemas/validate-path-value test-template ["two" 0 "c"] [:foo :bar :bar])
+      => :error.duplicate-items
+      (schemas/validate-path-value test-template ["two" 0 "c"] [:bad :bad])
+      => :error.invalid-items))
+  (facts "Reference list"
+    (let [opts {:references {:path {:to {:somewhere ["ref1" "ref2" "ref3"]}}}}
+          path ["two" :list-row "d" :ref]]
+      (schemas/validate-path-value test-template path ["ref1" "ref2"] opts)
+      => nil
+      (schemas/validate-path-value test-template path [:ref1 "ref2"] opts)
+      => nil
+      (schemas/validate-path-value test-template path [] opts) => nil
+      (fact "Bad path"
+        (schemas/validate-path-value test-template (conj path :items) [] opts)
+        => :error.invalid-value-path
+        (schemas/validate-path-value test-template (conj path :items)
+                                     ["two" :list-row "d"] opts)
+        => :error.invalid-value-path)
+      (fact "Invalid items"
+        (schemas/validate-path-value test-template path ["ref1" "bad"] opts)
+        => :error.invalid-items
+        (schemas/validate-path-value test-template path ["ref1" :bad] opts)
+        => :error.invalid-items
+        (schemas/validate-path-value test-template path ["ref1" nil] opts)
+        => :error.invalid-items
+        (fact "Duplicate items"
+          (schemas/validate-path-value test-template path ["ref1" :ref1] opts)
+          => :error.duplicate-items
+          (schemas/validate-path-value test-template path
+                                       ["ref2" :ref3 "ref2"] opts)
+          => :error.duplicate-items)))))
