@@ -205,11 +205,6 @@
     (schema-error options)
     :error.invalid-value-path))
 
-(defmethod validate-resolution :docgen
-  [_]
-  ;; TODO: Use the old-school docgen validation if possible
-  )
-
 (defn keyword-set [xs]
   (set (map keyword xs)))
 
@@ -217,8 +212,29 @@
   (let [v-set (keyword-set items)
         d-set (keyword-set data-items)]
     (cond
-      (not (set/subset? v-set d-set))    :error.invalid-items
+      (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
+
+(defmethod validate-resolution :docgen
+  [{:keys [path schema value data] :as options}]
+  ;; TODO: Use the old-school docgen validation if possible
+  ;; For now we support only the types used by Matti
+  (let [body      (-> schema :body first)
+        data-type (:type body)
+        names     (map :name (:body body))
+        check     (fn [pred] (when (sc/check pred value)
+                               :error.invalid-value))]
+    (cond
+      (seq path)                   :error.invalid-value-path
+      (coll? value)                :error.invalid-value
+      (data-type #{:text :string}) (check sc/Str)
+      (= data-type :checkbox)      (check sc/Bool)
+      ;; TODO: Nil handling should follow valueAllowUnset.
+      (= data-type :select)        (when-not (nil? value)
+                                     (check-items [value] names))
+      (= data-type :radioGroup)    (check-items [value] names)
+      :else                        :error.invalid-value))
+  )
 
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]

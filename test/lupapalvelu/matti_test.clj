@@ -81,7 +81,16 @@
                                                         :schema {:date-delta {:unit :days}}}
                                                        {:id "ref"
                                                         :schema {:reference-list {:type :select
-                                                                                  :path [:path :to :somewhere]}}}]}}}]}]}}]})
+                                                                                  :path [:path :to :somewhere]}}}]}}}]}]}}
+              {:id "three"
+               :grid {:columns 4
+                      :rows [{:id "docgen"
+                              :row [{:id "text"
+                                     :schema {:docgen "matti-verdict-text"}}
+                                    {:id "select"
+                                     :schema {:docgen "matti-verdict-giver"}}
+                                    {:id "radio"
+                                     :schema {:docgen "automatic-vs-manual"}}]}]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/MattiVerdict test-template)
@@ -223,18 +232,18 @@
       => :error.invalid-value-path)
     (fact "Invalid items"
       (schemas/validate-path-value test-template ["two" 0 "c"] ["foo" :bar :baz])
-      => :error.invalid-items
+      => :error.invalid-value
       (schemas/validate-path-value test-template ["two" 0 "c"] [:baz])
-      => :error.invalid-items
+      => :error.invalid-value
       (schemas/validate-path-value test-template ["two" 0 "c"] [:baz :doh])
-      => :error.invalid-items)
+      => :error.invalid-value)
     (fact "Duplicate items"
       (schemas/validate-path-value test-template ["two" 0 "c"] ["foo" :foo])
       => :error.duplicate-items
       (schemas/validate-path-value test-template ["two" 0 "c"] [:foo :bar :bar])
       => :error.duplicate-items
       (schemas/validate-path-value test-template ["two" 0 "c"] [:bad :bad])
-      => :error.invalid-items))
+      => :error.invalid-value))
   (facts "Reference list"
     (let [opts {:references {:path {:to {:somewhere ["ref1" "ref2" "ref3"]}}}}
           path ["two" :list-row "d" :ref]]
@@ -251,14 +260,88 @@
         => :error.invalid-value-path)
       (fact "Invalid items"
         (schemas/validate-path-value test-template path ["ref1" "bad"] opts)
-        => :error.invalid-items
+        => :error.invalid-value
         (schemas/validate-path-value test-template path ["ref1" :bad] opts)
-        => :error.invalid-items
+        => :error.invalid-value
         (schemas/validate-path-value test-template path ["ref1" nil] opts)
-        => :error.invalid-items
+        => :error.invalid-value
         (fact "Duplicate items"
           (schemas/validate-path-value test-template path ["ref1" :ref1] opts)
           => :error.duplicate-items
           (schemas/validate-path-value test-template path
                                        ["ref2" :ref3 "ref2"] opts)
-          => :error.duplicate-items)))))
+          => :error.duplicate-items))))
+  (facts "Docgen"
+    (facts "checkbox"
+      (schemas/validate-path-value test-template ["one" "0" "0"] true)
+      => nil
+      (schemas/validate-path-value test-template ["one" "0" "0"] false)
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template ["one" "0" "0" :bad] true)
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template ["one" "0" "0"] nil)
+        => :error.invalid-value
+        (schemas/validate-path-value test-template ["one" "0" "0"] "bad")
+        => :error.invalid-value))
+    (facts "string"
+      (schemas/validate-path-value test-template [:two :list-row "d" 0] "hello")
+      => nil
+      (schemas/validate-path-value test-template [:two :list-row "d" 0] "")
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template [:two :list-row "d" 0 :bad] "hello")
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template [:two :list-row "d" 0] 1234)
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:two :list-row "d" 0] nil)
+        => :error.invalid-value))
+    (facts "text"
+      (schemas/validate-path-value test-template [:three :docgen :text] "hello")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :text] "")
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template [:three :docgen :text :bad] "hello")
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template [:three :docgen :text] 1234)
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :text] nil)
+        => :error.invalid-value))
+    (facts "select"
+      (schemas/validate-path-value test-template [:three :docgen :select] "viranhaltija")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :select] :lautakunta)
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :select] nil)
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template [:three :docgen :select :bad] "hello")
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template [:three :docgen :select] "")
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :select] 1234)
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :select] [:lautakunta :viranhaltija])
+        => :error.invalid-value))
+    (facts "radio group"
+      (schemas/validate-path-value test-template [:three :docgen :radio] "automatic")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :radio] :manual)
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template [:three :docgen :radio :bad] "hello")
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template [:three :docgen :radio] "")
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :radio] 1234)
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :radio] [:automatic :manual])
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :radio] nil)
+        => :error.invalid-value))))
