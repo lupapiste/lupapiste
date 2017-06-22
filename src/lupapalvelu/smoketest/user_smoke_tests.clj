@@ -20,4 +20,4 @@
 (mongocheck :users
   #(when (and (= "dummy" (:role %)) (not (:enabled %)) (-> % :private :password))
      (format "Dummy user %s has password" (:username %)))
-  :role :private)
+  :role :private :username :enabled)
