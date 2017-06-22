@@ -251,6 +251,7 @@
                                                         :street "Mutakatu 7"
                                                         :username "teppo@example.com"
                                                         :virtual false
+                                                        :personIdSource "identification-service"
                                                         :zip "33560"})})))
   (fact
     (let [data {:firstName "Seppo"
