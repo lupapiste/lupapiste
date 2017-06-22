@@ -175,6 +175,14 @@ Nyt seuraavalla komennolla pitäisi päästä `lupapiste`-kantaan käyttäjänä
 
     docker exec -it lupapiste-mongo mongo -u lupapiste-user -p lupapiste-password lupapiste
 
+Jatkossa mongo-kontin saa taas käyntiin komennolla
+
+    $ docker start lupapiste-mongo
+
+Ja kontin voi sammuttaa komennolla
+
+    $ docker stop lupapiste-mongo
+
 ## Palvelun käynnistys
 
 Kun työkalut on asennettu ja lisätty polkuun sekä MongoDB käynnistetty,
