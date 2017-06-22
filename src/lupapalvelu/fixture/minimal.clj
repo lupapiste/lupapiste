@@ -652,6 +652,8 @@
     :username "erkki@example.com" ;
     :firstName "Erkki"
     :lastName "Esimerkki"
+    :personId "010203-041B"
+    :personIdSource :identification-service
     :phone "556677"
     :email "erkki@example.com"
     :street "Merkintie 88"
