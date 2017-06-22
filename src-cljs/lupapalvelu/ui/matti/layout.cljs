@@ -19,11 +19,14 @@
 ;; Miscellaneous components
 ;; -------------------------------
 
+(defn show-label? [{label? :label?} wrap-label?]
+  (and wrap-label? (not (false? label?))))
+
 (rum/defc matti-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   (let [enabled-path (path/extend path :enabled)]
     [:div.matti-date-delta
-     (when wrap-label?
+     (when (show-label? schema wrap-label?)
        [:div.delta-label (path/loc path)])
      [:div.delta-editor
       (docgen/docgen-checkbox (assoc options
@@ -40,7 +43,7 @@
 (rum/defc matti-multi-select < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.matti-multi-select
-   (when wrap-label?
+   (when (show-label? schema wrap-label?)
      [:h4.matti-label (path/loc path schema)])
    (let [state (path/state path state)
          items (->> (:items schema)
@@ -79,7 +82,7 @@
                                                            (distinct (path/react (:path schema)
                                                                                  state/references)))}]))
         component (docgen/docgen-select options)]
-    (if wrap-label?
+    (if (show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options component)
       component)))
 

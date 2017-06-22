@@ -151,12 +151,6 @@ $section-border: 1px solid $gray51;
   }
 }
 
-.matti-settings-last-saved {
-  border-bottom: $section-border;
-}
-
-
-
 .matti--view {
   .matti-condition-box + .matti-condition-box:before {
     content: ", ";
@@ -225,4 +219,17 @@ div.matti-template-list {
     margin-top: $marginL;
   }
 
+}
+
+// Settings
+
+
+div.matti-settings {
+h2.matti-settings-title {
+  margin-top: 0;
+}
+.section-header {
+  background-color: initial;
+  border-bottom: none;
+}
 }

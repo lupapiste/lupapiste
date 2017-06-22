@@ -17952,10 +17952,6 @@ input:disabled + .matti-radio-label:hover.matti-radio-label:before {
   border-top: none;
 }
 
-.matti-settings-last-saved {
-  border-bottom: 1px solid #333333;
-}
-
 .matti--view .matti-condition-box + .matti-condition-box:before {
   content: ", ";
 }
@@ -18021,6 +18017,15 @@ div.matti-template-list table.matti-templates-table tr:hover {
 
 div.matti-template-list table.matti-templates-table tr:hover:nth-child(even) {
   background: #f6f6f6;
+}
+
+div.matti-settings h2.matti-settings-title {
+  margin-top: 0;
+}
+
+div.matti-settings .section-header {
+  background-color: initial;
+  border-bottom: none;
 }
 
 /* VIEWS

@@ -23,20 +23,32 @@
                                      :category category
                                      :_meta {:updated settings-updater})))))
 
-(defn last-saved-header [options]
-  [:div.matti-grid-1.matti-settings-last-saved
+(defn settings-section-header [edit? {:keys [path schema]}]
+  [:div.matti-grid-6.section-header
    [:div.row.row--tight
-    [:div.col-1.col--right
-     (layout/last-saved (assoc options :state state/settings))]]])
+    [:div.col-4
+     [:span.matti-label
+      (when edit? {:class :row-text})
+      (common/loc (str "matti-settings."
+                                                  (-> path first name)))]]
+    (when edit?
+      [:div.col-2.col--right
+       [:button.ghost (common/loc :edit)]])]])
 
 (rum/defc verdict-template-settings < rum/reactive
   [{:keys [title sections] :as options}]
-  [:div
-   [:h2 (common/loc :matti-settings (common/loc title))]
+  [:div.matti-settings
+   [:div.matti-grid-2
+    [:div.row.row--tight
+     [:div.col-1
+      [:h2.matti-settings-title (common/loc :matti-settings
+                                            (common/loc title))]]
+     [:div.col-1.col--right
+      (layout/last-saved (assoc options :state state/settings))]]]
    (for [{id :id :as sec} sections]
      (sections/section (assoc sec
                               :path [id]
                               :state state/settings)
-                       (case (keyword id)
-                         :verdict (partial last-saved-header options)
-                         #())))])
+                       (partial settings-section-header
+                                (contains? #{:reviews :plans}
+                                           (keyword id)))))])

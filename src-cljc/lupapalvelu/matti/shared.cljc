@@ -21,31 +21,36 @@
    ;; earlier localisations are arguments to the latter.
    (sc/optional-key :i18nkey)    [sc/Keyword]})
 
+(defschema MattiComponent
+  (merge MattiBase
+         {(sc/optional-key :label?) sc/Bool})) ;; Show label? Default true
+
 (defschema MattiReferenceList
   "Component that builds schema from an external source."
-  (merge MattiBase
+  (merge MattiComponent
          ;; Path is interpreted by the implementation. In Matti the
          ;; path typically refers to the settings.
-         {:path                 [sc/Keyword]
-          :type                 (sc/enum :select :multi-select)
+         {:path                              [sc/Keyword]
+          :type                              (sc/enum :select :multi-select)
           (sc/optional-key :item-loc-prefix) sc/Keyword
-          (sc/optional-key :id) sc/Str}))
+          (sc/optional-key :id)              sc/Str}))
 
 (def keyword-or-string (sc/conditional
                         keyword? sc/Keyword
                         :else    sc/Str))
 
 (defschema MattiMultiSelect
-  (merge MattiBase
+  (merge MattiComponent
          ;; Sometimes it is useful to finetune item localisations
          ;; separately from the label.
          {(sc/optional-key :item-loc-prefix) sc/Keyword
           :items           [keyword-or-string]}))
 
 (defschema MattiDateDelta
-  {(sc/optional-key :enabled) sc/Bool
-   (sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
-   :unit                      (sc/enum :days :years)})
+  (merge MattiComponent
+         {(sc/optional-key :enabled) sc/Bool
+          (sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
+          :unit                      (sc/enum :days :years)}))
 
 (def schema-type-alternatives
   {:docgen         sc/Str
@@ -211,7 +216,8 @@
    :sections [{:id   "verdict"
                :grid {:columns 1
                       :rows    [[{:id     "verdict-code"
-                                  :schema {:multi-select {:loc-prefix :matti-r
+                                  :schema {:multi-select {:label? false
+                                                          :loc-prefix :matti-r
                                                           :items      [:annettu-lausunto
                                                                        :asiakirjat-palautettu
                                                                        :ehdollinen
@@ -253,12 +259,14 @@
               {:id   "foremen"
                :grid {:columns 1
                       :rows    [[{:id     "foremen"
-                                  :schema {:multi-select {:loc-prefix :matti-r
+                                  :schema {:multi-select {:label? false
+                                                          :loc-prefix :matti-r
                                                           :items      [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]]}}
               {:id   "reviews"
                :grid {:columns 1
                       :rows    [[{:id     "reviews"
-                                  :schema {:multi-select {:loc-prefix :matti-r
+                                  :schema {:multi-select {:label? false
+                                                          :loc-prefix :matti-r
                                                           :items      [:paikka :sijainti :aloitus :pohja
                                                                        :rakenne :vv :iv :loppu]}}}]]}}]})
 
