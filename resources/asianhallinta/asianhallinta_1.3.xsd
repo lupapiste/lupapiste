@@ -398,7 +398,7 @@
                     </element>
                     <element name="Lausunnonantaja" type="string">
                         <annotation>
-                            <documentation>Lausunnonantaja</documentation>
+                            <documentation>Lausunnonantajan nimi</documentation>
                         </annotation>
                     </element>
                     <element name="LausuntoPvm" type="date">
@@ -429,7 +429,6 @@
                     <documentation>Lausunnon pyytäjän saateteksti</documentation>
                 </annotation>
             </element>
-            <!-- TODO: tarvitaanko tieto keneltä pyydetään? -->
             <element name="Pyytaja" type="string">
                 <annotation>
                     <documentation>Lausuntoa pyytänyt taho</documentation>
