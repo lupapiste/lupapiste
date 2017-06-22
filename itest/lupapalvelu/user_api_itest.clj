@@ -8,7 +8,8 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.user-api :as user-api]))
+            [lupapalvelu.user-api :as user-api]
+            [sade.schema-generators :as ssg]))
 
 ;;
 ;; ==============================================================================
@@ -96,6 +97,25 @@
 (facts "Veikko updates his name"
   (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
   (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
+
+(def UpdateableUser (select-keys user/User [:firstName :lastName :street :city :zip :phone :language]))
+
+(facts update-user
+  (facts "update person-id"
+    (fact "basic user"
+      (command pena :update-user (assoc (ssg/generate UpdateableUser) :personId "010203+040A"))
+      => (partial expected-failure? :error.user.trying-to-update-verified-person-id))
+
+    (fact "company user without id"
+      (command kaino :update-user (assoc (ssg/generate UpdateableUser) :personId "010203+040A")) => ok?)
+
+    (fact "company user without id - invalid id"
+      (command kaino :update-user (assoc (ssg/generate UpdateableUser) :personId "010203+040B"))
+      => (partial expected-failure? :error.invalid-user-data))
+
+    (fact "company user with personId from identification service"
+      (command erkki :update-user (assoc (ssg/generate UpdateableUser) :personId "010203+040A"))
+      => (partial expected-failure? :error.user.trying-to-update-verified-person-id))))
 
 (facts "save-application-filter"
   (apply-remote-minimal)

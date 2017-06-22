@@ -352,6 +352,7 @@
                               :lastName    (:lastName user)
                               :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
                               :personId    (:personId user)
+                              :personIdSource (:personIdSource user)
                               :password    password
                               :role        :applicant
                               :architect   true
