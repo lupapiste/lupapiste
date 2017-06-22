@@ -3176,6 +3176,7 @@
 "task.reject" "en" "Needs revision"
 "task.reject" "fi" "Tarkennettavaa"
 "task.reject" "sv" "Bör preciseras"
+"task.resend-review" "fi" "Siirrä uudelleen taustajärjestelmään"
 "task.review-done" "en" "Review carried out"
 "task.review-done" "fi" "Katselmus pidetty"
 "task.review-done" "sv" "Syneförrättning genomförd"

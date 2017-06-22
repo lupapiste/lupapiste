@@ -22,7 +22,7 @@
   (fn [{{task-id :taskId} :data app :application}]
     (if-let [task (util/find-by-id task-id (:tasks app))]
       (when-not ((set types) (keyword (-> task :source :type)))
-        (fail :error.command-illegal-state))
+        (fail :error.invalid-task-type))
       (fail :error.task-not-found))))
 
 (defn- task-state-assertion [states]
@@ -272,6 +272,22 @@
                                           :set-app-modified? false
                                           :set-attachment-modified? false))
     (set-state command taskId :faulty_review_task)))
+
+(defcommand resend-review-to-backing-system
+  {:description "Resend review data to backend"
+   :parameters  [id taskId lang]
+   :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
+   :pre-checks  [validate-task-is-review
+                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
+                 (task-state-assertion #{:sent})
+                 (task-source-type-assertion #{:verdict :authority :task})]
+   :user-roles  #{:authority}
+   :states      valid-states}
+  [{application :application user :user organization :organization created :created :as command}]
+  (let [sent-file-ids  (mapping-to-krysp/save-review-as-krysp application @organization (util/find-by-id taskId (:tasks application)) user lang)
+        sent-to-krysp? (not (nil? sent-file-ids))]
+    (infof "resending review task %s to KRYSP (successful: %s)" taskId sent-to-krysp?)
+    (ok :integrationAvailable sent-to-krysp?)))
 
 (defquery is-end-review
   {:description "Pseudo query that fails if the task is neither
