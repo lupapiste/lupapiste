@@ -208,6 +208,9 @@
 (defn authority? [{role :role}]
   (contains? #{:authority :oirAuthority} (keyword role)))
 
+(defn verified-person-id? [{pid :personId source :personIdSource :as user}]
+  (and (ss/not-blank? pid) (= :identification-service source)))
+
 (defn validate-authority
   "Validator: current user must be an authority. To be used in commands'
    :pre-check vectors."
@@ -579,7 +582,7 @@
 (defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
   (let [email (ss/canonize-email (:email user-data))]
     (-<> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId
+      (select-keys [:email :username :role :firstName :lastName :personId :personIdSource
                     :phone :city :street :zip :enabled :orgAuthz :language
                     :allowDirectMarketing :architect :company
                     :graduatingYear :degree :fise :fiseKelpoisuus])
