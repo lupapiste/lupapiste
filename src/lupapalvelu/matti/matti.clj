@@ -1,6 +1,7 @@
 (ns lupapalvelu.matti.matti
   (:require [lupapalvelu.i18n :as i18n]
             [lupapalvelu.matti.schemas :as schemas]
+            [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.strings :as ss]
@@ -48,13 +49,21 @@
                             timestamp)
                   update)))
 
-(defn save-draft-value [organization template-id timestamp path value]
+(defn settings [organization category]
+  (get-in organization [:verdict-templates :settings (keyword category)]))
+
+(defn save-draft-value
+  "Error code on failure (see schemas for details)."
+  [organization template-id timestamp path value]
   (let [template (verdict-template organization template-id)
         draft    (assoc-in (:draft template) (map keyword path) value)]
-    (template-update organization
-                     template-id
-                     {$set {:verdict-templates.templates.$.draft draft}}
-                     timestamp)))
+    (or (schemas/validate-path-value shared/default-verdict-template path value
+                                     {:schema-overrides {:section shared/MattiVerdictSection}
+                                      :references {:settings (settings organization (:cateogry template))}})
+        (template-update organization
+                         template-id
+                         {$set {:verdict-templates.templates.$.draft draft}}
+                         timestamp))))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (template-update organization
@@ -91,9 +100,6 @@
                           (format "%s (%s)"
                                   name
                                   (i18n/localize lang :matti-copy-postfix)))))
-
-(defn settings [organization category]
-  (get-in organization [:verdict-templates :settings (keyword category)]))
 
 (defn save-settings-value [organization category timestamp path value]
   (let [draft        (assoc-in (:draft (settings organization category))

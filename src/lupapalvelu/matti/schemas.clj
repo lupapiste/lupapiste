@@ -138,9 +138,15 @@
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
       multi-select (wrap :multi-select shared/MattiMultiSelect multi-select))))
 
+(defn- parse-int [x]
+  (let [n (-> x str name)]
+   (cond
+     (integer? x)                 x
+     (re-matches #"^[+-]?\d+$" n) (util/->int n))))
+
 (defn- resolve-index [xs x]
-  (if (re-matches #"^\d+$" x)
-    (util/->int x)
+  (if-let [index (parse-int x)]
+    index
     (first (keep-indexed (fn [i data]
                            (when (= x (:id data))
                              i))
@@ -178,7 +184,7 @@
   data. Returns map with remaining path and resolved schema (see
   resolve-path-schema)."
   [data path]
-  (when (seq path)
+  (when (and (seq path) (empty? (filter coll? path)))
     (schema-data-helper data (map #(name (if (number? %) (str %) %)) path))))
 
 (defmulti validate-resolution :type)
@@ -201,9 +207,12 @@
 
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
-  (if (contains? #{:enabled :delta} (first path))
-    (schema-error options)
-    :error.invalid-value-path))
+  (let [property (first path)]
+    (if (contains? #{:enabled :delta} property)
+     (schema-error (merge options
+                          (when (= property :delta)
+                            {:value (parse-int value)})))
+     :error.invalid-value-path)))
 
 (defn keyword-set [xs]
   (set (map keyword xs)))

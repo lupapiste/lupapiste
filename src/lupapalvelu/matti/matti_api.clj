@@ -7,7 +7,6 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
-
 (defn- command->organization [{user :user}]
   (usr/authority-admins-organization user))
 
@@ -74,12 +73,13 @@
    :input-validators [(partial action/vector-parameters [:path])
                       verdict-template-editable]}
   [{:keys [created] :as command}]
-  (matti/save-draft-value (command->organization command)
-                          template-id
-                          created
-                          path
-                          value)
-  (ok :modified created))
+  (if-let [error (matti/save-draft-value (command->organization command)
+                                         template-id
+                                         created
+                                         path
+                                         value)]
+    (fail error)
+    (ok :modified created)))
 
 (defcommand publish-verdict-template
   {:description      "Creates new verdict template version."

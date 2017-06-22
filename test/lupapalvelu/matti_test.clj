@@ -163,7 +163,11 @@
     (fact "Bad column"
       (schemas/schema-data test-template ["one" "row" "bad"]) => nil
       (schemas/schema-data test-template ["one" "row" 40]) => nil
-      (schemas/schema-data test-template ["one" "row" -1]) => nil))
+      (schemas/schema-data test-template ["one" "row" -1]) => nil)
+    (fact "Collections in path"
+      (schemas/schema-data test-template [[]]) => nil
+      (schemas/schema-data test-template [:one [:row] :b]) => nil
+      (schemas/schema-data test-template [[:one :row :b]]) => nil))
 
 (facts "Path value validation"
   (fact "Bad paths"
@@ -213,11 +217,18 @@
       => :error.invalid-value
       (schemas/validate-path-value test-template [:one :row :b :delta] "hiihoo")
       => :error.invalid-value
+      (schemas/validate-path-value test-template [:one :row :b :delta] [8 9])
+      => :error.invalid-value
+      (schemas/validate-path-value test-template [:one :row :b :delta] nil)
+      => :error.invalid-value
       (schemas/validate-path-value test-template [:one :row :b :enabled] "hiihoo")
       => :error.invalid-value)
     (fact "Unit cannot be changed"
       (schemas/validate-path-value test-template [:one :row :b :unit] :years)
-      => :error.invalid-value-path))
+      => :error.invalid-value-path)
+    (fact "Automatic number conversion"
+      (schemas/validate-path-value test-template [:one :row :b :delta] "8")
+      => nil))
   (facts "Multi select"
     (schemas/validate-path-value test-template ["two" 0 "c"] [])
     => nil
