@@ -144,9 +144,17 @@ Luo tunnukset lupapisteelle (käytä samaa kannan nimeä, käyttäjän nimeä ja
 
 ## MongoDB Dockerissa
 
-Vaihtoehtoisesti voit ajaa Mongoa Dockerissa. Luo ensin uusi mongo-kontti:
+Vaihtoehtoisesti voit ajaa Mongoa Dockerissa. Jos käytössäsi on Docker 17.03 tai uudempi, niin luo ensin uusi volume container tietokannan muuttuvan datan sijoituspaikaksi
 
-    $ docker run --name lupapiste-mongo -p 27018:27017 -d mongo:3.2 --auth
+    $ docker volume create lupis-mongo-volume
+
+Luo seuraavaksi mongo-kontti joka käyttää äsken luotua volume containeria
+
+    $ docker run --name lupapiste-mongo -v lupis-mongo-volume:/data/db -p 27018:27017 -d mongo:3.2
+
+Jos et luonut volume containeria niin jätä `-v lupis-mongo-volume:/data/db` pois parametreista, eli luo container seuraavasti:
+
+    $ docker run --name lupapiste-mongo -p 27018:27017 -d mongo:3.2
 
 edellisellä komennolla ajettuna kontin mongon portti 27017 ohjataan oman koneen porttiin 27018. Jos portti 27017 on vapaana, voit hyvin ohjata myös siihen tai vaihtoehtoisesti johonkin toiseen porttiin. Käytetty oman koneen portti pitää päivittää `user.properties`-tiedostoon.
 
@@ -162,7 +170,7 @@ Luodaan vielä lupapisteelle tietokanta ja käyttäjätunnukset:
 
     echo  'use lupapiste;
     db.createUser({user: "lupapiste-user", pwd: "lupapiste-password", roles: [{role: "readWrite", db: "lupapiste"}]});' | docker exec -i lupapiste-mongo mongo -u admin-tunnus -p admin-salasana admin
-    
+
 Nyt seuraavalla komennolla pitäisi päästä `lupapiste`-kantaan käyttäjänä `lupapiste-user`:
 
     docker exec -it lupapiste-mongo mongo -u lupapiste-user -p lupapiste-password lupapiste
