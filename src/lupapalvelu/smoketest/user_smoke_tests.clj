@@ -14,7 +14,7 @@
 (mongocheck :users
             (fn [{pid :personId source :personIdSource :as user}]
               (cond
-                (and pid (not (sc/check usr/PersonIdSource (keyword source))))
+                (and pid (not (sc/check usr/PersonIdSource source)))
                 (format "User % has invalid person id source" (:username user))
 
                 (and (usr/applicant? user) (not (usr/company-user? user)) (not (usr/verified-person-id? user)))

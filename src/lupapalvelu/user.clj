@@ -65,7 +65,7 @@
 (defschema OrgId (sc/pred keyword? "Organization ID"))
 (defschema Authz (sc/pred string? "Authz access right"))
 (defschema OrgAuthz {OrgId [Authz]})
-(defschema PersonIdSource (sc/enum :identification-service :user))
+(defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User
           {:id                                    Id
