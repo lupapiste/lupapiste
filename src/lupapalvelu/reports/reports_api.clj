@@ -9,6 +9,16 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.reports.applications :as app-reports]))
 
+(defn excel-response [filename body]
+  (try
+    {:status  200
+     :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+               "Content-Disposition" (str "attachment;filename=\"" filename "\"")}
+     :body    body}
+    (catch Exception e#
+      (error "Exception while compiling open applications excel:" e#)
+      {:status 500})))
+
 (defraw open-applications-xlsx
   {:user-roles #{:authorityAdmin}}
   [{user :user {lang :lang} :data}]
@@ -18,14 +28,11 @@
                                  "_"
                                  (util/to-xml-date (now))
                                  ".xlsx")]
-    (try
-      {:status  200
-       :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                 "Content-Disposition" (str "attachment;filename=\"" resulting-file-name "\"")}
-       :body    (app-reports/open-applications-for-organization-in-excel! orgId lang excluded-operations)}
-      (catch Exception e#
-        (error "Exception while compiling open applications excel:" e#)
-        {:status 500}))))
+    (excel-response resulting-file-name
+                    (app-reports/open-applications-for-organization-in-excel!
+                      orgId
+                      lang
+                      excluded-operations))))
 
 
 (defn max-month-window [{{:keys [startTs endTs]} :data}]
@@ -53,15 +60,10 @@
                                  "_"
                                  (util/to-xml-date (now))
                                  ".xlsx")]
-    (try
-      {:status  200
-       :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                 "Content-Disposition" (str "attachment;filename=\"" resulting-file-name "\"")}
-       :body    (app-reports/applications-between-excel orgId
-                                                        (util/to-long startTs)
-                                                        (util/to-long endTs)
-                                                        lang
-                                                        excluded-operations)}
-      (catch Exception e#
-        (error "Exception while compiling open applications excel:" e#)
-        {:status 500}))))
+    (excel-response resulting-file-name
+                    (app-reports/applications-between-excel
+                      orgId
+                      (util/to-long startTs)
+                      (util/to-long endTs)
+                      lang
+                      excluded-operations))))
