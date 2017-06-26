@@ -79,7 +79,8 @@
         .kuntalupatunnusFromPrevPermit(null)
         .organizationOptions([])
         .selectedPrevPermitOrganization(null)
-        .needMorePrevPermitInfo(false);
+        .needMorePrevPermitInfo(false)
+        .permitNotFound(false);
     };
 
     self.createOK = ko.pureComputed(function() {

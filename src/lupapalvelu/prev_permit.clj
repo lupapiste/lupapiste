@@ -249,14 +249,14 @@
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
       fetched-application)))
 
-(defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
+(defn enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and
     (not (ss/blank? address))
     (not (ss/blank? propertyId))
     (-> x util/->double pos?)
     (-> y util/->double pos?)))
 
-(defn get-location-info [{data :data :as command} app-info]
+(defn- get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
                                       (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))

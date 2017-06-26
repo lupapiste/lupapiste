@@ -91,7 +91,7 @@
 
 (defn do-create-application-from-previous-permit [command operation xml app-info location-info permit-type]
   (let [{:keys [hakijat]} app-info
-        buildings-and-structures (building-reader/->buildings-and-structures xml)
+        buildings-and-structures (when app-info (building-reader/->buildings-and-structures xml))
         document-datas (pp/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
         command (update-in command [:data] merge
@@ -120,13 +120,20 @@
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
       fetched-application)))
 
+(defn get-location-info [{data :data :as command} app-info]
+  (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
+                                    (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))]
+    (cond
+      rakennuspaikka-exists?                             (:rakennuspaikka app-info)
+      (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
+
 (defn fetch-or-create-archiving-project! [{{:keys [organizationId kuntalupatunnus createAnyway]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        location-info     (pp/get-location-info command app-info)
+        location-info     (get-location-info command app-info)
         organization      (when (:propertyId location-info)
                             (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
         validation-result (permit/validate-verdict-xml permit-type xml organization)
