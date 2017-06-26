@@ -313,7 +313,7 @@
                                     <span data-bind="ltext: 'arkistointi'"></span>
                                 </a></li>
 
-                            <li data-bind="if: tosFunction() && $root.authorization.ok('permanent-archive-enabled') && $root.authorization.ok('tos-operations-enabled'),
+                            <li data-bind="if: tosFunction() && $root.authorization.ok('permanent-archive-enabled') && $root.authorization.ok('case-file-data'),
                                              css: {'active': $parent.selectedTabName() === 'caseFile'}">
                               <a data-bind="click: changeTab" href="#" data-target="caseFile" data-test-id="application-open-caseFile-tab" class="link-btn">
                                 <span data-bind="ltext: 'caseFile.tab'"></span>
@@ -551,7 +551,7 @@
                     </div>
                     <!-- /ko -->
 
-                    <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('tos-operations-enabled') && application.id -->
+                    <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('case-file-data') && application.id -->
                     <div id="application-caseFile-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'case-file', params: {application: application, authModel: $root.authorization}}"></div>

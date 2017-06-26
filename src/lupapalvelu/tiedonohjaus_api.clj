@@ -77,7 +77,7 @@
   {:parameters [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
-   :states states/pre-verdict-but-draft}
+   :states (conj states/pre-verdict-but-draft :underReview)}
   [command]
   (update-tos-metadata functionCode command))
 
@@ -214,7 +214,7 @@
 (defquery tos-operations-enabled
   {:user-roles #{:authority}
    :categories #{:attachments}
-   :states states/all-application-states}
+   :states states/all-application-or-archiving-project-states}
   (ok))
 
 
