@@ -46,14 +46,17 @@
                {:old-email (:email user)
                 :new-email (:new-email data)})})
 
-(defn- has-person-id? [user]
+(defn- has-verified-person-id? [user]
   (if-let [user-id (:id user)]
-    (let [full-user (if (contains? user :personId) user (usr/get-user-by-id! user-id))]
-      (not (ss/blank? (:personId full-user))))
+    (-> (if (and (ss/not-blank? (:personIdSource user)) (ss/not-blank? (:personId user)))
+          user
+          (usr/get-user-by-id! user-id))
+        usr/verified-person-id?
+        not)
     false))
 
-(defn- validate-has-person-id [{user :user}]
-  (when-not (has-person-id? user)
+(defn- validate-has-verified-person-id [{user :user}]
+  (when-not (has-verified-person-id? user)
     (fail :error.unauthorized)))
 
 (defcommand change-email-init
@@ -62,7 +65,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified   true
-   :pre-checks [(some-pre-check validate-has-person-id
+   :pre-checks [(some-pre-check validate-has-verified-person-id
                                 (com/validate-has-company-role :any))]
    :description "Starts the workflow for changing user password"}
   [{user :user}]

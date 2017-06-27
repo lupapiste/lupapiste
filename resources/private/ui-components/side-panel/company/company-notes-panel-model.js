@@ -10,7 +10,7 @@ LUPAPISTE.CompanyNotesPanelModel = function(params) {
   self.note = ko.observable();
   self.tags = ko.observableArray([]);
 
-  self.noteLabel = loc("company-note.prompt") + " (" + loc("company-note.prompt.info") + ").";
+  self.noteLabel = loc("company-note.prompt") + " (" + loc("company-note.prompt.info") + ")";
 
   // Update inner observables when values change and suppress change events going outside
   self.disposedComputed(function() {

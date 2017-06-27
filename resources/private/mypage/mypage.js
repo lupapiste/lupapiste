@@ -40,6 +40,10 @@
     };
   }
 
+  function isPersonIdUpdateAllowed(user) {
+    return user.role === "applicant" && _.get(user, "company.role") && user.personIdSource !== "identification-service";
+  }
+
   function OwnInfo(uploadModel) {
 
     var self = this;
@@ -50,6 +54,8 @@
     self.lastName = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.username = ko.observable();
     self.email = ko.observable();
+    self.personId = ko.observable().extend({ personId: true });
+    self.personIdEditable = ko.observable();
     self.street = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.city = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
@@ -76,7 +82,7 @@
       return a && a.length > 0;
     });
 
-    self.all = ko.validatedObservable([self.firstName, self.lastName, self.street, self.city,
+    self.all = ko.validatedObservable([self.firstName, self.lastName, self.personId, self.street, self.city,
                                        self.zip, self.phone, self.degree, self.graduatingYear, self.fise, self.fiseKelpoisuus,
                                        self.companyName, self.companyId]);
 
@@ -133,6 +139,8 @@
         .username(u.username)
         .language(u.language)
         .email(u.email)
+        .personId(u.personId)
+        .personIdEditable(isPersonIdUpdateAllowed(u))
         .street(u.street)
         .city(u.city)
         .zip(u.zip)
@@ -168,7 +176,7 @@
     };
 
     self.save = makeSaveFn("update-user",
-        ["firstName", "lastName",
+        ["firstName", "lastName", "personId",
          "street", "city", "zip", "phone",
          "language", "architect",
          "degree", "graduatingYear", "fise", "fiseKelpoisuus",

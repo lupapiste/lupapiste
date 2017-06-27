@@ -43,7 +43,8 @@
   (if (usr/virtual-user? user)
     user
     (let [full-user (usr/get-user-by-id (:id user))]
-      (dissoc full-user :private :personId))))
+      (cond-> (dissoc full-user :private)
+        (usr/verified-person-id? full-user) (dissoc :personId)))))
 
 (defquery user
   {:on-success (fn [_ {user :user}]
@@ -142,13 +143,13 @@
 
 (def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone :language
                                  :architect :degree :graduatingYear :fise :fiseKelpoisuus
-                                 :companyName :companyId :allowDirectMarketing])
+                                 :companyName :companyId :allowDirectMarketing :personId])
 
 (defn- validate-update-user! [caller user-data]
   (let [caller-email    (:email caller)
         user-email      (:email user-data)]
 
-    (if (usr/admin? caller)
+    (if (usr/admin? caller) ; TODO: Admin is not allowed to update userdata since restruction fromUserUpdate schema. How this should work?
       (when (= user-email caller-email)    (fail! :error.unauthorized :desc "admin may not change his/her own data"))
       (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
 
@@ -165,14 +166,22 @@
   (when (sc/check usr/RegisterUser user-data)
     (fail :error.invalid-user-data)))
 
+(defn- validate-person-id-update-is-allowed! [{{person-id :personId email :email} :data {caller-email :email} :user}]
+  (when (and person-id (-> (or email caller-email)
+                           usr/get-user-by-email
+                           usr/verified-person-id?))
+    (fail :error.user.trying-to-update-verified-person-id)))
+
 (defcommand update-user
   {:user-roles #{:applicant :authority :authorityAdmin :admin}
-   :input-validators [validate-updatable-user]}
-  [{caller :user user-data :data :as command}]
+   :input-validators [validate-updatable-user]
+   :pre-checks [validate-person-id-update-is-allowed!]}
+  [{caller :user {person-id :personId :as user-data} :data :as command}]
   (let [email     (ss/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
-    (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
+    (if (= 1 (mongo/update-n :users {:email email} {$set (cond-> (select-keys user-data user-data-editable-fields)
+                                                           person-id (assoc :personIdSource :user))}))
       (if (= email (:email caller))
         (ssess/merge-to-session command (ok) {:user (usr/session-summary (usr/get-user-by-id (:id caller)))})
         (ok))
@@ -515,7 +524,7 @@
     (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
     (when architect
       (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
-    {:email (ss/canonize-email email) :role "applicant" :enabled false}))
+    {:email (ss/canonize-email email) :role "applicant" :enabled false :personIdSource :identification-service}))
 
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
