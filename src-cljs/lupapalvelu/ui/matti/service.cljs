@@ -76,3 +76,24 @@
                   :category category
                   :path path
                   :value value))
+
+(defn reviews [category callback]
+  (common/query "verdict-template-reviews"
+                callback
+                :category category))
+
+(defn new-review [category callback]
+  (common/command {:command "add-verdict-template-review"
+                   :success callback}
+                  :category category))
+
+(defn update-review [review-id callback & updates]
+  (apply (partial common/command {:command "update-verdict-template-review"
+                                  :success (fn [{:keys [review modified] :as response}]
+                                             (when (= (:category review)
+                                                      @state/current-category)
+                                               (swap! state/settings
+                                                      #(assoc % :modified modified)))
+                                             (callback response))}
+                  :review-id review-id)
+         updates))

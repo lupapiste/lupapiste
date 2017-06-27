@@ -10,6 +10,20 @@
                               :can-remove?])
                         (repeat sc/Bool)))
 
+(def review-type-map
+  {:muu-katselmus             "muu katselmus"
+   :muu-tarkastus             "muu tarkastus"
+   :aloituskokous             "aloituskokous"
+   :paikan-merkitseminen      "rakennuksen paikan merkitseminen"
+   :paikan-tarkastaminen      "rakennuksen paikan tarkastaminen"
+   :pohjakatselmus            "pohjakatselmus"
+   :rakennekatselmus          "rakennekatselmus"
+   :lvi-katselmus             "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+   :osittainen-loppukatselmus "osittainen loppukatselmus"
+   :loppukatselmus            "loppukatselmus"
+   :ei-tiedossa               "ei tiedossa"
+   })
+
 (defschema MattiBase
   {(sc/optional-key :_meta)      meta-flags
    (sc/optional-key :css)        [sc/Keyword]
@@ -128,8 +142,8 @@
   {:id    (name id)
    :grid  {:columns 1
            :rows    (mapv (fn [complexity]
-                            [{:schema {:reference-list {:id      (name complexity)
-                                                        :i18nkey [(->> complexity
+                            [{:id (name complexity)
+                              :schema {:reference-list {:i18nkey [(->> complexity
                                                                        name
                                                                        (str "matti.complexity.")
                                                                        keyword)

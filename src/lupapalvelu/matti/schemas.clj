@@ -49,19 +49,7 @@
    :valituksesta-luovuttu-1     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy puollettuna)"
    :valituksesta-luovuttu-2     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"})
 
-(def review-type-map
-  {:muu-katselmus             "muu katselmus"
-   :muu-tarkastus             "muu tarkastus"
-   :aloituskokous             "aloituskokous"
-   :paikan-merkitseminen      "rakennuksen paikan merkitseminen"
-   :paikan-tarkastaminen      "rakennuksen paikan tarkastaminen"
-   :pohjakatselmus            "pohjakatselmus"
-   :rakennekatselmus          "rakennekatselmus"
-   :lvi-katselmus             "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
-   :osittainen-loppukatselmus "osittainen loppukatselmus"
-   :loppukatselmus            "loppukatselmus"
-   :ei-tiedossa               "ei tiedossa"
-   })
+
 
 (def matti-string {:name "matti-string"
                    :type :string})
@@ -83,31 +71,38 @@
 (def verdict-check {:name "matti-verdict-check"
                     :type :checkbox})
 
+(defschema MattiCategory
+  {:id       ssc/ObjectIdStr
+   :category (sc/enum :r :p :ya :kt :ymp)})
+
 (defschema MattiSettingsReview
-  {:id      ssc/ObjectIdStr
-   :name    {:fi sc/Str
-             :sv sc/Str
-             :en sc/Str}
-   :type    (apply sc/enum (keys review-type-map))
-   :deleted sc/Bool})
+  (merge MattiCategory
+         {:name    {:fi sc/Str
+                    :sv sc/Str
+                    :en sc/Str}
+          :type    (apply sc/enum (keys shared/review-type-map))
+          :deleted sc/Bool}))
 
 (defschema MattiSavedSettings
-  {:id sc/Str
+  {:id       sc/Str
    :modified ssc/Timestamp
-   :draft sc/Any
-   :reviews [MattiSettingsReview]})
+   :draft    sc/Any})
 
 (defschema MattiSavedTemplate
-  {:id       ssc/ObjectIdStr
-   :name     sc/Str
-   :category (sc/enum :r :p :ya :kt :ymp)
-   :deleted  sc/Bool
-   :draft    sc/Any ;; draft is copied to version data on publish.
-   :modified ssc/Timestamp
-   :versions [{:id        ssc/ObjectIdStr
-               :published ssc/Timestamp
-               :data      sc/Any
-               :settings  MattiSavedSettings}]})
+  (merge MattiCategory
+         {:name     sc/Str
+          :deleted  sc/Bool
+          :draft    sc/Any ;; draft is copied to version data on publish.
+          :modified ssc/Timestamp
+          :versions [{:id        ssc/ObjectIdStr
+                      :published ssc/Timestamp
+                      :data      sc/Any
+                      :settings  MattiSavedSettings}]}))
+
+(defschema MattiSavedVerdictTemplates
+  {:templates [MattiSavedTemplate]
+   :settings  {(sc/optional-key :r) MattiSavedSettings}
+   :reviews   [MattiSettingsReview]})
 
 (doc-schemas/defschemas 1
   (map (fn [m]
@@ -217,8 +212,9 @@
 (defn keyword-set [xs]
   (set (map keyword xs)))
 
-(defn check-items [items data-items]
-  (let [v-set (keyword-set items)
+(defn check-items [x data-items]
+  (let [items (flatten [x])
+        v-set (keyword-set items)
         d-set (keyword-set data-items)]
     (cond
       (not (set/subset? v-set d-set))    :error.invalid-value

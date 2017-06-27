@@ -174,3 +174,103 @@
              :template-id id
              :path ["matti-appeal" "0" "type"]
              :value "bad") => (err :error.invalid-value)))
+
+(facts "Reviews"
+  (fact "Initially empty"
+    (query sipoo :verdict-template-reviews :category "r")
+    => {:ok      true
+        :reviews []})
+  (fact "Add new review"
+    (let [{id :id} (:review (command sipoo :add-verdict-template-review
+                                     :category "r"))]
+      id => truthy
+      (fact "Fetch reviews again"
+        (:reviews (query sipoo :verdict-template-reviews :category "r"))
+        => (just [(contains {:name     {:fi "Katselmus"
+                                        :sv "Syn"
+                                        :en "Review"}
+                             :category "r"
+                             :deleted  false
+                             :type     "muu-katselmus"})]))
+      (fact "Give name to the review"
+        (:review (command sipoo :update-verdict-template-review
+                          :review-id id
+                          :fi "Nimi" :sv "Namn" :en "Name"))
+        => (contains {:id       id
+                      :name     {:fi "Nimi" :sv "Namn" :en "Name"}
+                      :deleted  false
+                      :category "r"
+                      :type     "muu-katselmus"}))
+      (fact "New name available"
+        (:reviews (query sipoo :verdict-template-reviews :category "r"))
+        => (just [(contains {:name     {:fi "Nimi" :sv "Namn" :en "Name"}
+                             :category "r"
+                             :deleted  false
+                             :type     "muu-katselmus"})]))
+      (facts "Update review details"
+        (fact "Finnish name"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :fi "Moro")
+          => (contains {:review (contains {:id id
+                                           :name {:fi "Moro"
+                                                  :sv "Namn"
+                                                  :en "Name"}})}))
+        (fact "Name cannot be empty"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :en "  ")
+          => (err :error.review-name-blank))
+        (fact "Review type"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :type :aloituskokous)
+          => (contains {:review (contains {:id id
+                                           :type "aloituskokous"})}))
+        (fact "Invalid review type"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :type :hiihoo)
+          => (err :error.invalid-review-type))
+        (fact "Swedish and English names, review type"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :sv "Stockholm" :en "London" :type :lvi-katselmus)
+          => (contains {:review (contains {:id id
+                                           :name {:fi "Moro"
+                                                  :sv "Stockholm"
+                                                  :en "London"}
+                                           :type "lvi-katselmus"})}))
+        (fact "Unsupported params"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :type :aloituskokous
+                   :foo "bar")
+          => (err :error.unsupported-parameters))
+        (fact "Mark review as deleted"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :deleted true)
+          => (contains {:review (contains {:id id
+                                           :deleted true})}))
+        (fact "Deleted review cannot be re-deleted"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :deleted true)
+          => (err :error.settings-review-deleted))
+        (fact "Deleted reviews cannot be edited"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :type :aloituskokous
+                   :fi "Hei")
+          => (err :error.settings-review-deleted))
+        (fact "Deleted reviews can be restored (and edited)"
+          (command sipoo :update-verdict-template-review
+                   :review-id id
+                   :type :aloituskokous
+                   :fi "Hei"
+                   :deleted false)
+          => (contains {:review (contains {:id id
+                                           :type "aloituskokous"
+                                           :name (contains {:fi "Hei"})
+                                           :deleted false})}))))))

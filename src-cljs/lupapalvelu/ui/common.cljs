@@ -15,8 +15,9 @@
 
 (defmulti command (fn [a & _]
                     (cond
-                      (map? a)    :map
-                      (string? a) :string)))
+                      (map? a)     :map
+                      (string? a)  :string
+                      (keyword? a) :string)))
 
 (defmethod command :map
   [{:keys [command  show-saved-indicator? success]} & kvs]
@@ -30,9 +31,10 @@
 
 (defmethod command :string
   [command-name success-fn & kvs]
-  (command {:command               command-name
-            :show-saved-indicator? true
-            :success               success-fn }))
+  (apply command (cons {:command               command-name
+                        :show-saved-indicator? true
+                        :success               success-fn }
+                       kvs)))
 
 
 (defn reset-if-needed!

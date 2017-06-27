@@ -18028,6 +18028,27 @@ div.matti-settings .section-header {
   border-bottom: none;
 }
 
+div.matti-settings-editor {
+  padding-top: 6px;
+  margin-bottom: 24px;
+}
+
+div.matti-settings-editor .checkbox-wrapper {
+  margin-bottom: 6px;
+}
+
+div.matti-settings-editor table.matti-editor-table {
+  margin-top: 0;
+}
+
+div.matti-settings-editor table.matti-editor-table tr:hover {
+  background-color: white;
+}
+
+div.matti-settings-editor table.matti-editor-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

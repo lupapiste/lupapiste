@@ -1,7 +1,9 @@
 (ns lupapalvelu.matti.matti-api
-  (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
+  (:require [clojure.set :as set]
+            [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.matti.matti :as matti]
             [lupapalvelu.matti.schemas :as schemas]
+            [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -38,6 +40,42 @@
                        (-> data :category keyword))
     (fail :error.invalid-category)))
 
+(defn settings-review-editable
+  "Review exists and is not deleted. Even if the review is deleted, it
+  is editable if the update includes deleted parameter with false value."
+  [{{:keys [review-id deleted]} :data user :user :as command}]
+  (if-let [review (matti/review (usr/authority-admins-organization-id user)
+                                review-id)]
+    (when (and (:deleted review) (-> deleted false? not))
+      (fail :error.settings-review-deleted))
+    (fail :error.settings-review-not-found)))
+
+(defn supported-parameters
+  "Returns checker that fails on unknown parameters. Params must be
+  keywords."
+  [& params]
+  #(when-not (set/subset? (->> % :data keys (map keyword) set)
+                          (set params))
+     (fail :error.unsupported-parameters)))
+
+(defn- settings-review-details-valid
+  "Pre-chek: none of the details is mandatory."
+  [{data :data}]
+  (some (fn [[k v]]
+          (let [k (keyword k)]
+            (cond
+              (k #{:fi :sv :en})
+              (when (ss/blank? v)
+                (fail :error.review-name-blank))
+              (= k :type)
+              (when-not (contains? (set (keys shared/review-type-map))
+                                   (keyword v))
+                (fail :error.invalid-review-type))
+              (= k :deleted)
+              (when-not (or (false? v) (true? v))
+                (fail :error.review-deleted-not-boolean)))))
+        data))
+
 ;; ----------------------------------
 ;; Verdict template API
 ;; ----------------------------------
@@ -49,9 +87,9 @@
    :input-validators [valid-category]}
   [{:keys [created user lang]}]
   (ok (matti/new-verdict-template (usr/authority-admins-organization-id user)
-                                   created
-                                   lang
-                                   category)))
+                                  created
+                                  lang
+                                  category)))
 
 (defcommand set-verdict-template-name
   {:parameters       [template-id name]
@@ -150,7 +188,7 @@
 ;; ----------------------------------
 
 (defquery verdict-template-settings
-  {:description "Settings matching the id or empty response."
+  {:description "Settings matching the category or empty response."
    :user-roles #{:authorityAdmin}
    :parameters [category]
    :input-validators [valid-category]}
@@ -173,3 +211,44 @@
                              path
                              value)
   (ok :modified created))
+
+;; ----------------------------------
+;; Verdict template reviews API
+;; ----------------------------------
+
+(defquery verdict-template-reviews
+  {:description      "Reviews matching the category"
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category]
+   :input-validators [valid-category]}
+  [command]
+  (ok :reviews (matti/reviews (command->organization command)
+                              category)))
+
+(defcommand add-verdict-template-review
+  {:description      "Creates empty review for the settings
+  category. Returns review."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category]
+   :input-validators [valid-category]}
+  [{user :user}]
+  (ok :review (matti/new-review (usr/authority-admins-organization-id user)
+                                category)))
+
+(defcommand update-verdict-template-review
+  {:description         "Updates review details according to the
+  parameters. Returns the updated review."
+   :user-roles          #{:authorityAdmin}
+   :parameters          [review-id]
+   :optional-parameters [fi sv en type deleted]
+   :input-validators    [settings-review-editable
+                         (supported-parameters :review-id :fi :sv :en :type :deleted)
+                         settings-review-details-valid]}
+  [{:keys [created user data]}]
+  (let [organization-id (usr/authority-admins-organization-id user)]
+    (matti/set-review-details organization-id
+                              created
+                              review-id
+                              data)
+    (ok :review (matti/review organization-id review-id)
+        :modified created)))

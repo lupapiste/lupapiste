@@ -14,3 +14,4 @@
 (def categories       (state-cursor :categories))
 (def references       (state-cursor :references))
 (def settings         (rum/cursor-in references [:settings]))
+(def reviews          (rum/cursor-in references [:reviews]))

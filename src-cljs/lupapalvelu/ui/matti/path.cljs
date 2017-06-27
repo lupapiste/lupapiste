@@ -49,13 +49,24 @@
            flatten
            loc)))))
 
+(defn latest-helper
+  "The latest non-nil value for the given key in the state* along the
+  path. Path is shortened until the value is found. Nil if value not
+  found. Key can be also be key sequence. Value-fn is either value or
+  react."
+  [value-fn path state* & key]
+  (let [v (value-fn path state* key)]
+    (if (or (some? v) (empty? path))
+      v
+      (latest-helper value-fn (drop-last path) state* key))))
 
 (defn latest
   "The latest non-nil value for the given key in the state* along the
   path. Path is shortened until the value is found. Nil if value not
   found. Key can be also be key sequence."
   [path state* & key]
-  (let [v (value path state* key)]
+  (latest-helper value path state* key)
+  #_(let [v (value path state* key)]
     (if (or (some? v) (empty? path))
       v
       (latest (drop-last path) state* key))))
@@ -66,6 +77,13 @@
   [{:keys [state path _meta]} key]
   (or (get _meta (keyword key))
       (latest path state :_meta key)))
+
+(defn react-meta?
+  "Truthy if _meta value for the given key is found either within
+  _meta options or as latest _meta from the state."
+  [{:keys [state path _meta]} key]
+  (or (get _meta (keyword key))
+      (latest-helper react path state :_meta key)))
 
 (defn flip-meta
   "Flips (toggles boolean) on the path _meta."
@@ -88,3 +106,8 @@
   [{:keys [state path] :as options}]
   (when-let [fun (latest path state :_meta :updated)]
     (fun options)))
+
+(defn key-fn
+  "Rum key-fn, where key is the path id."
+  [{path :path}]
+  (id path))

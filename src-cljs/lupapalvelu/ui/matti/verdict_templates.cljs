@@ -91,7 +91,7 @@
 (defn toggle-delete [id deleted]
   [:button.primary.outline
    {:on-click #(service/toggle-delete-template id (not deleted) identity)}
-   (common/loc (if deleted "matti-restore-template" "remove"))])
+   (common/loc (if deleted :matti-restore :remove))])
 
 (defn set-category [category]
   (reset! state/current-category category)

@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.matti.layout
   (:require [clojure.string :as s]
+            [clojure.set :as set]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
@@ -67,10 +68,12 @@
          {:for item-id
           :on-click (fn [_]
                       (swap! state
-                            (fn [xs]
-                              (distinct (if checked
-                                          (remove #(= item %) xs)
-                                          (cons item xs)))))
+                             (fn [xs]
+                               ;; Sanitation on the client side.
+                              (set/intersection (set (if checked
+                                                       (remove #(= item %) xs)
+                                                       (cons item xs)))
+                                                (set (map :item items)))))
                       (path/meta-updated options))}
          text]]))])
 

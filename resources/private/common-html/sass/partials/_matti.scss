@@ -233,3 +233,19 @@ h2.matti-settings-title {
   border-bottom: none;
 }
 }
+
+// Reviews
+
+div.matti-settings-editor {
+  padding-top: $marginS;
+  margin-bottom: $marginL;
+  .checkbox-wrapper {
+    margin-bottom: $marginS;
+  }
+  table.matti-editor-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+    margin-top: 0;
+  }
+
+}
