@@ -440,16 +440,6 @@ Attachment state should be
   Log  ${STATE_ATTR_VALUE}
   Should Be Equal  ${STATE_ATTR_VALUE}  ${state}
 
-Sign all attachments
-  [Arguments]  ${password}
-  Tab should be visible  attachments
-  Click by test id  sign-attachments
-  Wait Until   Element should be visible  signAttachmentPassword
-  Input text by test id  signAttachmentPassword  ${password}
-  Click enabled by test id  do-sign-attachments
-  Wait Until   Element should not be visible  signAttachmentPassword
-  Confirm  dynamic-ok-confirm-dialog
-
 Not needed matches
   # Helper for matching not needed properties
   [Arguments]  ${type}  ${property}  ${times}
