@@ -447,8 +447,8 @@
                             </button>
                             <div class="accordion_content"
                                  data-bind="
-                                        attr: {'data-accordion-state' : lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'open' : 'closed'},
-                                        style: { display: lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'block' : 'none' }
+                                        attr: {'data-accordion-state': lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'open' : 'closed'},
+                                        css: { expanded: lupapisteApp.models.applicationAuthModel.ok('enable-accordions')}
                                         ">
                                 <div class="accordion-fields">
                                     <div id="application-summary-statements-table" data-bind="if: summaryAvailable">
@@ -471,8 +471,8 @@
                             </button>
                             <div class="accordion_content" data-accordion-state="closed"
                                  data-bind="
-                                        attr: {'data-accordion-state' : lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'open' : 'closed'},
-                                        style: { display: lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'block' : 'none' }
+                                        attr: {'data-accordion-state': lupapisteApp.models.applicationAuthModel.ok('enable-accordions') ? 'open' : 'closed'},
+                                        css: { expanded: lupapisteApp.models.applicationAuthModel.ok('enable-accordions')}
                                         ">
                                 <div class="accordion-fields" data-bind="if: summaryAvailable">
                                     <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing-from-prev-permit'}}}"></div>
