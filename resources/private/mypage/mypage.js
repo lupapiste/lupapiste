@@ -41,7 +41,7 @@
   }
 
   function isPersonIdUpdateAllowed(user) {
-    return user.role === "applicant" && _.get(user, "company.role") && user.personIdSource === "user";
+    return user.role === "applicant" && _.get(user, "company.role") && user.personIdSource !== "identification-service";
   }
 
   function OwnInfo(uploadModel) {
