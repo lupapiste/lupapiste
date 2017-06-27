@@ -1,13 +1,14 @@
 (ns lupapalvelu.reports.applications
   (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.i18n :as i18n]
             [sade.core :refer [now]]
-            [lupapalvelu.action :refer [defraw]])
+            [lupapalvelu.action :refer [defraw]]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.reports.parties :as parties])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)))
 
 (defn handler-roles-org [org-id]
@@ -41,6 +42,20 @@
                        [:_id :submitted :modified :state :handlers
                         :primaryOperation :secondaryOperations :verdicts]
                        {:submitted 1}))))
+
+(defn parties-between-data [orgId startTs endTs]
+  (let [now (now)]
+    (mongo/select :applications
+                  {:organization orgId
+                   :permitType "R"
+                   :submitted {$gte startTs
+                               $lte (if (< now endTs) now endTs)}
+                   :infoRequest false}
+                  [:_id :submitted  :address :modified :state
+                   :documents.schema-info.name :documents.schema-info.subtype
+                   :documents.data
+                   :primaryOperation]
+                  {:submitted 1})))
 
 (defn- authority [app]
   (->> app
@@ -141,3 +156,21 @@
                      (partial localized-secondary-operations lang))]
 
     (xlsx-stream data sheet-name header-row-content row-fn)))
+
+
+  (defn parties-between-excel [organizationId startTs endTs lang]
+    (let [apps (parties-between-data organizationId startTs endTs)
+          result-map {:private-applicants  []
+                      :company-applicant   []
+                      :designers           []
+                      :foremen             []}
+          reducer-fn (fn [res app]
+                       (-> res
+                           (update :private-applicants concat (parties/private-applicants app lang))
+                           (update :company-applicants concat (parties/company-applicants app lang))
+                           (update :designers concat (parties/designers app lang))
+                           (update :foremen concat (parties/foremen app lang))))
+          data (reduce reducer-fn result-map apps)
+          _ (clojure.pprint/pprint data)
+          row-fn parties/private-applicants-row-fn]
+      (xlsx-stream (:private-applicants data) "foo" (map str [:id-link :id :address :primaryOperation :sukunimi :suoramarkkinointilupa :turvakielto :osoite :puhelin :sahkoposti]) row-fn)))

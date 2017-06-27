@@ -67,3 +67,23 @@
                       (util/to-long endTs)
                       lang
                       excluded-operations))))
+
+(defraw parties-between-xlsx                                ; LPK-3053
+  {:description "Excel to list parties for applications. Period can be max one year window."
+   :parameters       [startTs endTs]
+   :input-validators [(partial action/numeric-parameters [:startTs :endTs])
+                      start-gt-end
+                      max-month-window]
+   :user-roles       #{:authorityAdmin}}
+  [{user :user {lang :lang} :data ts :created}]
+  (let [orgId               (usr/authority-admins-organization-id user)
+        resulting-file-name (str (i18n/localize lang "applications.report.parties-between.file-name")
+                                 "_"
+                                 (util/to-xml-date ts)
+                                 ".xlsx")]
+    (excel-response resulting-file-name
+                    (app-reports/parties-between-excel
+                      orgId
+                      (util/to-long startTs)
+                      (util/to-long endTs)
+                      lang))))
