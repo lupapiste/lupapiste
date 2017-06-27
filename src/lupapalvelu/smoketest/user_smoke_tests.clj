@@ -15,10 +15,10 @@
             (fn [{pid :personId source :personIdSource :as user}]
               (cond
                 (and pid (not (sc/check usr/PersonIdSource source)))
-                (format "User % has invalid person id source" (:username user))
+                (format "User %s has invalid person id source" (:username user))
 
                 (and (usr/applicant? user) (not (usr/company-user? user)) (not (usr/verified-person-id? user)))
-                (format "Applicant user % has unverified person id")))
+                (format "Applicant user %s has unverified person id" (:username user))))
             :personId :personIdSource :username :company :role)
 
 (mongocheck :users
