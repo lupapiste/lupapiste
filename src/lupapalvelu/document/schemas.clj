@@ -1325,7 +1325,7 @@
            :i18name "uusiRakennus"
            :approvable false
            :accordion-fields buildingid-accordion-paths}
-    :body (body kuvaus
+    :body (body (assoc kuvaus :required false)
                 tunnus
                 kaytto-minimal
                 rakennustunnus)}

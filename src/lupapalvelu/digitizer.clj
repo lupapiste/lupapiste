@@ -89,9 +89,23 @@
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn do-create-application-from-previous-permit [command operation xml app-info location-info permit-type]
+(defn- buildings->krysp-keys [buildings]
+  (map
+    (fn [{:keys [nationalId localId buildingId localShortId usage]}]
+      {:data {:valtakunnallinenNumero nationalId
+              :rakennusnro localShortId
+              :kaytto {:kayttotarkoitus usage}}})
+    buildings))
+
+(defn get-buildings [organization permit-type property-id]
+  (when (and organization permit-type property-id)
+    (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
+      (->> (building-reader/building-info-list url credentials property-id)
+           buildings->krysp-keys))))
+
+(defn do-create-application-from-previous-permit
+  [command operation buildings-and-structures app-info location-info permit-type]
   (let [{:keys [hakijat]} app-info
-        buildings-and-structures (when app-info (building-reader/->buildings-and-structures xml))
         document-datas (pp/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
         command (update-in command [:data] merge
@@ -133,20 +147,22 @@
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        location-info     (get-location-info command app-info)
-        organization      (when (:propertyId location-info)
-                            (organization/resolve-organization (p/municipality-id-by-property-id (:propertyId location-info)) permit-type))
-        validation-result (permit/validate-verdict-xml permit-type xml organization)
-        organizations-match?  (= organizationId (:id organization))
-        no-proper-applicants? (not-any? pp/get-applicant-type (:hakijat app-info))]
+        {:keys [propertyId] :as location-info} (get-location-info command app-info)
+        organization      (when propertyId
+                            (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
+        buildings-and-structures (or (when app-info (building-reader/->buildings-and-structures xml))
+                                     (get-buildings organizationId permit-type propertyId))
+        organizations-match?  (= organizationId (:id organization))]
     (cond
       (and (empty? app-info)
            (not createAnyway))          (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
       (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
-      validation-result                 validation-result
-      :else                             (let [{id :id} (do-create-application-from-previous-permit command operation xml app-info location-info permit-type)]
-                                          (if no-proper-applicants?
-                                            (ok :id id :text :error.no-proper-applicants-found-from-previous-permit)
-                                            (ok :id id))))))
+      :else                             (let [{id :id} (do-create-application-from-previous-permit command
+                                                                                                   operation
+                                                                                                   buildings-and-structures
+                                                                                                   app-info
+                                                                                                   location-info
+                                                                                                   permit-type)]
+                                          (ok :id id)))))
