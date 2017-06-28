@@ -499,7 +499,8 @@
 
 (defn send-invite-notifications! [{:keys [auth] :as application} {:keys [user] :as command}]
   (let [[users companies] ((juxt remove filter) (comp #{"company"} :type)
-                                                (remove (comp #{:owner} keyword :role) auth))]
+                                                (remove (comp #{:owner :statementGiver} keyword :role)
+                                                        auth))]
     ;; Non-company invites
     (user-invite-notifications! application command users)
     ;; Company invites
