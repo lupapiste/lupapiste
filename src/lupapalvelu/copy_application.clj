@@ -471,8 +471,7 @@
 
 (defn- notify-of-invite! [app command invite-type recipients]
   (let [recipients (map (fn [{{:keys [email user]} :invite}]
-                          (or (usr/get-user-by-email email)
-                              (assoc user :email email)))
+                          (usr/get-user-by-email email))
                         recipients)]
     (notif/notify! invite-type
                    (assoc command
