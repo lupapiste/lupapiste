@@ -35,7 +35,7 @@
        (get-in party-data [:osoite :maa])))
 
 (defn pick-henkilo-data
-  "Nimi, Tietojani saa luovuttaa, turvakielto, yhteysosoite, puhelin, sähköposti"
+  "Nimi, tietojani saa luovuttaa, turvakielto, yhteysosoite, puhelin, sahkoposti"
   [doc]
   (let [data (tools/unwrapped (get-in doc [:data :henkilo]))]
     {:etunimi (get-in data [:henkilotiedot :etunimi])
@@ -46,18 +46,44 @@
      :puhelin (get-in data [:yhteystiedot :puhelin])
      :sahkoposti (get-in data [:yhteystiedot :email])}))
 
-(defn private-applicants [app lang]
+(defn pick-yritys-data
+  "henkilo + nimi, yhteysosoiteet ja kaikki yhteyshenkilon tiedot"
+  [doc]
+  (let [data (tools/unwrapped (get-in doc [:data :yritys]))]
+    {:yritysnimi (get-in data [:yritysnimi])
+     :osoite (get-osoite data)
+     :yhteyshenkiloetunimi (get-in data [:yhteyshenkilo :henkilotiedot :etunimi])
+     :yhteyshenkilosukunimi (get-in data [:yhteyshenkilo :henkilotiedot :sukunimi])
+     :suoramarkkinointilupa (get-in data [:yhteyshenkilo :kytkimet :suoramarkkinointilupa])
+     :turvakielto (get-in data [:yhteyshenkilo :henkilotiedot :turvakieltoKytkin])
+     :yhteyshenkilopuhelin (get-in data [:yhteyshenkilo :yhteystiedot :puhelin])
+     :yhteyshenkilosahkoposti (get-in data [:yhteyshenkilo :yhteystiedot :email])}))
+
+(defn applicants [filter-fn map-fn app lang]
   (let [info (basic-info-localized app lang)
         applicant-schema-name (op/get-applicant-doc-schema-name app)]
     (->> (:documents app)
          (filter (partial applicant-doc? applicant-schema-name))
-         (filter henkilo-doc?)
-         (map pick-henkilo-data)
+         (filter filter-fn)
+         (map map-fn)
          (map (partial merge info)))))
 
-(def private-applicants-row-fn
-  (juxt :id-link :id :address :primaryOperation :etunimi :sukunimi :osoite :puhelin :suoramarkkinointilupa :sahkoposti :turvakielto))
+(defn private-applicants [app lang]
+  (applicants henkilo-doc? pick-henkilo-data app lang))
 
-(defn company-applicants [app lang] [])
+(def private-applicants-row-fn
+  (juxt :id-link :id :address :primaryOperation
+        :etunimi :sukunimi :osoite :puhelin :sahkoposti
+        :suoramarkkinointilupa :turvakielto))
+
+(defn company-applicants [app lang]
+  (applicants yritys-doc? pick-yritys-data app lang ))
+
+(def company-applicants-row-fn
+  (juxt :id-link :id :address :primaryOperation
+        :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
+        :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
+        :turvakielto))
+
 (defn designers [app lang] [])
 (defn foremen [app lang] [])
