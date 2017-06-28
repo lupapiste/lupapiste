@@ -34,7 +34,7 @@
        " "
        (get-in party-data [:osoite :maa])))
 
-(defn pick-henkilo-data
+(defn pick-person-data
   "Nimi, tietojani saa luovuttaa, turvakielto, yhteysosoite, puhelin, sahkoposti"
   [doc]
   (let [data (tools/unwrapped (get-in doc [:data :henkilo]))]
@@ -46,7 +46,7 @@
      :puhelin (get-in data [:yhteystiedot :puhelin])
      :sahkoposti (get-in data [:yhteystiedot :email])}))
 
-(defn pick-yritys-data
+(defn pick-company-data
   "henkilo + nimi, yhteysosoiteet ja kaikki yhteyshenkilon tiedot"
   [doc]
   (let [data (tools/unwrapped (get-in doc [:data :yritys]))]
@@ -59,17 +59,17 @@
      :yhteyshenkilopuhelin (get-in data [:yhteyshenkilo :yhteystiedot :puhelin])
      :yhteyshenkilosahkoposti (get-in data [:yhteyshenkilo :yhteystiedot :email])}))
 
-(defn applicants [filter-fn map-fn app lang]
-  (let [info (basic-info-localized app lang)
-        applicant-schema-name (op/get-applicant-doc-schema-name app)]
+(defn applicants [filter-fn map-fn app]
+  (let [applicant-schema-name (op/get-applicant-doc-schema-name app)]
     (->> (:documents app)
          (filter (partial applicant-doc? applicant-schema-name))
          (filter filter-fn)
-         (map map-fn)
-         (map (partial merge info)))))
+         (map map-fn))))
 
 (defn private-applicants [app lang]
-  (applicants henkilo-doc? pick-henkilo-data app lang))
+  (map
+    (partial merge (basic-info-localized app lang))
+    (applicants henkilo-doc? pick-person-data app)))
 
 (def private-applicants-row-fn
   (juxt :id-link :id :address :primaryOperation
@@ -77,7 +77,9 @@
         :suoramarkkinointilupa :turvakielto))
 
 (defn company-applicants [app lang]
-  (applicants yritys-doc? pick-yritys-data app lang ))
+  (map
+    (partial merge (basic-info-localized app lang))
+    (applicants yritys-doc? pick-company-data app)))
 
 (def company-applicants-row-fn
   (juxt :id-link :id :address :primaryOperation
