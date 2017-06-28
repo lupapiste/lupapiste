@@ -1,5 +1,7 @@
 (ns lupapalvelu.reports.parties
   (:require [sade.env :as env]
+            [sade.strings :as ss]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -115,5 +117,25 @@
   (juxt :id-link :id :address :primaryOperation
         :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
         :fise :tutkinto :valmistumisvuosi))
+
+; Yritys, tj nimi, yhtestiedot, puhelin, sähköposti,
+; rooli, vaativuus, täysi/osa-aikainen, tutkinto,
+; sijaistettavan nimi, sijaistettavan aika, vastattavat työtehtävät pilkulla eroteltuna.
+
+(defn vastattavat-tyotehtavat-as-string [doc lang]
+  (let [vastattavat-data (tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
+        vastattavat-loc-keys (reduce (fn [m {:keys [name i18nkey]}]
+                                       (assoc m (keyword name) i18nkey))
+                                     {}
+                                     (get-in schemas/vastattavat-tyotehtavat-tyonjohtaja-v2 [0 :body]))]
+    (->> vastattavat-data
+         (reduce-kv (fn [result key val]
+                      (cond
+                        (and (= :muuMika (keyword key))
+                             (not (ss/blank? val))) (conj result val)
+                        (true? val) (conj result (i18n/localize lang (get vastattavat-loc-keys key)))
+                        :else result))
+                    [])
+         (ss/join ","))))
 
 (defn foremen [app lang] [])
