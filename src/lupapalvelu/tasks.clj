@@ -205,7 +205,7 @@
     :template "form-grid-docgen-group-template"
     :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
            {:name "kuvaus"  :type :text :max-len 20000 }
-           {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
+           {:name "vaaditutErityissuunnitelmat" :type :text :max-len 20000 :hidden true}]}])
 
 
 (defn task-doc-validation [schema-name doc]

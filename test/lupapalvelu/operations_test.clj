@@ -146,3 +146,30 @@
                          :secondaryOperations [{:id "321"} {:id "1"}]} "1") => true
   (operation-id-exists? {:primaryOperation {:id "123"}
                          :secondaryOperations [{:id "321"} {:id "1"}]} 1) => false)
+
+(facts "selected-operations-for-organizations"
+  (fact "deprecated operations are not in the operation tree"
+    (selected-operations-for-organizations [{:selected-operations ["asuinrakennus"]}])
+    => [])
+
+  (fact "overlapping selected operations do not affect the form of the operation tree"
+    (selected-operations-for-organizations [{:selected-operations ["mainoslaite"
+                                                                   "yleiskaava"
+                                                                   "laajentaminen"]}
+                                            {:selected-operations ["yleiskaava"
+                                                                   "laajentaminen"
+                                                                   "auto-katos"]}
+                                            {:selected-operations ["laajentaminen"
+                                                                   "auto-katos"
+                                                                   "maasto-tms"]}])
+    => (selected-operations-for-organizations [{:selected-operations ["mainoslaite"
+                                                                      "yleiskaava"]}
+                                               {:selected-operations ["laajentaminen"
+                                                                      "auto-katos"
+                                                                      "maasto-tms"]}]))
+
+  (fact "the operation tree can be further pruned by providing a predicate function as a second argument"
+    (selected-operations-for-organizations [{:selected-operations ["pientalo"
+                                                                   "ya-katulupa-vesi-ja-viemarityot"]}]
+                                           #(= "YA" (permit-type-of-operation %)))
+    => (selected-operations-for-organizations [{:selected-operations ["ya-katulupa-vesi-ja-viemarityot"]}])))

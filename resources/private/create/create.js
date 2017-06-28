@@ -122,6 +122,9 @@
       hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self.locationModel.clearMap().reset();
       self.locationModel.beginUpdateRequest()
+      // Either point by propertyId (property-id-by-point)
+      // or point by address (get-address).
+      // searchPoint looks for propertyId pattern and decides which endpoint to call.
         .searchPoint(self.search(), self.searching);
       return false;
     };

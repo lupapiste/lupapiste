@@ -41,6 +41,31 @@ LUPAPISTE.SidePanelService = function() {
       && ko.unwrap( self.application.unseenAuthorityNotice);
   });
 
+
+  var companyNotes = ko.pureComputed(function() {
+    return _.merge({tags: ko.observable(), note: ko.observable()},
+                   _.find(ko.unwrap(self.application["company-notes"]), function(item) {
+                     return ko.unwrap(item.companyId) === util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
+                   }));
+  });
+
+  self.companyNote = ko.pureComputed({
+    read: function() { return util.getIn(companyNotes,["note"]); },
+    write: function(value) { companyNotes().note(value); }
+  });
+
+  self.companyTags = ko.pureComputed({
+    read: function() { return util.getIn(companyNotes,["tags"]); },
+    write: function(value) { companyNotes().tags(value); }
+  });
+
+  var companyNoteSeenAppId = ko.observable();
+
+  self.unseenCompanyNote = ko.pureComputed( function() {
+    return companyNoteSeenAppId() !== self.application.id()
+      && ko.unwrap( self.application.unseenCompanyNote);
+  });
+
   hub.subscribe("SidePanelService::NoticeSeen", function() {
     noticeSeenAppId(pageutil.hashApplicationId());
     if( self.unseenNotice() ) {
@@ -80,6 +105,15 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::TagsChanged", function(event) {
     changeNoticeInfo("add-application-tags", _.pick(event, "tags"));
+  });
+
+  hub.subscribe("SidePanelService::CompanyNoteChanged", function(event) {
+    changeNoticeInfo("update-application-company-notes", _.pick(event, "note"));
+    self.companyNote( event.note );
+  });
+
+  hub.subscribe("SidePanelService::CompanyTagsChanged", function(event) {
+    changeNoticeInfo("update-application-company-notes", _.pick(event, "tags"));
   });
 
   // Conversation

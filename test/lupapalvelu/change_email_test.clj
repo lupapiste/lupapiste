@@ -23,6 +23,10 @@
                                                     :email    ..old-email..
                                                     :personId ..hetu..})
     (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})
+    (provided (usr/verified-person-id? {:id       ..user-id..
+                                        :username ..username..
+                                        :email    ..old-email..
+                                        :personId ..hetu..}) => true)
     (provided (usr/get-user-by-email ..new-email..) => {:id ..dummy-id..
                                                         :role "dummy"})
 
@@ -48,6 +52,10 @@
                                                     :email    ..old-email..
                                                     :personId ..hetu..})
     (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})
+    (provided (usr/verified-person-id? {:id       ..user-id..
+                                        :username ..username..
+                                        :email    ..old-email..
+                                        :personId ..hetu..}) => true)
     (provided (usr/get-user-by-email ..new-email..) => nil)
 
     (provided (usr/update-user-by-email ..old-email.. {:personId ..hetu..} {$set {:username ..new-email.. :email ..new-email..}}) => 1)
@@ -95,7 +103,7 @@
     (provided (usr/get-user-by-email ..new-email..) => {:id ..dummy-id..
                                                         :role "dummy"})
 
-    (provided (usr/update-user-by-email ..old-email.. {:personId nil} {$set {:username ..new-email.. :email ..new-email.. :personId ..hetu..}}) => 1)
+    (provided (usr/update-user-by-email ..old-email.. {:personId nil} {$set {:username ..new-email.. :email ..new-email.. :personId ..hetu.. :personIdSource :identification-service}}) => 1)
     (provided (token/get-token ..token-id.. :consume true) => 1)
     (provided (#'lupapalvelu.change-email/remove-dummy-auths-where-user-already-has-auth ..user-id.. ..new-email.. ) => 1)
     (provided (#'lupapalvelu.change-email/change-auths-dummy-id-to-user-id {:id ..user-id.. :username ..username.. :email ..old-email.. :company {:role "admin"}} ..dummy-id.. ) => 1)
@@ -117,6 +125,11 @@
                                                     :personId ..hetu..
                                                     :company {:role "admin"}})
     (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})
+    (provided (usr/verified-person-id? {:id       ..user-id..
+                                        :username ..username..
+                                        :email    ..old-email..
+                                        :personId ..hetu..
+                                        :company {:role "admin"}}) => true)
     (provided (usr/get-user-by-email ..new-email..) => {:id ..dummy-id..
                                                         :role "dummy"})
 
@@ -143,7 +156,11 @@
                                                     :username ..username..
                                                     :email    ..old-email..
                                                     :personId ..hetu..})
-    (provided (vetuma/get-user ..stamp..) => {:userid ..another-hetu..}))
+    (provided (vetuma/get-user ..stamp..) => {:userid ..another-hetu..})
+    (provided (usr/verified-person-id? {:id       ..user-id..
+                                        :username ..username..
+                                        :email    ..old-email..
+                                        :personId ..hetu..}) => true))
 
   (fact "company admin - later chaange - vetumadata does not match"
     (try+
@@ -159,7 +176,12 @@
                                                     :email    ..old-email..
                                                     :personId ..hetu..
                                                     :company {:role "admin"}})
-    (provided (vetuma/get-user ..stamp..) => {:userid ..another-hetu..}))
+    (provided (vetuma/get-user ..stamp..) => {:userid ..another-hetu..})
+    (provided (usr/verified-person-id? {:id       ..user-id..
+                                        :username ..username..
+                                        :email    ..old-email..
+                                        :personId ..hetu..
+                                        :company {:role "admin"}}) => true))
 
   (fact "no person id nor company role"
     (try+
@@ -188,4 +210,8 @@
                                                     :username ..username..
                                                     :email    ..old-email..
                                                     :personId ..hetu..})
-    (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})))
+    (provided (vetuma/get-user ..stamp..) => {:userid ..hetu..})
+    (provided (usr/verified-person-id? {:id       ..user-id..
+                                        :username ..username..
+                                        :email    ..old-email..
+                                        :personId ..hetu..}) => true)))

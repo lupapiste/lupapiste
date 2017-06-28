@@ -2,6 +2,7 @@
   (:require [pandect.core :as pandect]
             [lupapalvelu.itest-util :refer :all]
             [sade.core :refer [now]]
+            [sade.strings :as ss]
             [sade.http :as http]
             [midje.sweet :refer :all]))
 
@@ -37,6 +38,19 @@
        url (str (target-server-or-localhost-address) "/app/fi/")
        resp (http-get url {:basic-auth [email password] :follow-redirects false})]
    (-> resp :headers (get "Location")) => #"/app/fi/authority"))
+
+(fact "Auto login to upload resources"
+  (let [email (email-for "pekka")
+        password (password-hash email)
+        url (str (target-server-or-localhost-address) "/app/latest/upload.css")
+        resp (http-get url {:basic-auth [email password] :follow-redirects false})
+        location-redirect (-> resp :headers (get "Location"))
+        {:keys [body status headers]} (http-get url {:basic-auth [email password] :follow-redirects true})]
+    location-redirect #"/app/[0-9-]+/upload.css"
+    (fact "css response"
+      status => 200
+      (get headers "Content-Type") => "text/css; charset=utf-8"
+      body =not=> ss/blank?)))
 
 (fact "Invalid timestamp, autologin fails"
  (let [email (email-for "pekka")

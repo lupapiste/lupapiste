@@ -37,7 +37,7 @@ Set DB cookie
   ${timestamp}=  Get Time  epoch
   ${random post fix}=  Evaluate  random.randint(0, sys.maxint)  modules=random, sys
   ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}_${random post fix}
-  Add Cookie  ${DB COOKIE}  ${dbname}
+  Add Cookie  ${DB COOKIE}  ${dbname}  /
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
   Log  Cookie: ${DB COOKIE} = ${dbname}
 

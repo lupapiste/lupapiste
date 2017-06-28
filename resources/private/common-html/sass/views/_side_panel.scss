@@ -150,7 +150,7 @@
     height: 100%;
   }
 
-  #notice-panel {
+  .notice-panel {
     height: 100%;
 
     .notice-component {
@@ -211,6 +211,9 @@
         }
       }
     }
+  }
+  #company-notes-panel.notice-panel .form-grid .row.textarea-wrapper textarea {
+    height: 50%;
   }
 }
 

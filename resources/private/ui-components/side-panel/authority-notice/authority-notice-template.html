@@ -11,7 +11,8 @@
                  data-bind="component: {name: 'autocomplete-application-tags',
                                         params: {tags: true,
                                                  selectedValues: tags,
-                                                 disable: !authorization.ok('add-application-tags')}}"></div>
+                                                 disable: !authorization.ok('add-application-tags'),
+                                                 lPlaceholder: 'tags.autocomplete.placeholder'}}"></div>
           </div>
         </div>
         <div class="row">

@@ -76,7 +76,7 @@
   (and (not (empty? event))
        (not (empty? (:eventType event)))))
 
-(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter event]} user]
+(defn make-query [query {:keys [searchText applicationType handlers tags companyTags organizations operations areas modifiedAfter event]} user]
   {$and
    (filter seq
      [query
@@ -115,6 +115,8 @@
                   {:handlers.userId {$in handler-ids}}]})))
       (when-not (empty? tags)
         {:tags {$in tags}})
+      (when-not (empty? companyTags)
+        {:company-notes {$elemMatch {:companyId (get-in user [:company :id]) :tags {$in companyTags}}}})
       (when-not (empty? organizations)
         {:organization {$in organizations}})
       (when (event-search event)

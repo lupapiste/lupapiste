@@ -31,4 +31,9 @@ LUPAPISTE.OrganizationTagsService = function() {
   if (!load()) {
     hub.subscribe("global-auth-model-loaded", load, true);
   }
+
+  self.refresh = function() {
+    load();
+  };
+
 };

@@ -207,4 +207,6 @@
         (:state updated-loppukatselmus) => "faulty_review_task"
         (fact "review attachment is not to be archived"
           (-> targeted-attachment :metadata :tila) => "ei-arkistoida-virheellinen"
-          (-> targeted-attachment :metadata :sailytysaika :arkistointi) => "ei")))))
+          (-> targeted-attachment :metadata :sailytysaika :arkistointi) => "ei"))
+      (fact "faulty review can not be sent to background"
+        (command sonja :resend-review-to-backing-system :id application-id :taskId (:id loppukatselmus) :lang "fi") => (partial expected-failure? :error.command-illegal-state)))))
