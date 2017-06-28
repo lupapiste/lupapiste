@@ -3287,6 +3287,17 @@
                 {$set {:personIdSource :identification-service}}
                 :multi true))
 
+(def orphaned-company-users-query
+  {:personId nil, :role :applicant, :company.role {$exists false}})
+
+(defmigration disable-orphaned-company-users
+  {:apply-when (pos? (mongo/count :users orphaned-company-users-query))}
+  (mongo/update :users
+                orphaned-company-users-query
+                {$set {:enabled false :role :dummy}
+                 $unset {:private ""}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
