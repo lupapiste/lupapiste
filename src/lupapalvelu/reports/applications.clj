@@ -146,7 +146,7 @@
                      (partial localized-secondary-operations lang))]
     (xlsx-stream data sheet-name header-row-content row-fn)))
 
-(defn applications-between-excel [organizationId startTs endTs lang excluded-operations]
+(defn ^OutputStream applications-between-excel [organizationId startTs endTs lang excluded-operations]
   (let [data               (submitted-applications-between organizationId startTs endTs excluded-operations)
         sheet-name         (str (i18n/localize lang "applications.report.applications-between.sheet-name-prefix")
                                 " "
@@ -171,7 +171,7 @@
     (xlsx-stream data sheet-name header-row-content row-fn)))
 
 
-  (defn parties-between-excel [organizationId startTs endTs lang]
+  (defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
     (let [apps (parties-between-data organizationId startTs endTs)
           result-map {:private-applicants  []
                       :company-applicant   []
@@ -184,6 +184,19 @@
                            (update :designers concat (parties/designers app lang))
                            (update :foremen concat (parties/foremen app lang))))
           data (reduce reducer-fn result-map apps)
-          _ (clojure.pprint/pprint data)
-          row-fn parties/private-applicants-row-fn]
-      (xlsx-stream (:private-applicants data) "foo" (map str [:id-link :id :address :primaryOperation :sukunimi :suoramarkkinointilupa :turvakielto :osoite :puhelin :sahkoposti]) row-fn)))
+          henk-header (map str [:id-link :id :address :primaryOperation
+                                :etunimi :sukunimi :osoite :puhelin :sahkoposti
+                                :suoramarkkinointilupa :turvakielto])
+          yritys-header (map str [:id-link :id :address :primaryOperation
+                                  :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
+                                  :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
+                                  :turvakielto])
+          designers-header (map str [:id-link :id :address :primaryOperation
+                                     :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
+                                     :fise :tutkinto :valmistumisvuosi])
+          ;; (-> (.getCreationHelper wb) (.createHyperlink help HyperlinkType/URL) (.setAddress "https://...") )
+          ;; cell.setHyperlink(link)
+          ]
+      (xlsx-stream [{:sheet-name "Henkilöhakijat" :header henk-header :row-fn parties/private-applicants-row-fn :data (:private-applicants data)}
+                    {:sheet-name "Yritysakijat" :header yritys-header :row-fn parties/company-applicants-row-fn :data (:company-applicants data)}
+                    {:sheet-name "Suunnittelijat" :header designers-header :row-fn parties/designers-row-fn :data (:designers data)}])))

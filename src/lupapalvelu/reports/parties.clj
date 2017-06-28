@@ -109,6 +109,11 @@
   (map
     (partial merge (basic-info-localized app lang))
     (->> (domain/get-documents-by-subtype (:documents app) "suunnittelija")
-         pick-designer-data)))
+         (map pick-designer-data))))
+
+(def designers-row-fn
+  (juxt :id-link :id :address :primaryOperation
+        :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
+        :fise :tutkinto :valmistumisvuosi))
 
 (defn foremen [app lang] [])
