@@ -1,8 +1,9 @@
 (ns lupapalvelu.reports.parties
   (:require [sade.env :as env]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.operations :as op]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.operations :as op]))
 
 
 (defn make-app-link [id lang]
@@ -59,6 +60,23 @@
      :yhteyshenkilopuhelin (get-in data [:yhteyshenkilo :yhteystiedot :puhelin])
      :yhteyshenkilosahkoposti (get-in data [:yhteyshenkilo :yhteystiedot :email])}))
 
+(defn pick-designer-data
+  "Vaativuusluokka, Nimi, Rooli(huom pääsunnitelija dokumentti tyyppi), pätevyys, yhteysosoite, puh, sähköposti,tutkinto, valmistumisvuosi, fisekortti(linkkinä)\n"
+  [doc]
+  (let [data (tools/unwrapped (get doc :data))]
+    {:etunimi          (get-in data [:henkilotiedot :etunimi])
+     :sukunimi         (get-in data [:henkilotiedot :sukunimi])
+     :rooli            (case (get-in doc [:schema-info :name])
+                         "paasuunnittelija" "P\u00e4\u00e4suunnittelija"
+                         "suunnittelija"    (get data :kuntaRoolikoodi))
+     :patevyys         (get-in data [:patevyys :koulutusvalinta])
+     :osoite           (get-osoite data)
+     :puhelin          (get-in data [:yhteystiedot :puhelin])
+     :sahkoposti       (get-in data [:yhteystiedot :email])
+     :tutkinto         (get-in data [:patevyys :koulutusvalinta])
+     :valmistumisvuosi (get-in data [:patevyys :valmistumisvuosi])
+     :fise             (get-in data [:patevyys :fise])}))
+
 (defn applicants [filter-fn map-fn app]
   (let [applicant-schema-name (op/get-applicant-doc-schema-name app)]
     (->> (:documents app)
@@ -87,5 +105,10 @@
         :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
         :turvakielto))
 
-(defn designers [app lang] [])
+(defn designers [app lang]
+  (map
+    (partial merge (basic-info-localized app lang))
+    (->> (domain/get-documents-by-subtype (:documents app) "suunnittelija")
+         pick-designer-data)))
+
 (defn foremen [app lang] [])
