@@ -58,7 +58,7 @@ Pena is now also on the icon title
 Pena adds new attachment version
   Open attachment details  muut.muu
   Add attachment version  ${TXT_TESTFILE_PATH}
-  Click by test id  back-to-application-from-attachment
+  Wait until  Click by test id  back-to-application-from-attachment
 
 There is no more signed icon
   Wait until  Attachment indicator icon should be visible  state  muut.muu
