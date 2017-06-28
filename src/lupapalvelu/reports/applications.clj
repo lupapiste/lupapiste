@@ -91,21 +91,34 @@
     (ss/join "\n" (map (partial localized-operation lang) secondaryOperations))))
 
 (defn ^OutputStream xlsx-stream
-  [data sheet-name header-row-content row-fn]
-  (let [wb           (spreadsheet/create-workbook
-                       sheet-name
-                       (concat [header-row-content] (map row-fn data)))
-        sheet        (first (spreadsheet/sheet-seq wb))
-        header-row   (-> sheet spreadsheet/row-seq first)
-        column-count (count header-row-content)]
-    (spreadsheet/set-row-style! header-row (spreadsheet/create-cell-style! wb {:font {:bold true}}))
-    ; Expand columns to fit all their contents
-    (doseq [i (range column-count)]
-      (.autoSizeColumn sheet i))
+  ([data sheet-name header-row-content row-fn]
+    (xlsx-stream [{:sheet-name sheet-name
+                   :header header-row-content
+                   :row-fn row-fn
+                   :data data}]))
+  ([sheets]
+   {:pre [(every? (every-pred :sheet-name :header :row-fn :data) sheets)]}
+   (let [wb (apply spreadsheet/create-workbook
+                   (apply concat
+                          (reduce (fn [wb-sheets conf]
+                                    (conj wb-sheets
+                                          [(:sheet-name conf)
+                                           (concat [(:header conf)]
+                                                   (map (:row-fn conf) (:data conf)))]))
+                                  []
+                                  sheets)))]
+     ; Format each sheet
+     (doseq [sheet (spreadsheet/sheet-seq wb)
+             :let [header-row   (-> sheet spreadsheet/row-seq first)
+                   column-count (.getLastCellNum header-row)
+                   bold-style   (spreadsheet/create-cell-style! wb {:font {:bold true}})]]
+       (spreadsheet/set-row-style! header-row bold-style)
+       (doseq [i (range column-count)]
+         (.autoSizeColumn sheet i)))
 
-    (with-open [out (ByteArrayOutputStream.)]
-      (spreadsheet/save-workbook-into-stream! out wb)
-      (ByteArrayInputStream. (.toByteArray out)))))
+     (with-open [out (ByteArrayOutputStream.)]
+       (spreadsheet/save-workbook-into-stream! out wb)
+       (ByteArrayInputStream. (.toByteArray out))))))
 
 (defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
   ;; Create a spreadsheet and save it
