@@ -47,8 +47,8 @@
 (defn- merge-review-tasks
   "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
   [from-update from-mongo]
-  (let [faulty-tasks (filter #(= (:state %) :faulty_review_task) from-mongo)
-        from-mongo   (remove #(= (:state %) :faulty_review_task) from-mongo)]
+  (let [faulty-tasks (filter #(util/=as-kw (:state %) :faulty_review_task) from-mongo)
+        from-mongo   (remove #(util/=as-kw (:state %) :faulty_review_task) from-mongo)]
     (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s (+faulty: %s)" (count from-update) (count from-mongo) (count faulty-tasks))
     (loop [from-update from-update
            from-mongo from-mongo
