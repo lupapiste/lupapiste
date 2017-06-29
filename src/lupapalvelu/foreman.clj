@@ -217,8 +217,23 @@
       (assoc-in [:schema-info :name]  schema-name)
       (assoc-in [:data :henkilo :userId] {:value nil}))))
 
+;; imported previous permit applications do not have a hankkeen-kuvaus -document
+;; and have the description in the first aiemman-luvan-toimenpide -document
+(defn get-application-description [application]
+  (let 
+    [description 
+      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") 
+        first 
+        (get-in [:data :kuvaus :value]))]
+    (if (and description (not (= description "")))
+      description
+      (or
+        (-> (domain/get-document-by-name (:documents application) "aiemman-luvan-toimenpide") 
+         (get-in [:data :kuvaus :value]))
+        ""))))
+
 (defn update-foreman-docs [foreman-app application role]
-  (let [hankkeen-kuvaus      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") first (get-in [:data :kuvaus :value]))
+  (let [hankkeen-kuvaus      (get-application-description application)
         hankkeen-kuvaus-doc  (first (domain/get-documents-by-subtype (:documents foreman-app) "hankkeen-kuvaus"))
         hankkeen-kuvaus-doc  (if hankkeen-kuvaus
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
