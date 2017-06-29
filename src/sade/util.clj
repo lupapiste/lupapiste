@@ -434,12 +434,13 @@
   {:pre [(map? x)]}
   (merge x (apply f x args)))
 
-(defn mongerify [x]
+(defn mongerify
   "Transforms values into ones that could be returned by monger,
    applied recursively into sequences and values of maps.
 
    Turns keywords into strings (except for keys of maps).
    Turns lists, sets and vectors into vectors."
+  [x]
   (cond (keyword? x)     (name x)
         (map? x)         (map-values mongerify x)
         (or (seq? x)

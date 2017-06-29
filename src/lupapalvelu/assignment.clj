@@ -203,11 +203,12 @@
                :limit  100
                :sort   {:asc true :field "created"}})))
 
-(defn- make-query [{:keys [searchText recipient operation area createdDate targetType]} user]
-  "Returns query parameters in two parts:
+(defn- make-query 
+    "Returns query parameters in two parts:
    - pre-lookup: query conditions that can be executed directly against the assignments collection itself
    - post-lookup: conditions that need data fetched via the assignments->applications lookup stage in aggregation query
                   (basically the ones that are targeted to the :applicationDetails subdocument"
+  [{:keys [searchText recipient operation area createdDate targetType]} user]
   {:pre-lookup (filter seq
                        [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}}
                         (when-not (empty? recipient)
@@ -332,7 +333,7 @@
     {:userTotalCount (mongo/count :assignments)
      ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
      :totalCount     (:count assignments-result)
-     :assignments    (->> (:assignments assignments-result))}))
+     :assignments    (:assignments assignments-result)}))
 
 (sc/defn ^:always-validate count-active-assignments-for-user :- sc/Int
   [{user-id :id}]

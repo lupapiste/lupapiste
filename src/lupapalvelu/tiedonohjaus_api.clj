@@ -145,12 +145,12 @@
                      sanitize-metadata)]
     (assoc document :metadata metadata)))
 
-(defn- update-application-child-metadata! [{:keys [application created user] :as command} type id metadata]
-  (if-let [child (first (filter #(= (:id %) id) (type application)))]
+(defn- update-application-child-metadata! [{:keys [application created user] :as command} child-type id metadata]
+  (if-let [child (first (filter #(= (:id %) id) (child-type application)))]
     (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
           updated-child (update-document-metadata child metadata user-roles application)
-          updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
-      (action/update-application command {$set {:modified created type updated-children}})
+          updated-children (-> (remove #(= % child) (child-type application)) (conj updated-child))]
+      (action/update-application command {$set {:modified created child-type updated-children}})
       (t/update-process-retention-period (:id application) created)
       (ok {:metadata (:metadata updated-child)}))
     (fail "error.child.id")))

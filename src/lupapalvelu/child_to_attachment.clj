@@ -13,8 +13,8 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
   (:import (java.io File FileOutputStream)))
 
-(defn- get-child [application type id]
-  (first (filter #(or (nil? id) (= id (:id %))) (type application))))
+(defn- get-child [application child-type id]
+  (first (filter #(or (nil? id) (= id (:id %))) (child-type application))))
 
 (defn- child-attachment-type [permit-type type source-document]
   (->> (case type

@@ -207,10 +207,11 @@
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, cannot validate file")
         false)))
 
-(defn convert-file-to-pdf-in-place [pdf-file]
-  {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}
-  "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
+(defn convert-file-to-pdf-in-place 
+   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
+  [pdf-file]
+  {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}
   (files/with-temp-file temp-file
     (try
       (let [conversion-result (convert-to-pdf-a pdf-file temp-file)]

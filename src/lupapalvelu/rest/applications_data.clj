@@ -12,7 +12,7 @@
 (defn- transform-operation [operation]
   (-> operation
       (select-keys [:uusi :muuMuutosTyo :laajennus :purkaminen :kaupunkikuvaToimenpide])
-      (assoc :rakennuksenTiedot (dissoc (get-in operation [:rakennustieto :Rakennus :rakennuksenTiedot])))
+      (assoc :rakennuksenTiedot (get-in operation [:rakennustieto :Rakennus :rakennuksenTiedot]))
       (assoc :rakennelmanTiedot (get-in operation [:rakennelmatieto :Rakennelma]))
       (update :rakennelmanTiedot :kuvaus)
       (util/strip-nils)))

@@ -493,8 +493,9 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
-(defn- transform-coordinates-to-wgs84 [collection]
+(defn- transform-coordinates-to-wgs84
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+ [collection]
   (let [schema (.getSchema collection)
         crs (.getCoordinateReferenceSystem schema)
         transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)

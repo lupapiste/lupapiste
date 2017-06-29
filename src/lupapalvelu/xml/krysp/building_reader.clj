@@ -204,8 +204,9 @@
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
    :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})
 
-(defn ->buildings-and-structures [app-xml]
+(defn ->buildings-and-structures 
   "Produces a building or structure for each (valid) construction operation in the application"
+  [app-xml]
   (remove empty?
     (map (fn [xml]
            (let [rakennus (->rakennuksen-tiedot (-> xml (select [:Rakennus]) first))
