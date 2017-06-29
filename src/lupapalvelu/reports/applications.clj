@@ -182,8 +182,9 @@
                            (update :private-applicants concat (parties/private-applicants app lang))
                            (update :company-applicants concat (parties/company-applicants app lang))
                            (update :designers concat (parties/designers app lang))))
+          enriched-foremen (parties/enrich-foreman-apps foreman-apps)
           data (-> (reduce reducer-fn result-map other-apps)
-                   (assoc :foremen (map #(parties/foremen % lang) foreman-apps)))
+                   (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
           henk-header (map str [:id-link :id :address :primaryOperation
                                 :etunimi :sukunimi :osoite :puhelin :sahkoposti
                                 :suoramarkkinointilupa :turvakielto])
@@ -194,9 +195,13 @@
           designers-header (map str [:id-link :id :address :primaryOperation
                                      :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
                                      :fise :tutkinto :valmistumisvuosi])
+          foremen-header (map str [:id-link :id :address :primaryOperation
+                                   :etunimi :sukunimi :rooli :vastattavat-tyotehtavat])
           ;; (-> (.getCreationHelper wb) (.createHyperlink help HyperlinkType/URL) (.setAddress "https://...") )
           ;; cell.setHyperlink(link)
+          sheets [{:sheet-name "Henkilöhakijat" :header henk-header :row-fn parties/private-applicants-row-fn :data (:private-applicants data)}
+                  {:sheet-name "Yritysakijat" :header yritys-header :row-fn parties/company-applicants-row-fn :data (:company-applicants data)}
+                  {:sheet-name "Suunnittelijat" :header designers-header :row-fn parties/designers-row-fn :data (:designers data)}
+                  {:sheet-name "Tyonjohtajat" :header foremen-header :row-fn parties/foremen-row-fn :data (:foremen data)}]
           ]
-      (xlsx-stream [{:sheet-name "Henkilöhakijat" :header henk-header :row-fn parties/private-applicants-row-fn :data (:private-applicants data)}
-                    {:sheet-name "Yritysakijat" :header yritys-header :row-fn parties/company-applicants-row-fn :data (:company-applicants data)}
-                    {:sheet-name "Suunnittelijat" :header designers-header :row-fn parties/designers-row-fn :data (:designers data)}])))
+      (xlsx-stream sheets)))

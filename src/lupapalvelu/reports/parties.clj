@@ -1,10 +1,13 @@
 (ns lupapalvelu.reports.parties
   (:require [sade.env :as env]
             [sade.strings :as ss]
+            [monger.operators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]))
 
 
@@ -79,6 +82,11 @@
      :valmistumisvuosi (get-in data [:patevyys :valmistumisvuosi])
      :fise             (get-in data [:patevyys :fise])}))
 
+
+;;
+;; Private applicants
+;;
+
 (defn applicants [filter-fn map-fn app]
   (let [applicant-schema-name (op/get-applicant-doc-schema-name app)]
     (->> (:documents app)
@@ -96,6 +104,10 @@
         :etunimi :sukunimi :osoite :puhelin :sahkoposti
         :suoramarkkinointilupa :turvakielto))
 
+;;
+;; Company applicants
+;;
+
 (defn company-applicants [app lang]
   (map
     (partial merge (basic-info-localized app lang))
@@ -106,6 +118,10 @@
         :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
         :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
         :turvakielto))
+
+;;
+;; Designers
+;;
 
 (defn designers [app lang]
   (map
@@ -118,9 +134,29 @@
         :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
         :fise :tutkinto :valmistumisvuosi))
 
+;;
+;; Foremen
+;;
 ; Yritys, tj nimi, yhtestiedot, puhelin, sähköposti,
 ; rooli, vaativuus, täysi/osa-aikainen, tutkinto,
 ; sijaistettavan nimi, sijaistettavan aika, vastattavat työtehtävät pilkulla eroteltuna.
+
+
+(defn enrich-foreman-apps
+  "Enrich foreman-apps suitable for excel report. Replace primary operation with project application's operation."
+  [foreman-apps]
+  (let [link-map (->> (mongo/select :app-links {:link {$in (map :id foreman-apps)}})
+                      (reduce (fn [result link]
+                                (let [fore-id (keyword (first (:link link))) ; target
+                                      project-id (keyword (second (:link link)))] ; source
+                                  (assoc result fore-id (assoc
+                                                          (get link project-id)
+                                                          :id
+                                                          (name project-id))))) {}))]
+    (->> foreman-apps
+         (map #(assoc-in %
+                         [:primaryOperation :name]
+                         (get-in link-map [(keyword (:id %)) :apptype]))))))
 
 (defn vastattavat-tyotehtavat-as-string [doc lang]
   (let [vastattavat-data (tools/unwrapped (get-in doc [:data :vastattavatTyotehtavat]))
@@ -138,4 +174,21 @@
                     [])
          (ss/join ","))))
 
-(defn foremen [app lang] [])
+
+(defn pick-foreman-data
+  "Doc: tyonjohtaja-v2"
+  [doc lang]
+  (let [data (tools/unwrapped (get doc :data))]
+    {:etunimi (get-in data [:henkilotiedot :etunimi])
+     :sukunimi (get-in data [:henkilotiedot :sukunimi])
+     :rooli    (get-in data [:kuntaRoolikoodi])
+     :vastattavat-tyotehtavat (vastattavat-tyotehtavat-as-string doc lang)}))
+
+
+(defn foremen [app lang]
+  (merge (basic-info-localized app lang)
+         (pick-foreman-data (foreman/get-foreman-document app) lang)))
+
+(def foremen-row-fn
+  (juxt :id-link :id :address :primaryOperation
+        :etunimi :sukunimi :rooli :vastattavat-tyotehtavat))
