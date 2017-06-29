@@ -58,7 +58,7 @@
                                              "data.henkilotiedot.hetu.value" foreman-hetu}}}
                     [:created :documents :municipality]))))
 
-(defn get-foreman-documents [foreman-application]
+(defn get-foreman-document [foreman-application]
   (domain/get-document-by-name foreman-application "tyonjohtaja-v2"))
 
 (defn get-foreman-project-applications

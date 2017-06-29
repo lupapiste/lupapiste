@@ -216,7 +216,7 @@
 (defn- foremen [application]
   (if (ss/blank? (:foreman application))
     (when-let [foremen (->> (foreman/get-linked-foreman-applications-by-id (:id application))
-                            (map foreman/get-foreman-documents)
+                            (map foreman/get-foreman-document)
                             (map #(person-name (:data %)))
                             seq)]
       (string/join ", " foremen))
