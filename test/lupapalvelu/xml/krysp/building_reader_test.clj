@@ -23,7 +23,8 @@
         rakennelma (second buildings)]
 
     (:operationId rakennus) => "abcdefghijklmnopqr"
-    (:operationId rakennelma) => "56c72f3cf165623f0132a28b"
+    (fact "using Lupapistetunnus as muuTunnus/sovellus value"
+          (:operationId rakennelma) => "56c72f3cf165623f0132a28b")
     (fact "Index used as description if needed"
       (:description rakennus) => "Talo A, Toinen selite"
       (:description rakennelma) => "3")))

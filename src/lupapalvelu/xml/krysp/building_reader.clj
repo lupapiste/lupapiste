@@ -51,7 +51,7 @@
                             cr/parse-datetime
                             (cr/unparse-datetime :year))
      :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
-                           (when (#{"toimenpideId" "Lupapiste"} sovellus)
+                           (when (#{"toimenpideId" "Lupapiste" "Lupapistetunnus"} sovellus)
                              tunnus))
                          (->list (:muuTunnustieto edn)))
      :description  (or (:rakennuksenSelite edn) building-index)}))
