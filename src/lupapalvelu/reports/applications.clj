@@ -172,7 +172,7 @@
 
 
   (defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
-    (let [apps (parties-between-data organizationId startTs endTs)
+    (let [[foreman-apps other-apps] ((juxt filter remove) foreman/foreman-app? (parties-between-data organizationId startTs endTs))
           result-map {:private-applicants  []
                       :company-applicant   []
                       :designers           []
@@ -181,9 +181,9 @@
                        (-> res
                            (update :private-applicants concat (parties/private-applicants app lang))
                            (update :company-applicants concat (parties/company-applicants app lang))
-                           (update :designers concat (parties/designers app lang))
-                           (update :foremen concat (parties/foremen app lang))))
-          data (reduce reducer-fn result-map apps)
+                           (update :designers concat (parties/designers app lang))))
+          data (-> (reduce reducer-fn result-map other-apps)
+                   (assoc :foremen (map #(parties/foremen % lang) foreman-apps)))
           henk-header (map str [:id-link :id :address :primaryOperation
                                 :etunimi :sukunimi :osoite :puhelin :sahkoposti
                                 :suoramarkkinointilupa :turvakielto])
