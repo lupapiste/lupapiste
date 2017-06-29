@@ -97,7 +97,7 @@
                    :row-fn row-fn
                    :data data}]))
   ([sheets]
-   {:pre [(every? (every-pred :sheet-name :header :row-fn :data) sheets)]}
+   {:pre [(every? (every-pred :sheet-name :header :row-fn) sheets)]}
    (let [wb (apply spreadsheet/create-workbook
                    (apply concat
                           (reduce (fn [wb-sheets conf]
