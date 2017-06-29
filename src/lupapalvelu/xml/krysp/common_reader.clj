@@ -4,7 +4,8 @@
             [lupapalvelu.wfs :as wfs]
             [sade.common-reader :as scr]
             [sade.strings :as ss]
-            [sade.xml :refer [get-text select1] :as sxml]))
+            [sade.xml :refer [get-text select1] :as sxml]
+            [sade.util :as util]))
 
 
 ;; Object types (URL encoded)
@@ -153,3 +154,18 @@
                        :postinumero                   (get-text yritys :postiosoite :postinumero)
                        :postitoimipaikannimi          (get-text yritys :postiosoite :postitoimipaikannimi)}
               :yhteyshenkilo (-> (->henkilo xml-without-ns) :henkilo (dissoc :osoite))}}))
+
+(def to-projection "EPSG:3067")
+(def allowed-projection-prefix "EPSG:")
+
+(defn ->source-projection [xml path]
+  (let [source-projection-attr (sxml/select1-attribute-value xml path :srsName)                          ;; e.g. "urn:x-ogc:def:crs:EPSG:3879"
+        source-projection-point-dimension (-> (sxml/select1-attribute-value xml path :srsDimension) (util/->int false))]
+    (when (and source-projection-attr (= 2 source-projection-point-dimension))
+      (let [projection-name-index    (.lastIndexOf source-projection-attr allowed-projection-prefix) ;; find index of "EPSG:"
+            source-projection        (when (> projection-name-index -1)
+                                       (subs source-projection-attr projection-name-index))          ;; rip "EPSG:3879"
+            source-projection-number (subs source-projection (count allowed-projection-prefix))]
+        (if (util/->int source-projection-number false)              ;; make sure the stuff after "EPSG:" parses as an Integer
+          source-projection
+          (throw (Exception. (str "No coordinate source projection could be parsed from string '" source-projection-attr "'"))))))))

@@ -468,26 +468,11 @@
 
 ;; Coordinates
 
-(def- to-projection "EPSG:3067")
-(def- allowed-projection-prefix "EPSG:")
-
-(defn- ->source-projection [xml path]
-  (let [source-projection-attr (select1-attribute-value xml path :srsName)                          ;; e.g. "urn:x-ogc:def:crs:EPSG:3879"
-        source-projection-point-dimension (-> (select1-attribute-value xml path :srsDimension) (util/->int false))]
-    (when (and source-projection-attr (= 2 source-projection-point-dimension))
-     (let [projection-name-index    (.lastIndexOf source-projection-attr allowed-projection-prefix) ;; find index of "EPSG:"
-           source-projection        (when (> projection-name-index -1)
-                                      (subs source-projection-attr projection-name-index))          ;; rip "EPSG:3879"
-           source-projection-number (subs source-projection (count allowed-projection-prefix))]
-       (if (util/->int source-projection-number false)              ;; make sure the stuff after "EPSG:" parses as an Integer
-         source-projection
-         (throw (Exception. (str "No coordinate source projection could be parsed from string '" source-projection-attr "'"))))))))
-
 (defn- resolve-coordinates [point-xml-with-ns point-str kuntalupatunnus]
   (try
-    (when-let [source-projection (->source-projection point-xml-with-ns [:Point])]
+    (when-let [source-projection (common/->source-projection point-xml-with-ns [:Point])]
       (let [coords (ss/split point-str #" ")]
-        (coordinate/convert source-projection to-projection 3 coords)))
+        (coordinate/convert source-projection common/to-projection 3 coords)))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
 

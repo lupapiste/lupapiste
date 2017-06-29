@@ -10,7 +10,8 @@
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.building :as building]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.coordinate :as coordinate]))
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
@@ -28,6 +29,16 @@
   (let [building-id (or (ss/trim s) "")]
     (when (v/rakennustunnus? building-id)
       building-id)))
+
+(defn- resolve-coordinates [point-xml building-id]
+  (println point-xml)
+  (try
+    (when-let [source-projection (common/->source-projection point-xml [:Point])]
+      (let [point-str (get-text point-xml :pos)
+            coords (ss/split point-str #" ")]
+        (let [[x y] (coordinate/convert source-projection common/to-projection 3 coords)]
+          {:x x :y y})))
+    (catch Exception e (error e "Coordinate conversion failed for building " building-id))))
 
 (defn- ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
 
@@ -138,13 +149,17 @@
          (util/assoc-when-pred
            {:muutostyolaji                          ...notimplemented...
             :valtakunnallinenNumero                 (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
-            ;; TODO: Add support for kunnanSisainenPysyvaRakennusnumero (rakval krysp 2.1.6 +)
-            ;             :kunnanSisainenPysyvaRakennusnumero (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
+            :kunnanSisainenPysyvaRakennusnumero     (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
             :rakennusnro                            (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
             :manuaalinen_rakennusnro                ""
             :jarjestysnumero                        (get-text rakennus :rakennustunnus :jarjestysnumero)
             :kiinttun                               (get-text rakennus :rakennustunnus :kiinttun)
             :verkostoliittymat                      (cr/all-of rakennus [:verkostoliittymat])
+
+            :sijainti                               (-> (select1 rakennus :sijaintitieto :Sijainti :piste :Point)
+                                                        (resolve-coordinates
+                                                          (pysyva-rakennustunnus
+                                                            (get-text rakennus :rakennustunnus :valtakunnallinenNumero))))
 
             :osoite {:kunta                         (get-text rakennus :osoite :kunta)
                      :lahiosoite                    (get-text rakennus :osoite :osoitenimi :teksti)

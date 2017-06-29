@@ -89,19 +89,12 @@
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn- buildings->krysp-keys [buildings]
-  (map
-    (fn [{:keys [nationalId localId buildingId localShortId usage]}]
-      {:data {:valtakunnallinenNumero nationalId
-              :rakennusnro localShortId
-              :kaytto {:kayttotarkoitus usage}}})
-    buildings))
-
 (defn get-buildings [organization permit-type property-id]
   (when (and organization permit-type property-id)
     (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
-      (->> (building-reader/building-info-list url credentials property-id)
-           buildings->krysp-keys))))
+      (->> (building-reader/building-xml url credentials property-id)
+           building-reader/->buildings
+           (map #(-> {:data %}))))))
 
 (defn do-create-application-from-previous-permit
   [command operation buildings-and-structures app-info location-info permit-type]

@@ -799,13 +799,19 @@
 
 (def rakennustunnus {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true :readonly true})
 
+(def sijainti {:name "sijainti"
+               :type :group
+               :body [{:name "x" :type :string :subtype :decimal}
+                      {:name "y" :type :string :subtype :decimal}]})
+
 (def rakennuksen-tiedot-ilman-huoneistoa [kaytto
                                           mitat
                                           rakenne
                                           lammitys
                                           verkostoliittymat
                                           varusteet
-                                          luokitus])
+                                          luokitus
+                                          sijainti])
 
 (def rakennuksen-tiedot-ilman-huoneistoa-muutos [kaytto
                                                  mitat-muutos
@@ -1328,7 +1334,8 @@
     :body (body (assoc kuvaus :required false)
                 tunnus
                 kaytto-minimal
-                rakennustunnus)}
+                rakennustunnus
+                sijainti)}
 
    {:info {:name "uusiRakennus"
            :approvable true
