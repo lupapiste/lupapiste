@@ -439,21 +439,33 @@
 
     (upload-attachment pena application-id attachment true :filename "dev-resources/test-pdf.pdf")
 
-    (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
+    (let [application (query-application sonja application-id)
+          attachment (get-attachment-by-id sonja application-id  attachment-id)
+          v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
           v1 (first v1-versions)]
       (fact "one version" (count v1-versions) => 1)
+      (fact "one comment" (count (:comments application)) => 1)
       (fact "fileID is set" (:fileId v1) => truthy)
       (fact "fileID is set" (:originalFileId v1) => truthy)
       (fact "File is original before rotation" (:fileId v1) => (:originalFileId v1))
       (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
+      (fact "Version is not modified" (:modified v1) => nil)
+      (fact "Attachment modified timestamp is the same as created"
+        (:modified attachment) => (:created v1))
 
       (fact "version number is set" (:version v1) => {:major 1 :minor 0})
 
       (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
-      (let [v2-versions (:versions (get-attachment-by-id sonja application-id  attachment-id))
+      (let [application (query-application sonja application-id)
+            attachment (get-attachment-by-id sonja application-id  attachment-id)
+            v2-versions (:versions attachment)
             v2          (first v2-versions)]
         (fact "No new version" (count v2-versions) => 1)
+        (fact "No new comment" (count (:comments application)) => 1)
+        (fact "Created timestamp is intact" (:created v1) => (:created v2))
+        (fact "Attachment modified timestamp is intact" (:modified attachment) => (:created v2))
+        (fact "Version has now modified timestamp" (- (:modified v2) (:created v2)) => pos?)
         (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
         (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
         (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
@@ -469,6 +481,53 @@
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
 (when pdfa/pdf2pdf-enabled?
+  (facts "Explictly convert to PDF/A"
+    (fact "Temporarily disable permanent archive for Jarvenpaa"
+      (command admin :set-organization-permanent-archive-enabled
+               :enabled false :organizationId "186-R"))
+    (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+          application-id (:id application)
+          attachment (first (:attachments application))
+          attachment-id (:id attachment)]
+
+    (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
+
+    (let [application (query-application pena application-id)
+          attachment (get-attachment-by-id pena application-id  attachment-id)
+          v1-versions (:versions attachment)
+          v1 (first v1-versions)]
+      (fact "one version" (count v1-versions) => 1)
+      (fact "one comment" (count (:comments application)) => 1)
+      (fact "fileID is set" (:fileId v1) => truthy)
+      (fact "fileID is set" (:originalFileId v1) => truthy)
+      (fact "File is original before conversion" (:fileId v1) => (:originalFileId v1))
+      (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
+      (fact "Version is not modified" (:modified v1) => nil)
+      (fact "Attachment modified timestamp is the same as created"
+        (:modified attachment) => (:created v1))
+
+      (fact "version number is set" (:version v1) => {:major 1 :minor 0})
+
+      (fact "Enable permanent archive for Jarvenpaa"
+        (command admin :set-organization-permanent-archive-enabled
+                 :enabled true :organizationId "186-R"))
+      (command raktark-jarvenpaa :convert-to-pdfa :id application-id :attachmentId attachment-id) => ok?
+
+      (let [application (query-application pena application-id)
+            attachment (get-attachment-by-id pena application-id  attachment-id)
+            v2-versions (:versions attachment)
+            v2          (first v2-versions)]
+        (fact "No new version" (count v2-versions) => 1)
+        (fact "No new comment" (count (:comments application)) => 1)
+        (fact "Created timestamp is intact" (:created v1) => (:created v2))
+        (fact "Attachment modified timestamp is intact" (:modified attachment) => (:created v2))
+        (fact "Version has now modified timestamp" (- (:modified v2) (:created v2)) => pos?)
+        (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
+        (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
+        (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
+
+        (fact "version number is not changed" (:version v2) => (:version v1))))))
+
   (facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
           (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
                 application-id (:id application)

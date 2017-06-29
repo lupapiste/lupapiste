@@ -107,8 +107,12 @@
   "Attachment version"
   {:version                              VersionNumber
    :fileId                               sc/Str             ;; fileId in GridFS
-   :originalFileId                       sc/Str             ;; fileId of the unrotated file
+   :originalFileId                       sc/Str             ;; fileId of the unrotated/unconverted file
    :created                              ssc/Timestamp
+   ;; Timestamp for the latest "non-versioning" operation (e.g.,
+   ;; rotation, pdf/a conversion). Thus, modified can be present only
+   ;; if originalFileId is present.
+   (sc/optional-key :modified)           ssc/Timestamp
    :user                                 (sc/if :id         ;; User who created the version
                                            usr/SummaryUser ;; Only name is used for users without Lupapiste account, eg. neighbours
                                            (select-keys usr/User [:firstName :lastName]))
@@ -445,7 +449,8 @@
 
 (defn make-version
   [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
-                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog]}]
+                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog
+                           modified]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
@@ -465,6 +470,7 @@
          :size           size
          :stamped        (boolean stamped)
          :archivable     (boolean archivable)}
+        :modified       modified
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
         :autoConversion autoConversion
