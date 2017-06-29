@@ -58,7 +58,7 @@
                  [org.mnode.ical4j/ical4j "1.0.7" :exclusions [commons-logging]]
 
                  ; Apache Commons
-                 [commons-fileupload "1.3.2"] ; explicit requirement to catch version upgrades
+                 [commons-fileupload "1.3.3"] ; explicit requirement to catch version upgrades
                  [org.apache.commons/commons-lang3 "3.5"]
                  [commons-io "2.5"]
                  [commons-codec "1.10"]
