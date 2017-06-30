@@ -12,7 +12,7 @@ selaimen osoiteriville.
 
 {{link}}
 
-Mikä on Lupapiste? Evolta Oy:n, kuntien ja ympäristöministeriön
+Lupapiste on Evolta Oy:n, kuntien ja ympäristöministeriön
 yhteistyössä kehittämä sähköinen asiointipalvelu. Palvelussa voidaan
 hoitaa rakennetun ympäristön lupa-asiointia vuorovaikutuksessa kunnan
 viranomaisten sekä hankkeen osapuolten kanssa.
