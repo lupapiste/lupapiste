@@ -19,6 +19,12 @@
       (assoc :id-link (make-app-link (:id app) lang))
       (update :primaryOperation #(i18n/localize lang (str "operations." (:name %))))))
 
+(def basic-info-localization-mapping
+  {:id-link "application.id"
+   :id "application.id"
+   :address "applications.location"
+   :primaryOperation "applications.operation"})
+
 (defn applicant-doc? [applicant-schema-name doc]
   (= (get-in doc [:schema-info :name])
      applicant-schema-name))
@@ -144,9 +150,6 @@
 ;;
 ;; Foremen
 ;;
-; Yritys, tj nimi, yhtestiedot, puhelin, sähköposti,
-; rooli, vaativuus, täysi/osa-aikainen, tutkinto,
-; sijaistettavan nimi, sijaistettavan aika, vastattavat työtehtävät pilkulla eroteltuna.
 
 
 (defn enrich-foreman-apps
@@ -182,13 +185,39 @@
          (ss/join ","))))
 
 
+(defn- get-sijaistettava-nimi [doc-data]
+  (str (get-in doc-data [:sijaistus :sijaistettavaHloEtunimi])
+       " "
+       (get-in doc-data [:sijaistus :sijaistettavaHloSukunimi])))
+
+(defn- get-localized-taysiaikainen-osaaikainen [doc-data lang]
+  (i18n/localize lang
+                 "osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen"
+                 (get-in doc-data [:tyonjohtajaHanketieto :taysiaikainenOsaaikainen])))
+
+(defn- get-foreman-koulutus [doc-data lang]
+  (let [koulutusvalinta (get-in doc-data [:patevyys-tyonjohtaja :koulutusvalinta])]
+    (if (or (ss/blank? koulutusvalinta) (= "muu" koulutusvalinta))
+      (get-in doc-data [:patevyys-tyonjohtaja :koulutus])
+      (i18n/localize lang "koulutus" koulutusvalinta))))
+
 (defn pick-foreman-data
   "Doc: tyonjohtaja-v2"
   [doc lang]
   (let [data (tools/unwrapped (get doc :data))]
-    {:etunimi (get-in data [:henkilotiedot :etunimi])
+    {:yritys   (get-in data [:yritys :yritysnimi])
+     :etunimi (get-in data [:henkilotiedot :etunimi])
      :sukunimi (get-in data [:henkilotiedot :sukunimi])
-     :rooli    (get-in data [:kuntaRoolikoodi])
+     :osoite   (get-osoite data)
+     :puhelin  (get-in data [:yhteystiedot :puhelin])
+     :sahkoposti (get-in data [:yhteystiedot :email])
+     :rooli    (i18n/localize lang "osapuoli.tyonjohtaja.kuntaRoolikoodi" (get-in data [:kuntaRoolikoodi]))
+     :vaativuus (get-in data [:patevyysvaatimusluokka])
+     :taysiaikainenOsaaikainen (get-localized-taysiaikainen-osaaikainen data lang)
+     :tutkinto        (get-foreman-koulutus data lang)
+     :sijaistettava   (get-sijaistettava-nimi data)
+     :sijaisuus-alkaa (get-in data [:sijaistus :alkamisPvm])
+     :sijaisuus-paattyy (get-in data [:sijaistus :paatymisPvm])
      :vastattavat-tyotehtavat (vastattavat-tyotehtavat-as-string doc lang)}))
 
 
@@ -196,6 +225,27 @@
   (merge (basic-info-localized app lang)
          (pick-foreman-data (foreman/get-foreman-document app) lang)))
 
+(def foreman-fields-localization-mapping
+  (merge
+    basic-info-localization-mapping
+    {:yritys "userinfo.architect.company.name"
+     :etunimi "etunimi" :sukunimi "sukunimi" :osoite  "osoite" :puhelin "userinfo.phone" :sahkoposti "email"
+     :rooli "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label" :vaativuus "osapuoli.patevyys-tyonjohtaja.patevyysvaatimusluokka._group_label"
+     :taysiaikainenOsaaikainen "osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen" :tutkinto "osapuoli.patevyys.koulutus"
+     :sijaistettava "tyonjohtaja.sijaistus._group_label"  :sijaisuus-alkaa "tyonjohtaja.sijaistus.alkamisPvm"
+     :sijaisuus-paattyy "tyonjohtaja.sijaistus.paattymisPvm"
+     :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
+
+(def foremen-fields
+  [:id-link :id :address :primaryOperation
+   :yritys :etunimi :sukunimi
+   :osoite :puhelin :sahkoposti
+   :rooli :vaativuus :taysiaikainenOsaaikainen :tutkinto
+   :sijaistettava :sijaisuus-alkaa :sijaisuus-paattyy
+   :vastattavat-tyotehtavat])
+
+(defn foreman-fields-lozalized [lang]
+  (map #(i18n/localize lang (get foreman-fields-localization-mapping %)) foremen-fields))
+
 (def foremen-row-fn
-  (juxt :id-link :id :address :primaryOperation
-        :etunimi :sukunimi :rooli :vastattavat-tyotehtavat))
+  (apply juxt foremen-fields))

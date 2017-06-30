@@ -193,13 +193,11 @@
                                   :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
                                   :turvakielto])
           designers-header (map str parties/designers-fields)
-          foremen-header (map str [:id-link :id :address :primaryOperation
-                                   :etunimi :sukunimi :rooli :vastattavat-tyotehtavat])
           ;; (-> (.getCreationHelper wb) (.createHyperlink help HyperlinkType/URL) (.setAddress "https://...") )
           ;; cell.setHyperlink(link)
           sheets [{:sheet-name "Henkilöhakijat" :header henk-header :row-fn parties/private-applicants-row-fn :data (:private-applicants data)}
                   {:sheet-name "Yritysakijat" :header yritys-header :row-fn parties/company-applicants-row-fn :data (:company-applicants data)}
                   {:sheet-name "Suunnittelijat" :header designers-header :row-fn parties/designers-row-fn :data (:designers data)}
-                  {:sheet-name "Tyonjohtajat" :header foremen-header :row-fn parties/foremen-row-fn :data (:foremen data)}]
+                  {:sheet-name "Tyonjohtajat" :header (parties/foreman-fields-lozalized lang) :row-fn parties/foremen-row-fn :data (:foremen data)}]
           ]
       (xlsx-stream sheets)))
