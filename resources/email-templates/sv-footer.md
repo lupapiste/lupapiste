@@ -1,1 +1,1 @@
-_Detta &auml;r ett automatiskt meddelande – sl&ouml;sa inte tid p&aring; att svara, ingen kommer att l&auml;sa ditt meddelande. I st&auml;llet kan du f&ouml;ra projektet vidare genom att logga in hos Lupapiste._
+_Detta &auml;r ett automatiskt meddelande – svara inte på detta meddelande._
