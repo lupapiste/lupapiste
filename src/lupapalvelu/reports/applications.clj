@@ -8,8 +8,10 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.reports.parties :as parties])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)))
+            [lupapalvelu.reports.parties :as parties]
+            [lupapalvelu.foreman :as foreman])
+  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
+           (org.apache.poi.xssf.usermodel XSSFHyperlink XSSFWorkbook)))
 
 (defn handler-roles-org [org-id]
   (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
@@ -90,7 +92,7 @@
   (when (seq secondaryOperations)
     (ss/join "\n" (map (partial localized-operation lang) secondaryOperations))))
 
-(defn create-workbook
+(defn ^XSSFWorkbook create-workbook
   ([data sheet-name header-row-content row-fn]
    (create-workbook [{:sheet-name sheet-name
                       :header header-row-content
@@ -117,8 +119,7 @@
          (.autoSizeColumn sheet i)))
      wb)))
 
-(defn ^OutputStream xlsx-stream [wb]
-  {:pre [(every? (every-pred :sheet-name :header :row-fn) sheets)]}
+(defn ^OutputStream xlsx-stream [^XSSFWorkbook wb]
   (with-open [out (ByteArrayOutputStream.)]
     (spreadsheet/save-workbook-into-stream! out wb)
     (ByteArrayInputStream. (.toByteArray out))))
