@@ -1,12 +1,21 @@
 # Hei {{user.firstName}},
 
-Hienoa saada **{{company.name}}** palvelumme k&auml;ytt&auml;j&auml;ksi! **{{company.name}}** Yritystili on aktivointia vaille valmis ja sinut on m&auml;&auml;ritetty tilin yll&auml;pit&auml;j&auml;ksi. Yll&auml;pit&auml;j&auml;n&auml; hallinnoit yrityksesi tietoja ja k&auml;ytt&auml;ji&auml; sek&auml; hyv&auml;ksyt Yritystilille tulevat valtuutuskutsut. Huomaathan, ett&auml; s&auml;hk&ouml;isten valtuutuskutsujen hyv&auml;ksyminen vastaa perinteist&auml; valtakirjaa.
+**{{company.name}}** Yritystili on aktivointia vaille valmis ja sinut on m&auml;&auml;ritetty tilin yll&auml;pit&auml;j&auml;ksi. Yll&auml;pit&auml;j&auml;n&auml; hallinnoit yrityksesi tietoja ja k&auml;ytt&auml;ji&auml; sek&auml; hyv&auml;ksyt yrityksellesi tulevat valtuutuskutsut hakemuksille. Huomaathan, ett&auml; s&auml;hk&ouml;isten valtuutuskutsujen hyv&auml;ksyminen vastaa perinteist&auml; valtakirjaa.
 
 Aktivoi tilisi oheisella linkill&auml;:
 
 {{link}}
 
-Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.             
+Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+
+Tilin aktivoimisen jälkeen voit kutsua muut käyttäjät tilille. Tässä ohjeet:
+
+1. Kirjaudu sisään
+2. Klikkaa nimeäsi oikeassa yläkulmassa
+3. Rullaa "Omat tiedot" -sivun alareunaan ja klikkaa auki musta otsikko "Yritys"
+4. Klikkaa "Hallinnoi yrityksen käyttäjiä" ja "Lisää käyttäjä"
+
+HUOM! Suosittelemme, että Yritystilillä on vähintään kaksi ylläpitäjää.
 
 Ongelmatilanteissa ota yhteytt&auml; {{support-email}}.
 
