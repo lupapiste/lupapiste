@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-**{{company.name}}** Yritystili on aktivointia vaille valmis ja sinut on m&auml;&auml;ritetty tilin yll&auml;pit&auml;j&auml;ksi. Yll&auml;pit&auml;j&auml;n&auml; hallinnoit yrityksesi tietoja ja k&auml;ytt&auml;ji&auml; sek&auml; hyv&auml;ksyt yrityksellesi tulevat valtuutuskutsut hakemuksille. Huomaathan, ett&auml; s&auml;hk&ouml;isten valtuutuskutsujen hyv&auml;ksyminen vastaa perinteist&auml; valtakirjaa.
+**{{company.name}}** Yritystili on aktivointia vaille valmis ja sinut on m&auml;&auml;ritetty tilin yll&auml;pit&auml;j&auml;ksi. Yll&auml;pit&auml;j&auml;n&auml; hallinnoit yrityksesi tietoja ja k&auml;ytt&auml;ji&auml; sek&auml; hyv&auml;ksyt yrityksellesi tulevat valtuutuskutsut hakemuksille. Kutsun hyväksymisen lisäksi hakemukselle ei tarvitse liittää erillistä valtakirjaa.
 
 Aktivoi tilisi oheisella linkill&auml;:
 
