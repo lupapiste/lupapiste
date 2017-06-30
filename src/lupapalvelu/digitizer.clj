@@ -23,7 +23,9 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.operations :as operations]))
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.building :as building]
+            [monger.operators :refer :all]))
 
 (defn- get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
@@ -89,15 +91,34 @@
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn get-buildings [organization permit-type property-id]
+(defn fetch-building-xml [organization permit-type property-id]
   (when (and organization permit-type property-id)
     (when-let [{url :url credentials :credentials} (org/get-krysp-wfs {:_id organization} permit-type)]
-      (->> (building-reader/building-xml url credentials property-id)
-           building-reader/->buildings
-           (map #(-> {:data %}))))))
+      (building-reader/building-xml url credentials property-id))))
+
+(defn buildings-for-documents [xml]
+  (->> (building-reader/->buildings xml)
+       (map #(-> {:data %}))))
+
+(defn update-buildings-array! [xml application]
+  (let [doc-buildings (building/building-ids application)
+        buildings (building-reader/->buildings-summary xml)
+        find-op-id (fn [nid]
+                     (->> (filter #(= (:national-id %) nid) doc-buildings)
+                          first
+                          :operation-id))
+        updated-buildings (map
+                            (fn [{:keys [nationalId] :as bldg}]
+                              (-> (select-keys bldg [:localShortId :buildingId :localId :nationalId :location-wgs84 :location])
+                                  (assoc :operationId (find-op-id nationalId))))
+                            buildings)]
+    (when (seq updated-buildings)
+      (mongo/update-by-id :applications
+                          (:id application)
+                          {$set {:buildings updated-buildings}}))))
 
 (defn do-create-application-from-previous-permit
-  [command operation buildings-and-structures app-info location-info permit-type]
+  [command operation buildings-and-structures app-info location-info permit-type building-xml]
   (let [{:keys [hakijat]} app-info
         document-datas (pp/schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
@@ -125,6 +146,7 @@
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
+      (update-buildings-array! building-xml fetched-application)
       fetched-application)))
 
 (defn get-location-info [{data :data :as command} app-info]
@@ -143,8 +165,9 @@
         {:keys [propertyId] :as location-info} (get-location-info command app-info)
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
+        building-xml      (if app-info xml (fetch-building-xml organizationId permit-type propertyId))
         buildings-and-structures (or (when app-info (building-reader/->buildings-and-structures xml))
-                                     (get-buildings organizationId permit-type propertyId))
+                                     (buildings-for-documents building-xml))
         organizations-match?  (= organizationId (:id organization))]
     (cond
       (and (empty? app-info)
@@ -157,5 +180,6 @@
                                                                                                    buildings-and-structures
                                                                                                    app-info
                                                                                                    location-info
-                                                                                                   permit-type)]
+                                                                                                   permit-type
+                                                                                                   building-xml)]
                                           (ok :id id)))))

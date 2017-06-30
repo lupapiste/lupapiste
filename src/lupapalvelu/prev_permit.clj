@@ -212,7 +212,7 @@
                            (when-not (ss/blank? vahainenPoikkeaminen)
                              [["poikkeamat"] vahainenPoikkeaminen])))) buildings))
 
-(defn do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
+(defn do-create-application-from-previous-permit [command operation xml app-info location-i2nfo authorize-applicants]
   (let [{:keys [hakijat]} app-info
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (schema-datas app-info buildings-and-structures)

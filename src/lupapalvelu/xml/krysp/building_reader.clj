@@ -30,14 +30,13 @@
     (when (v/rakennustunnus? building-id)
       building-id)))
 
-(defn- resolve-coordinates [point-xml building-id]
-  (println point-xml)
+(defn- pos-xml->location-map [point-xml building-id]
   (try
     (when-let [source-projection (common/->source-projection point-xml [:Point])]
       (let [point-str (get-text point-xml :pos)
             coords (ss/split point-str #" ")]
-        (let [[x y] (coordinate/convert source-projection common/to-projection 3 coords)]
-          {:x x :y y})))
+        {:location (coordinate/convert source-projection common/to-projection 3 coords)
+         :location-wgs84 (coordinate/convert source-projection :WGS84 3 coords)}))
     (catch Exception e (error e "Coordinate conversion failed for building " building-id))))
 
 (defn- ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
@@ -50,22 +49,25 @@
                            ss/trim (#(when-not (ss/blank? %) %)))
         edn            (-> xml-no-ns (select [id-container]) first xml->edn id-container)
         building-index (get-text xml-no-ns id-container :jarjestysnumero)]
-    {:propertyId   (get-text xml-no-ns id-container :kiinttun)
-     :buildingId   (first (remove ss/blank? [national-id local-short-id]))
-     :nationalId   national-id
-     :localId      local-id
-     :localShortId local-short-id
-     :index        building-index
-     :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
-     :area         (get-text xml-no-ns :kokonaisala)
-     :created      (some->> (get-text xml-no-ns :alkuHetki)
-                            cr/parse-datetime
-                            (cr/unparse-datetime :year))
-     :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
-                           (when (#{"toimenpideId" "Lupapiste"} sovellus)
-                             tunnus))
-                         (->list (:muuTunnustieto edn)))
-     :description  (or (:rakennuksenSelite edn) building-index)}))
+    (merge
+      {:propertyId   (get-text xml-no-ns id-container :kiinttun)
+       :buildingId   (first (remove ss/blank? [national-id local-short-id]))
+       :nationalId   national-id
+       :localId      local-id
+       :localShortId local-short-id
+       :index        building-index
+       :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
+       :area         (get-text xml-no-ns :kokonaisala)
+       :created      (some->> (get-text xml-no-ns :alkuHetki)
+                              cr/parse-datetime
+                              (cr/unparse-datetime :year))
+       :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
+                             (when (#{"toimenpideId" "Lupapiste"} sovellus)
+                               tunnus))
+                           (->list (:muuTunnustieto edn)))
+       :description  (or (:rakennuksenSelite edn) building-index)}
+      (-> (select1 xml-no-ns :sijaintitieto :Sijainti :piste :Point)
+          (pos-xml->location-map national-id)))))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
@@ -155,11 +157,6 @@
             :jarjestysnumero                        (get-text rakennus :rakennustunnus :jarjestysnumero)
             :kiinttun                               (get-text rakennus :rakennustunnus :kiinttun)
             :verkostoliittymat                      (cr/all-of rakennus [:verkostoliittymat])
-
-            :sijainti                               (-> (select1 rakennus :sijaintitieto :Sijainti :piste :Point)
-                                                        (resolve-coordinates
-                                                          (pysyva-rakennustunnus
-                                                            (get-text rakennus :rakennustunnus :valtakunnallinenNumero))))
 
             :osoite {:kunta                         (get-text rakennus :osoite :kunta)
                      :lahiosoite                    (get-text rakennus :osoite :osoitenimi :teksti)
