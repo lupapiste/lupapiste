@@ -185,17 +185,16 @@
           enriched-foremen (parties/enrich-foreman-apps foreman-apps)
           data (-> (reduce reducer-fn result-map other-apps)
                    (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
-          henk-header (map str [:id-link :id :address :primaryOperation
-                                :etunimi :sukunimi :osoite :puhelin :sahkoposti
-                                :suoramarkkinointilupa :turvakielto])
-          yritys-header (map str [:id-link :id :address :primaryOperation
-                                  :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
-                                  :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
-                                  :turvakielto])
           ;; (-> (.getCreationHelper wb) (.createHyperlink help HyperlinkType/URL) (.setAddress "https://...") )
           ;; cell.setHyperlink(link)
-          sheets [{:sheet-name "Henkilöhakijat" :header henk-header :row-fn parties/private-applicants-row-fn :data (:private-applicants data)}
-                  {:sheet-name "Yritysakijat" :header yritys-header :row-fn parties/company-applicants-row-fn :data (:company-applicants data)}
+          sheets [{:sheet-name "Henkilöhakijat"
+                   :header (parties/applicants-field-localization :private lang)
+                   :row-fn parties/private-applicants-row-fn
+                   :data (:private-applicants data)}
+                  {:sheet-name "Yritysakijat"
+                   :header (parties/applicants-field-localization :company lang)
+                   :row-fn parties/company-applicants-row-fn
+                   :data (:company-applicants data)}
                   {:sheet-name "Suunnittelijat"
                    :header (parties/designer-fields-localized lang)
                    :row-fn parties/designers-row-fn

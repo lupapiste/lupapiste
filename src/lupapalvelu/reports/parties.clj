@@ -72,6 +72,14 @@
      :yhteyshenkilosahkoposti (get-in data [:yhteyshenkilo :yhteystiedot :email])}))
 
 
+(def applicants-fields-localization-mapping
+  (merge
+    basic-info-localization-mapping
+    {:etunimi "etunimi" :sukunimi "sukunimi" :osoite  "osoite" :puhelin "userinfo.phone" :sahkoposti "email"
+     :suoramarkkinointilupa "suoramarkkinointilupa" :turvakielto "turvakielto"
+     :yritysnimi "company"  :yhteyshenkiloetunimi "yhteyshenkilo.etunimi" :yhteyshenkilosukunimi "yhteyshenkilo.sukunimi"
+     :yhteyshenkilopuhelin "yhteyshenkilo.puhelin" :yhteyshenkilosahkoposti "yhteyshenkilo.sahkoposti"}))
+
 ;;
 ;; Private applicants
 ;;
@@ -88,10 +96,13 @@
     (partial merge (basic-info-localized app lang))
     (applicants henkilo-doc? pick-person-data app)))
 
+(def private-applicants-fields
+  [:id-link :id :address :primaryOperation
+   :etunimi :sukunimi :osoite :puhelin :sahkoposti
+   :suoramarkkinointilupa :turvakielto])
+
 (def private-applicants-row-fn
-  (juxt :id-link :id :address :primaryOperation
-        :etunimi :sukunimi :osoite :puhelin :sahkoposti
-        :suoramarkkinointilupa :turvakielto))
+  (apply juxt private-applicants-fields))
 
 ;;
 ;; Company applicants
@@ -102,11 +113,21 @@
     (partial merge (basic-info-localized app lang))
     (applicants yritys-doc? pick-company-data app)))
 
+(def company-applicants-fields
+  [:id-link :id :address :primaryOperation
+   :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
+   :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
+   :turvakielto])
+
 (def company-applicants-row-fn
-  (juxt :id-link :id :address :primaryOperation
-        :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
-        :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
-        :turvakielto))
+  (apply juxt company-applicants-fields))
+
+(defn applicants-field-localization [type lang]
+  (map
+    #(i18n/localize lang (get applicants-fields-localization-mapping %))
+    (case (keyword type)
+      :private private-applicants-fields
+      :company company-applicants-fields)))
 
 ;;
 ;; Designers
@@ -244,10 +265,12 @@
 (def foreman-fields-localization-mapping
   (merge
     basic-info-localization-mapping
-    {:yritys "userinfo.architect.company.name"
+    {:yritys "company"
      :etunimi "etunimi" :sukunimi "sukunimi" :osoite  "osoite" :puhelin "userinfo.phone" :sahkoposti "email"
-     :rooli "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label" :vaativuus "osapuoli.patevyys-tyonjohtaja.patevyysvaatimusluokka._group_label"
-     :taysiaikainenOsaaikainen "osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen" :tutkinto "osapuoli.patevyys.koulutus"
+     :rooli "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
+     :vaativuus "osapuoli.patevyys-tyonjohtaja.patevyysvaatimusluokka._group_label"
+     :taysiaikainenOsaaikainen "osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen"
+     :tutkinto "osapuoli.patevyys.koulutus"
      :sijaistettava "tyonjohtaja.sijaistus._group_label"  :sijaisuus-alkaa "tyonjohtaja.sijaistus.alkamisPvm"
      :sijaisuus-paattyy "tyonjohtaja.sijaistus.paattymisPvm"
      :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
