@@ -8,7 +8,8 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n :refer [with-lang loc]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as op]))
+            [lupapalvelu.operations :as op]
+            [sade.validators :as v]))
 
 
 (defn make-app-link [id lang]
@@ -132,6 +133,12 @@
 ;; Designers
 ;;
 
+(defn get-fise-link [data]
+  (let [fise-val (get-in data [:patevyys :fise])]
+    (if (and (not (ss/blank? fise-val)) (v/http-url? fise-val))
+      (str "=HYPERLINK(\"" fise-val \" ",\"" fise-val "\")")
+      fise-val)))
+
 (defn pick-designer-data
   [lang doc]
   (with-lang lang
@@ -149,7 +156,7 @@
        :osoite                (get-osoite data)
        :puhelin               (get-in data [:yhteystiedot :puhelin])
        :sahkoposti            (get-in data [:yhteystiedot :email])
-       :fise                  (get-in data [:patevyys :fise])
+       :fise                  (get-fise-link data)
        :tutkinto              (loc "koulutus" (get-in data [:patevyys :koulutusvalinta]))
        :valmistumisvuosi      (get-in data [:patevyys :valmistumisvuosi])})))
 
