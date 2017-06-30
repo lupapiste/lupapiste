@@ -1,19 +1,16 @@
 # Hei {{user.firstName}},
 
-onnittelut - pääsette jatkossa antamaan lausuntoja vaikka omalta
-kotisohvaltanne käsin! {{organization}} nimittäin käyttää rakennetun
-ympäristön sähköistä lupa-asiointipalvelua Lupapistettä, ja teidät on
+{{organization}} käyttää rakennetun
+ympäristön sähköistä lupa-asiointipalvelua Lupapistettä, ja sinut on
 nyt lisätty lausunnonantajaksi nimikkeellä {{text}}.
 
-Teiltä ei vielä odoteta mitään toimenpiteitä. Kun teiltä pyydetään
-ensimmäisen kerran lausuntoa, saatte sähköpostiinne linkin sivulle,
-jossa voitte asettaa itsellenne salasanan
-palveluun. Käyttäjätunnuksena toimii sähköpostiosoitteenne.
+Sinulta ei vielä odoteta mitään toimenpiteitä. Kun saat ensimmäisen lausuntopyynnön, saat sähköpostiisi linkin sivulle,
+jossa voit asettaa itsellesi salasanan palveluun. Käyttäjätunnuksena toimii sähköpostiosoitteesi.
 
-Jatkossa pääsette antamaan lausunnon käyttäjätunnuksellanne ja
-asettamallanne salasanalla sähköpostiinne tulevan linkin kautta.
+Jatkossa pääset antamaan lausunnon käyttäjätunnuksellasi ja
+asettamallasi salasanalla sähköpostiisi tulevan linkin kautta.
 
-Lue {{lupapiste-help-statements}} sekä {{lupapiste-for-authorities}}.
+Lisätietoa sivuiltamme {{lupapiste-help-statements}} sekä {{lupapiste-for-authorities}}.
 
 Pääset seuraamaan lupa-asioinnin sähköistymistä {{facebook}} |
 {{twitter}} | {{instagram}}
