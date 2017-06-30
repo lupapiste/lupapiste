@@ -6,7 +6,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.i18n :as i18n :refer [with-lang loc]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]))
 
@@ -113,29 +113,42 @@
 ;;
 
 (defn pick-designer-data
-  "Vaativuusluokka, Nimi, Rooli(huom pääsunnitelija dokumentti tyyppi), pätevyys, yhteysosoite, puh, sähköposti,tutkinto, valmistumisvuosi, fisekortti(linkkinä)\n"
-  [doc]
-  (let [data (tools/unwrapped (get doc :data))]
-    {:etunimi          (get-in data [:henkilotiedot :etunimi])
-     :sukunimi         (get-in data [:henkilotiedot :sukunimi])
-     :rooli            (case (get-in doc [:schema-info :name])
-                         "paasuunnittelija" "P\u00e4\u00e4suunnittelija"
-                         "suunnittelija"    (get data :kuntaRoolikoodi))
-     :suunnittelu-vaativuus (get-in data [:suunnittelutehtavanVaativuusluokka])
-     :patevyysluokka   (get-in data [:patevyys :patevyysluokka])
-     :patevyys         (get-in data [:patevyys :patevyys])
-     :osoite           (get-osoite data)
-     :puhelin          (get-in data [:yhteystiedot :puhelin])
-     :sahkoposti       (get-in data [:yhteystiedot :email])
-     :fise             (get-in data [:patevyys :fise])
-     :tutkinto         (get-in data [:patevyys :koulutusvalinta])
-     :valmistumisvuosi (get-in data [:patevyys :valmistumisvuosi])}))
+  [lang doc]
+  (with-lang lang
+    (let [data (tools/unwrapped (get doc :data))]
+      {:etunimi               (get-in data [:henkilotiedot :etunimi])
+       :sukunimi              (get-in data [:henkilotiedot :sukunimi])
+       :rooli                 (case (get-in doc [:schema-info :name])
+                                "paasuunnittelija" (loc "osapuoli.suunnittelija.kuntaRoolikoodi.p\u00e4\u00e4suunnittelija")
+                                "suunnittelija" (i18n/localize-fallback
+                                                  lang [(str "osapuoli.suunnittelija.kuntaRoolikoodi." (get data :kuntaRoolikoodi))
+                                                        (str "osapuoli.kuntaRoolikoodi." (get data :kuntaRoolikoodi))]))
+       :suunnittelu-vaativuus (loc "osapuoli.suunnittelutehtavanVaativuusluokka" (get-in data [:suunnittelutehtavanVaativuusluokka]))
+       :patevyysluokka        (loc "osapuoli.patevyys.patevyysluokka" (get-in data [:patevyys :patevyysluokka]))
+       :patevyys              (get-in data [:patevyys :patevyys])
+       :osoite                (get-osoite data)
+       :puhelin               (get-in data [:yhteystiedot :puhelin])
+       :sahkoposti            (get-in data [:yhteystiedot :email])
+       :fise                  (get-in data [:patevyys :fise])
+       :tutkinto              (loc "koulutus" (get-in data [:patevyys :koulutusvalinta]))
+       :valmistumisvuosi      (get-in data [:patevyys :valmistumisvuosi])})))
 
 (defn designers [app lang]
   (map
     (partial merge (basic-info-localized app lang))
     (->> (domain/get-documents-by-subtype (:documents app) "suunnittelija")
-         (map pick-designer-data))))
+         (map (partial pick-designer-data lang)))))
+
+(def designer-fields-localization-mapping
+  (merge
+    basic-info-localization-mapping
+    {:etunimi "etunimi" :sukunimi "sukunimi" :osoite  "osoite" :puhelin "userinfo.phone" :sahkoposti "email"
+     :rooli "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
+     :suunnittelu-vaativuus "osapuoli.suunnittelutehtavanVaativuusluokka._group_label"
+     :patevyysluokka "osapuoli.patevyys.patevyysluokka._group_label" :patevyys "osapuoli.patevyys.patevyys"
+     :tutkinto "osapuoli.patevyys.koulutus" :fise "osapuoli.patevyys.fise"
+     :valmistumisvuosi "osapuoli.patevyys.valmistumisvuosi"
+     :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
 
 (def designers-fields
   [:id-link :id :address :primaryOperation
@@ -143,6 +156,9 @@
    :suunnittelu-vaativuus :patevyysluokka :patevyys
    :osoite :puhelin :sahkoposti
    :fise :tutkinto :valmistumisvuosi])
+
+(defn designer-fields-localized [lang]
+  (map #(i18n/localize lang (get designer-fields-localization-mapping %)) designers-fields))
 
 (def designers-row-fn
   (apply juxt designers-fields))
