@@ -245,7 +245,7 @@
   // ========================================================================================
 
   function TabsModel(companyId) {
-    this.tabs = _.map(["info", "users"], function(name) {
+    this.tabs = _.map(["info", "users", "tags"], function(name) {
       return {
         name: name,
         active: ko.observable(false),

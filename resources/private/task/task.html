@@ -17,6 +17,9 @@
         <i class="lupicon-eye"></i>
         <span data-bind="ltext: 'task.review-done'"></span>
       </button>
+      <button data-test-id="resend-review" data-bind="click: resendReview, enable: !$root.processing(), visible: $root.authorization.ok('resend-review-to-backing-system')" class="positive">
+        <span data-bind="ltext: 'task.resend-review'"></span>
+      </button>
       <!-- ko if: approvable || rejectable -->
       <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>

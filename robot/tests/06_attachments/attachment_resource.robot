@@ -80,3 +80,13 @@ Attachment subgroup should be visible
 Attachment subgroup should not be visible
   [Arguments]  ${nth}  ${sub-nth}
   Element Should Not Be Visible  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:eq(${nth}) rollup[data-test-level=accordion-level-1]:eq(${sub-nth})
+
+Sign all attachments
+  [Arguments]  ${password}
+  Tab should be visible  attachments
+  Click by test id  sign-attachments
+  Wait Until   Element should be visible  signAttachmentPassword
+  Input text by test id  signAttachmentPassword  ${password}
+  Click enabled by test id  do-sign-attachments
+  Wait Until   Element should not be visible  signAttachmentPassword
+  Confirm  dynamic-ok-confirm-dialog

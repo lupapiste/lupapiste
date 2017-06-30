@@ -124,5 +124,3 @@
 
        (against-background
          (mongo/select anything anything anything) => [model-ad-1 model-ad-2 model-ad-3 model-ad-4]))
-
-

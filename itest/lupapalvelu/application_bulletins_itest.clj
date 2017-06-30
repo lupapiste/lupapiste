@@ -223,12 +223,12 @@
               _ (command sonja :approve-application :id (:id sipoo-app) :lang "fi") => ok?
               _ (command olli :move-to-proclaimed
                          :id (:id oulu-app)
-                         :proclamationStartsAt (now)
+                         :proclamationStartsAt (util/get-timestamp-ago :day 1)
                          :proclamationEndsAt (util/get-timestamp-from-now :day 1)
                          :proclamationText "testi") => ok?
               _ (command sonja :move-to-proclaimed
                          :id (:id sipoo-app)
-                         :proclamationStartsAt (now)
+                         :proclamationStartsAt (util/get-timestamp-ago :day 1)
                          :proclamationEndsAt (util/get-timestamp-from-now :day 1)
                          :proclamationText "testi") => ok?
               _ (datatables pena :application-bulletins :page "1"
@@ -237,6 +237,8 @@
                             :state nil
                             :sort nil) => (partial expected-failure? :error.illegal-number)
               resp (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil) => ok?]
+          (fact "Paging count"
+            (:left resp) => -8)
           (fact "Two bulletins is returned"
             (count (:data resp)) => 2)
 
@@ -282,7 +284,7 @@
 
           (facts "verdict given bulletin"
             (let [{vid :verdict-id} (give-verdict olli (:id oulu-app) :verdictId "12330-2016")
-                  ts-now (now)
+                  ts-now (util/get-timestamp-ago :day 1)
                   _ (upload-attachment-to-target olli (:id oulu-app) nil true vid "verdict")
                   resp (command olli :move-to-verdict-given
                                      :id (:id oulu-app)

@@ -24,7 +24,7 @@
 (defn- party-info-from-document [document]
   {:document-id (:id document)
    :document-name (tools/doc-name document)
-   :id (tools/party-doc-user-id document)
+   :id (tools/party-doc-selected-id document)
    :role (tools/party-doc->user-role document)})
 
 (def ^:private non-copyable-roles #{:tyonjohtaja :statementGiver})
@@ -38,15 +38,18 @@
                   (juxt :id vector)))
        (apply merge-with concat)))
 
-(defn- auth-id [auth-entry]
+(defn auth-id [auth-entry]
   (or (not-empty (:id auth-entry))
       (-> auth-entry :invite :user :id)))
 
-(defn- auth-is-user [auth user]
-  (= (:id auth) (:id user)))
+(defn- auth-is-user? [auth user]
+  (= (auth-id auth) (:id user)))
 
-(defn- auth-is-company-of-user [auth user]
-  (= (:id auth) (-> user :company :id)))
+(defn- auth-is-company-of-user? [auth user]
+  (= (auth-id auth) (-> user :company :id)))
+
+(defn- auth-is-invite? [auth]
+  (boolean (:invite auth)))
 
 (defn- auth-role [auth-entry]
   (or (keyword (-> auth-entry :invite :role))
@@ -54,10 +57,10 @@
 
 (defn non-copyable-auth? [auth user]
   (or (contains? non-copyable-roles (auth-role auth))
-      (auth-is-user auth user)
-      (auth-is-company-of-user auth user)))
+      (auth-is-user? auth user)
+      (auth-is-company-of-user? auth user)))
 
-(defn- not-in-auth [auth]
+(defn not-in-auth [auth]
   (let [auth-id-set (set (map auth-id auth))]
     (fn [id]
       (not (get auth-id-set id)))))
@@ -151,8 +154,11 @@
                (not-in-auth? (id-from-personal-information element))))
       (building-selector-element? element)))
 
-(defn- clear-user-and-company-ids [element]
-  (if (map? element)
+(defn- clear-user-and-company-ids [element auth]
+  (if (and (map? element)
+           (auth-is-invite? (find-first #(= (:id %)
+                                            (id-from-personal-information element))
+                                        auth)))
     (cond (contains? element :userId)    (assoc-in element [:userId :value] "")
           (contains? element :companyId) (assoc-in element [:companyId :value] "")
           :else element)
@@ -173,7 +179,7 @@
                   ; clear user and company id's in any case because
                   ; document is invalid if an unauthorized id is found, and
                   ; invites are not considered authorizations
-                  (clear-user-and-company-ids v)))
+                  (clear-user-and-company-ids v (:auth application))))
               document)))
 
 (defn- construction-waste-plan? [doc]
@@ -231,16 +237,16 @@
     (update-in document [:schema-info :op :id] op-id-mapping)
     document))
 
-(defn- preprocess-document
-  [document op-id-mapping application organization manual-schema-datas]
+(defn preprocess-document
+  "Preprocess document taken from another application so that it is valid for the target application"
+  [document application organization manual-schema-datas]
   (-> document
       (handle-copy-action   application organization manual-schema-datas)
       (handle-special-cases application organization manual-schema-datas)
       (assoc :id      (mongo/create-id)
              :created (:created application))
       (dissoc :meta)
-      (clear-personal-information application manual-schema-datas)
-      (update-doc-operation-reference op-id-mapping)))
+      (clear-personal-information application manual-schema-datas)))
 
 (defn- update-attachment-operation-references
   "Update the attachment so that it refers to an operation in the copied
@@ -257,10 +263,11 @@
                                op-id-mapping)
      :secondaryOperations (mapv #(assoc % :id (op-id-mapping (:id %)))
                                 (:secondaryOperations application))
-     :documents (mapv #(preprocess-document % op-id-mapping
-                                            application
-                                            organization
-                                            manual-schema-datas)
+     :documents (mapv (comp #(update-doc-operation-reference % op-id-mapping)
+                            #(preprocess-document %
+                                                  application
+                                                  organization
+                                                  manual-schema-datas))
                       (:documents application))
      :attachments (mapv #(update-attachment-operation-references % op-id-mapping)
                         (:attachments application))}))
@@ -277,7 +284,7 @@
   (if (empty? documents)
     (app/application-documents-map copied-application user organization manual-schema-datas)))
 
-(defn- create-company-auth [old-company-auth]
+(defn create-company-auth [old-company-auth]
   (when-let [company-id (auth-id old-company-auth)]
     (when-let [company (company/find-company-by-id company-id)]
       (assoc
@@ -286,16 +293,19 @@
        :role (:role old-company-auth)
        :invite {:user {:id company-id}}))))
 
-(defn- create-user-auth [old-user-auth inviter application-id timestamp]
+(defn create-user-auth [old-user-auth role inviter application-id timestamp & [text document-name document-id path]]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]
     (auth/create-invite-auth inviter user application-id
-                             (:role old-user-auth)
-                             timestamp)))
+                             role
+                             timestamp
+                             text document-name document-id path)))
 
-(defn- new-auth [old-auth inviter application-id timestamp]
+(defn auth->invite
+  "Create an invite from existing auth entry."
+  [old-auth inviter application-id timestamp]
   (if (= (:type old-auth) "company")
     (create-company-auth old-auth)
-    (create-user-auth old-auth inviter application-id timestamp )))
+    (create-user-auth old-auth (:role old-auth) inviter application-id timestamp)))
 
 (defn- new-auth-map [{auth           :auth
                      id              :id
@@ -308,7 +318,7 @@
                       (map #(if (= (keyword (:role %)) :owner)
                               (assoc % :role :writer)
                               %))
-                      (mapv #(new-auth % inviter id created))))})
+                      (mapv #(auth->invite % inviter id created))))})
 
 
 (def default-copy-options
@@ -462,8 +472,7 @@
 
 (defn- notify-of-invite! [app command invite-type recipients]
   (let [recipients (map (fn [{{:keys [email user]} :invite}]
-                          (or (usr/get-user-by-email email)
-                              (assoc user :email email)))
+                          (usr/get-user-by-email email))
                         recipients)]
     (notif/notify! invite-type
                    (assoc command
@@ -490,7 +499,8 @@
 
 (defn send-invite-notifications! [{:keys [auth] :as application} {:keys [user] :as command}]
   (let [[users companies] ((juxt remove filter) (comp #{"company"} :type)
-                                                (remove (comp #{:owner} keyword :role) auth))]
+                                                (remove (comp #{:owner :statementGiver} keyword :role)
+                                                        auth))]
     ;; Non-company invites
     (user-invite-notifications! application command users)
     ;; Company invites

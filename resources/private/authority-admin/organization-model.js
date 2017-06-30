@@ -44,6 +44,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.selectedOperations = ko.observableArray();
   self.allOperations = [];
   self.appRequiredFieldsFillingObligatory = ko.observable(false);
+  self.automaticOkForAttachments = ko.observable(false);
   self.assignmentsEnabled = ko.observable(false);
   self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
@@ -72,6 +73,16 @@ LUPAPISTE.OrganizationModel = function () {
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
+    }
+  });
+
+  ko.computed(function() {
+    var automaticOk = self.automaticOkForAttachments();
+    if (self.initialized) {
+      ajax.command("set-automatic-ok-for-attachments", {enabled: automaticOk})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
     }
   });
 
@@ -224,6 +235,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.appRequiredFieldsFillingObligatory(organization["app-required-fields-filling-obligatory"] || false);
 
     self.assignmentsEnabled(organization["assignments-enabled"] || false);
+
+    self.automaticOkForAttachments(organization["automatic-ok-for-attachments-enabled"] || false);
 
     self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
 

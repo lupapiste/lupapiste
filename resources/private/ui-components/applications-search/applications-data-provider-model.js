@@ -73,6 +73,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
     return { searchText: self.searchFieldDelayed(),
              tags: _.map(lupapisteApp.services.tagFilterService.selected(), "id"),
+             companyTags: _.map(lupapisteApp.services.companyTagFilterService.selected(), "id"),
              organizations: _.map(lupapisteApp.services.organizationFilterService.selected(), "id"),
              operations: _.map(operations, "id"),
              handlers: _.map(lupapisteApp.services.handlerFilterService.selected(), "id"),
@@ -87,6 +88,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   self.disposedComputed(function() {
     self.searchFieldDelayed();
     lupapisteApp.services.tagFilterService.selected();
+    lupapisteApp.services.companyTagFilterService.selected();
     lupapisteApp.services.organizationFilterService.selected();
     lupapisteApp.services.operationFilterService.selected();
     lupapisteApp.services.handlerFilterService.selected();
@@ -133,6 +135,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   self.clearFilters = function() {
     lupapisteApp.services.handlerFilterService.selected([]);
     lupapisteApp.services.tagFilterService.selected([]);
+    lupapisteApp.services.companyTagFilterService.selected([]);
     lupapisteApp.services.operationFilterService.selected([]);
     lupapisteApp.services.organizationFilterService.selected([]);
     lupapisteApp.services.areaFilterService.selected([]);

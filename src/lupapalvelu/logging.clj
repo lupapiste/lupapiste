@@ -62,11 +62,13 @@
 
 (defn log-event [level event]
   (let [stripped (-> event
-                   (dissoc :application :application-assignments :organization :user-organizations :ns)
+                   (dissoc :application :application-assignments :organization :user-organizations :company :ns)
                    (util/dissoc-in [:data :tempfile]) ; Temporary java.io.File set by ring
                    (update-in [:data :files] (partial map #(if (:tempfile %)
                                                              (dissoc % :tempfile)
-                                                             %)))) ; data in multipart/form-data w/ POST
+                                                             %))) ; data in multipart/form-data w/ POST
+                   (update :data (fn [m] (if-not (seq (:files m)) (dissoc m :files) m))) ; strip empty data.files
+                   (util/strip-empty-maps))
         jsoned   (json/generate-string stripped)]
     (try
       (unsecure-log-event level jsoned {:ns (str (:ns event))})

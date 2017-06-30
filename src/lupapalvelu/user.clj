@@ -41,6 +41,7 @@
               :asc    sc/Bool}
    :filter   {(sc/optional-key :handlers)      [sc/Str]
               (sc/optional-key :tags)          [sc/Str]
+              (sc/optional-key :companyTags)   [sc/Str]
               (sc/optional-key :operations)    [sc/Str]
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]
@@ -64,6 +65,7 @@
 (defschema OrgId (sc/pred keyword? "Organization ID"))
 (defschema Authz (sc/pred string? "Authz access right"))
 (defschema OrgAuthz {OrgId [Authz]})
+(defschema PersonIdSource (sc/enum "identification-service" "user"))
 
 (defschema User
           {:id                                    Id
@@ -76,7 +78,8 @@
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            OrgAuthz
-           (sc/optional-key :personId)            (sc/maybe ssc/Hetu)
+           (sc/optional-key :personId)            (sc/if ss/blank? ssc/BlankStr ssc/Hetu)
+           (sc/optional-key :personIdSource)      PersonIdSource
            (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :zip)                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
@@ -104,9 +107,11 @@
                                                    (sc/optional-key :message)        sc/Str
                                                    (sc/optional-key :title)          sc/Str}
            (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
-                                                   (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
+                                                   (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)
+                                                   (sc/optional-key :companyFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
+           (sc/optional-key :companyFilters)      [SearchFilter]
            (sc/optional-key :language)            i18n/supported-language-schema
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
            (sc/optional-key :firstLogin)          sc/Bool})
@@ -202,6 +207,9 @@
 
 (defn authority? [{role :role}]
   (contains? #{:authority :oirAuthority} (keyword role)))
+
+(defn verified-person-id? [{pid :personId source :personIdSource :as user}]
+  (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
 
 (defn validate-authority
   "Validator: current user must be an authority. To be used in commands'
@@ -574,7 +582,7 @@
 (defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
   (let [email (ss/canonize-email (:email user-data))]
     (-<> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId
+      (select-keys [:email :username :role :firstName :lastName :personId :personIdSource
                     :phone :city :street :zip :enabled :orgAuthz :language
                     :allowDirectMarketing :architect :company
                     :graduatingYear :degree :fise :fiseKelpoisuus])

@@ -8,6 +8,7 @@
             [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.job :as job]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]
             [lupapiste-commons.attachment-types :as att-types]
@@ -39,25 +40,25 @@
     (util/contains-value? config-by-group (keyword typeId))))
 
 (defn bind-single-attachment! [{:keys [application user created]} mongo-file {:keys [fileId type attachmentId contents] :as filedata} exclude-ids]
-  (let [conversion-data    (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
-        is-authority       (usr/user-is-authority-in-organization? user (:organization application))
-
-        placeholder-id     (or attachmentId
+  (let [conversion-data       (att/conversion application (assoc mongo-file :content ((:content mongo-file))))
+        is-authority          (usr/user-is-authority-in-organization? user (:organization application))
+        automatic-ok-enabled  (org/get-organization-auto-ok (:organization application))
+        placeholder-id        (or attachmentId
                                (att/get-empty-attachment-placeholder-id (:attachments application) type (set exclude-ids)))
-        attachment         (or
-                             (att/get-attachment-info application placeholder-id)
-                             (att/create-attachment! application
-                                                     (assoc (select-keys filedata [:group :contents :target :source])
-                                                            :requested-by-authority (boolean (auth/application-authority? application user))
-                                                       :created         created
-                                                       :attachment-type type)))
+        attachment            (or
+                                (att/get-attachment-info application placeholder-id)
+                                (att/create-attachment! application
+                                                      (assoc (select-keys filedata [:group :contents :target :source])
+                                                              :requested-by-authority (boolean (auth/application-authority? application user))
+                                                        :created         created
+                                                        :attachment-type type)))
         version-options (merge
                           (select-keys mongo-file [:fileId :filename :contentType :size])
                           (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign :target])
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
                                            :comment-text contents
-                                           :state (when is-authority
+                                           :state (when (and is-authority automatic-ok-enabled)
                                                     :ok)
                                            :constructionTime (boolean (and (not is-authority)
                                                                            (:type filedata)
