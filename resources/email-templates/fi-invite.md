@@ -1,37 +1,32 @@
 # Hei {{user.firstName}},
 
 Sinut halutaan valtuuttaa kirjoitusoikeudella osapuoleksi
-Lupapisteessä olevaan hankkeeseen käyttäen sähköpostiosoitetta
-{{recipient-email}}. Lupapisteessä voidaan hoitaa lupa-asiointia
-yhdessä muiden hankkeen osapuolten kanssa. Vuorokauden ympäri.
+Lupapisteessä olevaan hankkeeseen sähköpostiosoitteella
+{{recipient-email}}. 
 
 Kirjoitusoikeus koskee hanketta {{operation}} osoitteessa {{address}},
 {{municipality}}.
 
 {{recognition-of-authorization}}
 
-Jos et ole vielä Lupapisteen käyttäjä, hankkeen näkeminen edellyttää
-rekisteröitymistä palveluun käyttäen sähköpostiosoitetta
-{{recipient-email}}. Rekisteröityminen tehdään tunnistautumalla
+Jos et ole vielä käyttänyt Lupapistettä, rekisteröidy palveluun käyttäen sähköpostiosoitetta
+{{recipient-email}}. Rekisteröityminen edellyttää vahvaa tunnistautumista
 mobiilivarmenteen tai henkilökohtaisten verkkopankkitunnusten avulla.
 
-Muistathan rekisteröityä palveluun samalla sähköpostiosoitteella,
-johon kutsu on lähetetty (eli {{recipient-email}}). Mikäli olet jo
-rekisteröitynyt eri osoitteella Lupapisteeseen, pyydä kutsun
+Mikäli olet jo rekisteröitynyt eri osoitteella Lupapisteeseen ja haluat käyttää sitä nytkin, pyydä kutsun
 lähettäjältä {{inviter-email}} uusi kutsu käyttämääsi osoitteeseen.
 
-Nähdäksesi hankkeen tiedot klikkaa alla olevaa linkkiä ja hyväksy
-valtuutus. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen
-osoiteriville.
+Päästäksesi täydentämään hakemusta klikkaa alla olevaa linkkiä ja hyväksy valtuutus. Hyväksymisen jälkeen voit hakemuksella valita oman nimesi edustamasi roolin alasvetovalikosta, jolloin henkilötietosi täydentyvät hakemukselle automaattisesti.
+
+Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
 {{link}}
  
-Kutsun lähettäjä on myös halunnut jättää sinulle seuraavan viestin:
+Kutsun lähettäjä on myös halunnut jättää sinulle seuraavan viestin (kohta on tyhjä, jos viestikohtaan ei ole kirjoitettu mitään):
 
 {{message}}
 
-Onko sinulla kysyttävää palvelun käytöstä? Suosittelemme tutustumaan
-{{lupapiste.help}} sekä {{faq}}.
+Lupapisteessä voidaan hoitaa lupa-asiointia yhdessä muiden hankkeen osapuolten kanssa. Vuorokauden ympäri. Onko sinulla kysyttävää palvelun käytöstä? Suosittelemme tutustumaan {{lupapiste.help}} sekä {{faq}}.
 
 Terveisin,
 
