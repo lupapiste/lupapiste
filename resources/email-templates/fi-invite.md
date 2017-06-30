@@ -4,7 +4,7 @@ Sinut halutaan valtuuttaa kirjoitusoikeudella osapuoleksi
 Lupapisteessä olevaan hankkeeseen sähköpostiosoitteella
 {{recipient-email}}. 
 
-Kirjoitusoikeus koskee hanketta {{operation}} osoitteessa {{address}},
+Valtuutus koskee hanketta {{operation}} osoitteessa {{address}},
 {{municipality}}.
 
 {{recognition-of-authorization}}
