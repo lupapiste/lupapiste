@@ -192,9 +192,7 @@
                                   :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
                                   :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
                                   :turvakielto])
-          designers-header (map str [:id-link :id :address :primaryOperation
-                                     :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
-                                     :fise :tutkinto :valmistumisvuosi])
+          designers-header (map str parties/designers-fields)
           foremen-header (map str [:id-link :id :address :primaryOperation
                                    :etunimi :sukunimi :rooli :vastattavat-tyotehtavat])
           ;; (-> (.getCreationHelper wb) (.createHyperlink help HyperlinkType/URL) (.setAddress "https://...") )

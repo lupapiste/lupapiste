@@ -65,23 +65,6 @@
      :yhteyshenkilopuhelin (get-in data [:yhteyshenkilo :yhteystiedot :puhelin])
      :yhteyshenkilosahkoposti (get-in data [:yhteyshenkilo :yhteystiedot :email])}))
 
-(defn pick-designer-data
-  "Vaativuusluokka, Nimi, Rooli(huom pääsunnitelija dokumentti tyyppi), pätevyys, yhteysosoite, puh, sähköposti,tutkinto, valmistumisvuosi, fisekortti(linkkinä)\n"
-  [doc]
-  (let [data (tools/unwrapped (get doc :data))]
-    {:etunimi          (get-in data [:henkilotiedot :etunimi])
-     :sukunimi         (get-in data [:henkilotiedot :sukunimi])
-     :rooli            (case (get-in doc [:schema-info :name])
-                         "paasuunnittelija" "P\u00e4\u00e4suunnittelija"
-                         "suunnittelija"    (get data :kuntaRoolikoodi))
-     :patevyys         (get-in data [:patevyys :koulutusvalinta])
-     :osoite           (get-osoite data)
-     :puhelin          (get-in data [:yhteystiedot :puhelin])
-     :sahkoposti       (get-in data [:yhteystiedot :email])
-     :tutkinto         (get-in data [:patevyys :koulutusvalinta])
-     :valmistumisvuosi (get-in data [:patevyys :valmistumisvuosi])
-     :fise             (get-in data [:patevyys :fise])}))
-
 
 ;;
 ;; Private applicants
@@ -123,16 +106,40 @@
 ;; Designers
 ;;
 
+(defn pick-designer-data
+  "Vaativuusluokka, Nimi, Rooli(huom pääsunnitelija dokumentti tyyppi), pätevyys, yhteysosoite, puh, sähköposti,tutkinto, valmistumisvuosi, fisekortti(linkkinä)\n"
+  [doc]
+  (let [data (tools/unwrapped (get doc :data))]
+    {:etunimi          (get-in data [:henkilotiedot :etunimi])
+     :sukunimi         (get-in data [:henkilotiedot :sukunimi])
+     :rooli            (case (get-in doc [:schema-info :name])
+                         "paasuunnittelija" "P\u00e4\u00e4suunnittelija"
+                         "suunnittelija"    (get data :kuntaRoolikoodi))
+     :suunnittelu-vaativuus (get-in data [:suunnittelutehtavanVaativuusluokka])
+     :patevyysluokka   (get-in data [:patevyys :patevyysluokka])
+     :patevyys         (get-in data [:patevyys :patevyys])
+     :osoite           (get-osoite data)
+     :puhelin          (get-in data [:yhteystiedot :puhelin])
+     :sahkoposti       (get-in data [:yhteystiedot :email])
+     :fise             (get-in data [:patevyys :fise])
+     :tutkinto         (get-in data [:patevyys :koulutusvalinta])
+     :valmistumisvuosi (get-in data [:patevyys :valmistumisvuosi])}))
+
 (defn designers [app lang]
   (map
     (partial merge (basic-info-localized app lang))
     (->> (domain/get-documents-by-subtype (:documents app) "suunnittelija")
          (map pick-designer-data))))
 
+(def designers-fields
+  [:id-link :id :address :primaryOperation
+   :etunimi :sukunimi :rooli
+   :suunnittelu-vaativuus :patevyysluokka :patevyys
+   :osoite :puhelin :sahkoposti
+   :fise :tutkinto :valmistumisvuosi])
+
 (def designers-row-fn
-  (juxt :id-link :id :address :primaryOperation
-        :rooli :etunimi :sukunimi :osoite :puhelin :sahkoposti :patevyys
-        :fise :tutkinto :valmistumisvuosi))
+  (apply juxt designers-fields))
 
 ;;
 ;; Foremen
