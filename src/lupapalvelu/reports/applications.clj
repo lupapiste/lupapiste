@@ -11,7 +11,8 @@
             [lupapalvelu.reports.parties :as parties]
             [lupapalvelu.foreman :as foreman])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
-           (org.apache.poi.xssf.usermodel XSSFHyperlink XSSFWorkbook)))
+           (org.apache.poi.xssf.usermodel XSSFWorkbook)
+           (org.apache.poi.ss.usermodel CellType)))
 
 (defn handler-roles-org [org-id]
   (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
@@ -175,37 +176,47 @@
     (xlsx-stream (create-workbook data sheet-name header-row-content row-fn))))
 
 
-  (defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
-    (let [[foreman-apps other-apps] ((juxt filter remove) foreman/foreman-app? (parties-between-data organizationId startTs endTs))
-          result-map {:private-applicants  []
-                      :company-applicant   []
-                      :designers           []
-                      :foremen             []}
-          reducer-fn (fn [res app]
-                       (-> res
-                           (update :private-applicants concat (parties/private-applicants app lang))
-                           (update :company-applicants concat (parties/company-applicants app lang))
-                           (update :designers concat (parties/designers app lang))))
-          enriched-foremen (parties/enrich-foreman-apps foreman-apps)
-          data (-> (reduce reducer-fn result-map other-apps)
-                   (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
-          ;; (-> (.getCreationHelper wb) (.createHyperlink help HyperlinkType/URL) (.setAddress "https://...") )
-          ;; cell.setHyperlink(link)
-          sheets [{:sheet-name "Henkilöhakijat"
-                   :header (parties/applicants-field-localization :private lang)
-                   :row-fn parties/private-applicants-row-fn
-                   :data (:private-applicants data)}
-                  {:sheet-name "Yritysakijat"
-                   :header (parties/applicants-field-localization :company lang)
-                   :row-fn parties/company-applicants-row-fn
-                   :data (:company-applicants data)}
-                  {:sheet-name "Suunnittelijat"
-                   :header (parties/designer-fields-localized lang)
-                   :row-fn parties/designers-row-fn
-                   :data (:designers data)}
-                  {:sheet-name "Tyonjohtajat"
-                   :header (parties/foreman-fields-lozalized lang)
-                   :row-fn parties/foremen-row-fn
-                   :data (:foremen data)}]
-          ]
-      (xlsx-stream (create-workbook sheets))))
+(defn hyperlinks-to-formulas! [wb]
+  (doseq [sheet (spreadsheet/sheet-seq wb)
+          cell  (spreadsheet/cell-seq sheet)
+          :when (ss/starts-with (.toString cell) "=HYPERLINK")
+          :let  [value (.toString cell)]]
+    (doto cell
+      (.setCellType CellType/FORMULA)
+      (.setCellFormula (subs value 1)))))
+
+(defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
+  (let [[foreman-apps other-apps] ((juxt filter remove)
+                                    foreman/foreman-app?
+                                    (parties-between-data organizationId startTs endTs))
+        result-map {:private-applicants  []
+                    :company-applicant   []
+                    :designers           []
+                    :foremen             []}
+        reducer-fn (fn [res app]
+                     (-> res
+                         (update :private-applicants concat (parties/private-applicants app lang))
+                         (update :company-applicants concat (parties/company-applicants app lang))
+                         (update :designers concat (parties/designers app lang))))
+        enriched-foremen (parties/enrich-foreman-apps foreman-apps)
+        data (-> (reduce reducer-fn result-map other-apps)
+                 (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
+        wb (create-workbook
+             [{:sheet-name "Henkilöhakijat"
+               :header (parties/applicants-field-localization :private lang)
+               :row-fn parties/private-applicants-row-fn
+               :data (:private-applicants data)}
+              {:sheet-name "Yritysakijat"
+               :header (parties/applicants-field-localization :company lang)
+               :row-fn parties/company-applicants-row-fn
+               :data (:company-applicants data)}
+              {:sheet-name "Suunnittelijat"
+               :header (parties/designer-fields-localized lang)
+               :row-fn parties/designers-row-fn
+               :data (:designers data)}
+              {:sheet-name "Tyonjohtajat"
+               :header (parties/foreman-fields-lozalized lang)
+               :row-fn parties/foremen-row-fn
+               :data (:foremen data)}])]
+    (hyperlinks-to-formulas! wb)
+    (xlsx-stream wb)))

@@ -16,12 +16,11 @@
 
 (defn basic-info-localized [app lang]
   (-> (select-keys app [:id :address :primaryOperation])
-      (assoc :id-link (make-app-link (:id app) lang))
+      (assoc :id (str "=HYPERLINK(\"" (make-app-link (:id app) lang) \" ",\"" (:id app) "\")"))
       (update :primaryOperation #(i18n/localize lang (str "operations." (:name %))))))
 
 (def basic-info-localization-mapping
-  {:id-link "application.id"
-   :id "application.id"
+  {:id "application.id"
    :address "applications.location"
    :primaryOperation "applications.operation"})
 
@@ -97,7 +96,7 @@
     (applicants henkilo-doc? pick-person-data app)))
 
 (def private-applicants-fields
-  [:id-link :id :address :primaryOperation
+  [:id :address :primaryOperation
    :etunimi :sukunimi :osoite :puhelin :sahkoposti
    :suoramarkkinointilupa :turvakielto])
 
@@ -114,7 +113,7 @@
     (applicants yritys-doc? pick-company-data app)))
 
 (def company-applicants-fields
-  [:id-link :id :address :primaryOperation
+  [:id :address :primaryOperation
    :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
    :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
    :turvakielto])
@@ -172,7 +171,7 @@
      :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
 
 (def designers-fields
-  [:id-link :id :address :primaryOperation
+  [:id :address :primaryOperation
    :etunimi :sukunimi :rooli
    :suunnittelu-vaativuus :patevyysluokka :patevyys
    :osoite :puhelin :sahkoposti
@@ -276,7 +275,7 @@
      :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
 
 (def foremen-fields
-  [:id-link :id :address :primaryOperation
+  [:id :address :primaryOperation
    :yritys :etunimi :sukunimi
    :osoite :puhelin :sahkoposti
    :rooli :vaativuus :taysiaikainenOsaaikainen :tutkinto
