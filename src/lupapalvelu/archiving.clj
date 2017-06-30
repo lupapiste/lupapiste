@@ -183,6 +183,9 @@
                 (last))]
     (ts->iso-8601-date ts)))
 
+(defn- get-jattopvm [application]
+  (ts->iso-8601-date (:submitted application)))
+
 (defn- get-usages [{:keys [documents]} op-ids]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
@@ -254,6 +257,7 @@
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
                        :paatospvm             (get-paatospvm application)
+                       :jattopvm              (get-jattopvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (util/find-first :general handlers) [:userId :firstName :lastName])
