@@ -2,7 +2,7 @@
 
 Osoitteessa {{address}}, {{municipality}} on vireill&auml; lupahakemus s&auml;hk&ouml;isen Lupapiste-palvelun kautta.
 
-Kohteen rajanaapurina saat tarkempia alla olevasta linkist&auml;. Linkki vanhentuu kahdessa viikossa, {{expires}}. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+Kohteen rajanaapurina saat tarkempia tietoja alla olevasta linkist&auml;. Linkki vanhentuu kahdessa viikossa, {{expires}}. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 {{link}}
 
