@@ -90,12 +90,12 @@
   (when (seq secondaryOperations)
     (ss/join "\n" (map (partial localized-operation lang) secondaryOperations))))
 
-(defn ^OutputStream xlsx-stream
+(defn create-workbook
   ([data sheet-name header-row-content row-fn]
-    (xlsx-stream [{:sheet-name sheet-name
-                   :header header-row-content
-                   :row-fn row-fn
-                   :data data}]))
+   (create-workbook [{:sheet-name sheet-name
+                      :header header-row-content
+                      :row-fn row-fn
+                      :data data}]))
   ([sheets]
    {:pre [(every? (every-pred :sheet-name :header :row-fn) sheets)]}
    (let [wb (apply spreadsheet/create-workbook
@@ -115,10 +115,13 @@
        (spreadsheet/set-row-style! header-row bold-style)
        (doseq [i (range column-count)]
          (.autoSizeColumn sheet i)))
+     wb)))
 
-     (with-open [out (ByteArrayOutputStream.)]
-       (spreadsheet/save-workbook-into-stream! out wb)
-       (ByteArrayInputStream. (.toByteArray out))))))
+(defn ^OutputStream xlsx-stream [wb]
+  {:pre [(every? (every-pred :sheet-name :header :row-fn) sheets)]}
+  (with-open [out (ByteArrayOutputStream.)]
+    (spreadsheet/save-workbook-into-stream! out wb)
+    (ByteArrayInputStream. (.toByteArray out))))
 
 (defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
   ;; Create a spreadsheet and save it
@@ -144,7 +147,7 @@
                      (partial date-value :modified)
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
-    (xlsx-stream data sheet-name header-row-content row-fn)))
+    (xlsx-stream (create-workbook data sheet-name header-row-content row-fn))))
 
 (defn ^OutputStream applications-between-excel [organizationId startTs endTs lang excluded-operations]
   (let [data               (submitted-applications-between organizationId startTs endTs excluded-operations)
@@ -168,7 +171,7 @@
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
 
-    (xlsx-stream data sheet-name header-row-content row-fn)))
+    (xlsx-stream (create-workbook data sheet-name header-row-content row-fn))))
 
 
   (defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
@@ -204,4 +207,4 @@
                    :row-fn parties/foremen-row-fn
                    :data (:foremen data)}]
           ]
-      (xlsx-stream sheets)))
+      (xlsx-stream (create-workbook sheets))))
