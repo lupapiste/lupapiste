@@ -1,9 +1,7 @@
 # Hej {{user.firstName}}, 
 
 du föreslås få fullmakt och skrivbehörighet som part i ett projekt vid
-Lupapiste, med e-postadressen {{recipient-email}}. Vid Lupapiste kan
-man sköta tillståndsärenden tillsammans med de andra parterna i
-projektet. Dygnet runt.
+Lupapiste, med e-postadressen {{recipient-email}}.
 
 Skrivbehörigheten gäller projektet {{operation}} på adressen
 {{address}}, {{municipality}}.
@@ -30,7 +28,7 @@ Avsändaren har också skrivit följande meddelande till dig:
 
 {{message}} 
 
-Har du frågor angående tjänsten? Vi rekommenderar att du bekantar dig
+Vid Lupapiste kan man sköta tillståndsärenden tillsammans med de andra parterna i projektet. Dygnet runt. Har du frågor angående tjänsten? Vi rekommenderar att du bekantar dig
 med {{lupapiste.help}} och {{faq}}.
 
 Hälsningar, 
