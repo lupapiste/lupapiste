@@ -66,7 +66,11 @@
         :vapautusperuste ""
         :vapautushakemustieto
         {:Vapautushakemus
-         {:hakija (remove nil? (map get-yhteystiedot (get documents hakija-key)))
+         ;; KuntaGML supports only one hakija at maximum.
+         {:hakija (->> (get documents hakija-key)
+                       (map get-yhteystiedot)
+                       (remove nil?)
+                       (take 1))
           :kohde (get-vapautus-kohde application documents)
           :sijaintitieto (get-sijaintitieto application)}}
         :asianKuvaus asian-kuvaus}}}})
