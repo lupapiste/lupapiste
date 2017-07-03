@@ -1,7 +1,6 @@
 (ns lupapalvelu.digitizer
   (:require [sade.property :as p]
             [sade.core :refer :all]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
@@ -14,7 +13,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.operations :as op]
             [sade.property :as prop]
             [sade.env :as env]
             [clj-time.core :refer [year]]
@@ -25,7 +23,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.building :as building]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [sade.strings :as ss]))
 
 (defn- get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
@@ -84,6 +83,18 @@
                                     created
                                     manual-schema-datas))))
 
+(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus]} buildings]
+  (map
+    (fn [{:keys [data]}]
+      (remove empty? (conj [[[:valtakunnallinenNumero] (:valtakunnallinenNumero data)]
+                            [[:kaytto :kayttotarkoitus] (get-in data [:kaytto :kayttotarkoitus])]]
+                           (when-not (or (ss/blank? (:rakennusnro data))
+                                         (= "000" (:rakennusnro data)))
+                             [[:tunnus] (:rakennusnro data)])
+                           (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                             [[:kuvaus] rakennusvalvontaasianKuvaus]))))
+    buildings))
+
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op :archiving-project (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "archiving-project") (now))
@@ -120,7 +131,7 @@
 (defn do-create-application-from-previous-permit
   [command operation buildings-and-structures app-info location-info permit-type building-xml]
   (let [{:keys [hakijat]} app-info
-        document-datas (pp/schema-datas app-info buildings-and-structures)
+        document-datas (schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
         command (update-in command [:data] merge
                            {:operation operation :infoRequest false :messages []}
@@ -141,6 +152,9 @@
         command (util/deep-merge command (action/application->command created-application))]
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
+
+    (when-let [updates (verdict/find-verdicts-from-xml command building-xml)]
+      (action/update-application command updates))
 
     (add-applicant-documents command hakijat)
 

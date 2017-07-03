@@ -18,7 +18,7 @@
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :org-authz-roles  #{:archivist}
-   :states           states/post-verdict-states}
+   :states           (conj states/post-verdict-states :underReview)}
   [{:keys [application user organization] :as command}]
   (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
                                (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
@@ -54,10 +54,11 @@
 (defquery archiving-operations-enabled
   {:user-roles      #{:authority}
    :org-authz-roles (with-meta #{:archivist} {:skip-validation true})
-   :states          states/all-application-or-archiving-project-states
+   :states          (conj states/post-verdict-states :underReview)
    :pre-checks      [(fn [{:keys [user application]}]
                        (when-not (or application (usr/user-is-archivist? user nil)) ; If application, :org-authz-roles works as validator
-                         unauthorized))]}
+                         unauthorized))
+                     validate-permanent-archive-enabled]}
   (ok))
 
 (defquery permanent-archive-enabled

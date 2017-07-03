@@ -91,15 +91,15 @@
    :final []})
 
 
-(def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent})
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent :underReview})
 
-(def pre-sent-application-states #{:draft :open :submitted :complementNeeded})
+(def pre-sent-application-states #{:draft :open :submitted :complementNeeded :underReview})
 
-(def create-doc-states #{:draft :answered :open :submitted :complementNeeded})
+(def create-doc-states #{:draft :answered :open :submitted :complementNeeded :underReview})
 
-(def update-doc-states #{:draft :open :submitted :complementNeeded})
+(def update-doc-states #{:draft :open :submitted :complementNeeded :underReview})
 
-(def approve-doc-states #{:open :submitted :complementNeeded})
+(def approve-doc-states #{:open :submitted :complementNeeded :underReview})
 
 
 ;;
@@ -132,7 +132,7 @@
 (def verdict-given-states #{:verdictGiven                   ; R + others
                             :foremanVerdictGiven :acknowledged ; foreman applications
                             :finished :agreementPrepared :agreementSigned  ; YA cases
-                            :underReview :archived ; Archiving projects (ARK)
+                            :archived ; Archiving projects (ARK)
                             })
 
 (def post-verdict-states

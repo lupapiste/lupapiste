@@ -207,7 +207,8 @@
   {:parameters [:id lang]
    :input-validators [(partial action/non-blank-parameters [:lang])]
    :user-roles #{:authority}
-   :states states/all-application-states}
+   :states states/all-application-states
+   :pre-checks [(permit/validate-permit-type-is-not permit/ARK)]}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application lang)))
 

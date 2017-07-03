@@ -42,6 +42,5 @@
   (action/update-application command
                              {$set  {:state     :underReview
                                      :modified  created
-                                     :opened    (:opened application)
-                                     :submitted (or (:submitted application) created)}
+                                     :opened    (:opened application)}
                               $push {:history (app/history-entry :underReview created user)}}))

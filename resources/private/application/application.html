@@ -307,7 +307,7 @@
                               </a>
                             </li>
 
-                            <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
+                            <li data-bind="if: $root.authorization.ok('archiving-operations-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
                                 <a data-bind="click: changeTab" href="#" data-target="archival" data-test-id="application-open-archival-tab" class="link-btn">
                                     <span data-bind="ltext: 'arkistointi'"></span>
@@ -543,7 +543,7 @@
 
                     <!-- Archival tab -->
 
-                    <!--ko if: selectedTabName() === 'archival' && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('archiving-operations-enabled') -->
+                    <!--ko if: selectedTabName() === 'archival' && $root.authorization.ok("archiving-operations-enabled") -->
                     <div id="application-archival-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>

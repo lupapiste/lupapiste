@@ -200,7 +200,7 @@
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
     (lupapalvelu.document.model/apply-updates doc doc-updates)))
 
-(defn schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
+(defn- schema-datas [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} buildings]
   (map
     (fn [{:keys [data]}]
       (remove empty? (conj (doc-model/map2updates [] (select-keys data building-fields))
@@ -212,7 +212,7 @@
                            (when-not (ss/blank? vahainenPoikkeaminen)
                              [["poikkeamat"] vahainenPoikkeaminen])))) buildings))
 
-(defn do-create-application-from-previous-permit [command operation xml app-info location-i2nfo authorize-applicants]
+(defn do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (schema-datas app-info buildings-and-structures)

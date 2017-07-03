@@ -122,7 +122,7 @@
 (defquery party-document-names
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :states     states/all-application-states}
+   :states     states/all-application-or-archiving-project-states}
   [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
