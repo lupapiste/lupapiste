@@ -162,19 +162,19 @@
         data (-> (reduce reducer-fn result-map other-apps)
                  (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
         wb (excel/create-workbook
-             [{:sheet-name "Henkil\u00f6hakijat"
+             [{:sheet-name (i18n/localize lang "henkilohakijat")
                :header (parties/applicants-field-localization :private lang)
                :row-fn parties/private-applicants-row-fn
                :data (:private-applicants data)}
-              {:sheet-name "Yritysakijat"
+              {:sheet-name (i18n/localize lang "yrityshakijat")
                :header (parties/applicants-field-localization :company lang)
                :row-fn parties/company-applicants-row-fn
                :data (:company-applicants data)}
-              {:sheet-name "Suunnittelijat"
+              {:sheet-name (i18n/localize lang "suunnittelijat")
                :header (parties/designer-fields-localized lang)
                :row-fn parties/designers-row-fn
                :data (:designers data)}
-              {:sheet-name "Tyonjohtajat"
+              {:sheet-name (i18n/localize lang "tyonjohtajat")
                :header (parties/foreman-fields-lozalized lang)
                :row-fn parties/foremen-row-fn
                :data (:foremen data)}])]
