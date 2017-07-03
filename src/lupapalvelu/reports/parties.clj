@@ -134,11 +134,32 @@
 ;; Designers
 ;;
 
-(defn get-fise-link [data]
+(defn- get-fise-link [data]
   (let [fise-val (get-in data [:patevyys :fise])]
     (if (and (not (ss/blank? fise-val)) (v/http-url? fise-val))
       (str "=HYPERLINK(\"" fise-val \" ",\"" fise-val "\")")
       fise-val)))
+
+(defn- select-with-ei-tiedossa-loc [key-path loc-prefix doc-data]
+  (when-let [value (get-in doc-data key-path)]
+    (case value
+      "" ""
+      "ei tiedossa" (loc "ei-tiedossa")
+      (loc loc-prefix value))))
+
+(defn- get-koulutus-valinta [doc-data]
+  (let [value (get-in doc-data [:patevyys :koulutusvalinta])]
+    (when-not (ss/blank? value)
+      (loc "koulutus" value))))
+
+(defn- get-suunnittelija-rooli-loc [doc-data lang]
+  (let [kuntaRoolikoodi-schema (-> schemas/kuntaroolikoodi
+                                   first
+                                   :body)
+        loc-keys-mapping (zipmap (map :name kuntaRoolikoodi-schema) (map :i18nkey kuntaRoolikoodi-schema))
+        kuntaroolikoodi (get doc-data :kuntaRoolikoodi)]
+    (when-not (ss/blank? kuntaroolikoodi)
+      (loc (get loc-keys-mapping kuntaroolikoodi)))))
 
 (defn pick-designer-data
   [lang doc]
@@ -148,17 +169,18 @@
        :sukunimi              (get-in data [:henkilotiedot :sukunimi])
        :rooli                 (case (get-in doc [:schema-info :name])
                                 "paasuunnittelija" (loc "osapuoli.suunnittelija.kuntaRoolikoodi.p\u00e4\u00e4suunnittelija")
-                                "suunnittelija" (i18n/localize-fallback
-                                                  lang [(str "osapuoli.suunnittelija.kuntaRoolikoodi." (get data :kuntaRoolikoodi))
-                                                        (str "osapuoli.kuntaRoolikoodi." (get data :kuntaRoolikoodi))]))
-       :suunnittelu-vaativuus (loc "osapuoli.suunnittelutehtavanVaativuusluokka" (get-in data [:suunnittelutehtavanVaativuusluokka]))
-       :patevyysluokka        (loc "osapuoli.patevyys.patevyysluokka" (get-in data [:patevyys :patevyysluokka]))
+                                "suunnittelija" (get-suunnittelija-rooli-loc data lang))
+       :suunnittelu-vaativuus (select-with-ei-tiedossa-loc
+                                [:suunnittelutehtavanVaativuusluokka]
+                                "osapuoli.suunnittelutehtavanVaativuusluokka"
+                                data)
+       :patevyysluokka        (select-with-ei-tiedossa-loc [:patevyys :patevyysluokka] "osapuoli.patevyys.patevyysluokka" data)
        :patevyys              (get-in data [:patevyys :patevyys])
        :osoite                (get-osoite data)
        :puhelin               (get-in data [:yhteystiedot :puhelin])
        :sahkoposti            (get-in data [:yhteystiedot :email])
        :fise                  (get-fise-link data)
-       :tutkinto              (loc "koulutus" (get-in data [:patevyys :koulutusvalinta]))
+       :tutkinto              (get-koulutus-valinta data)
        :valmistumisvuosi      (get-in data [:patevyys :valmistumisvuosi])})))
 
 (defn designers [app lang]
