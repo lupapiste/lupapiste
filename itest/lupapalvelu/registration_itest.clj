@@ -13,6 +13,7 @@
                                             login
                                             ]]
             [lupapalvelu.vetuma-itest-util :refer :all]
+            [lupapalvelu.dummy-ident-itest-util :refer [dummy-ident-init dummy-ident-finish]]
             [sade.env :as env]))
 
 (apply-remote-minimal)
@@ -37,27 +38,6 @@
          :body (json/encode user)}))))
 
 ;
-; dummy ident specifics
-;
-
-(defn- dummy-ident-init
-  "Initializes dummy-ident session. Returns transaction ID (TRID)."
-  [request-opts token-query]
-  ; Request welcome page and query features to init session
-  (http-get (str (server-address) "/app/wi/welcome") request-opts)
-  (http-get (str (server-address) "/api/query/features") request-opts)
-  (let [{:keys [status body] :as resp} (http-get (str (server-address) "/dev/saml/init-login") (merge request-opts token-query))
-        trid (:trid (decode-body resp))]
-
-    (fact "Init returned OK" status => 200)
-    trid))
-
-(defn- dummy-ident-finish
-  [request-opts trid]
-  (http-post (str (server-address) "/dev/saml-login") (assoc request-opts :form-params {:userid "itest@example.com"
-                                                                                        :stamp trid})))
-
-;
 ; Other helpers
 ;
 
@@ -68,6 +48,7 @@
   (fact "zip" (:zip new-user) => (:zip new-user-details))
   (fact "city" (:city new-user) => (:city new-user-details))
   (fact "personId" (:personId new-user) => person-id)
+  (fact "peronsIdSource" (:personIdSource new-user) => "identification-service")
   (fact "enabled" (:enabled new-user) => false)
   (fact "role" (:role new-user) => "applicant")
   (fact "orgAuthz" (:orgAuthz new-user) => empty?)
