@@ -351,13 +351,13 @@
                               :firstName   (:firstName user)
                               :lastName    (:lastName user)
                               :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
-                              :personId    (:personId user)
-                              :personIdSource (:personIdSource user)
                               :password    password
                               :role        :applicant
                               :architect   true
                               :enabled     true}
-                             :language    (:language user))
+                             :language    (:language user)
+                             :personId    (:personId user)
+                             :personIdSource (:personIdSource user))
     :send-email false)
   (ok))
 
