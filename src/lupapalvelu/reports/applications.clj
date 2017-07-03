@@ -162,7 +162,7 @@
         data (-> (reduce reducer-fn result-map other-apps)
                  (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
         wb (excel/create-workbook
-             [{:sheet-name "Henkilöhakijat"
+             [{:sheet-name "Henkil\u00f6hakijat"
                :header (parties/applicants-field-localization :private lang)
                :row-fn parties/private-applicants-row-fn
                :data (:private-applicants data)}
