@@ -1,14 +1,19 @@
 (ns lupapalvelu.reports.applications
   (:require [dk.ative.docjure.spreadsheet :as spreadsheet]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.i18n :as i18n]
             [sade.core :refer [now]]
-            [lupapalvelu.action :refer [defraw]])
-  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)))
+            [lupapalvelu.action :refer [defraw]]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.reports.parties :as parties]
+            [lupapalvelu.reports.excel :as excel]
+            [lupapalvelu.foreman :as foreman])
+  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
+           (org.apache.poi.xssf.usermodel XSSFWorkbook)
+           (org.apache.poi.ss.usermodel CellType)))
 
 (defn handler-roles-org [org-id]
   (mongo/select-one :organizations {:_id org-id} [:handler-roles]))
@@ -41,6 +46,20 @@
                        [:_id :submitted :modified :state :handlers
                         :primaryOperation :secondaryOperations :verdicts]
                        {:submitted 1}))))
+
+(defn parties-between-data [orgId startTs endTs]
+  (let [now (now)]
+    (mongo/select :applications
+                  {:organization orgId
+                   :permitType "R"
+                   :submitted {$gte startTs
+                               $lte (if (< now endTs) now endTs)}
+                   :infoRequest false}
+                  [:_id :submitted  :address :modified :state
+                   :documents.schema-info.name :documents.schema-info.subtype
+                   :documents.data
+                   :primaryOperation]
+                  {:submitted 1})))
 
 (defn- authority [app]
   (->> app
@@ -75,23 +94,6 @@
   (when (seq secondaryOperations)
     (ss/join "\n" (map (partial localized-operation lang) secondaryOperations))))
 
-(defn ^OutputStream xlsx-stream
-  [data sheet-name header-row-content row-fn]
-  (let [wb           (spreadsheet/create-workbook
-                       sheet-name
-                       (concat [header-row-content] (map row-fn data)))
-        sheet        (first (spreadsheet/sheet-seq wb))
-        header-row   (-> sheet spreadsheet/row-seq first)
-        column-count (count header-row-content)]
-    (spreadsheet/set-row-style! header-row (spreadsheet/create-cell-style! wb {:font {:bold true}}))
-    ; Expand columns to fit all their contents
-    (doseq [i (range column-count)]
-      (.autoSizeColumn sheet i))
-
-    (with-open [out (ByteArrayOutputStream.)]
-      (spreadsheet/save-workbook-into-stream! out wb)
-      (ByteArrayInputStream. (.toByteArray out)))))
-
 (defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
   ;; Create a spreadsheet and save it
   (let [data               (open-applications-for-organization organizationId excluded-operations)
@@ -116,9 +118,9 @@
                      (partial date-value :modified)
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
-    (xlsx-stream data sheet-name header-row-content row-fn)))
+    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
 
-(defn applications-between-excel [organizationId startTs endTs lang excluded-operations]
+(defn ^OutputStream applications-between-excel [organizationId startTs endTs lang excluded-operations]
   (let [data               (submitted-applications-between organizationId startTs endTs excluded-operations)
         sheet-name         (str (i18n/localize lang "applications.report.applications-between.sheet-name-prefix")
                                 " "
@@ -140,4 +142,41 @@
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
 
-    (xlsx-stream data sheet-name header-row-content row-fn)))
+    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
+
+
+(defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
+  (let [[foreman-apps other-apps] ((juxt filter remove)
+                                    foreman/foreman-app?
+                                    (parties-between-data organizationId startTs endTs))
+        result-map {:private-applicants  []
+                    :company-applicant   []
+                    :designers           []
+                    :foremen             []}
+        reducer-fn (fn [res app]
+                     (-> res
+                         (update :private-applicants concat (parties/private-applicants app lang))
+                         (update :company-applicants concat (parties/company-applicants app lang))
+                         (update :designers concat (parties/designers app lang))))
+        enriched-foremen (parties/enrich-foreman-apps foreman-apps)
+        data (-> (reduce reducer-fn result-map other-apps)
+                 (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
+        wb (excel/create-workbook
+             [{:sheet-name "Henkilöhakijat"
+               :header (parties/applicants-field-localization :private lang)
+               :row-fn parties/private-applicants-row-fn
+               :data (:private-applicants data)}
+              {:sheet-name "Yritysakijat"
+               :header (parties/applicants-field-localization :company lang)
+               :row-fn parties/company-applicants-row-fn
+               :data (:company-applicants data)}
+              {:sheet-name "Suunnittelijat"
+               :header (parties/designer-fields-localized lang)
+               :row-fn parties/designers-row-fn
+               :data (:designers data)}
+              {:sheet-name "Tyonjohtajat"
+               :header (parties/foreman-fields-lozalized lang)
+               :row-fn parties/foremen-row-fn
+               :data (:foremen data)}])]
+    (excel/hyperlinks-to-formulas! wb)
+    (excel/xlsx-stream wb)))
