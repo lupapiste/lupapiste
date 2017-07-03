@@ -35,3 +35,4 @@
 "application.ARK.neighbors" "en" "Neighbours"
 "application.ARK.neighbors" "fi" "Naapurit"
 "application.ARK.neighbors" "sv" "Grannar"
+"authorityrole.digitizer" "fi" "Digitoija"

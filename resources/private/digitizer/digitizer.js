@@ -271,9 +271,7 @@
       self.clear();
       self.creatingAppWithPrevPermit = true;
 
-      // TODO: Nyt kovakoodattu permitType -> pitaisiko hakea jostain muualta, esim permit-type-select-valinta?
-      //       "aiemmalla-luvalla-hakeminen"-toimenpiteen permitType on "R"
-      ajax.query("user-organizations-for-permit-type", {permitType: "R"})
+      ajax.query("user-organizations-for-archiving-project")
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {

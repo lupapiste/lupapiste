@@ -7,7 +7,15 @@
             [sade.strings :as ss]
             [monger.operators :refer :all]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [clojure.set :as set]))
+
+(defn user-is-allowed-to-digitize [{user-orgs :user-organizations user :user {:keys [organizationId]} :data}]
+  (let [archive-enabled? (some :permanent-archive-enabled (filter #(= organizationId (:id %)) user-orgs))
+        roles ((keyword organizationId) (:orgAuthz user))
+        correct-role? (seq (set/intersection #{:authority :digitizer} roles))]
+    (when-not (and archive-enabled? correct-role?)
+      unauthorized)))
 
 (defcommand create-archiving-project
             {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway]
@@ -17,10 +25,7 @@
                                 (fn [{{propertyId :propertyId} :data :as command}]
                                   (when (not (ss/blank? propertyId))
                                     (action/property-id-parameters [:propertyId] command)))]
-             :pre-checks       [(fn [{:keys [user data]}]
-                                  (when-let [organization-id (:organizationId data)]
-                                    (when-not (user/user-is-authority-in-organization? user organization-id)
-                                      unauthorized)))]}
+             :pre-checks       [user-is-allowed-to-digitize]}
             [{:keys [user] :as command}]
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
