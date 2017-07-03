@@ -1,7 +1,6 @@
 (ns lupapalvelu.smoketest.user-smoke-tests
   (:require [lupapiste.mongocheck.core :refer [mongocheck]]
             [schema.core :as sc]
-            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]))
 
@@ -15,7 +14,7 @@
 (mongocheck :users
             (fn [{pid :personId source :personIdSource :as user}]
               (cond
-                (and (ss/not-blank? pid) (sc/check usr/PersonIdSource source))
+                (and pid (sc/check usr/PersonIdSource source))
                 (format "User %s has invalid person id source" (:username user))
 
                 (and (usr/applicant? user)
