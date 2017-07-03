@@ -22,16 +22,19 @@
                   :zip "33100"
                   :po "Tampere"
                   :customAccountLimit nil})
-(defn init-sign []
-  (-> (command pena :init-sign
-               :company company-map
-               :signer {:firstName   "First"
-                        :lastName    "Last"
-                        :email       "a@b.c"
-                        :personId "131052-308T"}
-               :lang "fi")
-      :process-id
-      get-process))
+
+(defn init-sign
+  ([email person-id]
+   (-> (command pena :init-sign
+                :company company-map
+                :signer {:firstName "First"
+                         :lastName  "Last"
+                         :email     email
+                         :personId  person-id}
+                :lang "fi")
+       :process-id
+       get-process))
+  ([] (init-sign "a@b.c" "131052-308T")))
 
 (defn init-sign-existing-user []
   (-> (command pena :init-sign
@@ -52,7 +55,7 @@
                             :company company-map
                             :signer {:firstName   "First"
                                      :lastName    "Last"
-                                     :email        "a@b.c"
+                                     :email       "a@b.c"
                                      :personId    "131052-308T"}
                             :status  "created"
                             :lang    "fi"}))
@@ -132,9 +135,23 @@
     response => http200?
     (get-process-status process-id) => "done"))
 
-(fact "Pena confirms company registration (for a@b.c)"
-      (http-get (->> (sent-emails) first :body :plain (re-find #"http[^\s]+"))
-                {}) => http200?)
+
+(fact "a@b.c has not yet been created"
+  (query admin :user-by-email :email "a@b.c")
+  => (contains {:user nil}))
+
+(let [url   (->> (sent-emails) first :body :plain (re-find #"http[^\s]+"))
+      token (re-find #"[^/]+$" url)]
+  (fact "Pena confirms company registration (for a@b.c)"
+    (http-get url {}) => http200?)
+  (fact "Set the password for a@b.c"
+    (http-token-call token {:password "zheshiwodemima"})
+    => http200?))
+
+(fact "a@b.c personId details are correct"
+  (:user (query admin :user-by-email :email "a@b.c"))
+  => (contains {:personId       "131052-308T"
+                :personIdSource "identification-service"}))
 
 (let [id (->> (query pena :companies) :companies (util/find-by-key :name "company-name") :id)]
   (fact "Kaino cannot edit the created company info"
@@ -143,7 +160,7 @@
         (command kaino :company-update :company "solita" :updates {:po "Beijing"}) => ok?))
 
 (fact "Fail signing process"
-  (let [process-id (:id (init-sign))
+  (let [process-id (:id (init-sign "fail@example.com" "050349-982Y"))
         _ (fetch-document process-id) => http200?
         store (atom {})
         params {:cookie-store (->cookie-store store)
