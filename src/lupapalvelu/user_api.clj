@@ -560,7 +560,8 @@
       (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (if-let [user (usr/create-new-user
                       nil
-                      (merge data vetuma-data {:email email :role "applicant" :enabled true})
+                      (merge data vetuma-data {:email email :role "applicant"
+                                               :enabled true :personIdSource :identification-service})
                       :send-email false)]
         (do
           (vetuma/consume-user stamp)
