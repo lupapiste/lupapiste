@@ -167,7 +167,7 @@
 
 (defn success! [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
-        signer     (:signer process)
+        signer     (assoc (:signer process) :personIdSource :identification-service)
         crypto-key (-> (env/value :onnistuu :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
         crypto-iv  (-> iv (crypt/str->bytes) (crypt/base64-decode))
         resp       (->> data
