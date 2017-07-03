@@ -9,6 +9,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.reports.parties :as parties]
+            [lupapalvelu.reports.excel :as excel]
             [lupapalvelu.foreman :as foreman])
   (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
            (org.apache.poi.xssf.usermodel XSSFWorkbook)
@@ -93,38 +94,6 @@
   (when (seq secondaryOperations)
     (ss/join "\n" (map (partial localized-operation lang) secondaryOperations))))
 
-(defn ^XSSFWorkbook create-workbook
-  ([data sheet-name header-row-content row-fn]
-   (create-workbook [{:sheet-name sheet-name
-                      :header header-row-content
-                      :row-fn row-fn
-                      :data data}]))
-  ([sheets]
-   {:pre [(every? (every-pred :sheet-name :header :row-fn) sheets)]}
-   (let [wb (apply spreadsheet/create-workbook
-                   (apply concat
-                          (reduce (fn [wb-sheets conf]
-                                    (conj wb-sheets
-                                          [(:sheet-name conf)
-                                           (concat [(:header conf)]
-                                                   (map (:row-fn conf) (:data conf)))]))
-                                  []
-                                  sheets)))]
-     ; Format each sheet
-     (doseq [sheet (spreadsheet/sheet-seq wb)
-             :let [header-row   (-> sheet spreadsheet/row-seq first)
-                   column-count (.getLastCellNum header-row)
-                   bold-style   (spreadsheet/create-cell-style! wb {:font {:bold true}})]]
-       (spreadsheet/set-row-style! header-row bold-style)
-       (doseq [i (range column-count)]
-         (.autoSizeColumn sheet i)))
-     wb)))
-
-(defn ^OutputStream xlsx-stream [^XSSFWorkbook wb]
-  (with-open [out (ByteArrayOutputStream.)]
-    (spreadsheet/save-workbook-into-stream! out wb)
-    (ByteArrayInputStream. (.toByteArray out))))
-
 (defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
   ;; Create a spreadsheet and save it
   (let [data               (open-applications-for-organization organizationId excluded-operations)
@@ -149,7 +118,7 @@
                      (partial date-value :modified)
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
-    (xlsx-stream (create-workbook data sheet-name header-row-content row-fn))))
+    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
 
 (defn ^OutputStream applications-between-excel [organizationId startTs endTs lang excluded-operations]
   (let [data               (submitted-applications-between organizationId startTs endTs excluded-operations)
@@ -173,17 +142,8 @@
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
 
-    (xlsx-stream (create-workbook data sheet-name header-row-content row-fn))))
+    (excel/xlsx-stream (excel/create-workbook data sheet-name header-row-content row-fn))))
 
-
-(defn hyperlinks-to-formulas! [wb]
-  (doseq [sheet (spreadsheet/sheet-seq wb)
-          cell  (spreadsheet/cell-seq sheet)
-          :when (ss/starts-with (.toString cell) "=HYPERLINK")
-          :let  [value (.toString cell)]]
-    (doto cell
-      (.setCellType CellType/FORMULA)
-      (.setCellFormula (subs value 1)))))
 
 (defn ^OutputStream parties-between-excel [organizationId startTs endTs lang]
   (let [[foreman-apps other-apps] ((juxt filter remove)
@@ -201,7 +161,7 @@
         enriched-foremen (parties/enrich-foreman-apps foreman-apps)
         data (-> (reduce reducer-fn result-map other-apps)
                  (assoc :foremen (map #(parties/foremen % lang) enriched-foremen)))
-        wb (create-workbook
+        wb (excel/create-workbook
              [{:sheet-name "Henkilöhakijat"
                :header (parties/applicants-field-localization :private lang)
                :row-fn parties/private-applicants-row-fn
@@ -218,5 +178,5 @@
                :header (parties/foreman-fields-lozalized lang)
                :row-fn parties/foremen-row-fn
                :data (:foremen data)}])]
-    (hyperlinks-to-formulas! wb)
-    (xlsx-stream wb)))
+    (excel/hyperlinks-to-formulas! wb)
+    (excel/xlsx-stream wb)))

@@ -1,6 +1,7 @@
 (ns lupapalvelu.reports.parties
   (:require [sade.env :as env]
             [sade.strings :as ss]
+            [sade.validators :as v]
             [monger.operators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -9,15 +10,15 @@
             [lupapalvelu.i18n :as i18n :refer [with-lang loc]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as op]
-            [sade.validators :as v]))
+            [lupapalvelu.reports.excel :as excel]))
 
 
 (defn make-app-link [id lang]
   (str (env/value :host) "/app/" lang "/authority" "#!/application/" id))
 
-(defn basic-info-localized [app lang]
+(defn basic-info-localized [{id :id :as app} lang]
   (-> (select-keys app [:id :address :primaryOperation])
-      (assoc :id (str "=HYPERLINK(\"" (make-app-link (:id app) lang) \" ",\"" (:id app) "\")"))
+      (assoc :id (excel/hyperlink-str (make-app-link id lang) id))
       (update :primaryOperation #(i18n/localize lang (str "operations." (:name %))))))
 
 (def basic-info-localization-mapping
