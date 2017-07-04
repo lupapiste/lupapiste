@@ -17,6 +17,10 @@
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
 
+(defn archiving-project-permit-type [{{:keys [permitType]} :application}]
+  (when-not (= permitType "ARK")
+    unauthorized))
+
 (defcommand create-archiving-project
             {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway]
              :user-roles       #{:authority}
@@ -42,7 +46,8 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :user-authz-roles roles/default-authz-writer-roles
-   :states           #{:open}}
+   :states           #{:open}
+   :pre-checks       [archiving-project-permit-type]}
   [{:keys [application created user] :as command}]
   (action/update-application command
                              {$set  {:state     :underReview
