@@ -116,20 +116,11 @@
 
           <button class="positive top-marginM"
                   data-test-id="application-submit-btn"
-                  data-bind="click: submitApplication,
-                             visible: $root.authorization.ok( 'submit-application' ),
+                  data-bind="click: submitButtonFunction(),
+                             visible: submitButtonFunction,
                              enable: submitButtonEnabled">
               <i class="lupicon-download"></i>
-              <span data-bind="ltext: 'application.submitApplication'"></span>
-          </button>
-
-          <button class="positive top-marginM"
-                  data-test-id="application-submit-btn"
-                  data-bind="click: submitArchivingProject,
-                             visible: $root.authorization.ok('submit-archiving-project'),
-                             enable: submitButtonEnabled">
-              <i class="lupicon-download"></i>
-              <span data-bind="ltext: 'digitizer.submitProject'"></span>
+              <span data-bind="ltext: submitButtonKey"></span>
           </button>
 
 

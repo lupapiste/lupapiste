@@ -282,6 +282,23 @@ LUPAPISTE.ApplicationModel = function() {
     return !self.stateChanged() && !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
   });
 
+  self.submitButtonFunction = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok('submit-application')) {
+      return self.submitApplication;
+    } else if (lupapisteApp.models.applicationAuthModel.ok('submit-archiving-project')) {
+      return self.submitArchivingProject;
+    } else {
+      return false;
+    }
+  });
+
+  self.submitButtonKey = ko.pureComputed(function() {
+    if (self.isArchivingProject()) {
+      return lupapisteApp.models.currentUser.isArchivist() ? 'digitizer.archiveProject' : 'digitizer.submitProject';
+    } else {
+      return 'application.submitApplication';
+    }
+  });
 
   self.reload = function() {
     self.submitErrors([]);
@@ -936,7 +953,9 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.requiredFieldSummaryButtonKey = ko.pureComputed(function() {
-    if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
+    if (self.isArchivingProject()) {
+      return 'archivingProject.tabRequiredFieldSummary';
+    } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
       return 'application.tabRequiredFieldSummary.afterSubmitted';
     } else {
       return 'application.tabRequiredFieldSummary';
