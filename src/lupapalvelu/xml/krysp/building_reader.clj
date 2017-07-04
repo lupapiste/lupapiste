@@ -118,6 +118,11 @@
 (def empty-building-ids {:valtakunnallinenNumero ""
                          :rakennusnro ""})
 
+(defn get-non-zero-text [xml key]
+  (let [text (get-text xml key)]
+    (when (not= (ss/trim text) "0")
+      text)))
+
 (defn ->rakennuksen-tiedot
   ([xml building-id]
    (let [stripped  (cr/strip-xml-namespaces xml)
@@ -160,12 +165,12 @@
                      :rakentajaTyyppi               (get-text rakennus :rakentajaTyyppi)}
             :luokitus {:energialuokka               (get-text rakennus :energialuokka)
                        :paloluokka                  (get-text rakennus :paloluokka)}
-            :mitat {:kellarinpinta-ala              (get-text rakennus :kellarinpinta-ala)
-                    :kerrosala                      (get-text rakennus :kerrosala)
-                    :rakennusoikeudellinenKerrosala (get-text rakennus :rakennusoikeudellinenKerrosala)
+            :mitat {:kellarinpinta-ala              (get-non-zero-text rakennus :kellarinpinta-ala)
+                    :kerrosala                      (get-non-zero-text rakennus :kerrosala)
+                    :rakennusoikeudellinenKerrosala (get-non-zero-text rakennus :rakennusoikeudellinenKerrosala)
                     :kerrosluku                     (get-text rakennus :kerrosluku)
-                    :kokonaisala                    (get-text rakennus :kokonaisala)
-                    :tilavuus                       (get-text rakennus :tilavuus)}
+                    :kokonaisala                    (get-non-zero-text rakennus :kokonaisala)
+                    :tilavuus                       (get-non-zero-text rakennus :tilavuus)}
             :rakenne {:julkisivu                    (get-text rakennus :julkisivumateriaali)
                       :kantavaRakennusaine          (get-text rakennus :rakennusaine)
                       :rakentamistapa               (get-text rakennus :rakentamistapa)}

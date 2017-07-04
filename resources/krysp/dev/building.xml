@@ -608,6 +608,8 @@
             </rakval:rinnakkaisosoite>
             <rakval:kerrosluku>2</rakval:kerrosluku>
             <rakval:kerrosala>281</rakval:kerrosala>
+            <rakval:kellarinpinta-ala>0</rakval:kellarinpinta-ala>
+            <rakval:rakennusoikeudellinenKerrosala>0</rakval:rakennusoikeudellinenKerrosala>
             <rakval:rakentamistapa>paikalla</rakval:rakentamistapa>
             <rakval:kantavaRakennusaine>
               <rakval:rakennusaine>tiili</rakval:rakennusaine>
