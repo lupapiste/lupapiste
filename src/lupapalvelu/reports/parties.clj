@@ -26,6 +26,8 @@
    :address "applications.location"
    :primaryOperation "applications.operation"})
 
+(def basic-info-keys [:id :address :primaryOperation])
+
 (defn applicant-doc? [applicant-schema-name doc]
   (= (get-in doc [:schema-info :name])
      applicant-schema-name))
@@ -98,12 +100,11 @@
     (applicants henkilo-doc? pick-person-data app)))
 
 (def private-applicants-fields
-  [:id :address :primaryOperation
-   :etunimi :sukunimi :osoite :puhelin :sahkoposti
+  [:etunimi :sukunimi :osoite :puhelin :sahkoposti
    :suoramarkkinointilupa :turvakielto])
 
 (def private-applicants-row-fn
-  (apply juxt private-applicants-fields))
+  (apply juxt (concat basic-info-keys private-applicants-fields)))
 
 ;;
 ;; Company applicants
@@ -115,20 +116,21 @@
     (applicants yritys-doc? pick-company-data app)))
 
 (def company-applicants-fields
-  [:id :address :primaryOperation
-   :yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
+  [:yritysnimi :osoite :yhteyshenkiloetunimi :yhteyshenkilosukunimi
    :yhteyshenkilopuhelin :yhteyshenkilosahkoposti :suoramarkkinointilupa
    :turvakielto])
 
 (def company-applicants-row-fn
-  (apply juxt company-applicants-fields))
+  (apply juxt (concat basic-info-keys company-applicants-fields)))
 
 (defn applicants-field-localization [type lang]
   (map
     #(i18n/localize lang (get applicants-fields-localization-mapping %))
-    (case (keyword type)
-      :private private-applicants-fields
-      :company company-applicants-fields)))
+    (concat
+      basic-info-keys
+      (case (keyword type)
+        :private private-applicants-fields
+        :company company-applicants-fields))))
 
 ;;
 ;; Designers
@@ -201,17 +203,16 @@
      :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
 
 (def designers-fields
-  [:id :address :primaryOperation
-   :etunimi :sukunimi :rooli
+  [:etunimi :sukunimi :rooli
    :suunnittelu-vaativuus :patevyysluokka :patevyys
    :osoite :puhelin :sahkoposti
    :fise :tutkinto :valmistumisvuosi])
 
 (defn designer-fields-localized [lang]
-  (map #(i18n/localize lang (get designer-fields-localization-mapping %)) designers-fields))
+  (map #(i18n/localize lang (get designer-fields-localization-mapping %)) (concat basic-info-keys designers-fields)))
 
 (def designers-row-fn
-  (apply juxt designers-fields))
+  (apply juxt (concat basic-info-keys designers-fields)))
 
 ;;
 ;; Foremen
@@ -269,7 +270,7 @@
 
 (defn pick-foreman-data
   "Doc: tyonjohtaja-v2"
-  [doc lang]
+  [lang doc]
   (let [data (tools/unwrapped (get doc :data))]
     {:yritys   (get-in data [:yritys :yritysnimi])
      :etunimi (get-in data [:henkilotiedot :etunimi])
@@ -289,7 +290,7 @@
 
 (defn foremen [app lang]
   (merge (basic-info-localized app lang)
-         (pick-foreman-data (foreman/get-foreman-document app) lang)))
+         (pick-foreman-data lang (foreman/get-foreman-document app) )))
 
 (def foreman-fields-localization-mapping
   (merge
@@ -305,15 +306,14 @@
      :vastattavat-tyotehtavat "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"}))
 
 (def foremen-fields
-  [:id :address :primaryOperation
-   :yritys :etunimi :sukunimi
+  [:yritys :etunimi :sukunimi
    :osoite :puhelin :sahkoposti
    :rooli :vaativuus :taysiaikainenOsaaikainen :tutkinto
    :sijaistettava :sijaisuus-alkaa :sijaisuus-paattyy
    :vastattavat-tyotehtavat])
 
 (defn foreman-fields-lozalized [lang]
-  (map #(i18n/localize lang (get foreman-fields-localization-mapping %)) foremen-fields))
+  (map #(i18n/localize lang (get foreman-fields-localization-mapping %)) (concat basic-info-keys foremen-fields)))
 
 (def foremen-row-fn
-  (apply juxt foremen-fields))
+  (apply juxt (concat basic-info-keys foremen-fields)))
