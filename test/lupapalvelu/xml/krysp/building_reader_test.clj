@@ -196,7 +196,8 @@
                (keys fc-group) => (contains ["LP-999-2016-99999" "LP-999-2016-99349"] :in-any-order))))
 
 (facts "Zero areas are ignored"
-  (let [buildings (-> "dev-resources/krysp/building-2.1.2.xml" xml/parse ->buildings-summary)
+  (let [xml       (xml/parse "dev-resources/krysp/building-2.1.2.xml")
+        buildings (->buildings-summary xml)
         mitat1    (->> buildings first :buildingId (->rakennuksen-tiedot xml) :mitat)
         mitat2    (->> buildings last  :buildingId (->rakennuksen-tiedot xml) :mitat)]
     (fact "first building areas"
