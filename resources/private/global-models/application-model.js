@@ -930,4 +930,25 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
     return false;
   });
+
+  self.requiredFieldSummaryButtonVisible = ko.pureComputed(function() {
+    return _.includes(['draft', 'open', 'submitted', 'complementNeeded'], ko.unwrap(self.state));
+  });
+
+  self.requiredFieldSummaryButtonKey = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
+      return 'application.tabRequiredFieldSummary.afterSubmitted';
+    } else {
+      return 'application.tabRequiredFieldSummary';
+    }
+  });
+
+  self.requiredFieldSummaryButtonClass = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
+      _.includes(['draft', 'open'], ko.unwrap(self.state))) {
+      return 'link-btn-inverse';
+    } else {
+      return 'link-btn';
+    }
+  });
 };

@@ -247,33 +247,12 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: _.includes(['draft', 'open'], state()),
+                            <li data-bind="if: requiredFieldSummaryButtonVisible,
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
-                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
-                                   class="link-btn-inverse">
-                                  <!-- ko if: $root.authorization.ok('approve-application') -->
-                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></span>
-                                  <!-- /ko -->
-                                  <!-- ko ifnot: $root.authorization.ok('approve-application') -->
-                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span>
-                                  <!-- /ko -->
+                                <a data-bind="click: changeTab, css: requiredFieldSummaryButtonClass" href="#"
+                                   data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
+                                  <span data-bind="ltext: requiredFieldSummaryButtonKey"></span>
                                 </a>
-                            </li>
-
-                            <li data-bind="if: _.includes(['submitted', 'complementNeeded'], state()),
-                                           css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
-                                  <!-- ko if: $root.authorization.ok('approve-application') -->
-                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
-                                   class="link-btn-inverse">
-                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></span>
-                                </a>
-                                  <!-- /ko -->
-                                  <!-- ko ifnot: $root.authorization.ok('approve-application') -->
-                                <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
-                                   class="link-btn">
-                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span>
-                                </a>
-                                  <!-- /ko -->
                             </li>
 
                             <li data-bind="if: !inPostVerdictState() && !isArchivingProject(), css: {'active': $parent.selectedTabName() === 'statement'}">
