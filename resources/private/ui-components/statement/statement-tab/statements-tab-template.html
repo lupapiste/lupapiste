@@ -113,7 +113,7 @@
 
       </div>
 
-      <div class="application-neighbors">
+      <div class="application-neighbors" data-bind="visible: authorization.ok('neighbors-statement-enabled')">
           <h1 data-bind="lhtml: 'application.' + application.permitType() + '.neighbors'">Naapurit</h1>
           <span data-bind="component: {
                            name: 'help-toggle',
