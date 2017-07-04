@@ -284,7 +284,7 @@
      :tutkinto        (get-foreman-koulutus data lang)
      :sijaistettava   (get-sijaistettava-nimi data)
      :sijaisuus-alkaa (get-in data [:sijaistus :alkamisPvm])
-     :sijaisuus-paattyy (get-in data [:sijaistus :paatymisPvm])
+     :sijaisuus-paattyy (get-in data [:sijaistus :paattymisPvm])
      :vastattavat-tyotehtavat (vastattavat-tyotehtavat-as-string doc lang)}))
 
 
