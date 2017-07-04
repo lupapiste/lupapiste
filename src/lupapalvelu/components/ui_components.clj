@@ -327,6 +327,7 @@
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
                        "create-digging-permit.js"
+                       "parties-model.js"
                        "application.js"]
                   :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"

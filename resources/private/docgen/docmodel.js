@@ -20,6 +20,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.propertyId = application.propertyId;
   self.propertyIdSource = application.propertyIdSource;
   self.isDisabled = (options && options.disabled) || self.docDisabled;
+  self.partiesModel = options.partiesModel;
   self.events = [];
 
   self.subscriptions = [];
@@ -875,6 +876,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent( "docgen-building-select", subSchema, model, path );
   }
 
+  function buildDocgenPersonSelect( subSchema, model, path ) {
+    return buildGroupComponent( "docgen-person-select", subSchema, model, path );
+  }
+
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
@@ -1068,107 +1073,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return createComponent("fill-info", params);
   }
 
-  function buildPersonSelector(subSchema, model, path) {
-    var myPath = path.join(".");
-    var validationResult = getValidationResult(model, subSchema.name);
-    var span = makeEntrySpan(subSchema, myPath, validationResult);
-    span.className = span.className + " personSelector";
-    var myNs = path.slice(0, path.length - 1).join(".");
-    var select = document.createElement("select");
-    var selectedOption = getModelValue(model, subSchema.name);
-    var option = document.createElement("option");
-    select.id = pathStrToID(myPath);
-    select.name = myPath;
-    select.className = "form-input combobox";
-    var validationLevel = validationResult && validationResult[0];
-    if (validationLevel) {
-      select.className += " " + validationLevel;
-    }
-
-    if (authorizationModel.ok("set-user-to-document")) {
-      select.onchange = function (e) {
-        var event = getEvent(e);
-        var target = event.target;
-        var userId = target.value;
-        if (!_.isEmpty(userId)) {
-          ajax
-            .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
-            .success(function () {
-              save(event, function () { repository.load(self.appId); });
-            })
-            .error(function(e) {
-              if (e.text !== "error.application-does-not-have-given-auth") {
-                error("Failed to set user to document", userId, self.docId, e);
-              }
-              notify.ajaxError(e);
-            })
-            .call();
-        }
-        return false;
-      };
-    } else {
-      select.disabled = true;
-    }
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") {
-      option.selected = "selected";
-    }
-    select.appendChild(option);
-
-    _.each(self.application.auth, function (user) {
-      // LUPA-89: don't print fully empty names, LPK-1257 Do not add statement givers
-      // No guests or guest authorities
-      if( user.firstName && user.lastName
-                         && !_.includes( ["statementGiver", "guest", "guestAuthority"],
-                                         user.role)) {
-        var option = document.createElement("option");
-        var value = user.id;
-        option.value = value;
-        option.appendChild(document.createTextNode(user.lastName + " " + user.firstName));
-        if (selectedOption === value) {
-          option.selected = "selected";
-        }
-        if (user.invite) {
-          option.disabled = true;
-        }
-        select.appendChild(option);
-      }
-    });
-
-    var label = document.createElement("label");
-    var locKey = ("person-selector");
-    label.className = "form-label form-label-select";
-    if (validationLevel) {
-      label.className += " " + validationLevel;
-    }
-    label.innerHTML = loc(locKey);
-    span.appendChild(label);
-    span.appendChild(select);
-
-    // new invite
-    if (authorizationModel.ok("invite-with-role")) {
-      var button =
-        $("<button>", {
-          "class": "icon-remove positive",
-          text: loc("personSelector.invite"),
-          click: function () {
-            $("#invite-document-name").val(self.schemaName).change();
-            $("#invite-document-path").val(myNs).change();
-            $("#invite-document-id").val(self.docId).change();
-            LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-            return false;
-          }
-        });
-      if (options && options.dataTestSpecifiers) {
-        button.attr("data-test-id", "application-invite-" + self.schemaName);
-      }
-      button.appendTo(span);
-    }
-
-    return span;
-  }
-
   function buildCompanySelector(subSchema, model, path) {
 
     function mapCompany(company) {
@@ -1258,7 +1162,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,
     "hanke-table": buildForemanOtherApplications,
-    personSelector: buildPersonSelector,
+    personSelector: buildDocgenPersonSelect,
     companySelector: buildCompanySelector,
     table: buildTableRow,
     unknown: buildUnknown
