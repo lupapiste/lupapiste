@@ -1,18 +1,19 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero? max-key])
-  (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.java.io :as io]
-            [clojure.edn :as edn]
-            [sade.core :refer [fail!]]
-            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
-            [clj-time.format :as timeformat]
+  (:require [clj-time.coerce :as tc]
             [clj-time.core :as t :refer [hours days weeks months years ago from-now]]
-            [clj-time.coerce :as tc]
+            [clj-time.format :as timeformat]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.walk :refer [postwalk prewalk]]
+            [me.raynes.fs :as fs]
+            [sade.core :refer [fail!]]
+            [sade.shared-util :as shared]
+            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [debugf]]
-            [me.raynes.fs :as fs])
-  (:import [org.joda.time LocalDateTime]
-           [java.util.jar JarFile]))
+            [taoensso.timbre :as timbre :refer [debugf]])
+  (:import [java.util.jar JarFile]
+           [org.joda.time LocalDateTime]))
 
 ;;
 ;; Nil-safe number utilities
@@ -144,10 +145,7 @@
         (apply some-key m (rest ks))
         (m k)))))
 
-(defn find-by-key
-  "Return item from sequence col of maps where element k (keyword) matches value v."
-  [k v col]
-  (some (fn [m] (when (= v (get m k)) m)) col))
+(def find-by-key shared/find-by-key)
 
 (defn find-by-id
   "Return item from sequence col of maps where :id matches id."

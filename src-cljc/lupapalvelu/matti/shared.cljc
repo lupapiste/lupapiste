@@ -40,14 +40,35 @@
          {(sc/optional-key :label?) sc/Bool})) ;; Show label? Default true
 
 (defschema MattiReferenceList
-  "Component that builds schema from an external source."
+  "Component that builds schema from an external source. Each item is
+  the id property of the target value or the the value itself."
   (merge MattiComponent
          ;; Path is interpreted by the implementation. In Matti the
          ;; path typically refers to the settings.
          {:path                              [sc/Keyword]
           :type                              (sc/enum :select :multi-select)
+          ;; By default, an item value is the same as
+          ;; source. If :item-key is given, then the corresponding
+          ;; source property is used.
+          (sc/optional-key :item-key)        sc/Keyword
+          ;; Term-path overrides item-loc-prefix. However,
+          ;; item-loc-prefix supports item-key.
           (sc/optional-key :item-loc-prefix) sc/Keyword
-          (sc/optional-key :id)              sc/Str}))
+          (sc/optional-key :id)              sc/Str
+          ;; Term definition resolves the localization for the value.
+          (sc/optional-key :term)
+          {;; The path contains sources with corresponding fi, sv and
+           ;; en localisations (if not extra-path given). The matching
+           ;; is done by :item-key
+           :path                         [sc/Keyword]
+           ;; Additional path within matched term that contains the
+           ;; lang properties.
+           (sc/optional-key :extra-path) [sc/Keyword]
+           ;; Key for the source property that should match the
+           ;; value. For example, the value list might be just ids and
+           ;; the match-key could by :id. Default value is the same as
+           ;; item-key.
+           (sc/optional-key :match-key)  sc/Keyword}}))
 
 (def keyword-or-string (sc/conditional
                         keyword? sc/Keyword
@@ -58,7 +79,10 @@
          ;; Sometimes it is useful to finetune item localisations
          ;; separately from the label.
          {(sc/optional-key :item-loc-prefix) sc/Keyword
-          :items           [keyword-or-string]}))
+          :items           [(sc/conditional
+                             :text  {:value sc/Str
+                                     :text  sc/Str}
+                             :else keyword-or-string)]}))
 
 (defschema MattiDateDelta
   (merge MattiComponent
@@ -125,34 +149,29 @@
    :name                       sc/Str ;; Non-localized raw string
    :sections                   [MattiVerdictSection]})
 
-(defn checkbox-rows [checks]
-  (mapv (fn [complexity]
-         [{:col 4
-           :schema {:list {:id (name complexity)
-                           :i18nkey [(->> complexity name (str "matti.complexity.") keyword)
-                                     :matti.complexity.label]
-                           :items (mapv (fn [check]
-                                         {:id check
-                                          :schema {:docgen "matti-verdict-check"}
-                                          :css [:matti-condition-box]})
-                                       checks)}}}])
-       [:small :medium :large :extra-large]))
-
-(defn complexity-section [id settings-path loc-prefix]
+(defn  complexity-section [id settings-path extra]
   {:id    (name id)
    :grid  {:columns 1
            :rows    (mapv (fn [complexity]
                             [{:id (name complexity)
-                              :schema {:reference-list {:i18nkey [(->> complexity
-                                                                       name
-                                                                       (str "matti.complexity.")
-                                                                       keyword)
-                                                                  :matti.complexity.label]
-                                                        :type    :multi-select
-                                                        :item-loc-prefix loc-prefix
-                                                        :path    settings-path}}}])
+                              :schema {:reference-list (merge {:i18nkey [(->> complexity
+                                                                              name
+                                                                              (str "matti.complexity.")
+                                                                              keyword)
+                                                                         :matti.complexity.label]
+                                                               :type    :multi-select
+                                                               :path    settings-path}
+                                                              extra)}}])
                           [:small :medium :large :extra-large])}
    :_meta {:can-remove? true}})
+
+(defn foremen-section [id settings-path loc-prefix]
+  (complexity-section id settings-path {:item-loc-prefix loc-prefix}))
+
+(defn reviews-section [id settings-path]
+  (complexity-section id settings-path {:term {:path       [:reviews]
+                                               :extra-path [:name]
+                                               :match-key  :id}}))
 
 (defn text-section [id]
   {:id (name id)
@@ -194,9 +213,9 @@
                                    :align  :full
                                    :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
-              (complexity-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
+              (foremen-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
               #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (complexity-section :matti-reviews [:settings :reviews :0 :reviews] :matti-r.reviews)
+              (reviews-section :matti-reviews [:settings :reviews :0 :reviews])
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
                :grid  {:columns 6
@@ -230,7 +249,7 @@
    :sections [{:id   "verdict"
                :grid {:columns 1
                       :rows    [[{:id     "verdict-code"
-                                  :schema {:multi-select {:label? false
+                                  :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
                                                           :items      [:annettu-lausunto
                                                                        :asiakirjat-palautettu
@@ -273,16 +292,18 @@
               {:id   "foremen"
                :grid {:columns 1
                       :rows    [[{:id     "foremen"
-                                  :schema {:multi-select {:label? false
+                                  :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
                                                           :items      [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]]}}
               {:id   "reviews"
                :grid {:columns 1
                       :rows    [[{:id     "reviews"
-                                  :schema {:multi-select {:label? false
-                                                          :loc-prefix :matti-r
-                                                          :items      [:paikka :sijainti :aloitus :pohja
-                                                                       :rakenne :vv :iv :loppu]}}}]]}}]})
+                                  :schema {:reference-list {:label?   false
+                                                            :path     [:reviews]
+                                                            :item-key :id
+                                                            :type     :multi-select
+                                                            :term     {:path       [:reviews]
+                                                                       :extra-path [:name]}}}}]]}}]})
 
 (def settings-schemas
   {:r r-settings})

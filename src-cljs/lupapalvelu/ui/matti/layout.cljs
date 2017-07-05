@@ -1,6 +1,6 @@
 (ns lupapalvelu.ui.matti.layout
-  (:require [clojure.string :as s]
-            [clojure.set :as set]
+  (:require [clojure.set :as set]
+            [clojure.string :as s]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
@@ -8,7 +8,8 @@
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 
 (defn schema-type [schema-type]
@@ -48,34 +49,62 @@
      [:h4.matti-label (path/loc path schema)])
    (let [state (path/state path state)
          items (->> (:items schema)
-                    (map name)
                     (map (fn [item]
-                           {:item item
-                            :text (if-let [item-loc (:item-loc-prefix schema)]
-                                    (path/loc [item-loc item])
-                                    (path/loc path schema item))}))
+                           (if (:value item)
+                             item
+                             (let [item (keyword item)]
+                               {:value item
+                                :text  (if-let [item-loc (:item-loc-prefix schema)]
+                                         (path/loc [item-loc item])
+                                         (path/loc path schema item))}))))
                     (sort-by :text))]
 
-     (for [{:keys [item text]} items
-           :let [item-id (path/id (path/extend path item))
-                 checked (contains? (set (rum/react state)) item)]]
+     (for [{:keys [value text]} items
+           :let                 [item-id (path/id (path/extend path value))
+                                 checked (contains? (set (rum/react state)) value)]]
        [:div.matti-checkbox-wrapper
-        {:key     item-id}
-        [:input {:type "checkbox"
+        {:key item-id}
+        [:input {:type    "checkbox"
                  :id      item-id
                  :checked checked}]
         [:label.matti-checkbox-label
-         {:for item-id
+         {:for      item-id
           :on-click (fn [_]
                       (swap! state
                              (fn [xs]
                                ;; Sanitation on the client side.
-                              (set/intersection (set (if checked
-                                                       (remove #(= item %) xs)
-                                                       (cons item xs)))
-                                                (set (map :item items)))))
+                               (set/intersection (set (if checked
+                                                        (remove #(= value %) xs)
+                                                        (cons value xs)))
+                                                 (set (map :value items)))))
                       (path/meta-updated options))}
          text]]))])
+
+(defn thread-log [x]
+  (println "value:" x)
+  x)
+
+(defn- resolve-reference-list
+  "List of :value, :text maps"
+  [{:keys [path schema]}]
+  (let [{:keys [item-key item-loc-prefix term]}        schema
+        {:keys [extra-path match-key] term-path :path} term
+        match-key                                      (or match-key item-key)]
+    (->> (path/value (:path schema) state/references)
+         (remove :deleted) ; Safe for non-maps
+         (map (fn [x]
+                (let [v (if item-key (item-key x) x)]
+                  {:value v
+                   :text  (cond
+                            (and match-key term-path) (-> (util/find-by-key match-key
+                                                                            v
+                                                                            (path/value term-path
+                                                                                        state/references))
+                                                          (get-in (cond->> [(keyword (common/get-current-language))]
+                                                                    extra-path (concat extra-path))))
+                            item-loc-prefix          (path/loc [item-loc-prefix v])
+                            :else                    (path/loc path schema v))})))
+         distinct)))
 
 (rum/defc select-reference-list < rum/reactive
   [{:keys [state path schema ] :as options} & [wrap-label?]]
@@ -91,8 +120,7 @@
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [state path schema] :as options} & [wrap-label?]]
-  (matti-multi-select (assoc-in options [:schema :items] (distinct (path/react (:path schema)
-                                                                               state/references)))
+  (matti-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
                       wrap-label?))
 
 (rum/defc last-saved < rum/reactive
