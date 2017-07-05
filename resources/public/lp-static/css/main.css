@@ -5465,6 +5465,396 @@ label.btn.ghost.positive:active, .dataTables_paginate label.ghost.positive.pagin
   border-color: #61b72f;
 }
 
+button.sidebar-button {
+  color: #f39129;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+button.sidebar-button:link, button.sidebar-button:visited {
+  color: #f39129;
+  background-color: #eeeeee;
+}
+
+button.sidebar-button:hover {
+  color: #f7ac2e;
+  background-color: #eeeeee;
+  text-decoration: none;
+}
+
+button.sidebar-button:active, button.sidebar-button.active {
+  color: #fbc732;
+  background-color: #eeeeee;
+}
+
+button.sidebar-button:disabled, button.sidebar-button.disabled, button.sidebar-button.waiting {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+div.btn.sidebar-button, .dataTables_paginate div.sidebar-button.paginate_disabled_previous, .dataTables_paginate div.sidebar-button.paginate_disabled_next {
+  color: #f39129;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+div.btn.sidebar-button:link, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate div.sidebar-button.paginate_disabled_next:link, div.btn.sidebar-button:visited, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate div.sidebar-button.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #eeeeee;
+}
+
+div.btn.sidebar-button:hover, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:hover, .dataTables_paginate div.sidebar-button.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #eeeeee;
+  text-decoration: none;
+}
+
+div.btn.sidebar-button:active, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:active, .dataTables_paginate div.sidebar-button.paginate_disabled_next:active, div.btn.sidebar-button.active, .dataTables_paginate div.sidebar-button.active.paginate_disabled_previous, .dataTables_paginate div.sidebar-button.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #eeeeee;
+}
+
+div.btn.sidebar-button:disabled, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:disabled, .dataTables_paginate div.sidebar-button.paginate_disabled_next:disabled, div.btn.sidebar-button.disabled, .dataTables_paginate div.sidebar-button.disabled.paginate_disabled_previous, .dataTables_paginate div.sidebar-button.disabled.paginate_disabled_next, div.btn.sidebar-button.waiting, .dataTables_paginate div.sidebar-button.waiting.paginate_disabled_previous, .dataTables_paginate div.sidebar-button.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+a.btn.sidebar-button, .dataTables_paginate a.sidebar-button.paginate_disabled_previous, .dataTables_paginate a.sidebar-button.paginate_disabled_next {
+  color: #f39129;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+a.btn.sidebar-button:link, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate a.sidebar-button.paginate_disabled_next:link, a.btn.sidebar-button:visited, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate a.sidebar-button.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #eeeeee;
+}
+
+a.btn.sidebar-button:hover, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:hover, .dataTables_paginate a.sidebar-button.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #eeeeee;
+  text-decoration: none;
+}
+
+a.btn.sidebar-button:active, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:active, .dataTables_paginate a.sidebar-button.paginate_disabled_next:active, a.btn.sidebar-button.active, .dataTables_paginate a.sidebar-button.active.paginate_disabled_previous, .dataTables_paginate a.sidebar-button.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #eeeeee;
+}
+
+a.btn.sidebar-button:disabled, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:disabled, .dataTables_paginate a.sidebar-button.paginate_disabled_next:disabled, a.btn.sidebar-button.disabled, .dataTables_paginate a.sidebar-button.disabled.paginate_disabled_previous, .dataTables_paginate a.sidebar-button.disabled.paginate_disabled_next, a.btn.sidebar-button.waiting, .dataTables_paginate a.sidebar-button.waiting.paginate_disabled_previous, .dataTables_paginate a.sidebar-button.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+i.btn.sidebar-button, .dataTables_paginate i.sidebar-button.paginate_disabled_previous, .dataTables_paginate i.sidebar-button.paginate_disabled_next {
+  color: #f39129;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+i.btn.sidebar-button:link, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate i.sidebar-button.paginate_disabled_next:link, i.btn.sidebar-button:visited, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate i.sidebar-button.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #eeeeee;
+}
+
+i.btn.sidebar-button:hover, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:hover, .dataTables_paginate i.sidebar-button.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #eeeeee;
+  text-decoration: none;
+}
+
+i.btn.sidebar-button:active, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:active, .dataTables_paginate i.sidebar-button.paginate_disabled_next:active, i.btn.sidebar-button.active, .dataTables_paginate i.sidebar-button.active.paginate_disabled_previous, .dataTables_paginate i.sidebar-button.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #eeeeee;
+}
+
+i.btn.sidebar-button:disabled, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:disabled, .dataTables_paginate i.sidebar-button.paginate_disabled_next:disabled, i.btn.sidebar-button.disabled, .dataTables_paginate i.sidebar-button.disabled.paginate_disabled_previous, .dataTables_paginate i.sidebar-button.disabled.paginate_disabled_next, i.btn.sidebar-button.waiting, .dataTables_paginate i.sidebar-button.waiting.paginate_disabled_previous, .dataTables_paginate i.sidebar-button.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+span.btn.sidebar-button, .dataTables_paginate span.sidebar-button.paginate_disabled_previous, .dataTables_paginate span.sidebar-button.paginate_disabled_next {
+  color: #f39129;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+span.btn.sidebar-button:link, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate span.sidebar-button.paginate_disabled_next:link, span.btn.sidebar-button:visited, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate span.sidebar-button.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #eeeeee;
+}
+
+span.btn.sidebar-button:hover, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:hover, .dataTables_paginate span.sidebar-button.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #eeeeee;
+  text-decoration: none;
+}
+
+span.btn.sidebar-button:active, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:active, .dataTables_paginate span.sidebar-button.paginate_disabled_next:active, span.btn.sidebar-button.active, .dataTables_paginate span.sidebar-button.active.paginate_disabled_previous, .dataTables_paginate span.sidebar-button.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #eeeeee;
+}
+
+span.btn.sidebar-button:disabled, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:disabled, .dataTables_paginate span.sidebar-button.paginate_disabled_next:disabled, span.btn.sidebar-button.disabled, .dataTables_paginate span.sidebar-button.disabled.paginate_disabled_previous, .dataTables_paginate span.sidebar-button.disabled.paginate_disabled_next, span.btn.sidebar-button.waiting, .dataTables_paginate span.sidebar-button.waiting.paginate_disabled_previous, .dataTables_paginate span.sidebar-button.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+label.btn.sidebar-button, .dataTables_paginate label.sidebar-button.paginate_disabled_previous, .dataTables_paginate label.sidebar-button.paginate_disabled_next {
+  color: #f39129;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+label.btn.sidebar-button:link, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate label.sidebar-button.paginate_disabled_next:link, label.btn.sidebar-button:visited, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate label.sidebar-button.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #eeeeee;
+}
+
+label.btn.sidebar-button:hover, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:hover, .dataTables_paginate label.sidebar-button.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #eeeeee;
+  text-decoration: none;
+}
+
+label.btn.sidebar-button:active, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:active, .dataTables_paginate label.sidebar-button.paginate_disabled_next:active, label.btn.sidebar-button.active, .dataTables_paginate label.sidebar-button.active.paginate_disabled_previous, .dataTables_paginate label.sidebar-button.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #eeeeee;
+}
+
+label.btn.sidebar-button:disabled, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:disabled, .dataTables_paginate label.sidebar-button.paginate_disabled_next:disabled, label.btn.sidebar-button.disabled, .dataTables_paginate label.sidebar-button.disabled.paginate_disabled_previous, .dataTables_paginate label.sidebar-button.disabled.paginate_disabled_next, label.btn.sidebar-button.waiting, .dataTables_paginate label.sidebar-button.waiting.paginate_disabled_previous, .dataTables_paginate label.sidebar-button.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+button.sidebar-button-light {
+  color: #f39129;
+  background-color: #f6f6f6;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+button.sidebar-button-light:link, button.sidebar-button-light:visited {
+  color: #f39129;
+  background-color: #f6f6f6;
+}
+
+button.sidebar-button-light:hover {
+  color: #f7ac2e;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+
+button.sidebar-button-light:active, button.sidebar-button-light.active {
+  color: #fbc732;
+  background-color: #f6f6f6;
+}
+
+button.sidebar-button-light:disabled, button.sidebar-button-light.disabled, button.sidebar-button-light.waiting {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+div.btn.sidebar-button-light, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next {
+  color: #f39129;
+  background-color: #f6f6f6;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+div.btn.sidebar-button-light:link, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:link, div.btn.sidebar-button-light:visited, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #f6f6f6;
+}
+
+div.btn.sidebar-button-light:hover, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:hover, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+
+div.btn.sidebar-button-light:active, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:active, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:active, div.btn.sidebar-button-light.active, .dataTables_paginate div.sidebar-button-light.active.paginate_disabled_previous, .dataTables_paginate div.sidebar-button-light.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #f6f6f6;
+}
+
+div.btn.sidebar-button-light:disabled, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:disabled, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:disabled, div.btn.sidebar-button-light.disabled, .dataTables_paginate div.sidebar-button-light.disabled.paginate_disabled_previous, .dataTables_paginate div.sidebar-button-light.disabled.paginate_disabled_next, div.btn.sidebar-button-light.waiting, .dataTables_paginate div.sidebar-button-light.waiting.paginate_disabled_previous, .dataTables_paginate div.sidebar-button-light.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+a.btn.sidebar-button-light, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next {
+  color: #f39129;
+  background-color: #f6f6f6;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+a.btn.sidebar-button-light:link, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:link, a.btn.sidebar-button-light:visited, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #f6f6f6;
+}
+
+a.btn.sidebar-button-light:hover, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:hover, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+
+a.btn.sidebar-button-light:active, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:active, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:active, a.btn.sidebar-button-light.active, .dataTables_paginate a.sidebar-button-light.active.paginate_disabled_previous, .dataTables_paginate a.sidebar-button-light.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #f6f6f6;
+}
+
+a.btn.sidebar-button-light:disabled, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:disabled, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:disabled, a.btn.sidebar-button-light.disabled, .dataTables_paginate a.sidebar-button-light.disabled.paginate_disabled_previous, .dataTables_paginate a.sidebar-button-light.disabled.paginate_disabled_next, a.btn.sidebar-button-light.waiting, .dataTables_paginate a.sidebar-button-light.waiting.paginate_disabled_previous, .dataTables_paginate a.sidebar-button-light.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+i.btn.sidebar-button-light, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next {
+  color: #f39129;
+  background-color: #f6f6f6;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+i.btn.sidebar-button-light:link, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:link, i.btn.sidebar-button-light:visited, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #f6f6f6;
+}
+
+i.btn.sidebar-button-light:hover, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:hover, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+
+i.btn.sidebar-button-light:active, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:active, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:active, i.btn.sidebar-button-light.active, .dataTables_paginate i.sidebar-button-light.active.paginate_disabled_previous, .dataTables_paginate i.sidebar-button-light.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #f6f6f6;
+}
+
+i.btn.sidebar-button-light:disabled, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:disabled, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:disabled, i.btn.sidebar-button-light.disabled, .dataTables_paginate i.sidebar-button-light.disabled.paginate_disabled_previous, .dataTables_paginate i.sidebar-button-light.disabled.paginate_disabled_next, i.btn.sidebar-button-light.waiting, .dataTables_paginate i.sidebar-button-light.waiting.paginate_disabled_previous, .dataTables_paginate i.sidebar-button-light.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+span.btn.sidebar-button-light, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next {
+  color: #f39129;
+  background-color: #f6f6f6;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+span.btn.sidebar-button-light:link, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:link, span.btn.sidebar-button-light:visited, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #f6f6f6;
+}
+
+span.btn.sidebar-button-light:hover, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:hover, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+
+span.btn.sidebar-button-light:active, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:active, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:active, span.btn.sidebar-button-light.active, .dataTables_paginate span.sidebar-button-light.active.paginate_disabled_previous, .dataTables_paginate span.sidebar-button-light.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #f6f6f6;
+}
+
+span.btn.sidebar-button-light:disabled, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:disabled, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:disabled, span.btn.sidebar-button-light.disabled, .dataTables_paginate span.sidebar-button-light.disabled.paginate_disabled_previous, .dataTables_paginate span.sidebar-button-light.disabled.paginate_disabled_next, span.btn.sidebar-button-light.waiting, .dataTables_paginate span.sidebar-button-light.waiting.paginate_disabled_previous, .dataTables_paginate span.sidebar-button-light.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+label.btn.sidebar-button-light, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next {
+  color: #f39129;
+  background-color: #f6f6f6;
+  border-bottom: 1px solid #dddddd;
+  padding-left: 48px;
+  padding-right: 48px;
+  min-width: 326px;
+  max-width: 326px;
+}
+
+label.btn.sidebar-button-light:link, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:link, label.btn.sidebar-button-light:visited, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: #f6f6f6;
+}
+
+label.btn.sidebar-button-light:hover, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:hover, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+
+label.btn.sidebar-button-light:active, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:active, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:active, label.btn.sidebar-button-light.active, .dataTables_paginate label.sidebar-button-light.active.paginate_disabled_previous, .dataTables_paginate label.sidebar-button-light.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: #f6f6f6;
+}
+
+label.btn.sidebar-button-light:disabled, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:disabled, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:disabled, label.btn.sidebar-button-light.disabled, .dataTables_paginate label.sidebar-button-light.disabled.paginate_disabled_previous, .dataTables_paginate label.sidebar-button-light.disabled.paginate_disabled_next, label.btn.sidebar-button-light.waiting, .dataTables_paginate label.sidebar-button-light.waiting.paginate_disabled_previous, .dataTables_paginate label.sidebar-button-light.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #f39129 !important;
+  background-color: #dddddd !important;
+}
+
+.sidebar-button.sidebar-button--icon,
+.sidebar-button-light.sidebar-button--icon {
+  min-width: 118px;
+  max-width: 118px;
+}
+
 a.link-btn {
   color: #f39129;
   background-color: none;
@@ -16872,6 +17262,64 @@ div.organization-link-cell {
 
 .stamp-editor-drag-guide {
   margin: 1em 0;
+}
+
+.navi-sidebar {
+  position: fixed;
+  height: 100%;
+  margin-top: -10px;
+  background-color: #eeeeee;
+}
+
+@media (max-width: 1800px) {
+  .navi-sidebar {
+    display: none;
+  }
+}
+
+.navi-sidebar.navi-sidebar--menu {
+  z-index: 888;
+}
+
+@media (max-width: 1800px) {
+  .navi-sidebar.navi-sidebar--menu {
+    display: initial;
+  }
+}
+
+.container.container--authority-admin {
+  max-width: initial;
+  width: initial;
+  margin-left: 326px;
+}
+
+.container.container--authority-admin.container--icon {
+  margin-left: 118px;
+}
+
+@media (max-width: 1800px) {
+  .container.container--authority-admin,
+  .container.container--authority-admin.container--icon {
+    margin-left: 0;
+  }
+}
+
+.navi-toolbar {
+  background-color: #eeeeee;
+  border-bottom: 1px solid #dddddd;
+  width: 100%;
+  min-height: 40px;
+}
+
+.navi-toolbar button.sidebar-button {
+  border: none;
+  display: none;
+}
+
+@media (max-width: 1800px) {
+  .navi-toolbar button.sidebar-button {
+    display: initial;
+  }
 }
 
 #neighbor-show .pending {

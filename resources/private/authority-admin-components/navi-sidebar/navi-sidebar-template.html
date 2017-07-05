@@ -1,0 +1,31 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="navi-sidebar-template">
+  <div class="navi-sidebar"
+       data-bind="css: {'navi-sidebar--menu': showMenu,
+                  'navi-sidebar--icon': iconsOnly}">
+    <div class="stacked">
+      <!-- ko foreach: menu -->
+      <button class="sidebar-button"
+              data-bind="disable: $parent.isCurrentPage( page ),
+                         click: $parent.openPage,
+                         css: $parent.buttonCss(),
+                         testId: $data.testId">
+        <i data-bind="css: icon,
+                      ltitle: $parent.buttonTitle( $data )"></i>
+        <!-- ko ifnot: $parent.iconsOnly -->
+        <span data-bind="ltext: loc"></span>
+        <!-- /ko -->
+      </button>
+      <!-- /ko -->
+      <button class="sidebar-button-light"
+              data-bind="toggleClick: iconsOnly,
+                         css: buttonCss()">
+        <i data-bind="css: {'lupicon-chevron-left': !iconsOnly(),
+                      'lupicon-chevron-end': iconsOnly}"></i>
+        <!-- ko ifnot: iconsOnly -->
+        <span data-bind="ltext: 'navi-sidebar.minify'" ></span>
+        <!-- /ko -->
+      </button>
+    </div>
+  </div>
+</script>

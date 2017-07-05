@@ -208,7 +208,7 @@
       ajax.command("create-statement-giver", statementGiver)
         .success(self.onSuccess)
         .error(function(result) {
-          self.error(result.txt);           
+          self.error(result.txt);
         })
         .call();
       return false;
@@ -455,7 +455,7 @@
 
   $(function() {
     organizationModel.load();
-    $("#applicationTabs").applyBindings({});
+    $("#navi-toolbar").applyBindings({});
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
       statementGivers:    statementGiversModel,

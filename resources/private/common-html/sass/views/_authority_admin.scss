@@ -225,3 +225,51 @@ div.organization-link-cell {
 .stamp-editor-drag-guide {
   margin: 1em 0;
 }
+
+.navi-sidebar {
+  position: fixed;
+  height: 100%;
+  margin-top: -10px; // Avoid gap between toolbar
+  background-color: $sidebar-button-color; // from buttons.scss
+  @media (max-width: 1800px ) {
+    display: none;
+  }
+}
+
+.navi-sidebar.navi-sidebar--menu {
+  z-index: 888;
+  @media (max-width: 1800px ) {
+    display: initial;
+  }
+}
+
+.container.container--authority-admin {
+  max-width: initial;
+  width: initial;
+  margin-left: $sidebar-button-width; // from buttons.scss
+
+  &.container--icon {
+    margin-left: $sidebar-icon-width;
+  }
+}
+
+.container.container--authority-admin,
+.container.container--authority-admin.container--icon {
+  @media (max-width: 1800px ) {
+    margin-left: 0;
+  }
+}
+
+.navi-toolbar {
+  background-color: $sidebar-button-color; // from buttons.scss
+  border-bottom: 1px solid $gray221;
+  width: 100%;
+  min-height: $btn-height;
+  button.sidebar-button {
+    border: none;
+    display: none;
+     @media (max-width: 1800px ) {
+       display: initial;
+     }
+  }
+}
