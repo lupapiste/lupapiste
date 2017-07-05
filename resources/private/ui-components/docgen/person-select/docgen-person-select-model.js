@@ -2,8 +2,6 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
   "use strict";
   var self = this;
 
-  var EMPTY = "empty";
-
   ko.utils.extend( self, new LUPAPISTE.DocgenInputModel( params ));
 
   // selectValue is a proxy for the underlying document data service
@@ -13,7 +11,7 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
   self.appId = partiesModel.applicationId;
   self.myNs = self.path.slice(0, self.path.length - 1).join(".");
 
-  var collectionFn = _.get(params, "docModel.getCollection") || function() { return "documents" };
+  var collectionFn = _.get(params, "docModel.getCollection") || function() { return "documents"; };
   var collection = collectionFn();
 
   self.personOptions = self.disposedComputed( function() {
@@ -36,7 +34,7 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
             .success( _.partial( repository.load, self.appId, _.noop))
             .error(function(e) {
               if (e.text !== "error.application-does-not-have-given-auth") {
-                error("Failed to set user to document", userId, self.docId, e);
+                error("Failed to set user to document", value, self.docId, e);
               }
               notify.ajaxError(e);
             })

@@ -20,7 +20,6 @@ LUPAPISTE.PartiesModel = function() {
         .success(function(result) {
           var companyUsers = result.users;
           self.personSelectorItems(_.unionBy(validPersons, companyUsers, "id"));
-          console.log(validPersons, companyUsers, self.personSelectorItems());
         })
         .call();
     } else {
