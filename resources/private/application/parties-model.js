@@ -7,7 +7,6 @@ LUPAPISTE.PartiesModel = function() {
   self.personSelectorItems = ko.observableArray();
 
   self.refresh = function(application) {
-    self.applicationId = application.id;
     var authArray = application.auth;
     var companies = _.filter(authArray, ["type", "company"]);
 
@@ -16,8 +15,17 @@ LUPAPISTE.PartiesModel = function() {
              !_.includes( ["statementGiver", "guest", "guestAuthority"], user.role);
     });
 
-    self.personSelectorItems(validPersons);
-
+    if (!_.isEmpty(companies)) {
+      ajax.query("company-users-for-person-selector", {id: application.id})
+        .success(function(result) {
+          var companyUsers = result.users;
+          self.personSelectorItems(_.unionBy(validPersons, companyUsers, "id"));
+          console.log(validPersons, companyUsers, self.personSelectorItems());
+        })
+        .call();
+    } else {
+      self.personSelectorItems(validPersons);
+    }
   };
 
 };
