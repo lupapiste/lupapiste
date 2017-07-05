@@ -174,6 +174,8 @@
           (when temp-input-file
             (io/delete-file temp-input-file :silently)))))
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, using original")
+        (when (:assume-pdfa-compatibility opts)
+          (io/copy pdf-file output-file))
         {:pdfa? (or (:assume-pdfa-compatibility opts) false)})))
 
 (hystrix/defcommand convert-to-pdf-a
