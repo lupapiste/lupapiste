@@ -31,10 +31,13 @@
    :pre-checks  [domain/validate-owner-or-write-access]
    :parameters  [id]}
   [{{auth :auth} :application}]
-  (let [authorised-company-ids (map :id
-                                    (filter #(and (= (:type %) "company")
-                                             (not (= (:role %) "reader"))) auth))]
-    (ok :users (mapcat com/find-company-users authorised-company-ids))))
+  (let [authorised-companies (map #(select-keys % [:id :name])
+                                  (filter #(and (= (:type %) "company")
+                                           (not (= (:role %) "reader"))) auth))]
+    (ok :users
+        (mapcat (fn [{:keys [id name]}]
+                  (->> (com/find-company-users id)
+                       (map #(assoc-in % [:company :name] name)))) authorised-companies))))
 
 (defquery company-tags
   {:user-roles #{:applicant :authority :admin}

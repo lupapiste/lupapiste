@@ -21,7 +21,12 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
 
   self.optionsText = function( person ) {
     if (person.id) {
-      return person.lastName + " " + person.firstName;
+      var name = person.lastName + " " + person.firstName;
+      if (person.company) {
+        return name + ", " + person.company.name;
+      } else {
+        return name;
+      }
     }
   };
 
