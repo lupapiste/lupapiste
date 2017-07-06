@@ -38,7 +38,11 @@ LUPAPISTE.NaviSidebarModel = function() {
                testId: "stamp-editor"}];
 
   self.showMenu = service.showMenu;
-  self.iconsOnly = service.iconsOnly;
+  self.iconsOnly = self.disposedComputed( {
+    read: function() {
+      return service.iconsOnly() && !service.showMenu();
+    },
+    write: service.iconsOnly});
 
   if( features.enabled("ajanvaraus")
    && lupapisteApp.models.globalAuthModel.ok("calendars-enabled") ) {
@@ -55,7 +59,7 @@ LUPAPISTE.NaviSidebarModel = function() {
     return lupapisteApp.models.rootVMO.isCurrentPage( page );
   };
 
-  self.openPage = service.openPage
+  self.openPage = service.openPage;
 
   self.buttonCss = function() {
     return {"sidebar-button--icon": self.iconsOnly()};
@@ -64,4 +68,6 @@ LUPAPISTE.NaviSidebarModel = function() {
   self.buttonTitle = function( item ) {
     return self.iconsOnly() ? item.loc : "";
   };
+
+
 };

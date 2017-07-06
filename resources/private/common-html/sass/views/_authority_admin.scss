@@ -226,20 +226,23 @@ div.organization-link-cell {
   margin: 1em 0;
 }
 
+// Note on breakpoints: IE does not support display: initial.
+$navi-sidebar-bp: 1800px;
+
 .navi-sidebar {
   position: fixed;
   height: 100%;
   margin-top: -10px; // Avoid gap between toolbar
   background-color: $sidebar-button-color; // from buttons.scss
-  @media (max-width: 1800px ) {
+  @media (max-width: $navi-sidebar-bp ) {
     display: none;
   }
 }
 
 .navi-sidebar.navi-sidebar--menu {
   z-index: 888;
-  @media (max-width: 1800px ) {
-    display: initial;
+  @media (max-width: $navi-sidebar-bp ) {
+    display: block;
   }
 }
 
@@ -255,7 +258,7 @@ div.organization-link-cell {
 
 .container.container--authority-admin,
 .container.container--authority-admin.container--icon {
-  @media (max-width: 1800px ) {
+  @media (max-width: $navi-sidebar-bp ) {
     margin-left: 0;
   }
 }
@@ -268,8 +271,8 @@ div.organization-link-cell {
   button.sidebar-button {
     border: none;
     display: none;
-     @media (max-width: 1800px ) {
-       display: initial;
+     @media (max-width: $navi-sidebar-bp ) {
+       display: inline-block;
      }
   }
 }

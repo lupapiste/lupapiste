@@ -21,8 +21,8 @@ LUPAPISTE.NaviSidebarService = function() {
 
 
   ko.computed( function() {
-    if( self.showMenu() ) {
-      self.iconsOnly( false );
+    if( self.iconsOnly()) {
+      self.showMenu( false );
     }
   });
 

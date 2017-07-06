@@ -17,15 +17,17 @@
         <!-- /ko -->
       </button>
       <!-- /ko -->
+      <!-- ko ifnot: showMenu -->
       <button class="sidebar-button-light"
               data-bind="toggleClick: iconsOnly,
                          css: buttonCss()">
-        <i data-bind="css: {'lupicon-chevron-left': !iconsOnly(),
-                      'lupicon-chevron-end': iconsOnly}"></i>
+        <i data-bind="css: {'lupicon-chevron-small-left': !iconsOnly(),
+                      'lupicon-chevron-right': iconsOnly}"></i>
         <!-- ko ifnot: iconsOnly -->
         <span data-bind="ltext: 'navi-sidebar.minify'" ></span>
         <!-- /ko -->
       </button>
+      <!-- /ko -->
     </div>
   </div>
 </script>
