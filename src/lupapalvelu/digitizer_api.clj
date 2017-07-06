@@ -11,8 +11,12 @@
             [clojure.set :as set]))
 
 (defn user-is-allowed-to-digitize [{user-orgs :user-organizations user :user {:keys [organizationId]} :data}]
-  (let [archive-enabled? (some :permanent-archive-enabled (filter #(= organizationId (:id %)) user-orgs))
-        roles ((keyword organizationId) (:orgAuthz user))
+  (let [archive-enabled? (some :permanent-archive-enabled (if organizationId
+                                                            (filter #(= organizationId (:id %)) user-orgs)
+                                                            user-orgs))
+        roles (if organizationId
+                ((keyword organizationId) (:orgAuthz user))
+                (apply set/union (vals (:orgAuthz user))))
         correct-role? (seq (set/intersection #{:authority :digitizer} roles))]
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
