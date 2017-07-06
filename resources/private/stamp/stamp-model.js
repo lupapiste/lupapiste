@@ -1,4 +1,3 @@
-LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
@@ -357,15 +356,15 @@ LUPAPISTE.StampModel = function(params) {
     return self.queryUpdate();
   };
 
-  hub.subscribe({eventType: "attachmentsService::query", stampRefresh: true}, function(event) {
+  hub.subscribe({eventType: "attachmentsService::query", stampRefresh: true}, function() {
     self.status(self.statusReady);
     pageutil.hideAjaxWait();
   });
-  self.stampAgain = function(model) {
+  self.stampAgain = function() {
     pageutil.showAjaxWaitNow(loc("attachments.loading"));
     self.status(self.statusInit);
     lupapisteApp.services.attachmentsService.queryAll({stampRefresh: true});
-  }
+  };
 
 /*
  * Selection toggling
