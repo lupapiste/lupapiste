@@ -20,7 +20,8 @@ LUPAPISTE.PartiesModel = function() {
       ajax.query("company-users-for-person-selector", {id: application.id})
         .success(function(result) {
           var companyUsers = result.users;
-          self.personSelectorItems(_.unionBy(companyUsers, validPersons, "id"));
+          var allUsers = _.unionBy(companyUsers, validPersons, "id");
+          self.personSelectorItems(_.sortBy(allUsers, ["lastName", "firstName"]));
         })
         .call();
     } else {
