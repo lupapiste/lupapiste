@@ -16,11 +16,6 @@ var stamping = (function() {
       pageutil.openPage("application/" + id, "attachments");
     },
 
-    resetStamping: function() {
-      model.stampingMode(false);
-      hub.send("page-load", {pageId: "stamping"});
-    },
-
     reloadStamps: function(param) {
       param.stamps([]);
       param.stampsChanged(false);
