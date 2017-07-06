@@ -9,10 +9,13 @@ LUPAPISTE.NaviSidebarService = function() {
     return {"container--icon": self.iconsOnly()};
   } );
 
-  self.menuCss = ko.pureComputed( function ()  {
+  var animate = ko.observable( 0 );
+
+  self.menuCss = ko.computed( function ()  {
     var menu = self.showMenu();
     return {"lupicon-menu": !menu,
-            "lupicon-remove": menu};
+            "lupicon-remove": menu,
+           "spin-once": animate()};
   } );
 
   self.menuLoc = ko.pureComputed( function() {
@@ -24,6 +27,11 @@ LUPAPISTE.NaviSidebarService = function() {
     if( self.iconsOnly()) {
       self.showMenu( false );
     }
+  });
+
+  self.showMenu.subscribe( function() {
+    animate( true );
+    _.delay( _.wrap( false, animate), 600);
   });
 
   self.openPage = function( item ) {

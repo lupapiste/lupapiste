@@ -449,29 +449,29 @@ a.link-btn-julkipano {
 // Note: the icon element needs to have wait class.
 //       The class just hides the element when not waiting.
 //       Here the waiting shows spin animation (see below).
-@mixin rotate-frames( $name ) {
+@mixin rotate-frames( $name, $degrees: 360deg ) {
   @-webkit-keyframes #{$name} {
     100% {
-      -webkit-transform: rotate(360deg);
+      -webkit-transform: rotate($degrees);
     }
   }
   @-moz-keyframes #{$name} {
     100% {
-      -moz-transform: rotate(360deg);
+      -moz-transform: rotate($degrees);
     }
   }
   @keyframes #{$name}  {
     100% {
-      -webkit-transform: rotate(360deg);
-      transform:rotate(360deg);
+      -webkit-transform: rotate($degrees);
+      transform:rotate($degrees);
     }
   }
 }
 
-@mixin rotate( $name, $speed: 4s ) {
-  -webkit-animation: $name $speed linear infinite;
-  -moz-animation: $name $speed linear infinite;
-  animation: $name $speed linear infinite;
+@mixin rotate( $name, $speed: 4s, $count: infinite ) {
+  -webkit-animation: $name $speed linear $count;
+  -moz-animation: $name $speed linear $count;
+  animation: $name $speed linear $count;
 }
 
 @include rotate-frames( spin );

@@ -17264,11 +17264,22 @@ div.organization-link-cell {
   margin: 1em 0;
 }
 
+body.authority-admin .nav-box {
+  max-width: none;
+  padding-left: 48px;
+  padding-right: 48px;
+}
+
+body.authority-admin .nav-box .brand > a {
+  margin-left: 0;
+}
+
 .navi-sidebar {
   position: fixed;
   height: 100%;
   margin-top: -10px;
   background-color: #eeeeee;
+  border-right: 1px solid #dddddd;
 }
 
 @media (max-width: 1800px) {
@@ -17320,6 +17331,38 @@ div.organization-link-cell {
   .navi-toolbar button.sidebar-button {
     display: inline-block;
   }
+}
+
+@-webkit-keyframes half-spin {
+  100% {
+    -webkit-transform: rotate(180deg);
+  }
+}
+
+@-moz-keyframes half-spin {
+  100% {
+    -moz-transform: rotate(180deg);
+  }
+}
+
+@keyframes half-spin {
+  100% {
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+}
+
+.spin-once {
+  -webkit-animation: half-spin 0.5s linear 1;
+  -moz-animation: half-spin 0.5s linear 1;
+  animation: half-spin 0.5s linear 1;
+  vertical-align: middle;
+  padding: 0 !important;
+  display: table-cell;
+}
+
+.spin-once + span {
+  padding-left: 10px;
 }
 
 #neighbor-show .pending {

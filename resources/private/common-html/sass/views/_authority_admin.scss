@@ -226,6 +226,15 @@ div.organization-link-cell {
   margin: 1em 0;
 }
 
+body.authority-admin .nav-box {
+  max-width: none;
+  padding-left: 2 * $marginL;
+  padding-right: 2 * $marginL;
+  .brand > a {
+    margin-left: 0;
+  }
+}
+
 // Note on breakpoints: IE does not support display: initial.
 $navi-sidebar-bp: 1800px;
 
@@ -234,6 +243,7 @@ $navi-sidebar-bp: 1800px;
   height: 100%;
   margin-top: -10px; // Avoid gap between toolbar
   background-color: $sidebar-button-color; // from buttons.scss
+  border-right: 1px solid $gray221;
   @media (max-width: $navi-sidebar-bp ) {
     display: none;
   }
@@ -275,4 +285,17 @@ $navi-sidebar-bp: 1800px;
        display: inline-block;
      }
   }
+}
+
+@include rotate-frames( half-spin, 180deg );
+
+.spin-once {
+  @include rotate( half-spin, 0.5s, $count: 1);
+  vertical-align: middle;
+  padding: 0 !important;
+  display: table-cell;
+}
+
+.spin-once + span {
+  padding-left: $icon-pad;
 }
