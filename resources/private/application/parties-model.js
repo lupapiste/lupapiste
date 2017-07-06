@@ -20,8 +20,13 @@ LUPAPISTE.PartiesModel = function() {
       ajax.query("company-users-for-person-selector", {id: application.id})
         .success(function(result) {
           var companyUsers = result.users;
+          _.map(companyUsers, function(u) {
+            u.notPersonallyAuthorized = _.isUndefined(_.find(validPersons, ["id", u.id]));
+            return u;
+          });
           var allUsers = _.unionBy(companyUsers, validPersons, "id");
           self.personSelectorItems(_.sortBy(allUsers, ["lastName", "firstName"]));
+          console.log(self.personSelectorItems());
         })
         .call();
     } else {
