@@ -327,3 +327,11 @@
 
 (defn is-ya-permit [permit-type]
   (= permit-type (name YA)))
+
+(defn is-archiving-project [{{:keys [permitType]} :application}]
+  (when-not (= permitType (name ARK))
+    (fail :error.unsupported-permit-type)))
+
+(defn is-not-archiving-project [{{:keys [permitType]} :application}]
+  (when (= permitType (name ARK))
+    (fail :error.unsupported-permit-type)))

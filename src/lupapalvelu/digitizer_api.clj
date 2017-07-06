@@ -8,7 +8,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.application :as app]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [lupapalvelu.permit :as permit]))
 
 (defn user-is-allowed-to-digitize [{user-orgs :user-organizations user :user {:keys [organizationId]} :data}]
   (let [archive-enabled? (some :permanent-archive-enabled (if organizationId
@@ -20,10 +21,6 @@
         correct-role? (seq (set/intersection #{:authority :digitizer} roles))]
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
-
-(defn archiving-project-permit-type [{{:keys [permitType]} :application}]
-  (when-not (= permitType "ARK")
-    unauthorized))
 
 (defcommand create-archiving-project
             {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway]
@@ -51,7 +48,7 @@
    :user-roles       #{:authority}
    :user-authz-roles roles/default-authz-writer-roles
    :states           #{:open}
-   :pre-checks       [archiving-project-permit-type]}
+   :pre-checks       [permit/is-archiving-project]}
   [{:keys [application created user] :as command}]
   (action/update-application command
                              {$set  {:state     :underReview
