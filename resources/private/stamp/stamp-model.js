@@ -147,9 +147,7 @@ LUPAPISTE.StampModel = function(params) {
   self.stamps = params.stamps;
 
   self.selectedStampsId = params.selectedStampId;
-  if (!ko.unwrap(self.selectedStampsId)) {
-    self.selectedStampsId(self.stamps()[0].id);
-  }
+
   self.selectedStamp = ko.pureComputed(function() {
     return _.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
@@ -197,18 +195,6 @@ LUPAPISTE.StampModel = function(params) {
       })
       .value()
       .join("\n") + "\nwww.lupapiste.fi";
-  }
-
-  if (!self.selectedStamp()) {
-    self.selectedStamp({
-      id: null,
-      name: null,
-      position: {},
-      background: null,
-      page: null,
-      qrCode: null,
-      rows: [[]]
-    });
   }
 
   // Stamp info

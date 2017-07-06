@@ -3,28 +3,21 @@ var stamping = (function() {
 
   var model = {
     stampingMode: ko.observable(false),
-    authorization: null,
-    appModel: null,
-    attachments: null,
+    authorization: lupapisteApp.models.applicationAuthModel,
+    appModel: lupapisteApp.models.application,
+    attachments: lupapisteApp.services.attachmentsService.attachments,
     pending: ko.observable(false),
     stamps: ko.observableArray([]),
     selectedStampId: ko.observable(null),
 
     cancelStamping: function() {
-      var id = pageutil.subPage();
       model.stampingMode(false);
-      model.appModel = null;
-      model.attachments = null;
-      model.authorization = null;
+      var id = pageutil.subPage();
       pageutil.openPage("application/" + id, "attachments");
     },
 
     resetStamping: function() {
       model.stampingMode(false);
-      model.appModel = null;
-      model.attachments = null;
-      model.authorization = null;
-
       hub.send("page-load", {pageId: "stamping"});
     },
 
@@ -68,34 +61,29 @@ var stamping = (function() {
           }
         });
         model.stamps(data.stamps);
+        if (!ko.unwrap(model.selectedStampId)) { // if nothing is selected, use first stamp by default
+          model.selectedStampId(model.stamps()[0].id);
+        }
       }).call();
   }
 
-  function initStamp(appModel) {
-    model.appModel = appModel;
-    model.attachments = lupapisteApp.services.attachmentsService.attachments;
-    model.authorization = lupapisteApp.models.applicationAuthModel;
-    pageutil.openPage("stamping", model.appModel.id());
-  }
-
   hub.onPageLoad("stamping", function() {
+    pageutil.showAjaxWait();
     if ( pageutil.subPage() ) {
-      if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
-        // refresh
+      if ( model.appModel.id() !== pageutil.subPage() ) {
+        // refresh as ID is undefined or LP-id in URL changed
         var appId = pageutil.subPage();
         model.pending(true);
         model.stampingMode(false);
         loadStampTemplates(appId);
         repository.load(appId, _.noop, function(application) {
           lupapisteApp.setTitle(application.title);
-          model.authorization = lupapisteApp.models.applicationAuthModel;
-          model.appModel = lupapisteApp.models.application;
-          ko.mapping.fromJS(application, {}, model.appModel);
-          model.appModel._js = application;
-          model.attachments = lupapisteApp.services.attachmentsService.attachments;
           model.stampingMode(true);
         }, true);
       } else { // appModel already initialized, show stamping
+        model.pending(true);
+        lupapisteApp.services.attachmentsService.queryAll(); // subscription below will set pending to false
+        loadStampTemplates(model.appModel.id());
         model.stampingMode(true);
         lupapisteApp.setTitle(model.appModel.title());
       }
@@ -108,21 +96,12 @@ var stamping = (function() {
 
   hub.onPageUnload("stamping", function() {
     model.stampingMode(false);
-    model.appModel = null;
-    model.attachments = null;
-    model.pending(true);
+    // refresh attachments for application page
     lupapisteApp.services.attachmentsService.queryAll();
-    model.authorization = null;
   });
 
   hub.subscribe({eventType: "attachmentsService::query", query: "attachments"}, function() {
     model.pending(false);
-  });
-
-  hub.subscribe("start-stamping", function(param) {
-    loadStampTemplates(param.application.id());
-    pageutil.showAjaxWait();
-    _.delay(initStamp, 1000, param.application);
   });
 
   ko.components.register("stamping-component", {
