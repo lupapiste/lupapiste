@@ -4,16 +4,16 @@
 <section class="page container" id="create-archiving-project">
   <h1 data-bind="ltext: 'newRequest.createArchivingProject'"></h1>
   <div class="form-grid form-grid--no-border">
-    <div>
-      <label class="form-label">
+    <div class="row">
+      <label>
         <span data-bind="ltext: 'prev-permit-label-kuntalupatunnus'"></span>
         <input data-bind="textInput: kuntalupatunnusFromPrevPermit" data-test-id="test-archiving-project-kuntalupatunnus"
-               type="text" class="form-input text" autofocus="autofocus" name="kuntalupatunnus" />
+               type="text" autofocus="autofocus" name="kuntalupatunnus" />
       </label>
     </div>
 
-    <div data-bind="visible: !needMorePrevPermitInfo()">
-      <label class="form-label" for="prev-permit-organization-select">
+    <div class="row">
+      <label for="prev-permit-organization-select">
         <span data-bind="ltext: 'prev-permit-label-organization'"></span>
         <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
                 class="dropdown"
@@ -33,9 +33,8 @@
              <!--id="archiving-address-search" type="text" class="form-input text" autofocus="autofocus" />-->
     <!--</div>-->
 
-    <div data-bind="visible: permitNotFound">
-      <h3 data-bind="ltext: 'digitizer.prevPermitNotFound'"></h3>
-
+    <div data-bind="visible: permitNotFound" class="row">
+      <div style="font-weight: bold; margin-bottom: 1rem;" data-bind="ltext: 'digitizer.prevPermitNotFound'"></div>
       <div>
         <div class="create-application-search-box">
           <p data-bind="ltext: 'newRequest.locationInfo'"></p>
