@@ -9,36 +9,7 @@ LUPAPISTE.NaviSidebarModel = function() {
 
   var service = lupapisteApp.services.naviSidebarService;
 
-  self.menu = [{icon: "lupicon-user",
-               page: "users",
-               loc: "auth-admin.users",
-               testId: "users"},
-              {icon: "lupicon-documents",
-               page: "applications",
-               loc: "auth-admin.application-settings",
-               testId: "application-settings"},
-              {icon: "lupicon-hammer",
-               page: "operations",
-               loc: "auth-admin.selected-operations"},
-              {icon: "lupicon-paperclip",
-               page: "attachments",
-               loc: "auth-admin.operations-attachments"},
-              {icon: "lupicon-external-link",
-               page: "backends",
-               loc: "auth-admin.backends"},
-              {icon: "lupicon-add-area",
-               page: "areas",
-               loc: "auth-admin.areas"},
-              {icon: "lupicon-document-list",
-               page: "reports",
-               loc: "auth-admin.reports"},
-              {icon: "lupicon-file-check",
-               page: "assignments",
-               loc: "auth-admin.assignments"},
-              {icon: "lupicon-stamp",
-               page: "stamp-editor",
-               loc: "auth-admin.stamp-editor",
-               testId: "stamp-editor"}];
+  self.menu = service.userMenu;
 
   self.showMenu = service.showMenu;
   self.iconsOnly = self.disposedComputed( {

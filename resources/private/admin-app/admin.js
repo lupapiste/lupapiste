@@ -7,8 +7,7 @@
 
   $(function() {
     lupapisteApp.domReady();
-    $("#admin").applyBindings({});
-    $("#applicationTabs").applyBindings({});
+    $("#navi-toolbar").applyBindings({});
   });
 
 })();

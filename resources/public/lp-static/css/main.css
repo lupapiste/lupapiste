@@ -16959,10 +16959,6 @@ td.comment-text {
   max-width: 1400px;
 }
 
-.admin .page {
-  margin-top: 150px;
-}
-
 .admin .users-table .filters {
   margin-bottom: 12px;
 }
@@ -17276,12 +17272,14 @@ div.organization-link-cell {
   margin: 1em 0;
 }
 
+body.admin .nav-box,
 body.authority-admin .nav-box {
   max-width: none;
   padding-left: 48px;
   padding-right: 48px;
 }
 
+body.admin .nav-box .brand > a,
 body.authority-admin .nav-box .brand > a {
   margin-left: 0;
 }
