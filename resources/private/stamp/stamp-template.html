@@ -324,16 +324,11 @@
                 <attachment-type-id params="attachment: $data"></attachment-type-id>
                   <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
               </td>
-              <td class="attachment-file-info">
-                <span data-bind="if: $data.latestVersion">
-                  <a href="#" data-bind="text: latestVersion.filename,
-                                         attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId(),
-                                                title: loc('download')},
-                                         click: function() {return true;},
-                                         clickBubble: false"></a><br/>
-                  <i data-bind="ltext: latestVersion.contentType"></i>
-                  <i data-bind="size: latestVersion.size"></i>
-                </span>
+              <td class="attachment-file-info view-with-download">
+                <!-- ko if: $data.latestVersion -->
+                  <a data-bind="fileLink: latestVersion, click: _.constant(true), clickBubble: false"></a>
+                  <div data-bind="downloadWithIcon: latestVersion, click: _.constant(true), clickBubble: false"></div>
+                <!-- /ko -->
                 <!-- ko ifnot: $data.latestVersion -->
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 <!-- /ko -->
