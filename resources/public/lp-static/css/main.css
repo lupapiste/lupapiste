@@ -5473,6 +5473,7 @@ button.sidebar-button {
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 button.sidebar-button:link, button.sidebar-button:visited {
@@ -5505,6 +5506,7 @@ div.btn.sidebar-button, .dataTables_paginate div.sidebar-button.paginate_disable
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 div.btn.sidebar-button:link, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate div.sidebar-button.paginate_disabled_next:link, div.btn.sidebar-button:visited, .dataTables_paginate div.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate div.sidebar-button.paginate_disabled_next:visited {
@@ -5537,6 +5539,7 @@ a.btn.sidebar-button, .dataTables_paginate a.sidebar-button.paginate_disabled_pr
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 a.btn.sidebar-button:link, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate a.sidebar-button.paginate_disabled_next:link, a.btn.sidebar-button:visited, .dataTables_paginate a.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate a.sidebar-button.paginate_disabled_next:visited {
@@ -5569,6 +5572,7 @@ i.btn.sidebar-button, .dataTables_paginate i.sidebar-button.paginate_disabled_pr
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 i.btn.sidebar-button:link, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate i.sidebar-button.paginate_disabled_next:link, i.btn.sidebar-button:visited, .dataTables_paginate i.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate i.sidebar-button.paginate_disabled_next:visited {
@@ -5601,6 +5605,7 @@ span.btn.sidebar-button, .dataTables_paginate span.sidebar-button.paginate_disab
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 span.btn.sidebar-button:link, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate span.sidebar-button.paginate_disabled_next:link, span.btn.sidebar-button:visited, .dataTables_paginate span.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate span.sidebar-button.paginate_disabled_next:visited {
@@ -5633,6 +5638,7 @@ label.btn.sidebar-button, .dataTables_paginate label.sidebar-button.paginate_dis
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 label.btn.sidebar-button:link, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:link, .dataTables_paginate label.sidebar-button.paginate_disabled_next:link, label.btn.sidebar-button:visited, .dataTables_paginate label.sidebar-button.paginate_disabled_previous:visited, .dataTables_paginate label.sidebar-button.paginate_disabled_next:visited {
@@ -5665,6 +5671,7 @@ button.sidebar-button-light {
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 button.sidebar-button-light:link, button.sidebar-button-light:visited {
@@ -5697,6 +5704,7 @@ div.btn.sidebar-button-light, .dataTables_paginate div.sidebar-button-light.pagi
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 div.btn.sidebar-button-light:link, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:link, div.btn.sidebar-button-light:visited, .dataTables_paginate div.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate div.sidebar-button-light.paginate_disabled_next:visited {
@@ -5729,6 +5737,7 @@ a.btn.sidebar-button-light, .dataTables_paginate a.sidebar-button-light.paginate
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 a.btn.sidebar-button-light:link, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:link, a.btn.sidebar-button-light:visited, .dataTables_paginate a.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate a.sidebar-button-light.paginate_disabled_next:visited {
@@ -5761,6 +5770,7 @@ i.btn.sidebar-button-light, .dataTables_paginate i.sidebar-button-light.paginate
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 i.btn.sidebar-button-light:link, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:link, i.btn.sidebar-button-light:visited, .dataTables_paginate i.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate i.sidebar-button-light.paginate_disabled_next:visited {
@@ -5793,6 +5803,7 @@ span.btn.sidebar-button-light, .dataTables_paginate span.sidebar-button-light.pa
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 span.btn.sidebar-button-light:link, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:link, span.btn.sidebar-button-light:visited, .dataTables_paginate span.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate span.sidebar-button-light.paginate_disabled_next:visited {
@@ -5825,6 +5836,7 @@ label.btn.sidebar-button-light, .dataTables_paginate label.sidebar-button-light.
   padding-right: 48px;
   min-width: 326px;
   max-width: 326px;
+  overflow: hidden;
 }
 
 label.btn.sidebar-button-light:link, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:link, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:link, label.btn.sidebar-button-light:visited, .dataTables_paginate label.sidebar-button-light.paginate_disabled_previous:visited, .dataTables_paginate label.sidebar-button-light.paginate_disabled_next:visited {

@@ -2,7 +2,9 @@
         id="navi-sidebar-template">
   <div class="navi-sidebar"
        data-bind="css: {'navi-sidebar--menu': showMenu,
-                  'navi-sidebar--icon': iconsOnly}">
+                  'navi-sidebar--icon': iconsOnly},
+                  click: _.noop,
+                  clickBubble: false">
     <div class="stacked">
       <!-- ko foreach: menu -->
       <button class="sidebar-button"

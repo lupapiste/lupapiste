@@ -1,3 +1,6 @@
+// Authority admin navigation sidebar. The same component instance is
+// used both for the static sidebar and the menu. The menu button is
+// in the authority admin index.html.
 LUPAPISTE.NaviSidebarModel = function() {
   "use strict";
   var self = this;
@@ -47,8 +50,8 @@ LUPAPISTE.NaviSidebarModel = function() {
   if( features.enabled("ajanvaraus")
    && lupapisteApp.models.globalAuthModel.ok("calendars-enabled") ) {
     self.menu.push( {icon: "lupicon-calendar",
-                page: "organization-calendars",
-                loc: "auth-admin.organization-calendars"});
+                     page: "organization-calendars",
+                     loc: "auth-admin.organization-calendars"});
   }
 
   _.map( self.menu, function( item ) {
@@ -68,6 +71,5 @@ LUPAPISTE.NaviSidebarModel = function() {
   self.buttonTitle = function( item ) {
     return self.iconsOnly() ? item.loc : "";
   };
-
 
 };

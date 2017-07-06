@@ -374,6 +374,7 @@ $sidebar-button-color: $gray238;
   padding-right: 2 * $marginL;
   min-width: $sidebar-button-width;
   max-width: $sidebar-button-width;
+  overflow: hidden;
 }
 
 @include button-div-a-i-span( sidebar-button ) {
