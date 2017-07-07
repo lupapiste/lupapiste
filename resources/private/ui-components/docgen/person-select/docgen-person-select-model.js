@@ -53,11 +53,12 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
     self.disposedSubscribe(self.selectValue, function(value) {
       if (value !== self.value() && !_.isEmpty(value)) {
         var selectedUser = _.find(self.personOptions(), ["id", value]);
-        console.log(selectedUser);
         if (self.isDesignerDocument && selectedUser.notPersonallyAuthorized) {
-          LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"),
-                                                 loc("document.party.person-select.designer.areyousure"),
-                                                 {title: loc("yes"), fn: _.partial(self.doSetUserToDocument, value)});
+          $("#invite-document-name").val(self.schemaName).change();
+          $("#invite-document-path").val(self.myNs).change();
+          $("#invite-document-id").val(self.documentId).change();
+          $("#invite-email").val(selectedUser.email).change();
+          LUPAPISTE.ModalDialog.open("#dialog-valtuutus-yrityskayttaja-suunnittelijaksi");
         } else {
           self.doSetUserToDocument(value);
         }
@@ -70,6 +71,7 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
   if (self.authModel.ok("invite-with-role")) {
     self.inviteWithRoleOk(true);
   }
+
 
   self.invite = function() {
     $("#invite-document-name").val(self.schemaName).change();
