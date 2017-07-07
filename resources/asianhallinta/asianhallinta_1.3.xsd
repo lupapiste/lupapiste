@@ -50,7 +50,7 @@
                 <documentation>Käytettävän skeeman versio</documentation>
             </annotation>
         </attribute>
-        <attribute name="messageId" type="string" use="required">
+        <attribute name="messageId" type="string">
             <annotation>
                 <documentation>Lähettäjän määrittämä sanoman tunnus</documentation>
             </annotation>
