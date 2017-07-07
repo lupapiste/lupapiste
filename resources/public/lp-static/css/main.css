@@ -5493,7 +5493,6 @@ label.btn.ghost.positive:active, .dataTables_paginate label.ghost.positive.pagin
   border-color: #61b72f;
 }
 
-<<<<<<< HEAD
 button.sidebar-button {
   color: #f39129;
   background-color: #eeeeee;
@@ -5894,7 +5893,8 @@ label.btn.sidebar-button-light:disabled, .dataTables_paginate label.sidebar-butt
 .sidebar-button-light.sidebar-button--icon {
   min-width: 118px;
   max-width: 118px;
-=======
+}
+
 .outline:disabled, outline.disabled, .outline.waiting,
 .btn.outline.disabled,
 .dataTables_paginate .outline.disabled.paginate_disabled_previous,
@@ -6172,7 +6172,6 @@ label.btn.primary.outline:hover, .dataTables_paginate label.primary.outline.pagi
 
 label.btn.primary.outline:active, .dataTables_paginate label.primary.outline.paginate_disabled_previous:active, .dataTables_paginate label.primary.outline.paginate_disabled_next:active {
   border-color: #fbc732;
->>>>>>> LPK-2953 Verdict template copy support.
 }
 
 a.link-btn {
