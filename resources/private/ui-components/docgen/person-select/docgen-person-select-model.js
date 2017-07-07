@@ -8,10 +8,10 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
   // value. This approach allows for canceling.
   self.selectValue = ko.observable( self.value() );
   var partiesModel = _.get(params, "docModel.partiesModel");
-  var documentSchema = _.get(params, "docModel.schema");
+  self.documentSchema = _.get(params, "docModel.schema");
 
-  self.isDesignerDocument = _.get(documentSchema, "info.type") === "party" &&
-                            _.get(documentSchema, "info.subtype") === "suunnittelija";
+  self.isDesignerDocument = _.get(self.documentSchema, "info.type") === "party" &&
+                            _.get(self.documentSchema, "info.subtype") === "suunnittelija";
 
   self.appId = partiesModel.applicationId;
   self.myNs = self.path.slice(0, self.path.length - 1).join(".");
