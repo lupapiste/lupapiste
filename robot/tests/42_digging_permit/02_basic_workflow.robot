@@ -24,7 +24,7 @@ Mikko selects Solita Oy as applicant for the application
 
 Mikko selects himself as payer for the application
   Execute Javascript  $("section[data-doc-type='yleiset-alueet-maksaja'] input[value='henkilo']").click();
-  Select From List  //section[@data-doc-type="yleiset-alueet-maksaja"]//select[@name="henkilo.userId"]  Intonen Mikko
+  Select From List  //section[@data-doc-type="yleiset-alueet-maksaja"]//select[@data-test-id="henkilo.userId"]  Intonen Mikko
   Wait Until  Javascript?  $("section[data-doc-type=yleiset-alueet-maksaja] input[data-docgen-path='henkilo.henkilotiedot.etunimi']").val() == "Mikko"
 
 Mikko submits the application

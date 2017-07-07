@@ -126,7 +126,7 @@
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
     (when-not (and
-                (auth/has-auth? application v)
+                (or (auth/has-auth? application v) (auth/has-auth-via-company? application v))
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 

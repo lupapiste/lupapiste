@@ -22,6 +22,7 @@
 "document.party.disabled.areyousure.confirmation" "en" "Mark as left"
 "document.party.disabled.areyousure.confirmation" "fi" "Merkitse poistuneeksi"
 "document.party.disabled.areyousure.confirmation" "sv" "Märk upp som avlägsnad"
+"document.party.person-select.designer.areyousure" "fi" "Suunnittelijan tehtävään hankkeella liittyy henkilökohtainen vastuu. Kun valitset valtuutetun yrityksen henkilön pääsuunnittelijaksi tai suunnittelijaksi, hänet tulee valtuuttaa henkilökohtaisesti tämän hakemuksen osapuoleksi."
 "document.status.toggle.disable" "en" "Mark as left"
 "document.status.toggle.disable" "fi" "Merkitse poistuneeksi"
 "document.status.toggle.disable" "sv" "Märk upp som avlägsnad"

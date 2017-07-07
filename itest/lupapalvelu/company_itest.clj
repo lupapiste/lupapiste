@@ -122,6 +122,10 @@
             auth-ids (flatten (map (juxt :id) auth))]
         (some #(= "solita" %) auth-ids) => true))
 
+    (fact "Company users are available for person selectors in party documents"
+      (map :id (:users (query mikko :company-users-for-person-selector :id application-id)))
+        => (just [teppo-id kaino-id]))
+
     (fact "Kaino and Mikko could submit application"
       (query mikko :application-submittable :id application-id) => ok?
       (query kaino :application-submittable :id application-id) => ok?)

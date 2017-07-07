@@ -10,7 +10,9 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.schemas :as ssc]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.authorization :as auth]))
 
 (defquery company
   {:user-roles #{:applicant :authority}
@@ -21,6 +23,25 @@
   (ok :company     (com/find-company! {:id company})
       :users       (and users (com/find-company-users company))
       :invitations (and users (com/find-user-invitations company))))
+
+(defquery company-users-for-person-selector
+  {:description "Fetch and return company users that can be bound to parties documents using the
+         set-user-to-document command. Basically this includes all users in companies that have been
+         authorised to the application."
+   :user-roles  #{:applicant :authority}
+   :pre-checks  [(some-pre-check domain/validate-owner-or-write-access
+                                 (fn [{application :application user :user}]
+                                   (when-not (auth/application-authority? application user)
+                                     (fail :error.unauthorized))))]
+   :parameters  [id]}
+  [{{auth :auth} :application}]
+  (let [authorised-companies (map #(select-keys % [:id :name])
+                                  (filter #(and (= (:type %) "company")
+                                           (not (= (:role %) "reader"))) auth))]
+    (ok :users
+        (mapcat (fn [{:keys [id name]}]
+                  (->> (com/find-company-users id)
+                       (map #(assoc-in % [:company :name] name)))) authorised-companies))))
 
 (defquery company-tags
   {:user-roles #{:applicant :authority :admin}
