@@ -130,7 +130,7 @@
                 (fn [{user :user {:keys [options]} :application}]
                   (when (and (:municipalityHearsNeighbors options) (not (usr/authority? user)))
                     (fail :error.unauthorized)))
-                (permit/validate-permit-type-is permit/R)]}
+                (permit/validate-permit-type-is permit/R permit/P)]}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
         email (ss/canonize-email email)

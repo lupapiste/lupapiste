@@ -294,6 +294,6 @@
   {:parameters [:id]
    :states     (states/all-application-states-but [:draft])
    :user-roles #{:authority :applicant}
-   :pre-checks [(permit/validate-permit-type-is permit/R permit/YI permit/YL permit/YM permit/VVVL permit/MAL)]
+   :pre-checks [(permit/validate-permit-type-is-not permit/YA)]
    :description "Pseudo query for determining whether show neighbors statement section."}
   [_])
