@@ -3,7 +3,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.authorization-api :refer :all]
-            ))
+            [lupapalvelu.authorization :as auth]))
 
 (facts "generate-remove-invalid-user-from-docs-updates"
   (generate-remove-invalid-user-from-docs-updates nil) => empty?
@@ -29,4 +29,5 @@
   => {"documents.0.data.rakennuksenOmistajat.0.henkilo.userId" ""
       "documents.0.data.rakennuksenOmistajat.1.henkilo.userId" ""}
 
-  )
+  (provided (auth/has-auth-via-company? anything "123") => false)
+  (provided (auth/has-auth-via-company? anything "345") => false))
