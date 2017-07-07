@@ -13,7 +13,7 @@ LUPAPISTE.PartiesModel = function() {
 
     var validPersons = _.filter(authArray, function(user) {
       return user.firstName && user.lastName &&
-             !_.includes( ["statementGiver", "guest", "guestAuthority"], user.role);
+             !_.includes( ["statementGiver", "guest", "guestAuthority", "reader"], user.role);
     });
 
     if (!_.isEmpty(companies)) {
@@ -26,7 +26,6 @@ LUPAPISTE.PartiesModel = function() {
           });
           var allUsers = _.unionBy(companyUsers, validPersons, "id");
           self.personSelectorItems(_.sortBy(allUsers, ["lastName", "firstName"]));
-          console.log(self.personSelectorItems());
         })
         .call();
     } else {
