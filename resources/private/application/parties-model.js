@@ -16,7 +16,7 @@ LUPAPISTE.PartiesModel = function() {
              !_.includes( ["statementGiver", "guest", "guestAuthority", "reader"], user.role);
     });
 
-    if (!_.isEmpty(companies)) {
+    if (!_.isEmpty(companies) && lupapisteApp.models.applicationAuthModel.ok("company-users-for-person-selector")) {
       ajax.query("company-users-for-person-selector", {id: application.id})
         .success(function(result) {
           var companyUsers = result.users;
