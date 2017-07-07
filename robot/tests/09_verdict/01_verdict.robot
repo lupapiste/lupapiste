@@ -129,6 +129,7 @@ Stamping page opens, verdict details can be seen
   Wait Until  Element should be visible  stamping-container
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
   Should not be empty  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
+  Textfield should contain  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]  §
   [Teardown]  Logout
 
 Mikko sees that the application has verdicts

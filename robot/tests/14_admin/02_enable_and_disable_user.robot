@@ -8,8 +8,7 @@ Resource        ../../common_resource.robot
 
 Solita admin logs in and goes to 'users' page
   SolitaAdmin logs in
-  Wait until  Element should be visible     xpath=//a[@data-test-id='users']
-  Click element                             xpath=//a[@data-test-id='users']
+  Go to page  users
   Wait until  Element should be visible     xpath=//section[@id='users']
 
 Solita admin search Ronja and disables her access
@@ -26,7 +25,7 @@ Ronja tries to login but can't
 
 Solita admin enables Ronjas account
   SolitaAdmin logs in
-  Click by test id  users
+  Go to page  users
   Wait until     Element should be visible  xpath=//section[@id='users']
   Wait until     Element should be visible  xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj

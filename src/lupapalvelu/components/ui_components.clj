@@ -226,7 +226,8 @@
                    "campaign-service.js"
                    "company-registration-service.js"
                    "triggers-target-service.js"
-                   "trigger-service.js"]}
+                   "trigger-service.js"
+                   "navi-sidebar-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

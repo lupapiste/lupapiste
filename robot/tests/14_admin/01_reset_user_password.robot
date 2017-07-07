@@ -8,8 +8,7 @@ Resource        ../../common_resource.robot
 
 Solita admin logs in and goes to 'users' page
   SolitaAdmin logs in
-  Wait until  Element should be visible     xpath=//a[@data-test-id='users']
-  Click element                             xpath=//a[@data-test-id='users']
+  Go to page  users
   Wait until  Element should be visible     xpath=//section[@id='users']
 
 Solita admin search Ronja and resets her password

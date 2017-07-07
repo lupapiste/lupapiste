@@ -15,14 +15,10 @@
   ([sheets]
    {:pre [(every? (every-pred :sheet-name :header :row-fn) sheets)]}
    (let [wb (apply spreadsheet/create-workbook
-                   (apply concat
-                          (reduce (fn [wb-sheets conf]
-                                    (conj wb-sheets
-                                          [(:sheet-name conf)
-                                           (concat [(:header conf)]
-                                                   (map (:row-fn conf) (:data conf)))]))
-                                  []
-                                  sheets)))]
+                   (->> sheets
+                        (map (fn [{:keys [sheet-name header row-fn data]}]
+                               [sheet-name (cons header (map row-fn data))]))
+                        (apply concat)))]
      ; Format each sheet
      (doseq [sheet (spreadsheet/sheet-seq wb)
              :let [header-row   (-> sheet spreadsheet/row-seq first)

@@ -37,5 +37,6 @@
   lupapisteApp.services.companyRegistrationService = new LUPAPISTE.CompanyRegistrationService();
   lupapisteApp.services.triggersTargetService = new LUPAPISTE.TriggerTargetService();
   lupapisteApp.services.triggerService = new LUPAPISTE.TriggerService();
+  lupapisteApp.services.naviSidebarService = new LUPAPISTE.NaviSidebarService();
 
 })();

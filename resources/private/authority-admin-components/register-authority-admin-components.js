@@ -11,7 +11,8 @@ jQuery(document).ready(function() {
                     {name: "inspection-summary-template-bubble"},
                     {name: "select-inspection-summary-template-for-operation"},
                     {name: "handler-roles"},
-                    {name: "triggers"}];
+                    {name: "triggers"},
+                    {name: "navi-sidebar"}];
 
   ko.registerLupapisteComponents(components);
 });
