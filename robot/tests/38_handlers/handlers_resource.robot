@@ -97,7 +97,7 @@ General handler to
   Wait until  Element should be visible  xpath=//${container}//button[@data-test-id='add-handler']
   Click element  xpath=//${container}//button[@data-test-id='add-handler']
   Edit handler  0  ${person}  Käsittelijä
-  Click element  xpath=//${container}//*[@data-test-id='edit-handlers-back']
+  Scroll and click test id  edit-handlers-back
 
 General application handler to
   [Arguments]  ${person}
