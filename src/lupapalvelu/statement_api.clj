@@ -13,6 +13,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as usr]
             [lupapalvelu.user-utils :as uu]
+            [lupapalvelu.permit :as permit]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -287,4 +288,12 @@
    :states      #{:submitted :complementNeeded}
    :user-roles  #{:authority}
    :description "Pseudo query for determining whether show a warning for statement drafts upon application approval."}
+  [_])
+
+(defquery neighbors-statement-enabled
+  {:parameters [:id]
+   :states     (states/all-application-states-but [:draft])
+   :user-roles #{:authority :applicant}
+   :pre-checks [(permit/validate-permit-type-is-not permit/YA)]
+   :description "Pseudo query for determining whether show neighbors statement section."}
   [_])
