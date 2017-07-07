@@ -70,7 +70,7 @@
         foreman-app-ids (map :id foreman-apps)
         links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
-    (mongo/select :applications {:_id {$in linked-app-ids}} [:documents :address :primaryOperation])))
+    (mongo/select :applications {$and [{:_id {$in linked-app-ids}} {:state {$ne :closed}}]} [:documents :address :primaryOperation])))
 
 (defn- get-linked-app-operations [foreman-app-id link]
   (let [other-id  (first (remove #{foreman-app-id} (:link link)))]
