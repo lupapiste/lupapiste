@@ -406,3 +406,6 @@
 "triggers.title" "en" "Automated task"
 "triggers.title" "fi" "Automaattitehtävät"
 "triggers.title" "sv" "Automatuppgifter"
+"navi-sidebar.minify" "fi" "Pienennä"
+"navi-sidebar.menu" "fi" "Valikko"
+"navi-sidebar.menu" "en" "Menu"
