@@ -1,3 +1,14 @@
+Version 1.3 (7.7.2017)
+- Lisätty messageId attribuutti juurielementteihin
+- AsiaType:lle pakolliseksi version-attribuutti, joka kuvaa mitä skeeman versiota vasten sanoma on validoitu
+- Lausuntotuki:
+  - Skeema mahdollistaa lausunnon pyyntö ja anto toiminnallisuuden
+  - AsianTyyppiTpe: lisätty "Lausuntopyyntö"
+  - Lausuntopyyntö-elementti
+  - LausuntoVastaus-elementti, joka sisältää varsinaisen lausunnon
+  - AsiaType: lisätty TyypinTarkenne vapaaehtoinen elementti, jolla voi ilmoittaa ELY-keskuksen asiointityypin
+  - AsiaType: Vaihtoehtoisina elementteinä Lausuntopyynto tai Lausunnot
+
 Versio 1.2 (15.10.2015)
 - LiiteType
    - Uudet vapaavalintaiset elementit KuvausFi ja KuvausSv, joiden mukana UusiAsia sanomassa lähetetään lokalisoitu liitetyypin selite
