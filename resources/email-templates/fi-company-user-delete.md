@@ -2,9 +2,9 @@
 
 {{company.name}} Yritystilin ylläpitäjä on poistanut sinut tilin käyttäjistä. 
 
-Voit jatkossa käyttää palvelua henkilökäyttäjänä. Jos et vielä ole tunnistautunut vahvasti palveluun, sinut ohjataan seuraavan kirjautumisen yhteydessä tunnistautumiseen, jossa tarvitset henkilökohtaisia verkkopankkitunnuksiasi.
+Voit jatkossa käyttää palvelua henkilökäyttäjänä. Et vielä ole tunnistautunut vahvasti palveluun, joten ole hyvä ja rekisteröidy Lupapisteeseen vahvasti täältä https://www.lupapiste.fi/app/fi/welcome#!/register. **Tarvitset rekisteröinnissä henkilökohtaisia verkkopankkitunnuksiasi.**
 
-Hakemukset, joilla olet itse henkilökohtaisesti osapuolena säilyvät näkymässäsi edelleen. Hakemukset, joilla vain {{company.name}} on osapuolena eivät enää ole näkymässäsi.
+Voit käyttää vanhaa sähköpostiasi jos sinulla on edelleen pääsy sähköpostilaatikkoosi. Näin hakemukset, joilla olet itse henkilökohtaisesti osapuolena säilyvät näkymässäsi edelleen. Hakemukset, joilla vain company on osapuolena eivät enää ole näkymässäsi. Jos vanha sähköpostisi ei ole enää käytössä, ole hyvä ja rekisteröidy Lupapisteeseen uudella sähköpostilla.
 
 Lisätietoa ja ohjeita luvanhakijalle löydät Lupapisteen sivuilta: {{lupapiste.help}}.
 
