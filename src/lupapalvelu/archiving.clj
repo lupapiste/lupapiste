@@ -139,8 +139,8 @@
                 (state-update-fn :valmis application now id))))))))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-ids]
-  (->> 
-    (cond->> 
+  (->>
+    (cond->>
       (concat [primaryOperation] secondaryOperations)
       (seq op-ids) (filter (comp (set op-ids) :id)))
     (map :name)

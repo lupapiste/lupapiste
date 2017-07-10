@@ -35,7 +35,7 @@
   [command]
   (info "browser-timing called from" pathname)
   (let [ua (ss/limit (get-in command [:web :user-agent]) 256)
-        ts (tc/now)
+        ts (t/now)
         timing-events (->
                         (into {} (filter (fn [[k v]] (number? v)) timing))
                         (select-keys [:navigationStart
