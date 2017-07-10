@@ -1276,6 +1276,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       appendButton.disabled = isSubSchemaWhitelisted(subSchema);
 
       var appender = function () {
+        if( lupapisteApp.services.documentDataService.findDocumentById( self.docId )) {
+          lupapisteApp.services.documentDataService.addRepeatingGroup( self.docId, myPath );
+        }
         var parent$ = $(this).closest(".accordion-fields");
         var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
