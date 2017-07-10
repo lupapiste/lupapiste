@@ -12,12 +12,10 @@ LUPAPISTE.NaviSidebarService = function() {
   var menus = {
     authorityAdmin: [{icon: "lupicon-user",
                       page: "users",
-                      loc: "auth-admin.users",
-                      testId: "users"},
+                      loc: "auth-admin.users"},
                      {icon: "lupicon-documents",
                       page: "applications",
-                      loc: "auth-admin.application-settings",
-                      testId: "application-settings"},
+                      loc: "auth-admin.application-settings"},
                      {icon: "lupicon-hammer",
                       page: "operations",
                       loc: "auth-admin.selected-operations"},
@@ -38,15 +36,19 @@ LUPAPISTE.NaviSidebarService = function() {
                       loc: "auth-admin.assignments"},
                      {icon: "lupicon-stamp",
                       page: "stamp-editor",
-                      loc: "auth-admin.stamp-editor",
-                      testId: "stamp-editor"}],
+                      loc: "auth-admin.stamp-editor"},
+                     {icon: "lupicon-calendar",
+                      page: "organization-calendars",
+                      loc: "auth-admin.organization-calendars",
+                      showIf: lupapisteApp.models.globalAuthModel
+                              .ok("calendars-enabled"),
+                      feature: "ajanvaraus"}],
     admin: [{icon: "lupicon-download",
              page: "admin",
              loc: "admin.xml"},
             {icon: "lupicon-user",
              page: "users",
-             loc: "auth-admin.users",
-             testId: "users"},
+             loc: "auth-admin.users"},
             {icon: "lupicon-circle-section-sign",
              page: "organizations",
              loc: "admin.organizations"},
@@ -73,12 +75,10 @@ LUPAPISTE.NaviSidebarService = function() {
              loc: "auth-admin.reports"},
             {icon: "lupicon-megaphone",
              page: "campaigns",
-             loc: "admin.campaigns",
-             testId: "campaigns"},
+             loc: "admin.campaigns"},
             {icon: "lupicon-eye",
              page: "logs",
-             loc: "admin.log",
-             testId: "frontend-logs"}]};
+             loc: "admin.log"}]};
 
   self.userMenu = ko.computed( function ()  {
     return menus[lupapisteApp.models.currentUser.role()];
@@ -90,15 +90,14 @@ LUPAPISTE.NaviSidebarService = function() {
 
   self.menuCss = ko.computed( function ()  {
     var menu = self.showMenu();
-    return {"lupicon-menu": !menu,
-            "lupicon-remove": menu,
+    return {"lupicon-menu": animate() ? animate() === "lupicon-menu" : !menu,
+            "lupicon-remove": animate() ? animate() === "lupicon-remove" : menu,
             "spin-once": animate()};
   } );
 
   self.menuLoc = ko.pureComputed( function() {
     return self.showMenu() ? "close" : "navi-sidebar.menu";
   });
-
 
   ko.computed( function() {
     if( self.iconsOnly() && self.showMenu()) {
@@ -108,9 +107,10 @@ LUPAPISTE.NaviSidebarService = function() {
 
   // By adding and removing animation (see menuCss), we make sure that
   // it runs every time the menu is toggled.
-  self.showMenu.subscribe( function() {
-    animate( true );
+  self.showMenu.subscribe( function( flag ) {
+    animate(flag ? "lupicon-menu" : "lupicon-remove" );
     _.delay( _.wrap( false, animate), 600);
+    _.delay( _.wrap( flag ?  "lupicon-remove" : "lupicon-menu", animate), 300);
   });
 
   function close() {
