@@ -48,7 +48,7 @@ Sonja removes mistakenly added neighbor d
 
 Sonja checks that property id and email validation works
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-edit']
-  Click element  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-edit']
+  Click element  jquery=tr[data-test-id='manage-neighbors-email-x@example.com'] a[data-test-id='manage-neighbors-edit']:visible
   Test id does not have class  neighbors.edit.propertyId  warn
   Test id does not have class  neighbors.edit.propertyId  tip
   Test id enabled  modal-dialog-submit-button
