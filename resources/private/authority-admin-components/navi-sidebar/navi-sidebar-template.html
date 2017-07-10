@@ -7,17 +7,20 @@
                   clickBubble: false">
     <div class="stacked">
       <!-- ko foreach: menu -->
+      <!-- ko if: _.isUndefined( $data.showIf ) || $data.showIf -->
       <button class="sidebar-button"
               data-bind="disable: $parent.isCurrentPage( page ),
                          click: $parent.openPage,
                          css: $parent.buttonCss(),
-                         testId: $data.testId">
+                         testId: 'test-' + page,
+                         feature: $data.feature">
         <i data-bind="css: icon,
                       ltitle: $parent.buttonTitle( $data )"></i>
         <!-- ko ifnot: $parent.iconsOnly -->
         <span data-bind="ltext: loc"></span>
         <!-- /ko -->
       </button>
+      <!-- /ko -->
       <!-- /ko -->
       <!-- ko ifnot: showMenu -->
       <button class="sidebar-button-light"

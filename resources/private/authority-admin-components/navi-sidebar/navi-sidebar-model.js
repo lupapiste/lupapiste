@@ -18,13 +18,6 @@ LUPAPISTE.NaviSidebarModel = function() {
     },
     write: service.iconsOnly});
 
-  if( features.enabled("ajanvaraus")
-   && lupapisteApp.models.globalAuthModel.ok("calendars-enabled") ) {
-    self.menu.push( {icon: "lupicon-calendar",
-                     page: "organization-calendars",
-                     loc: "auth-admin.organization-calendars"});
-  }
-
   _.map( self.menu, function( item ) {
     return _.set( item, "icon", _.set( {}, item.icon, true));
   });
