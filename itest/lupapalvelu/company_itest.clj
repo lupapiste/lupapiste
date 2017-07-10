@@ -200,18 +200,32 @@
 
     (fact "When company has max count of users, new member can't be invited"
       (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => (partial expected-failure? "error.company-user-limit-exceeded"))))
+; Reset
+(last-email)
 
-(fact "Kaino deletes Teppo from company"
-  (command kaino :company-user-delete :user-id teppo-id) => ok?
-  (fact "Teppo is notified via email"
-    (let [email (last-email)
-          body (get-in email [:body :plain])]
-      email => truthy
-      (:subject email) => (contains "Yritystilist\u00e4 poisto")
-      body => (contains #"Solita Oy Yritystilin.+on poistanut"))))
+(facts "Identified user deletion"
+  (fact "Before kickban, Teppo sees company application"
+    (let [apps (-> (datatables teppo :applications-search :searchText "")
+                   (get-in [:data :applications]))]
+      (count apps) => 2
+      (map :applicant apps) => (just "Nieminen Teppo" "Intonen Mikko")))
 
-(fact "Teppo is no longer in the company and has dummy role"
-  (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "dummy"))
+  (fact "Kaino deletes Teppo from company"
+    (command kaino :company-user-delete :user-id teppo-id) => ok?
+    (fact "Teppo is NOT notified via email"
+      (last-email) => nil))
+
+  (fact "Teppo is no longer in the company and has dummy role"
+    (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "applicant"))
+  (facts "Teppo is authed, he is not set to dummy"
+    (fact "Teppo can login"
+      (command teppo :login :username "teppo@example.com" :password "teppo69") => ok?)
+    teppo => (allowed? :reset-password)
+    (fact "Teppo can't no longer see company applications"
+      (let [apps (-> (datatables teppo :applications-search :searchText "")
+                     (get-in [:data :applications]))]
+        (count apps) => 1
+        (map :applicant apps) => (just "Nieminen Teppo")))))
 
 (facts "Authed dummy into company"
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
@@ -272,16 +286,6 @@
 (fact "Company back to regular account"
       (command admin :company-update :company "solita" :updates {:accountType "account5"}) => ok?)
 
-(facts "Teppo can't get back into shape"
-  (fact "Teppo cannot login"
-    (command teppo :login :username "teppo@exampele.com" :password "teppo69") => fail?)
-  (fact "Teppo can't reset password, he is dummy"
-    (decoded-simple-post (str (server-address) "/api/reset-password")
-                         {:form-params      {:email "teppo@example.com"}
-                          :content-type     :json
-                          :follow-redirects false
-                          :throw-exceptions false}) => fail?))
-
 (facts "Company locking"
        (fact "Admin locks Solita"
              (command admin :company-lock :company "solita" :timestamp (- (now) 10000)) => ok?)
@@ -311,8 +315,24 @@
                         :user-id foo-id
                         :role "admin"
                         :submit false) => locked-err)
-         (fact "User can be deleted"
-               (command kaino :company-user-delete :user-id foo-id) => ok?))
+         (facts "Unverified user deletion"
+           (fact "User can be deleted"
+             (command kaino :company-user-delete :user-id foo-id) => ok?)
+           (fact "Unverified user is set to dummy-user"       ; LPK-3034
+             (query kaino :company-search-user :email "foo@example.com") => (result :found :firstName "Foo" :lastName "Bar" :role "dummy"))
+           (fact "Login not possible for dummy"
+             (let [{body :body :as login} (-> (str (server-address) "/api/login")
+                                              (http-post {:form-params {:username "foo@example.com" :password "foofaafoo"}
+                                                        :as :json}))]
+               body => fail?
+               (:text body) => "error.login"
+               login => http200?))
+           (fact "User is notified via email"
+             (let [email (last-email)
+                   body (get-in email [:body :plain])]
+               email => truthy
+               (:subject email) => (contains "Yritystilist\u00e4 poisto")
+               body => (contains #"Solita Oy Yritystilin.+on poistanut")))))
        (fact "Unlock company"
              (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
        (fact "Locked pseudo-query fails"
@@ -358,20 +378,14 @@
                (command erkki :login :username "erkki@example.com" :password "esimerkki") => ok?))
        (fact "Kaino cannot login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
-       (fact "Kaino resets password"
-             (decoded-simple-post (str (server-address) "/api/reset-password")
-                                  {:form-params      {:email "kaino@solita.fi"}
-                                   :content-type     :json
-                                   :follow-redirects false
-                                   :throw-exceptions false})=> ok?)
-       (let [email (last-email)
-             token (token-from-email "kaino@solita.fi" email)]
-         (:subject email) => (contains "Uusi salasana")
-         (http-token-call token {:password "kaino456"}) => (contains {:status 200}))
-       (fact "Kaino can now login"
-             (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
-       (fact "Kaino is no longer Solitan"
-             (query kaino :company :company "solita" :users true) => unauthorized?))
+       (fact "Kaino can't reset, he is now dummy"
+         (let [reset-result (:body (decoded-simple-post (str (server-address) "/api/reset-password")
+                                                        {:form-params      {:email "kaino@solita.fi"}
+                                                         :content-type     :json
+                                                         :follow-redirects false
+                                                         :throw-exceptions false}))]
+           reset-result =not=> ok?
+           (:text reset-result) => "error.email-not-found")))
 
 (apply-remote-minimal)
 

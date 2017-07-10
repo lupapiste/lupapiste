@@ -106,7 +106,7 @@
    :on-success (notify :company-user-delete)}
   [_]
   (let [user (usr/get-user-by-id user-id)]
-    (ok :user (select-keys (com/delete-user! user-id) [:id :firstName :lastName :email :role :language])
+    (ok :user (select-keys (com/delete-user! user) [:id :firstName :lastName :email :role :language])
         :company (com/find-company {:id (get-in user [:company :id])} [:id :name]))))
 
 (defcommand company-user-delete-all

@@ -303,21 +303,32 @@
 ;; Deletion
 ;;
 
-(notif/defemail :company-user-delete
+(notif/defemail :company-user-delete                        ; Only sent to dummy users, who are not yet authed via identification service
                 {:subject-key   "company-user-delete.subject"
                  :recipients-fn (fn [{:keys [result]}] [(:user result)])
                  :model-fn      (fn [model _ _] (assoc model :company (get-in model [:result :company])))
                  :pred-fn       (fn [{:keys [result]}] (usr/dummy? (:user result)))})
 
+(def- verified-user-removal   {$unset {:company 1}})
+(def- unverified-user-removal {$set   {:role "dummy" :enabled false}
+                               $unset {:company 1, :private.password 1}})
+
 (defn delete-user!
-  [user-id]
-  (-> (mongo/update-one-and-return :users {:_id user-id} {$set {:role "dummy"}, $unset {:company 1, :private.password 1}})
-      (mongo/with-id)))
+  "Removes user from company. If user is not yet identificated, role is set to dummy.
+   By default returns updated user for further processing."
+  ([user]
+    (delete-user! user true))
+  ([user return?]
+   (let [update-command (if (usr/verified-person-id? user)
+                          verified-user-removal
+                          unverified-user-removal)]
+     (if return?
+       (mongo/with-id (mongo/update-one-and-return :users {:_id (:id user)} update-command))
+       (mongo/update-by-id :users (:id user) update-command)))))
 
 (defn delete-every-user! [company-id]
-  (mongo/update-by-query :users
-                         {:company.id company-id}
-                         {$set {:enabled false}, $unset {:company 1}}))
+  (->> (usr/find-users {:company.id company-id})
+       (run! #(delete-user! % false))))
 
 (defn update-user! [user-id role submit]
   (mongo/update-by-id :users user-id {$set {:company.role role
