@@ -203,13 +203,14 @@
 
 (fact "Kaino deletes Teppo from company"
   (command kaino :company-user-delete :user-id teppo-id) => ok?
-  (let [email (last-email)
-        body (get-in email [:body :plain])]
-    email => truthy
-    (:subject email) => (contains "Yritystilist\u00e4 poisto")
-    body => (contains #"Solita Oy Yritystilin.+on poistanut")))
+  (fact "Teppo is notified via email"
+    (let [email (last-email)
+          body (get-in email [:body :plain])]
+      email => truthy
+      (:subject email) => (contains "Yritystilist\u00e4 poisto")
+      body => (contains #"Solita Oy Yritystilin.+on poistanut"))))
 
-(fact "Teppo is no longer in the company"
+(fact "Teppo is no longer in the company and has dummy role"
   (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "dummy"))
 
 (facts "Authed dummy into company"
@@ -270,19 +271,16 @@
 
 (fact "Company back to regular account"
       (command admin :company-update :company "solita" :updates {:accountType "account5"}) => ok?)
-(facts "Teppo back into shape"
-       (fact "Teppo cannot login"
-             (command teppo :login :username "kaino@solita.fi" :password "kaino123") => fail?)
-       (fact "Teppo resets password"
-             (http-post (str (server-address) "/api/reset-password")
-                        {:form-params      {:email "teppo@example.com"}
-                         :content-type     :json
-                         :follow-redirects false
-                         :throw-exceptions false})=> http200?)
-       (let [email (last-email)
-             token (token-from-email "teppo@example.com" email)]
-         (:subject email) => (contains "Uusi salasana")
-         (http-token-call token {:password "Teppo rules!"}) => (contains {:status 200})))
+
+(facts "Teppo can't get back into shape"
+  (fact "Teppo cannot login"
+    (command teppo :login :username "teppo@exampele.com" :password "teppo69") => fail?)
+  (fact "Teppo can't reset password, he is dummy"
+    (decoded-simple-post (str (server-address) "/api/reset-password")
+                         {:form-params      {:email "teppo@example.com"}
+                          :content-type     :json
+                          :follow-redirects false
+                          :throw-exceptions false}) => fail?))
 
 (facts "Company locking"
        (fact "Admin locks Solita"
@@ -361,11 +359,11 @@
        (fact "Kaino cannot login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
        (fact "Kaino resets password"
-             (http-post (str (server-address) "/api/reset-password")
-                        {:form-params      {:email "kaino@solita.fi"}
-                         :content-type     :json
-                         :follow-redirects false
-                         :throw-exceptions false})=> http200?)
+             (decoded-simple-post (str (server-address) "/api/reset-password")
+                                  {:form-params      {:email "kaino@solita.fi"}
+                                   :content-type     :json
+                                   :follow-redirects false
+                                   :throw-exceptions false})=> ok?)
        (let [email (last-email)
              token (token-from-email "kaino@solita.fi" email)]
          (:subject email) => (contains "Uusi salasana")

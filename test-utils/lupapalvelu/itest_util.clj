@@ -606,6 +606,7 @@
   ([email]
    (token-from-email email (last-email)))
   ([email email-data]
+   {:pre [(ss/not-blank? email)]}
    (fact {:midje/description (str "Read email for " email)}
      (s/index-of (:to email-data) email) => pos?)
    (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
