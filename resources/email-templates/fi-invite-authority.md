@@ -1,7 +1,7 @@
 # Hei {{user.firstName}},
 
 sinut on kutsuttu Lupapiste-palvelussa viranomaiseksi organisaatioon
-{{org}}. Jotta pääsisit vauhtiin, aseta itsellesi salasana palveluun
+{{org}}. Aseta itsellesi salasana palveluun
 oheisen linkin kautta. Käyttäjätunnuksena toimii sähköpostiosoitteesi.
 
 Jatka klikkaamalla alla olevaa linkkiä. Jos linkki ei toimi, kopioi

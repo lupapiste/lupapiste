@@ -1,7 +1,6 @@
 # Hei,
 
-muistuttelemme, että joku kaipaa vieläkin neuvoasi!
-{{inforequest-created}} on avattu neuvontapyyntö koskien hanketta
+Muistutus: {{inforequest-created}} on avattu neuvontapyyntö koskien hanketta
 {{operation}} osoitteessa {{address}}, {{municipality}} on edelleen
 avoinna. Neuvoa on kysytty Lupapiste-palvelussa, jonka kautta voidaan
 tehdä rakennetun ympäristön asiointiin liittyviä
@@ -11,7 +10,7 @@ kopioi osoite ja liitä se selaimen osoiteriville.
 
 {{link}}
 
-Mikä on Lupapiste? Solita Oy:n, kuntien ja ympäristöministeriön
+Lupapiste on Evolta Oy:n, kuntien ja ympäristöministeriön
 yhteistyössä kehittämä sähköinen asiointipalvelu. Palvelussa voidaan
 hoitaa rakennetun ympäristön lupa-asiointia vuorovaikutuksessa kunnan
 viranomaisten sekä hankkeen osapuolten kanssa.
