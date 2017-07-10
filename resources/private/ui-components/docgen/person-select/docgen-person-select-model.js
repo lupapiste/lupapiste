@@ -13,7 +13,7 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
   self.isDesignerDocument = _.get(self.documentSchema, "info.type") === "party" &&
                             _.get(self.documentSchema, "info.subtype") === "suunnittelija";
 
-  self.appId = partiesModel.applicationId;
+  self.appId = _.get(partiesModel, "applicationId", params.applicationId);
   self.myNs = self.path.slice(0, self.path.length - 1).join(".");
 
   var collectionFn = _.get(params, "docModel.getCollection") || function() { return "documents"; };
