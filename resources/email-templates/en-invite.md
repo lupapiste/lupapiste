@@ -1,11 +1,10 @@
 # Hello, {{user.firstName}}. 
 
-A request has been made to authorize you as a party with writer access
+A request has been made to authorize you as a party with a write permission
 to a project in Lupapiste using the email address
-{{recipient-email}}. In Lupapiste, permit transactions can be handled
-together with the other parties of a project, 24 hours a day.
+{{recipient-email}}.
 
-The writer access is for the project {{operation}} at {{address}},
+Your write permission is for the project {{operation}} at {{address}},
 {{municipality}}.
 
 {{recognition-of-authorization}}
@@ -31,7 +30,7 @@ The inviter has also left you the following message:
 
 {{message}}
 
-Do you have any questions about using the service? We recommend you
+In Lupapiste, permit transactions can be handled together with the other parties of a project, 24 hours a day. Do you have any questions about using the service? We recommend you
 read {{lupapiste.help}} and {{faq}}.
 
 Regards,

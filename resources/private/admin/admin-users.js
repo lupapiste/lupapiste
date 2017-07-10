@@ -198,7 +198,8 @@
   var restApiUsers = new RestApiUsers();
 
   $(function() {
-    $("#addAuthAdmin").applyBindings({
+    $("#admin").applyBindings({});
+    $("#users").applyBindings({
       authorityAdminUsers: authorityAdminUsers,
       restApiUsers: restApiUsers
     });

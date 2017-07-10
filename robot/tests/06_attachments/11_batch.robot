@@ -281,6 +281,7 @@ Add to batch
   Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
   Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "none").toggleClass( "hidden", true )
   Run Keyword if  ${good} == True  Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Maximize browser window
 
 Select type
   [Arguments]  ${index}  ${type}
@@ -304,6 +305,7 @@ Select grouping
 
 Deselect grouping
   [Arguments]  ${index}
+  Scroll to test id  batch-grouping-${index}
   Click element  jquery=[data-test-id=batch-grouping-${index}] .tag-remove
 
 Grouping is
@@ -317,6 +319,7 @@ Grouping is general
 Fill down
   [Arguments]  ${cell}
   ${icon-button}=  Set Variable  icon-button[data-test-id=fill-${cell}]
+  Scroll to test id  batch-${cell}
   Execute Javascript  $("${icon-button}").css( "display", "block")
   Click button  jquery=${icon-button} button
   Execute Javascript  $("${icon-button}").css( "display", "none")

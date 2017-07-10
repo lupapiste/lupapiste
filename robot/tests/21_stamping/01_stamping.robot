@@ -84,7 +84,7 @@ Sonja prepares for stamping
   One attachment is selected
   Default Stamping Info Fields status
 
-Sonja change stamp info
+Sonja changes stamp info
   Select From List by test id and index  stamp-selected  1
   KV stamp fields status
   Textfield value should be  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-organization"]  ${DEF_STAMP_ORGANIZATION}
@@ -205,6 +205,7 @@ Attachment should not be stamped
 
 Open stamping page
   [Arguments]  ${appname}
+  Wait test id visible  stamp-attachments
   Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
@@ -231,7 +232,7 @@ Default stamping info fields status
   Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-user"]
   Wait until  Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-kuntalupatunnus"]
   Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-kuntalupatunnus"]
-  Element should not be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-section"]
+  Element should be enabled  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-section"]
   Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-xmargin"]
   Element should be visible  xpath=${stamp-info-fields-path}//input[@data-test-id="stamp-info-ymargin"]
   Element should be visible  xpath=${stamp-info-fields-path}//select[@data-test-id="stamp-info-transparency"]

@@ -134,6 +134,30 @@ var taskPageController = (function() {
       .call();
   }
 
+  function resendReview() {
+    ajax.command("resend-review-to-backing-system", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage() })
+      .pending(pending)
+      .processing(processing)
+      .success(function(resp) {
+        applicationModel.lightReload();
+
+        if (!resp.integrationAvailable) {
+          hub.send("show-dialog", {ltitle: "integration.title",
+                                   size: "medium",
+                                   component: "ok-dialog",
+                                   componentParams: {ltext: "integration.unavailable"}});
+        } else {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
+        }
+      })
+      .onError("error.invalid-task-type", notify.ajaxError)
+      .error(function(e){
+        applicationModel.lightReload();
+        LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
+      })
+      .call();
+  }
+
   function reviewDone() {
     hub.send("show-dialog", {ltitle: "areyousure",
                              size: "medium",
@@ -185,6 +209,7 @@ var taskPageController = (function() {
         t.reject = _.partial(runTaskCommand, "reject-task");
         t.reviewDone = reviewDone;
         t.markFaulty = markFaulty;
+        t.resendReview = resendReview;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
         t.addedToService = ko.observable();
         task(t);

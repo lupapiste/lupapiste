@@ -876,6 +876,10 @@ $preamble-min-height: 280px; // at least the size of the map container
   span, a {
     display: table-cell;
   }
+  span a {
+    display: inline;
+    padding: 0;
+  }
   a {
     padding-left: $marginM;
   }

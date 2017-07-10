@@ -18,8 +18,7 @@ Resource        ../../common_resource.robot
 # ---------------------
 Admin admin logs in and goes to campaigns tab
   SolitaAdmin logs in
-  Wait test id visible  campaigns
-  Click by test id  campaigns
+  Go to page  campaigns
 
 Initially, no campaigs
   Wait until  Element should not be visible  jquery=lupicon-remove.primary
@@ -54,8 +53,7 @@ Company registration page does not show campaign information
 # ---------------------
 Admin admin logs in again
   SolitaAdmin logs in
-  Wait test id visible  campaigns
-  Click by test id  campaigns
+  Go to page  campaigns
 
 Delete old campaign create new into the future
   Click by test id  huhtikuu2017-delete
@@ -79,8 +77,7 @@ Still no campaign info on the registration page
 # ---------------------
 Admin admin logs in once more
   SolitaAdmin logs in
-  Wait test id visible  campaigns
-  Click by test id  campaigns
+  Go to page  campaigns
 
 Delete old campaign and create new for today
   Click by test id  huhtikuu2017-delete
@@ -166,6 +163,7 @@ Company info page has the registered information
 
 Add campaign
   [Arguments]  ${code}  ${starts}  ${ends}  ${account5}  ${account15}  ${account30}  ${last-discount-date}
+  Wait test id visible  add-campaign
   Click by test id  add-campaign
   Input text by test id  edit-campaign-code  ${code}
   Execute JavaScript  $(".hasDatepicker").unbind("focus");

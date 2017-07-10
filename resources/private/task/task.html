@@ -17,11 +17,18 @@
         <i class="lupicon-eye"></i>
         <span data-bind="ltext: 'task.review-done'"></span>
       </button>
+      <button data-test-id="resend-review" data-bind="click: resendReview, enable: !$root.processing(), visible: $root.authorization.ok('resend-review-to-backing-system')" class="positive">
+        <i class="lupicon-circle-arrow-right"></i>
+        <span data-bind="ltext: 'task.resend-review'"></span>
+      </button>
       <!-- ko if: approvable || rejectable -->
       <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
       <!-- /ko -->
-      <button data-test-id="mark-faulty" data-bind="ltext: 'task.mark-faulty', click: markFaulty, visible: $root.authorization.ok('mark-review-faulty')" class="negative"></button>
+      <button data-test-id="mark-faulty" data-bind="click: markFaulty, visible: $root.authorization.ok('mark-review-faulty')" class="negative">
+        <i class="lupicon-remove"></i>
+        <span data-bind="ltext: 'task.mark-faulty'"></span>
+      </button>
 
       <button data-test-id="delete-task"
               data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"

@@ -272,7 +272,7 @@ Pena logs in, accepts invitation and still cannot submit application
 
 Solita admin sets custom account for company 'Solita Oy', max users 3
   SolitaAdmin logs in
-  Wait until  Click element  xpath=//li/a[contains(text(), "Yritykset")]
+  Go to page  companies
   Wait until  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
   Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritystä
   Select from list by value  xpath=//select[@name="account-type"]  custom

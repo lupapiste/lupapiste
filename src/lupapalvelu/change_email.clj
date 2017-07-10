@@ -72,13 +72,13 @@
          id        :id :as user} (usr/get-user-by-id! (:user-id token))
         new-email                (get-in token [:data :new-email])
         com-admin?               (usr/company-admin? user)
-        {vetuma-hetu :userid}    (when (or hetu com-admin?)
+        {vetuma-hetu :userid}    (when (or (usr/verified-person-id? user) com-admin?)
                                    (vetuma/get-user stamp))
         not-company?             (-> user :company :role ss/blank?)]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
       (and (not hetu) not-company?)            (fail! :error.missing-person-id)
-      (and hetu (not= hetu vetuma-hetu))       (fail! :error.personid-mismatch)
+      (and (usr/verified-person-id? user) (not= hetu vetuma-hetu)) (fail! :error.personid-mismatch)
       (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
 
     (when-let [{dummy-id :id :as dummy-user} (usr/get-user-by-email new-email)]
@@ -92,15 +92,16 @@
     (usr/update-user-by-email old-email
                               {:personId hetu}
                               {$set (merge {:username new-email :email new-email}
-                                           (when (and (not hetu) com-admin?)
-                                             {:personId vetuma-hetu}))})
+                                           (when (and (not (usr/verified-person-id? user)) com-admin?)
+                                             {:personId vetuma-hetu
+                                              :personIdSource :identification-service}))})
 
     (update-email-in-application-auth! id old-email new-email)
 
     (update-email-in-invite-auth! id old-email new-email)
 
     ;; Cleanup tokens
-    (when hetu (vetuma/consume-user stamp))
+    (when (usr/verified-person-id? user) (vetuma/consume-user stamp))
     (token/get-token (:id token) :consume true)
 
     ;; Send notifications

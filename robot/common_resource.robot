@@ -37,7 +37,7 @@ Set DB cookie
   ${timestamp}=  Get Time  epoch
   ${random post fix}=  Evaluate  random.randint(0, sys.maxint)  modules=random, sys
   ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}_${random post fix}
-  Add Cookie  ${DB COOKIE}  ${dbname}
+  Add Cookie  ${DB COOKIE}  ${dbname}  /
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
   Log  Cookie: ${DB COOKIE} = ${dbname}
 
@@ -520,10 +520,10 @@ Select From Autocomplete
 
   ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
   Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} div.autocomplete-selection-wrapper
-
+  Scroll by  400
   Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
-  Scroll and click  ${container} ul.autocomplete-result li span:contains('${value}')
+  Click element  jquery=${container} ul.autocomplete-result li span:contains('${value}')
   Wait until  Element should not be visible  jquery=${container} ul.autocomplete-result
   Wait for jQuery
 
@@ -812,6 +812,8 @@ Upload batch file
   Choose file  jquery=input[data-test-id=${testId}]  ${path}
   Hide file input  input[data-test-id=${testId}]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Wait test id visible  batch-ready
+  Scroll to bottom
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
@@ -831,7 +833,7 @@ Upload attachment
   Test id visible  add-attachments-label
   Scroll to top
   Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
-  Click enabled by test id  batch-ready
+  Scroll and click test id  batch-ready
   Wait until  No such test id  batch-ready
 
 Add attachment

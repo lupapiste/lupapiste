@@ -113,6 +113,7 @@
                                                   :verdicts [],
                                                   :startedBy {},
                                                   :documents [ctc/henkilohakija
+                                                              ctc/yrityshakija
                                                               talousvedet
                                                               kuvaus
                                                               rakennukset
@@ -159,11 +160,10 @@
         vapautushakemustieto (:vapautushakemustieto Vapautus) => truthy
         Vapautushakemus (:Vapautushakemus vapautushakemustieto) => truthy
         haetaan (:haetaan Vapautushakemus) => nil
-        hakija (first (:hakija Vapautushakemus)) => truthy
-        etunimi (:etunimi hakija) => "Pekka"
-        sukunimi (:sukunimi hakija) => "Borga"
-        henkilotunnus (:henkilotunnus hakija) => "210281-9988"
-
+        ;; Only one applicant (hakija) is included
+        applicants (:hakija Vapautushakemus) => (just [(contains {:etunimi "Pekka"
+                                                                  :sukunimi "Borga"
+                                                                  :henkilotunnus "210281-9988"})])
         kohde (:kohde Vapautushakemus) => truthy
 
         kiinteistorekisteritunnus (:kiinteistorekisteritunnus kohde) => "75342300020226"

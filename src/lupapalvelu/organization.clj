@@ -100,6 +100,7 @@
    (sc/optional-key :app-required-fields-filling-obligatory) sc/Bool
    (sc/optional-key :assignments-enabled) sc/Bool
    (sc/optional-key :extended-construction-waste-report-enabled) sc/Bool
+   (sc/optional-key :automatic-ok-for-attachments-enabled) sc/Bool
    (sc/optional-key :areas) sc/Any
    (sc/optional-key :areas-wgs84) sc/Any
    (sc/optional-key :calendars-enabled) sc/Bool
@@ -268,6 +269,9 @@
    (let [organization (get-organization organization-id)
          default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
      (get-in organization [:name lang] default))))
+
+(defn get-organization-auto-ok [organization-id]
+  (:automatic-ok-for-attachments-enabled (get-organization organization-id)))
 
 (defn resolve-organizations
   ([municipality]
@@ -493,8 +497,9 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
-(defn- transform-coordinates-to-wgs84 [collection]
+(defn- transform-coordinates-to-wgs84
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+ [collection]
   (let [schema (.getSchema collection)
         crs (.getCoordinateReferenceSystem schema)
         transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)

@@ -1,7 +1,6 @@
 # Hello, {{user.firstName}},
 
-and congratulations - from now on, you can give statements even from
-your own living room! Namely, {{organization}} uses the electronic
+{{organization}} uses the electronic
 built environment permit transaction service Lupapiste, and you have
 been added as a statement giver under the title {{text}}.
 
@@ -13,7 +12,7 @@ email address.
 Afterwards, you can give a statement with your username and the password
 you have defined through a link sent to you via email.
 
-Please read {{lupapiste-help-statements}} and {{lupapiste-for-authorities}}.
+For additional information please read {{lupapiste-help-statements}} and {{lupapiste-for-authorities}}.
 
 You can follow the digitalization of permit transactions: {{facebook}}
 | {{twitter}} | {{instagram}}

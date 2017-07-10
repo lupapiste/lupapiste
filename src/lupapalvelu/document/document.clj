@@ -57,7 +57,8 @@
     (fail :error.create-doc-not-allowed)))
 
 (defn user-can-be-set-validator [{{user-id :userId} :data application :application}]
-  (when-not (or (ss/blank? user-id) (user-can-be-set? user-id application))
+  (when-not (or (ss/blank? user-id) (user-can-be-set? user-id application)
+                (auth/has-auth-via-company? application user-id))
     (fail :error.application-does-not-have-given-auth)))
 
 (defn- deny-remove-of-non-removable-doc [{schema-info :schema-info}]

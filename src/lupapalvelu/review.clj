@@ -47,8 +47,8 @@
 (defn- merge-review-tasks
   "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
   [from-update from-mongo]
-  (let [faulty-tasks (filter #(= (:state %) :faulty_review_task) from-mongo)
-        from-mongo   (remove #(= (:state %) :faulty_review_task) from-mongo)]
+  (let [faulty-tasks (filter #(util/=as-kw (:state %) :faulty_review_task) from-mongo)
+        from-mongo   (remove #(util/=as-kw (:state %) :faulty_review_task) from-mongo)]
     (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s (+faulty: %s)" (count from-update) (count from-mongo) (count faulty-tasks))
     (loop [from-update from-update
            from-mongo from-mongo
@@ -87,15 +87,16 @@
        vals
        (map #(apply merge %))))
 
-(defn reviews-preprocessed [app-xml]
+(defn reviews-preprocessed 
   "Review preprocessing: 1) Duplicate entry prevention (group-by review type, name, date and external id)
                          2) Collect all related building and attachment elements together
                          3) Merge into final results in which there are no duplicates by name or type but still
                             all building details and attachments are still there"
+  [app-xml]
   (let [historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
         grouped-reviews (group-by
-                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm :muuTunnustieto])
+                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm])
                           (filter historical-timestamp-present? (review-reader/xml->reviews app-xml)))]
     (for [k (keys grouped-reviews)
           :let [values (get grouped-reviews k)

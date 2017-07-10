@@ -199,6 +199,7 @@
                    "operation-filter-service.js"
                    "organization-filter-service.js"
                    "organization-tags-service.js"
+                   "company-tags-service.js"
                    "handler-filter-service.js"
                    "publish-bulletin-service.js"
                    "application-filters-service.js"
@@ -225,7 +226,8 @@
                    "campaign-service.js"
                    "company-registration-service.js"
                    "triggers-target-service.js"
-                   "trigger-service.js"]}
+                   "trigger-service.js"
+                   "navi-sidebar-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -325,12 +327,15 @@
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
+                       "create-digging-permit.js"
+                       "parties-model.js"
                        "application.js"]
                   :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html"
                          "required-fields-summary-tab-template.html" "parties-tab-template.html"
-                         "case-file-template.html" "application-actions-template.html"]}
+                         "case-file-template.html" "create-digging-permit.html"
+                         "application-actions-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]

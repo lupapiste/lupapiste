@@ -317,8 +317,8 @@
 
       (facts "lupamaaraukset data is correct"
         lupamaaraykset => truthy
-        (:kerrosala lupamaaraykset) => "134.000"
-        (:kokonaisala lupamaaraykset) => "134.000"
+        (:kerrosala lupamaaraykset) => "134"
+        (:kokonaisala lupamaaraykset) => "134"
         (:vaaditutTyonjohtajat lupamaaraykset) => "Vastaava ty\u00f6njohtaja, KVV-ty\u00f6njohtaja, IV-ty\u00f6njohtaja"
         (facts "katselmukset"
           (count katselmukset) => 4

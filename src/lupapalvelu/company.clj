@@ -56,7 +56,8 @@
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     ssc/Timestamp
               (sc/optional-key :campaign)    sc/Str
-              (sc/optional-key :locked)      ssc/Timestamp})
+              (sc/optional-key :locked)      ssc/Timestamp
+              (sc/optional-key :tags)        [{:id ssc/ObjectIdStr :label sc/Str}]})
 
 (def company-skeleton ; required keys
   {:name nil
@@ -79,10 +80,12 @@
     :ovt      (fail! :error.illegal-ovt-tunnus)
     :pop      (fail! "error.illegal-value:select")
     :accountType (fail! :error.illegal-company-account)
+    :tags     (fail! :error.illegal-tags)
     (fail! :error.unknown)))
 
 (defn validate! [company]
   (when-let [errors (sc/check Company company)]
+    (debug "Company schema validation: " errors)
     (fail-property! (first (keys errors)))))
 
 (defn custom-account? [{type :accountType}]
@@ -112,6 +115,15 @@
                (:company data))
     unauthorized))
 
+(defn validate-company-is-authorized [{{{company-id :id} :company} :user {auth :auth} :application}]
+  (when-not (util/find-by-id company-id auth)
+    unauthorized))
+
+(defn validate-tag-ids [{company :company {tags :tags} :data}]
+  (some->> (remove (set (map :id (:tags @company))) tags)
+           not-empty
+           (fail :error.unknown-tag :tags)))
+
 ;;
 ;; API:
 ;;
@@ -128,14 +140,19 @@
 
 (defn find-company
   "Returns company mathing the provided query, or nil"
-  [q]
-  (when (seq q)
-    (some->> q (mongo/with-_id) (mongo/select-one :companies))))
+  ([q]
+   (when (seq q)
+     (some->> q (mongo/with-_id) (mongo/select-one :companies))))
+  ([query projection]
+   (when (seq query)
+     (mongo/select-one :companies (mongo/with-_id query) projection))))
 
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
-  [q]
-  (or (find-company q) (fail! :company.not-found)))
+  ([q]
+   (or (find-company q) (fail! :company.not-found)))
+  ([query projection]
+   (or (find-company query projection) (fail! :company.not-found))))
 
 (defn find-company-by-id
   "Returns company by given ID, or nil"
@@ -240,7 +257,7 @@
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
         updated (->> (merge company updates)
-                  (ensure-custom-limit id))
+                     (ensure-custom-limit id))
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
@@ -334,12 +351,13 @@
                               :firstName   (:firstName user)
                               :lastName    (:lastName user)
                               :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
-                              :personId    (:personId user)
                               :password    password
                               :role        :applicant
                               :architect   true
                               :enabled     true}
-                             :language    (:language user))
+                             :language    (:language user)
+                             :personId    (:personId user)
+                             :personIdSource (:personIdSource user))
     :send-email false)
   (ok))
 

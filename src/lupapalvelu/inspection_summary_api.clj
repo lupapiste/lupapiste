@@ -125,9 +125,7 @@
 
 (defcommand toggle-inspection-summary-locking
   {:pre-checks [inspection-summary/inspection-summary-api-authority-pre-check
-                inspection-summary/validate-summary-found-in-application
-                (fn [_] (when-not (env/feature? :inspection-summary-locking)
-                          (fail :error.feature-not-enabled)))]
+                inspection-summary/validate-summary-found-in-application]
    :parameters [:id summaryId isLocked]
    :categories #{:inspection-summaries}
    :input-validators [(partial action/non-blank-parameters [:summaryId])

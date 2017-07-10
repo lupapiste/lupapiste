@@ -4,27 +4,14 @@
     <meta charset="utf-8" />
   </head>
   <body>
-
     <nav>
-        <div class="breadcrumb">
-            <div class="container">
-                <ul id="applicationTabs" class="tabs">
-                    <li><a class="link-btn" href="#!/users" data-test-id="users" data-bind="ltext: 'auth-admin.users', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('users')}"></a></li>
-                    <li><a class="link-btn" href="#!/applications" data-test-id="" data-bind="ltext: 'auth-admin.application-settings', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('applications')}"></a></li>
-                    <li><a class="link-btn" href="#!/operations" data-test-id="" data-bind="ltext: 'auth-admin.selected-operations', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('operations')}"></a></li>
-                    <li><a class="link-btn" href="#!/attachments" data-test-id="" data-bind="ltext: 'auth-admin.operations-attachments.attachments', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('attachments')}"></a></li>
-                    <li><a class="link-btn" href="#!/backends" data-test-id="" data-bind="ltext: 'auth-admin.backends', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('backends')}"></a></li>
-                    <li><a class="link-btn" href="#!/areas" data-test-id="" data-bind="ltext: 'auth-admin.areas', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('areas')}"></a></li>
-                    <li><a class="link-btn" href="#!/reports" data-test-id="" data-bind="ltext: 'auth-admin.reports', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('reports')}"></a></li>
-                    <li><a class="link-btn" href="#!/assignments" data-test-id="tasks-tab" data-bind="ltext: 'auth-admin.assignments', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('assignments')}"></a></li>
-                    <li data-bind="if: features.enabled('ajanvaraus') && lupapisteApp.models.globalAuthModel.ok('calendars-enabled')">
-                      <a class="link-btn" href="#!/organization-calendars" data-test-id="" data-bind="ltext: 'auth-admin.organization-calendars', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('organization-calendars')}"></a>
-                    </li>
-                    <li><a class="link-btn" href="#!/stamp-editor" data-test-id="stamp-editor" data-bind="ltext: 'auth-admin.stamp-editor', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('stamp-editor')}"></a></li>
-                </ul>
-            </div>
-        </div>
+      <div class="navi-toolbar" id="navi-toolbar">
+        <button class="sidebar-button"
+                data-bind="toggleClick: lupapisteApp.services.naviSidebarService.showMenu">
+          <i data-bind="css: lupapisteApp.services.naviSidebarService.menuCss"></i>
+          <span data-bind="ltext: lupapisteApp.services.naviSidebarService.menuLoc"></span>
+        </button>
+      </div>
     </nav>
-
   </body>
 </html>

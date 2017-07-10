@@ -188,7 +188,7 @@
     update: function( element, valueAccessor) {
       var value = loc( ko.utils.unwrapObservable( valueAccessor() ) );
       if( value ) {
-        $(element).text( value.split( "" ).join( " "));
+        $(element).html( value.split( "" ).join( " ").replace("   "," &nbsp; "));
       }
     }
   };
@@ -651,8 +651,9 @@
     init: function(element, valueAccessor) {
       var value = valueAccessor();
 
-      ko.utils.registerEventHandler(element, "click", function() {
+      ko.utils.registerEventHandler(element, "click", function( e ) {
         value(!value());
+        e.stopPropagation();
       });
     }
   };

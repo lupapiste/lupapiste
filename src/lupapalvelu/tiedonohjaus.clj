@@ -185,7 +185,7 @@
                            :user (full-name user)})))))
 
 (defn- handler-name-and-role [handler handler-roles lang]
-  (let [role (->> (filter #(= (:roleId handler) (:id %)) handler-roles))]
+  (let [role (filter #(= (:roleId handler) (:id %)) handler-roles)]
     (str (full-name handler) " ("(get-in (first role) [:name (keyword lang)])")")))
 
 (defn- handler-with-role [handler user handler-roles lang category]

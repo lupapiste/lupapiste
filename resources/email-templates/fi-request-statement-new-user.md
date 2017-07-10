@@ -1,14 +1,12 @@
 # Hei {{user.firstName}},
 
-sähköpostiosoite {{user.email}} halutaan lisätä
-lausunnonantajaksi Lupapisteessä lupahakemukselle osoitteessa
+{{user.email}} halutaan lisätä lausunnonantajaksi Lupapisteessä lupahakemukselle osoitteessa
 {{address}}, {{municipality}}. Lupaa haetaan toimenpiteelle
 {{operation}}.
 
 Pääset antamaan lausunnon klikkaamalla alla olevaa linkkiä. Jos linkki
 ei toimi, kopioi osoite ja liitä se selaimen
-osoiteriville. Lupapisteessä voidaan hoitaa rakentamiseen liittyvää
-lupa-asiointia yhdessä hankkeen osapuolten kesken. Vuorokauden ympäri.
+osoiteriville.
 
 Jos et ole vielä Lupapisteen käyttäjä, hakemuksen näkeminen edellyttää
 rekisteröitymistä palveluun mobiilivarmenteen tai
@@ -33,3 +31,6 @@ pyytänyt taho lähettää vielä seuraavat terveiset:
 Terveisin,
 
 {{lupapiste.link}}
+
+Lupapisteessä voidaan hoitaa rakentamiseen liittyvää
+lupa-asiointia yhdessä hankkeen osapuolten kesken. Vuorokauden ympäri.

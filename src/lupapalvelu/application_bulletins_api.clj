@@ -231,7 +231,7 @@
           bulletin             (-> bulletin-version
                                    (domain/filter-application-content-for {})
                                    ; unset keys (with empty values) set by filter-application-content-for
-                                   (dissoc :comments :neighbors :statements)
+                                   (dissoc :comments :neighbors :statements :company-notes)
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (update-in [:attachments] (partial map #(dissoc % :metadata :auth)))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))

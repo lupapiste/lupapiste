@@ -48,7 +48,7 @@ Kaino invites Teppo to Solita
 # -------------------
 Admin admin locks Solita
   SolitaAdmin logs in
-  Scroll and click test id  companies
+  Go to page  companies
   ${today}=  Execute Javascript  return moment().format("D.M.YYYY");
   Lock company  solita  ${today}
   [Teardown]  Logout
@@ -74,7 +74,7 @@ Pena locks in but locking status is not visible to him
 # -------------------
 Admin admin locks Solita in the future
   SolitaAdmin logs in
-  Scroll and click test id  companies
+  Go to page  companies
   Scroll and click test id  unlock-company-solita
   ${tomorrow}=  Execute Javascript  return moment().add( 1, "days").format("D.M.YYYY");
   Lock company  solita  ${tomorrow}
@@ -93,7 +93,7 @@ Kaino logs in and sees Solita unlocked
 # -------------------
 Admin admin locks Solita in the past
   SolitaAdmin logs in
-  Scroll and click test id  companies
+  Go to page  companies
   Scroll and click test id  unlock-company-solita
   ${yesterday}=  Execute Javascript  return moment().subtract( 1, "days").format("D.M.YYYY");
   Lock company  solita  ${yesterday}

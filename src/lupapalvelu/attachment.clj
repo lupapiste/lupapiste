@@ -107,8 +107,12 @@
   "Attachment version"
   {:version                              VersionNumber
    :fileId                               sc/Str             ;; fileId in GridFS
-   :originalFileId                       sc/Str             ;; fileId of the unrotated file
+   :originalFileId                       sc/Str             ;; fileId of the unrotated/unconverted file
    :created                              ssc/Timestamp
+   ;; Timestamp for the latest "non-versioning" operation (e.g.,
+   ;; rotation, pdf/a conversion). Thus, modified can be present only
+   ;; if originalFileId is present.
+   (sc/optional-key :modified)           ssc/Timestamp
    :user                                 (sc/if :id         ;; User who created the version
                                            usr/SummaryUser ;; Only name is used for users without Lupapiste account, eg. neighbours
                                            (select-keys usr/User [:firstName :lastName]))
@@ -445,7 +449,8 @@
 
 (defn make-version
   [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
-                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog]}]
+                           stamped archivable archivabilityError missing-fonts autoConversion conversionLog
+                           modified]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
@@ -465,6 +470,7 @@
          :size           size
          :stamped        (boolean stamped)
          :archivable     (boolean archivable)}
+        :modified       modified
         :archivabilityError archivabilityError
         :missing-fonts missing-fonts
         :autoConversion autoConversion
@@ -481,9 +487,8 @@
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
-        version-index            (or (util/position-by-key :originalFileId (or replaceable-original-file-id originalFileId)
-                                                           (:versions attachment))
-                                     (count (:versions attachment)))
+        version-index            (util/position-by-key :originalFileId (or replaceable-original-file-id originalFileId)
+                                                       (:versions attachment))
         user-role                (if stamped :stamper :uploader)]
     (util/deep-merge
      (when target
@@ -503,13 +508,16 @@
                                                           originalFileId)) {:state :requires_authority_action})]
        {$set {(version-approval-path originalFileId) approval}})
 
-     {$set      {:modified                            created
-                 :attachments.$.modified              created
-                 :attachments.$.notNeeded             false ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
-                 (ss/join "."
-                          ["attachments" "$"
-                           "versions" version-index]) version-model}
-      $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
+     (merge
+       {$set      (merge
+                    {:modified                            created
+                     :attachments.$.modified              created
+                     :attachments.$.notNeeded             false}
+                    (when version-index
+                      {(ss/join "." ["attachments" "$" "versions" version-index]) version-model}))
+        $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}}
+       (when-not version-index
+         {$push {:attachments.$.versions version-model}})))))
 
 (defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)

@@ -2,13 +2,22 @@
 <html>
 <body>
   <section class="page" id="applications">
-    <div class="container">
+    <navi-sidebar></navi-sidebar>
+    <div class="container container--authority-admin"
+         data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.required-fields-obligatory.title'"></h2>
         <input type="checkbox" class="form-input" id="required-fields-obligatory-enabled" data-test-id="required-fields-obligatory-enabled"
                data-bind="checked: organization.appRequiredFieldsFillingObligatory, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
         <label for="required-fields-obligatory-enabled" class="form-label" data-bind="ltext: 'auth-admin.required-fields-obligatory.enabled'"></label>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.title'"></h2>
+        <input type="checkbox" class="form-input" id="automatic-ok-for-attachments-enabled" data-test-id="automatic-ok-for-attachments-enabled"
+               data-bind="checked: organization.automaticOkForAttachments, enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-ok-for-attachments')"/>
+        <label for="automatic-ok-for-attachments-enabled" class="form-label" data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.enabled'"></label>
       </section>
 
       <section>

@@ -309,12 +309,29 @@
 (defn doc-name [doc]
   (get-in doc [:schema-info :name]))
 
+(defn- party-doc-id [paths doc]
+  (some (fn->> (cons :data) (get-in doc) :value) paths))
+
 (def party-doc-user-id-paths
   [[:henkilo :userId]
    [:userId]])
 
-(defn party-doc-user-id [doc]
-  (some (fn->> (cons :data) (get-in doc) :value) party-doc-user-id-paths))
+(def party-doc-user-id
+  (partial party-doc-id party-doc-user-id-paths))
+
+(def party-doc-company-id-paths
+  [[:yritys :companyId]])
+
+(def party-doc-company-id
+  (partial party-doc-id party-doc-company-id-paths))
+
+(defn party-doc-selected-id
+  "Returns either the user or company id, depending on which one is selected"
+  [doc]
+  (when-let [id-extractor (-> doc :data :_selected :value
+                              {"henkilo" party-doc-user-id
+                               "yritys"  party-doc-company-id})]
+    (id-extractor doc)))
 
 (defn party-doc->user-role [doc]
   (cond

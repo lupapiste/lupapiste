@@ -30,7 +30,7 @@ Sonja enters the address for the copied application
   Wait until  Element should be visible by test id  copy-selected-location
   Element text should be  //section[@id='copy']//span[@data-test-id='copy-selected-location-text']  753-416-25-28, Latokuja 10, Sipoo
 
-Sonja invites pena to the copied application
+Sonja invites Pena to the copied application
   Xpath Should Match X Times  //section[@id='copy']//div[@id='copy-auths']//input  1
   Element text should be  //section[@id='copy']//div[@id='copy-auths']//label  Mikko Intonen, Hakemuksen tekijä
   Click element  xpath=//section[@id='copy']//div[@id='copy-auths']//label

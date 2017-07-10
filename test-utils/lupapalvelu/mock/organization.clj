@@ -9,6 +9,20 @@
     (fn [org-id]
       (mongerify (get org-map org-id)))))
 
+(defn mock-get-orgs [orgs]
+  (fn [& [query]]
+    (assert (not query) "I am just a mock function, I can't handle actual mongo queries")
+    (mongerify orgs)))
+
+(defn mock-resolve-orgs [orgs]
+  (fn [municipality & [permit-type]]
+    (->> orgs
+         (filter (fn [org]
+                   (some #(= (select-keys % (concat [:municipality] (when permit-type [:permitType])))
+                             (merge {:municipality municipality} (when permit-type {:permitType permit-type})))
+                         (:scope org))))
+         (mongerify))))
+
 (def all-orgs-minimal-by-id (key-by :id minimal/organizations))
 (def all-orgs-minimal (vals all-orgs-minimal-by-id))
 
@@ -34,7 +48,9 @@
   (get all-orgs-minimal-by-id "999-R-TESTI-3"))
 
 (defmacro with-mocked-orgs [orgs & body]
-  `(with-redefs [org/get-organization (mock-get-org ~orgs)]
+  `(with-redefs [org/get-organization (mock-get-org ~orgs)
+                 org/get-organizations (mock-get-orgs ~orgs)
+                 org/resolve-organizations (mock-resolve-orgs ~orgs)]
      ~@body))
 
 (defmacro with-all-mocked-orgs [& body]

@@ -20,7 +20,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.permit :as permit]))
 
 (defn- valid-token? [token statuses ts-now]
   {:pre [(number? ts-now) (pos? ts-now)]}
@@ -128,7 +129,8 @@
    :pre-checks [neighbor-marked-done?
                 (fn [{user :user {:keys [options]} :application}]
                   (when (and (:municipalityHearsNeighbors options) (not (usr/authority? user)))
-                    (fail :error.unauthorized)))]}
+                    (fail :error.unauthorized)))
+                (permit/validate-permit-type-is permit/R permit/P)]}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
         email (ss/canonize-email email)

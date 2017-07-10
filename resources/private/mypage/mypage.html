@@ -88,6 +88,16 @@
                                                    lLabel: 'userinfo.city',
                                                    required: true}}"></div>
             </div>
+            <div class="row" data-bind="if: personIdEditable">
+              <div class="col-1"
+                   data-bind="component: {name: 'text-field',
+                                          params: {value: personId,
+                                                   disable: disable,
+                                                   id: 'userinfo.personId',
+                                                   lLabel: 'userinfo.personId',
+                                                   required: false}}">
+              </div>
+            </div>
             <div class="row">
               <div class="col-1"
                    data-bind="component: {name: 'select-field',
