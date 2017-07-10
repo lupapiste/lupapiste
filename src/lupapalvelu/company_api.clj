@@ -1,6 +1,6 @@
 (ns lupapalvelu.company-api
   (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
-            [lupapalvelu.action :refer [defquery defcommand some-pre-check] :as action]
+            [lupapalvelu.action :refer [defquery defcommand some-pre-check notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.company :as com]
             [lupapalvelu.user :as usr]
@@ -102,9 +102,12 @@
   {:parameters [user-id]
    :input-validators [(partial action/non-blank-parameters [:user-id])]
    :user-roles #{:applicant :admin}
-   :pre-checks [com/company-user-edit-allowed]}
+   :pre-checks [com/company-user-edit-allowed]
+   :on-success (notify :company-user-delete)}
   [_]
-  (com/delete-user! user-id))
+  (let [user (usr/get-user-by-id user-id)]
+    (ok :user (select-keys (com/delete-user! user-id) [:id :firstName :lastName :email :role :language])
+        :company (com/find-company {:id (get-in user [:company :id])} [:id :name]))))
 
 (defcommand company-user-delete-all
   {:description "Nuclear option for deleting every company user when

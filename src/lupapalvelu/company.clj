@@ -299,9 +299,20 @@
                      created)
     (fail :error.company-not-locked)))
 
+;;
+;; Deletion
+;;
+
+(notif/defemail :company-user-delete
+                {:subject-key   "company-user-delete.subject"
+                 :recipients-fn (fn [{:keys [result]}] [(:user result)])
+                 :model-fn      (fn [model _ _] (assoc model :company (get-in model [:result :company])))
+                 :pred-fn       (fn [{:keys [result]}] (usr/dummy? (:user result)))})
+
 (defn delete-user!
   [user-id]
-  (mongo/update-by-id :users user-id {$set {:role "dummy"}, $unset {:company 1, :private.password 1}}))
+  (-> (mongo/update-one-and-return :users {:_id user-id} {$set {:role "dummy"}, $unset {:company 1, :private.password 1}})
+      (mongo/with-id)))
 
 (defn delete-every-user! [company-id]
   (mongo/update-by-query :users

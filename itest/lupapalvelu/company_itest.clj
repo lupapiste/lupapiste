@@ -202,9 +202,15 @@
       (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => (partial expected-failure? "error.company-user-limit-exceeded"))))
 
 (fact "Kaino deletes Teppo from company"
-      (command kaino :company-user-delete :user-id teppo-id) => ok?)
+  (command kaino :company-user-delete :user-id teppo-id) => ok?
+  (let [email (last-email)
+        body (get-in email [:body :plain])]
+    email => truthy
+    (:subject email) => (contains "Yritystilist\u00e4 poisto")
+    body => (contains #"Solita Oy Yritystilin.+on poistanut")))
+
 (fact "Teppo is no longer in the company"
-      (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "applicant"))
+  (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "dummy"))
 
 (facts "Authed dummy into company"
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
