@@ -3298,6 +3298,16 @@
                  $unset {:private ""}}
                 :multi true))
 
+(defmigration reset-application-archived-ts
+  {:apply-when (pos? (mongo/count :applications {:archived.application {$gt 0}
+                                                 :tosFunction nil
+                                                 :state {$ne "canceled"}}))}
+  (mongo/update-by-query :applications
+                         {:archived.application {$gt 0}
+                          :tosFunction nil
+                          :state {$ne "canceled"}}
+                         {$set {:archived.application nil}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

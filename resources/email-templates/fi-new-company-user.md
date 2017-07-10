@@ -2,7 +2,7 @@
 
 Yrityksesi on rekisteröitynyt Lupapisteeseen ja avannut Yritystilin, jonka avulla voidaan hallinnoida yrityksenne hankkeita yhteisen ty&ouml;jonon kautta. **{{company.name}}** -Yritystilin yll&auml;pit&auml;j&auml; {{company-admin}} on lis&auml;nnyt sinut Yritystilin k&auml;ytt&auml;j&auml;ksi Lupapisteeseen.
 
-Voit aktivoida tilisi ja asettaa itsellesi salasanan oheisella linkill&auml;:
+Voit liittyä Yritystiliin ja asettaa itsellesi salasanan oheisella linkill&auml;:
 
 {{link}}
 

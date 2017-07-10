@@ -561,7 +561,9 @@
                                                 :original-file-id originalFileId
                                                 :attachment-id attachmentId
                                                 :attachment-type (:type attachment)
-                                                :created created
+                                                :created (:created latest-version)
+                                                :modified created
+                                                :comment? false
                                                 :user user}
                                                :autoConversion autoConversion)]
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
@@ -572,7 +574,8 @@
                                          {:content temp-pdf
                                           :filename filename
                                           :content-type contentType
-                                          :size (.length temp-pdf)}))
+                                          :size (.length temp-pdf)}
+                                         ))
         (ok)))
     (fail :error.unknown)))
 
@@ -843,7 +846,7 @@
    :states           (states/all-application-states-but :draft)}
   [{:keys [application created]}]
   (if-let [attachment (att/get-attachment-info application attachmentId)]
-    (let [{:keys [fileId filename user stamped]} (last (:versions attachment))]
+    (let [{:keys [fileId filename user stamped] :as latest-version} (last (:versions attachment))]
       (files/with-temp-file temp-pdf
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
@@ -851,7 +854,9 @@
                                                                                 {:attachment-id attachmentId
                                                                                  :comment-text nil
                                                                                  :required false
-                                                                                 :created created
+                                                                                 :created (:created latest-version)
+                                                                                 :modified created
+                                                                                 :comment? false
                                                                                  :stamped stamped
                                                                                  :original-file-id fileId}
                                                                                 {:content temp-pdf :filename filename})]

@@ -113,27 +113,29 @@
 
       </div>
 
-      <div class="application-neighbors">
-          <h1 data-bind="lhtml: 'application.' + application.permitType() + '.neighbors'">Naapurit</h1>
-          <span data-bind="component: {
-                           name: 'help-toggle',
-                           params: {lhtml: 'help.' + application.permitType() + '.neighborsDesc'}
-                           }"></span>
+      <!-- ko if: $root.authorization.ok('neighbors-statement-enabled') -->
+        <div class="application-neighbors">
+            <h1 data-bind="lhtml: 'application.' + application.permitType() + '.neighbors'">Naapurit</h1>
+            <span data-bind="component: {
+                             name: 'help-toggle',
+                             params: {lhtml: 'help.' + application.permitType() + '.neighborsDesc'}
+                             }"></span>
 
-          <div data-bind="template: {name: 'neighbors-table-template',
-                                     data: {neighbors: application.neighbors,
-                                            optionMunicipalityHearsNeighbors: application.optionMunicipalityHearsNeighbors,
-                                            optionMunicipalityHearsNeighborsDisabled: application.optionMunicipalityHearsNeighborsDisabled,
-                                            municipalityHearsNeighborsVisible: application.municipalityHearsNeighborsVisible,
-                                            localisationKeys: {missing: 'neighbors.missing'}}}"></div>
-          <button data-bind="click: openNeighborsPage,
-                             visible: $root.authorization.ok('neighbor-add')"
-                  class="btn btn-primary modal"
-                  data-test-id="manage-neighbors">
-             <i class="lupicon-circle-plus"></i>
-             <span data-bind="ltext: 'neighbors.manage'"></span>
-           </button>
-      </div>
+            <div data-bind="template: {name: 'neighbors-table-template',
+                                       data: {neighbors: application.neighbors,
+                                              optionMunicipalityHearsNeighbors: application.optionMunicipalityHearsNeighbors,
+                                              optionMunicipalityHearsNeighborsDisabled: application.optionMunicipalityHearsNeighborsDisabled,
+                                              municipalityHearsNeighborsVisible: application.municipalityHearsNeighborsVisible,
+                                              localisationKeys: {missing: 'neighbors.missing'}}}"></div>
+            <button data-bind="click: openNeighborsPage,
+                               visible: $root.authorization.ok('neighbor-add')"
+                    class="btn btn-primary modal"
+                    data-test-id="manage-neighbors">
+               <i class="lupicon-circle-plus"></i>
+               <span data-bind="ltext: 'neighbors.manage'"></span>
+             </button>
+        </div>
+      <!-- /ko -->
 
     </script>
 

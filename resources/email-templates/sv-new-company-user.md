@@ -2,7 +2,7 @@
 
 Ditt f&ouml;retag har skapat ett F&ouml;retagskonto i Lupapiste f&ouml;r att hantera f&ouml;retagets projekt i en gemensam arbetsk&ouml;. Administrat&ouml;ren f&ouml;r F&ouml;retagskontot **{{company.name}}** {{company-admin}} har lagt till dig som anv&auml;ndare f&ouml;r F&ouml;retagskontot i Lupapiste.
 
-Du kan aktivera ditt konto och skapa ett l&ouml;senord genom att klicka p&aring; den bifogade l&auml;nken.
+Du kan registrera ditt konto och skapa ett l&ouml;senord genom att klicka p&aring; den bifogade l&auml;nken.
 
 {{link}}
 

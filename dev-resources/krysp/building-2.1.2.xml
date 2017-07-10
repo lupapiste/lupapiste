@@ -157,6 +157,7 @@
             <kayttotarkoitus>941 talousrakennukset</kayttotarkoitus>
             <tilavuus>0</tilavuus>
             <kokonaisala>70</kokonaisala>
+            <kellarinpinta-ala>0</kellarinpinta-ala>
             <kerrosluku>1</kerrosluku>
             <kerrosala>0</kerrosala>
             <rakentamistapa>paikalla</rakentamistapa>

@@ -187,6 +187,9 @@
 (defn decoded-get [url params]
   (decode-response (http-get url params)))
 
+(defn decoded-simple-post [url params]
+  (decode-response (http-post url params)))
+
 (defn- decode-post [action-type apikey command-name & args]
   (decode-response
     (http-post

@@ -58,7 +58,7 @@
                  [org.mnode.ical4j/ical4j "1.0.7" :exclusions [commons-logging]]
 
                  ; Apache Commons
-                 [commons-fileupload "1.3.2"] ; explicit requirement to catch version upgrades
+                 [commons-fileupload "1.3.3"] ; explicit requirement to catch version upgrades
                  [org.apache.commons/commons-lang3 "3.5"]
                  [commons-io "2.5"]
                  [commons-codec "1.10"]
@@ -124,7 +124,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.109"]
+                 [lupapiste/commons "0.7.110"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

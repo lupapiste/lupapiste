@@ -14,7 +14,7 @@
                    {value: ko.observable(), label: "Suoramarkkinointilupa",
                     arg: "allow"}];
 
-    
+
     self.link = ko.pureComputed( function() {
       return "/api/raw/user-report?"
            + _(self.values)
@@ -26,7 +26,7 @@
   }
 
   $(function() {
-    $("#admin-user-report").applyBindings( new UserReport());
+    $("#reports").applyBindings( new UserReport());
   });
 
 })();

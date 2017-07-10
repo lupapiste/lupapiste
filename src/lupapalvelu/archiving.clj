@@ -139,10 +139,12 @@
                 (state-update-fn :valmis application now id))))))))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-ids]
-  (cond->> (concat [primaryOperation] secondaryOperations)
-           (seq op-ids) (filter (comp (set op-ids) :id))
-           true (map :name)
-           true (distinct)))
+  (->> 
+    (cond->> 
+      (concat [primaryOperation] secondaryOperations)
+      (seq op-ids) (filter (comp (set op-ids) :id)))
+    (map :name)
+    (distinct)))
 
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
@@ -183,6 +185,9 @@
                 (last))]
     (ts->iso-8601-date ts)))
 
+(defn- get-jattopvm [application]
+  (ts->iso-8601-date (:submitted application)))
+
 (defn- get-usages [{:keys [documents]} op-ids]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
@@ -216,7 +221,7 @@
 (defn- foremen [application]
   (if (ss/blank? (:foreman application))
     (when-let [foremen (->> (foreman/get-linked-foreman-applications-by-id (:id application))
-                            (map foreman/get-foreman-documents)
+                            (map foreman/get-foreman-document)
                             (map #(person-name (:data %)))
                             seq)]
       (string/join ", " foremen))
@@ -254,6 +259,7 @@
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
                        :paatospvm             (get-paatospvm application)
+                       :jattopvm              (get-jattopvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (util/find-first :general handlers) [:userId :firstName :lastName])

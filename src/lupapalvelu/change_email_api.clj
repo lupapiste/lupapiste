@@ -51,8 +51,7 @@
     (-> (if (and (ss/not-blank? (:personIdSource user)) (ss/not-blank? (:personId user)))
           user
           (usr/get-user-by-id! user-id))
-        usr/verified-person-id?
-        not)
+        usr/verified-person-id?)
     false))
 
 (defn- validate-has-verified-person-id [{user :user}]

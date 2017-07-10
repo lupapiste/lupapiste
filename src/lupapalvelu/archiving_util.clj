@@ -26,6 +26,7 @@
         post-verdict-query {:_id id
                             ; Look for any attachments that have versions, are not yet arcvhived, but need to be
                             $or  [{:archived.completed {$ne nil}}
+                                  {:tosFunction nil}
                                   {:attachments {$elemMatch (merge {:versions {$gt []}}
                                                                    attachment-or-app-md)}}
                                   ; Check if the application itself is not yet archived, but needs to be

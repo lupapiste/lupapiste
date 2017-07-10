@@ -54,6 +54,7 @@
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
+  var partiesModel = new LUPAPISTE.PartiesModel();
 
   var authorities = lupapisteApp.services.handlerService.applicationAuthorities;
 
@@ -223,6 +224,9 @@
       // Verdict details
       verdictModel.refresh(app);
 
+      // Parties model
+      partiesModel.refresh(app);
+
       // Map
       mapModel.refresh(app);
 
@@ -271,7 +275,8 @@
                                 app,
                                 partyDocs,
                                 {dataTestSpecifiers: devMode,
-                                 accordionCollapsed: collapseAccordion});
+                                 accordionCollapsed: collapseAccordion,
+                                 partiesModel: partiesModel});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
@@ -279,7 +284,8 @@
                                   app,
                                   applicationModel.summaryAvailable() ? [] : nonpartyDocs,
                                   {dataTestSpecifiers: devMode,
-                                   accordionCollapsed: collapseAccordion});
+                                   accordionCollapsed: collapseAccordion,
+                                   partiesModel: partiesModel});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -290,7 +296,8 @@
                                   app,
                                   applicationModel.summaryAvailable() ? uneditableDocs : [],
                                   {dataTestSpecifiers: devMode,
-                                   accordionCollapsed: collapseAccordion});
+                                   accordionCollapsed: collapseAccordion,
+                                   partiesModel: partiesModel});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }

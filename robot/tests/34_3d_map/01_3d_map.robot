@@ -33,10 +33,10 @@ Open 3D map button is visible for inforequest too
 
 Solita admin edits organization 753-R
   SolitaAdmin logs in
-  Click link  Organisaatiot
+  Go to page  organizations
   Fill test id  organization-search-term  753-r
   Scroll and click test id  organization-search
-  Scroll and Click test id  edit-organization-753-R   
+  Scroll and Click test id  edit-organization-753-R
 
 3D map server backend must be https
   Fill test id  3d-map-url  http://example.org
@@ -45,7 +45,7 @@ Solita admin edits organization 753-R
 
 Admin edits 3D maps
   Wait until  Checkbox should be selected  3d-map-enabled
-  Test id enabled  3d-map-send  
+  Test id enabled  3d-map-send
   Unselect checkbox  3d-map-enabled
   Test id disabled  3d-map-send
   [Teardown]  Logout
@@ -59,5 +59,3 @@ Pena logs in and no longer sees 3D map button in the application
   Open inforequest  ${infoname}  ${infoid}
   No such test id  open-3d-map
   [Teardown]  Logout
-
-

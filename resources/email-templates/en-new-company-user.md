@@ -2,7 +2,7 @@
 
 Your company has created a Company account at Lupapiste, which allows you to manage the company projects with a shared work queue. **{{company.name}}** -The company account administrator {{company-admin}} has added you as a Company account user at Lupapiste.
 
-Activate your account and set yourself a password with the link below:
+Join the company account and set yourself a password with the link below:
 
 {{link}}
 

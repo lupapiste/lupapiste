@@ -37,7 +37,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   };
 
   self.startStamping = function() {
-    hub.send("start-stamping", {application: appModel});
+    pageutil.openPage("stamping", appModel.id());
   };
 
   self.canStamp = function() {

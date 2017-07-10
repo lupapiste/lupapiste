@@ -58,7 +58,7 @@
                                              "data.henkilotiedot.hetu.value" foreman-hetu}}}
                     [:created :documents :municipality]))))
 
-(defn get-foreman-documents [foreman-application]
+(defn get-foreman-document [foreman-application]
   (domain/get-document-by-name foreman-application "tyonjohtaja-v2"))
 
 (defn get-foreman-project-applications
@@ -70,7 +70,7 @@
         foreman-app-ids (map :id foreman-apps)
         links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
-    (mongo/select :applications {:_id {$in linked-app-ids}} [:documents :address :primaryOperation])))
+    (mongo/select :applications {$and [{:_id {$in linked-app-ids}} {:state {$ne :closed}}]} [:documents :address :primaryOperation])))
 
 (defn- get-linked-app-operations [foreman-app-id link]
   (let [other-id  (first (remove #{foreman-app-id} (:link link)))]
@@ -217,8 +217,23 @@
       (assoc-in [:schema-info :name]  schema-name)
       (assoc-in [:data :henkilo :userId] {:value nil}))))
 
+;; imported previous permit applications do not have a hankkeen-kuvaus -document
+;; and have the description in the first aiemman-luvan-toimenpide -document
+(defn get-application-description [application]
+  (let 
+    [description 
+      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") 
+        first 
+        (get-in [:data :kuvaus :value]))]
+    (if (and description (not (= description "")))
+      description
+      (or
+        (-> (domain/get-document-by-name (:documents application) "aiemman-luvan-toimenpide") 
+         (get-in [:data :kuvaus :value]))
+        ""))))
+
 (defn update-foreman-docs [foreman-app application role]
-  (let [hankkeen-kuvaus      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") first (get-in [:data :kuvaus :value]))
+  (let [hankkeen-kuvaus      (get-application-description application)
         hankkeen-kuvaus-doc  (first (domain/get-documents-by-subtype (:documents foreman-app) "hankkeen-kuvaus"))
         hankkeen-kuvaus-doc  (if hankkeen-kuvaus
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)

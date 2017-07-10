@@ -66,12 +66,14 @@
   ":kiinteistotieto and :maaraAlatieto sequences for given properties.
   Properties are property-details results."
   [properties]
-  (defn safe-conj [coll pred x]
+  
+  (letfn [(safe-conj [coll pred x]
     (if pred
       (let [coll (or coll [])]
         (conj coll x))
-      coll))
-  (reduce (fn [acc p]
+      coll))]
+  
+    (reduce (fn [acc p]
             (let [{:keys [kiinteistotieto maaraAlatieto]} acc
                   {:keys [property-id mat]} p
                   kt (safe-conj kiinteistotieto
@@ -82,7 +84,7 @@
                                {:MaaraAla {:maaraAlatunnus mat}})]
               (merge acc {:kiinteistotieto kt :maaraAlatieto m})))
           {}
-          properties))
+          properties)))
 
 (defn rt-details
   "All the rasitetoimitus operations are combined into one Rasitetoimitus,

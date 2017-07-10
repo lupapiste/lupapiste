@@ -11,21 +11,21 @@
             <span data-bind =" ltext: 'application.return'"></span>
           </a>
         </div>
-        <div class="attachment-multiselect-content" data-bind="if: stampingMode">
+        <div class="attachment-multiselect-content" data-bind="if: stampingMode() && selectedStampId()">
           <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
           <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stamps: stamps, selectedStampId: selectedStampId}}"></div>
         </div>
       </div>
 
       <script type="text/x-jquery-tmpl" id="stamp-attachments-template">
-       <div data-bind="visible: !selectedStamp()" data-test-id="stamp-templates-missing" class="row">
-          <h2 data-bind="ltext: 'stamp.templates.missing.title'"></h2>
-          <div class="info-line like-btn">
-              <i class="lupicon-circle-attention"></i>
-              <span data-bind="ltext: 'stamp.templates.missing.guide'"></span>
-          </div>
-          <div class="col-4"><br></div>
-       </div>
+         <div data-bind="visible: !selectedStamp()" data-test-id="stamp-templates-missing" class="row">
+            <h2 data-bind="ltext: 'stamp.templates.missing.title'"></h2>
+            <div class="info-line like-btn">
+                <i class="lupicon-circle-attention"></i>
+                <span data-bind="ltext: 'stamp.templates.missing.guide'"></span>
+            </div>
+            <div class="col-4"><br></div>
+         </div>
 
         <div class="stamp-info-container form-grid" data-bind="visible: selectedStamp()">
           <form id="stamp-info">
@@ -265,7 +265,7 @@
           <button data-bind="
               ltext: 'stamp.reset',
               visible: status() > statusRunning,
-              click: $parent.resetStamping"
+              click: stampAgain"
             class="positive close"
             data-test-id="stamp-reset">
           </button>
@@ -324,16 +324,11 @@
                 <attachment-type-id params="attachment: $data"></attachment-type-id>
                   <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
               </td>
-              <td class="attachment-file-info">
-                <span data-bind="if: $data.latestVersion">
-                  <a href="#" data-bind="text: latestVersion.filename,
-                                         attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId(),
-                                                title: loc('download')},
-                                         click: function() {return true;},
-                                         clickBubble: false"></a><br/>
-                  <i data-bind="ltext: latestVersion.contentType"></i>
-                  <i data-bind="size: latestVersion.size"></i>
-                </span>
+              <td class="attachment-file-info view-with-download">
+                <!-- ko if: $data.latestVersion -->
+                  <a data-bind="fileLink: latestVersion, click: _.constant(true), clickBubble: false"></a>
+                  <div data-bind="downloadWithIcon: latestVersion, click: _.constant(true), clickBubble: false"></div>
+                <!-- /ko -->
                 <!-- ko ifnot: $data.latestVersion -->
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 <!-- /ko -->

@@ -2,7 +2,9 @@
 <html>
   <body>
     <section class="page" id="operations" >
-      <div class="container">
+      <navi-sidebar></navi-sidebar>
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
         <section>
           <h2 data-bind="ltext: 'auth-admin.selected-operations'"></h2>
           <table data-test-id="organization-selected-operations"
@@ -24,7 +26,7 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: operations">
-              <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
+              <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">
                 <td data-bind="text: text"></td>
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
                 <td class="sot--center">

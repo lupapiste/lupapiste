@@ -2,7 +2,9 @@
 <html>
   <body>
     <section class="page" id="screenmessages">
-      <div class="container">
+      <navi-sidebar></navi-sidebar>
+      <div class="container container--authority-admin"
+           data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
           <h2 data-bind="ltext: 'admin.screenmessages.list-title'"></h2>
 
           <table class="table table-striped tablesorter" data-test-id="test-screenmessages-table">
