@@ -40,7 +40,8 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-calendar",
                       page: "organization-calendars",
                       loc: "auth-admin.organization-calendars",
-                      showIf: lupapisteApp.models.globalAuthModel.ok("calendars-enabled"),
+                      showIf: lupapisteApp.models.globalAuthModel
+                              .ok("calendars-enabled"),
                       feature: "ajanvaraus"}],
     admin: [{icon: "lupicon-download",
              page: "admin",
@@ -89,15 +90,14 @@ LUPAPISTE.NaviSidebarService = function() {
 
   self.menuCss = ko.computed( function ()  {
     var menu = self.showMenu();
-    return {"lupicon-menu": !menu,
-            "lupicon-remove": menu,
+    return {"lupicon-menu": animate() ? animate() === "lupicon-menu" : !menu,
+            "lupicon-remove": animate() ? animate() === "lupicon-remove" : menu,
             "spin-once": animate()};
   } );
 
   self.menuLoc = ko.pureComputed( function() {
     return self.showMenu() ? "close" : "navi-sidebar.menu";
   });
-
 
   ko.computed( function() {
     if( self.iconsOnly() && self.showMenu()) {
@@ -107,9 +107,10 @@ LUPAPISTE.NaviSidebarService = function() {
 
   // By adding and removing animation (see menuCss), we make sure that
   // it runs every time the menu is toggled.
-  self.showMenu.subscribe( function() {
-    animate( true );
+  self.showMenu.subscribe( function( flag ) {
+    animate(flag ? "lupicon-menu" : "lupicon-remove" );
     _.delay( _.wrap( false, animate), 600);
+    _.delay( _.wrap( flag ?  "lupicon-remove" : "lupicon-menu", animate), 300);
   });
 
   function close() {

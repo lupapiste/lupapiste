@@ -1628,6 +1628,11 @@ Test id visible
   [Arguments]  ${id}
   Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
+Click visible test id
+  [Arguments]  ${id}
+  Test id visible  ${id}
+  Click element  jquery=[data-test-id=${id}]:visible
+
 Click label
   [Arguments]  ${for}
   Scroll to  label[for=${for}]
