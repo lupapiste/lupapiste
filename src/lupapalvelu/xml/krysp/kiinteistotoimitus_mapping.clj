@@ -67,13 +67,16 @@
   Toimitushakemus. Thus, we need to add (the same) application
   attachments to every operative document."
   [canon attachments]
-  (defn binder [[k xs]]
-    {k (map #(assoc-in % [:toimitushakemustieto :Toimitushakemus :liitetieto] attachments) xs)})
-  (if attachments
-    (let [m (-> canon :Kiinteistotoimitus :featureMembers)
-          attached (reduce #(conj %1 (binder %2)) {} m)]
-      (assoc-in canon [:Kiinteistotoimitus :featureMembers] attached))
-    canon))
+  (letfn [(binder [[k xs]]
+            {k (map #(assoc-in % 
+                               [:toimitushakemustieto :Toimitushakemus :liitetieto] 
+                               attachments) 
+                    xs)})] 
+    (if attachments
+      (let [m (-> canon :Kiinteistotoimitus :featureMembers)
+            attached (reduce #(conj %1 (binder %2)) {} m)]
+        (assoc-in canon [:Kiinteistotoimitus :featureMembers] attached))
+      canon)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of

@@ -44,7 +44,7 @@
       nil
     (re-matches #"^[1-9][0-9]*$" v) ;; n>0
       (let [given (util/->int v 0)
-            current (+ 1900 (.getYear (java.util.Date.)))]
+            current (.getValue (java.time.Year/now))]
         (cond
           (> given current)
             [:warn "illegal-recent-year:future"]

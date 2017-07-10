@@ -12,9 +12,10 @@
 
 (defmulti waste-ads (fn [org-id & [fmt lang]] fmt))
 
-(defn- waste-ads-from-mongo [org-id]
+(defn- waste-ads-from-mongo 
   "Get ads that contain construction waste reports, have some materials available and something
    in the contact field. Returns ads that have only relevant fields."
+  [org-id]
   (mongo/select
     :applications
     {:organization (if (ss/blank? org-id)

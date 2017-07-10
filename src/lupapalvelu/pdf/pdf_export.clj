@@ -577,12 +577,11 @@
         ~@(map (child-renderer child-type) child-data)])))
 
 (defn generate-pdf-with-child
+  "5 parameters version generates PDF from given child type (Statement, Verdict (todo), Document) to given ByteArrayInputStream (out).
+   4 parameter version returns PDF ByteArrayInputStream of given application child (Document, Statemtn, Verdict)"
   ([app child-type id lang out]
-   "Generates PDF from given child type (Statement, Verdict (todo), Document) to given ByteArrayInputStream (out). "
    (pdf/pdf (generate-pdf-data-with-child app child-type id lang), out))
-
   ([app child-type id lang]
-   "Returns PDF ByteArrayInputStream of given application child (Document, Statemtn, Verdict)"
    (let [out (ByteArrayOutputStream.)]
      (generate-pdf-with-child app child-type id lang out)
      (ByteArrayInputStream. (.toByteArray out)))))

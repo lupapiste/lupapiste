@@ -139,10 +139,12 @@
                 (state-update-fn :valmis application now id))))))))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-ids]
-  (cond->> (concat [primaryOperation] secondaryOperations)
-           (seq op-ids) (filter (comp (set op-ids) :id))
-           true (map :name)
-           true (distinct)))
+  (->> 
+    (cond->> 
+      (concat [primaryOperation] secondaryOperations)
+      (seq op-ids) (filter (comp (set op-ids) :id)))
+    (map :name)
+    (distinct)))
 
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
