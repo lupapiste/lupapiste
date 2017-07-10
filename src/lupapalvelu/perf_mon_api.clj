@@ -4,17 +4,16 @@
             [noir.response :as resp]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defcommand] :as action]
             [lupapalvelu.perf-mon :as perf])
-  (:import (com.mongodb WriteConcern)))
+  (:import (com.mongodb WriteConcern)
+           (java.util Date)))
 
 (defpage "/perfmon/data" {:keys [start end]}
   (let [now-ts (now)]
-    (->> (perf/get-data (tc/from-long (or (perf/to-long start) (- now-ts (* 60 60 1000))))
-                        (tc/from-long (or (perf/to-long end) now-ts)))
+    (->> (perf/get-data (Date. (or (perf/to-long start) (- now-ts (* 60 60 1000))))
+                        (Date. (or (perf/to-long end) now-ts)))
          (resp/json)
          (resp/status 200))))
 
@@ -35,7 +34,7 @@
   [command]
   (info "browser-timing called from" pathname)
   (let [ua (ss/limit (get-in command [:web :user-agent]) 256)
-        ts (t/now)
+        ts (java.util.Date.)
         timing-events (->
                         (into {} (filter (fn [[k v]] (number? v)) timing))
                         (select-keys [:navigationStart
