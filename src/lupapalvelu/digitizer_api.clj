@@ -2,7 +2,7 @@
   (:require [lupapalvelu.digitizer :as d]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
-            [lupapalvelu.action :as action :refer [defcommand]]
+            [lupapalvelu.action :as action :refer [defcommand defquery]]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [monger.operators :refer :all]
@@ -55,3 +55,12 @@
                                      :modified  created
                                      :opened    (:opened application)}
                               $push {:history (app/history-entry :underReview created user)}}))
+
+(defquery user-is-pure-digitizer
+  {:user-roles #{:authority}
+   :pre-checks [(fn [{{org-authz :orgAuthz} :user}]
+                  (let [all-roles (apply set/union (vals org-authz))]
+                    (when (or (not (all-roles :digitizer))
+                              (all-roles :authority))
+                      unauthorized)))]}
+  (ok))
