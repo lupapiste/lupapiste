@@ -517,6 +517,7 @@
 "error.no-previous-permit-found-from-backend" "en" "No permit could be found in the background system using the given permit code"
 "error.no-previous-permit-found-from-backend" "fi" "Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä"
 "error.no-previous-permit-found-from-backend" "sv" "Inget tillstånd hittades i bakgrundssystemet med givna tillståndsbeteckning."
+"error.no-buildings-found-from-backend" "fi" "Taustajärjestelmästä ei löytynyt rakennustietoja kiinteistötunnukselle. Haluatko varmasti digitoida luvan ilman rakennustietoja?"
 "error.no-proper-applicants-found-from-previous-permit" "en" "Details of the permit's applicants contain incomplete information"
 "error.no-proper-applicants-found-from-previous-permit" "fi" "Noudettavalla luvalla olevien hakijoiden tiedot ovat puutteelliset tiedot"
 "error.no-proper-applicants-found-from-previous-permit" "sv" "Bristfälliga personuppgifter i tidigare lov"

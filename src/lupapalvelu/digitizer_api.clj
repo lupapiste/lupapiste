@@ -23,7 +23,7 @@
       unauthorized)))
 
 (defcommand create-archiving-project
-            {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway]
+            {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus createAnyway createWithoutBuildings]
              :user-roles       #{:authority}
              :input-validators [(partial action/non-blank-parameters [:lang :organizationId]) ;; no :address included
                                 ;; the propertyId parameter can be nil

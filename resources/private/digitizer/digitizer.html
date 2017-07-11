@@ -50,7 +50,7 @@
     </div>
 
     <div data-bind="ifnot: permitNotFound">
-      <button data-bind="click: function() { createArchivingProject(false); },
+      <button data-bind="click: function() { createArchivingProject(false, false); },
                          enable: creatingAppWithPrevPermitOk,
                          css: {waiting: pending}"
               data-test-id="test-prev-permit-create-button" class="btn btn-primary">

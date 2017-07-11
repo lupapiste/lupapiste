@@ -10,7 +10,7 @@
 
     hub.subscribe("digitizing-location-selected", function() {
       hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
-      self.createArchivingProject(true);
+      self.createArchivingProject(true, false);
     });
 
     self.search = ko.observable("");
@@ -289,12 +289,25 @@
       return _.trim((self.kuntalupatunnusFromPrevPermit() || "" )).split(/\s+/).join( " ");
     }
 
-    self.createArchivingProject = function(manually) {
+    function buildingsNotFoundHandler(response) {
+      console.log(response);
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc(response.text),
+        {
+          title: loc("yes"),
+          fn: function() {
+            self.createArchivingProject(true, true);
+          }});
+    }
+
+    self.createArchivingProject = function(createWithoutPrevPermit, createWithoutBuildings) {
       var params = self.locationModel.toJS();
       params.lang = loc.getCurrentLanguage();
       params.organizationId = self.selectedPrevPermitOrganization();
       params.kuntalupatunnus = trimBackendId();
-      params.createAnyway = manually;
+      params.createAnyway = createWithoutPrevPermit;
+      params.createWithoutBuildings = createWithoutBuildings;
 
       ajax.command("create-archiving-project", params)
         .processing(self.processing)
@@ -310,6 +323,8 @@
             } else {
               self.needMorePrevPermitInfo(true);
             }
+          } else if (d.buildingsNotFound) {
+            buildingsNotFoundHandler(d);
           } else if (d.permitNotFound) {
             self.permitNotFound(true);
             self.locationModel.clearMap();

@@ -170,7 +170,7 @@
       rakennuspaikka-exists?                             (:rakennuspaikka app-info)
       (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
 
-(defn fetch-or-create-archiving-project! [{{:keys [organizationId kuntalupatunnus createAnyway]} :data :as command}]
+(defn fetch-or-create-archiving-project! [{{:keys [organizationId kuntalupatunnus createAnyway createWithoutBuildings]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
@@ -180,20 +180,22 @@
         organization      (when propertyId
                             (organization/resolve-organization (p/municipality-id-by-property-id propertyId) permit-type))
         building-xml      (if app-info xml (fetch-building-xml organizationId permit-type propertyId))
-        buildings-and-structures (or (when app-info (building-reader/->buildings-and-structures xml))
-                                     (buildings-for-documents building-xml))
+        bldgs-and-structs (or (when app-info (building-reader/->buildings-and-structures xml))
+                              (buildings-for-documents building-xml))
         organizations-match?  (= organizationId (:id organization))]
     (cond
       (and (empty? app-info)
-           (not createAnyway))          (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
-      (not location-info)               (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
-      (not (:propertyId location-info)) (fail :error.previous-permit-no-propertyid)
-      (not organizations-match?)        (fail :error.previous-permit-found-from-backend-is-of-different-organization)
-      :else                             (let [{id :id} (do-create-application-from-previous-permit command
-                                                                                                   operation
-                                                                                                   buildings-and-structures
-                                                                                                   app-info
-                                                                                                   location-info
-                                                                                                   permit-type
-                                                                                                   building-xml)]
-                                          (ok :id id)))))
+           (not createAnyway))           (fail :error.no-previous-permit-found-from-backend :permitNotFound true)
+      (not location-info)                (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      (not (:propertyId location-info))  (fail :error.previous-permit-no-propertyid)
+      (not organizations-match?)         (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+      (and (empty? bldgs-and-structs)
+           (not createWithoutBuildings)) (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
+      :else                              (let [{id :id} (do-create-application-from-previous-permit command
+                                                                                                    operation
+                                                                                                    bldgs-and-structs
+                                                                                                    app-info
+                                                                                                    location-info
+                                                                                                    permit-type
+                                                                                                    building-xml)]
+                                           (ok :id id)))))
