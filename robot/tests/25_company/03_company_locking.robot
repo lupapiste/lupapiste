@@ -128,29 +128,17 @@ Kaino cannot login
   Go to login page
   Login fails  kaino@solita.fi  kaino123
 
-Kaino can login after password reset
-  Reset password  kaino@solita.fi  kaino456
-  Kaino logs in  kaino456
-
-Kaino is no longer a company user
-  Not company user
-  [Teardown]  Logout
+Kaino cannot reset password
+  Cannot reset password  kaino@solita.fi
 
 # -------------------
 # (former) Company user
 # -------------------
-Pena cannot login
+Pena can login but is no longer company user
   Go to login page
-  Login fails  pena  pena
-
-Pena can login after password reset
-  Reset password  pena@example.com  pena7890
-  Applicant logs in  pena  pena7890  Pena Panaani
-
-Pena is no longer a company user
+  Pena logs in
   Not company user
   [Teardown]  Logout
-
 
 
 *** Keywords ***
@@ -201,3 +189,10 @@ Reset password
   Click button  jquery=button.btn-primary:visible
   Wait until  Element should be visible  jquery=button.btn-dialog
   Click button  jquery=button.btn-dialog
+
+Cannot reset password
+  [Arguments]  ${email}
+  Click link  jquery=div.passwd-reset a
+  Input text with jQuery  input.form-input:visible  ${email}
+  Scroll and click test id  reset-send
+  Wait until  Page should contain  Antamaasi sähköpostiosoitetta ei löydy järjestelmästä.

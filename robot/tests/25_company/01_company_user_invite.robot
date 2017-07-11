@@ -84,7 +84,7 @@ Delete Duff3
   Wait until  Page should not contain  dummy3@example.com
 
 Invite Duff3 again
-  Invite existing user  dummy3@example.com  Duff3  Dummy3
+  Invite existing dummy user  dummy3@example.com  Duff3  Dummy3  False  True  True
 
 Duff3 user gets invite email again
   Open last email
@@ -153,7 +153,7 @@ Ulla sees herself as company admin
   Wait test id visible  company-user-delete-1
 
 Ulla invites Pena into company
-  Invite existing user  pena@example.com  Pena  Panaani  false  false
+  Invite existing user  pena@example.com  Pena  Panaani  False  False
   Check invitation  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei
   Logout
 
