@@ -124,8 +124,9 @@
                        :inspection-summary.templates.$.items    (split-into-template-items templateText)}}]
     (mongo/update-by-query :organizations query changes)))
 
-(defn delete-template [organizationId templateId]
+(defn delete-template 
   "Deletes the template and removes all references to it from the operations-templates mapping"
+  [organizationId templateId]
   (let [current-settings    (settings-for-organization organizationId)
         operations-to-unset (util/filter-map-by-val #{templateId} (:operations-templates current-settings))
         operations-to-unset (util/map-keys (partial util/kw-path :inspection-summary :operations-templates) operations-to-unset)]

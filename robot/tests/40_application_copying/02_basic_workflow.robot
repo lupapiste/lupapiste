@@ -56,5 +56,5 @@ Mikko is invited to the copied Application
 
 Mikko receives invitation email to the copied Application
   Open last email
-  Wait until  Page should contain  Sinut halutaan valtuuttaa kirjoitusoikeudella osapuoleksi Lupapisteessä olevaan hankkeeseen käyttäen sähköpostiosoitetta mikko@example.com
+  Wait until  Page should contain  Sinut halutaan valtuuttaa kirjoitusoikeudella osapuoleksi Lupapisteessä olevaan hankkeeseen sähköpostiosoitteella mikko@example.com
   Click link  xpath=//a

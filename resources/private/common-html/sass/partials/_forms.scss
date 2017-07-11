@@ -634,6 +634,7 @@ input.form-input.inline {
 // Padding tweaks for special cases.
 .accordion-fields > .form-entry,
 .accordion-fields > .verdict-info-fields,
+.accordion-fields .personSelector,
 .accordion-fields > div p {
   padding: {
     left: $marginS;

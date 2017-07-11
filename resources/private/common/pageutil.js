@@ -124,6 +124,7 @@ var pageutil = (function($) {
     subPage:              subPage,
     lastSubPage:          lastSubPage,
     showAjaxWait:         showAjaxWait,
+    showAjaxWaitNow:      showAjaxWaitNow,
     hideAjaxWait:         hideAjaxWait,
     makePendingAjaxWait:  makePendingAjaxWait,
     openApplicationPage:  openApplicationPage,

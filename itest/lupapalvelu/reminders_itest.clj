@@ -321,7 +321,7 @@
           (check-sent-reminder-email
             (-> statement-matching :person :email)
             "Lupapiste: Naapurikuja 3, Sipoo - muistutus lausuntopyynn\u00f6st\u00e4"
-            ["muistuttelemme" "sinulta on pyydetty lausuntoa"]
+            ["Muistutus" "sinulta on pyydetty lausuntoa"]
             (:id reminder-application) "authority"))))
 
     (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -343,7 +343,7 @@
         (check-sent-reminder-email
           (-> statement-matching :person :email)
           "Lupapiste: Naapurikuja 3, Sipoo - muistutus lausuntopyynn\u00f6st\u00e4"
-          ["muistuttelemme" "sinulta on pyydetty lausuntoa"]
+          ["Muistutus" "sinulta on pyydetty lausuntoa"]
           (:id reminder-application) "authority")))
 
     (fact "a fresh \"reminder-sent\" timestamp already exists -> no reminder is sent"
@@ -377,7 +377,7 @@
           (check-sent-reminder-email
             (-> statement-matching-duedate-passed :person :email)
             "Lupapiste: Naapurikuja 3, Sipoo - muistutus er\u00e4\u00e4ntyv\u00e4st\u00e4 lausuntopyynn\u00f6st\u00e4"
-            ["muistuttelemme" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+            ["Muistutus" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
             (:id reminder-application) "authority"))))
 
     (fact "the \"duedate-reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -399,7 +399,7 @@
         (check-sent-reminder-email
           (-> statement-matching-duedate-passed :person :email)
           "Lupapiste: Naapurikuja 3, Sipoo - muistutus er\u00e4\u00e4ntyv\u00e4st\u00e4 lausuntopyynn\u00f6st\u00e4"
-          ["muistuttelemme" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+          ["Muistutus" "sinulta on pyydetty lausuntoa" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
           (:id reminder-application) "authority")))
 
     (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
@@ -469,7 +469,7 @@
             (check-sent-reminder-email
               (->> neighbor-matching :status (filter #(= "email-sent" (:state %))) first :email)
               "Lupapiste: Naapurikuja 3, Sipoo - muistutus naapurin kuulemisesta"
-              ["Hei n," "muistuttelemme" "rajanaapurina teille on ilmoitettu"])))))
+              ["Hei n," "rajanaapurina sinulle on ilmoitettu"])))))
 
     (fact "a recent \"reminder-sent\" status already exists - no reminder is sent"
       (mongo/with-db db-name
@@ -527,7 +527,7 @@
             (check-sent-reminder-email
              "pena@example.com"
              "Lupapiste: Naapurikuja 3, Sipoo - onko hanke yh\u00e4 aktiivinen?"
-             ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
+             ["sinulla on Lupapiste-palvelussa aktiivinen" "lupahakemus"])))))
 
     (fact "the 'reminder-sent' timestamp already exists but is over 1 week old -> reminder is sent"
       (mongo/with-db db-name
@@ -542,7 +542,7 @@
           (check-sent-reminder-email
            "pena@example.com"
            "Lupapiste: Naapurikuja 3, Sipoo - onko hanke yh\u00e4 aktiivinen?"
-           ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
+           ["sinulla on Lupapiste-palvelussa aktiivinen" "lupahakemus"]))))
 
     (fact "the 'reminder-sent' timestamp already exists - no reminder is sent"
       (mongo/with-db db-name

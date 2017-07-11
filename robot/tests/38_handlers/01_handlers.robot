@@ -119,7 +119,7 @@ Sonja edits Käsittelijä
   Indicator should contain text  Tiedot tallennettu
 
 Sonja returns to the application and checks handlers
-  Click by test id  edit-handlers-back
+  Scroll and click test id  edit-handlers-back
   List handler is  0  Sibbo Ronja  Käsittelijä
   List handler is  1  Sibbo Sonja  Uusi
   No such test id  handler-2

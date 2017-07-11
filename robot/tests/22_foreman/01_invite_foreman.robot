@@ -53,7 +53,7 @@ Applicant cannot create foreman applications before verdict is given
 
 Applicant sets his info to the applicant document
   Click by test id  hakija-r_append_btn
-  Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Panaani Pena
+  Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@data-test-id="henkilo.userId"]  Panaani Pena
   Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
   Logout
 
@@ -247,7 +247,7 @@ Authority can view draft foreman application, but can't use commands
 
 ...on parties tab
   Open tab  parties
-  Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
+  Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//select[@data-test-id="henkilo.userId"]
   Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
 
 ...on attachments tab

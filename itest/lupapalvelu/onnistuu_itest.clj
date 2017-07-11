@@ -8,6 +8,8 @@
             [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
+; Reset emails
+(last-email)
 
 (defn get-process [process-id]
   (:process (query pena :find-sign-process :processId process-id)))
@@ -62,7 +64,7 @@
 
 (fact "cancel"
   (let [process-id (:id (init-sign))]
-    (command pena :cancel-sign :processId process-id)
+    (command pena :cancel-sign :processId process-id) => ok?
     (get-process-status process-id) => "cancelled"))
 
 (fact "cancel unknown"

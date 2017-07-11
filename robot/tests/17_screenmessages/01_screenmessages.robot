@@ -55,7 +55,7 @@ Verify fields of the screenmessages view
 
 Solita Admin goes to screen messages view of admin page
   SolitaAdmin logs in
-  Click link  Ennakkoilmoitukset
+  Go to page  screenmessages
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="test-screenmessages-table"]
   Verify fields of the screenmessages view
 

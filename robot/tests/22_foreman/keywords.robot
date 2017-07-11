@@ -31,7 +31,7 @@ Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
+  Wait until  jQuery should match X times  span[data-test-primary-operation-id=tyonjohtajan-nimeaminen-v2]:visible  1
 
 Open foreman accordions
   Open accordions  parties
@@ -67,9 +67,8 @@ Submit foreman base app
   Wait until  Primary operation is  kerrostalo-rivitalo
   Submit application
 
-
 Foreman accepts invitation and fills info
-  Wait until  Scroll and click test id  accept-invite-button
+  Wait until  Click visible test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
   Wait for jQuery
   Wait until  Scroll and click test id  fill-info-button
@@ -78,6 +77,7 @@ Foreman accepts invitation and fills info
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Open foreman application  ${index}
+  Test id visible  confirm-no
   Deny yes no dialog
   Sleep  1s
   Open tab  parties
@@ -101,8 +101,7 @@ Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Get role
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-  Reload page and kill dev-box
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
+  Wait until  Javascript?  $("span[data-test-id=application-id]").text() === "${appId}"
 
 Project application is open
   ${appId} =   Get From List  ${applicationIds}  0

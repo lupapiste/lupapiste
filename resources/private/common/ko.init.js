@@ -193,13 +193,18 @@
     }
   };
 
+  // Hide the inactive feature and emphasize an active one.
+  // Empty feature binding is safely ignored.
   ko.bindingHandlers.feature = {
     update: function( element, valueAccessor) {
-      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
-      if( features.enabled(value) ) {
-        $(element).addClass( "feature" );
-      } else {
-        $(element).remove();
+      var value = ko.utils.unwrapObservable( valueAccessor() );
+      if( value ) {
+        if( features.enabled(value) ) {
+          $(element).addClass( "feature" );
+        }
+        else {
+          $(element).remove();
+        }
       }
     }
   };
@@ -651,8 +656,9 @@
     init: function(element, valueAccessor) {
       var value = valueAccessor();
 
-      ko.utils.registerEventHandler(element, "click", function() {
+      ko.utils.registerEventHandler(element, "click", function( e ) {
         value(!value());
+        e.stopPropagation();
       });
     }
   };

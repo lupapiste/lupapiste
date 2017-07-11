@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation  Authority admin edits municipality links
+Documentation  Authority filter applications by operation
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
@@ -43,7 +43,8 @@ Sonja selects the Asuinkerrostalo operation and sees only that application
 
 Sonja selects Asuinkerrostalo and Katulupa operations and sees only those applications
   #Select from autocomplete by test id  operations-filter-component  Asuinkerrostalon tai rivitalon rakentaminen
-  # Asuinkerrostalo already selected in previous test
+  # Asuinkerrostalo already selected in the previous test
+  Scroll to test id  operations-filter-component
   Autocomplete selectable values should not contain  div[@data-test-id="operations-filter-component"]  Asuinkerrostalon tai rivitalon rakentaminen
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]

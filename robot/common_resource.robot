@@ -520,10 +520,10 @@ Select From Autocomplete
 
   ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
   Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} div.autocomplete-selection-wrapper
-
+  Scroll by  400
   Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
   Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
-  Scroll and click  ${container} ul.autocomplete-result li span:contains('${value}')
+  Click element  jquery=${container} ul.autocomplete-result li span:contains('${value}')
   Wait until  Element should not be visible  jquery=${container} ul.autocomplete-result
   Wait for jQuery
 
@@ -812,6 +812,8 @@ Upload batch file
   Choose file  jquery=input[data-test-id=${testId}]  ${path}
   Hide file input  input[data-test-id=${testId}]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Wait test id visible  batch-ready
+  Scroll to bottom
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   ${group-is-selected}=  Run Keyword and Return Status  Autocomplete selection by test id contains  batch-grouping-${index}  ${grouping}
@@ -831,7 +833,7 @@ Upload attachment
   Test id visible  add-attachments-label
   Scroll to top
   Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
-  Click enabled by test id  batch-ready
+  Scroll and click test id  batch-ready
   Wait until  No such test id  batch-ready
 
 Add attachment
@@ -1300,16 +1302,13 @@ Permit type should be
 
 Application address should be
   [Arguments]  ${address}
-  ${a} =  Convert To Uppercase  ${address}
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
-  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${a}
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${address}
 
 Neighbor application address should be
   [Arguments]  ${address}
-  ${a} =  Convert To Uppercase  ${address}
   Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
-  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${a}
-
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${address}
 
 #
 # Proxy control:
@@ -1625,6 +1624,11 @@ Javascript?
 Test id visible
   [Arguments]  ${id}
   Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
+
+Click visible test id
+  [Arguments]  ${id}
+  Test id visible  ${id}
+  Click element  jquery=[data-test-id=${id}]:visible
 
 Click label
   [Arguments]  ${for}

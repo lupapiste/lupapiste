@@ -27,8 +27,9 @@
     :text/plain})
 
 
-(defn libreoffice-conversion-required? [{:keys [filename]}]
+(defn libreoffice-conversion-required? 
   "Check if libre office conversion is required for given filename."
+  [{:keys [filename]}]
   (boolean (and (libre-conversion/enabled?)
                 (libre-conversion-file-types (-> filename
                                                  mime/sanitize-filename

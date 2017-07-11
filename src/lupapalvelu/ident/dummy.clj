@@ -15,6 +15,8 @@
 
 (defn session-id [] (get-in (request/ring-request) [:session :id]))
 
+(def dummy-person-id "010101-123N")
+
 (env/in-dev
   (defpage [:get "/dev/saml/init-login"] {:keys [success error cancel]}
     (let [sessionid (session-id)
@@ -49,7 +51,7 @@
                                   [:tr [:td "Hetu: "]
                                    [:td [:input {:name "userid"
                                                  :data-test-id "dummy-login-userid"
-                                                 :value "010101-123N"}]]]
+                                                 :value dummy-person-id}]]]
                                   [:tr [:td "Katuosoite: "
                                         [:td (form/text-field :street "Testikatu 23")]]]
                                   [:tr [:td "Postinumero: "]
