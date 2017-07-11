@@ -62,7 +62,7 @@
   (ok))
 
 (defquery permanent-archive-enabled
-  {:user-roles #{:applicant :authority}
+  {:user-roles #{:applicant :authority :authorityAdmin}
    :categories #{:attachments}
    :pre-checks [validate-permanent-archive-enabled]}
   [_])

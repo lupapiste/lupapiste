@@ -11,10 +11,9 @@
             [schema.core :as s]
             [taoensso.timbre :as timbre]
             [lupapiste-commons.schema-utils :as schema-utils]
-            [lupapalvelu.attachment-api :as aa]
             [lupapalvelu.application :as a]
-            [lupapalvelu.archiving-api :as archiving-api]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapiste-commons.operations :as operations]))
 
 (defn- target-is-not-archived [target-type {{attachment-id :attachmentId} :data {:keys [metadata processMetadata attachments]} :application}]
   (let [md (case target-type
@@ -34,7 +33,7 @@
 (defn- store-function-code [operation function-code user]
   (let [orgId (user/authority-admins-organization-id user)
         organization (o/get-organization orgId)
-        operation-valid? (some #{operation} (:selected-operations organization))
+        operation-valid? (some #{operation} (concat (:selected-operations organization) (map name operations/archiving-project-operations)))
         code-valid? (some #{function-code} (map :code (t/available-tos-functions orgId)))]
     (if (and operation-valid? code-valid?)
       (do (o/update-organization orgId {$set {(str "operations-tos-functions." operation) function-code}})

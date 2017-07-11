@@ -141,7 +141,8 @@
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
-   (sc/optional-key :stamps) [stmp/StampTemplate]})
+   (sc/optional-key :stamps) [stmp/StampTemplate]
+   (sc/optional-key :archiving-project-tos-function) sc/Str})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
