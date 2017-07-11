@@ -353,7 +353,9 @@
                    body (get-in email [:body :plain])]
                email => truthy
                (:subject email) => (contains "Yritystilist\u00e4 poisto")
-               body => (contains #"Solita Oy Yritystilin.+on poistanut")))))
+               body => (contains #"Solita Oy Yritystilin.+on poistanut")
+               (fact "register link exists"
+                 body => (contains #"#!/register"))))))
        (fact "Unlock company"
              (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
        (fact "Locked pseudo-query fails"

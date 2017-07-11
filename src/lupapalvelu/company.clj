@@ -303,10 +303,14 @@
 ;; Deletion
 ;;
 
+(defn- register-link [lang]
+  (str (env/value :host) "/app/" lang "/applicant#!/register"))
+
 (notif/defemail :company-user-delete                        ; Only sent to dummy users, who are not yet authed via identification service
                 {:subject-key   "company-user-delete.subject"
                  :recipients-fn (fn [{:keys [result]}] [(:user result)])
-                 :model-fn      (fn [model _ _] (assoc model :company (get-in model [:result :company])))
+                 :model-fn      (fn [model _ _] (assoc model :company (get-in model [:result :company])
+                                                             :register-link (fn [lang] (register-link lang))))
                  :pred-fn       (fn [{:keys [result]}] (usr/dummy? (:user result)))})
 
 (def- verified-user-removal   {$unset {:company 1}})
