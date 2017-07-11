@@ -14944,6 +14944,10 @@ span.icon_clear:before {
   margin-bottom: 6px;
 }
 
+.application_summary h1 .address {
+  text-transform: none;
+}
+
 .application_summary .application-map-container {
   position: relative;
 }
