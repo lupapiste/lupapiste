@@ -3308,6 +3308,14 @@
                           :state {$ne "canceled"}}
                          {$set {:archived.application nil}}))
 
+(defmigration disable-orphaned-company-users-v2             ; run again for LPK-3034
+  {:apply-when (pos? (mongo/count :users orphaned-company-users-query))}
+  (mongo/update :users
+                orphaned-company-users-query
+                {$set {:enabled false :role :dummy}
+                 $unset {:private ""}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

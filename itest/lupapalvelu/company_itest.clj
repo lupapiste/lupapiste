@@ -1,12 +1,16 @@
 (ns lupapalvelu.company-itest
-  (:require [midje.sweet  :refer :all]
+  (:require [midje.sweet :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :as vetuma]
+            [lupapalvelu.dummy-ident-itest-util :refer :all]
+            [lupapalvelu.ident.dummy :as dummy]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [cheshire.core :as json]
             [clojure.string :refer [index-of]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [ring.util.codec :as codec]))
 
 (apply-remote-minimal)
 
@@ -200,11 +204,32 @@
 
     (fact "When company has max count of users, new member can't be invited"
       (command kaino :company-invite-user :email "pena@example.com" :admin false :submit true) => (partial expected-failure? "error.company-user-limit-exceeded"))))
+; Reset
+(last-email)
 
-(fact "Kaino deletes Teppo from company"
-      (command kaino :company-user-delete :user-id teppo-id) => ok?)
-(fact "Teppo is no longer in the company"
-      (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "applicant"))
+(facts "Identified user deletion"
+  (fact "Before kickban, Teppo sees company application"
+    (let [apps (-> (datatables teppo :applications-search :searchText "")
+                   (get-in [:data :applications]))]
+      (count apps) => 2
+      (map :applicant apps) => (just "Nieminen Teppo" "Intonen Mikko")))
+
+  (fact "Kaino deletes Teppo from company"
+    (command kaino :company-user-delete :user-id teppo-id) => ok?
+    (fact "Teppo is NOT notified via email"
+      (last-email) => nil))
+
+  (fact "Teppo is no longer in the company and has dummy role"
+    (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "applicant"))
+  (facts "Teppo is authed, he is not set to dummy"
+    (fact "Teppo can login"
+      (command teppo :login :username "teppo@example.com" :password "teppo69") => ok?)
+    teppo => (allowed? :reset-password)
+    (fact "Teppo can't no longer see company applications"
+      (let [apps (-> (datatables teppo :applications-search :searchText "")
+                     (get-in [:data :applications]))]
+        (count apps) => 1
+        (map :applicant apps) => (just "Nieminen Teppo")))))
 
 (facts "Authed dummy into company"
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
@@ -249,34 +274,38 @@
                            (str (server-address) "/api/query/user")
                            params)]
           (get-in user-query [:body :user]) => (contains {:company {:id "solita" :role "user" :submit true}
-                                 :email foo-email
-                                 :firstName "Foo"
-                                 :lastName "Bar"})))
+                                                          :email foo-email
+                                                          :role "applicant"
+                                                          :firstName "Foo"
+                                                          :lastName "Bar"})))
 
       (fact "Original invite is visible for foo"
         (let [invites (get-in (decoded-get
                                 (str (server-address) "/api/query/invites")
                                 params) [:body :invites])]
           (count invites) => 1
-          (get-in (first invites) [:application :id]) => application-id)))))
+          (get-in (first invites) [:application :id]) => application-id))
+
+      (fact "Foo can create application"
+        (:body
+          (http-post (str (server-address) "/api/command/create-application")
+                     (-> params
+                         (update :headers assoc "content-type" "application/json;charset=utf-8")
+                         (assoc :body (json/encode (merge create-app-default-args {:municipality "753"}))
+                                :as :json)))) => ok?)
+      (fact "Foo sees company applications"
+        (->> (http-post (str (server-address) "/api/datatables/applications-search")
+                        (-> params
+                            (update :headers assoc "content-type" "application/json;charset=utf-8")
+                            (assoc :body (json/encode {:searchText ""})
+                                   :as :json)))
+             :body :data :applications
+             (map :applicant)) => (just ["Nieminen Teppo" "Intonen Mikko" "Bar Foo" "Intonen Mikko"] :in-any-order)))))
 
 (def locked-err {:ok false :text "error.company-locked"})
 
 (fact "Company back to regular account"
       (command admin :company-update :company "solita" :updates {:accountType "account5"}) => ok?)
-(facts "Teppo back into shape"
-       (fact "Teppo cannot login"
-             (command teppo :login :username "kaino@solita.fi" :password "kaino123") => fail?)
-       (fact "Teppo resets password"
-             (http-post (str (server-address) "/api/reset-password")
-                        {:form-params      {:email "teppo@example.com"}
-                         :content-type     :json
-                         :follow-redirects false
-                         :throw-exceptions false})=> http200?)
-       (let [email (last-email)
-             token (token-from-email "teppo@example.com" email)]
-         (:subject email) => (contains "Uusi salasana")
-         (http-token-call token {:password "Teppo rules!"}) => (contains {:status 200})))
 
 (facts "Company locking"
        (fact "Admin locks Solita"
@@ -307,8 +336,26 @@
                         :user-id foo-id
                         :role "admin"
                         :submit false) => locked-err)
-         (fact "User can be deleted"
-               (command kaino :company-user-delete :user-id foo-id) => ok?))
+         (facts "Unverified user deletion"
+           (fact "User can be deleted"
+             (command kaino :company-user-delete :user-id foo-id) => ok?)
+           (fact "Unverified user is set to dummy-user"       ; LPK-3034
+             (query kaino :company-search-user :email "foo@example.com") => (result :found :firstName "Foo" :lastName "Bar" :role "dummy"))
+           (fact "Login not possible for dummy"
+             (let [{body :body :as login} (-> (str (server-address) "/api/login")
+                                              (http-post {:form-params {:username "foo@example.com" :password "foofaafoo"}
+                                                        :as :json}))]
+               body => fail?
+               (:text body) => "error.login"
+               login => http200?))
+           (fact "User is notified via email"
+             (let [email (last-email)
+                   body (get-in email [:body :plain])]
+               email => truthy
+               (:subject email) => (contains "Yritystilist\u00e4 poisto")
+               body => (contains #"Solita Oy Yritystilin.+on poistanut")
+               (fact "register link exists"
+                 body => (contains #"#!/register"))))))
        (fact "Unlock company"
              (command admin :company-lock :company "solita" :timestamp "unlock") => ok?)
        (fact "Locked pseudo-query fails"
@@ -354,20 +401,59 @@
                (command erkki :login :username "erkki@example.com" :password "esimerkki") => ok?))
        (fact "Kaino cannot login"
              (command kaino :login :username "kaino@solita.fi" :password "kaino123") => fail?)
-       (fact "Kaino resets password"
-             (http-post (str (server-address) "/api/reset-password")
-                        {:form-params      {:email "kaino@solita.fi"}
-                         :content-type     :json
-                         :follow-redirects false
-                         :throw-exceptions false})=> http200?)
-       (let [email (last-email)
-             token (token-from-email "kaino@solita.fi" email)]
-         (:subject email) => (contains "Uusi salasana")
-         (http-token-call token {:password "kaino456"}) => (contains {:status 200}))
-       (fact "Kaino can now login"
-             (command kaino :login :username "kaino@solita.fi" :password "kaino456") => ok?)
-       (fact "Kaino is no longer Solitan"
-             (query kaino :company :company "solita" :users true) => unauthorized?))
+       (fact "Kaino can't reset, he is now dummy"
+         (let [reset-result (:body (decoded-simple-post (str (server-address) "/api/reset-password")
+                                                        {:form-params      {:email "kaino@solita.fi"}
+                                                         :content-type     :json
+                                                         :follow-redirects false
+                                                         :throw-exceptions false}))]
+           reset-result =not=> ok?
+           (:text reset-result) => "error.email-not-found")))
+
+(facts "Return of the Foo"                                  ; Kickbanned from company, Foo can return via identification service. LPK-3034
+  (let [store (atom {})
+        params (vetuma/default-vetuma-params (->cookie-store store))
+        trid (dummy-ident-init params vetuma/default-token-query)
+        ident-finish (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)
+        vetuma-data (decode-body (http-get (str (server-address) "/api/vetuma/user") params))
+        stamp (:stamp vetuma-data)
+        person-id (:userid vetuma-data)
+        params (update params :headers assoc "x-anti-forgery-token" (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
+        old-details (first (:users (query admin :users :email "foo@example.com")))
+        reg-resp (vetuma/register params {:email "foo@example.com"
+                                          :stamp stamp
+                                          :password "foofoo123"
+                                          :street "Testikatu 3" :zip    "33500"
+                                          :city "Tre" :phone "123"
+                                          :allowDirectMarketing false :rakentajafi false})
+        email (last-email)
+        activate-url (first (re-find  #".+/app/security/activate/([a-zA-Z0-9]+)" (get-in email [:body :plain])))]
+    (fact "Before registering was disalbed"
+      (:enabled old-details) => false)
+    (fact "Vetuma data OK"
+      vetuma-data => (contains {:stamp string?
+                                :userid dummy/dummy-person-id}))
+    (fact "Registering OK"
+      reg-resp => ok?)
+    (fact "Got email"
+      (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
+    (fact "Can NOT log in before activation"
+      (login "foo@example.com" "foofoo" params) => (partial expected-failure? :error.login))
+    (fact "Activate"
+      (http-get activate-url {:follow-redirects false}) => http302?)
+    (fact "Can NOT log in yet"
+      (login "foo@example.com" "foofoo123" params) => ok?)
+    (fact "Is enabled"
+      (-> (query admin :users :email "foo@example.com")
+          :users first) => (contains {:enabled true}))
+    (fact "Foo still sees own application from company time, but no company applications"
+      (->> (http-post (str (server-address) "/api/datatables/applications-search")
+                      (-> params
+                          (update :headers assoc "content-type" "application/json;charset=utf-8")
+                          (assoc :body (json/encode {:searchText ""})
+                                 :as :json)))
+           :body :data :applications
+           (map :applicant)) => (just ["Intonen Mikko" "Bar Foo"] :in-any-order))))
 
 (apply-remote-minimal)
 

@@ -13,7 +13,8 @@
             [lupapalvelu.user :refer [get-user-by-id]]
             [lupapalvelu.idf.idf-api :refer :all]
             [lupapalvelu.idf.idf-client :refer :all]
-            [lupapalvelu.idf.idf-core :refer [calculate-mac]]))
+            [lupapalvelu.idf.idf-core :refer [calculate-mac]]
+            [lupapalvelu.ident.dummy :as dummy]))
 
 ;;
 ;; Helpers & fixture
@@ -95,7 +96,7 @@
                   trid (dummy-ident-init params default-token-query)]
               (fact "trid" trid =not=> ss/blank?)
               (fact "Redirect OK"
-                (dummy-ident-finish params trid) => (partial redirects-to (get-in default-token-query [:query-params :success])))
+                (dummy-ident-finish params {:personId dummy/dummy-person-id} trid) => (partial redirects-to (get-in default-token-query [:query-params :success])))
 
               (last-email)                                  ; Inbox zero
 
