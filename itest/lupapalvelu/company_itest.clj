@@ -1,12 +1,16 @@
 (ns lupapalvelu.company-itest
-  (:require [midje.sweet  :refer :all]
+  (:require [midje.sweet :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :as vetuma]
+            [lupapalvelu.dummy-ident-itest-util :refer :all]
+            [lupapalvelu.ident.dummy :as dummy]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [cheshire.core :as json]
             [clojure.string :refer [index-of]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [ring.util.codec :as codec]))
 
 (apply-remote-minimal)
 
@@ -270,16 +274,33 @@
                            (str (server-address) "/api/query/user")
                            params)]
           (get-in user-query [:body :user]) => (contains {:company {:id "solita" :role "user" :submit true}
-                                 :email foo-email
-                                 :firstName "Foo"
-                                 :lastName "Bar"})))
+                                                          :email foo-email
+                                                          :role "applicant"
+                                                          :firstName "Foo"
+                                                          :lastName "Bar"})))
 
       (fact "Original invite is visible for foo"
         (let [invites (get-in (decoded-get
                                 (str (server-address) "/api/query/invites")
                                 params) [:body :invites])]
           (count invites) => 1
-          (get-in (first invites) [:application :id]) => application-id)))))
+          (get-in (first invites) [:application :id]) => application-id))
+
+      (fact "Foo can create application"
+        (:body
+          (http-post (str (server-address) "/api/command/create-application")
+                     (-> params
+                         (update :headers assoc "content-type" "application/json;charset=utf-8")
+                         (assoc :body (json/encode (merge create-app-default-args {:municipality "753"}))
+                                :as :json)))) => ok?)
+      (fact "Foo sees company applications"
+        (->> (http-post (str (server-address) "/api/datatables/applications-search")
+                        (-> params
+                            (update :headers assoc "content-type" "application/json;charset=utf-8")
+                            (assoc :body (json/encode {:searchText ""})
+                                   :as :json)))
+             :body :data :applications
+             (map :applicant)) => (just ["Nieminen Teppo" "Intonen Mikko" "Bar Foo" "Intonen Mikko"] :in-any-order)))))
 
 (def locked-err {:ok false :text "error.company-locked"})
 
@@ -386,6 +407,51 @@
                                                          :throw-exceptions false}))]
            reset-result =not=> ok?
            (:text reset-result) => "error.email-not-found")))
+
+(facts "Return of the Foo"                                  ; Kickbanned from company, Foo can return via identification service. LPK-3034
+  (let [store (atom {})
+        params (vetuma/default-vetuma-params (->cookie-store store))
+        trid (dummy-ident-init params vetuma/default-token-query)
+        ident-finish (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)
+        vetuma-data (decode-body (http-get (str (server-address) "/api/vetuma/user") params))
+        stamp (:stamp vetuma-data)
+        person-id (:userid vetuma-data)
+        params (update params :headers assoc "x-anti-forgery-token" (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
+        old-details (first (:users (query admin :users :email "foo@example.com")))
+        reg-resp (vetuma/register params {:email "foo@example.com"
+                                          :stamp stamp
+                                          :password "foofoo123"
+                                          :street "Testikatu 3" :zip    "33500"
+                                          :city "Tre" :phone "123"
+                                          :allowDirectMarketing false :rakentajafi false})
+        email (last-email)
+        activate-url (first (re-find  #".+/app/security/activate/([a-zA-Z0-9]+)" (get-in email [:body :plain])))]
+    (fact "Before registering was disalbed"
+      (:enabled old-details) => false)
+    (fact "Vetuma data OK"
+      vetuma-data => (contains {:stamp string?
+                                :userid dummy/dummy-person-id}))
+    (fact "Registering OK"
+      reg-resp => ok?)
+    (fact "Got email"
+      (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!")
+    (fact "Can NOT log in before activation"
+      (login "foo@example.com" "foofoo" params) => (partial expected-failure? :error.login))
+    (fact "Activate"
+      (http-get activate-url {:follow-redirects false}) => http302?)
+    (fact "Can NOT log in yet"
+      (login "foo@example.com" "foofoo123" params) => ok?)
+    (fact "Is enabled"
+      (-> (query admin :users :email "foo@example.com")
+          :users first) => (contains {:enabled true}))
+    (fact "Foo still sees own application from company time, but no company applications"
+      (->> (http-post (str (server-address) "/api/datatables/applications-search")
+                      (-> params
+                          (update :headers assoc "content-type" "application/json;charset=utf-8")
+                          (assoc :body (json/encode {:searchText ""})
+                                 :as :json)))
+           :body :data :applications
+           (map :applicant)) => (just ["Intonen Mikko" "Bar Foo"] :in-any-order))))
 
 (apply-remote-minimal)
 
