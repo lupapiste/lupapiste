@@ -61,7 +61,7 @@
                               </div>
 
                               <!-- Submitted: -->
-                              <div>
+                              <div data-bind="ifnot: isArchivingProject">
                                 <p data-bind="ltext: 'application.submissionDate'"></p>
                                 <span data-bind="if: $data.submitted">
                                   <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
@@ -78,7 +78,9 @@
                               </div>
 
                               <!-- Authorities: -->
+                              <!-- ko ifnot: isArchivingProject -->
                               <div data-bind="component: 'handler-list'"></div>
+                              <!-- /ko -->
 
                               <!-- Operations: -->
                               <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
