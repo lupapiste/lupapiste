@@ -315,20 +315,18 @@
 
 (defn delete-user!
   "Removes user from company. If user is not yet identificated, role is set to dummy.
-   By default returns updated user for further processing."
-  ([user]
-    (delete-user! user true))
-  ([user return?]
-   (let [update-command (if (usr/verified-person-id? user)
-                          verified-user-removal
-                          unverified-user-removal)]
-     (if return?
-       (mongo/with-id (mongo/update-one-and-return :users {:_id (:id user)} update-command))
-       (mongo/update-by-id :users (:id user) update-command)))))
+   Returns updated user for further processing."
+  [user]
+  (->> (if (usr/verified-person-id? user)
+         verified-user-removal
+         unverified-user-removal)
+       (mongo/update-one-and-return :users {:_id (:id user)})
+       (mongo/with-id)
+       (usr/non-private)))
 
 (defn delete-every-user! [company-id]
   (->> (usr/find-users {:company.id company-id})
-       (run! #(delete-user! % false))))
+       (run! delete-user!)))
 
 (defn update-user! [user-id role submit]
   (mongo/update-by-id :users user-id {$set {:company.role role
