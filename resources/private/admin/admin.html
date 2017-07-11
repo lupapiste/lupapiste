@@ -6,8 +6,6 @@
       <div class="container container--authority-admin"
            data-bind="css: lupapisteApp.services.naviSidebarService.containerCss">
 
-        <h1>Admin</h1>
-
         <h2>Lataa xml taustaj&auml;rjestelm&auml;st&auml;</h2>
         <form action="/api/raw/admin-download-application-xml" method="get">
           <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
