@@ -315,7 +315,7 @@
 
 (def- verified-user-removal   {$unset {:company 1}})
 (def- unverified-user-removal {$set   {:role "dummy" :enabled false}
-                               $unset {:company 1, :private.password 1}})
+                               $unset {:company 1, :private 1}})
 
 (defn delete-user!
   "Removes user from company. If user is not yet identificated, role is set to dummy.
