@@ -970,6 +970,7 @@
 "applications.filter.verdict" "en" "Decisions"
 "applications.filter.verdict" "fi" "Päätökset"
 "applications.filter.verdict" "sv" "Beslut"
+"applications.filter.archivingProjects" "fi" "Digitoidut luvat"
 "applications.foreman-name" "en" "Supervisor"
 "applications.foreman-name" "fi" "Työnjohtaja"
 "applications.foreman-name" "sv" "Arbetsledare"

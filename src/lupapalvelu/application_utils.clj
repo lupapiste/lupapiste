@@ -5,7 +5,8 @@
             [sade.strings :as s]
             [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.permit :as permit]))
 
 
 (defn operation-description
@@ -18,11 +19,12 @@
       (i18n/localize lang "operations" primary-operation)
       "")))
 
-(defn with-application-kind [{:keys [permitSubtype infoRequest] :as app}]
+(defn with-application-kind [{:keys [permitSubtype infoRequest permitType] :as app}]
   (assoc app :kind (cond
                      infoRequest "applications.inforequest"
                      (not (ss/blank? permitSubtype))
                                  (str "permitSubtype." permitSubtype)
+                     (= permitType permit/ARK) "digitizedPermit"
                      :else       "applications.application")))
 
 (defn enrich-applications-with-organization-name [applications]

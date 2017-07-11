@@ -40,3 +40,4 @@
 "archivingProject.tabRequiredFieldSummary" "fi" "Yhteenveto"
 "archivingProject.tabRequiredFieldSummary" "sv" "Sammandrag"
 "archivingProject.tabRequiredFieldSummary" "en" "Summary"
+"digitizedPermit" "fi" "Digitoitu lupa"
