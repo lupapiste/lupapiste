@@ -7100,6 +7100,17 @@ input[type=text].textinput:focus {
   font-size: 16px;
 }
 
+.textinput.textinput--big--long {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  line-height: 1;
+  font-size: 16px;
+  display: inline-block;
+  width: 20em;
+  vertical-align: middle;
+}
+
 input.dateinput {
   padding: 0 12px;
   box-sizing: border-box;
@@ -16981,7 +16992,7 @@ td.comment-text {
   width: 22.5em;
 }
 
-form.organizations-search input.textinput {
+form.organizations-search input.textinput, form.xml-download input.textinput {
   display: inline-block;
   width: 20em;
   vertical-align: middle;

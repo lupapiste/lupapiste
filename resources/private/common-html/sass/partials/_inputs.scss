@@ -219,10 +219,21 @@ input[type=text].textinput {
   }
 }
 
-.textinput.textinput--big {
+@mixin textinputBig {
   @include btn-height;
   line-height: 1;
   font-size: $font-size;
+}
+
+.textinput.textinput--big {
+    @include textinputBig;
+}
+
+.textinput.textinput--big--long {
+    @include textinputBig;
+    display: inline-block;
+    width: 20em;
+    vertical-align: middle;
 }
 
 input.dateinput {
