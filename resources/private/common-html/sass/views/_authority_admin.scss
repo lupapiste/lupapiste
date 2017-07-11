@@ -236,6 +236,11 @@ body.authority-admin .nav-box {
   }
 }
 
+body.admin .header-menu,
+body.authority-admin .header-menu {
+  padding-right: 48px;
+}
+
 // Note on breakpoints: IE does not support display: initial.
 $navi-sidebar-bp: 1800px;
 
@@ -258,6 +263,7 @@ $navi-sidebar-bp: 1800px;
 }
 
 .container.container--authority-admin {
+  padding: 1px 48px 10px 48px;
   max-width: initial;
   width: initial;
   margin-left: $sidebar-button-width; // from buttons.scss
