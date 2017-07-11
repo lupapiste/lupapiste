@@ -120,6 +120,9 @@
 (defn decode-response [resp]
   (http/decode-response resp))
 
+(defn decode-body [resp]
+  (:body (decode-response resp)))
+
 (defn printed [x] (println x) x)
 
 ;;
@@ -236,14 +239,16 @@
   (let [resp (decode-response (http-get (str (server-address) "/dev/ajanvaraus/clear") {}))]
     (assert (-> resp :body :ok) (str "Response not ok: clearing ajanvaraus-db" (pr-str resp)))))
 
+(def create-app-default-args {:operation "kerrostalo-rivitalo"
+                              :propertyId "75312312341234"
+                              :x 444444 :y 6666666
+                              :address "foo 42, bar"})
+
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
         municipality (:municipality args)
         params (->> args
-                 (merge {:operation "kerrostalo-rivitalo"
-                         :propertyId "75312312341234"
-                         :x 444444 :y 6666666
-                         :address "foo 42, bar"})
+                 (merge create-app-default-args)
                  (mapcat seq))]
     (apply f apikey :create-application params)))
 

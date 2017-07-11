@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [cheshire.core :as json]
             [ring.util.codec :as codec]
+            [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
@@ -10,11 +11,11 @@
                                             admin query command http-get http-post
                                             last-email apply-remote-minimal
                                             ok? fail? http200? redirects-to
-                                            login
+                                            login decode-body
                                             ]]
             [lupapalvelu.vetuma-itest-util :refer :all]
             [lupapalvelu.dummy-ident-itest-util :refer [dummy-ident-init dummy-ident-finish]]
-            [sade.env :as env]))
+            [lupapalvelu.ident.dummy :as dummy]))
 
 (apply-remote-minimal)
 
@@ -22,20 +23,9 @@
 ; VETUMA specifics
 ;
 
-(defn- decode-body [resp] (:body (decode-response resp)))
 
 (defn- vetuma-finish [request-opts trid]
   (vetuma-fake-respose request-opts (default-vetuma-response-data trid)))
-
-(defn- register [base-opts user]
-  (decode-body
-    (http-post
-      (str (server-address) "/api/command/register-user")
-      (util/deep-merge
-        base-opts
-        {;:debug true
-         :headers {"content-type" "application/json;charset=utf-8"}
-         :body (json/encode user)}))))
 
 ;
 ; Other helpers
@@ -206,7 +196,7 @@
       (fact "trid" trid =not=> ss/blank?)
 
       (fact "redirect"
-            (let [resp (dummy-ident-finish params trid)]
+            (let [resp (dummy-ident-finish params {:personId dummy/dummy-person-id} trid)]
               resp => (partial redirects-to (get-in default-token-query [:query-params :success]))))
 
       (last-email) ; Inbox zero
@@ -241,7 +231,7 @@
           (last-email) ; Inbox zero
           (reset! store {}) ; clear cookies
           (let [trid (dummy-ident-init params default-token-query)]
-            (dummy-ident-finish params trid))
+            (dummy-ident-finish params {:personId dummy/dummy-person-id} trid))
 
           (let [stamp (:stamp (decode-body (http-get (str (server-address) "/api/vetuma/user") params))) => string?
                 new-user-email "jukka2@example.com"
