@@ -28,6 +28,7 @@ Accordion information is localized
   Language to  SV
   Check accordion text  tyonjohtaja-v2  UTNÄMNING AV ARBETSLEDARE  - Fastighets vatten- och avloppsarbetsledare Teppo Nieminen
   Language to  FI
+  Kill dev-box
 
 Foreman continues filling his info
   Foreman sets role and difficulty to foreman application  1  KVV-työnjohtaja  B
@@ -116,4 +117,3 @@ There is no reduced history for this application
 
 Frontend errors check
   There are no frontend errors
-
