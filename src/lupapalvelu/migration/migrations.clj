@@ -3308,17 +3308,13 @@
                           :state {$ne "canceled"}}
                          {$set {:archived.application nil}}))
 
-(defmigration applicants-without-personid-and-company-to-dummy ; LPK-3034
-  {:apply-when (pos? (mongo/count :users {$and [{:personId {$exists true}}
-                                                {:personId nil}
-                                                {:company {$exists false}}
-                                                {:role {$ne "dummy"}}]}))}
-  (mongo/update-by-query :users
-                         {$and [{:personId {$exists true}}
-                                {:personId nil}
-                                {:company {$exists false}}
-                                {:role {$ne "dummy"}}]}
-                         {$set {:role "dummy" :enabled false}}))
+(defmigration disable-orphaned-company-users-v2             ; run again for LPK-3034
+  {:apply-when (pos? (mongo/count :users orphaned-company-users-query))}
+  (mongo/update :users
+                orphaned-company-users-query
+                {$set {:enabled false :role :dummy}
+                 $unset {:private ""}}
+                :multi true))
 
 ;;
 ;; ****** NOTE! ******
