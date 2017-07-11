@@ -55,10 +55,6 @@
 
 (def copied-document-names ["yleiset-alueet-maksaja" "hakija-ya"])
 
-(defn- auth->user-summary [auth]
-  (merge usr/user-skeleton
-         (usr/summary auth)))
-
 (defn- party-document->auth-invite
   [digging-document sijoitus-document app-id sijoitus-auth inviter timestamp]
   {:pre [(= (doc-tools/doc-type digging-document) :party)
@@ -75,10 +71,9 @@
       ;; consistent between sijoitus and digging permits
       (if (= (:type invited-auth-entry) "company")
         (copy-app/create-company-auth invited-auth-entry)
-        (auth/create-invite-auth inviter (auth->user-summary invited-auth-entry)
-                                 app-id :writer timestamp nil
-                                 (-> digging-document :schema-info :name)
-                                 (:id digging-document))))))
+        (copy-app/create-user-auth invited-auth-entry :writer inviter app-id timestamp nil
+                                   (-> digging-document :schema-info :name)
+                                   (:id digging-document))))))
 
 (defn- add-applicant-and-payer-auth [digging-app sijoitus-app user timestamp]
   (let [digging-documents (:documents digging-app)

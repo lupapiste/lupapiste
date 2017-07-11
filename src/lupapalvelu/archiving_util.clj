@@ -32,6 +32,7 @@
                             $or  (remove
                                    nil?
                                    [{:archived.completed {$ne nil}}
+                                    {:tosFunction nil}
                                     {:attachments {$elemMatch (merge {:versions {$gt []}}
                                                                      attachment-or-app-md)}}
                                     ; Check if the application itself is not yet archived, but needs to be

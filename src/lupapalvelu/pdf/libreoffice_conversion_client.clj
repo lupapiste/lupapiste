@@ -56,8 +56,11 @@
   (files/with-temp-file converted-temp-file
     (try
       (let [converted-content (:body (convert-to-pdfa-request filename content))
+            baos (ByteArrayOutputStream.)
+            _ (io/copy converted-content baos)
+            bytes (.toByteArray baos)
             ; Validate the result with pdf2pdf. If it's not enabled, assume PDF/A compatibility.
-            pdf2pdf-result (pdfa-conversion/convert-to-pdf-a converted-content converted-temp-file {:assume-pdfa-compatibility true})]
+            pdf2pdf-result (pdfa-conversion/convert-to-pdf-a (ByteArrayInputStream. bytes) converted-temp-file {:assume-pdfa-compatibility true})]
         (if (:pdfa? pdf2pdf-result)
           (->> converted-temp-file
                (.toPath)
@@ -66,8 +69,9 @@
                (success filename))
           (merge (select-keys pdf2pdf-result [:missing-fonts :conversionLog])
                  {:archivable         false
-                  :filename           filename
-                  :content            original-content
+                  :filename           (str (FilenameUtils/removeExtension filename) ".pdf")
+                  :autoConversion     true
+                  :content            (ByteArrayInputStream. bytes)
                   :archivabilityError :invalid-pdfa})))
       (catch Throwable t
         ; On LibraOffice connection failure or other unexpected error

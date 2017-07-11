@@ -67,10 +67,14 @@ LUPAPISTE.StateIconsModel = function( params ) {
   }
 
   function signer(attachment) {
-    var lastSignature = _.last( attachment.signatures );
-    if( lastSignature && versionString( lastSignature ) === versionString(attachment.latestVersion)) {
-      return [lastSignature.user.firstName, lastSignature.user.lastName].join(" ");
-    }
+    return _(attachment .signatures)
+           .filter(function( s ) {
+             return versionString( s ) === versionString( attachment.latestVersion );
+           })
+           .map( function( s ) {
+             return sprintf( "%s %s", s.user.firstName, s.user.lastName);
+           })
+           .join( "\n");
   }
 
   self.stateIcons = function() {

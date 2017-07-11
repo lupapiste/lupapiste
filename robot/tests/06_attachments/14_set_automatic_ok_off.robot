@@ -29,7 +29,7 @@ Sonja deletes the attachment and logs out
 Sipoo logs in goes to admin page and disables automatic ok
     [Tags]  attachments
     Sipoo logs in
-    Scroll and click test id  applications-settings
+    Go to page  applications
     Unselect set automatic ok for attachments checkbox
 
 Sipoo logs out
@@ -53,7 +53,7 @@ Sonja deletes the file and logs out
 Sipoo goes enables automatic ok
     [Tags]  attachments
     Sipoo logs in
-    Scroll and click test id  applications-settings
+    Go to page  applications
     Select set automatic ok for attachments checkbox
 
 Sipoo logs out the second time

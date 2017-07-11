@@ -863,7 +863,7 @@
                                  :page :first
                                  :qrCode true
                                  :rows [[{:type :custom-text :text "Hyv\u00e4ksytty"} {:type "current-date"}]
-                                        [{:type :backend-id}]
+                                        [{:type :backend-id} {:type :section}]
                                         [{:type :organization}]]}
                                 {:id "112233445566778899001122"
                                  :name "KV-leima"

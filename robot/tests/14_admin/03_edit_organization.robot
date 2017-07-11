@@ -18,7 +18,7 @@ Mikko creates an inforequest and an application in Sipoo
 
 Solita admin goes to organizations page
   SolitaAdmin logs in
-  Click link  Organisaatiot
+  Go to page  organizations
   Wait test id visible  organization-search-term
   Test id text is  organization-result-count  ${EMPTY}
 
@@ -67,7 +67,7 @@ Organization 753-R has now inforequest enabled and application disabled
 
 Admin impersonated Sipoo authority
   Wait Until  Positive indicator should not be visible
-  Click link  Organisaatiot
+  Go to page  organizations
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
   Scroll to  [data-impersonate=753-R]
   Wait until  Click link  xpath=//a[@data-impersonate="753-R"]

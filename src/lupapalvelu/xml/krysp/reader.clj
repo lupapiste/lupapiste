@@ -132,6 +132,9 @@
         %))
     (dissoc :maarays :maaraystieto)
 
+    (cr/convert-double-to-int :kokonaisala)
+    (cr/convert-double-to-int :kerrosala)
+
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan
                               :autopaikkojaVahintaan
                               :autopaikkojaRakennettava

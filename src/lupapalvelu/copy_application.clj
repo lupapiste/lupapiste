@@ -293,18 +293,19 @@
        :role (:role old-company-auth)
        :invite {:user {:id company-id}}))))
 
-(defn- create-user-auth [old-user-auth inviter application-id timestamp]
+(defn create-user-auth [old-user-auth role inviter application-id timestamp & [text document-name document-id path]]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]
     (auth/create-invite-auth inviter user application-id
-                             (:role old-user-auth)
-                             timestamp)))
+                             role
+                             timestamp
+                             text document-name document-id path)))
 
 (defn auth->invite
   "Create an invite from existing auth entry."
   [old-auth inviter application-id timestamp]
   (if (= (:type old-auth) "company")
     (create-company-auth old-auth)
-    (create-user-auth old-auth inviter application-id timestamp )))
+    (create-user-auth old-auth (:role old-auth) inviter application-id timestamp)))
 
 (defn- new-auth-map [{auth           :auth
                      id              :id
@@ -471,8 +472,7 @@
 
 (defn- notify-of-invite! [app command invite-type recipients]
   (let [recipients (map (fn [{{:keys [email user]} :invite}]
-                          (or (usr/get-user-by-email email)
-                              (assoc user :email email)))
+                          (usr/get-user-by-email email))
                         recipients)]
     (notif/notify! invite-type
                    (assoc command
@@ -499,7 +499,8 @@
 
 (defn send-invite-notifications! [{:keys [auth] :as application} {:keys [user] :as command}]
   (let [[users companies] ((juxt remove filter) (comp #{"company"} :type)
-                                                (remove (comp #{:owner} keyword :role) auth))]
+                                                (remove (comp #{:owner :statementGiver} keyword :role)
+                                                        auth))]
     ;; Non-company invites
     (user-invite-notifications! application command users)
     ;; Company invites

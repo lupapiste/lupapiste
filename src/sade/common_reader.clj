@@ -150,3 +150,8 @@
 (defn get-boolean [xml & selector] (to-boolean (apply get-text xml selector)))
 
 (defn get-date [xml & selector] (to-timestamp (apply get-text xml selector)))
+
+(defn convert-double-to-int [m k]
+  "Converts given key value to integer in map. Returns unchanged map if cant be converted."
+  (let [converted (int (util/->double (k m)))]
+    (if (zero? converted) m (assoc m k (str converted)))))

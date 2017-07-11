@@ -536,6 +536,7 @@
     (when-not (= (:id old-primary-op) secondaryOperationId)
       (when-not new-primary-op
         (fail! :error.unknown-operation))
+      ;; TODO update also :app-links apptype if application is linked to other apps (loose WriteConcern ok?)
       (update-application command {$set {:primaryOperation    new-primary-op
                                          :secondaryOperations new-secondary-ops}}))
     (ok)))

@@ -90,6 +90,9 @@ $preamble-min-height: 280px; // at least the size of the map container
     color: #fff;
     line-height: 24px;
     margin-bottom: $marginS;
+    .address {
+      text-transform: none;
+    }
   }
   .application-map-container {
     position: relative;

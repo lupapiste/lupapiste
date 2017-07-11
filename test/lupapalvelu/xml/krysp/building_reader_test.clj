@@ -23,7 +23,8 @@
         rakennelma (second buildings)]
 
     (:operationId rakennus) => "abcdefghijklmnopqr"
-    (:operationId rakennelma) => "56c72f3cf165623f0132a28b"
+    (fact "using Lupapistetunnus as muuTunnus/sovellus value"
+          (:operationId rakennelma) => "56c72f3cf165623f0132a28b")
     (fact "Index used as description if needed"
       (:description rakennus) => "Talo A, Toinen selite"
       (:description rakennelma) => "3")))
@@ -97,7 +98,7 @@
 
 
 (facts "KRYSP rakval 2.2.0 ->rakennuksen-tiedot"
-  (let [xml      (xml/parse (slurp "dev-resources/krysp/building-2.2.0.xml"))
+    (let [xml      (xml/parse (slurp "dev-resources/krysp/building-2.2.0.xml"))
         building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
     (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
     (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")
@@ -193,3 +194,23 @@
        (fact "FeatureCollection+boundedBy+multiple featureMembers review"
              (let [fc-group (group-xml "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml")]
                (keys fc-group) => (contains ["LP-999-2016-99999" "LP-999-2016-99349"] :in-any-order))))
+
+(facts "Zero areas are ignored"
+  (let [xml       (xml/parse "dev-resources/krysp/building-2.1.2.xml")
+        buildings (->buildings-summary xml)
+        mitat1    (->> buildings first :buildingId (->rakennuksen-tiedot xml) :mitat)
+        mitat2    (->> buildings last  :buildingId (->rakennuksen-tiedot xml) :mitat)]
+    (fact "first building areas"
+      mitat1 => (contains {:tilavuus                       "627"
+                           :kokonaisala                    "168"
+                           :kellarinpinta-ala              "4"
+                           :kerrosala                      "161"
+                           :rakennusoikeudellinenKerrosala "" ;; Not in schema
+                           }))
+    (fact "second building areas"
+      mitat2 => (contains {:tilavuus                       ""
+                           :kokonaisala                    "70"
+                           :kellarinpinta-ala              ""
+                           :kerrosala                      ""
+                           :rakennusoikeudellinenKerrosala "" ;; Not in schema
+                           }))))

@@ -147,9 +147,7 @@ LUPAPISTE.StampModel = function(params) {
   self.stamps = params.stamps;
 
   self.selectedStampsId = params.selectedStampId;
-  if (!ko.unwrap(self.selectedStampsId)) {
-    self.selectedStampsId(self.stamps()[0].id);
-  }
+
   self.selectedStamp = ko.pureComputed(function() {
     return _.find(self.stamps(), function (stamp) {
       return stamp.id === self.selectedStampsId();
@@ -197,18 +195,6 @@ LUPAPISTE.StampModel = function(params) {
       })
       .value()
       .join("\n") + "\nwww.lupapiste.fi";
-  }
-
-  if (!self.selectedStamp()) {
-    self.selectedStamp({
-      id: null,
-      name: null,
-      position: {},
-      background: null,
-      page: null,
-      qrCode: null,
-      rows: [[]]
-    });
   }
 
   // Stamp info
@@ -295,6 +281,10 @@ LUPAPISTE.StampModel = function(params) {
     }
   );
 
+/*
+ * Stamp process lifecycle
+ */
+
   var doStart = function() {
     self.status(self.statusStarting);
     ajax
@@ -366,6 +356,20 @@ LUPAPISTE.StampModel = function(params) {
 
     return self.queryUpdate();
   };
+
+  hub.subscribe({eventType: "attachmentsService::query", stampRefresh: true}, function() {
+    self.status(self.statusReady);
+    pageutil.hideAjaxWait();
+  });
+  self.stampAgain = function() {
+    pageutil.showAjaxWaitNow(loc("attachments.loading"));
+    self.status(self.statusInit);
+    lupapisteApp.services.attachmentsService.queryAll({stampRefresh: true});
+  };
+
+/*
+ * Selection toggling
+ */
 
   self.selectRow = function(row) {
     if ( self.status() < self.statusStarting ) {

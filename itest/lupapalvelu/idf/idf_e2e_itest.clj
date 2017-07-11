@@ -1,8 +1,14 @@
 (ns lupapalvelu.idf.idf-e2e-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :refer :all]
+            [lupapalvelu.dummy-ident-itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
             [sade.core :refer [now]]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [cheshire.core :as json]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :refer [get-user-by-id]]
             [lupapalvelu.idf.idf-api :refer :all]
@@ -43,7 +49,7 @@
 
 (defn- do-post [query-params]
   (http-post
-    (str (server-address) "/api/id-federation" )
+    (str (server-address) "/api/id-federation")
     {;:debug true :debug-body true
      :form-params query-params
      :follow-redirects false
@@ -75,10 +81,52 @@
         (get-in user [:partnerApplications :lupapiste :id]) => (:id documented-params)))
 
     (fact "User receives activation link"
-      (let [email (last-email)]
+      (let [email (last-email)
+            tokenId (last (re-matches #"(?sm).+/app/fi/welcome#!/link-account/(\w{48})\s.+" (get-in email [:body :plain])))]
         (:to email) => (contains (:email documented-params))
         (:subject email) => "Lupapiste: Tervetuloa Lupapisteeseen!"
-        (get-in email [:body :plain]) => (partial re-matches #"(?sm).+/app/fi/welcome#!/link-account/\w{48}\s.+")))))
+        (get-in email [:body :plain]) => (partial re-matches #"(?sm).+/app/fi/welcome#!/link-account/\w{48}\s.+")
+
+        (fact "Activate user via link and ident service"
+          (let [orig-feature-dummy-ident (env/feature? :dummy-ident)]
+            (env/set-feature! true [:dummy-ident])
+            (let [store (atom {})
+                  params (default-vetuma-params (->cookie-store store))
+                  trid (dummy-ident-init params default-token-query)]
+              (fact "trid" trid =not=> ss/blank?)
+              (fact "Redirect OK"
+                (dummy-ident-finish params trid) => (partial redirects-to (get-in default-token-query [:query-params :success])))
+
+              (last-email)                                  ; Inbox zero
+
+              (let [vetuma-data (:body (decoded-get (str (server-address) "/api/vetuma/user") params))
+                    stamp (:stamp vetuma-data) => string?
+                    cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
+                              :headers {"x-anti-forgery-token" "123"}}
+                    conf {:stamp    stamp
+                          :tokenId tokenId
+                          :email    "testi.makinen@lupapiste.fi"
+                          :password "Jepojeppis"
+                          :street   "Testikatu"
+                          :zip      12345
+                          :city     "Tre"
+                          :phone    "123"}
+
+                    resp (:body
+                           (decoded-simple-post
+                             (str (server-address) "/api/command/confirm-account-link")
+                             (util/deep-merge
+                               cmd-opts
+                               {:headers {"content-type" "application/json;charset=utf-8"}
+                                :body    (json/encode conf)})))
+                    user-id (:id resp) => string?
+                    user (first (:users (query admin :users :userId user-id)))]
+                resp => ok?
+                user => (contains {:enabled true
+                                   :personIdSource "identification-service"
+                                   :username "testi.makinen@lupapiste.fi"})))
+
+            (env/set-feature! orig-feature-dummy-ident [:dummy-ident])))))))
 
 (fact "Old user is linked"
   (let [test-id "123"]

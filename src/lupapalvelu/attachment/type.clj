@@ -204,6 +204,20 @@
        (map println)
        dorun))
 
+(defn print-localized-attachment-types-grouped [permit-type lang]
+  (->> ((keyword permit-type) attachment-types-by-permit-type)
+       (partition-by :type-group)
+       (map (fn [group]
+              (->> (str "attachmentType." (name (:type-group (first group))) "._group_label")
+                   (i18n/localize (keyword lang))
+                   str/upper-case
+                   println)
+              (doseq [{:keys [type-group type-id]} group]
+                (-> (i18n/localize (keyword lang) (ss/join "." ["attachmentType" (name type-group) (name type-id)]))
+                    (str  ";" (name type-group) "." (name type-id))
+                    println))))
+       dorun))
+
 (defn print-localized-attachment-contents [lang]
   (->> (map second content-mapping)
        flatten

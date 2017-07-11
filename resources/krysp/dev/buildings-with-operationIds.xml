@@ -99,7 +99,7 @@
                                 <rakval:muuTunnustieto>
                                     <rakval:MuuTunnus>
                                         <yht:tunnus>56c72f3cf165623f0132a28b</yht:tunnus>
-                                        <yht:sovellus>toimenpideId</yht:sovellus>
+                                        <yht:sovellus>Lupapistetunnus</yht:sovellus>
                                     </rakval:MuuTunnus>
                                 </rakval:muuTunnustieto>
                             </rakval:tunnus>

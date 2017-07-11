@@ -11,9 +11,11 @@
            (java.util Date)))
 
 (defpage "/perfmon/data" {:keys [start end]}
-  (let [now-ts (now)]
-    (->> (perf/get-data (Date. (or (perf/to-long start) (- now-ts (* 60 60 1000))))
-                        (Date. (or (perf/to-long end) now-ts)))
+  (let [now-ts (now)
+        start-time (or (perf/to-long start) (- now-ts (* 60 60 1000)))
+        end-time (or (perf/to-long end) now-ts)]
+    (->> (perf/get-data (Date. ^Long start-time)
+                        (Date. ^Long end-time))
          (resp/json)
          (resp/status 200))))
 

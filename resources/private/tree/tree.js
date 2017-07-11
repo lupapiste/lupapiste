@@ -36,7 +36,10 @@ var tree = (function() {
     self.onSelect = args.onSelect || nop;
     self.baseModel = args.baseModel || {};
     self.data = [];
-    self.width = args.width || context.width();
+    // 800 is a backstop from _tree.scss for embedding issue. Namely,
+    // that dynamic width calculation fails sometimes in embedded
+    // Lupapiste installations.
+    self.width = args.width || context.width() || 800;
     self.moveLeft  = {"margin-left": "-=" + self.width};
     self.moveRight = {"margin-left": "+=" + self.width};
 

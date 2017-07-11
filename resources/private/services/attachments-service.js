@@ -173,9 +173,9 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
   };
 
-  self.queryAll = function() {
+  self.queryAll = function(hubParams) {
     _.forEach(filterSets, function(filterSet) { filterSet.resetForcedVisibility(); });
-    queryData("attachments", "attachments", self.setAttachments);
+    queryData("attachments", "attachments", self.setAttachments, null, hubParams);
     self.queryTagGroupsAndFilters();
   };
 

@@ -1,14 +1,13 @@
 # Hei {{user.firstName}},
 
 {{requester.firstName}} {{requester.lastName}} vill lägga till
-e-postadressen {{user.email}} som givare av utlåtanden i Lupapiste för
+{{user.email}} som givare av utlåtanden i Lupapiste för
 en tillståndsansökan på adressen {{address}},
 {{municipality}}. Tillståndet söks för åtgärden {{operation}}.
 
 Du kan ge ditt utlåtande genom att klicka på länken nedan. Om länken
 inte fungerar, kopiera adressen och klistra in den i webbläsarens
-adressfält. I Lupapiste kan parterna i ett projekt sköta
-byggrelaterade tillståndsärenden tillsammans. Dygnet runt.
+adressfält.
 
 Om du ännu inte är användare hos Lupapiste måste du registrera dig med
 hjälp av mobilcertifikat eller bankkoder för att kunna se ansökan. Kom
@@ -33,3 +32,6 @@ utlåtandet skickar följande hälsningar:
 Hälsningar,
 
 {{lupapiste.link}}
+
+I Lupapiste kan parterna i ett projekt sköta
+byggrelaterade tillståndsärenden tillsammans. Dygnet runt.

@@ -52,13 +52,13 @@ Pena checks the signed icon title
 Pena signs the attachment
   Sign all attachments  pena
 
-Pena is now the icon title
-  Signed icon title is  Pena Panaani
+Pena is now also on the icon title
+  Signed icon title is  Mikko Intonen\\nPena Panaani
 
 Pena adds new attachment version
   Open attachment details  muut.muu
   Add attachment version  ${TXT_TESTFILE_PATH}
-  Click by test id  back-to-application-from-attachment
+  Wait until  Click by test id  back-to-application-from-attachment
 
 There is no more signed icon
   Wait until  Attachment indicator icon should be visible  state  muut.muu
@@ -71,4 +71,4 @@ There is no more signed icon
 Signed icon title is
   [Arguments]  ${title}
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
-  jQuery should match X times  [data-test-icon=signed-icon][title='${title}']  1
+  Javascript?  $("[data-test-icon=signed-icon]").attr( "title") === "${title}"
