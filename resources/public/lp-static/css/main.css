@@ -16968,6 +16968,10 @@ td.comment-text {
   margin-bottom: 12px;
 }
 
+.admin .users-table .filters .filter {
+  margin-right: 12px;
+}
+
 .admin #modal-dialog-content-component select, .admin #modal-dialog-content-component input[type=text] {
   display: block;
   margin: 6px 0;
@@ -17384,6 +17388,12 @@ body.authority-admin .header-menu {
 
 .spin-once + span {
   padding-left: 10px;
+}
+
+.users-search input.textinput {
+  display: inline-block;
+  width: 20em;
+  vertical-align: middle;
 }
 
 #neighbor-show .pending {

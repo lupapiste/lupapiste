@@ -57,8 +57,12 @@
   .users-table {
     .filters {
       margin-bottom: $marginM;
+      .filter {
+        margin-right: $marginM;
+      }
     }
   }
+
   #modal-dialog-content-component {
     select, input[type=text] {
       display: block;

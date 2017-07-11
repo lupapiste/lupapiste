@@ -12,28 +12,28 @@
     <div class="users-table">
 
       <div class="filters" data-bind="visible: show.filters">
-        <span data-bind="visible: show.roleFilter">
+        <span class="filter" data-bind="visible: show.roleFilter">
           <span data-bind="ltext: 'users.filters.role'"></span>
-          <select
+          <select class="dropdown"
             data-bind="options: availableRoles, value: filters.role, optionsText: 'name', optionsValue: 'id'"
             data-test-id="users-list-select-role">
           </select>
         </span>
-        <span data-bind="visible: show.enabledFilter">
+        <span class="filter" data-bind="visible: show.enabledFilter">
           <span data-bind="ltext: 'users.filters.enabled'"></span>
-          <select
+          <select class="dropdown" 
             data-bind="options: availableEnableds, value: filters.enabled, optionsText: 'name', optionsValue: 'id'"
             data-test-id="users-list-select-enabled">
           </select>
         </span>
-        <span data-bind="visible: show.search" data-test-id="users-list-filter-role">
-          <span data-bind="ltext: 'users.filters.search'"></span>
-          <input
-            data-bind="textInput: filters.search"
-            type="text"
-            data-test-id="users-list-input-search"/>
+        <span class="users-search" data-bind="visible: show.search" data-test-id="users-list-filter-role">
+            <input class="textinput textinput--big" type="text"
+              data-bind="textInput: filters.search,
+                         attr: {placeholder: loc('auth-admin.users.search.placeholder')}"
+              data-test-id="users-list-input-search"/>
         </span>
       </div>
+      <div class="clear spacerM"></div>
 
       <table class="table table-striped tablesorter">
         <thead>

@@ -306,3 +306,11 @@ $navi-sidebar-bp: 1800px;
 .spin-once + span {
   padding-left: $icon-pad;
 }
+
+ .users-search {
+  input.textinput {
+    display: inline-block;
+    width: 20em;
+    vertical-align: middle;
+  }
+}
