@@ -3308,6 +3308,18 @@
                           :state {$ne "canceled"}}
                          {$set {:archived.application nil}}))
 
+(defmigration applicants-without-personid-and-company-to-dummy ; LPK-3034
+  {:apply-when (pos? (mongo/count :users {$and [{:personId {$exists true}}
+                                                {:personId nil}
+                                                {:company {$exists false}}
+                                                {:role {$ne "dummy"}}]}))}
+  (mongo/update-by-query :users
+                         {$and [{:personId {$exists true}}
+                                {:personId nil}
+                                {:company {$exists false}}
+                                {:role {$ne "dummy"}}]}
+                         {$set {:role "dummy" :enabled false}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
