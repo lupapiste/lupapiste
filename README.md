@@ -10,7 +10,7 @@ operoi rakennetun ympäristön lupa-asiointiin keskittyvä pilvipalveluyhtiö
 Lupapisteeseen voi liittää myös sähköisen pysyväisarkiston asiakirjojen lain vaatimaa
 säilyttämistä varten.
 
-#Permit point
+# Permit point
 
 Lupapiste (Permit point) is a SaaS cloud application that allows citizens
 and corporations to apply for permits related to constructed environments, enabling
