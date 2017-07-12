@@ -61,7 +61,7 @@
 
      (for [{:keys [value text]} items
            :let                 [item-id (path/id (path/extend path value))
-                                 checked (contains? (set (rum/react state)) value)]]
+                                 checked (util/includes-as-kw? (set (rum/react state)) value)]]
        [:div.matti-checkbox-wrapper
         {:key item-id}
         [:input {:type    "checkbox"
