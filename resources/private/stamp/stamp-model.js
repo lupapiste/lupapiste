@@ -33,7 +33,7 @@ LUPAPISTE.StampModel = function(params) {
     a.status = ko.observable("");
     a.restamp = stamped;
     a.stamped = ko.observable(stamped);
-    a.fileId = ko.observable(a.latestVersion.fileId);
+    a.latestVersion.fileId = ko.observable(a.latestVersion.fileId);
     return a;
   }
 
@@ -340,10 +340,9 @@ LUPAPISTE.StampModel = function(params) {
       self.jobVersion = update.version;
       _.each(update.value, function (data, attachmentId) {
         var newStatus = data.status;
-        var fileId = data.fileId;
         _(self.selectedFiles()).filter({id: attachmentId}).map(function(f) {
           f.status(newStatus);
-          f.fileId(fileId);
+          f.latestVersion.fileId( data.fileId );
           return f;
         }).value();
       });
