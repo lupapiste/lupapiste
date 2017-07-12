@@ -106,21 +106,8 @@
                                       usr/Role authority-biased-user-role})]
     (gen/fmap usr/with-org-auth base-user-gen)))
 
-(def org-with-const-id
-  (gen/fmap (fn [org] (assoc org :id "100"))
-            (ssg/generator org/Organization)))
-
-(def orgs-gen
-  "Generates a set of organizations with different ids"
-  (gen/let [org-ids (gen/set (ssg/generator org/OrgId) {:num-elements 10
-                                                        :max-tries 50})
-            orgs (gen/vector org-with-const-id 10)]
-    (let [fix-id (fn [id org] (assoc org :id id))
-          with-fixed-ids (map fix-id org-ids orgs)]
-      (set with-fixed-ids))))
-
 (def enable-accordions-gen
-  (gen/let [orgs orgs-gen
+  (gen/let [orgs (org-gen/generate)
             user (user-gen orgs)
             application (application-gen orgs user)]
     {:orgs orgs
