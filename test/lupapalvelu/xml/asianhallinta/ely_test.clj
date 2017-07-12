@@ -1,9 +1,5 @@
 (ns lupapalvelu.xml.asianhallinta.ely-test
   (:require [midje.sweet :refer :all]
-            [clojure.test :refer [is]]
-            [clojure.test.check.generators :as gen]
-            [clojure.test.check.clojure-test :refer [defspec]]
-            [clojure.test.check.properties :as prop]
             [clojure.java.io :as io]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
