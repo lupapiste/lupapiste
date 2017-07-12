@@ -25,7 +25,7 @@
    "Lausuntopyynt\u00f6 purkamisaikomuksesta"
    "Lausuntopyynt\u00f6 purkamislupahakemuksesta"
    "Lausuntopyynt\u00f6 suunnittelutarveratkaisusta"
-   "Lausuntopyynt\u00f6 teiden suoja- ja n\u00e4kem\u00e4alueelle takentamisen poikkeamishakemuksesta"
+   "Lausuntopyynt\u00f6 teiden suoja- ja n\u00e4kem\u00e4alueelle rakentamisen poikkeamishakemuksesta"
    "Lausuntopyynt\u00f6 naapurin kuulemisesta teiden suoja- ja n\u00e4kem\u00e4alueen ulkopuolelle rakentamisesta"])
 
 (def ya-statement-types

@@ -112,7 +112,7 @@
    "Tiedoksi p\u00e4\u00e4t\u00f6s suunnittelutarveratkaisusta"
    "Lausuntopyynt\u00f6 suojeluesityksest\u00e4"
    "Tiedoksi p\u00e4\u00e4t\u00f6s rakennussuojelusta"
-   "Lausuntopyynt\u00f6 teiden suoja- ja n\u00e4kem\u00e4alueelle takentamisen poikkeamishakemuksesta"
+   "Lausuntopyynt\u00f6 teiden suoja- ja n\u00e4kem\u00e4alueelle rakentamisen poikkeamishakemuksesta"
    "Tiedoksi p\u00e4\u00e4t\u00f6s teiden suoja- ja n\u00e4kem\u00e4alueelle rakentamisen poikkeamisluvasta"
    "Lausuntopyynt\u00f6 naapurin kuulemisesta teiden suoja- ja n\u00e4kem\u00e4alueen ulkopuolelle rakentamisesta"
    "Tiedoksi p\u00e4\u00e4t\u00f6s suoja- ja n\u00e4kem\u00e4alueelle rakentamisen poikkeamisluvasta"])
