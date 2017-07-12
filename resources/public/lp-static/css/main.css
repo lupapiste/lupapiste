@@ -19760,9 +19760,9 @@ div.summary-button-bar {
 
 /* feature class for marking unfinished content */
 .feature {
-  border: orange dotted medium;
-  padding: 6px;
+  border: orange dotted medium !important;
   border-radius: 10px;
+  min-height: 44px;
 }
 
 .feature .legend {
