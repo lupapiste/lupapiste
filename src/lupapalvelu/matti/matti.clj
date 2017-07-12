@@ -120,61 +120,85 @@
                         {$set {settings-key {:draft draft
                                              :modified timestamp}}})))
 
-;; Settings reviews
+;; Generic supports both reviews and plans
 
-(defn new-review [organization-id category]
-  (let [data {:id       (mongo/create-id)
-              :name     {:fi (i18n/localize :fi :matti.katselmus)
-                         :sv (i18n/localize :sv :matti.katselmus)
-                         :en (i18n/localize :en :matti.katselmus)}
-              :category category
-              :type     :muu-katselmus
-              :deleted  false}]
+(defn new-generic [organization-id category name-key subcollection & extra]
+  (let [data (merge {:id       (mongo/create-id)
+                     :name     {:fi (i18n/localize :fi name-key)
+                                :sv (i18n/localize :sv name-key)
+                                :en (i18n/localize :en name-key)}
+                     :category category
+                     :deleted  false}
+                    (apply hash-map extra))]
     (mongo/update-by-id :organizations
                         organization-id
-                        {$push {:verdict-templates.reviews
+                        {$push {(util/kw-path :verdict-templates subcollection)
                                 data}})
     data))
 
-(defn reviews [{verdict-templates :verdict-templates} category]
+(defn generic-list [{verdict-templates :verdict-templates} category subcollection]
   (filter #(util/=as-kw category (:category %))
-          (:reviews verdict-templates)))
+          (subcollection verdict-templates)))
 
-(defn review [organization-id review-id]
+(defn generic [organization-id gen-id subcollection]
   (some->> (org/get-organization organization-id)
            :verdict-templates
-           :reviews
-           (util/find-by-id review-id)))
+           subcollection
+           (util/find-by-id gen-id)))
 
-(defn review-update [organization-id review-id update  & [timestamp]]
+(defn generic-update [organization-id gen-id update subcollection & [timestamp]]
   (mongo/update :organizations
                 {:_id     organization-id
-                 :verdict-templates.reviews {$elemMatch {:id review-id}}}
+                 (util/kw-path :verdict-templates subcollection) {$elemMatch {:id gen-id}}}
                 (if timestamp
                   (assoc-in update
-                            [$set (settings-key (:category (review organization-id
-                                                                   review-id))
+                            [$set (settings-key (:category (generic organization-id
+                                                                    gen-id
+                                                                    subcollection))
                                                 :modified)]
                             timestamp)
                   update)))
 
-
-(defn set-review-details [organization-id timestamp review-id data]
+(defn set-generic-details [organization-id timestamp gen-id data subcollection & extra-keys]
   (let [detail-updates
         (reduce (fn [acc [k v]]
-                  (let [k (keyword k)]
+                  (let [k      (keyword k)
+                        others (conj extra-keys :deleted)]
                     (merge acc
                            (cond
-                             (k #{:fi :sv :en}) {(str "name." (name k)) (ss/trim v)}
-                             (= k :type)        {:type v}
-                             (= k :deleted)     {:deleted v}))))
+                             (k #{:fi :sv :en})              {(str "name." (name k)) (ss/trim v)}
+                             (util/includes-as-kw? others k) {k v}))))
                 {}
                 data)]
     (when (seq detail-updates)
-      (review-update organization-id
-                     review-id
+      (generic-update organization-id
+                     gen-id
                      {$set (->> detail-updates
                                 (map (fn [[k v]]
-                                       [(keyword (str "verdict-templates.reviews.$." (name k))) v]))
+                                       [(util/kw-path :verdict-templates subcollection :$ k) v]))
                                 (into {}))}
+                     subcollection
                      timestamp))))
+
+;; Reviews
+
+(defn new-review [organization-id category]
+  (new-generic organization-id category :matti.katselmus :reviews
+               :type :muu-katselmus))
+
+(defn review [organization-id review-id]
+  (generic organization-id review-id :reviews))
+
+(defn set-review-details [organization-id timestamp review-id data]
+  (set-generic-details organization-id timestamp review-id data :reviews :type))
+
+;; Plans
+
+(defn new-plan [organization-id category]
+  (new-generic organization-id category :matti.suunnitelmat :plans))
+
+(defn plan [organization-id review-id]
+  (generic organization-id review-id :plans))
+
+(defn set-plan-details [organization-id timestamp review-id data]
+  (set-generic-details organization-id timestamp review-id data :plans))

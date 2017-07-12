@@ -214,7 +214,7 @@
                                    :schema {:docgen "matti-verdict-text"}}]]}
                :_meta {:can-remove? false}}
               (foremen-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
-              #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
+              (reference-section :plans :matti-plans [:settings :plans :0 :plans])
               (reference-section :reviews :matti-reviews [:settings :reviews :0 :reviews])
               (text-section :matti-neighbours)
               {:id    "matti-appeal"

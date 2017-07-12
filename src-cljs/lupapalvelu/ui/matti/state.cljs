@@ -15,3 +15,4 @@
 (def references       (state-cursor :references))
 (def settings         (rum/cursor-in references [:settings]))
 (def reviews          (rum/cursor-in references [:reviews]))
+(def plans            (rum/cursor-in references [:plans]))

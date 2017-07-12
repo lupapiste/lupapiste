@@ -150,8 +150,51 @@
      [:button.positive
       {:on-click #(service/new-review @state/current-category upsert-review)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc "add")]]])
-  )
+      [:span (common/loc "add")]]]))
+
+(rum/defcs plans-editor < rum/reactive
+  (rum/local false ::show-deleted)
+  [{show-deleted ::show-deleted}]
+  (let [plans (rum/react state/plans)]
+    [:div.matti-settings-editor
+     (when (some :deleted plans)
+       [:div.checkbox-wrapper
+        [:input {:type "checkbox"
+                 :id "show-deleted-plans"
+                 :value @show-deleted}]
+        [:label.checkbox-label
+         {:for "show-deleted-plans"
+          :on-click #(swap! show-deleted not)}
+         (common/loc :handler-roles.show-all)]])
+     (let [filtered (if @show-deleted
+                      plans
+                      (remove :deleted plans))]
+       (when (seq filtered)
+         [:table.matti-editor-table
+          [:thead
+           [:tr
+            [:th (common/loc "lang.fi")]
+            [:th (common/loc "lang.sv")]
+            [:th (common/loc "lang.en")]
+            [:th]]]
+          [:tbody
+           (for [{:keys [id deleted] :as plan} filtered]
+             [:tr {:key id}
+              [:td (name-cell plan :fi)]
+              [:td (name-cell plan :sv)]
+              [:td (name-cell plan :en)]
+              [:td [:button.primary.outline
+                    {:on-click #(service/update-review id
+                                                       upsert-review
+                                                       :deleted
+                                                       (not deleted))}
+                    (common/loc (if deleted :matti-restore :remove))]]])]]))
+     [:button.positive
+      {:on-click #(service/new-review @state/current-category upsert-review)}
+      [:i.lupicon-circle-plus]
+      [:span (common/loc "add")]]]))
+
+
 
 (defn settings-section-header [{:keys [path schema state] :as options} edit?]
   [:div.matti-grid-6.section-header
@@ -179,7 +222,8 @@
    [:div.section-body
     (if (path/react-meta? options :editor?)
       (case (keyword id)
-        :reviews (reviews-editor))
+        :reviews (reviews-editor)
+        :plans   (plans-editor))
       (layout/matti-grid (shared/child-schema options
                                               :grid
                                               options)))]])

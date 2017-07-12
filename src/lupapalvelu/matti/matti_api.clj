@@ -40,15 +40,21 @@
                        (-> data :category keyword))
     (fail :error.invalid-category)))
 
-(defn settings-review-editable
-  "Review exists and is not deleted. Even if the review is deleted, it
-  is editable if the update includes deleted parameter with false value."
-  [{{:keys [review-id deleted]} :data user :user :as command}]
-  (if-let [review (matti/review (usr/authority-admins-organization-id user)
-                                review-id)]
-    (when (and (:deleted review) (-> deleted false? not))
-      (fail :error.settings-review-deleted))
-    (fail :error.settings-review-not-found)))
+(defn settings-generic-editable
+  "Generic (a subcollection item) exists and is not deleted. Even if
+  the generic is deleted, it is editable if the update includes
+  deleted parameter with false value."
+  [subcollection]
+  (fn [{data :data user :user}]
+    (let [gen-id  (case subcollection
+                    :reviews (:review-id data)
+                    :plans (:plan-id data))]
+      (if-let [generic (matti/generic (usr/authority-admins-organization-id user)
+                                      gen-id
+                                      subcollection)]
+        (when (and (:deleted generic) (-> data :deleted false? not))
+         (fail :error.settings-item-deleted))
+        (fail :error.settings-item-not-found)))))
 
 (defn supported-parameters
   "Returns checker that fails on unknown parameters. Params must be
@@ -58,7 +64,7 @@
                           (set params))
      (fail :error.unsupported-parameters)))
 
-(defn- settings-review-details-valid
+(defn- settings-generic-details-valid
   "Pre-chek: none of the details is mandatory."
   [{data :data}]
   (some (fn [[k v]]
@@ -66,15 +72,19 @@
             (cond
               (k #{:fi :sv :en})
               (when (ss/blank? v)
-                (fail :error.review-name-blank))
-              (= k :type)
-              (when-not (contains? (set (keys shared/review-type-map))
-                                   (keyword v))
-                (fail :error.invalid-review-type))
+                (fail :error.name-blank))
               (= k :deleted)
               (when-not (or (false? v) (true? v))
-                (fail :error.review-deleted-not-boolean)))))
+                (fail :error.deleted-not-boolean)))))
         data))
+
+(defn- settings-review-details-valid
+  "Pre-chek: none of the details is mandatory."
+  [{{type :type} :data}]
+  (when (and type
+             (not (util/includes-as-kw? (keys shared/review-type-map)
+                                        type)))
+    (fail :error.invalid-review-type)))
 
 ;; ----------------------------------
 ;; Verdict template API
@@ -222,8 +232,9 @@
    :parameters       [category]
    :input-validators [valid-category]}
   [command]
-  (ok :reviews (matti/reviews (command->organization command)
-                              category)))
+  (ok :reviews (matti/generic-list (command->organization command)
+                                   category
+                                   :reviews)))
 
 (defcommand add-verdict-template-review
   {:description      "Creates empty review for the settings
@@ -241,8 +252,9 @@
    :user-roles          #{:authorityAdmin}
    :parameters          [review-id]
    :optional-parameters [fi sv en type deleted]
-   :input-validators    [settings-review-editable
+   :input-validators    [(settings-generic-editable :reviews)
                          (supported-parameters :review-id :fi :sv :en :type :deleted)
+                         settings-generic-details-valid
                          settings-review-details-valid]}
   [{:keys [created user data]}]
   (let [organization-id (usr/authority-admins-organization-id user)]
@@ -251,4 +263,46 @@
                               review-id
                               data)
     (ok :review (matti/review organization-id review-id)
+        :modified created)))
+
+;; ----------------------------------
+;; Verdict template plans API
+;; ----------------------------------
+
+(defquery verdict-template-plans
+  {:description      "Plans matching the category"
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category]
+   :input-validators [valid-category]}
+  [command]
+  (ok :plans (matti/generic-list (command->organization command)
+                                 category
+                                 :plans)))
+
+(defcommand add-verdict-template-plan
+  {:description      "Creates empty plan for the settings
+  category. Returns plan."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category]
+   :input-validators [valid-category]}
+  [{user :user}]
+  (ok :plan (matti/new-plan (usr/authority-admins-organization-id user)
+                                category)))
+
+(defcommand update-verdict-template-plan
+  {:description         "Updates plan details according to the
+  parameters. Returns the updated plan."
+   :user-roles          #{:authorityAdmin}
+   :parameters          [plan-id]
+   :optional-parameters [fi sv en type deleted]
+   :input-validators    [(settings-generic-editable :plans)
+                         (supported-parameters :plan-id :fi :sv :en :deleted)
+                         settings-generic-details-valid]}
+  [{:keys [created user data]}]
+  (let [organization-id (usr/authority-admins-organization-id user)]
+    (matti/set-plan-details organization-id
+                              created
+                              plan-id
+                              data)
+    (ok :plan (matti/plan organization-id plan-id)
         :modified created)))

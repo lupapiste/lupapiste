@@ -220,7 +220,7 @@
           (command sipoo :update-verdict-template-review
                    :review-id id
                    :en "  ")
-          => (err :error.review-name-blank))
+          => (err :error.name-blank))
         (fact "Review type"
           (command sipoo :update-verdict-template-review
                    :review-id id
@@ -257,13 +257,13 @@
           (command sipoo :update-verdict-template-review
                    :review-id id
                    :deleted true)
-          => (err :error.settings-review-deleted))
+          => (err :error.settings-item-deleted))
         (fact "Deleted reviews cannot be edited"
           (command sipoo :update-verdict-template-review
                    :review-id id
                    :type :aloituskokous
                    :fi "Hei")
-          => (err :error.settings-review-deleted))
+          => (err :error.settings-item-deleted))
         (fact "Deleted reviews can be restored (and edited)"
           (command sipoo :update-verdict-template-review
                    :review-id id
@@ -273,4 +273,96 @@
           => (contains {:review (contains {:id id
                                            :type "aloituskokous"
                                            :name (contains {:fi "Hei"})
-                                           :deleted false})}))))))
+                                           :deleted false})}))
+        (fact "Review not found"
+          (command sipoo :update-verdict-template-review
+                   :review-id "notfoun"
+                   :type :aloituskokous
+                   :fi "Hei")
+          => (err :error.settings-item-not-found))))))
+
+(facts "Plans"
+  (fact "Initially empty"
+    (query sipoo :verdict-template-plans :category "r")
+    => {:ok      true
+        :plans []})
+  (fact "Add new plan"
+    (let [{id :id} (:plan (command sipoo :add-verdict-template-plan
+                                     :category "r"))]
+      id => truthy
+      (fact "Fetch plans again"
+        (:plans (query sipoo :verdict-template-plans :category "r"))
+        => (just [(contains {:name     {:fi "Suunnitelmat"
+                                        :sv "Planer"
+                                        :en "Plans"}
+                             :category "r"
+                             :deleted  false})]))
+      (fact "Give name to the plan"
+        (:plan (command sipoo :update-verdict-template-plan
+                          :plan-id id
+                          :fi "Nimi" :sv "Namn" :en "Name"))
+        => (contains {:id       id
+                      :name     {:fi "Nimi" :sv "Namn" :en "Name"}
+                      :deleted  false
+                      :category "r"}))
+      (fact "New name available"
+        (:plans (query sipoo :verdict-template-plans :category "r"))
+        => (just [(contains {:name     {:fi "Nimi" :sv "Namn" :en "Name"}
+                             :category "r"
+                             :deleted  false})]))
+      (facts "Update plan details"
+        (fact "Finnish name"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :fi "Moro")
+          => (contains {:plan (contains {:id id
+                                           :name {:fi "Moro"
+                                                  :sv "Namn"
+                                                  :en "Name"}})}))
+        (fact "Name cannot be empty"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :en "  ")
+          => (err :error.name-blank))
+        (fact "Swedish and English names"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :sv "Stockholm" :en "London")
+          => (contains {:plan (contains {:id id
+                                           :name {:fi "Moro"
+                                                  :sv "Stockholm"
+                                                  :en "London"}})}))
+        (fact "Unsupported params"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :type :aloituskokous)
+          => (err :error.unsupported-parameters))
+        (fact "Mark plan as deleted"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :deleted true)
+          => (contains {:plan (contains {:id id
+                                           :deleted true})}))
+        (fact "Deleted plan cannot be re-deleted"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :deleted true)
+          => (err :error.settings-item-deleted))
+        (fact "Deleted plans cannot be edited"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :fi "Hei")
+          => (err :error.settings-item-deleted))
+        (fact "Deleted plans can be restored (and edited)"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id id
+                   :fi "Hei"
+                   :deleted false)
+          => (contains {:plan (contains {:id id
+                                         :name (contains {:fi "Hei"})
+                                           :deleted false})}))
+        (fact "Plan not found"
+          (command sipoo :update-verdict-template-plan
+                   :plan-id "notfoun"
+                   :fi "Hei")
+          => (err :error.settings-item-not-found))))))
