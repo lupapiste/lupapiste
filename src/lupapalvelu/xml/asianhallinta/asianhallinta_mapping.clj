@@ -57,10 +57,10 @@
       (assoc-in mapping [:attr :version] (name version))
       (throw (IllegalArgumentException. (str "Unsupported Asianhallinta version: " version))))))
 
-(defn get-ua-mapping [version]
+(defn get-uusi-asia-mapping [version]
   (get-mapping ua-version-mapping version))
 
-(defn get-ta-mapping [version]
+(defn get-taydennys-asiaan-mapping [version]
   (get-mapping ta-version-mapping version))
 
 (defn- attachments-for-write [attachments & [target]]
@@ -92,7 +92,7 @@
                                 (canonical/get-submitted-application-pdf application begin-of-link)
                                 (canonical/get-current-application-pdf application begin-of-link))
         canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdfs)
-        mapping (get-ua-mapping ah-version)
+        mapping (get-uusi-asia-mapping ah-version)
 
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write (:attachments application))]
@@ -105,7 +105,7 @@
         attachments (enrich-attachments-with-operation-data attachments (get-operations application))
         attachments-canonical (canonical/get-attachments-as-canonical attachments begin-of-link)
         canonical-with-attachments (assoc-in canonical [:TaydennysAsiaan :Liitteet :Liite] attachments-canonical)
-        mapping (get-ta-mapping ah-version)
+        mapping (get-taydennys-asiaan-mapping ah-version)
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write attachments)]
     (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir nil nil "taydennys")))
