@@ -38,13 +38,15 @@
       (swap! state/reviews #(assoc % index review))
       (swap! state/reviews #(conj % review)))))
 
-(defn css-flags [& flags]
+(defn css-flags
+  "List of keys with truthy values.
+  (css-flags :foo true :bar false) => '(\"foo\")"
+  [& flags]
   (->> (apply hash-map flags)
        (filter (fn [[k v]] v))
        keys
        (map name)))
 
-;;
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
   initialized to the first component argument."

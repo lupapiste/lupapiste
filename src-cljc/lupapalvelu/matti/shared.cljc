@@ -168,8 +168,8 @@
 (defn foremen-section [id settings-path loc-prefix]
   (complexity-section id settings-path {:item-loc-prefix loc-prefix}))
 
-(defn reviews-section [id settings-path]
-  (complexity-section id settings-path {:term {:path       [:reviews]
+(defn reference-section [ref id settings-path]
+  (complexity-section id settings-path {:term {:path       [ref]
                                                :extra-path [:name]
                                                :match-key  :id}}))
 
@@ -215,7 +215,7 @@
                :_meta {:can-remove? false}}
               (foremen-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
               #_(complexity-section :matti-plans ["rakenne" "vv" "piha" "ilma"])
-              (reviews-section :matti-reviews [:settings :reviews :0 :reviews])
+              (reference-section :reviews :matti-reviews [:settings :reviews :0 :reviews])
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
                :grid  {:columns 6
@@ -295,6 +295,15 @@
                                   :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
                                                           :items      [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]]}}
+              {:id   "plans"
+               :grid {:columns 1
+                      :rows    [[{:id     "plans"
+                                  :schema {:reference-list {:label?   false
+                                                            :path     [:plans]
+                                                            :item-key :id
+                                                            :type     :multi-select
+                                                            :term     {:path       [:plans]
+                                                                       :extra-path [:name]}}}}]]}}
               {:id   "reviews"
                :grid {:columns 1
                       :rows    [[{:id     "reviews"
