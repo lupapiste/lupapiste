@@ -1,9 +1,11 @@
 (ns lupapalvelu.generators.application
   (:require [clojure.test.check.generators :as gen]
+            [lupapalvelu.generators.organization :as org-gen]
             [lupapalvelu.generators.permit :as permit-gen]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.user :as usr]
-            [sade.schema-generators :as ssg]))
+            [sade.schema-generators :as ssg]
+            [sade.schemas :as ssc]))
 
 (def application-role-gen (gen/elements roles/all-authz-roles))
 
@@ -24,12 +26,17 @@
              auths)))
 
 (defn application-gen
-  [orgs user & {:keys [permit-type-gen] :or {permit-type-gen permit-gen/permit-type-gen}}]
-  (let [org-ids (map (comp keyword :id) orgs)]
-    (gen/let [permit-type permit-type-gen
-              org-id (gen/elements org-ids)
-              application-auths (application-auths-gen user)]
-      (merge lupapalvelu.domain/application-skeleton
-             {:permitType permit-type
-              :organization org-id
-              :auths application-auths}))))
+  [user & {:keys [permit-type-gen org-id-gen]
+           :or {permit-type-gen permit-gen/permit-type-gen
+                org-id-gen      org-gen/org-id-gen}}]
+  (gen/let [permit-type permit-type-gen
+            application-auths (application-auths-gen user)
+            id (ssg/generator ssc/ObjectIdStr)
+            org-id org-id-gen
+            state (gen/elements lupapalvelu.states/all-application-states)]
+    (merge lupapalvelu.domain/application-skeleton
+           {:id           id
+            :state        state
+            :permitType   permit-type
+            :organization org-id
+            :auths        application-auths})))

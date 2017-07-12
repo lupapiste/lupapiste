@@ -69,7 +69,9 @@
 (def enable-accordions-gen
   (gen/let [orgs orgs-gen
             user (user-gen/user-with-org-auth-gen orgs)
-            application (app-gen/application-gen orgs user :permit-type-gen permit-gen/YA-biased-permit-type)]
+            application (app-gen/application-gen user
+                                                 :permit-type-gen permit-gen/YA-biased-permit-type
+                                                 :org-id-gen      (gen/elements (map :id orgs)))]
     {:orgs orgs
      :application application
      :user user}))
