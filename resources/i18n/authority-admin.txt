@@ -379,6 +379,7 @@
 "navi-sidebar.menu" "en" "Menu"
 "navi-sidebar.menu" "fi" "Valikko"
 "navi-sidebar.menu" "sv" "Meny"
+"navi-sidebar.minify" "en" "Collapse"
 "navi-sidebar.minify" "fi" "Pienennä"
 "navi-sidebar.minify" "sv" "Förminska"
 "stamp-editor.tab.title" "en" "Stamp editor"
