@@ -68,11 +68,12 @@
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
 
-(defn- deny-remove-of-last-document [{schema-info :schema-info} {documents :documents}]
+(defn- deny-remove-of-last-document [{schema-info :schema-info} {documents :documents :as app} user]
   (when schema-info
-    (let [info (:info (schemas/get-schema schema-info))
-          doc-count (count (domain/get-documents-by-name documents (:name info)))]
-      (and (:deny-removing-last-document info) (<= doc-count 1)))))
+    (let [last-removable-by (-> schema-info schemas/get-schema :info :last-removable-by)
+          user-app-role     (if (auth/application-authority? app user) :authority :applicant)
+          doc-count         (count (domain/get-documents-by-name documents (:name info)))]
+      (and last-removable-by (not (last-removable-by user-app-role)) (<= doc-count 1)))))
 
 (defn- deny-remove-for-non-authority-user [user {schema-info :schema-info}]
   (and (not (usr/authority? user))
@@ -90,7 +91,7 @@
     (cond
       (deny-remove-of-non-removable-doc document)             (fail :error.not-allowed-to-remove-document)
       (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
-      (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
+      (deny-remove-of-last-document document application user) (fail :error.removal-of-last-document-denied)
       (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
       (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
       (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))

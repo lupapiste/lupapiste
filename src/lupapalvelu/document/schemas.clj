@@ -53,7 +53,7 @@
 
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
-                 :approvable :removable :deny-removing-last-document
+                 :approvable :removable :last-removable-by
                  :disableable
                  :removable-only-by-authority
                  :user-authz-roles
@@ -1385,7 +1385,7 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1401,7 +1401,7 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1417,7 +1417,7 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1433,7 +1433,7 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1449,7 +1449,7 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1465,7 +1465,7 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1481,7 +1481,6 @@
            :order 3
            :removable true
            :repeating true
-           :deny-removing-last-document false
            :approvable true
            :type :party
            :subtype :hakijan-asiamies

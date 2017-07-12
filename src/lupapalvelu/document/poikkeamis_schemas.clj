@@ -7,7 +7,7 @@
                            :order 50
                            :removable true
                            :approvable true
-                           :deny-removing-last-document true
+                           :last-removable-by :none
                            :repeating false}
                     :body [{:name "kaytettykerrosala" :type :group
                             :validator :poikkeus-olemassa-olevat-rakennukset

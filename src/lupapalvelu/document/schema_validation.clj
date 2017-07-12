@@ -366,7 +366,7 @@
           (opt :redraw-on-approval)          sc/Bool    ;;
           (opt :post-verdict-party)          sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
-          (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
+          (opt :last-removable-by)           (sc/if keyword? :none #{(sc/enum :authority :applicant)}) ;; Deny removing last repeating doc
           (opt :user-authz-roles)            #{(apply sc/enum roles/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
           (opt :addable-in-states)           #{sc/Keyword} ;; States where document can be added
