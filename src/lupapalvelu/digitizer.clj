@@ -128,7 +128,7 @@
                           (:id application)
                           {$set {:buildings updated-buildings}}))))
 
-(defn do-create-application-from-previous-permit
+(defn create-archiving-project-application!
   [command operation buildings-and-structures app-info location-info permit-type building-xml]
   (let [{:keys [hakijat]} app-info
         document-datas (schema-datas app-info buildings-and-structures)
@@ -191,11 +191,11 @@
       (not organizations-match?)         (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (and (empty? bldgs-and-structs)
            (not createWithoutBuildings)) (fail :error.no-buildings-found-from-backend :buildingsNotFound true)
-      :else                              (let [{id :id} (do-create-application-from-previous-permit command
-                                                                                                    operation
-                                                                                                    bldgs-and-structs
-                                                                                                    app-info
-                                                                                                    location-info
-                                                                                                    permit-type
-                                                                                                    building-xml)]
+      :else                              (let [{id :id} (create-archiving-project-application! command
+                                                                                               operation
+                                                                                               bldgs-and-structs
+                                                                                               app-info
+                                                                                               location-info
+                                                                                               permit-type
+                                                                                               building-xml)]
                                            (ok :id id)))))
