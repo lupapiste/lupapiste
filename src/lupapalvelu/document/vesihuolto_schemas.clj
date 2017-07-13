@@ -11,7 +11,7 @@
 
 (def vesihuolto-kiinteisto {:info {:name "vesihuolto-kiinteisto"
                                    :approvable true
-                                   :removable false
+                                   :removable-by :none
                                    :repeating false
                                    :order 2
                                    :type :location}
@@ -45,7 +45,7 @@
    {:info {:name "hulevedet"
            :approvable false
            :order 3
-           :removable false
+           :removable-by :none
            :repeating false
            }
     :body [{:name "hulevedet" :type :select :sortBy :displayname :other-key "johdetaanMuualle"
@@ -55,7 +55,7 @@
    {:info {:name "talousvedet"
            :approvable false
            :order 4
-           :removable false
+           :removable-by :none
            :repeating false}
     :body [{:name "hankinta" :type :select :sortBy :displayname :other-key "muualta"
             :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
@@ -75,6 +75,6 @@
    {:info {:name "jatevedet"
            :approvable false
            :order 5
-           :removable false
+           :removable-by :none
            :repeating false}
     :body [{:name "kuvaus"  :type :text :max-len 4000 :required true :layout :full-width}]}])

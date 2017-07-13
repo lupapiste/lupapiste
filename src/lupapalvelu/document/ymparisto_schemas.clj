@@ -436,7 +436,7 @@
            :i18name "osapuoli"
            :repeating false
            :order 6
-           :removable true
+           :removable-by :all
            :approvable true
            :subtype :maksaja
            :type :party

@@ -53,9 +53,8 @@
 
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
-                 :approvable :removable :last-removable-by
+                 :approvable :removable-by :last-removable-by
                  :disableable
-                 :removable-only-by-authority
                  :user-authz-roles
                  :group-help :section-help
                  :after-update
@@ -68,9 +67,6 @@
                  :accordion-fields
                  :blacklist
                  :copy-action})
-
-(def updateable-keys #{:removable})
-(def immutable-keys (set/difference info-keys updateable-keys))
 
 (def select-one-of-key "_selected")
 
@@ -125,9 +121,10 @@
   (->> @registered-schemas keys (sort >) first))
 
 (defn with-current-schema-info [document]
-  (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
-    (update document :schema-info merge current-info)))
-
+  (let [{op :op :as info} (-> document :schema-info get-schema :info)]
+    ;; Operation documents are removable by default
+    (->> (merge (when (map? op) {:removable-by :all}) info)
+         (update document :schema-info merge))))
 
 (defn select-one-of-schema? [{schema-name :name :as schema}]
   (= select-one-of-key (name schema-name)))
@@ -1383,7 +1380,7 @@
    {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :last-removable-by :none
            :approvable true
@@ -1399,7 +1396,7 @@
    {:info {:name "hakija-r"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :last-removable-by :none
            :approvable true
@@ -1415,7 +1412,7 @@
    {:info {:name "hakija-tj"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :last-removable-by :none
            :approvable true
@@ -1431,7 +1428,7 @@
    {:info {:name "hakija-kt"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :last-removable-by :none
            :approvable true
@@ -1447,7 +1444,7 @@
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :last-removable-by :none
            :approvable true
@@ -1463,7 +1460,7 @@
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :last-removable-by :none
            :approvable true
@@ -1479,7 +1476,7 @@
    {:info {:name "hakijan-asiamies"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
            :approvable true
            :type :party
@@ -1494,8 +1491,7 @@
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"
            :order 4
-           :removable  true
-           :removable-only-by-authority true
+           :removable-by :authority
            :approvable true
            :accordion-fields designer-accordion-paths
            :type :party
@@ -1509,7 +1505,7 @@
            :i18name "osapuoli"
            :repeating true
            :order 5
-           :removable true
+           :removable-by :all
            :approvable true
            :disableable true
            :redraw-on-approval true
@@ -1528,7 +1524,7 @@
    {:info {:name "tyonjohtaja"
            :i18name "osapuoli"
            :order 2
-           :removable true
+           :removable-by :all
            :repeating true
            :approvable true
            :type :party
@@ -1538,7 +1534,7 @@
    {:info {:name "tyonjohtaja-v2"
            :i18name "osapuoli"
            :order 2
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :type :party
@@ -1551,8 +1547,7 @@
            :i18name "osapuoli"
            :repeating true
            :order 6
-           :removable true
-           :removable-only-by-authority true
+           :removable-by :authority
            :approvable true
            :subtype :maksaja
            :section-help "schemas.maksaja.section.help"
@@ -1597,12 +1592,12 @@
            :order 3
            :repeating true
            :no-repeat-button true
-           :removable true
+           :removable-by :all
            :type :location
            :copy-action :clear}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
-   {:info {:name "aloitusoikeus" :removable false :approvable true}
+   {:info {:name "aloitusoikeus" :removable-by :none :approvable true}
     :body (body kuvaus)}
 
    {:info {:name "lisatiedot"
@@ -1612,7 +1607,7 @@
             :layout :full-width}]}
 
    {:info {:name "paatoksen-toimitus-rakval"
-           :removable false
+           :removable-by :none
            :approvable true
            :order 300
            :blacklist [:neighbor]

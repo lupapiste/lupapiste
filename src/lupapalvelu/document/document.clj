@@ -61,9 +61,9 @@
                 (auth/has-auth-via-company? application user-id))
     (fail :error.application-does-not-have-given-auth)))
 
-(defn- deny-remove-of-non-removable-doc [{schema-info :schema-info}]
-  ; removable flag can be overwritten per document
-  (not (:removable schema-info)))
+(defn- deny-remove-of-non-removable-doc [{{:keys [removable-by]} :schema-info} application user]
+  (let [user-app-role (auth/application-role application user)]
+    (not (#{:all user-app-role} removable-by))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))

@@ -123,6 +123,9 @@
   [application user]
   (boolean (has-organization-authz-roles? #{:authority :approver} (:organization application) user)))
 
+(defn application-role [application user]
+  (if (application-authority? application user) :authority :applicant))
+
 ;;
 ;; Enrich auth array
 ;;
