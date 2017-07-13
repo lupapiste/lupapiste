@@ -38,7 +38,7 @@
       (with-mocked-orgs orgs
         (let [res (action/validate ely-action)]
           (cond
-            (usr/oir-authority? user)       (is (unauthorized? res))
+            (usr/oir-authority? user)       (is (= :error.unauthorized (keyword (:text res))))
             (or (not (usr/authority? user))
                 (empty? (:orgAuthz user))) (is (fail? res))
             (contains? #{:canceled :draft :open} (keyword (:state application))) (is (= (:text res) "error.command-illegal-state"))

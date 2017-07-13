@@ -21,8 +21,6 @@
   ([] (fail! :error.unauthorized))
   ([desc] (fail! :error.unauthorized :desc desc)))
 
-(defn unauthorized? [{:keys [ok text]}] (and (not ok) (= :error.unauthorized (keyword text))))
-
 (def not-accessible (fail :error.application-not-accessible))
 
 (defn ok? [m] (true? (:ok m)))
