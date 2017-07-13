@@ -198,15 +198,18 @@
     with-org-auth
     (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
+(defn oir-authority? [{role :role}]
+  (contains? #{:oirAuthority} (keyword role)))
+
 (defn virtual-user?
   "True if user exists only in session, not in database"
-  [{:keys [role impersonating]}]
+  [{:keys [impersonating] :as user}]
   (or
     impersonating
-    (contains? #{:oirAuthority} (keyword role))))
+    (oir-authority? user)))
 
 (defn authority? [{role :role}]
-  (contains? #{:authority :oirAuthority} (keyword role)))
+  (contains? #{:authority} (keyword role)))
 
 (defn verified-person-id? [{pid :personId source :personIdSource :as user}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
