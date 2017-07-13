@@ -68,12 +68,10 @@
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
 
-(defn- deny-remove-of-last-document [{schema-info :schema-info} {documents :documents :as app} user]
-  (when schema-info
-    (let [last-removable-by (-> schema-info schemas/get-schema :info :last-removable-by)
-          user-app-role     (if (auth/application-authority? app user) :authority :applicant)
-          doc-count         (count (domain/get-documents-by-name documents (:name info)))]
-      (and last-removable-by (not (last-removable-by user-app-role)) (<= doc-count 1)))))
+(defn- deny-remove-of-last-document [{{:keys [last-removable-by schema-name]} :schema-info} {documents :documents :as app} user]
+  (let [user-app-role (auth/application-role application user)
+        doc-count     (count (domain/get-documents-by-name documents schema-name))]
+    (and last-removable-by (not (#{:all user-app-role}) last-removable-by) (<= doc-count 1))))
 
 (defn- deny-remove-for-non-authority-user [user {schema-info :schema-info}]
   (and (not (usr/authority? user))
@@ -232,3 +230,34 @@
 (assignment/register-assignment-target! :parties describe-parties-assignment-targets)
 
 (assignment/register-assignment-target! :documents describe-non-party-document-assignment-targets)
+
+(defn check-removable-against-schema [{{removable :removable :as schema} :schema-info doc-id :id}]
+  (let [schema-removable (-> (schemas/get-schema schema) :info :removable)]
+    (when-not (or (nil? removable) (= removable schema-removable)) {:id doc-id :name (:name schema) :removable-s schema-removable :removable-d removable})))
+
+(defn check-application-removables [{documents :documents id :id}]
+  (some->> (map check-removable-against-schema documents)
+           (remove nil?)
+           not-empty
+           (hash-map :app-id id :docs)))
+
+(->> (lupapalvelu.mongo/with-db "lupapiste-smoke"
+       (lupapalvelu.mongo/select :applications {:_id #"LP-...-2017"} [:documents]))
+     (map check-application-removables)
+     (remove nil?))
+
+(mapcat :docs
+        '({:app-id "LP-245-2015-00292", :docs ("5625eab928e06f7b1bb97e35")} {:app-id "LP-491-2015-00506", :docs ("556313e7e4b06ad18eb29784")} {:app-id "LP-505-2015-00001", :docs ("55cb2063e4b0115300055a5d")} {:app-id "LP-543-2015-00032", :docs ("55c1959be4b0c0d656ae9db7")} {:app-id "LP-543-2015-00020", :docs ("5587fafde4b0d2a425eada83")} {:app-id "LP-543-2015-00043", :docs ("55d5be02e4b025c8f3ed1b26")} {:app-id "LP-543-2015-00044", :docs ("55d6c317e4b025c8f3ed2c1c")} {:app-id "LP-753-2015-00094", :docs ("553a2c38e4b0d614ebff3c1a")} {:app-id "LP-753-2015-00233", :docs ("55ed2280e4b073172ddedb28")} {:app-id "LP-753-2015-00247", :docs ("560138a028e06f195b435c88")} {:app-id "LP-753-2015-00261", :docs ("560cf19b28e06f0cda003ebb")} {:app-id "LP-753-2015-00288", :docs ("5624d5c728e06f7b1bb9614c")} {:app-id "LP-753-2015-00347", :docs ("567a7a5b28e06f129b7db0a8")} {:app-id "LP-858-2015-00199", :docs ("5579282ae4b0995d5089ae12")}))
+
+(lupapalvelu.mongo/with-db "lupapiste-smoke" (lupapalvelu.mongo/select :applications
+                                                                       {:documents.id {$in (mapcat :docs)}}))
+'({:app-id "LP-245-2015-00292", :docs ("5625eab928e06f7b1bb97e35")} {:app-id "LP-491-2015-00506", :docs ("556313e7e4b06ad18eb29784")} {:app-id "LP-505-2015-00001", :docs ("55cb2063e4b0115300055a5d")} {:app-id "LP-543-2015-00032", :docs ("55c1959be4b0c0d656ae9db7")} {:app-id "LP-543-2015-00020", :docs ("5587fafde4b0d2a425eada83")} {:app-id "LP-543-2015-00043", :docs ("55d5be02e4b025c8f3ed1b26")} {:app-id "LP-543-2015-00044", :docs ("55d6c317e4b025c8f3ed2c1c")} {:app-id "LP-753-2015-00094", :docs ("553a2c38e4b0d614ebff3c1a")} {:app-id "LP-753-2015-00233", :docs ("55ed2280e4b073172ddedb28")} {:app-id "LP-753-2015-00247", :docs ("560138a028e06f195b435c88")} {:app-id "LP-753-2015-00261", :docs ("560cf19b28e06f0cda003ebb")} {:app-id "LP-753-2015-00288", :docs ("5624d5c728e06f7b1bb9614c")} {:app-id "LP-753-2015-00347", :docs ("567a7a5b28e06f129b7db0a8")} {:app-id "LP-858-2015-00199", :docs ("5579282ae4b0995d5089ae12")})
+{:documents.schema-info.name 1}
+
+(lupapalvelu.mongo/with-db "lupapiste-smoke" (lupapalvelu.mongo/select :applications
+                                                                       {:documents.id {$in (->>
+                                                                                            '({:app-id "LP-245-2017-00083", :docs ({:id "5717354828e06f48bd7fc9c9", :name "hakija-ya"})} {:app-id "LP-245-2017-00135", :docs ({:id "56caa3e528e06f08ea69f0ac", :name "hakija-ya"})} {:app-id "LP-245-2017-00136", :docs ({:id "56caa3e528e06f08ea69f0ac", :name "hakija-ya"})} {:app-id "LP-186-2017-00184", :docs ({:id "5644aed928e06f20cc96b087", :name "hakija-ya"})} {:app-id "LP-245-2017-00224", :docs ({:id "56d53d14edf02d49bc202703", :name "hakija-ya"})} {:app-id "LP-186-2017-00282", :docs ({:id "56c6b74128e06f4eb92d2892", :name "hakija-ya"})} {:app-id "LP-092-2017-01817", :docs ({:id "5702294eedf02d36eb7060ac", :name "hakija-ya"})} {:app-id "LP-245-2017-00412", :docs ({:id "5704b93a28e06f1d2b263805", :name "hakija-ya"})} {:app-id "LP-245-2017-00430", :docs ({:id "56ab50a828e06f2f33634213", :name "hakija-ya"})} {:app-id "LP-092-2017-02083", :docs ({:id "571cc31aedf02d57fe886407", :name "hakija-ya"})} {:app-id "LP-092-2017-02141", :docs ({:id "570cb51828e06f0ec716f701", :name "hakija-ya"})} {:app-id "LP-734-2017-00736", :docs ({:id "56f8c6b228e06f73aba53835", :name "hakija-ya"})} {:app-id "LP-092-2017-03876", :docs ({:id "56f22cf028e06f73aba4be2c", :name "hakija-ya"})})
+                                                                                            (mapcat :docs) (map :id))}}
+                                                                       {:primaryOperation.name 1}))
+
+(:removable (:info (schemas/get-schema {:name "maksaja" :version 1})))
