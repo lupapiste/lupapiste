@@ -285,7 +285,7 @@
       org/get-organization))
 
 (defn user-is-authority-in-organization? [user organization-id]
-  (let [org-set (organization-ids-by-roles user #{:authority})]
+  (let [org-set (organization-ids-by-roles user roles/default-org-authz-roles)]
     (contains? org-set organization-id)))
 
 (defn validate-authority-in-organization
