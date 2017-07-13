@@ -51,15 +51,12 @@
     u))
 
 (defn user-with-org-auth-gen
-  "User generator with generated org-authz for given orgs. About 1/2 role is 'authority'."
-  [orgs]
-  (let [org-ids    (map (comp keyword :id) orgs)
-        org-id-gen (gen/elements org-ids)
-        base-user-gen (gen/fmap
-                        applicant-without-org-authz
-                        (ssg/generator User
-                                       {OrgId org-id-gen
-                                        Role  authority-biased-user-role}))]
-    (gen/fmap with-org-auth base-user-gen)))
+  "User generator with generated org-authz for given orgs. About 3/5 role is 'authority'."
+  [org-id-gen]
+  (gen/fmap
+    (comp applicant-without-org-authz with-org-auth)
+    (ssg/generator User
+                   {OrgId org-id-gen
+                    Role  authority-biased-user-role})))
 
 

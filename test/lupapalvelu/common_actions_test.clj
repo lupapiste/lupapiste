@@ -24,13 +24,14 @@
             [lupapalvelu.test-util :refer [passing-quick-check catch-all]]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.actions-api :as ca]
-            ;; ensure all actions are registered by requiring server ns
+    ;; ensure all actions are registered by requiring server ns
             [lupapalvelu.server]
             [lupapalvelu.action :as action]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.authorization :as auth]
+            [sade.schema-utils :as ssu]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
@@ -61,14 +62,14 @@
   "Generates a set of organizations with different ids"
   (gen/let [org-ids (gen/set (ssg/generator org/OrgId) {:num-elements 10
                                                         :max-tries 50})
-            orgs (gen/vector (ssg/generator org/Organization) 10)]
+            orgs (gen/vector (ssg/generator (ssu/select-keys org/Organization [:id :name :statementGivers])) 10)]
     (let [fix-id (fn [id org] (assoc org :id id))
           with-fixed-ids (map fix-id org-ids orgs)]
       (set with-fixed-ids))))
 
 (def enable-accordions-gen
   (gen/let [orgs orgs-gen
-            user (user-gen/user-with-org-auth-gen orgs)
+            user (user-gen/user-with-org-auth-gen (->> orgs (map (comp keyword :id)) (gen/elements)))
             application (app-gen/application-gen user
                                                  :permit-type-gen permit-gen/YA-biased-permit-type
                                                  :org-id-gen      (gen/elements (map :id orgs)))]
@@ -92,8 +93,7 @@
                                                 user)]
     (with-mocked-orgs orgs
       (cond (not allowed-to-access?)   (is (fail? (validate action)))
-            (and authority?
-                 authority-in-org?
+            (and authority-in-org?
                  (= permit-type "YA")) (is (ok? (validate action)))
             authority?                 (is (fail? (validate action)))
             :else                      (is (ok? (validate action)))))))
