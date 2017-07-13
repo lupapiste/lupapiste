@@ -483,6 +483,17 @@
     (fact "s not found"
       (includes-as-kw? [:yi "er" :san "si" :wu] "liu")=> false))
 
+(facts "intersection-as-kw"
+  (fact "s and kw"
+    (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu" :yi :er])
+    => #{:yi :er})
+  (fact "empty"
+    (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"])
+    => #{})
+  (fact "nil safe"
+    (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"] nil nil)
+    => #{}))
+
 (facts get-in-tree
   (fact "single level"
     (get-in-tree [[:foo :bar] [:baz :quu]] [:foo]) => :bar)

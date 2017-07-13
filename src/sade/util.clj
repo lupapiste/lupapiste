@@ -593,9 +593,10 @@
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
 
-(def =as-kw          shared/=as-kw)
-(def not=as-kw       shared/not=as-kw)
-(def includes-as-kw? shared/includes-as-kw?)
+(def =as-kw             shared/=as-kw)
+(def not=as-kw          shared/not=as-kw)
+(def includes-as-kw?    shared/includes-as-kw?)
+(def intersection-as-kw shared/intersection-as-kw)
 
 (defn kw-path
   "a b c -> :a.b.c"

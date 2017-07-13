@@ -73,10 +73,10 @@
                       (swap! state
                              (fn [xs]
                                ;; Sanitation on the client side.
-                               (set/intersection (set (if checked
-                                                        (remove #(= value %) xs)
-                                                        (cons value xs)))
-                                                 (set (map :value items)))))
+                               (util/intersection-as-kw (if checked
+                                                          (remove #(util/=as-kw value %) xs)
+                                                          (cons value xs))
+                                                        (map :value items))))
                       (path/meta-updated options))}
          text]]))])
 

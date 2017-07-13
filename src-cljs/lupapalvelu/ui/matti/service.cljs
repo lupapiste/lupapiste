@@ -77,23 +77,25 @@
                   :path path
                   :value value))
 
-(defn reviews [category callback]
-  (common/query "verdict-template-reviews"
+(defn generics [generic-type category callback]
+  (common/query (js/sprintf "verdict-template-%ss"
+                            (name generic-type))
                 callback
                 :category category))
 
-(defn new-review [category callback]
-  (common/command {:command "add-verdict-template-review"
+(defn new-generic [generic-type category callback]
+  (common/command {:command (str "add-verdict-template-" (name generic-type))
                    :success callback}
                   :category category))
 
-(defn update-review [review-id callback & updates]
-  (apply (partial common/command {:command "update-verdict-template-review"
-                                  :success (fn [{:keys [review modified] :as response}]
-                                             (when (= (:category review)
+(defn update-generic [generic-type gen-id callback & updates]
+  (apply (partial common/command {:command (str "update-verdict-template-"
+                                                (name generic-type))
+                                  :success (fn [{:keys [modified] :as response}]
+                                             (when (= (-> response generic-type :category)
                                                       @state/current-category)
                                                (swap! state/settings
                                                       #(assoc % :modified modified)))
                                              (callback response))}
-                  :review-id review-id)
+                  (keyword (str (name generic-type) "-id")) gen-id)
          updates))

@@ -16,7 +16,6 @@
 "matti-foremen" "fi" "Työnjohtajat"
 "matti-neighbours" "fi" "Naapurien kuulemiset ja huomautukset"
 "matti-neighbours.text" "fi" "Naapurien kuuleminen ja mahdolliset huomautukset tulee kirjata päätökseen käsin."
-"matti-plans" "fi" "Lupaehtosuunnitelmat"
 "matti-purpose" "fi" "Kaavan käyttötarkoitus"
 "matti-purpose.text" "fi" "Kaavan käyttötarkoitustieto tulee kirjata päätökseen käsin."
 "matti-restore" "en" "Restore"
@@ -225,3 +224,5 @@
 "matti.suunnitelmat" "fi" "Suunnitelmat"
 "matti.suunnitelmat" "en" "Plans"
 "matti.suunnitelmat" "sv" "Planer"
+"matti-plans" "fi" "Lupaehtosuunnitelmat"
+"matti-settings.plans" "fi" "Lupaehtosuunnitelmat"

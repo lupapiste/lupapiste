@@ -23,20 +23,33 @@
                                      :modified (:modified settings)
                                      :category category
                                      :_meta {:updated settings-updater}))))
-  (service/reviews category
-                   (fn [{reviews :reviews}]
-                     (reset! state/reviews reviews))))
+  (service/generics :review
+                    category
+                    (fn [{reviews :reviews}]
+                      (reset! state/reviews reviews)))
+  (service/generics :plan
+                    category
+                    (fn [{plans :plans}]
+                      (reset! state/plans plans))))
 
-(defn upsert-review
-  "Updates reviews state according to the response. After adding or
-  updating a review."
-  [{review :review}]
-  (when (= (:category review) @state/current-category)
-    (if-let [index (first (keep-indexed #(when (= (:id %2) (:id review))
-                                           %1)
-                                        @state/reviews))]
-      (swap! state/reviews #(assoc % index review))
-      (swap! state/reviews #(conj % review)))))
+(defn- generic-state [generic-type]
+  (case generic-type
+    :review state/reviews
+    :plan   state/plans))
+
+(defn upsert-generic
+  "Updates generic's (review or plan) state according to the
+  response. After adding or updating a review."
+  [generic-type]
+  (let [state* (generic-state generic-type)]
+   (fn [response]
+     (let [generic (generic-type response)]
+       (when (= (:category generic) @state/current-category)
+         (if-let [index (first (keep-indexed #(when (= (:id %2) (:id generic))
+                                                %1)
+                                             @state*))]
+           (swap! state* #(assoc % index generic))
+           (swap! state* #(conj % generic))))))))
 
 (defn css-flags
   "List of keys with truthy values.
@@ -88,43 +101,44 @@
                  [:option {:key value :value value} text])))]))
 
 
-(defn update-details [review-id details-key initial value]
+(defn update-details [generic-type gen-id details-key initial value]
   (let [value (s/trim value)]
     (when-not (or (= initial value) (s/blank? value))
-      (service/update-review review-id
-                             upsert-review
-                             details-key
-                             value))))
+      (service/update-generic generic-type
+                              gen-id
+                              (upsert-generic generic-type)
+                              details-key
+                              value))))
 
-(defn name-cell [{:keys [id name deleted]} key]
+(defn name-cell [generic-type {:keys [id name deleted]} key]
   (let [value (key name)]
     (if deleted
       [:span value]
-      (name-edit value (partial update-details id key value)))))
+      (name-edit value (partial update-details generic-type id key value)))))
 
 (defn type-cell [{:keys [id type deleted]}]
   (if deleted
     [:span (common/loc (str "matti.review-type." (name type)))]
-    (type-edit type (partial update-details id :type type))))
+    (type-edit type (partial update-details :review id :type type))))
 
-
-(rum/defcs reviews-editor < rum/reactive
+(rum/defcs generic-editor < rum/reactive
   (rum/local false ::show-deleted)
-  [{show-deleted ::show-deleted}]
-  (let [reviews (rum/react state/reviews)]
+  [{show-deleted ::show-deleted} generic-type]
+  (let [items    (rum/react (generic-state generic-type))
+        check-id (js/sprintf "show-deleted-%ss" (name generic-type))]
     [:div.matti-settings-editor
-     (when (some :deleted reviews)
+     (when (some :deleted items)
        [:div.checkbox-wrapper
-        [:input {:type "checkbox"
-                 :id "show-deleted-reviews"
+        [:input {:type  "checkbox"
+                 :id    check-id
                  :value @show-deleted}]
         [:label.checkbox-label
-         {:for "show-deleted-reviews"
+         {:for      check-id
           :on-click #(swap! show-deleted not)}
          (common/loc :handler-roles.show-all)]])
      (let [filtered (if @show-deleted
-                      reviews
-                      (remove :deleted reviews))]
+                      items
+                      (remove :deleted items))]
        (when (seq filtered)
          [:table.matti-editor-table
           [:thead
@@ -132,69 +146,30 @@
             [:th (common/loc "lang.fi")]
             [:th (common/loc "lang.sv")]
             [:th (common/loc "lang.en")]
-            [:th (common/loc "verdict.katselmuksenLaji")]
+            (when (= generic-type :review)
+              [:th (common/loc "verdict.katselmuksenLaji")])
             [:th]]]
           [:tbody
-           (for [{:keys [id type deleted] :as review} filtered]
+           (for [{:keys [id deleted] :as item} filtered]
              [:tr {:key id}
-              [:td (name-cell review :fi)]
-              [:td (name-cell review :sv)]
-              [:td (name-cell review :en)]
-              [:td (type-cell review)]
+              [:td (name-cell generic-type item :fi)]
+              [:td (name-cell generic-type item :sv)]
+              [:td (name-cell generic-type item :en)]
+              (when (= generic-type :review)
+                [:td (type-cell item)])
               [:td [:button.primary.outline
-                    {:on-click #(service/update-review id
-                                                       upsert-review
-                                                       :deleted
-                                                       (not deleted))}
+                    {:on-click #(service/update-generic generic-type
+                                                        id
+                                                        (upsert-generic generic-type)
+                                                        :deleted
+                                                        (not deleted))}
                     (common/loc (if deleted :matti-restore :remove))]]])]]))
      [:button.positive
-      {:on-click #(service/new-review @state/current-category upsert-review)}
+      {:on-click #(service/new-generic generic-type
+                                       @state/current-category
+                                       (upsert-generic generic-type))}
       [:i.lupicon-circle-plus]
       [:span (common/loc "add")]]]))
-
-(rum/defcs plans-editor < rum/reactive
-  (rum/local false ::show-deleted)
-  [{show-deleted ::show-deleted}]
-  (let [plans (rum/react state/plans)]
-    [:div.matti-settings-editor
-     (when (some :deleted plans)
-       [:div.checkbox-wrapper
-        [:input {:type "checkbox"
-                 :id "show-deleted-plans"
-                 :value @show-deleted}]
-        [:label.checkbox-label
-         {:for "show-deleted-plans"
-          :on-click #(swap! show-deleted not)}
-         (common/loc :handler-roles.show-all)]])
-     (let [filtered (if @show-deleted
-                      plans
-                      (remove :deleted plans))]
-       (when (seq filtered)
-         [:table.matti-editor-table
-          [:thead
-           [:tr
-            [:th (common/loc "lang.fi")]
-            [:th (common/loc "lang.sv")]
-            [:th (common/loc "lang.en")]
-            [:th]]]
-          [:tbody
-           (for [{:keys [id deleted] :as plan} filtered]
-             [:tr {:key id}
-              [:td (name-cell plan :fi)]
-              [:td (name-cell plan :sv)]
-              [:td (name-cell plan :en)]
-              [:td [:button.primary.outline
-                    {:on-click #(service/update-review id
-                                                       upsert-review
-                                                       :deleted
-                                                       (not deleted))}
-                    (common/loc (if deleted :matti-restore :remove))]]])]]))
-     [:button.positive
-      {:on-click #(service/new-review @state/current-category upsert-review)}
-      [:i.lupicon-circle-plus]
-      [:span (common/loc "add")]]]))
-
-
 
 (defn settings-section-header [{:keys [path schema state] :as options} edit?]
   [:div.matti-grid-6.section-header
@@ -222,8 +197,8 @@
    [:div.section-body
     (if (path/react-meta? options :editor?)
       (case (keyword id)
-        :reviews (reviews-editor)
-        :plans   (plans-editor))
+        :reviews (generic-editor :review)
+        :plans   (generic-editor :plan))
       (layout/matti-grid (shared/child-schema options
                                               :grid
                                               options)))]])

@@ -53,6 +53,18 @@
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))
 
+(defn- published-settings
+  "The published settings only include the value lists without
+  schema-ordained structure."
+  [organization category]
+  (let [draft (:draft (settings organization category))]
+    (into {}
+          (for [[k v] draft]
+            [k (loop [v v]
+                 (if (map? v)
+                   (recur (-> v vals first))
+                   v))]))))
+
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
@@ -60,20 +72,24 @@
         draft    (assoc-in (:draft template) (map keyword path) value)]
     (or (schemas/validate-path-value shared/default-verdict-template path value
                                      {:schema-overrides {:section shared/MattiVerdictSection}
-                                      :references {:settings (:draft (settings organization (:category template)))}})
+                                      :references {:settings (:draft (settings organization
+                                                                               (:category template)))}})
         (template-update organization
                          template-id
                          {$set {:verdict-templates.templates.$.draft draft}}
                          timestamp))))
 
 (defn publish-verdict-template [organization template-id timestamp]
-  (template-update organization
-                   template-id
-                   {$push {:verdict-templates.templates.$.versions
-                           {:id        (mongo/create-id)
-                            :published timestamp
-                            :data      (:draft (verdict-template organization
-                                                                 template-id))}}}))
+  (let [template (verdict-template organization template-id)]
+    (template-update organization
+                     template-id
+                     {$push {:verdict-templates.templates.$.versions
+                             {:id        (mongo/create-id)
+                              :published timestamp
+                              :data      (:draft template)
+                              :settings (published-settings organization
+                                                            (:category template))}}})))
+
 (defn set-name [organization template-id timestamp name]
   (template-update organization
                    template-id

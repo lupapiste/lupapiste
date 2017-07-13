@@ -130,7 +130,11 @@
     (ok :modified created)))
 
 (defcommand publish-verdict-template
-  {:description      "Creates new verdict template version."
+  {:description "Creates new verdict template version. The version
+  includes also the current settings. Note: the review and plan
+  definitions (localizations and type) are shared between
+  versions. Thus, name and type changes affect every published
+  template."
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [verdict-template-editable

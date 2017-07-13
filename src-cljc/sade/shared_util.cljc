@@ -1,5 +1,6 @@
 (ns sade.shared-util
-  "Required and passed-through by sade.util")
+  "Required and passed-through by sade.util"
+  (:require [clojure.set :as set]))
 
 (defn find-by-key
   "Return item from sequence col of maps where element k (keyword)
@@ -23,3 +24,8 @@
   "True, if any coll item matches x as keyword."
   [coll x]
   (boolean (some (partial =as-kw x) coll)))
+
+(defn intersection-as-kw
+  "Intersection of given collections as keywords."
+  [& colls]
+  (apply set/intersection (map #(set (map keyword %)) colls)))
