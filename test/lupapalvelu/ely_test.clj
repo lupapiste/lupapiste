@@ -1,5 +1,7 @@
 (ns lupapalvelu.ely-test
-  (:require [clojure.test :refer [is]]
+  (:require [midje.sweet :refer :all]
+            [clojure.test :refer [is]]
+            [clojure.test.check :as tc]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
@@ -14,32 +16,34 @@
             [lupapalvelu.user :as usr]))
 
 
+(def org-map-gen
+  (gen/hash-map :id org-gen/org-id-gen))
+
 (def ely-app-data-gen
-  (gen/let [org-ids (gen/set org-gen/org-id-gen {:num-elements 10
-                                                 :max-tries 20})
-            orgs  (gen/vector (gen/hash-map :id (gen/elements org-ids)) 10)
-            user (user-gen/user-with-org-auth-gen orgs)
-            random-org-id  (gen/elements org-ids)
-            application (app-gen/application-gen user)]
+  (gen/let [orgs  (gen/vector-distinct-by :id org-map-gen {:min-elements 1})
+            user (user-gen/user-with-org-auth-gen (gen/elements (map (comp keyword :id) orgs)))
+            application (app-gen/application-gen user :org-id-gen (gen/elements (map (comp keyword :id) orgs)))]
     {:orgs        orgs
-     :application (assoc application :organization random-org-id)
+     :application application
      :user        user}))
 
-
-(defspec ely-statement-types
-  3
+(def ely-query-prop
   (prop/for-all [data ely-app-data-gen]
     (let [{:keys [orgs application user]} data
           action-skeleton {:user user
                            :application application
                            :data {:id (:id application)}}
           ely-action (action/build-action "ely-statement-types" action-skeleton)]
-      (when (usr/authority? user) (println "user is authority" (:orgAuthz user)))
       (with-mocked-orgs orgs
         (let [res (action/validate ely-action)]
           (cond
-            (empty? (:orgAuthz user)) (is (fail? res))
+            (or (not (usr/authority? user))
+                (empty? (:orgAuthz user))) (is (fail? res))
             (contains? #{:canceled :draft :open} (keyword (:state application))) (is (= (:text res) "error.command-illegal-state"))
             (and (usr/authority? user)
                  (usr/user-is-authority-in-organization? user (name (:organization application)))) (is (ok? res))
             :else (is (fail? res))))))))
+
+(fact "ely-stamtent-types-query"
+  ; writing test as midje + quick-check seems to work better in IDEA compared to defspec (crashes when tests shrink)
+  (tc/quick-check 150 ely-query-prop :max-size 30))
