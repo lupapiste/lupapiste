@@ -14,9 +14,15 @@
   (fact (sc/check (max-length-string 1) "ab") =not=> nil)
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
 
-(facts "schema-utils/keys"
-  (let [schema {:key                    sc/Str
-                (sc/required-key :rkey) sc/Int
-                (sc/optional-key :okey) sc/Any}]
-    (ssu/keys schema)) => (just [:key :rkey :okey]))
+(facts "schema-utils"
+  (let [test-schema {:key                    sc/Str
+                     (sc/required-key :rkey) sc/Int
+                     (sc/optional-key :okey) sc/Any}]
+    (fact "keys"
+      (ssu/keys test-schema) => (just [:key :rkey :okey]))
+    (fact "select-keys"
+      (ssu/select-keys test-schema [:key :okey :fookey]) => (just {:key sc/Str
+                                                                   (sc/optional-key :okey) sc/Any}))))
+
+
 
