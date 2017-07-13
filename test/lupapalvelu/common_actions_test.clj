@@ -39,7 +39,7 @@
   (with-all-mocked-orgs
     (let [application (merge lupapalvelu.domain/application-skeleton
                              {:permitType "YA"
-                              :organization (keyword (:id mock-org/sipoo-ya))})
+                              :organization (:id mock-org/sipoo-ya)})
           action-skeleton {:user (usr/with-org-auth mock-usr/sonja)
                            :application application
                            :data {:id ""}}
