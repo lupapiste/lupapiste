@@ -339,7 +339,7 @@
             <enumeration value="Lausuntopyyntö suojeluesityksestä"></enumeration>
             <enumeration value="Tiedoksi päätös rakennussuojelusta"></enumeration>
             <!-- 06.05.09  Teiden suoja- ja näkemäalueelle rakentaminen (poikkeamisluvat) -->
-            <enumeration value="Lausuntopyyntö teiden suoja- ja näkemäalueelle takentamisen poikkeamishakemuksesta"></enumeration>
+            <enumeration value="Lausuntopyyntö teiden suoja- ja näkemäalueelle rakentamisen poikkeamishakemuksesta"></enumeration>
             <enumeration value="Tiedoksi päätös teiden suoja- ja näkemäalueelle rakentamisen poikkeamisluvasta"></enumeration>
             <!-- 06.05.10 Teiden suoja- ja näkemäalueen ulkopuolelle rakentaminen (naapurin kuuleminen) -->
             <enumeration value="Lausuntopyyntö naapurin kuulemisesta teiden suoja- ja näkemäalueen ulkopuolelle rakentamisesta"></enumeration>

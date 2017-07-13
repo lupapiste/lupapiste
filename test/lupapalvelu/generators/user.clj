@@ -2,7 +2,8 @@
   (require [clojure.test.check.generators :as gen]
            [lupapalvelu.roles :as roles]
            [lupapalvelu.user :refer :all]
-           [sade.schema-generators :as ssg]))
+           [sade.schema-generators :as ssg]
+           [sade.util :as util]))
 
 (def org-id-num-generator
   (gen/choose 100 1000))
@@ -36,5 +37,26 @@
                           :max-elements (count roles/all-authz-roles)})))
 
 (ssg/register-generator [Authz] distinct-authz-generator)
+
+
+(def authority-biased-user-role
+  (gen/frequency [[3 (gen/return "authority")]
+                  [2 (ssg/generator Role)]]))
+
+(defn- applicant-without-org-authz
+  "Applicant's do not have orgAuthz"
+  [u]
+  (if (and (= "applicant" (:role u)) (util/not-empty-or-nil? (:orgAuthz u)))
+    (assoc u :orgAuthz {})
+    u))
+
+(defn user-with-org-auth-gen
+  "User generator with generated org-authz for given orgs. About 3/5 role is 'authority'."
+  [org-id-gen]
+  (gen/fmap
+    (comp applicant-without-org-authz with-org-auth)
+    (ssg/generator User
+                   {OrgId org-id-gen
+                    Role  authority-biased-user-role})))
 
 

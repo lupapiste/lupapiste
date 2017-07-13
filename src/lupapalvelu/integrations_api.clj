@@ -458,3 +458,12 @@
     (if (.exists f)
       (transferred-file-response (.getName f) (slurp f))
       (resp/status 404 "File Not Found"))))
+
+(defquery ely-statement-types
+  {:parameters [id]
+   :description "Returns possible ELY statement types for application"
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:authority}                                ; default-org-authz-roles
+   :states     (states/all-application-states-but :draft :open :canceled)}
+   [{{:keys [permitType]} :application}]
+  (ok :statementTypes (permit/get-metadata permitType :ely-statement-types)))
