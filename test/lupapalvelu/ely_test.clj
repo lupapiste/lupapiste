@@ -13,6 +13,7 @@
             [lupapalvelu.generators.application :as app-gen]
             [lupapalvelu.generators.organization :as org-gen]
             [lupapalvelu.generators.user :as user-gen]
+            [lupapalvelu.test-util :refer [passing-quick-check]]
             [lupapalvelu.user :as usr]))
 
 
@@ -37,6 +38,7 @@
       (with-mocked-orgs orgs
         (let [res (action/validate ely-action)]
           (cond
+            (usr/oir-authority? user)       (is (unauthorized? res))
             (or (not (usr/authority? user))
                 (empty? (:orgAuthz user))) (is (fail? res))
             (contains? #{:canceled :draft :open} (keyword (:state application))) (is (= (:text res) "error.command-illegal-state"))
@@ -44,6 +46,6 @@
                  (usr/user-is-authority-in-organization? user (name (:organization application)))) (is (ok? res))
             :else (is (fail? res))))))))
 
-(fact "ely-stamtent-types-query"
+(fact :qc "ely-stamtent-types-query"
   ; writing test as midje + quick-check seems to work better in IDEA compared to defspec (crashes when tests shrink)
-  (tc/quick-check 150 ely-query-prop :max-size 30))
+  (tc/quick-check 150 ely-query-prop :max-size 30) => passing-quick-check)
