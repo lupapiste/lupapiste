@@ -5,7 +5,7 @@
 
 (def rakennushanke {:info {:name "rakennushanke"
                            :order 50
-                           :removable true
+                           :removable-by :all
                            :approvable true
                            :last-removable-by :none
                            :repeating false}
