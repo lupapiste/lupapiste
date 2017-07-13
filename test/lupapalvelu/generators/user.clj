@@ -40,8 +40,8 @@
 
 
 (def authority-biased-user-role
-  (gen/frequency [[1 (gen/return "authority")]
-                  [1 (ssg/generator Role)]]))
+  (gen/frequency [[3 (gen/return "authority")]
+                  [2 (ssg/generator Role)]]))
 
 (defn- applicant-without-org-authz
   "Applicant's do not have orgAuthz"
