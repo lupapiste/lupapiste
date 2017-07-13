@@ -1547,7 +1547,8 @@
            :i18name "osapuoli"
            :repeating true
            :order 6
-           :removable-by :authority
+           :removable-by :all
+           :last-removable-by :authority
            :approvable true
            :subtype :maksaja
            :section-help "schemas.maksaja.section.help"
