@@ -120,11 +120,10 @@
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 
-(defn with-current-schema-info [document]
-  (let [{op :op :as info} (-> document :schema-info get-schema :info)]
-    ;; Operation documents are removable by default
-    (->> (merge (when (map? op) {:removable-by :all}) info)
-         (update document :schema-info merge))))
+(defn with-current-schema-info [{{op :op} :schema-info :as document}]
+  (->> document :schema-info get-schema :info
+       (merge (when (map? op) {:removable-by :all})) ; Operation documents are removable by default
+       (update document :schema-info merge)))
 
 (defn select-one-of-schema? [{schema-name :name :as schema}]
   (= select-one-of-key (name schema-name)))
