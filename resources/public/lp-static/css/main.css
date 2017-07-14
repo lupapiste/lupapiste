@@ -14931,7 +14931,6 @@ button.rollup-button {
   margin: 6px;
 }
 
-<<<<<<< HEAD
 #stamp-info .stamping--stamp-preview {
   text-align: center;
   resize: none;
@@ -14939,7 +14938,8 @@ button.rollup-button {
   border-width: 2px;
   border-radius: 10px;
   padding: 20px 20px 20px 20px;
-=======
+}
+
 .matti-grid-1 {
   width: 100%;
   color: #333333;
@@ -17704,7 +17704,6 @@ button.rollup-button {
 
 .matti-grid-12 .row .col--center > * {
   display: inline-block;
->>>>>>> LPK-2953 Matti grid.
 }
 
 .matti-grid-12 .row.row--tight {
