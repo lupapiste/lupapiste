@@ -2,19 +2,23 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.integrations.statement-canonical :refer :all]
             [lupapalvelu.statement :as stmnt]
-            [clojure.test.check.properties :as prop]
-            [sade.util :as util]
-            [sade.shared-schemas :as sschemas]
-            [sade.schema-generators :as ssg]
+            [lupapalvelu.test-util :refer [passing-quick-check]]
             [lupapalvelu.user :as usr]
+            [clojure.test.check :as tc]
             [clojure.test.check.generators :as gen]
-            [sade.schema-utils :as ssu]))
+            [clojure.test.check.properties :as prop]
+            [sade.schema-generators :as ssg]
+            [sade.schema-utils :as ssu]
+            [sade.shared-schemas :as sschemas]
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
+(def sonja-requester {:firstName "Sonja" :lastName "Sibbo" :organization {:fi "Sipoo"}})
 
 (fact "statement to canonical"
   (let [statement (stmnt/create-statement 123 nil "saate" (util/get-timestamp-from-now :day 7) (ssg/generate stmnt/StatementGiver))
         statement-request-canonical (statement-as-canonical
-                                      {:firstName "Sonja" :lastName "Sibbo" :organization {:fi "Sipoo"}}
+                                      sonja-requester
                                       statement
                                       "fi")]
     (fact "statement model format"
@@ -24,12 +28,30 @@
                           :person map?
                           :saateText "saate"
                           :state :requested}))
-    (fact "canonical ok"
+    (fact "statement request"                               ; only base information for statement
       statement-request-canonical => map?
       statement-request-canonical => (just {:LausuntoTunnus (:id statement)
                                             :Saateteksti (:saateText statement)
                                             :Pyytaja     (just "Sipoo (Sonja Sibbo)")
                                             :PyyntoPvm   (util/to-xml-date (get statement :requested))
                                             :Maaraaika   (util/to-xml-date (get statement :dueDate))
-                                            :Lausunnonantaja (contains (get-in statement [:person :name]))})))
-  #_(prop/for-all [statement (ssg/generator (ssu/select-keys stmnt/Statement [:id :person :requested :state]))]))
+                                            :Lausunnonantaja (contains (get-in statement [:person :name]))}))
+    (fact :qc "statement response, full data"
+      (tc/quick-check
+        150
+        (prop/for-all [full-statement (ssg/generator
+                                        (ssu/select-keys
+                                          stmnt/Statement
+                                          [:id :saateText :status :text :dueDate :requested :given :person]))]
+          (let [statement (statement-as-canonical sonja-requester full-statement "fi")]
+            (fact "mandatory keys"
+              statement => (contains [:LausuntoTunnus  (:id full-statement)]
+                                     [:Lausunnonantaja (contains (ss/trim (get-in full-statement [:person :name])))]
+                                     [:PyyntoPvm       (util/to-xml-date (get full-statement :requested))]
+                                     [:Pyytaja         (just "Sipoo (Sonja Sibbo)")]))
+            (fact "other keys"
+              (when (:saateText full-statement) (:saateText full-statement) => (:Saateteksti statement))
+              (when (:dueDate full-statement) (util/to-xml-date (:dueDate full-statement)) => (:Maaraaika statement))
+              (when (:given statement) (util/to-xml-date (:given full-statement)) => (:LausuntoPvm statement))
+              (when (:status statement) (:status full-statement) => (:Puolto statement))
+              (when (:text statement) (:text full-statement) => (:LausuntoTeksti statement)))))) => passing-quick-check )))
