@@ -9,52 +9,67 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
-(defn- command->organization [{user :user}]
-  (usr/authority-admins-organization user))
+(defn- command->organization
+  "User-organizations is not available for input-validators."
+  [{:keys [user user-organizations]}]
+  (util/find-by-id (usr/authority-admins-organization-id user)
+                   user-organizations ))
 
 ;; ----------------------------------
-;; Pre-checks for verdict templates
+;; Pre-checks
 ;; ----------------------------------
 (defn- verdict-template-exists [{data :data :as command}]
   (when-not (matti/verdict-template (command->organization command)
                                     (:template-id data))
     (fail :error.verdict-template-not-found)))
 
+(defn- check-template [{{template-id :template-id} :data :as command}
+                       check-fn]
+  (when template-id
+    (if-let [template (matti/verdict-template (command->organization command)
+                                              template-id)]
+      (check-fn template)
+      (fail :error.verdict-template-not-found))))
+
 (defn- verdict-template-editable
   "Template exists and is editable (not deleted)."
-    [{data :data :as command}]
-  (if-let [template (matti/verdict-template (command->organization command)
-                                            (:template-id data))]
-    (when (:deleted template)
-      (fail :error.verdict-template-deleted))
-    (fail :error.verdict-template-not-found)))
+  [command]
+  (check-template command
+                  #(when (:deleted %)
+                     (fail :error.verdict-template-deleted))))
 
-(defn- verdict-template-has-name [{data :data :as command}]
-  (when-not (-> (matti/verdict-template (command->organization command)
-                                        (:template-id data))
-                :name ss/not-blank?)
-    (fail :error.verdict-template-name-missing)))
+(defn- verdict-template-has-name
+  [command]
+  (check-template command
+                  #(when-not (-> % :name ss/not-blank?)
+                     (fail :error.verdict-template-name-missing))))
 
-(defn- valid-category [{data :data :as command}]
-  (when-not (contains? (matti/organization-categories (command->organization command))
-                       (-> data :category keyword))
-    (fail :error.invalid-category)))
+(defn- valid-category [{{category :category} :data :as command}]
+  (when category
+    (when-not (util/includes-as-kw? (matti/organization-categories (command->organization command))
+                                    category)
+      (fail :error.invalid-category))))
 
 (defn settings-generic-editable
   "Generic (a subcollection item) exists and is not deleted. Even if
   the generic is deleted, it is editable if the update includes
   deleted parameter with false value."
   [subcollection]
-  (fn [{data :data user :user}]
-    (let [gen-id  (case subcollection
-                    :reviews (:review-id data)
-                    :plans (:plan-id data))]
-      (if-let [generic (matti/generic (usr/authority-admins-organization-id user)
+  (fn [{:keys [data user] :as command}]
+    (when-let [gen-id (case subcollection
+                   :reviews (:review-id data)
+                   :plans   (:plan-id data)
+                   false)]
+      (if-let [generic (matti/generic (command->organization command)
                                       gen-id
                                       subcollection)]
         (when (and (:deleted generic) (-> data :deleted false? not))
          (fail :error.settings-item-deleted))
         (fail :error.settings-item-not-found)))))
+
+;; ----------------------------------
+;; Input-validators
+;; ----------------------------------
 
 (defn supported-parameters
   "Returns checker that fails on unknown parameters. Params must be
@@ -65,7 +80,7 @@
      (fail :error.unsupported-parameters)))
 
 (defn- settings-generic-details-valid
-  "Pre-chek: none of the details is mandatory."
+  "None of the details is mandatory."
   [{data :data}]
   (some (fn [[k v]]
           (let [k (keyword k)]
@@ -79,7 +94,7 @@
         data))
 
 (defn- settings-review-details-valid
-  "Pre-chek: none of the details is mandatory."
+  "None of the details is mandatory."
   [{{type :type} :data}]
   (when (and type
              (not (util/includes-as-kw? (keys shared/review-type-map)
@@ -91,10 +106,12 @@
 ;; ----------------------------------
 
 (defcommand new-verdict-template
-  {:description      "Creates new empty template. Returns template id, name and draft."
+  {:description "Creates new empty template. Returns template id, name
+  and draft."
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
-   :input-validators [valid-category]}
+   :input-validators [(partial action/non-blank-parameters [:category])]
+   :pre-checks       [valid-category]}
   [{:keys [created user lang]}]
   (ok (matti/new-verdict-template (usr/authority-admins-organization-id user)
                                   created
@@ -103,8 +120,8 @@
 
 (defcommand set-verdict-template-name
   {:parameters       [template-id name]
-   :input-validators [(partial action/non-blank-parameters [:name])
-                      verdict-template-editable]
+   :input-validators [(partial action/non-blank-parameters [:name])]
+   :pre-checks       [verdict-template-editable]
    :user-roles       #{:authorityAdmin}}
   [{created :created :as command}]
   (matti/set-name (command->organization command)
@@ -118,8 +135,10 @@
   drafts. Returns modified timestamp."
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id path value]
+   ;; Value is validated upon saving according to the schema.
    :input-validators [(partial action/vector-parameters [:path])
-                      verdict-template-editable]}
+                      (partial action/non-blank-parameters [:template-id])]
+   :pre-checks       [verdict-template-editable]}
   [{:keys [created] :as command}]
   (if-let [error (matti/save-draft-value (command->organization command)
                                          template-id
@@ -130,14 +149,12 @@
     (ok :modified created)))
 
 (defcommand publish-verdict-template
-  {:description "Creates new verdict template version. The version
-  includes also the current settings. Note: the review and plan
-  definitions (localizations and type) are shared between
-  versions. Thus, name and type changes affect every published
-  template."
+  {:description      "Creates new verdict template version. The version
+  includes also the current settings."
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
-   :input-validators [verdict-template-editable
+   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :pre-checks       [verdict-template-editable
                       verdict-template-has-name]}
   [{:keys [created user user-organizations] :as command}]
   (matti/publish-verdict-template (command->organization command)
@@ -162,11 +179,12 @@
   (ok :categories (matti/organization-categories (command->organization command))))
 
 (defquery verdict-template
-  {:description "Verdict template summary plus draft data. The
+  {:description      "Verdict template summary plus draft data. The
   template must be editable."
-   :user-roles #{:authorityAdmin}
-   :parameters [template-id]
-   :input-validators [verdict-template-editable]}
+   :user-roles       #{:authorityAdmin}
+   :parameters       [template-id]
+   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :pre-checks       [verdict-template-editable]}
   [command]
   (let [template (matti/verdict-template (command->organization command)
                                          template-id)]
@@ -174,23 +192,25 @@
                :draft (:draft template)))))
 
 (defcommand toggle-delete-verdict-template
-  {:description "Toggle template's deletion status"
-   :user-roles #{:authorityAdmin}
-   :parameters [template-id delete]
-   :input-validators [verdict-template-exists
-                      (partial action/boolean-parameters [:delete])]}
+  {:description      "Toggle template's deletion status"
+   :user-roles       #{:authorityAdmin}
+   :parameters       [template-id delete]
+   :input-validators [(partial action/non-blank-parameters [:template-id])
+                      (partial action/boolean-parameters [:delete])]
+   :pre-checks       [verdict-template-exists]}
   [command]
   (matti/set-deleted (command->organization command)
                      template-id
                      delete))
 
 (defcommand copy-verdict-template
-  {:description "Makes copy of the template. The new template does not
+  {:description      "Makes copy of the template. The new template does not
   have any published versions. In other words, the draft of the
   original is copied."
-   :user-roles #{:authorityAdmin}
-   :parameters [template-id]
-   :input-validators [verdict-template-exists]}
+   :user-roles       #{:authorityAdmin}
+   :parameters       [template-id]
+   :input-validators [(partial action/non-blank-parameters [:template-id])]
+   :pre-checks       [verdict-template-exists]}
   [{:keys [created lang] :as command}]
   (ok (matti/copy-verdict-template (command->organization command)
                                     template-id
@@ -202,10 +222,11 @@
 ;; ----------------------------------
 
 (defquery verdict-template-settings
-  {:description "Settings matching the category or empty response."
-   :user-roles #{:authorityAdmin}
-   :parameters [category]
-   :input-validators [valid-category]}
+  {:description      "Settings matching the category or empty response."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [category]
+   :input-validators [(partial action/non-blank-parameters [:category])]
+   :pre-checks       [valid-category]}
   [command]
   (when-let [settings (matti/settings (command->organization command)
                                       category)]
@@ -216,8 +237,10 @@
   settings. Returns modified timestamp. Creates settings if needed."
    :user-roles       #{:authorityAdmin}
    :parameters       [category path value]
-   :input-validators [(partial action/vector-parameters [:path])
-                      valid-category]}
+   ;; Value is validated against schema on saving.
+   :input-validators [(partial action/non-blank-parameters [:category])
+                      (partial action/vector-parameters [:path])]
+   :pre-checks       [valid-category]}
   [{:keys [created] :as command}]
   (matti/save-settings-value (command->organization command)
                              category
@@ -234,7 +257,8 @@
   {:description      "Reviews matching the category"
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
-   :input-validators [valid-category]}
+   :input-validators [(partial action/non-blank-parameters [:category])]
+   :pre-checks       [valid-category]}
   [command]
   (ok :reviews (matti/generic-list (command->organization command)
                                    category
@@ -245,7 +269,8 @@
   category. Returns review."
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
-   :input-validators [valid-category]}
+   :input-validators [(partial action/non-blank-parameters [:category])]
+   :pre-checks       [valid-category]}
   [{user :user}]
   (ok :review (matti/new-review (usr/authority-admins-organization-id user)
                                 category)))
@@ -256,18 +281,20 @@
    :user-roles          #{:authorityAdmin}
    :parameters          [review-id]
    :optional-parameters [fi sv en type deleted]
-   :input-validators    [(settings-generic-editable :reviews)
-                         (supported-parameters :review-id :fi :sv :en :type :deleted)
+   :input-validators    [(partial action/non-blank-parameters [:review-id])
+                         (supported-parameters :review-id :fi :sv :en
+                                               :type :deleted)
                          settings-generic-details-valid
-                         settings-review-details-valid]}
-  [{:keys [created user data]}]
-  (let [organization-id (usr/authority-admins-organization-id user)]
-    (matti/set-review-details organization-id
-                              created
-                              review-id
-                              data)
-    (ok :review (matti/review organization-id review-id)
-        :modified created)))
+                         settings-review-details-valid]
+   :pre-checks          [(settings-generic-editable :reviews)]}
+  [{:keys [created user data] :as command}]
+  (matti/set-review-details (command->organization command)
+                            created
+                            review-id
+                            data)
+  (ok :review (matti/review (usr/authority-admins-organization user)
+                            review-id)
+      :modified created))
 
 ;; ----------------------------------
 ;; Verdict template plans API
@@ -277,7 +304,8 @@
   {:description      "Plans matching the category"
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
-   :input-validators [valid-category]}
+   :input-validators [(partial action/non-blank-parameters [:category])]
+   :pre-checks       [valid-category]}
   [command]
   (ok :plans (matti/generic-list (command->organization command)
                                  category
@@ -288,10 +316,11 @@
   category. Returns plan."
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
-   :input-validators [valid-category]}
+   :input-validators [(partial action/non-blank-parameters [:category])]
+   :pre-checks       [valid-category]}
   [{user :user}]
   (ok :plan (matti/new-plan (usr/authority-admins-organization-id user)
-                                category)))
+                            category)))
 
 (defcommand update-verdict-template-plan
   {:description         "Updates plan details according to the
@@ -299,14 +328,15 @@
    :user-roles          #{:authorityAdmin}
    :parameters          [plan-id]
    :optional-parameters [fi sv en type deleted]
-   :input-validators    [(settings-generic-editable :plans)
+   :input-validators    [(partial action/non-blank-parameters [:plan-id])
                          (supported-parameters :plan-id :fi :sv :en :deleted)
-                         settings-generic-details-valid]}
-  [{:keys [created user data]}]
-  (let [organization-id (usr/authority-admins-organization-id user)]
-    (matti/set-plan-details organization-id
-                              created
-                              plan-id
-                              data)
-    (ok :plan (matti/plan organization-id plan-id)
-        :modified created)))
+                         settings-generic-details-valid]
+   :pre-checks          [(settings-generic-editable :plans)]}
+  [{:keys [created user data] :as command}]
+  (matti/set-plan-details (command->organization command)
+                          created
+                          plan-id
+                          data)
+  (ok :plan (matti/plan (usr/authority-admins-organization user)
+                        plan-id)
+      :modified created))

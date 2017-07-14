@@ -47,8 +47,6 @@
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
-(def verdict-codes )
-
 (def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 
 (defschema Katselmus

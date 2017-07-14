@@ -4,6 +4,47 @@
 
 (declare MattiList)
 
+;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
+(def verdict-code-map
+  {:annettu-lausunto            "annettu lausunto"
+   :asiakirjat-palautettu       "asiakirjat palautettu korjauskehotuksin"
+   :ehdollinen                  "ehdollinen"
+   :ei-lausuntoa                "ei lausuntoa"
+   :ei-puollettu                "ei puollettu"
+   :ei-tiedossa                 "ei tiedossa"
+   :ei-tutkittu-1               "ei tutkittu"
+   :ei-tutkittu-2               "ei tutkittu (oikaisuvaatimusvaatimus tai lupa pysyy puollettuna)"
+   :ei-tutkittu-3               "ei tutkittu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"
+   :evatty                      "ev\u00e4tty"
+   :hallintopakko               "hallintopakon tai uhkasakkoasian k\u00e4sittely lopetettu"
+   :hyvaksytty                  "hyv\u00e4ksytty"
+   :ilmoitus-tiedoksi           "ilmoitus merkitty tiedoksi"
+   :konversio                   "muutettu toimenpideluvaksi (konversio)"
+   :lautakunta-palauttanut      "asia palautettu uudelleen valmisteltavaksi"
+   :lautakunta-poistanut        "asia poistettu esityslistalta"
+   :lautakunta-poydalle         "asia pantu p\u00f6yd\u00e4lle kokouksessa"
+   :maarays-peruutettu          "m\u00e4\u00e4r\u00e4ys peruutettu"
+   :muutti-evatyksi             "muutti ev\u00e4tyksi"
+   :muutti-maaraysta            "muutti m\u00e4\u00e4r\u00e4yst\u00e4 tai p\u00e4\u00e4t\u00f6st\u00e4"
+   :muutti-myonnetyksi          "muutti my\u00f6nnetyksi"
+   :myonnetty                   "my\u00f6nnetty"
+   :myonnetty-aloitusoikeudella "my\u00f6nnetty aloitusoikeudella "
+   :osittain-myonnetty          "osittain my\u00f6nnetty"
+   :peruutettu                  "peruutettu"
+   :puollettu                   "puollettu"
+   :pysytti-evattyna            "pysytti ev\u00e4ttyn\u00e4"
+   :pysytti-maarayksen-2        "pysytti m\u00e4\u00e4r\u00e4yksen tai p\u00e4\u00e4t\u00f6ksen"
+   :pysytti-myonnettyna         "pysytti my\u00f6nnettyn\u00e4"
+   :pysytti-osittain            "pysytti osittain my\u00f6nnettyn\u00e4"
+   :siirretty-maaoikeudelle     "siirretty maaoikeudelle"
+   :suunnitelmat-tarkastettu    "suunnitelmat tarkastettu"
+   :tehty-hallintopakkopaatos-1 "tehty hallintopakkop\u00e4\u00e4t\u00f6s (ei velvoitetta)"
+   :tehty-hallintopakkopaatos-2 "tehty hallintopakkop\u00e4\u00e4t\u00f6s (asetettu velvoite)"
+   :tehty-uhkasakkopaatos       "tehty uhkasakkop\u00e4\u00e4t\u00f6s"
+   :tyohon-ehto                 "ty\u00f6h\u00f6n liittyy ehto"
+   :valituksesta-luovuttu-1     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy puollettuna)"
+   :valituksesta-luovuttu-2     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"})
+
 (def meta-flags (zipmap (map sc/optional-key
                              [:can-edit?
                               :editing?
@@ -21,8 +62,9 @@
    :lvi-katselmus             "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
    :osittainen-loppukatselmus "osittainen loppukatselmus"
    :loppukatselmus            "loppukatselmus"
-   :ei-tiedossa               "ei tiedossa"
-   })
+   :ei-tiedossa               "ei tiedossa"})
+
+(def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj])
 
 (defschema MattiBase
   {(sc/optional-key :_meta)      meta-flags
@@ -251,50 +293,13 @@
                       :rows    [[{:id     "verdict-code"
                                   :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
-                                                          :items      [:annettu-lausunto
-                                                                       :asiakirjat-palautettu
-                                                                       :ehdollinen
-                                                                       :ei-lausuntoa
-                                                                       :ei-puollettu
-                                                                       :ei-tiedossa
-                                                                       :ei-tutkittu-1
-                                                                       :ei-tutkittu-2
-                                                                       :ei-tutkittu-3
-                                                                       :evatty
-                                                                       :hallintopakko
-                                                                       :hyvaksytty
-                                                                       :ilmoitus-tiedoksi
-                                                                       :konversio
-                                                                       :lautakunta-palauttanut
-                                                                       :lautakunta-poistanut
-                                                                       :lautakunta-poydalle
-                                                                       :maarays-peruutettu
-                                                                       :muutti-evatyksi
-                                                                       :muutti-maaraysta
-                                                                       :muutti-myonnetyksi
-                                                                       :myonnetty
-                                                                       :myonnetty-aloitusoikeudella
-                                                                       :osittain-myonnetty
-                                                                       :peruutettu
-                                                                       :puollettu
-                                                                       :pysytti-evattyna
-                                                                       :pysytti-maarayksen-2
-                                                                       :pysytti-myonnettyna
-                                                                       :pysytti-osittain
-                                                                       :siirretty-maaoikeudelle
-                                                                       :suunnitelmat-tarkastettu
-                                                                       :tehty-hallintopakkopaatos-1
-                                                                       :tehty-hallintopakkopaatos-2
-                                                                       :tehty-uhkasakkopaatos
-                                                                       :tyohon-ehto
-                                                                       :valituksesta-luovuttu-1
-                                                                       :valituksesta-luovuttu-2]}}}]]}}
+                                                          :items (keys verdict-code-map)}}}]]}}
               {:id   "foremen"
                :grid {:columns 1
                       :rows    [[{:id     "foremen"
                                   :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
-                                                          :items      [:vastaava-tj :vv-tj :iv-tj :erityis-tj]}}}]]}}
+                                                          :items foreman-codes}}}]]}}
               {:id   "plans"
                :grid {:columns 1
                       :rows    [[{:id     "plans"

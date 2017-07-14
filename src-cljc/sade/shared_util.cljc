@@ -2,6 +2,12 @@
   "Required and passed-through by sade.util"
   (:require [clojure.set :as set]))
 
+(defn find-first
+  "Returns first element from coll for which (pred item)
+   returns true. pred must be free of side-effects."
+  [pred coll]
+  (first (filter pred coll)))
+
 (defn find-by-key
   "Return item from sequence col of maps where element k (keyword)
   matches value v."
@@ -26,6 +32,9 @@
   (boolean (some (partial =as-kw x) coll)))
 
 (defn intersection-as-kw
-  "Intersection of given collections as keywords."
+  "Intersection of given collections as keywords. The result is a
+  list. The items in the result set are taken from the first coll.
+  (intersection-as-kw [\"yi\" :er \"san\"] '(:yi \"er\" :si) => (\"yi\" :er)"
   [& colls]
-  (apply set/intersection (map #(set (map keyword %)) colls)))
+  (let [kw-set (apply set/intersection (map #(set (map keyword %)) colls))]
+    (filter #(includes-as-kw? kw-set %) (first colls))))

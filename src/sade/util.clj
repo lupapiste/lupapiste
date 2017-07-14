@@ -511,11 +511,7 @@
 (defn separate-emails [^String email-str]
   (->> (ss/split email-str #"[,;]") (map ss/trim) set))
 
-(defn find-first
-  "Returns first element from coll for which (pred item)
-   returns true. pred must be free of side-effects."
-  [pred coll]
-  (first (filter pred coll)))
+(def find-first shared/find-first)
 
 (defn get-files-by-regex
   "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."

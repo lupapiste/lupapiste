@@ -360,9 +360,9 @@
                    :deleted false)
           => (contains {:plan (contains {:id id
                                          :name (contains {:fi "Hei"})
-                                           :deleted false})}))
+                                         :deleted false})}))
         (fact "Plan not found"
           (command sipoo :update-verdict-template-plan
-                   :plan-id "notfoun"
+                   :plan-id "notfound"
                    :fi "Hei")
           => (err :error.settings-item-not-found))))))

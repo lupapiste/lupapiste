@@ -53,17 +53,31 @@
 (defn settings [organization category]
   (get-in organization [:verdict-templates :settings (keyword category)]))
 
+(defn- pack-generics [gen-ids generics]
+  (->> gen-ids
+       (map #(util/find-by-id % generics))
+       (remove :deleted)
+       (map #(select-keys % [:id :name :type]))))
+
 (defn- published-settings
-  "The published settings only include the value lists without
-  schema-ordained structure."
+  "The published settings only include lists without schema-ordained
+  structure. List items contain the localisations. In other words,
+  subsequent localisation changes do not affect already published
+  verdict templates."
   [organization category]
-  (let [draft (:draft (settings organization category))]
-    (into {}
-          (for [[k v] draft]
-            [k (loop [v v]
-                 (if (map? v)
-                   (recur (-> v vals first))
-                   v))]))))
+  (let [draft                   (:draft (settings organization category))
+        {plan-ids   :plans
+         review-ids :reviews
+         :as        data}       (into {}
+                                      (for [[k v] draft]
+                                        [k (loop [v v]
+                                             (if (map? v)
+                                               (recur (-> v vals first))
+                                               v))]))
+        {:keys [plans reviews]} (:verdict-templates organization)]
+    (assoc data
+           :plans   (pack-generics plan-ids plans)
+           :reviews (pack-generics review-ids reviews))))
 
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
@@ -136,7 +150,9 @@
                         {$set {settings-key {:draft draft
                                              :modified timestamp}}})))
 
-;; Generic supports both reviews and plans
+;; Generic is a placeholder term that means either review or plan
+;; depending on the context. Namely, the subcollection argument in
+;; functions below is either :reviews or :plans.
 
 (defn new-generic [organization-id category name-key subcollection & extra]
   (let [data (merge {:id       (mongo/create-id)
@@ -156,26 +172,27 @@
   (filter #(util/=as-kw category (:category %))
           (subcollection verdict-templates)))
 
-(defn generic [organization-id gen-id subcollection]
-  (some->> (org/get-organization organization-id)
+(defn generic [organization gen-id subcollection]
+  (some->> organization
            :verdict-templates
            subcollection
            (util/find-by-id gen-id)))
 
-(defn generic-update [organization-id gen-id update subcollection & [timestamp]]
+(defn generic-update [organization gen-id update subcollection & [timestamp]]
   (mongo/update :organizations
-                {:_id     organization-id
-                 (util/kw-path :verdict-templates subcollection) {$elemMatch {:id gen-id}}}
+                {:_id                         (:id organization)
+                 (util/kw-path :verdict-templates
+                               subcollection) {$elemMatch {:id gen-id}}}
                 (if timestamp
                   (assoc-in update
-                            [$set (settings-key (:category (generic organization-id
+                            [$set (settings-key (:category (generic organization
                                                                     gen-id
                                                                     subcollection))
                                                 :modified)]
                             timestamp)
                   update)))
 
-(defn set-generic-details [organization-id timestamp gen-id data subcollection & extra-keys]
+(defn set-generic-details [organization timestamp gen-id data subcollection & extra-keys]
   (let [detail-updates
         (reduce (fn [acc [k v]]
                   (let [k      (keyword k)
@@ -187,7 +204,7 @@
                 {}
                 data)]
     (when (seq detail-updates)
-      (generic-update organization-id
+      (generic-update organization
                      gen-id
                      {$set (->> detail-updates
                                 (map (fn [[k v]]
@@ -202,19 +219,19 @@
   (new-generic organization-id category :matti.katselmus :reviews
                :type :muu-katselmus))
 
-(defn review [organization-id review-id]
-  (generic organization-id review-id :reviews))
+(defn review [organization review-id]
+  (generic organization review-id :reviews))
 
-(defn set-review-details [organization-id timestamp review-id data]
-  (set-generic-details organization-id timestamp review-id data :reviews :type))
+(defn set-review-details [organization timestamp review-id data]
+  (set-generic-details organization timestamp review-id data :reviews :type))
 
 ;; Plans
 
 (defn new-plan [organization-id category]
   (new-generic organization-id category :matti.suunnitelmat :plans))
 
-(defn plan [organization-id review-id]
-  (generic organization-id review-id :plans))
+(defn plan [organization review-id]
+  (generic organization review-id :plans))
 
-(defn set-plan-details [organization-id timestamp review-id data]
-  (set-generic-details organization-id timestamp review-id data :plans))
+(defn set-plan-details [organization timestamp review-id data]
+  (set-generic-details organization timestamp review-id data :plans))

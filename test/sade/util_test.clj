@@ -486,13 +486,13 @@
 (facts "intersection-as-kw"
   (fact "s and kw"
     (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu" :yi :er])
-    => #{:yi :er})
+    => ["yi" :er])
   (fact "empty"
     (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"])
-    => #{})
+    => [])
   (fact "nil safe"
     (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"] nil nil)
-    => #{}))
+    => []))
 
 (facts get-in-tree
   (fact "single level"
