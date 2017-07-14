@@ -73,11 +73,6 @@
         doc-count     (count (domain/get-documents-by-name documents schema-name))]
     (and last-removable-by (not (#{:all user-app-role}) last-removable-by) (<= doc-count 1))))
 
-(defn- deny-remove-for-non-authority-user [user {schema-info :schema-info}]
-  (and (not (usr/authority? user))
-       schema-info
-       (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
-
 (defn- deny-remove-of-non-post-verdict-document [document {state :state :as application}]
   (and (contains? states/post-verdict-states (keyword state)) (not (created-after-verdict? document application))))
 
@@ -88,7 +83,6 @@
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
       (deny-remove-of-non-removable-doc document)             (fail :error.not-allowed-to-remove-document)
-      (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
       (deny-remove-of-last-document document application user) (fail :error.removal-of-last-document-denied)
       (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
       (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
