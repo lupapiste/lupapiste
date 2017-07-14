@@ -171,10 +171,10 @@
 
 (defn application-to-asianhallinta-canonical
   "Return canonical, does not contain attachments"
-  [application lang]
+  [application lang & [type]]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
     (-> root-element
-      (assoc-in [:UusiAsia :Tyyppi] (get-asian-tyyppi-string application))
+      (assoc-in [:UusiAsia :Tyyppi] (or type (get-asian-tyyppi-string application)))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (get-hakijat (domain/get-applicant-documents documents)))

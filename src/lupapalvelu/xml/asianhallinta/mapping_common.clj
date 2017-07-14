@@ -78,7 +78,27 @@
   [{:tag :ToimenpideTunnus}
    {:tag :ToimenpideTeksti}])
 
-(def asian-tyypin-tarkenne-values
+;;
+;; Schema version 1.3 support for statements
+;;
+
+(def lausuntopyynto-type
+  [{:tag :LausuntoTunnus}
+   {:tag :Saateteksti}
+   {:tag :Pyytaja}
+   {:tag :PyyntoPvm}
+   {:tag :Maaraaika}])
+
+(def lausunto-type
+  (concat
+    [{:tag :AsianTunnus}
+     {:tag :Lausunnonantaja}
+     {:tag :LausuntoPvm}
+     {:tag :Puolto}
+     {:tag :LausuntoTeksti}]
+    lausuntopyynto-type))
+
+(def asian-tyypin-tarkenne-values                           ; enumeration from schema
   ["Lausuntopyynt\u00f6 ymp\u00e4rist\u00f6nsuojelulain valvontamenettelyst\u00e4"
    "Tiedoksi p\u00e4\u00e4t\u00f6s ymp\u00e4rist\u00f6nsuojelulain valvontamenettelyst\u00e4"
    "Lausuntopyynt\u00f6 pohjavesien suojelusuunnitelmasta"
