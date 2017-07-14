@@ -1,0 +1,251 @@
+$matti-grid-margin: 10px;
+
+@mixin matti-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * (100% / $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $matti-grid-margin;
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+
+@mixin matti-grid ($columns) {
+  .matti-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    .row {
+      @include clearfix;
+      padding: $matti-grid-margin 0;
+      @for $i from 1 through $columns {
+        .col-#{$i} {
+          @include matti-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
+    }
+  }
+}
+
+@for $i from 1 through 12 {
+  @include matti-grid( $i );
+}
+
+.matti-list {
+  > .item {
+    display: inline-block;
+  }
+  > .item.item--full {
+    display: block;
+  }
+  .item--full > * {
+    width: 100%;
+  }
+  .item--right > * {
+    float: right;
+  }
+  .item--left > * {
+    float: left;
+  }
+  .item--center {
+    text-align: center;
+    > * {
+      display: inline-block;
+    }
+  }
+}
+
+// toggle-helper is defined in _inputs.scss
+@include toggle-helper ( matti-checkbox, "e604", "e603",
+                         $wrapper-display: inline-block ) {}
+@include toggle-helper (matti-radio, "e635", "e634", $wrapper-display: block) {}
+
+.matti-checkbox-wrapper {
+  border: none;
+  $margin-right: $marginS;
+  $margin-bottom: $marginS;
+}
+
+.matti-radio-wrapper {
+  border: none;
+}
+
+.matti-buttons {
+    float: right;
+    > button {
+      margin-left: $marginS;
+    }
+}
+
+$section-border: 1px solid $gray51;
+
+.matti-section {
+  div.section-header {
+    padding-left: $marginM;
+    padding-right: $marginM;
+    border: $section-border;
+    background-color: transparentize( $orange-dark, 0.6);
+    .section-title {
+      font-size: 17px;
+      font-weight: bold;
+    }
+  }
+  > .matti-buttons {
+    margin-top: $marginS;
+  }
+  div.section-body {
+    padding: {
+      left: $marginM;
+      right: $marginM;
+    }
+    border: {
+      left: $section-border;
+      right: $section-border;
+      bottom: $section-border;
+    }
+  }
+}
+
+.matti-section + .matti-section {
+  .section-header {
+    border-top: none;
+  }
+}
+
+.matti--view {
+  .matti-condition-box + .matti-condition-box:before {
+    content: ", ";
+  }
+}
+
+span.formatted {
+  white-space: pre-wrap;
+}
+
+.matti-label {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+// Meta status classes
+.matti--edit {}
+.matti--view {}
+
+.row-text {
+  line-height: $btn-height;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.row-text--margin {
+  margin-right: $marginL;
+}
+
+div.verdict-template {
+  span.pen-input--edit, span.pen-input--view {
+    margin-left: $marginS;
+  }
+  span.header {
+    font-size: 17px;
+    font-weight: bold;
+  }
+}
+
+span.saved-info {
+  color: $gray153;
+}
+
+div.matti-date-delta {
+  > div.delta-editor {
+    white-space: nowrap;
+    input.grid-style-input {
+      max-width: 5em;
+      margin-left: 0.5em;
+      margin-right: 0.2em;
+    }
+  }}
+
+.row.row--date-delta-title {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+div.matti-template-list {
+  .checkbox-wrapper {
+    margin-top: $marginL;
+  }
+  table.matti-templates-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+    margin-top: $marginL;
+  }
+
+}
+
+// Settings
+
+
+div.matti-settings {
+h2.matti-settings-title {
+  margin-top: 0;
+}
+.section-header {
+  background-color: initial;
+  border-bottom: none;
+}
+}
+
+// Reviews
+
+div.matti-settings-editor {
+  padding-top: $marginS;
+  margin-bottom: $marginL;
+  .checkbox-wrapper {
+    margin-bottom: $marginS;
+  }
+  table.matti-editor-table {
+    // No-row-hover mixin is defined in _tables.scss
+    @include no-row-hover;
+    margin-top: 0;
+  }
+
+}

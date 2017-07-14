@@ -102,6 +102,8 @@
 
 (defonce args (atom {}))
 
+(def log (.-log js/console))
+
 (defn mount-component []
   (rum/mount (stamp-editor (:auth-model @args))
              (.getElementById js/document (:dom-id @args))))
