@@ -50,11 +50,11 @@
 (defschema Statement
   {:id                              ssc/ObjectIdStr ;; statement id
    :state                           (apply sc/enum statement-states) ;; handling state of the statement
+   :requested                       ssc/Timestamp   ;; when requested
    (sc/optional-key :saateText)     sc/Str          ;; cover note for statement, written by authority
    (sc/optional-key :status)        (apply sc/enum statement-statuses) ;; status indicator
    (sc/optional-key :text)          sc/Str          ;; statement text written by statement giver
    (sc/optional-key :dueDate)       ssc/Timestamp   ;; due date for statement to be given
-   (sc/optional-key :requested)     ssc/Timestamp   ;; when requested
    (sc/optional-key :given)         ssc/Timestamp   ;; when given
    (sc/optional-key :reminder-sent) ssc/Timestamp   ;; for remiders sent week after the request
    (sc/optional-key :modified)      ssc/Timestamp   ;; last modified
