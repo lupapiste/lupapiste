@@ -68,10 +68,10 @@
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
 
-(defn- deny-remove-of-last-document [{{:keys [last-removable-by schema-name]} :schema-info} {documents :documents :as app} user]
-  (let [user-app-role (auth/application-role application user)
-        doc-count     (count (domain/get-documents-by-name documents schema-name))]
-    (and last-removable-by (not (#{:all user-app-role}) last-removable-by) (<= doc-count 1))))
+(defn- deny-remove-of-last-document [{{:keys [last-removable-by name]} :schema-info} {documents :documents :as app} user]
+  (and last-removable-by
+       (not (#{:all (auth/application-role app user)} last-removable-by))
+       (<= (count (domain/get-documents-by-name documents name)) 1)))
 
 (defn- deny-remove-of-non-post-verdict-document [document {state :state :as application}]
   (and (contains? states/post-verdict-states (keyword state)) (not (created-after-verdict? document application))))
