@@ -50,3 +50,6 @@
 (defn response->state [state kw]
   (fn [response]
     (swap! state #(assoc % kw (kw response)))))
+
+(defn feature? [feature]
+  (boolean (js/features.enabled (name feature))))

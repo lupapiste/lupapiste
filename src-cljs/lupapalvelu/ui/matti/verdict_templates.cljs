@@ -180,16 +180,18 @@
 (defonce args (atom {}))
 
 (defn mount-component []
-  (rum/mount (verdict-templates (:auth-model @args))
-             (.getElementById js/document (:dom-id @args))))
+  (when (common/feature? :matti)
+    (rum/mount (verdict-templates (:auth-model @args))
+               (.getElementById js/document (:dom-id @args)))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc
-         :auth-model (aget componentParams "authModel")
-         :dom-id (name domId))
-  (service/fetch-schemas)
-  (service/fetch-template-list)
-  (service/fetch-categories (fn [categories]
-                              (set-category (first categories))))
-  (reset-template nil)
-  (mount-component))
+  (when (common/feature? :matti)
+    (swap! args assoc
+           :auth-model (aget componentParams "authModel")
+           :dom-id (name domId))
+    (service/fetch-schemas)
+    (service/fetch-template-list)
+    (service/fetch-categories (fn [categories]
+                                (set-category (first categories))))
+    (reset-template nil)
+    (mount-component)))

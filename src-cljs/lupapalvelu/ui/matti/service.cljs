@@ -77,6 +77,8 @@
                   :path path
                   :value value))
 
+;; Generic refers to either review or plan.
+
 (defn generics [generic-type category callback]
   (common/query (js/sprintf "verdict-template-%ss"
                             (name generic-type))

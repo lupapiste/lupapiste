@@ -31,7 +31,7 @@
             [me.raynes.fs :as fs]
             [lupapalvelu.attachment.stamp-schema :as stmp]
             [clojure.walk :refer [keywordize-keys]]
-            [lupapalvelu.matti.schemas :refer [MattiSavedTemplate]]))
+            [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates]]))
 
 (def scope-skeleton
   {:permitType nil
@@ -143,7 +143,7 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
-   (sc/optional-key :verdict-templates) [MattiSavedTemplate]})
+   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))

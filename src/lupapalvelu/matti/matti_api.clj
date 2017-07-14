@@ -106,8 +106,9 @@
 ;; ----------------------------------
 
 (defcommand new-verdict-template
-  {:description "Creates new empty template. Returns template id, name
+  {:description      "Creates new empty template. Returns template id, name
   and draft."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -119,7 +120,9 @@
                                   category)))
 
 (defcommand set-verdict-template-name
-  {:parameters       [template-id name]
+  {:description "Name cannot be empty."
+   :feature          :matti
+   :parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])]
    :pre-checks       [verdict-template-editable]
    :user-roles       #{:authorityAdmin}}
@@ -133,6 +136,7 @@
 (defcommand save-verdict-template-draft-value
   {:description      "Incremental save support for verdict template
   drafts. Returns modified timestamp."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id path value]
    ;; Value is validated upon saving according to the schema.
@@ -151,6 +155,7 @@
 (defcommand publish-verdict-template
   {:description      "Creates new verdict template version. The version
   includes also the current settings."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -165,7 +170,8 @@
 (defquery verdict-templates
   {:description "Id, name, modified, published and deleted maps for
   every verdict template. The response also includes category list."
-   :user-roles #{:authorityAdmin}}
+   :feature     :matti
+   :user-roles  #{:authorityAdmin}}
   [command]
   (ok :verdict-templates (->> (command->organization command)
                               :verdict-templates
@@ -174,13 +180,15 @@
 
 (defquery verdict-template-categories
   {:description "Categories for the user's organization"
-   :user-roles #{:authorityAdmin}}
+   :feature     :matti
+   :user-roles  #{:authorityAdmin}}
   [command]
   (ok :categories (matti/organization-categories (command->organization command))))
 
 (defquery verdict-template
   {:description      "Verdict template summary plus draft data. The
   template must be editable."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -193,6 +201,7 @@
 
 (defcommand toggle-delete-verdict-template
   {:description      "Toggle template's deletion status"
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id delete]
    :input-validators [(partial action/non-blank-parameters [:template-id])
@@ -207,6 +216,7 @@
   {:description      "Makes copy of the template. The new template does not
   have any published versions. In other words, the draft of the
   original is copied."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
@@ -223,6 +233,7 @@
 
 (defquery verdict-template-settings
   {:description      "Settings matching the category or empty response."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -235,6 +246,7 @@
 (defcommand save-verdict-template-settings-value
   {:description      "Incremental save support for verdict template
   settings. Returns modified timestamp. Creates settings if needed."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category path value]
    ;; Value is validated against schema on saving.
@@ -255,6 +267,7 @@
 
 (defquery verdict-template-reviews
   {:description      "Reviews matching the category"
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -267,6 +280,7 @@
 (defcommand add-verdict-template-review
   {:description      "Creates empty review for the settings
   category. Returns review."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -278,6 +292,7 @@
 (defcommand update-verdict-template-review
   {:description         "Updates review details according to the
   parameters. Returns the updated review."
+   :feature             :matti
    :user-roles          #{:authorityAdmin}
    :parameters          [review-id]
    :optional-parameters [fi sv en type deleted]
@@ -302,6 +317,7 @@
 
 (defquery verdict-template-plans
   {:description      "Plans matching the category"
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -314,6 +330,7 @@
 (defcommand add-verdict-template-plan
   {:description      "Creates empty plan for the settings
   category. Returns plan."
+   :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
@@ -325,6 +342,7 @@
 (defcommand update-verdict-template-plan
   {:description         "Updates plan details according to the
   parameters. Returns the updated plan."
+   :feature             :matti
    :user-roles          #{:authorityAdmin}
    :parameters          [plan-id]
    :optional-parameters [fi sv en type deleted]

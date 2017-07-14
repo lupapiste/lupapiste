@@ -54,11 +54,15 @@ ajax.header = function() {};
 var util = {};
 util.showSavedIndicator = function() {};
 util.partyFullName = function() {};
+util.finnishDateAndTime = function() {};
 
+var sprintf = function() {};
+
+var features = {};
+features.enabled = function() {};
 
 var LUPAPISTE = {};
 LUPAPISTE.FileuploadService = function() {};
-
 
 var hub = {};
 hub.send = function() {};
@@ -117,5 +121,3 @@ lupapisteApp.services.cardService = {};
 lupapisteApp.models = {};
 lupapisteApp.models.currentUser = {};
 lupapisteApp.models.currentUser.displayName = function() {};
-
-
