@@ -123,6 +123,7 @@ div.organization-link-cell {
 .edit-stamp-bubble {
   border: 1px solid $gray221;
   margin-top: 1em;
+  max-width: 90%;
 }
 
 .stamp-selection {
@@ -148,7 +149,14 @@ div.organization-link-cell {
 }
 
 .stamp-preview {
-  border: 1px solid $gray221;
+  border: medium solid $gray221;
+  border-radius: 10px;
+  width: 50%;
+  padding: 20px 20px 20px 20px;
+}
+
+.stamp-preview-row {
+  width: auto;
 }
 
 @mixin btn-with-border {

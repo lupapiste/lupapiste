@@ -92,8 +92,8 @@
   (let [stamps (rum/cursor component-state :stamps)
         editor-state (rum/cursor component-state :editor)
         selected-stamp-id (rum/cursor component-state :selected-stamp-id)]
-    [:div.container
-     [:h1 (loc "stamp-editor.tab.title")]
+    [:div
+     [:h2 (loc "stamp-editor.tab.title")]
      [:div.stamp-selection
       (stamp-select stamps selected-stamp-id)
       (new-stamp-button selected-stamp-id editor-state)]
