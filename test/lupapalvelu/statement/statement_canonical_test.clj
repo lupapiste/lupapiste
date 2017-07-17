@@ -38,7 +38,7 @@
                                             :Lausunnonantaja (contains (get-in statement [:person :name]))}))
     (fact :qc "statement response, full data"
       (tc/quick-check
-        150
+        200
         (prop/for-all [full-statement (ssg/generator
                                         (ssu/select-keys
                                           stmnt/Statement
@@ -52,6 +52,6 @@
             (fact "other keys"
               (when (:saateText full-statement) (:saateText full-statement) => (:Saateteksti statement))
               (when (:dueDate full-statement) (util/to-xml-date (:dueDate full-statement)) => (:Maaraaika statement))
-              (when (:given statement) (util/to-xml-date (:given full-statement)) => (:LausuntoPvm statement))
-              (when (:status statement) (:status full-statement) => (:Puolto statement))
-              (when (:text statement) (:text full-statement) => (:LausuntoTeksti statement)))))) => passing-quick-check )))
+              (when (:given full-statement) (util/to-xml-date (:given full-statement)) => (:LausuntoPvm statement))
+              (when (:status full-statement) (:status full-statement) => (:Puolto statement))
+              (when (:text full-statement) (:text full-statement) => (:LausuntoTeksti statement)))))) => passing-quick-check )))
