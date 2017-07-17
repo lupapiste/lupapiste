@@ -8,12 +8,13 @@
             [sade.strings :as ss]
             [sade.validators :as v]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.integrations.ely :as ely]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
 ;;
 ;; Common
@@ -47,6 +48,13 @@
    :nothing-to-add                  sc/Bool         ;; indicator that user has read the statement and has nothing to add
    (sc/optional-key :text)          sc/Str})        ;; reply text that user has written
 
+(defschema ExternalData
+  "Identification data for external statement from integrations"
+  {:partner                      (sc/eq "ely")
+   :subtype                      (apply sc/enum ely/all-statement-types)
+   (sc/optional-key :externalId) sc/Str
+   (sc/optional-key :messageId)  sc/Str})
+
 (defschema Statement
   {:id                              ssc/ObjectIdStr ;; statement id
    :state                           (apply sc/enum statement-states) ;; handling state of the statement
@@ -63,6 +71,7 @@
    (sc/optional-key :editor-id)     usr/Id          ;; id of the user last edited the statement
    (sc/optional-key :reply)         Reply
    :person                          StatementGiver
+   (sc/optional-key :external)      ExternalData
    (sc/optional-key :metadata)      {sc/Any sc/Any}})
 
 (defn create-statement [now metadata saate-text due-date person]

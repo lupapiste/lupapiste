@@ -1,6 +1,16 @@
 (ns lupapalvelu.integrations.ely
   "ELY-keskus USPA integraatio")
 
+(def ely-statement-user
+  {:userId "ely-uspa"
+   :id     "ely-uspa"
+   :username "ely-uspa@lupapiste.fi"
+   :email "ely-uspa@lupapiste.fi"
+   :enabled true
+   :lastName "Lausunnot"
+   :firstName "ELY-keskus"
+   :role "authority"})
+
 (def r-statement-types
   "ELY statement types for R.
   07.01.05 Poikkeamisluvat tai poikkeamis-, suunnittelutarveratkaisu- ja rakennusj\u00e4rjestysp\u00e4\u00e4t\u00f6kset; rakennus-, toimenpide-, purkamis- ja maisematy\u00f6luvat.
@@ -53,3 +63,6 @@
   ["Lausuntopyynt\u00f6 asemakaavasta"
    "Lausuntopyynt\u00f6 maakuntakaavasta"
    "Lausuntopyynt\u00f6 yleiskaavasta"])
+
+(def all-statement-types
+  (distinct (concat r-statement-types p-statement-types ya-statement-types ymp-statement-types mm-kt-statement-types)))
