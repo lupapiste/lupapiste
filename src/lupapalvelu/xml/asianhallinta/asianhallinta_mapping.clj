@@ -90,7 +90,8 @@
 
 (defn- attachments-for-write
   ([attachments]
-    (attachments-for-write #(and (not= "statement" (-> % :target :type)) (not= "verdict" (-> % :target :type)))))
+    (attachments-for-write attachments #(and (not= "statement" (-> % :target :type))
+                                             (not= "verdict" (-> % :target :type)))))
   ([attachments pred]
    (for [attachment attachments
          :when (and (:latestVersion attachment)
@@ -142,7 +143,7 @@
   (let [{:keys [version begin-of-link output-dir]} message-config
         application   (enrich-application application)
         canonical (-> (canonical/application-to-asianhallinta-canonical application lang "Lausuntopyynt\u00f6")
-                      (assoc-in [:UusiAsia :TyypinTarkenne] (i18n/localize lang "statement.type" (:type statement)))
+                      (assoc-in [:UusiAsia :TyypinTarkenne] (get-in statement [:external :subtype]))
                       (assoc-in [:UusiAsia :Lausuntopyynto] (statement-as-canonical user statement lang)))
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link)
         attachments-with-pdf  (canonical/get-current-application-pdf application begin-of-link)
