@@ -58,7 +58,7 @@
 
 (fact :qc "Statement to XML"
   (tc/quick-check
-    200
+    150
     (prop/for-all
       [full-statement (ssg/generator (ssu/select-keys
                                        stmnt/Statement
@@ -80,6 +80,8 @@
           xml => truthy)
         (fact "Validate UusiAsia Lausuntopyynto XML"
           (validator/validate xml-s (:permitType application) schema-version) => nil)
+        (fact "version attribute"
+          (sxml/select1-attribute-value xml-parsed [:UusiAsia] :version) => (ss/suffix schema-version "-"))
         (fact "Tyyppi"
           (sxml/get-text xml-parsed [:Tyyppi]) => "Lausuntopyynt\u00f6")
         (fact "TyypinTarkenne"

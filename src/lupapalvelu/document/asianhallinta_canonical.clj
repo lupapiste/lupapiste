@@ -37,9 +37,6 @@
      :VainSahkoinenAsiointi (get-in data [:yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin])}))
 
 (defn- get-henkilo [data]
-
-
-
   (util/strip-nils
     {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])

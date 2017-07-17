@@ -150,10 +150,12 @@
         application  (enrich-application application)
         canonical    (create-statement-request-canonical user application statement lang)
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link)
-        attachments-with-pdf  (canonical/get-current-application-pdf application begin-of-link)
-        canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdf)
+        attachments-with-pdfs  (conj attachments-canonical
+                                    (canonical/get-submitted-application-pdf application begin-of-link)
+                                    (canonical/get-current-application-pdf application begin-of-link))
+        canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdfs)
         mapping (get-uusi-asia-mapping version)
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write (:attachments application) #(not= "verdict" (-> % :target :type)))
         ]
-    (writer/write-to-disk application attachments xml (str "ah-" version) output-dir nil nil "statement_request")))
+    (writer/write-to-disk application attachments xml (str "ah-" version) output-dir submitted-application lang "statement_request")))
