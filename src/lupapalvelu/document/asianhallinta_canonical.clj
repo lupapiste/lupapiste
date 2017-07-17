@@ -3,6 +3,7 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.property :as p]
+            [lupapalvelu.document.attachments-canonical :as acanon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -127,17 +128,18 @@
 
 ;; Public
 
-(defn get-attachments-as-canonical [attachments begin-of-link & [target]]
-  (not-empty
-    (for [attachment attachments
-          :when (and (:latestVersion attachment)
-                  (not= "statement" (-> attachment :target :type))
-                  (not= "verdict" (-> attachment :target :type))
-                  (or (nil? target) (= target (:target attachment))))
-          :let [file-id (get-in attachment [:latestVersion :fileId])
-                attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                link (str begin-of-link attachment-file-name)]]
-      (get-liite attachment link))))
+(defn get-attachments-as-canonical
+  ([attachments begin-of-link]
+    (get-attachments-as-canonical attachments begin-of-link acanon/no-statements-no-verdicts))
+  ([attachments begin-of-link pred]
+   (not-empty
+     (for [attachment attachments
+           :when (and (:latestVersion attachment)
+                      (pred attachment))
+           :let [file-id (get-in attachment [:latestVersion :fileId])
+                 attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                 link (str begin-of-link attachment-file-name)]]
+       (get-liite attachment link)))))
 
 (defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
   {:Kuvaus "Vireille tullut hakemus"
