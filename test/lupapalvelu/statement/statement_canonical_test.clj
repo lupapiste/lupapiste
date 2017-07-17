@@ -16,7 +16,7 @@
 (def sonja-requester {:firstName "Sonja" :lastName "Sibbo" :organization {:fi "Sipoo"}})
 
 (fact "statement to canonical"
-  (let [statement (stmnt/create-statement 123 nil "saate" (util/get-timestamp-from-now :day 7) (ssg/generate stmnt/StatementGiver))
+  (let [statement (stmnt/create-statement 123 "saate" (util/get-timestamp-from-now :day 7) (ssg/generate stmnt/StatementGiver))
         statement-request-canonical (statement-as-canonical
                                       sonja-requester
                                       statement

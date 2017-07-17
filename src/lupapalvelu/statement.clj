@@ -74,7 +74,7 @@
    (sc/optional-key :external)      ExternalData
    (sc/optional-key :metadata)      {sc/Any sc/Any}})
 
-(defn create-statement [now metadata saate-text due-date person]
+(defn create-statement [now saate-text due-date person & [metadata external]]
   (sc/validate Statement
                (cond-> {:id        (mongo/create-id)
                         :person    person
@@ -82,7 +82,8 @@
                         :state     :requested}
                  saate-text     (assoc :saateText saate-text)
                  due-date       (assoc :dueDate due-date)
-                 (seq metadata) (assoc :metadata metadata))))
+                 (seq metadata) (assoc :metadata metadata)
+                 (seq external) (assoc :external external))))
 
 (defn get-statement [{:keys [statements]} id]
   (util/find-by-id id statements))

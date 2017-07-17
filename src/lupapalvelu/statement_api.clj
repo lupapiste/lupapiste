@@ -128,7 +128,7 @@
         users       (map (comp #(usr/get-or-create-user-by-email % user) :email) persons)
         persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
         metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-        statements  (map (partial statement/create-statement now metadata saateText dueDate) persons+uid)
+        statements  (map #(statement/create-statement now saateText dueDate % metadata) persons+uid)
         auth        (map #(usr/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
     (update-application command {$push {:statements {$each statements}
                                         :auth       {$each auth}}})
