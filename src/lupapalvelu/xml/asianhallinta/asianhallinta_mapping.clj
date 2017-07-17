@@ -137,18 +137,21 @@
         attachments (attachments-for-write attachments)]
     (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir nil nil "taydennys")))
 
+(defn- create-statement-request-canonical
+  [user application statement lang]
+  (-> (canonical/application-to-asianhallinta-canonical application lang "Lausuntopyynt\u00f6")
+      (assoc-in [:UusiAsia :TyypinTarkenne] (get-in statement [:external :subtype]))
+      (assoc-in [:UusiAsia :Lausuntopyynto] (statement-as-canonical user statement lang))))
+
 (defn statement-request
   "Construct UusiAsia XML with type Lausuntopyynt\u00f6. Writes XML and attachments to disk"
   [user application submitted-application statement lang message-config]
   (let [{:keys [version begin-of-link output-dir]} message-config
-        application   (enrich-application application)
-        canonical (-> (canonical/application-to-asianhallinta-canonical application lang "Lausuntopyynt\u00f6")
-                      (assoc-in [:UusiAsia :TyypinTarkenne] (get-in statement [:external :subtype]))
-                      (assoc-in [:UusiAsia :Lausuntopyynto] (statement-as-canonical user statement lang)))
+        application  (enrich-application application)
+        canonical    (create-statement-request-canonical user application statement lang)
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link)
         attachments-with-pdf  (canonical/get-current-application-pdf application begin-of-link)
         canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdf)
-
         mapping (get-uusi-asia-mapping version)
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write (:attachments application) #(not= "verdict" (-> % :target :type)))
