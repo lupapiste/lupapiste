@@ -69,7 +69,7 @@
                              sonja-requester application full-statement "fi")
             canonical      (assoc-in canonical
                                      [:UusiAsia :Liitteet :Liite]
-                                     (ah/get-attachments-as-canonical (:attachments application) "sftp://foo.faa"))
+                                     (ah/get-attachments-as-canonical (:attachments application) "sftp://foo.faa" #(not= "verdict" (-> % :target :type))))
             schema-version "ah-1.3"
             mapping        (ah-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
             xml            (element-to-xml canonical mapping)
@@ -103,6 +103,8 @@
                                   (get full-statement key))]
                       :when (ss/not-blank? val)]
                 (fact {:midje/description (name elem)}
-                  (sxml/get-text lausuntopyynto [elem]) => val)))
-            ))
+                  (sxml/get-text lausuntopyynto [elem]) => val)))))
+        (fact "Liiiteet"
+          (let [liitteet (:content (sxml/select1 xml-parsed [:UusiAsia :Liitteet]))]
+            (count liitteet) => (dec (count attachments)))) ; one without latestVersion is declined
         ))) => passing-quick-check )

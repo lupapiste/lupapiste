@@ -149,7 +149,7 @@
   (let [{:keys [version begin-of-link output-dir]} message-config
         application  (enrich-application application)
         canonical    (create-statement-request-canonical user application statement lang)
-        attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link)
+        attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link #(not= "verdict" (-> % :target :type)))
         attachments-with-pdfs  (conj attachments-canonical
                                     (canonical/get-submitted-application-pdf application begin-of-link)
                                     (canonical/get-current-application-pdf application begin-of-link))
