@@ -1,15 +1,13 @@
 (ns lupapalvelu.integrations.ely
-  "ELY-keskus USPA integraatio")
+  "ELY-keskus USPA integraatio"
+  (:require [sade.core :refer :all]))
 
-(def ely-statement-user
+(defn ely-statement-giver [subtype]
   {:userId "ely-uspa"
    :id     "ely-uspa"
-   :username "ely-uspa@lupapiste.fi"
    :email "ely-uspa@lupapiste.fi"
-   :enabled true
-   :lastName "Lausunnot"
-   :firstName "ELY-keskus"
-   :role "authority"})
+   :name "ELY-keskus"
+   :text subtype})
 
 (def r-statement-types
   "ELY statement types for R.
@@ -65,4 +63,9 @@
    "Lausuntopyynt\u00f6 yleiskaavasta"])
 
 (def all-statement-types
-  (distinct (concat r-statement-types p-statement-types ya-statement-types ymp-statement-types mm-kt-statement-types)))
+  (set (concat r-statement-types p-statement-types ya-statement-types ymp-statement-types mm-kt-statement-types)))
+
+(def subtype-input-validator
+  (fn [{{:keys [subtype]} :data}]
+    (when-not (contains? all-statement-types subtype)
+      (fail :error.illegal-key :source ::subtype-input-validator))))
