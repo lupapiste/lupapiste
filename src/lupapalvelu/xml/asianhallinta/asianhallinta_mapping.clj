@@ -88,15 +88,16 @@
 (defn get-taydennys-asiaan-mapping [version]
   (get-mapping ta-version-mapping version))
 
-(defn- attachments-for-write [attachments & [target]]
-  (for [attachment attachments
-        :when (and (:latestVersion attachment)
-                (not= "statement" (-> attachment :target :type))
-                (not= "verdict" (-> attachment :target :type))
-                (or (nil? target) (= target (:target attachment))))
-        :let [fileId (-> attachment :latestVersion :fileId)]]
-    {:fileId fileId
-     :filename (writer/get-file-name-on-server fileId (get-in attachment [:latestVersion :filename]))}))
+(defn- attachments-for-write
+  ([attachments]
+    (attachments-for-write #(and (not= "statement" (-> % :target :type)) (not= "verdict" (-> % :target :type)))))
+  ([attachments pred]
+   (for [attachment attachments
+         :when (and (:latestVersion attachment)
+                    (pred attachment))
+         :let [fileId (-> attachment :latestVersion :fileId)]]
+     {:fileId fileId
+      :filename (writer/get-file-name-on-server fileId (get-in attachment [:latestVersion :filename]))})))
 
 (defn- enrich-attachment-with-operation [attachment operations]
   (update attachment :op (partial map #(util/assoc-when % :name (:name (util/find-by-id (:id %) operations))))))
@@ -139,7 +140,7 @@
   "Construct UusiAsia XML with type Lausuntopyynt\u00f6. Writes XML and attachments to disk"
   [user application submitted-application statement lang message-config]
   (let [{:keys [version begin-of-link output-dir]} message-config
-        application           (enrich-application application)
+        application   (enrich-application application)
         canonical (-> (canonical/application-to-asianhallinta-canonical application lang "Lausuntopyynt\u00f6")
                       (assoc-in [:UusiAsia :TyypinTarkenne] (i18n/localize lang "statement.type" (:type statement)))
                       (assoc-in [:UusiAsia :Lausuntopyynto] (statement-as-canonical user statement lang)))
@@ -149,6 +150,6 @@
 
         mapping (get-uusi-asia-mapping version)
         xml (emit/element-to-xml canonical-with-attachments mapping)
-        attachments (attachments-for-write (:attachments application))
+        attachments (attachments-for-write (:attachments application) #(not= "verdict" (-> % :target :type)))
         ]
     (writer/write-to-disk application attachments xml (str "ah-" version) output-dir nil nil "statement_request")))
