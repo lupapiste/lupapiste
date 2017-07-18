@@ -144,6 +144,7 @@
    :states           #{:open :submitted :complementNeeded :sent}
    :pre-checks       [statement/statement-in-sent-state-allowed]
    :input-validators [ely/subtype-input-validator]
+   :feature          :ely-uspa
    :description      "Sends request for statement to ELY-keskus via integration"}
   [{:keys [application created user organization] :as command}]
   (let [org @organization
