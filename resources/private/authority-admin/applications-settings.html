@@ -8,23 +8,29 @@
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.required-fields-obligatory.title'"></h2>
-        <input type="checkbox" class="form-input" id="required-fields-obligatory-enabled" data-test-id="required-fields-obligatory-enabled"
-               data-bind="checked: organization.appRequiredFieldsFillingObligatory, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
-        <label for="required-fields-obligatory-enabled" class="form-label" data-bind="ltext: 'auth-admin.required-fields-obligatory.enabled'"></label>
+        <div class="blockbox-wrapper">
+          <input type="checkbox" id="required-fields-obligatory-enabled" data-test-id="required-fields-obligatory-enabled"
+                 data-bind="checked: organization.appRequiredFieldsFillingObligatory, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
+          <label for="required-fields-obligatory-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.required-fields-obligatory.enabled'"></label>
+        </div>
       </section>
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.title'"></h2>
-        <input type="checkbox" class="form-input" id="automatic-ok-for-attachments-enabled" data-test-id="automatic-ok-for-attachments-enabled"
-               data-bind="checked: organization.automaticOkForAttachments, enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-ok-for-attachments')"/>
-        <label for="automatic-ok-for-attachments-enabled" class="form-label" data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.enabled'"></label>
+        <div class="blockbox-wrapper">
+          <input type="checkbox" id="automatic-ok-for-attachments-enabled" data-test-id="automatic-ok-for-attachments-enabled"
+                 data-bind="checked: organization.automaticOkForAttachments, enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-ok-for-attachments')"/>
+          <label for="automatic-ok-for-attachments-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.enabled'"></label>
+        </div>
       </section>
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.extended-construction-waste-report.title'"></h2>
-        <input type="checkbox" class="form-input" id="extended-construction-waste-report-enabled" data-test-id="extended-construction-waste-report-enabled"
-               data-bind="checked: organization.extendedConstructionWasteReportEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report')" />
-        <label for="extended-construction-waste-report-enabled" class="form-label" data-bind="ltext: 'auth-admin.extended-construction-waste-report.enabled'"></label>
+        <div class="blockbox-wrapper">
+          <input type="checkbox" id="extended-construction-waste-report-enabled" data-test-id="extended-construction-waste-report-enabled"
+                 data-bind="checked: organization.extendedConstructionWasteReportEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report')" />
+          <label for="extended-construction-waste-report-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.extended-construction-waste-report.enabled'"></label>
+        </div>
       </section>
 
       <section>
@@ -43,13 +49,15 @@
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.inspection-summaries'"></h2>
-        <p><input type="checkbox" class="form-input" id="inspection-summaries-enabled" data-test-id="inspection-summaries-enabled"
+        <div class="blockbox-wrapper">
+          <input type="checkbox" id="inspection-summaries-enabled" data-test-id="inspection-summaries-enabled"
                data-bind="checked: organization.inspectionSummariesEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-inspection-summaries')" />
-        <label for="inspection-summaries-enabled" class="form-label" data-bind="ltext: 'auth-admin.inspection-summaries.enabled'"></label></p>
-        <!-- ko if: organization.inspectionSummariesEnabled -->
-        <h3 data-bind="ltext: 'auth-admin.inspection-summaries.subtitle'"></h3>
-        <div data-bind="component: 'inspection-summary-templates-list'"></div>
-        <!-- /ko -->
+          <label for="inspection-summaries-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.inspection-summaries.enabled'"></label>
+        </div>
+          <!-- ko if: organization.inspectionSummariesEnabled -->
+          <h3 data-bind="ltext: 'auth-admin.inspection-summaries.subtitle'" class="top-marginM  "></h3>
+          <div data-bind="component: 'inspection-summary-templates-list'"></div>
+          <!-- /ko -->
       </section>
 
       <section>
@@ -90,13 +98,14 @@
       <section>
         <h2 data-bind="ltext: 'authorityAdmin.archive.heading'"></h2>
         <div class="permanent-archive-date-input">
-          <label for="archiving-start-date" data-bind="ltext: 'authorityAdmin.archive.startDate'"></label>
+          <span for="archiving-start-date" data-bind="ltext: 'authorityAdmin.archive.startDate'"></span>
           <input data-bind="datepicker: organization.permanentArchiveInUseSince,
                             valueUpdate: 'afterkeydown',
                             enable: $root.authorization.ok('set-organization-permanent-archive-start-date'),
                             attr: {placeholder: loc('choose')}"
                  type="text"
-                 id="archiving-start-date">
+                 id="archiving-start-date"
+                 class="form-input inline textinput textinput--big">
         </div>
       </section>
       <!-- /ko -->
