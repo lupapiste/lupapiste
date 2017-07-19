@@ -9,7 +9,7 @@
           <h2>Lataa xml taustaj&auml;rjestelm&auml;st&auml;</h2>
           <form action="/api/raw/admin-download-application-xml" method="get" class="xml-download">
             <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
-            <input class="textinput textinput--big--long" type="text" name="applicationId" placeholder="LP-tunnus">
+            <input class="textinput textinput--big-long" type="text" name="applicationId" placeholder="LP-tunnus">
             <button type="submit" class="primary">
               <i class="lupicon-download"></i><span>Lataa</span>
             </button>
@@ -19,8 +19,8 @@
           <h2>Lataa xml taustaj&auml;rjestelm&auml;st&auml; kuntalupatunnuksella</h2>
           <form action="/api/raw/admin-download-application-xml-with-kuntalupatunnus" method="get" class="xml-download">
             <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
-            <input class="textinput textinput--big--long" type="text" name="kuntalupatunnus" placeholder="kuntalupatunnus">
-            <input class="textinput textinput--big--long" type="text" name="municipality" placeholder="kunnan id, esim. '753'">
+            <input class="textinput textinput--big-long" type="text" name="kuntalupatunnus" placeholder="kuntalupatunnus">
+            <input class="textinput textinput--big-long" type="text" name="municipality" placeholder="kunnan id, esim. '753'">
             <select id="choose-permit-type" name="permitType" class="dropdown">
               <option value="R">R</option>
               <option value="YA">YA</option>
@@ -50,7 +50,7 @@
           <h2>Lataa rakennus-XML taustaj&auml;rjestelm&auml;st&auml;</h2>
           <form action="/api/raw/admin-download-building-info" method="get" class="xml-download">
             <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
-            <input class="textinput textinput--big--long" type="text" name="applicationId" placeholder="LP-tunnus">
+            <input class="textinput textinput--big-long" type="text" name="applicationId" placeholder="LP-tunnus">
             <button type="submit" class="primary">
               <i class="lupicon-download"></i><span>Lataa</span>
             </button>

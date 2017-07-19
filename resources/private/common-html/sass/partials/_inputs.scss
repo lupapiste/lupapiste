@@ -229,7 +229,7 @@ input[type=text].textinput {
     @include textinputBig;
 }
 
-.textinput.textinput--big--long {
+.textinput.textinput--big-long {
     @include textinputBig;
     display: inline-block;
     width: 20em;

@@ -7412,7 +7412,7 @@ input[type=text].textinput:focus {
   font-size: 16px;
 }
 
-.textinput.textinput--big--long {
+.textinput.textinput--big-long {
   min-height: 40px;
   max-height: 40px;
   line-height: 40px;
