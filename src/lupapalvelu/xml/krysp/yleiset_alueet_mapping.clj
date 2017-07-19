@@ -331,7 +331,7 @@
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments :title (:title application)}
                                                         begin-of-link
-                                                        (comp target-pred attachments-canon/no-statements-no-verdicts)))
+                                                        (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
 
         all-canonical-attachments (seq (filter identity canonical-attachments))
 

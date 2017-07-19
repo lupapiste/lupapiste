@@ -391,10 +391,10 @@
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
-                                                        begin-of-link (comp target-pred attachments-canon/no-statements-no-verdicts)))
+                                                        begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
         canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
-                                     begin-of-link (comp target-pred attachments-canon/no-statements-no-verdicts)))
+                                     begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
         canonical-pk (:Liite canonical-pk-liite)
 
         all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
