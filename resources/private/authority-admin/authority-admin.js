@@ -508,6 +508,10 @@
       organization:        organizationModel,
       authorization:       lupapisteApp.models.globalAuthModel
     });
+    $("#matti-verdict-templates").applyBindings({
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel
+    });
 
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();

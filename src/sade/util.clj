@@ -1,18 +1,19 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero? max-key])
-  (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.java.io :as io]
-            [clojure.edn :as edn]
-            [sade.core :refer [fail!]]
-            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
-            [clj-time.format :as timeformat]
+  (:require [clj-time.coerce :as tc]
             [clj-time.core :as t :refer [hours days weeks months years ago from-now]]
-            [clj-time.coerce :as tc]
+            [clj-time.format :as timeformat]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.walk :refer [postwalk prewalk]]
+            [me.raynes.fs :as fs]
+            [sade.core :refer [fail!]]
+            [sade.shared-util :as shared]
+            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [debugf]]
-            [me.raynes.fs :as fs])
-  (:import [org.joda.time LocalDateTime]
-           [java.util.jar JarFile]))
+            [taoensso.timbre :as timbre :refer [debugf]])
+  (:import [java.util.jar JarFile]
+           [org.joda.time LocalDateTime]))
 
 ;;
 ;; Nil-safe number utilities
@@ -144,10 +145,7 @@
         (apply some-key m (rest ks))
         (m k)))))
 
-(defn find-by-key
-  "Return item from sequence col of maps where element k (keyword) matches value v."
-  [k v col]
-  (some (fn [m] (when (= v (get m k)) m)) col))
+(def find-by-key shared/find-by-key)
 
 (defn find-by-id
   "Return item from sequence col of maps where :id matches id."
@@ -513,11 +511,7 @@
 (defn separate-emails [^String email-str]
   (->> (ss/split email-str #"[,;]") (map ss/trim) set))
 
-(defn find-first
-  "Returns first element from coll for which (pred item)
-   returns true. pred must be free of side-effects."
-  [pred coll]
-  (first (filter pred coll)))
+(def find-first shared/find-first)
 
 (defn get-files-by-regex
   "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
@@ -595,17 +589,10 @@
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
 
-(defn =as-kw
-  "Converts arguments to keywords and compares if they are the same"
-  ([x] true)
-  ([x y] (= (keyword x) (keyword y)))
-  ([x y & more] (apply = (keyword x) (keyword y) (map keyword more))))
-
-(defn not=as-kw
-  "Converts arguments to keywords and compares if they are the same"
-  ([x] false)
-  ([x y] (not= (keyword x) (keyword y)))
-  ([x y & more] (apply not= (keyword x) (keyword y) (map keyword more))))
+(def =as-kw             shared/=as-kw)
+(def not=as-kw          shared/not=as-kw)
+(def includes-as-kw?    shared/includes-as-kw?)
+(def intersection-as-kw shared/intersection-as-kw)
 
 (defn kw-path
   "a b c -> :a.b.c"

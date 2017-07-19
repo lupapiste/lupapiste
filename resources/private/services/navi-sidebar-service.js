@@ -42,7 +42,11 @@ LUPAPISTE.NaviSidebarService = function() {
                       loc: "auth-admin.organization-calendars",
                       showIf: lupapisteApp.models.globalAuthModel
                               .ok("calendars-enabled"),
-                      feature: "ajanvaraus"}],
+                      feature: "ajanvaraus"},
+                     {icon: "lupicon-circle-section-sign",
+                      page: "matti-verdict-templates",
+                      loc: "matti.verdict-templates",
+                      feature: "matti"}],
     admin: [{icon: "lupicon-download",
              page: "admin",
              loc: "admin.xml"},

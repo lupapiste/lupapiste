@@ -469,6 +469,31 @@
     (fact "foo :bar foo"  (not=as-kw "foo" :bar "foo") => true)
     (fact "foo foo :bar"  (not=as-kw "foo" "foo" :bar) => true)))
 
+(facts "includes-as-kw?"
+    (fact "[s] s: found"
+      (includes-as-kw? [:yi "er" :san "si" :wu] "er") => true)
+    (fact "[s] kw: found"
+      (includes-as-kw? [:yi "er" :san "si" :wu] :si) => true)
+    (fact "[kw] kw: found"
+      (includes-as-kw? [:yi "er" :san "si" :wu] :san) => true)
+    (fact "[kw] s: found"
+      (includes-as-kw? [:yi "er" :san "si" :wu] "yi") => true)
+    (fact "kw not found"
+      (includes-as-kw? [:yi "er" :san "si" :wu] :liu)=> false)
+    (fact "s not found"
+      (includes-as-kw? [:yi "er" :san "si" :wu] "liu")=> false))
+
+(facts "intersection-as-kw"
+  (fact "s and kw"
+    (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu" :yi :er])
+    => ["yi" :er])
+  (fact "empty"
+    (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"])
+    => [])
+  (fact "nil safe"
+    (intersection-as-kw ["yi" :er "san"] '(:yi "er" :si) ["liu"] nil nil)
+    => []))
+
 (facts get-in-tree
   (fact "single level"
     (get-in-tree [[:foo :bar] [:baz :quu]] [:foo]) => :bar)
