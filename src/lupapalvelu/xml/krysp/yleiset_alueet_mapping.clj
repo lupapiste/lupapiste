@@ -325,11 +325,13 @@
   (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         attachment-target {:type "task" :id (:id katselmus)}
+        target-pred  #(= attachment-target (:target %))
 
-        attachments (filter #(= attachment-target (:target %)) (:attachments application))
+        attachments (filter target-pred (:attachments application))
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments :title (:title application)}
-                                                        begin-of-link attachment-target))
+                                                        begin-of-link
+                                                        (comp target-pred attachments-canon/no-statements-no-verdicts)))
 
         all-canonical-attachments (seq (filter identity canonical-attachments))
 

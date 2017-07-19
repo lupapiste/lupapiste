@@ -112,7 +112,7 @@
        (not (->> (util/find-by-id (:id target) statements) (authorized-to-statement? user)))))
 
 (defn- statement-summary [statement]
-  (select-keys statement [:id :person :requested :given :state]))
+  (select-keys statement [:id :person :requested :given :state :external]))
 
 (defn- can-read-comments? [app user]
   (or (auth/user-authz? roles/comment-user-authz-roles app user)

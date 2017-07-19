@@ -300,7 +300,7 @@
 (facts "Unit tests - attachments-for-write"
 
   (fact "FileId and filename are returned"
-    (map keys (attachments-for-write {:attachments attachments})) => (has every? (just [:fileId :filename])))
+    (map keys (attachments-for-write attachments)) => (has every? (just [:fileId :filename])))
 
   (fact "Only latestVersions are returned"
     (let [for-write-ids (set (map :fileId (attachments-for-write attachments)))]

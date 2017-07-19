@@ -3,6 +3,7 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.property :as p]
+            [lupapalvelu.document.attachments-canonical :as acanon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -36,9 +37,6 @@
      :VainSahkoinenAsiointi (get-in data [:yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin])}))
 
 (defn- get-henkilo [data]
-
-
-
   (util/strip-nils
     {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
@@ -127,17 +125,18 @@
 
 ;; Public
 
-(defn get-attachments-as-canonical [attachments begin-of-link & [target]]
-  (not-empty
-    (for [attachment attachments
-          :when (and (:latestVersion attachment)
-                  (not= "statement" (-> attachment :target :type))
-                  (not= "verdict" (-> attachment :target :type))
-                  (or (nil? target) (= target (:target attachment))))
-          :let [file-id (get-in attachment [:latestVersion :fileId])
-                attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                link (str begin-of-link attachment-file-name)]]
-      (get-liite attachment link))))
+(defn get-attachments-as-canonical
+  ([attachments begin-of-link]
+    (get-attachments-as-canonical attachments begin-of-link acanon/no-statements-no-verdicts))
+  ([attachments begin-of-link pred]
+   (not-empty
+     (for [attachment attachments
+           :when (and (:latestVersion attachment)
+                      (pred attachment))
+           :let [file-id (get-in attachment [:latestVersion :fileId])
+                 attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                 link (str begin-of-link attachment-file-name)]]
+       (get-liite attachment link)))))
 
 (defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
   {:Kuvaus "Vireille tullut hakemus"
@@ -171,10 +170,10 @@
 
 (defn application-to-asianhallinta-canonical
   "Return canonical, does not contain attachments"
-  [application lang]
+  [application lang & [type]]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
     (-> root-element
-      (assoc-in [:UusiAsia :Tyyppi] (get-asian-tyyppi-string application))
+      (assoc-in [:UusiAsia :Tyyppi] (or type (get-asian-tyyppi-string application)))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (get-hakijat (domain/get-applicant-documents documents)))

@@ -246,7 +246,6 @@
 
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
-        municipality (:municipality args)
         params (->> args
                  (merge create-app-default-args)
                  (mapcat seq))]
