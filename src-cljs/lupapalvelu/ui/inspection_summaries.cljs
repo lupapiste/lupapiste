@@ -350,7 +350,7 @@
        (templates-select (rum/react (rum/cursor-in component-state [:templates])) selected-template)]]
      [:div.row.left-buttons
       [:button.positive
-       {:on-click (partial create-inspection-summary (fn [_] (reset! visible? false?)))
+       {:on-click (partial create-inspection-summary (fn [_] (reset! visible? false)))
         :data-test-id "create-summary-button"
         :disabled (or (empty? selected-op) (empty? selected-template))}
        [:i.lupicon-check]
