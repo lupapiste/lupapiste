@@ -10274,7 +10274,7 @@ label.mandatory:after {
   display: inline;
 }
 
-select.dropdown {
+select.dropdown, .dataTables_length select {
   color: #333333;
   border: 1px solid #bbbbbb;
   border-radius: 0 0 0 0;
@@ -10292,18 +10292,18 @@ select.dropdown {
   overflow: hidden;
 }
 
-select.dropdown:disabled {
+select.dropdown:disabled, .dataTables_length select:disabled {
   border-color: #dddddd;
   background-image: url("/lp-static/img/lupicon-chevron-down-gray187.png");
   background-color: #f6f6f6;
 }
 
-select.dropdown:focus {
+select.dropdown:focus, .dataTables_length select:focus {
   background-image: url("/lp-static/img/lupicon-chevron-down-orange-light.png");
   border-color: #fbc732;
 }
 
-select.dropdown::-ms-expand {
+select.dropdown::-ms-expand, .dataTables_length select::-ms-expand {
   display: none;
 }
 

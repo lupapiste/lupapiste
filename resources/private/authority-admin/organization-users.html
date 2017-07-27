@@ -9,9 +9,11 @@
           <h2 data-bind="ltext: 'auth-admin.admins'"></h2>
 
           <div class="admin-users-table"></div>
-
-          <button data-bind="click: organizationUsers.addUserToOrganization, ltext: 'add.authority', enable: lupapisteApp.models.globalAuthModel.ok('update-user-organization')"
-                  class="btn-primary" data-test-id="authadmin-add-authority"></button>
+          <div class="clear spacerM"></div>
+          <button data-bind="click: organizationUsers.addUserToOrganization, enable: lupapisteApp.models.globalAuthModel.ok('update-user-organization')"
+                  class="positive" data-test-id="authadmin-add-authority">
+            <i class="lupicon-circle-plus"></i><span data-bind="ltext: 'add.authority'"></span>
+          </button>
 
           <div id="add-user-to-organization-dialog" class="window autosized">
             <div class="dialog-header">
@@ -100,8 +102,10 @@
               </tr>
             </tbody>
           </table>
-          <button data-bind="click: $root.statementGivers.openCreateModal, ltext: 'auth-admin.statement-person.add', enable: lupapisteApp.models.globalAuthModel.ok('create-statement-giver')"
-                  data-test-id="create-statement-giver" class="modal btn btn-primary"></button>
+          <button data-bind="click: $root.statementGivers.openCreateModal, enable: lupapisteApp.models.globalAuthModel.ok('create-statement-giver')"
+                  data-test-id="create-statement-giver" class="modal btn btn-primary">
+            <i class="lupicon-circle-plus"></i><span data-bind="ltext: 'auth-admin.statement-person.add'"></span>
+          </button>
         </section>
       </div>
 
