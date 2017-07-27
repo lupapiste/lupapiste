@@ -84,9 +84,14 @@
   (sc/pred string?))
 
 (sc/defschema DocStoreInfo
-  {:docStoreInUse sc/Bool
-   :documentPrice sc/Num
+  {:docStoreInUse           sc/Bool
+   :documentPrice           sc/Num
    :organizationDescription sc/Str})
+
+(def default-docstore-info
+  {:docStoreInUse           false
+   :documentPrice           0.0
+   :organizationDescription ""})
 
 (sc/defschema Organization
   {:id OrgId
