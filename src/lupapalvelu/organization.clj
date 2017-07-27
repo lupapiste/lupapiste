@@ -83,6 +83,11 @@
 (sc/defschema OrgId
   (sc/pred string?))
 
+(sc/defschema DocStoreInfo
+  {:docStoreInUse sc/Bool
+   :documentPrice sc/Num
+   :organizationDescription sc/Str})
+
 (sc/defschema Organization
   {:id OrgId
    :name (zipmap i18n/all-languages (repeat sc/Str))
@@ -143,7 +148,8 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
-   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates})
+   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
+   (sc/optional-key :docstore-info) DocStoreInfo})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))

@@ -19,16 +19,20 @@
 (defonce endpoints (atom []))
 
 (defn valid-inputs? [request param-map]
-  (not-every? (fn [key]
-                (let [input-schema (or (get param-map key) sc/Any)
-                      input-val    (get request key)]
-                  (sc/check input-schema input-val))) (keys param-map)))
+  (let [param-keys (keys param-map)]
+    (or (empty? param-keys)
+        (not-every? (fn [key]
+                      (let [input-schema (or (get param-map key) sc/Any)
+                            input-val    (get request key)]
+                        (sc/check input-schema input-val))) param-keys))))
 
-(defmacro defendpoint [path & content]
+(defmacro defendpoint-for [role-check-fn path & content]
   (let [meta-data (when (map? (first content)) (first content))
-        params (->> (util/select-values meta-data [:parameters :optional-parameters])
-                    (apply concat)
-                    (apply assoc {}))
+        params-list (->> (util/select-values meta-data [:parameters :optional-parameters])
+                         (apply concat))
+        params  (if (empty? params-list)
+                  {}
+                  (apply assoc {} params-list))
         letkeys (keys params)]
     `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
            retval-schema# (get ~meta-data :returns)]
@@ -38,7 +42,7 @@
        (defpage ~path {:keys ~letkeys :as request#}
          (if-let [~'user (or (basic-authentication (request/ring-request))
                              (autologin/autologin  (request/ring-request)))]
-           (if (usr/rest-user? ~'user)
+           (if (~role-check-fn ~'user)
              ; Input schema validation
              (if (valid-inputs? request# ~params)
                (let [response-data# (do ~@content)]
@@ -54,6 +58,9 @@
                (resp/status 404 {:ok "false" :text :error.input-validation-error}))
              (resp/status 401 "Unauthorized"))
            basic-401)))))
+
+(defmacro defendpoint [path & content]
+  `(defendpoint-for usr/rest-user? ~path ~@content))
 
 (defendpoint "/rest/submitted-applications"
   {:summary          "Organisaation kaikki j\u00e4tetyt hakemukset."

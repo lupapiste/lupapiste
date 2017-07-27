@@ -68,6 +68,7 @@
             [lupapalvelu.property-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.reports.reports-api]
+            [lupapalvelu.rest.docstore-api]
             [lupapalvelu.rest.rest-api]
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.ssokeys-api]

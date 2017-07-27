@@ -144,7 +144,7 @@
 
 ;; roles which do not receive email notifications
 (def non-notified-roles
-  #{"rest-api" "trusted-etl" "salesforce-etl"})
+  #{"rest-api" "trusted-etl" "salesforce-etl" "docstore-api"})
 
  ; email template ids, which are sent regardless of current user state
 (def always-sent-templates
