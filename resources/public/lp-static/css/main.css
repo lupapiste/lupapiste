@@ -6422,11 +6422,6 @@ div.docgen-content > section + button {
   margin-bottom: 24px;
 }
 
-#login-button span {
-  text-align: center;
-  width: 200px;
-}
-
 button:focus {
   outline: 0;
 }
@@ -21194,38 +21189,15 @@ div.register-company-wizard div.register-company-container img.logo {
   font-weight: 100;
 }
 
-#login label {
-  margin: 16px 0 20px 0;
-  line-height: 16px;
-  font-size: 14px;
-  color: black;
-  vertical-align: baseline;
-}
-
 #login #login-button {
-  /* max-width: 250px; */
-  /* width: 90%; */
-  text-align: center;
   margin-top: 20px;
   margin-bottom: 10px;
   display: block;
 }
 
-#login a {
-  text-decoration: none;
-  color: #0078ff;
-}
-
-#login a:hover {
-  text-decoration: underline;
-}
-
-.login-input {
-  /* max-width: 250px; */
-  /* width: 90%; */
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  height: 32px;
+#login .welcome-login-section {
+  width: 80%;
+  max-width: 80%;
 }
 
 #verdict section {
