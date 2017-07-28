@@ -31,13 +31,15 @@
 
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority}}
-  [{{:keys [id]} :user}]
-  (let [common     {:auth {$elemMatch {:invite.user.id id}}}
-        query      {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications query [:auth :primaryOperation :address :municipality])
-        invites    (mapcat invites-with-application data)
-        my-invites (filter #(= id (get-in % [:user :id])) invites)]
-    (ok :invites my-invites)))
+  [{{user-id :id {company-id :id company-role :role} :company} :user}]
+  (let [ids (cond-> #{user-id} (util/=as-kw company-role :admin) (conj company-id))]
+    (->> (mongo/select :applications
+                       {:auth.invite.user.id {$in ids}
+                        :state {$ne :canceled}}
+                       [:auth :primaryOperation :address :municipality])
+         (mapcat invites-with-application)
+         (filter (comp ids :id :user))
+         (ok :invites))))
 
 (def settable-roles #{:writer :foreman})
 (def changeable-roles #{:writer :foreman})
