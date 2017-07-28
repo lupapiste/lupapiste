@@ -466,7 +466,7 @@
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
         auth      (assoc (company->auth company)
-                    :id      "" ; prevents access to application before accepting invite
+                    :id      company-id
                     :role    "reader"
                     :inviter (usr/summary caller)
                     :invite  {:user {:id company-id}})

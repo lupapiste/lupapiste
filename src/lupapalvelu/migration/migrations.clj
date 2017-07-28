@@ -3316,6 +3316,13 @@
                  $unset {:private ""}}
                 :multi true))
 
+(defn copy-auth-id-from-invite [{{{id :id} :user} :invite :as auth}]
+  (util/assoc-when auth :id id))
+
+(defmigration allow-reader-access-for-invited-company-users
+  {:apply-when (pos? (mongo/count :applications {:auth.id ""}))}
+  (update-applications-array :auth copy-auth-id-from-invite {:auth.id ""}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

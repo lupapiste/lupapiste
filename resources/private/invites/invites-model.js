@@ -16,7 +16,8 @@ LUPAPISTE.InvitesModel = function() {
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       var invs = _(data.invites).map(function(inv) {
-        return _.assign(inv, { headerText: getHeaderText(inv) });
+        return _.assign(inv, { headerText: getHeaderText(inv),
+                               created: inv.created });
       }).value();
 
       self.invites(invs);

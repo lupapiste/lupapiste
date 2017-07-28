@@ -274,7 +274,9 @@
   (first (get-applicant-documents documents)))
 
 (defn invites [{auth :auth}]
-  (map :invite (filter :invite auth)))
+  (->> (filter :invite auth)
+       (map (fn [{invite :invite inviter :inviter}]
+              (merge {:inviter inviter} invite)))))
 
 (defn invite [application email]
   (first (filter #(= (ss/lower-case email) (:email %)) (invites application))))
