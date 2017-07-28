@@ -11664,6 +11664,7 @@ div.attachments-table-container table.attachments-table span.attachment-drawing-
 .attachment-state-icons i {
   margin-left: 1px;
   margin-right: 1px;
+  cursor: default;
 }
 
 table.suti-admin-table {
@@ -19009,6 +19010,10 @@ span.icon_clear:before {
   margin-top: 1.5em;
 }
 
+#application-tasks-tab i {
+  cursor: default;
+}
+
 #construction-time-documents {
   margin-top: 24px;
 }
@@ -20106,6 +20111,11 @@ td.comment-text {
   vertical-align: middle;
   margin-left: 2px;
   font-size: 18px;
+  cursor: default;
+}
+
+.archive-valid span {
+  margin-left: 5px;
 }
 
 .modal-body p {
