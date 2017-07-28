@@ -19,12 +19,14 @@
 ;; application mongo querys
 ;;
 
-(defn basic-application-query-for [user]
+(defn basic-application-query-for [{user-id :id {company-id :id company-role :role} :company :as user}]
   (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
     (case (keyword (:role user))
-      :applicant    (if-let [company-id (get-in user [:company :id])]
-                      {$or [{:auth.id (:id user)} {:auth.id company-id}]}
-                      {:auth.id (:id user)})
+      :applicant    (cond
+                      (nil? company-id)                 {:auth.id user-id}
+                      (util/=as-kw company-role :admin) {:auth.id {$in [user-id company-id]}}
+                      :else                             {$or [{:auth.id user-id}
+                                                              {:auth {$elemMatch {:id company-id :invite {$exists false}}}}]})
       :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
       :rest-api     {:organization {$in organizations}}
       :oirAuthority {:organization {$in organizations}}
@@ -119,6 +121,14 @@
       (auth/has-organization-authz-roles? roles/commenter-org-authz-roles (:organization app) user)
       (auth/has-auth? app (get-in user [:company :id]))))
 
+(defn- remove-access-rights-from-company-invitation-auth [{invite :invite type :type :as auth}]
+  (cond-> auth (and (util/=as-kw :type :company) (not-empty invite)) (dissoc :id)))
+
+(defn- deny-access-for-invited-company-non-admin-users [{{company-role :role} :company :as user} authz]
+  (cond->> authz
+    (and company-role (not (util/=as-kw company-role :admin)))
+    (map remove-access-rights-from-company-invitation-auth)))
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (-> application
@@ -132,6 +142,7 @@
         (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
+        (update-in [:auth] (partial deny-access-for-invited-company-non-admin-users user))
         (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:company-notes] (partial pick-user-company-notes user))
         (filter-notice-from-application user))))
