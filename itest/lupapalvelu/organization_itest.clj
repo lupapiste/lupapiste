@@ -1084,3 +1084,37 @@
                         :open-inforequest-email "",
                         :opening nil,
                         :permitType "P"}])))
+
+(defn update-docstore-info [org-id docStoreInUse documentPrice organizationDescription]
+  (command admin :update-docstore-info
+           :org-id org-id
+           :docStoreInUse docStoreInUse
+           :documentPrice documentPrice
+           :organizationDescription organizationDescription))
+
+(defn get-docstore-info [org-id]
+  (let [result (query admin :organization-by-id :organizationId org-id)]
+    (if (ok? result)
+      (-> result :data :docstore-info)
+      result)))
+
+(facts update-docstore-info
+
+  (fact "calling does not change other organization data"
+    (let [org (:data (query admin :organization-by-id :organizationId "753-R"))]
+      (update-docstore-info "753-R" true 1.0 "Description") => ok?
+      (dissoc org :docstore-info)
+      => (-> (query admin :organization-by-id :organizationId "753-R")
+             :data
+             (dissoc :docstore-info))))
+
+  (fact "calling updates organization's docstore info"
+    (update-docstore-info "753-R" true 1.0 "Description") => ok?
+    (get-docstore-info "753-R")
+    => {:docStoreInUse true
+        :documentPrice 1.0
+        :organizationDescription "Description"})
+
+  (fact "can't set negative document price"
+    (update-docstore-info "753-R" true -1.0 "Description")
+    => (partial expected-failure? :error.invalid-price)))
