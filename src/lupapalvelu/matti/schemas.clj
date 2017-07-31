@@ -88,6 +88,16 @@
        [matti-string verdict-text verdict-check
         verdict-giver automatic-vs-manual]))
 
+;; Phrases
+
+(def phrase-categories #{:verdict})
+
+(defschema Phrase
+  {:id       ssc/ObjectIdStr
+   :category (apply sc/enum phrase-categories)
+   :tag      sc/Str
+   :phrase   sc/Str})
+
 ;; Schema utils
 
 (defn- resolve-path-schema
