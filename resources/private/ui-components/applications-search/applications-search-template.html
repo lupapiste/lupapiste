@@ -10,12 +10,14 @@
             <h1 data-bind="ltext: 'navigation'"></h1>
             <div class="button-group">
               <!-- ko if: authorizationModel.ok('create-archiving-project') -->
+              <div data-bind="feature: 'digitizer'" style="display:inline-block">
               <button data-bind="click: createArchivingProject"
                       data-test-id="applications-create-archiving project"
                       class="positive application-create">
                 <i class="lupicon-circle-plus"></i>
                 <span data-bind="ltext: 'newRequest.createArchivingProject'"></span>
               </button>
+              </div>
               <!-- /ko -->
 
               <button data-bind="click: create"
@@ -104,7 +106,7 @@
             <!-- ko if: authorizationModel.ok('user-is-pure-digitizer') && authorizationModel.ok('create-archiving-project') -->
               <div class="first-box app-type-box">
                 <h2 class="bottom-marginM" data-bind="ltext: 'newRequest.createArchivingProject'"></h2>
-                <p>Mahtavaa paperia</p>
+                <p data-bind="ltext: 'applications.missing.archiving-project.desc'"></p>
               </div>
             <!-- /ko -->
             <!-- ko ifnot: authorizationModel.ok('user-is-pure-digitizer') && authorizationModel.ok('create-archiving-project') -->

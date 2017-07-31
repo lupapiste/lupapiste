@@ -30,7 +30,8 @@
                                 (fn [{{propertyId :propertyId} :data :as command}]
                                   (when (not (ss/blank? propertyId))
                                     (action/property-id-parameters [:propertyId] command)))]
-             :pre-checks       [user-is-allowed-to-digitize]}
+             :pre-checks       [user-is-allowed-to-digitize]
+             :feature          :digitizer}
             [{:keys [user] :as command}]
   (if-let [app-with-verdict (domain/get-application-as
                               {:organization organizationId
@@ -48,7 +49,8 @@
    :user-roles       #{:authority}
    :user-authz-roles roles/default-authz-writer-roles
    :states           #{:open}
-   :pre-checks       [permit/is-archiving-project]}
+   :pre-checks       [permit/is-archiving-project]
+   :feature          :digitizer}
   [{:keys [application created user] :as command}]
   (action/update-application command
                              {$set  {:state     :underReview
@@ -62,5 +64,6 @@
                   (let [all-roles (apply set/union (vals org-authz))]
                     (when (or (not (all-roles :digitizer))
                               (all-roles :authority))
-                      unauthorized)))]}
+                      unauthorized)))]
+   :feature    :digitizer}
   (ok))
