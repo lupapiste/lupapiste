@@ -116,7 +116,7 @@
                 <rakval:Sijainti>
                   <yht:piste>
                     <gml:Point srsDimension="2" srsName="urn:x-ogc:def:crs:EPSG:3878">
-                      <gml:pos>1 2</gml:pos>
+                      <gml:pos>24500000 6976848</gml:pos>
                     </gml:Point>
                   </yht:piste>
                   <yht:vrkSijaintiepavarmuus>6</yht:vrkSijaintiepavarmuus>

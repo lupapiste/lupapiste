@@ -32,9 +32,10 @@
 
 (defn- pos-xml->location-map [point-xml building-id]
   (try
-    (when-let [source-projection (common/->source-projection point-xml [:Point])]
-      (let [point-str (get-text point-xml :pos)
-            coords (ss/split point-str #" ")]
+    (let [source-projection (common/->source-projection point-xml [:Point])
+          point-str (get-text point-xml :pos)
+          coords (ss/split point-str #" ")]
+      (when (and source-projection (= 2 (count coords)))
         {:location (coordinate/convert source-projection common/to-projection 3 coords)
          :location-wgs84 (coordinate/convert source-projection :WGS84 3 coords)}))
     (catch Exception e (error e "Coordinate conversion failed for building " building-id))))
