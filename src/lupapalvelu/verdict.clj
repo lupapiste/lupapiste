@@ -47,45 +47,6 @@
   (:import [java.net URL]
            [java.nio.charset StandardCharsets]))
 
-(def verdict-codes ["my\u00f6nnetty"
-                    "hyv\u00e4ksytty"
-                    "ev\u00e4tty"
-                    "osittain my\u00f6nnetty"
-                    "pysytti osittain my\u00f6nnettyn\u00e4"
-                    "my\u00f6nnetty aloitusoikeudella "
-                    "ehdollinen"
-                    "ei tutkittu (oikaisuvaatimusvaatimus tai lupa pysyy puollettuna)"
-                    "ei tutkittu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"
-                    "ty\u00f6h\u00f6n liittyy ehto"
-                    "tehty hallintopakkop\u00e4\u00e4t\u00f6s (asetettu velvoite)"
-                    "tehty hallintopakkop\u00e4\u00e4t\u00f6s (ei velvoitetta)"
-                    "tehty uhkasakkop\u00e4\u00e4t\u00f6s"
-                    "hallintopakon tai uhkasakkoasian k\u00e4sittely lopetettu"
-                    "pysytti m\u00e4\u00e4r\u00e4yksen tai p\u00e4\u00e4t\u00f6ksen"
-                    "muutti m\u00e4\u00e4r\u00e4yst\u00e4 tai p\u00e4\u00e4t\u00f6st\u00e4"
-                    "m\u00e4\u00e4r\u00e4ys peruutettu"
-                    "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy puollettuna)"
-                    "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"
-                    "muutti my\u00f6nnetyksi"
-                    "pysytti my\u00f6nnettyn\u00e4"
-                    "muutti ev\u00e4tyksi"
-                    "pysytti ev\u00e4ttyn\u00e4"
-                    "puollettu"
-                    "ei puollettu"
-                    "annettu lausunto"
-                    "ei lausuntoa"
-                    "siirretty maaoikeudelle"
-                    "suunnitelmat tarkastettu"
-                    "muutettu toimenpideluvaksi (konversio)"
-                    "peruutettu"
-                    "ei tutkittu"
-                    "asia palautettu uudelleen valmisteltavaksi"
-                    "asiakirjat palautettu korjauskehotuksin"
-                    "asia poistettu esityslistalta"
-                    "asia pantu p\u00f6yd\u00e4lle kokouksessa"
-                    "ilmoitus merkitty tiedoksi"
-                    "ei tiedossa"])
-
 (def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 
 (defschema Katselmus

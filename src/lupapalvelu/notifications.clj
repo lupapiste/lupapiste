@@ -165,7 +165,7 @@
 (defn notify! [template-name command & [result]]
   {:pre [template-name (map? command) (template-name @mail-config)]}
   (let [conf (template-name @mail-config)]
-    (when ((get conf :pred-fn (constantly true)) command)
+    (when ((get conf :pred-fn (constantly true)) (assoc command :result result))
       (let [application-fn (get conf :application-fn identity)
             application    (application-fn (:application command))
             command        (assoc command :application application)

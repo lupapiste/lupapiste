@@ -124,10 +124,10 @@
     (subtype/subtype-validation {:subtype :number} v)))
 
 (defmethod validate-field :personSelector [application elem v]
-  (when-not (ss/blank? v)
-    (when-not (and
-                (or (auth/has-auth? application v) (auth/has-auth-via-company? application v))
-                (domain/no-pending-invites? application v))
+  (let [approved-auths (remove :invite (:auth application))]
+    (when-not (or (ss/blank? v)
+                  (auth/has-auth? {:auth approved-auths} v)
+                  (auth/has-auth-via-company? {:auth approved-auths} v))
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :companySelector [application elem v]

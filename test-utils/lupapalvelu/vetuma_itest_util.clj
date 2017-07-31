@@ -2,11 +2,13 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [net.cgrand.enlive-html :as e]
-            [lupapalvelu.itest-util :refer [http-get http-post] :as itu]
+            [lupapalvelu.itest-util :refer [http-get http-post server-address] :as itu]
             [sade.strings :as ss]
             [sade.env :as env]
+            [sade.util :as util]
             [sade.xml :as xml]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [cheshire.core :as json]))
 
 (testable-privates lupapalvelu.vetuma mac-of keys-as-keywords)
 
@@ -20,6 +22,16 @@
 (def default-token-query {:query-params {:success "/success"
                                          :cancel "/cancel"
                                          :error "/error"}})
+
+(defn register [base-opts user]
+  (itu/decode-body
+    (http-post
+      (str (server-address) "/api/command/register-user")
+      (util/deep-merge
+        base-opts
+        {;:debug true
+         :headers {"content-type" "application/json;charset=utf-8"}
+         :body    (json/encode user)}))))
 
 (defn default-vetuma-response-data [trid]
   {"TRID" trid

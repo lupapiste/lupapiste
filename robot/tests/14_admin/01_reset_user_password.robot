@@ -18,6 +18,7 @@ Solita admin search Ronja and resets her password
   Wait until     Element should be visible    xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='resetPassword']
   Wait until     Click element                xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='resetPassword']
   Confirm  dynamic-yes-no-confirm-dialog
+  Confirm  dynamic-ok-confirm-dialog
 
 Ronja receives an email
   Open last email

@@ -112,21 +112,21 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   });
 
   self.totalCount = ko.pureComputed(function() {
-    return self.searchModel().totalCount();
+    return util.getIn(self.searchModel, ["totalCount"], 0);
   });
 
   self.noResults = ko.pureComputed(function(){
-    return self.searchModel().totalCount() === 0;
+    return util.getIn(self.searchModel, ["totalCount"]) === 0;
   });
 
   self.gotResults = ko.pureComputed(function(){
-    return self.searchModel().gotResults();
+    return util.getIn(self.searchModel, ["gotResults"]);
   });
 
   self.noApplications = ko.pureComputed(function(){
     return self.dataProvider.initialized()
-        && self.searchModel().userTotalCount() <= 0
-        && _.includes(["applications", "company"], self.searchModel().type);
+        && util.getIn(self.searchModel, ["userTotalCount"]) <= 0
+        && _.includes(["applications", "company"], util.getIn(self.searchModel, ["type"]));
   });
 
   self.missingTitle = ko.pureComputed(function() {

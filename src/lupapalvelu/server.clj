@@ -85,7 +85,8 @@
             [lupapalvelu.ya-extension-api]
             [lupapalvelu.admin-reports-api]
             [lupapalvelu.campaign-api]
-            [lupapalvelu.digitizer-api])
+            [lupapalvelu.digitizer-api]
+            [lupapalvelu.matti.matti-api])
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]
            [fi.lupapiste.jmx ServerFactory]))

@@ -4,6 +4,7 @@
             [sade.core :refer [fail]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.integrations.ely :as ely]
             [lupapalvelu.states :as states]))
 
 (defonce ^:private permit-type-defs (atom {}))
@@ -16,6 +17,7 @@
    :multiple-parties-allowed sc/Bool
    :extra-statement-selection-values sc/Bool
    :state-graph     {sc/Keyword [sc/Keyword]}
+   :ely-statement-types [sc/Str]
    (sc/optional-key :allow-state-change) (sc/cond-pre sc/Keyword [(sc/cond-pre sc/Keyword sc/Str)] )
    (sc/optional-key :wfs-krysp-ns-name) sc/Str
    (sc/optional-key :wfs-krysp-url-asia-prefix) sc/Str})
@@ -50,6 +52,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values true
+   :ely-statement-types ely/r-statement-types
    :wfs-krysp-ns-name "rakennusvalvonta"
    :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 
@@ -61,6 +64,7 @@
    :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false
    :extra-statement-selection-values false
+   :ely-statement-types ely/ya-statement-types
    :wfs-krysp-ns-name "yleisenalueenkaytonlupahakemus"
    :wfs-krysp-url-asia-prefix "yak:luvanTunnisteTiedot/"})
 
@@ -71,6 +75,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
+   :ely-statement-types ely/ymp-statement-types
    :wfs-krysp-ns-name "ymparisto/ilmoitukset"})
 
 (defpermit YL  "Ymparistolupa"
@@ -81,6 +86,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
+   :ely-statement-types ely/ymp-statement-types
    :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
    :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
@@ -91,6 +97,7 @@
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
+   :ely-statement-types ely/ymp-statement-types
    :extra-statement-selection-values false})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
@@ -101,6 +108,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
+   :ely-statement-types ely/ymp-statement-types
    :wfs-krysp-ns-name "ymparisto/vesihuoltolaki"
    :wfs-krysp-url-asia-prefix "ymv:luvanTunnistetiedot/"})
 
@@ -112,6 +120,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values true
+   :ely-statement-types ely/p-statement-types
    :wfs-krysp-ns-name "poikkeamispaatos_ja_suunnittelutarveratkaisu"
    :wfs-krysp-url-asia-prefix "ppst:luvanTunnistetiedot/"})
 
@@ -123,6 +132,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
+   :ely-statement-types ely/ymp-statement-types
    :wfs-krysp-ns-name "ymparisto/maa_ainesluvat"
    :wfs-krysp-url-asia-prefix "ymm:luvanTunnistetiedot/"})
 
@@ -133,6 +143,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
+   :ely-statement-types ely/mm-kt-statement-types
    :wfs-krysp-ns-name "kiinteistotoimitus"})
 
 (defpermit MM "Maankayton muutos"
@@ -142,6 +153,7 @@
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
    :extra-statement-selection-values false
+   :ely-statement-types ely/mm-kt-statement-types
    :wfs-krysp-ns-name "maankaytonmuutos"})
 
 (defpermit ARK  "Arkistointiprojekti"
@@ -151,7 +163,8 @@
    :sftp-directory                   ""
    :allowed-task-schemas             #{}
    :multiple-parties-allowed         false
-   :extra-statement-selection-values false})
+   :extra-statement-selection-values false
+   :ely-statement-types              []})
 
 ;;
 ;; Helpers

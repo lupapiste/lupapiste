@@ -329,7 +329,7 @@
                                               :number "80",
                                               :name {:fi "Turku" :sv "\u00c5bo"}
                                               :municipality "853"
-                                              :location {:x 237551.371, :y 6709441.9}
+                                              :location {:x "237556.799" :y "6709445.314"}
                                               }))))
 
   (fact "address-by-point-proxy"

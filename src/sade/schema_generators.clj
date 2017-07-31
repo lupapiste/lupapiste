@@ -109,8 +109,11 @@
 (register-generator ssc/Email email)
 (register-generator ssc/Username email)
 
-(def timestamp (gen/fmap (partial + 1450000000000)
-                         gen/large-integer))
+(def timestamp (gen/fmap (partial + 1450000000000)          ; ~ 2015 (offset)
+                         (gen/large-integer* {:min (- -2208988800000 ; 1.1.1900
+                                                      1450000000000)
+                                              :max (- 253402214400000 ; 31.12.9999
+                                                      1450000000000)})))
 
 (register-generator ssc/Timestamp timestamp)
 

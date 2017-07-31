@@ -71,3 +71,16 @@
         ah-version    (resolve-ah-version scope)
         output-dir    (resolve-output-directory scope)]
     (ah-mapping/taydennys-asiaan-from-application application attachments lang ah-version begin-of-link output-dir)))
+
+(def ely-config {:version "1.3"
+                 :sftp-user (env/value :ely :sftp-user)
+                 :output-dir (str (env/value :outgoing-directory) "/" (env/value :ely :sftp-user) ah-from-dir)})
+
+(defn save-statement-request
+  [user application submitted-application organization statement lang]
+  (ah-mapping/statement-request (assoc user :organization organization)
+                                application
+                                submitted-application
+                                statement
+                                lang
+                                (assoc ely-config :begin-of-link begin-of-link)))

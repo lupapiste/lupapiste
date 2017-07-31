@@ -64,6 +64,7 @@ Bad date is error and not show on the accordion
 
 Even after reload the bad date is hidden on the accordion
   Reload page
+  Kill dev-box
   Wait until  Element should be visible  jquery=input.hasDatepicker.warn[data-docgen-path=tyoaika-alkaa-pvm]
   Check accordion text  tyo-aika-for-jatkoaika  LUPA-AIKA  \u2013 10.10.2016
 
@@ -90,7 +91,7 @@ The extensions are listed according to the start date
 
 Second link leads to the first extension
   Scroll and click test id  state-link-1
-  Test id text is  application-title  EXTENSION YI
+  Test id text is  application-title  ${ext1}
 
 Pena submits extension
   Submit application

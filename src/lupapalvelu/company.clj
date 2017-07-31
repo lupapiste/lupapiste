@@ -299,14 +299,38 @@
                      created)
     (fail :error.company-not-locked)))
 
+;;
+;; Deletion
+;;
+
+(defn- register-link [lang]
+  (str (env/value :host) "/app/" lang "/applicant#!/register"))
+
+(notif/defemail :company-user-delete                        ; Only sent to dummy users, who are not yet authed via identification service
+                {:subject-key   "company-user-delete.subject"
+                 :recipients-fn (fn [{:keys [result]}] [(:user result)])
+                 :model-fn      (fn [model _ _] (assoc model :company (get-in model [:result :company])
+                                                             :register-link (fn [lang] (register-link lang))))
+                 :pred-fn       (fn [{:keys [result]}] (usr/dummy? (:user result)))})
+
+(def- verified-user-removal   {$unset {:company 1}})
+(def- unverified-user-removal {$set   {:role "dummy" :enabled false}
+                               $unset {:company 1, :private 1}})
+
 (defn delete-user!
-  [user-id]
-  (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}}))
+  "Removes user from company. If user is not yet identificated, role is set to dummy.
+   Returns updated user for further processing."
+  [user]
+  (->> (if (usr/verified-person-id? user)
+         verified-user-removal
+         unverified-user-removal)
+       (mongo/update-one-and-return :users {:_id (:id user)})
+       (mongo/with-id)
+       (usr/non-private)))
 
 (defn delete-every-user! [company-id]
-  (mongo/update-by-query :users
-                         {:company.id company-id}
-                         {$set {:enabled false}, $unset {:company 1}}))
+  (->> (usr/find-users {:company.id company-id})
+       (run! delete-user!)))
 
 (defn update-user! [user-id role submit]
   (mongo/update-by-id :users user-id {$set {:company.role role

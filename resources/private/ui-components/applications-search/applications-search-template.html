@@ -67,12 +67,16 @@
           </div>
 
           <!-- Filters -->
+          <!-- ko if: searchModel() -->
           <div data-bind="component: searchModel().filter"
                class="application-search-component"></div>
+          <!-- /ko -->
 
           <!-- Tabs -->
+          <!-- ko if: searchModel() -->
           <div data-bind="component: searchModel().tabs"
                class="application-search-component"></div>
+          <!-- /ko -->
         </div>
       </div>
       <!-- /ko -->
@@ -80,7 +84,7 @@
       <!-- Search results and paging-->
       <div class="container">
 
-        <!-- ko ifnot: noApplications() -->
+        <!-- ko if: searchModel() && !noApplications() -->
         <div data-bind="component: searchModel().searchResults"
              class="applications-search-component"></div>
 

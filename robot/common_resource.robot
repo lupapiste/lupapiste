@@ -1302,16 +1302,13 @@ Permit type should be
 
 Application address should be
   [Arguments]  ${address}
-  ${a} =  Convert To Uppercase  ${address}
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
-  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${a}
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  ${address}
 
 Neighbor application address should be
   [Arguments]  ${address}
-  ${a} =  Convert To Uppercase  ${address}
   Wait Until  Element Should Be Visible  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']
-  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${a}
-
+  Wait Until  Element text should be  xpath=//section[@id='neighbor-show']//span[@data-test-id='application-title']  ${address}
 
 #
 # Proxy control:

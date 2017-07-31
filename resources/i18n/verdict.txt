@@ -313,7 +313,6 @@
 "verdict.status.11" "en" "Issued a statement"
 "verdict.status.11" "fi" "Annettu lausunto (rlk)"
 "verdict.status.11" "sv" "Givet utlåtande (bn)"
-"verdict.status.12" "en" "Appeal submitted"
 "verdict.status.12" "fi" "Valituks.luovuttu (oik.vaatimus/lupa pysyy puoll.)"
 "verdict.status.12" "sv" "Från besvär har avståtts (rättelseyrkande/tillståndet kvarstår som förordat)"
 "verdict.status.13" "en" "Moved to granted"

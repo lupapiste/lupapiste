@@ -10,7 +10,6 @@ Mikko creates a new application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  invite${secs}
-  Set Suite Variable  ${appnameUC}  INVITE${secs}
   Set Suite Variable  ${propertyId}  753-416-5-5
   Create application with state  ${appname}  ${propertyId}  kerrostalo-rivitalo  open
 
@@ -62,7 +61,7 @@ Teppo can view application
   Wait Until  Element should be visible  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Deny yes no dialog
-  Application address should be  ${appnameUC}
+  Application address should be  ${appname}
   Go to page  applications
 
 Teppo accepts invitation
@@ -76,7 +75,7 @@ Teppo can edit Mikko's application
   Open application  ${appname}  ${propertyId}
   Open accordions  info
   # OnChange event does not seem to get triggered. Do it manually.
-  Click by test id  maaraala-checkbox
+  Wait until  Scroll and click test id  maaraala-checkbox
   Input text with jQuery  input[data-test-id="kiinteisto.maaraalaTunnus"]  1024
   Textfield Value Should Be  xpath=//input[@data-test-id='kiinteisto.maaraalaTunnus']  1024
   Wait Until  Element should be visible  //*[@data-test-id='save-indicator']
@@ -111,7 +110,7 @@ Mikko can see invite paasuunnittelija button again
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko can't invite himself
-  Click by test id  application-invite-paasuunnittelija
+  Wait until  Click by test id  application-invite-paasuunnittelija
   Input Text  invite-email  mikko@example.com
   Input Text  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit

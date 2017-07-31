@@ -1,5 +1,6 @@
 (ns lupapalvelu.dummy-ident-itest-util
   (:require [midje.sweet :refer :all]
+            [clojure.set :refer [rename-keys]]
             [lupapalvelu.itest-util :refer :all]))
 
 (defn dummy-ident-init
@@ -16,9 +17,8 @@
     trid))
 
 (defn dummy-ident-finish
-  [request-opts trid]
+  [request-opts user trid]
   (http-post (str (server-address) "/dev/saml-login")
              (assoc request-opts
                     :form-params
-                    {:userid "itest@example.com"
-                     :stamp trid})))
+                    (assoc (rename-keys user {:personId :userid}) :stamp trid))))
