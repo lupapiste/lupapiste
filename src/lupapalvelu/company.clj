@@ -11,6 +11,7 @@
             [sade.core :refer :all]
             [sade.validators :as v]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
@@ -469,7 +470,9 @@
                     :id      company-id
                     :role    "reader"
                     :inviter (usr/summary caller)
-                    :invite  {:user {:id company-id}})
+                    :invite  {:user {:id company-id}
+                              :created (now)
+                              :role "writer"})
         admins    (find-company-admins company-id)
         application-id (:id application)
         token-id  (company-invitation-token caller company-id application-id)
@@ -496,15 +499,23 @@
                                                                                  "/welcome#!/accept-company-invitation/"
                                                                                  (:token-id model))}))})
 
+(defmethod auth/approve-invite-auth :company [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
+  (when invite
+    (some-> (find-company! {:id company-id})
+            company->auth
+            (util/assoc-when-pred util/not-empty-or-nil?
+              :inviter (:inviter auth)
+              :inviteAccepted accepted-ts))))
+
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
   (when-let [application (domain/get-application-no-access-checking application-id)]
-    (let [company           (find-company! {:id company-id})
-          {:keys [inviter]} (some #(when (= (:y company) (:y %)) %) (:auth application))]
+    (let [auth (-> (auth/get-auth application company-id)
+                   (auth/approve-invite-auth {:company {:id company-id}} (now)))]
       (update-application
        (application->command application)
        {:auth {$elemMatch {:invite.user.id company-id}}}
-       {$set  {:auth.$ (-> company company->auth (util/assoc-when-pred util/not-empty-or-nil? :inviter inviter :inviteAccepted (now)))}}))
+       {$set  {:auth.$ auth}}))
     (ok)))
 
 (defn cannot-submit

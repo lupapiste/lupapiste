@@ -289,9 +289,6 @@
        (map (fn [{invite :invite inviter :inviter}]
               (merge {:inviter inviter} invite)))))
 
-(defn invite [application email]
-  (first (filter #(= (ss/lower-case email) (:email %)) (invites application))))
-
 (defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))
 

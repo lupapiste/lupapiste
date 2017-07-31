@@ -29,7 +29,9 @@
    (sc/optional-key :text)           sc/Str})
 
 (defschema CompanyInvite
-  {:user {:id usr/Id}})
+  {:user                             {:id usr/Id}
+   (sc/optional-key :role)           (apply sc/enum all-authz-roles)
+   (sc/optional-key :created)        ssc/Timestamp})
 
 (defschema Auth
   {:id                               usr/Id
@@ -96,6 +98,17 @@
                  (not (ss/blank? document-name)) (assoc :documentName document-name)
                  (not (ss/blank? document-id))   (assoc :documentId document-id))]
     (assoc (usr/user-in-role invited :reader) :invite invite)))
+
+(defmulti approve-invite-auth
+  {:arglists '([auth-elem user accepted-ts])}
+  (fn [{auth-type :type :as auth} & _] (keyword auth-type)))
+
+(defmethod approve-invite-auth nil [{invite :invite :as auth} user accepted-ts]
+  (when invite
+    (let [role (or (:role invite) (:role auth))]
+      (util/assoc-when-pred (usr/user-in-role user role) util/not-empty-or-nil?
+                            :inviter (:inviter invite)
+                            :inviteAccepted accepted-ts))))
 
 ;;
 ;; Authz checkers

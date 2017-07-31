@@ -52,10 +52,9 @@
                      inviter :user
                      application :application
                      :as command}]
-  {:pre [(valid-role role)]}
-  (let [email (ss/canonize-email email)
-        existing-user (user/get-user-by-email email)]
-    (if (or (domain/invite application email) (auth/has-auth? application (:id existing-user)))
+  (let [email (ss/canonize-email email)]
+    (if (or (util/find-by-key :email email (domain/invites application))
+            (auth/has-auth? application (:id (user/get-user-by-email email))))
       (fail :invite.already-has-auth)
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
@@ -88,24 +87,25 @@
 
 (defcommand approve-invite
   {:parameters [id]
+   :optional-parameters [invite-type]
    :user-roles #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states}
-  [{:keys [created user application] :as command}]
-  (when-let [my-invite (domain/invite application (:email user))]
-    (let [my-auth (auth/get-auth application (:id user))
-          role (or (:role my-invite) (:role my-auth))
-          inviter (:inviter my-invite)
-          document-id (:documentId my-invite)]
+  [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
+  (let [auth          (->> (cond (not (util/=as-kw invite-type :company)) user-id
+                                 (util/=as-kw company-role :admin)        company-id)
+                           (auth/get-auth application))
+        approved-auth (auth/approve-invite-auth auth user created)]
+    (when approved-auth
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
-               :auth.$   (util/assoc-when-pred (user/user-in-role user role) util/not-empty-or-nil? :inviter inviter :inviteAccepted created)}})
-      (when-not (empty? document-id)
+               :auth.$   approved-auth}})
+      (when-let [document-id (not-empty (get-in auth [:invite :documentId]))]
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
           ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-          (doc-persistence/do-set-user-to-document application document-id (:id user) (:path my-invite) created false)))
+          (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created false)))
       (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
