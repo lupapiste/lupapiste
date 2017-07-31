@@ -153,7 +153,7 @@
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
 
-    (when-let [updates (verdict/find-verdicts-from-xml command building-xml)]
+    (when-let [updates (verdict/find-verdicts-from-xml command building-xml false)]
       (action/update-application command updates))
 
     (add-applicant-documents command hakijat)

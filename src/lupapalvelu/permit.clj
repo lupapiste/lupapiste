@@ -156,7 +156,7 @@
    :ely-statement-types ely/mm-kt-statement-types
    :wfs-krysp-ns-name "maankaytonmuutos"})
 
-(defpermit ARK  "Arkistointiprojekti"
+(defpermit ARK "Arkistointiprojekti"
   {:subtypes                         []
    :state-graph                      states/ark-state-graph
    :allow-state-change               []
