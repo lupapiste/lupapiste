@@ -397,10 +397,9 @@
   (let [required-authz (get command-meta-data :org-authz-roles #{})]
     (auth/has-organization-authz-roles? required-authz (:organization application) user)))
 
-(defn- company-authz? [command-meta-data application {{company-id :id company-role :role} :company}]
-  (if (util/=as-kw company-role :admin)
-    (auth/has-auth? application company-id)
-    (auth/has-auth? (update application :auth (partial remove :invite)) company-id)))
+(defn- company-authz? [command-meta-data application user]
+  (-> (get command-meta-data :user-authz-roles #{})
+      (auth/company-authz? application user)))
 
 (defn user-is-allowed-to-access?
   [{user :user :as command} application]

@@ -119,6 +119,13 @@
   (let [roles-in-app  (map (comp keyword :role) (get-auths application (:id user)))]
     (some roles roles-in-app)))
 
+(defn company-authz? [roles application {{company-id :id company-role :role} :company :as user}]
+  (let [auths-in-app  (cond->> (get-auths application company-id)
+                        (not (util/=as-kw :admin company-role)) (remove :invite))]
+    (->> auths-in-app
+         (map (comp keyword :role))
+         (some roles))))
+
 (defn org-authz
   "Returns user's org authz in given organization, nil if not found"
   [organization-id user]
