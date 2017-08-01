@@ -98,19 +98,24 @@ No archive problems
 
 Icon selector
   [Arguments]  ${type}
-  Set Suite Variable  ${selector}  tr[data-test-type='${type}'] td[data-test-id=file-info] i.archive-problem
+  Set Suite Variable  ${icon-selector}  tr[data-test-type='${type}'] td[data-test-id=file-info] i[data-test-id=archive-problem-icon]
+
+Text selector
+  [Arguments]  ${type}
+  Set Suite Variable  ${text-selector}  tr[data-test-type='${type}'] td[data-test-id=file-info] i[data-test-id=archive-problem-icon] span[data-test-id=archive-problem-text]
 
 No archive error
   [Arguments]  ${type}
   Icon selector  ${type}
-  Wait until  Element should not be visible  jquery=${selector}
+  Wait until  Element should not be visible  jquery=${icon-selector}
 
 Archive error
   [Arguments]  ${type}  ${title}
   Icon selector  ${type}
-  Wait until  Element should be visible  jquery=${selector}
-  ${error_title}=  Get element attribute  jquery=${selector}@title
-  Should be equal as strings  ${error_title}  ${title}
+  Mouse over  jquery=${icon-selector}
+  Text selector  ${type}
+  Wait until  Element should be visible  jquery=${text-selector}
+  Element should contain  jquery=${text-selector}  ${title}
 
 Admin edits Sipoo
   SolitaAdmin logs in
