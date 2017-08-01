@@ -24,7 +24,7 @@
            (assoc docstore-info :id id))
         (org/get-organizations query {:docstore-info 1}))))
 
-(defendpoint-for usr/docstore-user? "/rest/docstore-organizations"
+(defendpoint-for usr/docstore-user? "/rest/docstore-organizations" false
     {:summary     ""
      :description ""
      :parameters  []
@@ -32,7 +32,7 @@
     {:ok true :data (get-docstore-infos)})
 
 
-(defendpoint-for usr/docstore-user? "/rest/docstore-organization"
+(defendpoint-for usr/docstore-user? "/rest/docstore-organization" false
     {:summary     ""
      :description ""
      :parameters  [:id org/OrgId]

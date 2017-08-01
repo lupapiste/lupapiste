@@ -26,7 +26,7 @@
                             input-val    (get request key)]
                         (sc/check input-schema input-val))) param-keys))))
 
-(defmacro defendpoint-for [role-check-fn path & content]
+(defmacro defendpoint-for [role-check-fn path register-endpoint? & content]
   (let [meta-data (when (map? (first content)) (first content))
         params-list (->> (util/select-values meta-data [:parameters :optional-parameters])
                          (apply concat))
@@ -36,9 +36,10 @@
         letkeys (keys params)]
     `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
            retval-schema# (get ~meta-data :returns)]
-       (swap! endpoints conj {:method (keyword m#)
-                              :path   p#
-                              :meta   ~meta-data})
+       (when ~register-endpoint?
+         (swap! endpoints conj {:method (keyword m#)
+                                :path   p#
+                                :meta   ~meta-data}))
        (defpage ~path {:keys ~letkeys :as request#}
          (if-let [~'user (or (basic-authentication (request/ring-request))
                              (autologin/autologin  (request/ring-request)))]
@@ -60,7 +61,7 @@
            basic-401)))))
 
 (defmacro defendpoint [path & content]
-  `(defendpoint-for usr/rest-user? ~path ~@content))
+  `(defendpoint-for usr/rest-user? ~path true ~@content))
 
 (defendpoint "/rest/submitted-applications"
   {:summary          "Organisaation kaikki j\u00e4tetyt hakemukset."
