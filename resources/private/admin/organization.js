@@ -49,7 +49,7 @@
                    {"org-id": self.organization().id(),
                     docStoreInUse: self.docstoreEnabled(),
                     documentPrice: documentPrice,
-                    organizationDescription: self.docstoreDescription()})
+                    organizationDescription: self.docstoreDescription() || ""})
         .success(util.showSavedIndicator)
         .error(function(resp) {
           util.showErrorDialog(resp);

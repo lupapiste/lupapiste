@@ -1117,4 +1117,4 @@
 
   (fact "can't set negative document price"
     (update-docstore-info "753-R" true -1.0 "Description")
-    => (partial expected-failure? :error.invalid-price)))
+    => (partial expected-failure? :error.illegal-number)))
