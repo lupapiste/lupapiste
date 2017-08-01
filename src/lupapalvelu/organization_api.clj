@@ -869,7 +869,7 @@
                       (partial number-parameters  [:documentPrice])
                       (fn [{{price :documentPrice} :data}]
                         (when (neg? price)
-                          (fail :error.invalid-price)))
+                          (fail :error.illegal-number)))
                       (partial string-parameters  [:organizationDescription])]}
   [{user :user created :created}]
   (mongo/update-by-query :organizations

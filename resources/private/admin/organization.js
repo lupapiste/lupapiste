@@ -33,6 +33,31 @@
       errorMessageTerm: null
     };
 
+    self.docstoreEnabled = ko.observable(false);
+    self.docstorePrice = ko.observable("");
+    self.docstoreDescription = ko.observable("");
+
+    self.validDocstorePrice = ko.pureComputed(function () {
+      var price = util.parseFloat(self.docstorePrice());
+      return !_.isNaN(price) && ( price >= 0.0);
+    });
+
+    self.updateDocstoreInfo = function() {
+      var documentPrice = util.parseFloat(self.docstorePrice());
+      ajax.command("update-docstore-info",
+
+                   {"org-id": self.organization().id(),
+                    docStoreInUse: self.docstoreEnabled(),
+                    documentPrice: documentPrice,
+                    organizationDescription: self.docstoreDescription()})
+        .success(util.showSavedIndicator)
+        .error(function(resp) {
+          util.showErrorDialog(resp);
+        })
+        .call();
+    };
+
+
     function organizationCommand( command, params ) {
       ajax.command( command,
                     _.merge(params,
@@ -89,6 +114,9 @@
           isLoading = true;
           self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
+          self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
+          self.docstorePrice(_.toString(_.get(result, "data.docstore-info.documentPrice")));
+          self.docstoreDescription(_.get(result, "data.docstore-info.organizationDescription"));
           self.calendarsEnabled(result.data["calendars-enabled"]);
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));

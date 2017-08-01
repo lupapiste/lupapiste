@@ -24,7 +24,37 @@
               </tr>
             </tbody>
           </table>
-          <button data-bind="ltext: 'save', click: updateOrganizationName" class="btn positive"></button>
+          <button data-bind="ltext: 'save',
+                             click: updateOrganizationName,
+                             enable: validDocstorePrice" class="btn positive"></button>
+          <h2>Aineistokauppa</h2>
+          <div class="docstore-setting">
+            <div>
+              <label data-bind="ltext: 'organization.docstore.enabled'" for="docstoreEnabled"></label>
+              <input data-bind="checked: docstoreEnabled" id="docstoreEnabled" type="checkbox"/>
+            </div>
+            <!-- ko if: docstoreEnabled -->
+            <div>
+              <label data-bind="ltext: 'organization.docstore.price'"
+                     for="docstorePrice"></label>
+              <input data-bind="value: docstorePrice,
+                                valueUpdate: 'keyup',
+                                css: { warn: !validDocstorePrice() }"
+                     class="form-input"
+                     data-test-id="docstore-price" name="docstorePrice" type="text"/>
+            </div>
+            <div>
+              <label data-bind="ltext: 'organization.docstore.description'"
+                     for="docstoreDescription"></label>
+              <textarea data-bind="value: docstoreDescription"
+                        class="form-input textarea oneline"
+                        data-test-id="docstore-description" name="docstoreDescription"/>
+            </div>
+            <!-- /ko -->
+            <button data-bind="ltext: 'save',
+                               click: updateDocstoreInfo,
+                               enable: validDocstorePrice" class="btn positive"></button>
+          </div>
 
           <h2>Asetukset</h2>
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
