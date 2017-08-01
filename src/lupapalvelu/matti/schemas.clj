@@ -90,11 +90,9 @@
 
 ;; Phrases
 
-(def phrase-categories #{:verdict})
-
 (defschema Phrase
   {:id       ssc/ObjectIdStr
-   :category (apply sc/enum phrase-categories)
+   :category (apply sc/enum shared/phrase-categories)
    :tag      sc/Str
    :phrase   sc/Str})
 

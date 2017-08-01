@@ -101,3 +101,24 @@
                                              (callback response))}
                   (keyword (str (name generic-type) "-id")) gen-id)
          updates))
+
+;; Phrases
+
+(defn fetch-organization-phrases []
+  (common/query "organization-phrases"
+                #(reset! state/phrases (get % :phrases []))))
+
+(defn upsert-phrase [phrase-map callback]
+  (apply common/command
+         "upsert-phrase"
+         (fn []
+           (fetch-organization-phrases)
+           (callback))
+         (flatten (into [] phrase-map))))
+
+(defn delete-phrase [phrase-id callback]
+  (common/command {:command "delete-phrase"
+                   :success (fn []
+                              (fetch-organization-phrases)
+                              (callback))}
+                  :phrase-id phrase-id))

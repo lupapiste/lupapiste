@@ -338,3 +338,9 @@
     (if (or (nil? schema) v)
       v
       (parent-value (:_parent schema) kw))))
+
+;; Phrases
+
+(def phrase-categories #{:paatosteksti :lupaehdot :naapurit
+                         :muutoksenhaku :vakuus :vaativuus
+                         :rakennusoikeus :kaava})

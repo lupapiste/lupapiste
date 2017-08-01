@@ -53,3 +53,12 @@
 
 (defn feature? [feature]
   (boolean (js/features.enabled (name feature))))
+
+(defn css-flags
+  "List of keys with truthy values.
+  (css-flags :foo true :bar false) => '(\"foo\")"
+  [& flags]
+  (->> (apply hash-map flags)
+       (filter (fn [[k v]] v))
+       keys
+       (map name)))

@@ -32,7 +32,7 @@
            {:ltitle titleKey
             :size   "medium"
             :component "yes-no-dialog"
-            :componentParams #js {:ltext     messageKey
+            :componentParams #js {:ltext     (name messageKey)
                                   :yesFn     callback
                                   :lyesTitle "ok"
                                   :lnoTitle  "cancel"}}))
@@ -79,3 +79,47 @@
       {:for      input-id
        :on-click #(handler-fn (not (value-fn value)))}
       (common/loc label)]]))
+
+(defn initial-value-mixin
+  "Assocs to component's local state local-key with atom that is
+  initialized to the first component argument."
+  [local-key]
+  {:will-mount (fn [state]
+                 (assoc state local-key (-> state
+                                            :rum/args
+                                            first
+                                            atom)))})
+
+(defn- text-options [text* callback {:keys [required? test-id immediate?]}]
+  (merge {:value     @text*
+          :class     (common/css-flags :required (and required?
+                                                      (-> text* rum/react s/trim s/blank?)))
+          :on-change (fn [event]
+                       (let [value (.. event -target -value)]
+                         (common/reset-if-needed! text* value)
+                         (when immediate?
+                           (callback value))))}
+         (when (not immediate?)
+           {:on-blur #(callback (.. % -target -value))})
+         (when test-id
+           {:data-test-id test-id})))
+
+;; Arguments Initial value, callback, options
+;; Options [all optional]
+;;  required?  truthy if required.
+;;  test-id    data-test-id attribute value
+;;; immediate? If true, callback is called on change (default on blur).
+(rum/defcs text-edit < (initial-value-mixin ::text)
+  rum/reactive
+  [local-state _ callback & [options]]
+  (let [text* (::text local-state)]
+    [:input.grid-style-input
+     (assoc (text-options text* callback options)
+            :type "text")]))
+
+(rum/defcs textarea-edit < (initial-value-mixin ::text)
+  rum/reactive
+  [local-state _ callback & [options]]
+  (let [text* (::text local-state)]
+    [:textarea.grid-style-input
+     (text-options text* callback options)]))

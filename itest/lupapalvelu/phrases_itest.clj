@@ -13,31 +13,31 @@
 
 (fact "Add new phrase"
   (command sipoo :upsert-phrase
-           :category :verdict
+           :category :paatosteksti
            :tag "Tag"
            :phrase "Hello") => ok?)
 
 (facts "One phrase listed"
   (let [phrases (:phrases (query sipoo :organization-phrases))]
     phrases => (just [(contains {:tag "Tag"
-                                 :category "verdict"
+                                 :category "paatosteksti"
                                  :phrase "Hello"})])
     (fact "Update phrase"
       (let [phrase-id (-> phrases first :id)]
         (command sipoo :upsert-phrase
                  :phrase-id phrase-id
-                 :category "verdict"
+                 :category "kaava"
                  :tag "Gat"
                  :phrase "World")=> ok?
         (fact "Phrase updated"
           (:phrases (query sipoo :organization-phrases))
           => [{:id       phrase-id
                :tag      "Gat"
-               :category "verdict"
+               :category "kaava"
                :phrase   "World"}])
         (fact "Add one more phrase"
           (command sipoo :upsert-phrase
-                   :category "verdict"
+                   :category "vakuus"
                    :tag "Bah"
                    :phrase "Humbug") => ok?)
         (fact "Delete the first phrase"
@@ -45,7 +45,7 @@
                    :phrase-id phrase-id) => ok?)
         (fact "Check the phrases"
           (:phrases (query sipoo :organization-phrases))
-          => (just [(contains {:category "verdict"
+          => (just [(contains {:category "vakuus"
                                :tag "Bah"
                                :phrase "Humbug"})]))))))
 
@@ -59,7 +59,7 @@
 (fact "Bad phrase id"
   (command sipoo :upsert-phrase
            :phrase-id "bad"
-           :category "verdict"
+           :category "muutoksenhaku"
            :tag "Gat"
            :phrase "World")
   => (err :error.phrase-not-found))

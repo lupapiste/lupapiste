@@ -247,5 +247,23 @@ div.matti-settings-editor {
     @include no-row-hover;
     margin-top: 0;
   }
+}
 
+// Phrases
+
+div.matti-phrases {
+  margin-top: $marginL;
+  table.matti-phrases-table {
+    @include no-row-hover;
+    margin-top: $marginL;
+    i.icon-placeholder {
+      min-width: 22px;
+    }
+    td.phrase {
+      width: 100%;
+      max-width: 0;
+      text-overflow: ellipsis;
+      overflow-x: hidden;
+    }
+  }
 }
