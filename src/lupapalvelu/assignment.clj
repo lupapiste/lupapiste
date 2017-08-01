@@ -45,7 +45,7 @@
   (str "assignment-" tag-id))
 
 (defn- assignment-in-user-organization-query [user]
-  {:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}})
+  {:application.organization {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}})
 
 (defn- organization-query-for-user [user query]
   (merge query (assignment-in-user-organization-query user)))

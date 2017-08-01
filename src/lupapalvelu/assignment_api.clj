@@ -7,7 +7,8 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.env :as env]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.roles :as roles]))
 
 ;; Helpers and validators
 
@@ -48,17 +49,19 @@
    :pre-checks [assignments-enabled-for-application]
    :states (conj states/all-application-states-but-draft-or-terminal :acknowledged) ;LPK-2519
    :user-roles #{:authority}
+   :org-authz-roles (conj roles/default-org-authz-roles :digitizer)
    :categories #{:documents}}
   [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
 
 (defquery assignment-targets
-  {:description "Possible assignment targets per application for frontend"
-   :parameters [id lang]
-   :user-roles #{:authority}
-   :pre-checks [assignments-enabled-for-application]
+  {:description      "Possible assignment targets per application for frontend"
+   :parameters       [id lang]
+   :user-roles       #{:authority}
+   :org-authz-roles  (conj roles/default-org-authz-roles :digitizer)
+   :pre-checks       [assignments-enabled-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :states   (conj states/all-application-states-but-draft-or-terminal :acknowledged)}
+   :states           (conj states/all-application-states-but-draft-or-terminal :acknowledged)}
   [{:keys [application]}]
   (ok :targets (assignment/assignment-targets application)))
 
@@ -103,6 +106,7 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
+   :org-authz-roles  (conj roles/default-org-authz-roles :digitizer)
    :parameters       [id recipientId targets description]
    :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/vector-parameters [:targets])]
