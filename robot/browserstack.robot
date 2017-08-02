@@ -26,8 +26,8 @@ Open browser
   Disable maps
 
 Remember me checkbox should not be selected
-  Wait Until  Element Should Be Visible  rememberme
-  Checkbox Should Not Be Selected  rememberme
+  Wait Until  Element Should Be Visible  rememberme-label
+  Checkbox Wrapper Not Selected  rememberme
 
 Login fails with invalid password
   [Tags]  ie8
@@ -61,9 +61,9 @@ Login fails with empty username and password
 
 Mikko logs in and wants us to remember him
   [Tags]  ie8
-  Wait Until  Element Should Be Visible  rememberme
-  Checkbox Should Not Be Selected  rememberme
-  Select Checkbox  rememberme
+  Wait Until  Element Should Be Visible  rememberme-label
+  Checkbox Wrapper Not Selected  rememberme
+  Click label  rememberme
   Login  ${LOGIN}  ${PASSWORD}
   Run Keyword And Ignore Error  Confirm Action
   User should be logged in  ${USERNAME}
@@ -86,20 +86,20 @@ Mikko remembers he's Finnish
 
 Mikko is logged out but remembered
   [Tags]  ie8
-  Wait Until  Element Should Be Visible  rememberme
+  Wait Until  Element Should Be Visible  rememberme-label
   User should not be logged in
-  Checkbox Should Be Selected  rememberme
+  Checkbox Wrapper Selected  rememberme
   Textfield Value Should Be  login-username  mikko@example.com
 
 Mikko logs in with username that has capital letters and wants to be forgotten
   [Tags]  ie8
-  Unselect Checkbox  rememberme
+  Click label  rememberme
   Login  Mikko@Example.COM  ${PASSWORD}
   User should be logged in  ${USERNAME}
   Logout
   User should not be logged in
-  Wait Until  Element Should Be Visible  rememberme
-  Checkbox Should Not Be Selected  rememberme
+  Wait Until  Element Should Be Visible  rememberme-label
+  Checkbox Wrapper Not Selected  rememberme
 
 Trying to open my page without logging in opens a help page
   [Tags]  ie8
@@ -112,7 +112,7 @@ My page opens after login
   [Tags]  ie8
   Element should be visible by test id  login
   Click by test id  login
-  Wait Until  Element Should Be Visible  rememberme
+  Wait Until  Element Should Be Visible  rememberme-label
   Login  mikko@example.com  ${PASSWORD}
   Wait Until  Element Should Be Visible  mypage
   User should be logged in  ${USERNAME}

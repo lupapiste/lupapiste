@@ -398,12 +398,9 @@ div.attachments-table-container {
   i {
     margin-left: 1px;
     margin-right: 1px;
+    cursor: default;
   }
 }
-
-
-
-
 
 table.suti-admin-table {
   margin-top: $marginM;
@@ -445,8 +442,39 @@ div.suti-admin-container .serversettings--wide {
     }
   }
   .archive-problem {
+    position: relative;
+    margin-left: 5px;
     font-size: 15px;
-    margin-left: 2px;
+    cursor: default;
+  }
+  .archive-problem .archive-problem-text {
+    visibility: hidden;
+    width: 200px;
+    background-color: white;
+    border: 2px solid $negative;
+    color: $grey-text;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 1;
+    top: -20px;
+    left: 110%;
+    font-size: 15px;
+    margin-left: 10px;
+    position: absolute;
+  }
+  .archive-problem .archive-problem-text::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent $negative transparent transparent;
+  }
+  .archive-problem:hover .archive-problem-text {
+    visibility: visible;
   }
 }
 

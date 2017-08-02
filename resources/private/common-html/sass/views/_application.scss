@@ -546,6 +546,9 @@ $preamble-min-height: 280px; // at least the size of the map container
   h2 {
     margin-top: 1.5em;
   }
+  i {
+    cursor: default;
+  }
 }
 
 #construction-time-documents {

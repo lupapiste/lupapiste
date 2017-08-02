@@ -6422,11 +6422,6 @@ div.docgen-content > section + button {
   margin-bottom: 24px;
 }
 
-#login-button span {
-  text-align: center;
-  width: 200px;
-}
-
 button:focus {
   outline: 0;
 }
@@ -10285,7 +10280,7 @@ label.mandatory:after {
   display: inline;
 }
 
-select.dropdown {
+select.dropdown, .dataTables_length select {
   color: #333333;
   border: 1px solid #bbbbbb;
   border-radius: 0 0 0 0;
@@ -10303,18 +10298,18 @@ select.dropdown {
   overflow: hidden;
 }
 
-select.dropdown:disabled {
+select.dropdown:disabled, .dataTables_length select:disabled {
   border-color: #dddddd;
   background-image: url("/lp-static/img/lupicon-chevron-down-gray187.png");
   background-color: #f6f6f6;
 }
 
-select.dropdown:focus {
+select.dropdown:focus, .dataTables_length select:focus {
   background-image: url("/lp-static/img/lupicon-chevron-down-orange-light.png");
   border-color: #fbc732;
 }
 
-select.dropdown::-ms-expand {
+select.dropdown::-ms-expand, .dataTables_length select::-ms-expand {
   display: none;
 }
 
@@ -11675,6 +11670,7 @@ div.attachments-table-container table.attachments-table span.attachment-drawing-
 .attachment-state-icons i {
   margin-left: 1px;
   margin-right: 1px;
+  cursor: default;
 }
 
 table.suti-admin-table {
@@ -11722,8 +11718,42 @@ div.suti-admin-container .serversettings--wide {
 }
 
 .view-with-download .archive-problem {
+  position: relative;
+  margin-left: 5px;
   font-size: 15px;
-  margin-left: 2px;
+  cursor: default;
+}
+
+.view-with-download .archive-problem .archive-problem-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: white;
+  border: 2px solid #df3215;
+  color: #333333;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 1;
+  top: -20px;
+  left: 110%;
+  font-size: 15px;
+  margin-left: 10px;
+  position: absolute;
+}
+
+.view-with-download .archive-problem .archive-problem-text::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  margin-top: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent #df3215 transparent transparent;
+}
+
+.view-with-download .archive-problem:hover .archive-problem-text {
+  visibility: visible;
 }
 
 th.full-width-column {
@@ -19020,6 +19050,10 @@ span.icon_clear:before {
   margin-top: 1.5em;
 }
 
+#application-tasks-tab i {
+  cursor: default;
+}
+
 #construction-time-documents {
   margin-top: 24px;
 }
@@ -20117,6 +20151,11 @@ td.comment-text {
   vertical-align: middle;
   margin-left: 2px;
   font-size: 18px;
+  cursor: default;
+}
+
+.archive-valid span {
+  margin-left: 5px;
 }
 
 .modal-body p {
@@ -21200,38 +21239,15 @@ div.register-company-wizard div.register-company-container img.logo {
   font-weight: 100;
 }
 
-#login label {
-  margin: 16px 0 20px 0;
-  line-height: 16px;
-  font-size: 14px;
-  color: black;
-  vertical-align: baseline;
-}
-
 #login #login-button {
-  /* max-width: 250px; */
-  /* width: 90%; */
-  text-align: center;
   margin-top: 20px;
   margin-bottom: 10px;
   display: block;
 }
 
-#login a {
-  text-decoration: none;
-  color: #0078ff;
-}
-
-#login a:hover {
-  text-decoration: underline;
-}
-
-.login-input {
-  /* max-width: 250px; */
-  /* width: 90%; */
-  box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  height: 32px;
+#login .welcome-login-section {
+  width: 80%;
+  max-width: 80%;
 }
 
 #verdict section {

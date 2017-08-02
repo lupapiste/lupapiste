@@ -1,13 +1,15 @@
 # Hej {{user.firstName}},
 
-i tj&auml;nsten Lupapiste har du en aktiv tillst&aring;ndsans&ouml;kan g&auml;llande projektet {{operation}} p&aring; adressen {{address}}, {{municipality}}. Ans&ouml;kan uppdaterades senast {{modified}}. Är &auml;rendet fortfarande aktuellt? 
+i tjänsten Lupapiste har du en aktiv tillståndsansökan gällande projektet {{operation}} på adressen {{address}}, {{municipality}}. Ansökan uppdaterades senast {{modified}}. Är ärendet fortfarande aktuellt?
 
-Om ans&ouml;kan &auml;r grundl&ouml;s kan du logga in i Lupapiste och klicka "Avbryt ans&ouml;kan" uppe till h&ouml;ger p&aring; ans&ouml;kan. N&auml;r du avbryter ans&ouml;kan annulleras ocks&aring; e-postmeddelandena som ber&ouml;r den. Du kan inte l&auml;ngre redigera uppgifter om en ans&ouml;kan som avbrutits och den kan inte l&auml;ngre &aring;terst&auml;llas.
+Ifall så är fallet, kan du lämna in ansökan under fliken ”Inlämning av ansökan”. Vid behov, fråga hjälp från myndigheten via Diskussion på höger på sidan. 
 
-Klicka p&aring; l&auml;nken nedan att se uppgifterna om projektet. Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
+Om ansökan är grundlös kan du logga in i Lupapiste och klicka "Avbryt ansökan" uppe till höger på ansökan. När du avbryter ansökan annulleras också e-postmeddelandena som berör den.
+
+Klicka på länken nedan att se uppgifterna om projektet. Om länken inte fungerar, kopiera adressen och klistra in den i webbläsarens adressfält.
 
 {{link}}
 
-H&auml;lsningar,
+Hälsningar,
 
 {{lupapiste.link}}
