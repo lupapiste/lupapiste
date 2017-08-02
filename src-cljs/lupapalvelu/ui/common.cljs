@@ -1,4 +1,5 @@
-(ns lupapalvelu.ui.common)
+(ns lupapalvelu.ui.common
+  (:require [clojure.string :as s]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
@@ -62,3 +63,13 @@
        (filter (fn [[k v]] v))
        keys
        (map name)))
+
+(defn fuzzy-re
+  "Simplified Clojurescript version of sade.strings.fuzzy-re.
+
+  \"hello world\" -> #\"(?i)^.*hello.*world.*$\""
+  [term]
+  (let [fuzzy (->> (s/split term #"\s")
+                   (map goog.string/regExpEscape)
+                   (s/join ".*"))]
+    (re-pattern (str "(?i)^.*" fuzzy ".*$"))))

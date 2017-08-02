@@ -120,6 +120,61 @@
                             {:on-click #(reset! phrase* phrase-map)}
                             phrase]]]))]])
       [:button.positive
-       {:on-click #(reset! phrase* {:tag "" :category "" :phrase ""})}
+       {:on-click #(reset! phrase* {:tag "" :category "paatosteksti" :phrase ""})}
        [:i.lupicon-circle-plus]
-       [:span (common/loc :phrase.add)]]])])
+       [:span (common/loc :phrase.add)]]
+      [:p]
+      (components/autocomplete ""
+                               identity
+                               {:items (map #(hash-map :text % :value %)
+                                            ["slipway"
+                                             "flabbergast"
+                                             "chondrify"
+                                             "dinoceras"
+                                             "conduplication"
+                                             "jasperoid"
+                                             "bottoms"
+                                             "unkneeling"
+                                             "ossified"
+                                             "adelheid"
+                                             "humaniser"
+                                             "precalculate"
+                                             "squawker"
+                                             "aecidia"
+                                             "vend"
+                                             "denuder"
+                                             "remediless"
+                                             "nullifier"
+                                             "drabber"
+                                             "meindert"
+                                             "unfrilly"
+                                             "triapsidal"
+                                             "uncultivated"
+                                             "jellify"
+                                             "unpitiful"
+                                             "iciness"
+                                             "gluier"
+                                             "interdependence"
+                                             "rubric"
+                                             "podium"
+                                             "roulade"
+                                             "siliqua"
+                                             "compete"
+                                             "emetine"
+                                             "calcicolous"
+                                             "unfecund"
+                                             "streamingly"
+                                             "vidicon"
+                                             "googly"
+                                             "refrigerant"
+                                             "lisbon"
+                                             "belteshazzar"
+                                             "roughly"
+                                             "mtif"
+                                             "garda"
+                                             "liebig"
+                                             "asymmetry"
+                                             "uncapitulating"
+                                             "cutch"
+                                             "preknitted"])})
+      [:p "Lorem ipsum!"]])])

@@ -18113,6 +18113,91 @@ div.matti-settings-editor table.matti-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
+div.matti-phrases {
+  margin-top: 24px;
+}
+
+div.matti-phrases table.matti-phrases-table {
+  margin-top: 24px;
+}
+
+div.matti-phrases table.matti-phrases-table tr:hover {
+  background-color: white;
+}
+
+div.matti-phrases table.matti-phrases-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+div.matti-phrases table.matti-phrases-table th,
+div.matti-phrases table.matti-phrases-table th > div.like-btn {
+  cursor: pointer;
+}
+
+div.matti-phrases table.matti-phrases-table th i.icon-placeholder,
+div.matti-phrases table.matti-phrases-table th > div.like-btn i.icon-placeholder {
+  min-width: 22px;
+}
+
+div.matti-phrases table.matti-phrases-table td.phrase {
+  width: 100%;
+  max-width: 0;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+div.matti-autocomplete .ac--selected {
+  border: 1px solid #bbbbbb;
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+}
+
+div.matti-autocomplete .ac--selected span {
+  min-height: 40px;
+  max-height: 40px;
+  height: 40px;
+  line-height: 40px;
+  padding-left: 12px;
+  padding-right: 12px;
+  min-width: 10em;
+}
+
+div.matti-autocomplete .ac__menu {
+  z-index: 888;
+  max-width: 20em;
+  border: 1px solid #f39129;
+}
+
+div.matti-autocomplete .ac__menu div.ac__term {
+  padding: 4px 4px 4px 4px;
+  width: 100%;
+}
+
+div.matti-autocomplete .ac__menu div.ac__term input {
+  width: 100%;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items {
+  max-height: 10em;
+  overflow-y: scroll;
+  list-style-type: none;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 4px;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li {
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-left: 4px;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--current {
+  background-color: #fbc732;
+  color: white;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

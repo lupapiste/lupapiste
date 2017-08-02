@@ -2,7 +2,8 @@
   (:require [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared_util :as util]))
 
 (rum/defc select [change-fn data-test-id value options & [classes]]
   [:select
@@ -90,7 +91,7 @@
                                             first
                                             atom)))})
 
-(defn- text-options [text* callback {:keys [required? test-id immediate?]}]
+(defn- text-options [text* callback {:keys [required? test-id immediate?] :as options}]
   (merge {:value     @text*
           :class     (common/css-flags :required (and required?
                                                       (-> text* rum/react s/trim s/blank?)))
@@ -102,7 +103,8 @@
          (when (not immediate?)
            {:on-blur #(callback (.. % -target -value))})
          (when test-id
-           {:data-test-id test-id})))
+           {:data-test-id test-id})
+         (dissoc options :required? :test-id :immediate?)))
 
 ;; Arguments Initial value, callback, options
 ;; Options [all optional]
@@ -123,3 +125,94 @@
   (let [text* (::text local-state)]
     [:textarea.grid-style-input
      (text-options text* callback options)]))
+
+(defn- default-items-fn [items]
+  (fn [term]
+    (let [fuzzy (common/fuzzy-re term)]
+      (filter #(re-find fuzzy (:text %)) items))))
+
+(defn- scroll-element-if-needed [container elem]
+  (let [scroll-top (.-scrollTop container)
+        container-top (.-offsetTop container)
+        container-height (.-offsetHeight container)
+        scroll-bottom (+ scroll-top container-height)
+        elem-top (- (.-offsetTop elem) container-top)
+        elem-height (.-offsetHeight elem)
+        elem-bottom (+ elem-top elem-height)
+        scroll         (cond
+                         (< elem-top scroll-top)
+                         elem-top
+                         (> elem-bottom scroll-bottom)
+                         (+ (- elem-top container-height)
+                            elem-height))]
+    (when (integer? scroll)
+      (aset container "scrollTop" scroll))))
+
+;; Options:
+;;   items: either list or function. The function argument is the
+;;   filtering term. An item is a map with :text and :value keys.
+(rum/defcs autocomplete < (initial-value-mixin ::selected)
+  rum/reactive
+  (rum/local "" ::term)    ; Filtering term
+  (rum/local 0 ::current) ; Currently highlighted item
+  (rum/local false ::open?)
+  [{selected* ::selected
+    term*     ::term
+    current*  ::current
+    open?*    ::open?
+    :as local-state} _ callback {items :items}]
+  (let [items-fn (if (fn? items)
+                   items
+                   (default-items-fn items))
+        open?    (rum/react open?*)
+        items    (items-fn (rum/react term*))]
+    (when-not open?
+      (common/reset-if-needed! term* ""))
+    [:div.matti-autocomplete
+     [:div.like-btn.ac--selected
+      {:on-click #(swap! open?* not)}
+      [:span (:text (util/find-by-key :value
+                                      (rum/react selected*)
+                                      (items-fn "")))]
+      [:i.primary
+       {:class (common/css-flags :lupicon-chevron-small-down (not open?)
+                                 :lupicon-chevron-small-up   open?)}]]
+     (when (rum/react open?*)
+       (letfn [(select [value]
+                 (when value
+                   (reset! selected* value))
+                 (reset! current* 0)
+                 (reset! open?* false))
+               (inc-current [n]
+                 (when (pos? (count items))
+                   (do (swap! current* #(rem (+ (or % 0) n) (count items)))
+                       (scroll-element-if-needed (rum/ref local-state "autocomplete-items")
+                                                 (rum/ref local-state (str "item-" @current*))))))]
+         [:div.ac__menu
+          [:div.ac__term (text-edit @term*
+                                    #(reset! term* %)
+                                    {:immediate? true
+                                     :auto-focus true
+                                     :on-key-down #(case (.-keyCode %)
+                                                     ;; Enter
+                                                     13 (select (some->> @current*
+                                                                         (get (vec items))
+                                                                         :value))
+                                                     ;; Esc
+                                                     27 (reset! open?* false)
+                                                     ;; Up
+                                                     38 (inc-current (- (count items) 1))
+                                                     ;; Down
+                                                     40 (inc-current 1)
+                                                     :default)})]
+          [:ul.ac__items
+           {:ref "autocomplete-items"}
+           (map-indexed (fn [index {:keys [text value]}]
+                          [:li
+                           {:on-click #(select value)
+                            :ref (str "item-" index)
+                            :on-mouse-enter #(reset! current* index)
+                            :class (common/css-flags :ac--current (= (rum/react current*)
+                                                                     index))}
+                           text])
+                        items)]]))]))

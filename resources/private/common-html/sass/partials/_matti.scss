@@ -256,14 +256,69 @@ div.matti-phrases {
   table.matti-phrases-table {
     @include no-row-hover;
     margin-top: $marginL;
-    i.icon-placeholder {
-      min-width: 22px;
+    th,
+    th > div.like-btn {
+      cursor: pointer;
+      i.icon-placeholder {
+        min-width: 22px;
+      }
     }
     td.phrase {
       width: 100%;
       max-width: 0;
       text-overflow: ellipsis;
       overflow-x: hidden;
+    }
+  }
+}
+
+// Autocomplete
+
+div.matti-autocomplete {
+  .ac--selected {
+    border: 1px solid $input-border-color;
+    min-height: 40px;
+    max-height: 40px;
+    line-height: 40px;
+    span {
+      min-height: 40px;
+      max-height: 40px;
+      height: 40px;
+      line-height: 40px;
+      padding: {
+        left: 12px;
+        right: 12px;
+      }
+      min-width: 10em;
+    }
+  }
+  .ac__menu {
+    z-index: 888;
+    max-width: 20em;
+    border: 1px solid $orange-dark;
+    div.ac__term {
+      padding: 4px 4px 4px 4px;
+      width: 100%;
+      input {
+        width: 100%;
+      }
+    }
+    ul.ac__items {
+      max-height: 10em;
+      overflow-y: scroll;
+      list-style-type: none;
+      padding-left: 0;
+      padding-right: 0;
+      padding-bottom: 4px;
+      li {
+        padding-top: 2px;
+        padding-right: 2px;
+        padding-left: 4px;
+        &.ac--current {
+          background-color: $orange-active;
+          color: white;
+        }
+      }
     }
   }
 }
