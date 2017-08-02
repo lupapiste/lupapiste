@@ -20,7 +20,7 @@
                             (when-not (empty? query-params)
                               {:query-params query-params})))))
 
-(facts "REST interface for organization docstore information -"
+(facts "REST interface for organization docstore information"
 
   (fact "not available as anonymous user"
     (api-call organizations-address {}) => http401?
@@ -29,11 +29,21 @@
   (fact "Docstore user can access"
     (docstore-api-call organizations-address {}) => http200?
     (docstore-api-call organization-address {:id "753-R"}) => http200?)
+
   (fact "Queries return correct information"
     (-> (docstore-api-call organization-address {:id "753-R"}) :body :data)
     => (assoc org/default-docstore-info :id "753-R")
     (-> (docstore-api-call organizations-address {}) :body :data)
-    => [(assoc org/default-docstore-info :id "753-R")])
+    => [(assoc org/default-docstore-info :id "753-R")]
+    (-> (docstore-api-call organizations-address {:status "all"}) :body :data)
+    => [(assoc org/default-docstore-info :id "753-R")]
+    (-> (docstore-api-call organizations-address {:status "active"}) :body :data)
+    => []
+    (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data)
+    => [(assoc org/default-docstore-info :id "753-R")]
+
+    (-> (docstore-api-call organizations-address {:status "zorblax"}) :body)
+    => (partial expected-failure? "error.input-validation-error"))
 
   (fact "Docstore user cannot access other REST endpoints"
         (api-call (str (server-address) "/rest/submitted-applications")

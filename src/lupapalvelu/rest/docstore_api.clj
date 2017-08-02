@@ -26,13 +26,13 @@
                 (assoc docstore-info :id id)))
         (remove (partial sc/check OrganizationDocstoreInfo)))))
 
-(defendpoint-for usr/docstore-user? "/rest/docstore/organizations" false
-    {:summary     ""
-     :description ""
-     :parameters  []
-     :returns     OrganizationsResponse}
-  {:ok true :data (get-docstore-infos)})
+(sc/defschema OrganizationStatusFilter
+  (sc/enum "all" "active" "inactive"))
 
+(def status-query
+  {"all"      {}
+   "active"   {:docstore-info.docStoreInUse true}
+   "inactive" {:docstore-info.docStoreInUse false}})
 
 (defendpoint-for usr/docstore-user? "/rest/docstore/organization" false
     {:summary     ""
@@ -42,3 +42,11 @@
   (if-let [docstore-info (first (get-docstore-infos {:_id id}))]
     {:ok true :data docstore-info}
     (fail :error.missing-organization)))
+
+(defendpoint-for usr/docstore-user? "/rest/docstore/organizations" false
+  {:summary     ""
+   :description ""
+   :parameters  []
+   :optional-parameters [:status OrganizationStatusFilter]
+   :returns     OrganizationsResponse}
+  {:ok true :data (get-docstore-infos (get status-query status {}))})
