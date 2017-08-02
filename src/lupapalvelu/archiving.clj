@@ -27,7 +27,8 @@
             [lupapalvelu.domain :as domain]
             [lupapiste-commons.schema-utils :as su]
             [lupapalvelu.states :as states]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit])
   (:import [java.util.concurrent ThreadFactory Executors]
            [java.io InputStream]))
 
@@ -265,14 +266,16 @@
      :projectDescription    (project-description application op-filtered-docs)}))
 
 (defn- generate-archive-metadata
-  [{:keys [id propertyId _applicantIndex address organization municipality
+  [{:keys [id propertyId _applicantIndex address organization municipality permitType
            tosFunction verdicts handlers closed drawings] :as application}
    user
    s2-md-key
    & [attachment]]
   (let [s2-metadata (or (s2-md-key attachment) (s2-md-key application))
+        permit-ids (remove nil? (map :kuntalupatunnus verdicts))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
-                       :applicationId         id
+                       ; Don't use application ids for archiving projects if there are municipal permit ids
+                       :applicationId         (when (or (not= permitType permit/ARK) (empty? permit-ids)) id)
                        :propertyId            propertyId
                        :applicants            _applicantIndex
                        :tosFunction           (->> (tiedonohjaus/available-tos-functions organization)
@@ -281,7 +284,7 @@
                        :address               address
                        :organization          organization
                        :municipality          municipality
-                       :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus verdicts))
+                       :kuntalupatunnukset    permit-ids
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
                        :paatospvm             (get-paatospvm application)
