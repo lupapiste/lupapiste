@@ -29,16 +29,25 @@
     (domain/invites application)
     (map #(assoc % :application (select-keys application [:id :address :primaryOperation :municipality])))))
 
+(defn- select-invite-auth-by-company-role [{user-id :id {company-id :id company-role :role} :company :as user} {auth :auth :as application}]
+  (let [company-auth  (util/find-by-id company-id auth)
+        personal-auth (util/find-by-id user-id auth)]
+    (assoc application :auth
+           (cond
+             (and company-auth (not (:invite company-auth)))      []
+             (and company-auth (util/=as-kw :admin company-role)) [company-auth]
+             :else                                                [personal-auth]))))
+
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority}}
-  [{{user-id :id {company-id :id company-role :role} :company} :user}]
+  [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
   (let [ids (cond-> #{user-id} (util/=as-kw company-role :admin) (conj company-id))]
     (->> (mongo/select :applications
                        {:auth.invite.user.id {$in ids}
                         :state {$ne :canceled}}
                        [:auth :primaryOperation :address :municipality])
+         (map (partial select-invite-auth-by-company-role user))
          (mapcat invites-with-application)
-         (filter (comp ids :id :user))
          (ok :invites))))
 
 (def settable-roles #{:writer :foreman})
