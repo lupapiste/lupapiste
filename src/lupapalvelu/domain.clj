@@ -286,8 +286,8 @@
 
 (defn invites [{auth :auth}]
   (->> (filter :invite auth)
-       (map (fn [{invite :invite inviter :inviter}]
-              (merge {:inviter inviter} invite)))))
+       (map (fn [{invite :invite inviter :inviter auth-type :type}]
+              (merge {:inviter inviter :type auth-type} invite)))))
 
 (defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))

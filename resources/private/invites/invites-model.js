@@ -6,7 +6,7 @@ LUPAPISTE.InvitesModel = function() {
     var address = inv.application.address;
     var municipality = inv.application.municipality;
     var operation = util.getIn(inv, ["application", "primaryOperation", "name"]);
-    return loc("auth") + ": " +
+    return (inv.type === "company" ? loc("company-auth") : loc("auth")) + ": " +
            (address ? address + ", " : "") +
            (municipality ? loc(["municipality", municipality]) + ", " : "") +
            (operation ? loc(["operations", operation]) : "");

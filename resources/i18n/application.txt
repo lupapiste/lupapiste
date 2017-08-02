@@ -825,7 +825,7 @@
 "applications.applications" "sv" "Ansökningar"
 "applications.approveCompanyInvite" "en" "Accept company invitation"
 "applications.approveCompanyInvite" "fi" "Hyväksy yrityskutsu"
-"applications.approveCompanyInvite" "sv" "Godkänn företag inbjudan"
+"applications.approveCompanyInvite" "sv" "Godkänn företagsinbjudan"
 "applications.approveInvite" "en" "Accept invitation"
 "applications.approveInvite" "fi" "Hyväksy kutsu"
 "applications.approveInvite" "sv" "Godkänn inbjudan"
