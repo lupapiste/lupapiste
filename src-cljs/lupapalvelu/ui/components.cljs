@@ -3,7 +3,8 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
             [rum.core :as rum]
-            [sade.shared_util :as util]))
+            [sade.shared_util :as util])
+  (:import [goog.async Delay]))
 
 (rum/defc select [change-fn data-test-id value options & [classes]]
   [:select
@@ -178,11 +179,13 @@
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
                                  :lupicon-chevron-small-up   open?)}]]
      (when (rum/react open?*)
-       (letfn [(select [value]
+       (letfn [(close []
+                 (reset! open?* false)
+                 (reset! current* 0))
+               (select [value]
                  (when value
                    (reset! selected* value))
-                 (reset! current* 0)
-                 (reset! open?* false))
+                 (close))
                (inc-current [n]
                  (when (pos? (count items))
                    (do (swap! current* #(rem (+ (or % 0) n) (count items)))
@@ -190,16 +193,25 @@
                                                  (rum/ref local-state (str "item-" @current*))))))]
          [:div.ac__menu
           [:div.ac__term (text-edit @term*
-                                    #(reset! term* %)
+                                    (fn [text]
+                                      (reset! term* text)
+                                      (common/reset-if-needed! current* 0))
                                     {:immediate? true
                                      :auto-focus true
+                                     ;; Delay is needed to make sure
+                                     ;; that possible selection will
+                                     ;; be processed and the menu will
+                                     ;; not accidentally reopen.
+                                     :on-blur #(.start (Delay. close 200))
                                      :on-key-down #(case (.-keyCode %)
                                                      ;; Enter
-                                                     13 (select (some->> @current*
-                                                                         (get (vec items))
-                                                                         :value))
+                                                     13 (do
+                                                          (select (some->> @current*
+                                                                           (get (vec items))
+                                                                           :value))
+                                                          (.preventDefault %))
                                                      ;; Esc
-                                                     27 (reset! open?* false)
+                                                     27 (close)
                                                      ;; Up
                                                      38 (inc-current (- (count items) 1))
                                                      ;; Down
