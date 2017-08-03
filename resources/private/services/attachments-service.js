@@ -616,6 +616,24 @@ LUPAPISTE.AttachmentsService = function() {
     return attachmentState(attachment) === self.REQUIRES_AUTHORITY_ACTION;
   };
 
+  self.isResellable = function(attachment) {
+    return util.getIn(attachment, ["metadata", "myyntipalvelu"]) === true;
+  };
+
+  self.toggleResell = function(attachment) {
+    ajax
+      .command("set-myyntipalvelu-for-attachment",
+        {
+          id: self.applicationId(),
+          attachmentId: attachment.id,
+          myyntipalvelu: !self.isResellable(attachment)
+        })
+      .success(function() {
+        self.queryOne(attachment.id, {triggerCommand: "set-myyntipalvelu-for-attachment"});
+      })
+      .call();
+  };
+
   // True if the attachment is needed but does not have file yet.
   self.isMissingFile = function( attachment ) {
     return !self.isNotNeeded( attachment )

@@ -1,5 +1,5 @@
 (ns lupapalvelu.tiedonohjaus-api
-  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters] :as action]
+  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters boolean-parameters] :as action]
             [sade.core :refer [ok fail fail!]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
@@ -201,6 +201,20 @@
     (action/update-application command {$set {:modified created
                                               :processMetadata processed-metadata}})
     (ok {:metadata processed-metadata})))
+
+(defcommand set-myyntipalvelu-for-attachment
+  {:parameters [:id attachmentId myyntipalvelu]
+   :categories #{:attachments}
+   :input-validators [(partial non-blank-parameters [:id :attachmentId])
+                      (partial boolean-parameters [:myyntipalvelu])]
+   :user-roles #{:authority}
+   :org-authz-roles #{:authority :archivist :digitizer}
+   :states states/all-but-draft
+   :pre-checks [(partial target-is-not-archived :attachment)]}
+   [{:keys [application created]}]
+   (if (pos? (t/update-metadata-attribute! application created attachmentId :myyntipalvelu myyntipalvelu))
+     (ok)
+     (fail :error.invalid-id)))
 
 (defquery case-file-data
   {:parameters [:id lang]

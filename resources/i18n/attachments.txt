@@ -543,3 +543,5 @@
 "uploadzone.text-two" "en" "on your computer. You can add multiple files at once."
 "uploadzone.text-two" "fi" "omalta koneeltasi. Voit lisätä useita tiedostoja kerralla."
 "uploadzone.text-two" "sv" "från din dator. Du kan lägga till flera filer."
+"attachments.resell.header" "fi" "Myyntipalv."
+"attachments.resell.header" "sv" ""
