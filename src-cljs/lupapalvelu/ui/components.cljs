@@ -149,9 +149,10 @@
     (when (integer? scroll)
       (aset container "scrollTop" scroll))))
 
-;; Options:
+;; Options [optional]:
 ;;   items: either list or function. The function argument is the
 ;;   filtering term. An item is a map with :text and :value keys.
+;;   [clear?] If truthy, clear button is shown when proper (default false).
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
   (rum/local "" ::term)    ; Filtering term
@@ -161,7 +162,7 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as local-state} _ callback {items :items}]
+    :as local-state} _ callback {:keys [items clear?]}]
   (let [items-fn (if (fn? items)
                    items
                    (default-items-fn items))
@@ -175,9 +176,15 @@
       [:span (:text (util/find-by-key :value
                                       (rum/react selected*)
                                       (items-fn "")))]
-      [:i.primary
+      [:i.primary.ac--chevron
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
-                                 :lupicon-chevron-small-up   open?)}]]
+                                 :lupicon-chevron-small-up   open?)}]
+      (when (and clear?
+                 (not (s/blank? (rum/react selected*))))
+        [:i.secondary.ac--clear.lupicon-remove
+         {:on-click (fn [event]
+                      (reset! selected* "")
+                      (.stopPropagation event))}])]
      (when (rum/react open?*)
        (letfn [(close []
                  (reset! open?* false)

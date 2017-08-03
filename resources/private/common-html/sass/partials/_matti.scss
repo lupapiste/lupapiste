@@ -275,26 +275,52 @@ div.matti-phrases {
 // Autocomplete
 
 div.matti-autocomplete {
+  position: relative;
+  display: inline-block;
   .ac--selected {
-    border: 1px solid $input-border-color;
     min-height: 40px;
     max-height: 40px;
     line-height: 40px;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    overflow-x: hidden;
     span {
+      border: 1px solid $input-border-color;
+      border-right: none;
       min-height: 40px;
       max-height: 40px;
       height: 40px;
       line-height: 40px;
       padding: {
         left: 12px;
-        right: 12px;
       }
       min-width: 10em;
+      width: 100%;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+    i {
+      min-width: 22px;
+      width: 32px;
+    }
+    i.ac--chevron {
+      //width: 32px;
+      border: 1px solid $input-border-color;
+      border-left: none;
+    }
+    i.ac--clear {
+      padding-left: 12px;
     }
   }
   .ac__menu {
+    background-color: white;
+    position: absolute;
+    left: 0;
+    top: 100%;
     z-index: 888;
-    max-width: 20em;
+    min-width: 20em;
+    width: 100%;
     border: 1px solid $orange-dark;
     div.ac__term {
       padding: 4px 4px 4px 4px;

@@ -18146,26 +18146,57 @@ div.matti-phrases table.matti-phrases-table td.phrase {
   overflow-x: hidden;
 }
 
+div.matti-autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
 div.matti-autocomplete .ac--selected {
-  border: 1px solid #bbbbbb;
   min-height: 40px;
   max-height: 40px;
   line-height: 40px;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 div.matti-autocomplete .ac--selected span {
+  border: 1px solid #bbbbbb;
+  border-right: none;
   min-height: 40px;
   max-height: 40px;
   height: 40px;
   line-height: 40px;
   padding-left: 12px;
-  padding-right: 12px;
   min-width: 10em;
+  width: 100%;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+div.matti-autocomplete .ac--selected i {
+  min-width: 22px;
+  width: 32px;
+}
+
+div.matti-autocomplete .ac--selected i.ac--chevron {
+  border: 1px solid #bbbbbb;
+  border-left: none;
+}
+
+div.matti-autocomplete .ac--selected i.ac--clear {
+  padding-left: 12px;
 }
 
 div.matti-autocomplete .ac__menu {
+  background-color: white;
+  position: absolute;
+  left: 0;
+  top: 100%;
   z-index: 888;
-  max-width: 20em;
+  min-width: 20em;
+  width: 100%;
   border: 1px solid #f39129;
 }
 

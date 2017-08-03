@@ -126,7 +126,8 @@
       [:p]
       (components/autocomplete ""
                                identity
-                               {:items (map #(hash-map :text % :value %)
+                               {:clear? true
+                                :items (map #(hash-map :text % :value %)
                                             ["slipway"
                                              "flabbergast"
                                              "chondrify"
@@ -138,6 +139,7 @@
                                              "ossified"
                                              "adelheid"
                                              "humaniser"
+                                             "Undescendible harquebusier calcining fictioneer yeuk. Rearousing electrum broiler suckler lettice"
                                              "precalculate"
                                              "squawker"
                                              "aecidia"
@@ -148,6 +150,7 @@
                                              "drabber"
                                              "meindert"
                                              "unfrilly"
+                                             "Rewear ungenerosity benedicite telephone preenumerate depilation nonreformational unmesmeric. Perfective akmolinsk preacceptance acervate stabilising disruption febricula circumambulating. Dandiest annihilator nontautomeric hasted ungodlier hypophloeodal goldoni dvandva."
                                              "triapsidal"
                                              "uncultivated"
                                              "jellify"
