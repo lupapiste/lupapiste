@@ -348,6 +348,12 @@ div.matti-autocomplete {
           background-color: $orange-active;
           color: white;
         }
+        &.ac--group {
+          font-weight: bold;
+        }
+        &.ac--grouped {
+          padding-left: 10px;
+        }
       }
     }
   }

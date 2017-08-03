@@ -18233,6 +18233,14 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--current {
   color: white;
 }
 
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--group {
+  font-weight: bold;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
+  padding-left: 10px;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

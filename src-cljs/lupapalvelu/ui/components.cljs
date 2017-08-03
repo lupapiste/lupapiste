@@ -151,8 +151,11 @@
 
 ;; Options [optional]:
 ;;   items: either list or function. The function argument is the
-;;   filtering term. An item is a map with :text and :value keys.
-;;   [clear?] If truthy, clear button is shown when proper (default false).
+;;          filtering term. An item is a map with mandatory :text
+;;          and :value keys and optional :group key.
+;;
+;;   [clear?] If truthy, clear button is shown when proper (default
+;;            false).
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
   (rum/local "" ::term)    ; Filtering term
@@ -162,7 +165,7 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as local-state} _ callback {:keys [items clear?]}]
+    :as       local-state} _ callback {:keys [items clear?]}]
   (let [items-fn (if (fn? items)
                    items
                    (default-items-fn items))
@@ -203,13 +206,13 @@
                                     (fn [text]
                                       (reset! term* text)
                                       (common/reset-if-needed! current* 0))
-                                    {:immediate? true
-                                     :auto-focus true
+                                    {:immediate?  true
+                                     :auto-focus  true
                                      ;; Delay is needed to make sure
                                      ;; that possible selection will
                                      ;; be processed and the menu will
                                      ;; not accidentally reopen.
-                                     :on-blur #(.start (Delay. close 200))
+                                     :on-blur     #(.start (Delay. close 200))
                                      :on-key-down #(case (.-keyCode %)
                                                      ;; Enter
                                                      13 (do
@@ -226,12 +229,26 @@
                                                      :default)})]
           [:ul.ac__items
            {:ref "autocomplete-items"}
-           (map-indexed (fn [index {:keys [text value]}]
-                          [:li
-                           {:on-click #(select value)
-                            :ref (str "item-" index)
-                            :on-mouse-enter #(reset! current* index)
-                            :class (common/css-flags :ac--current (= (rum/react current*)
-                                                                     index))}
-                           text])
-                        items)]]))]))
+           (loop [[x & xs]   (vec items)
+                  index      0
+                  last-group ""
+                  li-items   []]
+             (if x
+               (let [{:keys [text value group]} x
+                     group (-> (or group "") s/trim)
+                     li-items (if (= group last-group)
+                              li-items
+                              (conj li-items [:li.ac--group group]))]
+                 (recur xs
+                        (inc index)
+                        group
+                        (conj li-items
+                              [:li
+                               {:on-click       #(select value)
+                                :ref            (str "item-" index)
+                                :on-mouse-enter #(reset! current* index)
+                                :class          (common/css-flags :ac--current (= (rum/react current*)
+                                                                                  index)
+                                                                  :ac--grouped (not (s/blank? group)))}
+                               text])))
+               li-items))]]))]))
