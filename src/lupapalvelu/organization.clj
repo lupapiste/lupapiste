@@ -86,12 +86,12 @@
 (sc/defschema DocStoreInfo
   {:docStoreInUse           sc/Bool
    :documentPrice           sc/Num
-   :organizationDescription sc/Str})
+   :organizationDescription (i18n/localization-schema sc/Str)})
 
 (def default-docstore-info
   {:docStoreInUse           false
    :documentPrice           0.0
-   :organizationDescription ""})
+   :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
 (sc/defschema Organization
   {:id OrgId

@@ -3321,9 +3321,11 @@
   {:apply-when (pos? (mongo/count :organizations {:docstore-info {$exists false}}))}
   (mongo/update :organizations
                 {:docstore-info {$exists false}}
-                {$set {:docstore-info {:docStoreInUse false
-                                       :documentPrice 0.0
-                                       :organizationDescription ""}}}
+                {$set {:docstore-info
+                       {:docStoreInUse false
+                        :documentPrice 0.0
+                        :organizationDescription (i18n/supported-langs-map
+                                                  (constantly ""))}}}
                 :multi true))
 ;;
 ;; ****** NOTE! ******

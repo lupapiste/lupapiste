@@ -1113,7 +1113,7 @@
     (get-docstore-info "753-R")
     => {:docStoreInUse true
         :documentPrice 1.0
-        :organizationDescription "Description"})
+        :organizationDescription (i18n/supported-langs-map (constantly "Description"))})
 
   (fact "can't set negative document price"
     (update-docstore-info "753-R" true -1.0 "Description")
