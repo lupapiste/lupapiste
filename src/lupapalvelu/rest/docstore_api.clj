@@ -1,6 +1,7 @@
 (ns lupapalvelu.rest.docstore-api
   (:require [noir.response :as resp]
             [schema.core :as sc]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.rest.rest-api :refer [defendpoint-for]]
             [lupapalvelu.rest.schemas :refer [ApiResponse]]
@@ -9,7 +10,8 @@
 
 (sc/defschema OrganizationDocstoreInfo
   (assoc org/DocStoreInfo
-         :id org/OrgId))
+         :id org/OrgId
+         :name (i18n/localization-schema sc/Str)))
 
 (sc/defschema OrganizationResponse
   (assoc ApiResponse :data OrganizationDocstoreInfo))
@@ -21,9 +23,12 @@
   ([]
    (get-docstore-infos {}))
   ([query]
-   (->> (org/get-organizations query {:docstore-info 1})
-        (map #(let [{:keys [id docstore-info]} %]
-                (assoc docstore-info :id id)))
+   (->> (org/get-organizations query {:docstore-info 1
+                                      :name 1})
+        (map #(let [{:keys [id docstore-info name]} %]
+                (assoc docstore-info
+                       :id id
+                       :name name)))
         (remove (partial sc/check OrganizationDocstoreInfo)))))
 
 (sc/defschema OrganizationStatusFilter

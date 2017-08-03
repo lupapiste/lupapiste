@@ -1,5 +1,6 @@
 (ns lupapalvelu.rest-docstore-api-itest
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.organization :as org]))
 
@@ -20,6 +21,11 @@
                             (when-not (empty? query-params)
                               {:query-params query-params})))))
 
+(def default-sipoo-docstore-info
+  (assoc org/default-docstore-info
+         :id "753-R"
+         :name (i18n/supported-langs-map (constantly "Sipoon rakennusvalvonta"))))
+
 (facts "REST interface for organization docstore information"
 
   (fact "not available as anonymous user"
@@ -32,15 +38,15 @@
 
   (fact "Queries return correct information"
     (-> (docstore-api-call organization-address {:id "753-R"}) :body :data)
-    => (assoc org/default-docstore-info :id "753-R")
+    => default-sipoo-docstore-info
     (-> (docstore-api-call organizations-address {}) :body :data)
-    => [(assoc org/default-docstore-info :id "753-R")]
+    => [default-sipoo-docstore-info]
     (-> (docstore-api-call organizations-address {:status "all"}) :body :data)
-    => [(assoc org/default-docstore-info :id "753-R")]
+    => [default-sipoo-docstore-info]
     (-> (docstore-api-call organizations-address {:status "active"}) :body :data)
     => []
     (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data)
-    => [(assoc org/default-docstore-info :id "753-R")]
+    => [default-sipoo-docstore-info]
 
     (-> (docstore-api-call organizations-address {:status "zorblax"}) :body)
     => (partial expected-failure? "error.input-validation-error"))

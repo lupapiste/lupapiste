@@ -95,7 +95,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+   :name (i18n/localization-schema sc/Str)
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
