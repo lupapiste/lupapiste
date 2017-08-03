@@ -66,6 +66,11 @@
 
 (def foreman-codes [:vastaava-tj :vv-tj :iv-tj :erityis-tj])
 
+;; Phrases
+
+(def phrase-categories #{:paatosteksti :lupaehdot :naapurit
+                         :muutoksenhaku :vakuus :vaativuus
+                         :rakennusoikeus :kaava})
 (defschema MattiBase
   {(sc/optional-key :_meta)      meta-flags
    (sc/optional-key :css)        [sc/Keyword]
@@ -112,6 +117,13 @@
            ;; item-key.
            (sc/optional-key :match-key)  sc/Keyword}}))
 
+(defschema MattiPhraseText
+  "Textarea with integrated phrase support."
+  (merge MattiComponent
+         {;; Default category.
+          :category (apply sc/enum phrase-categories)
+          (sc/optional-key :text) sc/Str}))
+
 (def keyword-or-string (sc/conditional
                         keyword? sc/Keyword
                         :else    sc/Str))
@@ -136,6 +148,7 @@
   {:docgen         sc/Str
    :list           (sc/recursive #'MattiList)
    :reference-list MattiReferenceList
+   :phrase-text    MattiPhraseText
    :loc-text       sc/Keyword ;; Localisation term shown as text.
    :date-delta     MattiDateDelta
    :multi-select   MattiMultiSelect})
@@ -224,25 +237,31 @@
 (def default-verdict-template
   {:name     ""
    :sections [{:id    "matti-verdict"
-               :grid  {:columns 6
+               :grid  {:columns 12
                        :rows    [{:css [:row--date-delta-title]
-                                  :row [{:col    6
+                                  :row [{:col    12
                                          :css    [:matti-label]
                                          :schema {:loc-text :matti-verdict-dates}}]}
                                  [{:id     "julkipano"
+                                   :col 2
                                    :schema {:date-delta {:unit :days}}}
                                   {:id     "anto"
+                                   :col 2
                                    :schema {:date-delta {:unit :days}}}
                                   {:id     "valitus"
+                                   :col 2
                                    :schema {:date-delta {:unit :days}}}
                                   {:id     "lainvoimainen"
+                                   :col 2
                                    :schema {:date-delta {:unit :days}}}
                                   {:id     "aloitettava"
+                                   :col 2
                                    :schema {:date-delta {:unit :years}}}
                                   {:id     "voimassa"
+                                   :col 2
                                    :schema {:date-delta {:unit :years}}}]
                                  [{:id     "giver"
-                                   :col    2
+                                   :col    3
                                    :schema {:docgen "matti-verdict-giver"}}
                                   {:align  :full
                                    :col    2
@@ -250,10 +269,9 @@
                                    :schema {:reference-list {:path       [:settings :verdict :0 :verdict-code]
                                                              :type       :select
                                                              :loc-prefix :matti-r}}}]
-                                 [{:col    5
+                                 [{:col    12
                                    :id     "paatosteksti"
-                                   :align  :full
-                                   :schema {:docgen "matti-verdict-text"}}]]}
+                                   :schema {:phrase-text {:category :paatosteksti}}}]]}
                :_meta {:can-remove? false}}
               (foremen-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
               (reference-section :plans :matti-plans [:settings :plans :0 :plans])
@@ -338,9 +356,3 @@
     (if (or (nil? schema) v)
       v
       (parent-value (:_parent schema) kw))))
-
-;; Phrases
-
-(def phrase-categories #{:paatosteksti :lupaehdot :naapurit
-                         :muutoksenhaku :vakuus :vaativuus
-                         :rakennusoikeus :kaava})

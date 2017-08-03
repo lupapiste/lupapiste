@@ -84,13 +84,15 @@
 
 (defn initial-value-mixin
   "Assocs to component's local state local-key with atom that is
-  initialized to the first component argument."
+  initialized to the first component argument. If the argument is an
+  atom or cursor it is used as is (aka poor man's two-way binding)"
   [local-key]
   {:will-mount (fn [state]
-                 (assoc state local-key (-> state
-                                            :rum/args
-                                            first
-                                            atom)))})
+                 (let [value (-> state :rum/args first)]
+                   (assoc state local-key (if (or (instance? Atom value)
+                                                  (instance? rum.cursor.Cursor value))
+                                            value
+                                            (atom value)))))})
 
 (defn- text-options [text* callback {:keys [required? test-id immediate?] :as options}]
   (merge {:value     @text*
@@ -111,7 +113,8 @@
 ;; Options [all optional]
 ;;  required?  truthy if required.
 ;;  test-id    data-test-id attribute value
-;;; immediate? If true, callback is called on change (default on blur).
+;;  immediate? If true, callback is called on change (default on blur).
+;; In addition all the Rum options can be passed as well.
 (rum/defcs text-edit < (initial-value-mixin ::text)
   rum/reactive
   [local-state _ callback & [options]]
@@ -133,22 +136,23 @@
       (filter #(re-find fuzzy (:text %)) items))))
 
 (defn- scroll-element-if-needed [container elem]
-  (let [scroll-top (.-scrollTop container)
-        container-top (.-offsetTop container)
+  (let [scroll-top       (.-scrollTop container)
+        container-top    (.-offsetTop container)
         container-height (.-offsetHeight container)
-        scroll-bottom (+ scroll-top container-height)
-        elem-top (- (.-offsetTop elem) container-top)
-        elem-height (.-offsetHeight elem)
-        elem-bottom (+ elem-top elem-height)
-        scroll         (cond
-                         (< elem-top scroll-top)
-                         elem-top
-                         (> elem-bottom scroll-bottom)
-                         (+ (- elem-top container-height)
-                            elem-height))]
+        scroll-bottom    (+ scroll-top container-height)
+        elem-top         (- (.-offsetTop elem) container-top)
+        elem-height      (.-offsetHeight elem)
+        elem-bottom      (+ elem-top elem-height)
+        scroll           (cond
+                           (< elem-top scroll-top)
+                           elem-top
+                           (> elem-bottom scroll-bottom)
+                           (+ (- elem-top container-height)
+                              elem-height))]
     (when (integer? scroll)
       (aset container "scrollTop" scroll))))
 
+;; Parameters: initial-value callback options
 ;; Options [optional]:
 ;;   items: either list or function. The function argument is the
 ;;          filtering term. An item is a map with mandatory :text
@@ -170,7 +174,10 @@
                    items
                    (default-items-fn items))
         open?    (rum/react open?*)
-        items    (items-fn (rum/react term*))]
+        items    (items-fn (rum/react term*))
+        set-selected (fn [value]
+                       (reset! selected* value)
+                       (callback value))]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.matti-autocomplete
@@ -186,7 +193,7 @@
                  (not (s/blank? (rum/react selected*))))
         [:i.secondary.ac--clear.lupicon-remove
          {:on-click (fn [event]
-                      (reset! selected* "")
+                      (set-selected "")
                       (.stopPropagation event))}])]
      (when (rum/react open?*)
        (letfn [(close []
@@ -194,7 +201,7 @@
                  (reset! current* 0))
                (select [value]
                  (when value
-                   (reset! selected* value))
+                   (set-selected value))
                  (close))
                (inc-current [n]
                  (when (pos? (count items))
@@ -235,10 +242,10 @@
                   li-items   []]
              (if x
                (let [{:keys [text value group]} x
-                     group (-> (or group "") s/trim)
-                     li-items (if (= group last-group)
-                              li-items
-                              (conj li-items [:li.ac--group group]))]
+                     group                      (-> (or group "") s/trim)
+                     li-items                   (if (= group last-group)
+                                                  li-items
+                                                  (conj li-items [:li.ac--group group]))]
                  (recur xs
                         (inc index)
                         group

@@ -107,6 +107,7 @@
         reflist      (:reference-list data)
         date-delta   (:date-delta data)
         multi-select (:multi-select data)
+        phrase-text  (:phrase-text data)
         wrap         (fn [id schema data]
                        {id {:schema schema
                             :path   path
@@ -116,7 +117,8 @@
       docgen       (wrap :docgen (doc-schemas/get-schema {:name docgen}) docgen)
       date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
-      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select))))
+      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
+      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text))))
 
 (defn- parse-int [x]
   (let [n (-> x str name)]
@@ -238,6 +240,10 @@
   (cond
     (not-empty path) :error.invalid-value-path
     :else            (check-items value (get-in references (:path data)))))
+
+(defmethod validate-resolution :phrase-text
+  [{:keys [path schema value data] :as options}]
+  (schema-error (assoc options :path (conj path :text))))
 
 (defn validate-path-value
   "Error message if not valid, nil otherwise."

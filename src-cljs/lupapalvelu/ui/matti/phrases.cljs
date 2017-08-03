@@ -10,8 +10,31 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(defn phrase-list-for-autocomplete [category]
+  (println "phrase-list:" category)
+  (->> @state/phrases
+       (filter #(util/=as-kw category (:category %)))
+       (map (fn [{:keys [tag phrase]}]
+              {:text (str tag " - " phrase)
+               :value phrase}))))
+
 (defn- category-text [category]
   (path/loc [:phrase.category category]))
+
+(rum/defcs phrase-category-select < rum/reactive
+  (components/initial-value-mixin ::selected)
+  [{selected* ::selected} _ callback]
+  [:select.dropdown
+   {:value  @selected*
+    :on-change #(let [selected (.. % -target -value)]
+                  (reset! selected* selected)
+                  (callback selected) )}
+   (->> shared/phrase-categories
+        (map name)
+        (map (fn [n] {:value n :text (category-text n)}))
+        (sort-by :text)
+        (map (fn [{:keys [value text]}]
+               [:option {:key value :value value} text])))])
 
 (rum/defcs phrase-editor < rum/reactive
   (components/initial-value-mixin ::local)
@@ -21,17 +44,10 @@
     [:div.col-2
      [:div.col--vertical
       [:label (common/loc :phrase.category)]
-      [:select.dropdown
-       {:value (:category @local*)
-        :on-change (fn [event]
-                     (swap! local*
-                            #(assoc % :category (.. event -target -value))))}
-       (->> shared/phrase-categories
-            (map name)
-            (map (fn [n] {:value n :text (category-text n)}))
-            (sort-by :text)
-            (map (fn [{:keys [value text]}]
-                   [:option {:key value :value value} text])))]]]
+      (phrase-category-select (:category @local*)
+                              (fn [selected]
+                                (swap! local*
+                                       #(assoc % :category selected))))]]
     [:div.col-2
      [:div.col--vertical.col--full
       [:label.required (common/loc :phrase.tag)]
@@ -125,7 +141,7 @@
        [:span (common/loc :phrase.add)]]
       [:p]
       (components/autocomplete ""
-                               identity
+                               #(println "Selected:" %)
                                {:clear? true
                                 :items (concat (map #(hash-map :text % :value % :group "One")
                                                     ["slipway"
@@ -181,4 +197,8 @@
                                                      "uncapitulating"
                                                      "cutch"
                                                      "preknitted"]))})
-      [:p "Lorem ipsum!"]])])
+      [:p (str "Atom is Atom: " (instance? Atom (atom 8)))]
+      [:p (str "Atom is IAtom: " (instance? IAtom (atom 8)))]
+      [:p (str "Cursor is Atom: " (instance? Atom (rum/cursor-in (atom {}) [:foo])))]
+      [:p (str "Cursor is IAtom: " (instance? IAtom (rum/cursor-in (atom {}) [:foo])))]
+      [:p (str "Cursor is Cursor: " (instance? rum.cursor.Cursor (rum/cursor-in (atom {}) [:foo])))]])])

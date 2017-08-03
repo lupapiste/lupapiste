@@ -286,12 +286,14 @@ div.matti-autocomplete {
     width: 100%;
     overflow-x: hidden;
     span {
+      font-size: 15px;
+      box-sizing: border-box;
       border: 1px solid $input-border-color;
       border-right: none;
       min-height: 40px;
       max-height: 40px;
       height: 40px;
-      line-height: 40px;
+      line-height: 38px;
       padding: {
         left: 12px;
       }
@@ -301,11 +303,12 @@ div.matti-autocomplete {
       text-overflow: ellipsis;
     }
     i {
+      box-sizing: border-box;
       min-width: 22px;
       width: 32px;
     }
     i.ac--chevron {
-      //width: 32px;
+      font-weight: bold;
       border: 1px solid $input-border-color;
       border-left: none;
     }
@@ -326,6 +329,7 @@ div.matti-autocomplete {
       padding: 4px 4px 4px 4px;
       width: 100%;
       input {
+        font-size: 15px;
         width: 100%;
       }
     }
@@ -338,6 +342,7 @@ div.matti-autocomplete {
       padding-right: 0;
       padding-bottom: 4px;
       li {
+        font-size: 15px;
         white-space: nowrap;
         overflow-x: hidden;
         text-overflow: ellipsis;

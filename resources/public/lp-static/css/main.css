@@ -18162,12 +18162,14 @@ div.matti-autocomplete .ac--selected {
 }
 
 div.matti-autocomplete .ac--selected span {
+  font-size: 15px;
+  box-sizing: border-box;
   border: 1px solid #bbbbbb;
   border-right: none;
   min-height: 40px;
   max-height: 40px;
   height: 40px;
-  line-height: 40px;
+  line-height: 38px;
   padding-left: 12px;
   min-width: 10em;
   width: 100%;
@@ -18176,11 +18178,13 @@ div.matti-autocomplete .ac--selected span {
 }
 
 div.matti-autocomplete .ac--selected i {
+  box-sizing: border-box;
   min-width: 22px;
   width: 32px;
 }
 
 div.matti-autocomplete .ac--selected i.ac--chevron {
+  font-weight: bold;
   border: 1px solid #bbbbbb;
   border-left: none;
 }
@@ -18206,6 +18210,7 @@ div.matti-autocomplete .ac__menu div.ac__term {
 }
 
 div.matti-autocomplete .ac__menu div.ac__term input {
+  font-size: 15px;
   width: 100%;
 }
 
@@ -18220,6 +18225,7 @@ div.matti-autocomplete .ac__menu ul.ac__items {
 }
 
 div.matti-autocomplete .ac__menu ul.ac__items li {
+  font-size: 15px;
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
