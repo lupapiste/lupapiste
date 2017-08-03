@@ -44,13 +44,20 @@
                      id="docstore-price" name="docstore-price"
                      type="text"/>
             </div>
-            <div>
-              <label data-bind="ltext: 'organization.docstore.description'"
-                     for="docstore-description"></label>
-              <textarea data-bind="value: docstoreDescription"
-                        class="form-input textarea oneline"
-                        id="docstore-description"/>
-            </div>
+            <table data-test-id="organization-name-table">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'userinfo.language'"></th>
+                  <th data-bind="ltext: 'organization.docstore.description'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: docstoreDescs">
+                <tr>
+                  <td data-bind="ltext: 'lang.'+$data.lang"></td>
+                  <td><input type="text" data-bind="value: $data.description" class="form-input"></td>
+                </tr>
+              </tbody>
+            </table>
             <!-- /ko -->
             <button data-bind="ltext: 'save',
                                click: updateDocstoreInfo,

@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.stamps :as stamps]
@@ -852,7 +852,6 @@
        (util/find-by-id user-orgs)
        (org/remove-assignment-trigger triggerId)))
 
-
 (defcommand update-docstore-info
   {:description "Updates organization's document store information"
    :parameters [org-id docStoreInUse documentPrice organizationDescription]
@@ -862,14 +861,11 @@
                       (fn [{{price :documentPrice} :data}]
                         (when (neg? price)
                           (fail :error.illegal-number)))
-                      (partial string-parameters  [:organizationDescription])]}
+                      (partial localization-parameters [:organizationDescription])]}
   [{user :user created :created}]
   (mongo/update-by-query :organizations
       {:_id org-id}
       {$set {:docstore-info {:docStoreInUse docStoreInUse
                              :documentPrice documentPrice
-                             :organizationDescription
-                             ;; TODO temporary solution
-                             (i18n/supported-langs-map
-                              (constantly organizationDescription))}}})
+                             :organizationDescription organizationDescription}}})
   (ok))

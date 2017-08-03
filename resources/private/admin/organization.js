@@ -35,7 +35,7 @@
 
     self.docstoreEnabled = ko.observable(false);
     self.docstorePrice = ko.observable("");
-    self.docstoreDescription = ko.observable("");
+    self.docstoreDescs = ko.observableArray();
 
     self.validDocstorePrice = ko.pureComputed(function () {
       var price = util.parseFloat(self.docstorePrice());
@@ -43,13 +43,14 @@
     });
 
     self.updateDocstoreInfo = function() {
+      // TODO
+      var descs = _(self.docstoreDescs()).map(unWrapDesc).fromPairs().value();
       var documentPrice = util.parseFloat(self.docstorePrice());
       ajax.command("update-docstore-info",
-
-                   {"org-id": self.organization().id(),
-                    docStoreInUse: self.docstoreEnabled(),
-                    documentPrice: documentPrice,
-                    organizationDescription: self.docstoreDescription() || ""})
+                   {"org-id":                self.organization().id(),
+                    docStoreInUse:           self.docstoreEnabled(),
+                    documentPrice:           documentPrice,
+                    organizationDescription: descs})
         .success(util.showSavedIndicator)
         .error(function(resp) {
           util.showErrorDialog(resp);
@@ -94,12 +95,28 @@
         .call();
     }
 
+    function wrapLoc(k, v, lang) {
+      return _.set({lang: lang}, k, ko.observable(v));
+    }
+
+    function unWrapLoc(o, k) {
+      return [o.lang, util.getIn(o, [k])];
+    }
+
     function wrapName(name, lang) {
-      return {lang: lang, name: ko.observable(name)};
+      return wrapLoc("name", name, lang);
     }
 
     function unWrapName(o) {
-      return [o.lang, util.getIn(o, ["name"])];
+      return unWrapLoc(o, "name");
+    }
+
+    function wrapDesc(desc, lang) {
+      return wrapLoc("description", desc, lang);
+    }
+
+    function unWrapDesc(o) {
+      return unWrapLoc(o, "description");
     }
 
     self.open = function(orgId) {
@@ -116,7 +133,8 @@
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
           self.docstorePrice(_.toString(_.get(result, "data.docstore-info.documentPrice")));
-          self.docstoreDescription(_.get(result, "data.docstore-info.organizationDescription"));
+          // TODO samalla lailla kuin self.names yllä
+          self.docstoreDescs(_.map(util.getIn(result,["data", "docstore-info", "organizationDescription"]), wrapDesc));
           self.calendarsEnabled(result.data["calendars-enabled"]);
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
