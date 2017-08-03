@@ -25,8 +25,8 @@
             </tbody>
           </table>
           <button data-bind="ltext: 'save',
-                             click: updateOrganizationName,
-                             enable: validDocstorePrice" class="btn positive"></button>
+                             click: updateOrganizationName" class="btn positive"></button>
+
           <h2>Aineistokauppa</h2>
           <div class="docstore-setting">
             <div>
@@ -44,7 +44,8 @@
                      id="docstore-price" name="docstore-price"
                      type="text"/>
             </div>
-            <table data-test-id="organization-name-table">
+            <table data-test-id="docstore-description-table"
+                   class="table table-striped admin-settings">
               <thead>
                 <tr>
                   <th data-bind="ltext: 'userinfo.language'"></th>
@@ -54,7 +55,12 @@
               <tbody data-bind="foreach: docstoreDescs">
                 <tr>
                   <td data-bind="ltext: 'lang.'+$data.lang"></td>
-                  <td><input type="text" data-bind="value: $data.description" class="form-input"></td>
+                  <td class="value">
+                    <input type="text"
+                           data-bind="value: $data.description,
+                                      attr: {'data-test-id': 'docstore-desc-' + $data.lang }"
+                           class="form-input">
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -30,9 +30,6 @@ Admin enables docstore, and new options appear
   Select Checkbox  xpath=//section[@id="organization"]//input[@id="docstore-enabled"]
   Wait until  Element should be visible  xpath=//section[@id="organization"]//div[@data-test-id="docstore-enabled-settings"]
 
-Admin sees that document price is required
-  Wait until  Element should be visible  xpath=//section[@id="organization"]//input[@id="docstore-price" and contains(@class, 'warn')]
-
 Admin attempts to enter a negative price
   Input text  docstore-price  -10.5
   Wait until  Element should be visible  xpath=//section[@id="organization"]//input[@id="docstore-price" and contains(@class, 'warn')]
@@ -47,7 +44,8 @@ Admin saves the changes
   Wait Until  Positive indicator should be visible
 
 Admin enters a description of the organization and saves the changes
-  Input text  docstore-description  Organisaatiokuvausteksi
+  Input text by test id  docstore-desc-fi  Organisaatiokuvausteksi
+  Input text by test id  docstore-desc-en  Organization description
   Click by test id  save-docstore-info
   Wait Until  Positive indicator should be visible
   
