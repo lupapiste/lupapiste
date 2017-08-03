@@ -38,7 +38,8 @@
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.attachment.stamps :as stamps]))
+            [lupapalvelu.attachment.stamps :as stamps]
+            [lupapalvelu.permit :as permit]))
 
 ;; Action category: attachments
 
@@ -697,16 +698,17 @@
    :categories       #{:attachments}})
 
 (defcommand sign-attachments
-  {:description "Designers can sign blueprints and other attachments. LUPA-1241"
-   :parameters [:id attachmentIds password]
-   :categories #{:attachments}
+  {:description      "Designers can sign blueprints and other attachments. LUPA-1241"
+   :parameters       [:id attachmentIds password]
+   :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
-   :states     (states/all-application-states-but states/terminal-states)
-   :pre-checks [domain/validate-owner-or-write-access
-                (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
-                app/validate-authority-in-drafts]
-   :user-roles #{:applicant :authority}
+   :states           (states/all-application-states-but states/terminal-states)
+   :pre-checks       [domain/validate-owner-or-write-access
+                      (app/allow-roles-only-in-operations [:foreman] [:tyonjohtajan-nimeaminen-v2])
+                      app/validate-authority-in-drafts
+                      permit/is-not-archiving-project]
+   :user-roles       #{:applicant :authority}
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
@@ -804,6 +806,7 @@
    :states     states/pre-verdict-states
    :pre-checks [att/attachment-matches-application
                 app/validate-authority-in-drafts
+                permit/is-not-archiving-project
                 (fn [{{value :value} :data :as command}]
                   (when (false? value)
                     (att/validate-attachment-manually-set-construction-time command)))]

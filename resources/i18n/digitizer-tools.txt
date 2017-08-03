@@ -41,3 +41,6 @@
 "archivingProject.tabRequiredFieldSummary" "sv" "Sammandrag"
 "archivingProject.tabRequiredFieldSummary" "en" "Summary"
 "digitizedPermit" "fi" "Digitoitu lupa"
+"digitizer.resellCheckbox" "fi" "Estä myynti"
+"digitizer.resellCheckbox" "en" ""
+"digitizer.resellCheckbox" "sv" ""

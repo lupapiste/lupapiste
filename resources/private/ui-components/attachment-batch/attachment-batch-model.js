@@ -20,6 +20,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                                                              service.authModel.ok));
   self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
                                                      service.authModel.ok));
+  self.showResell = service.isArchivingProject;
 
   var currentHover = ko.observable();
 
@@ -96,7 +97,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                 drawing: new Cell( ko.observable(drawingNumber)),
                 grouping: new Cell( grouping ),
                 sign: new Cell( ko.observable()),
-                construction: new Cell( ko.observable() )};
+                construction: new Cell( ko.observable() ),
+                disableResell: new Cell( ko.observable() )
+    };
     return row;
   }
 
@@ -283,7 +286,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                contents: data.contents.value(),
                drawingNumber: data.drawing.value(),
                sign: data.sign.value(),
-               constructionTime: data.construction.value() };
+               constructionTime: data.construction.value(),
+               disableResell: data.disableResell.value()
+      };
     }), self.password() );
 
     jobStatuses(statuses);

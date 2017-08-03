@@ -32,6 +32,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
+  self.isArchivingProject = lupapisteApp.models.application.isArchivingProject;
 
   var reload = function() {
     self.queryAll();

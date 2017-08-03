@@ -328,11 +328,14 @@
   [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
   (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]} myyntipalvelu-disabled?]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
                      (tos/update-end-dates verdicts))]
     (if (seq metadata)
-      metadata
+      ; Myyntipalvelu can be only negatively overridden, it can't be forced on if TOS says otherwise
+      (if (and myyntipalvelu-disabled? (:myyntipalvelu metadata))
+        (assoc metadata :myyntipalvelu false)
+        metadata)
       {:nakyvyys :julkinen})))
 
 (defn- required-options-check [options-map]
@@ -355,10 +358,11 @@
 
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
-  [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority contents read-only source]
+  [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority
+                       contents read-only source disableResell]
                 :or {required false locked false requested-by-authority false} :as options}]
   {:pre [(required-options-check options)]}
-  (let [metadata (default-tos-metadata-for-attachment-type attachment-type application)]
+  (let [metadata (default-tos-metadata-for-attachment-type attachment-type application disableResell)]
     (make-attachment created
                      (when target (attachment-target-coercer target))
                      required
@@ -388,7 +392,7 @@
 (defn create-attachments! [application attachment-types group created locked? required? requested-by-authority?]
   {:pre [(map? application)]}
   (let [attachment-types-with-metadata (map (fn [type] {:type     (attachment-type-coercer type)
-                                                        :metadata (default-tos-metadata-for-attachment-type type application)})
+                                                        :metadata (default-tos-metadata-for-attachment-type type application false)})
                                             attachment-types)
         attachments (make-attachments created (:state application) attachment-types-with-metadata group locked? required? requested-by-authority?)]
     (update-application
