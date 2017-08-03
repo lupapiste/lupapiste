@@ -290,7 +290,6 @@
     }
 
     function buildingsNotFoundHandler(response) {
-      console.log(response);
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("areyousure"),
         loc(response.text),
