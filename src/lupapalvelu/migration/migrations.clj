@@ -3316,8 +3316,9 @@
                  $unset {:private ""}}
                 :multi true))
 
-(defn copy-auth-id-from-invite [{{{id :id} :user} :invite :as auth}]
-  (util/assoc-when auth :id id))
+(defn copy-auth-id-from-invite [{{{id :id} :user} :invite invite-type :type :as auth}]
+  (cond-> auth
+    (and id (util/=as-kw invite-type :company)) (assoc :id id :company-role :admin)))
 
 (defmigration allow-reader-access-for-invited-company-users
   {:apply-when (pos? (mongo/count :applications {:auth.id ""}))}

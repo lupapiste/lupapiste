@@ -29,26 +29,29 @@
     (domain/invites application)
     (map #(assoc % :application (select-keys application [:id :address :primaryOperation :municipality])))))
 
-(defn- select-invite-auth-by-company-role [{user-id :id {company-id :id company-role :role} :company :as user} {auth :auth :as application}]
+(defn- select-invite-auth
+  "Select invite auth for user. Company authorization overrides personal authorization."
+  [{user-id :id {company-id :id} :company :as user} {auth :auth :as application}]
   (let [company-auth  (util/find-by-id company-id auth)
         personal-auth (util/find-by-id user-id auth)]
     (assoc application :auth
            (cond
-             (and company-auth (not (:invite company-auth)))      []
-             (and company-auth (util/=as-kw :admin company-role)) [company-auth]
-             :else                                                [personal-auth]))))
+             (:invite company-auth) [company-auth]
+             company-auth           []
+             :else                  [personal-auth]))))
 
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority}}
   [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
-  (let [ids (cond-> #{user-id} (util/=as-kw company-role :admin) (conj company-id))]
-    (->> (mongo/select :applications
-                       {:auth.invite.user.id {$in ids}
-                        :state {$ne :canceled}}
-                       [:auth :primaryOperation :address :municipality])
-         (map (partial select-invite-auth-by-company-role user))
-         (mapcat invites-with-application)
-         (ok :invites))))
+  (->> (mongo/select :applications
+                     {$or [{:auth.invite.user.id user-id}
+                           {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
+                           {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]
+                      :state {$ne :canceled}}
+                     [:auth :primaryOperation :address :municipality])
+       (map (partial select-invite-auth user))
+       (mapcat invites-with-application)
+       (ok :invites)))
 
 (def settable-roles #{:writer :foreman})
 (def changeable-roles #{:writer :foreman})

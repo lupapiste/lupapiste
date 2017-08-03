@@ -22,11 +22,11 @@
 (defn basic-application-query-for [{user-id :id {company-id :id company-role :role} :company :as user}]
   (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
     (case (keyword (:role user))
-      :applicant    (cond
-                      (nil? company-id)                 {:auth.id user-id}
-                      (util/=as-kw company-role :admin) {:auth.id {$in [user-id company-id]}}
-                      :else                             {$or [{:auth.id user-id}
-                                                              {:auth {$elemMatch {:id company-id :invite {$exists false}}}}]})
+      :applicant    (if (nil? company-id)
+                      {:auth.id user-id}
+                      {$or [{:auth.id user-id}
+                            {:auth {$elemMatch {:id company-id :company-role company-role}}}
+                            {:auth {$elemMatch {:id company-id :company-role {$exists false}}}}]})
       :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
       :rest-api     {:organization {$in organizations}}
       :oirAuthority {:organization {$in organizations}}
