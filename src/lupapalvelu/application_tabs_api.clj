@@ -33,7 +33,7 @@
 
 (defquery application-info-tab-visible
   {:parameters [id]
-   :states states/all-application-states
+   :states states/all-application-or-archiving-project-states
    :user-roles #{:authority :applicant}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
@@ -44,7 +44,7 @@
 
 (defquery application-summary-tab-visible
   {:parameters [id]
-   :states states/all-application-states
+   :states states/all-application-or-archiving-project-states
    :user-roles #{:authority :applicant}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles

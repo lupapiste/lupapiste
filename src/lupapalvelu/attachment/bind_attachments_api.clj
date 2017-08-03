@@ -13,7 +13,7 @@
             [sade.util :as util]
             [sade.strings :as ss]))
 
-(def bind-states (states/all-application-states-but states/terminal-states))
+(def bind-states (states/all-application-or-archiving-project-states-but states/terminal-states))
 
 (defn- validate-attachment-ids [command]
   (->> (get-in command [:data :filedatas])

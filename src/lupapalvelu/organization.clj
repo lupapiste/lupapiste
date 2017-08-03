@@ -148,7 +148,7 @@
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
 
-(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
+(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist :digitizer])
 (def authority-roles
   "Reader role has access to every application within org."
   (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))

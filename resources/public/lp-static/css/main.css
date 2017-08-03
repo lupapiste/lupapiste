@@ -18889,6 +18889,26 @@ span.icon_clear:before {
   display: inline-block;
 }
 
+.application_summary .application_summary_info .state-indication div.underReview .underReview-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.underReview .underReview-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.archived .archived-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.archived .archived-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
 .application_summary .application_summary_info .state-indication div.final .final-box {
   color: white;
   background-color: #2ca92c;

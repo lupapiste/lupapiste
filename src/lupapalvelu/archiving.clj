@@ -27,7 +27,8 @@
             [lupapalvelu.domain :as domain]
             [lupapiste-commons.schema-utils :as su]
             [lupapalvelu.states :as states]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit])
   (:import [java.util.concurrent ThreadFactory Executors]
            [java.io InputStream]))
 
@@ -105,9 +106,14 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
+(defn- do-post-archival-ops [state-update-fn id application now user]
+  (state-update-fn :arkistoitu application now id)
+  (mark-first-time-archival application now)
+  (mark-application-archived-if-done application now user))
+
 (defn- upload-and-set-state
   "Does the actual archiving in a different thread pool"
-  [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn]
+  [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn user]
   (info "Trying to archive attachment id" id "from application" app-id)
   (do (state-update-fn :arkistoidaan application now id)
       (.submit
@@ -121,17 +127,13 @@
             (cond
               (= 200 status)
               (do
-                (state-update-fn :arkistoitu application now id)
                 (info "Archived attachment id" id "from application" app-id)
-                (mark-first-time-archival application now)
-                (mark-application-archived-if-done application now))
+                (do-post-archival-ops state-update-fn id application now user))
 
               (and (= status 409) (string/includes? body "already exists"))
               (do
                 (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
-                (state-update-fn :arkistoitu application now id)
-                (mark-first-time-archival application now)
-                (mark-application-archived-if-done application now))
+                (do-post-archival-ops state-update-fn id application now user))
 
               :else
               (do
@@ -175,6 +177,9 @@
   (and (= "YA" (:permitType application))
        (contains? states/ya-post-verdict-states (keyword (:state application)))))
 
+(defn archiving-project? [application]
+  (= :ARK (keyword (:permitType application))))
+
 (defn- get-paatospvm [{:keys [verdicts]}]
   (let [ts (->> verdicts
                 (map (fn [{:keys [paatokset]}]
@@ -197,14 +202,6 @@
            (vals id-to-usage))
          (remove nil?)
          (distinct))))
-
-(defn- get-building-ids [bldg-key {:keys [buildings]} op-ids]
-  ;; Only some building lists contain operation ids at all
-  (->> (if-let [filtered-bldgs (seq (filter (comp (set op-ids) :operationId) buildings))]
-         filtered-bldgs
-         buildings)
-       (map bldg-key)
-       (remove nil?)))
 
 (defn- make-version-number [{{{:keys [major minor]} :version} :latestVersion}]
   (str major "." minor))
@@ -233,29 +230,61 @@
       (get-in document [:data :yritys :yritysnimi :value])
       (person-name (get-in document [:data :henkilo])))))
 
+(defn- building-ids [buildings documents b-key doc-ks]
+  (or (->> (map b-key buildings)
+           (remove nil?)
+           seq)
+      (->> (map #(get-in % doc-ks) documents)
+           (remove nil?))))
+
+(defn- location [application buildings loc-key]
+  (if (= 1 (count buildings))
+    ; Use building coordinates only for attachments related to exactly one buildings
+    (or (loc-key (first buildings)) (loc-key application))
+    (loc-key application)))
+
+(defn- project-description [{:keys [_projectDescriptionIndex]} documents]
+  (let [doc-desc (some #(get-in % [:data :kuvaus :value]) documents)]
+    (if (and (= 1 (count documents)) doc-desc)
+      doc-desc
+      _projectDescriptionIndex)))
+
+(defn- op-specific-data-for-attachment [{:keys [buildings documents] :as application} attachment]
+  (let [attachment-op-ids (set (att/get-operation-ids attachment))
+        op-filtered-bldgs (if (seq attachment-op-ids)
+                            (filter #(attachment-op-ids (:operationId %)) buildings)
+                            buildings)
+        op-filtered-docs (if (seq attachment-op-ids)
+                           (filter #(attachment-op-ids (get-in % [:schema-info :op :id])) documents)
+                           documents)]
+    {:nationalBuildingIds   (building-ids op-filtered-bldgs op-filtered-docs :nationalId [:data :valtakunnallinenNumero :value])
+     :buildingIds           (building-ids op-filtered-bldgs op-filtered-docs :localId [:data :kunnanSisainenPysyvaRakennusnumero :value])
+     :operations            (find-op application attachment-op-ids)
+     :kayttotarkoitukset    (get-usages application attachment-op-ids)
+     :location-etrs-tm35fin (location application op-filtered-bldgs :location)
+     :location-wgs84        (location application op-filtered-bldgs :location-wgs84)
+     :projectDescription    (project-description application op-filtered-docs)}))
+
 (defn- generate-archive-metadata
-  [{:keys [id propertyId _applicantIndex address organization municipality location
-           location-wgs84 tosFunction verdicts handlers closed drawings] :as application}
+  [{:keys [id propertyId _applicantIndex address organization municipality permitType
+           tosFunction verdicts handlers closed drawings] :as application}
    user
    s2-md-key
    & [attachment]]
   (let [s2-metadata (or (s2-md-key attachment) (s2-md-key application))
+        permit-ids (remove nil? (map :kuntalupatunnus verdicts))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
-                       :applicationId         id
-                       :buildingIds           (get-building-ids :localId application (att/get-operation-ids attachment))
-                       :nationalBuildingIds   (get-building-ids :nationalId application (att/get-operation-ids attachment))
+                       ; Don't use application ids for archiving projects if there are municipal permit ids
+                       :applicationId         (when (or (not= permitType permit/ARK) (empty? permit-ids)) id)
                        :propertyId            propertyId
                        :applicants            _applicantIndex
-                       :operations            (find-op application (att/get-operation-ids attachment))
                        :tosFunction           (->> (tiedonohjaus/available-tos-functions organization)
                                                    (filter #(= tosFunction (:code %)))
                                                    first)
                        :address               address
                        :organization          organization
                        :municipality          municipality
-                       :location-etrs-tm35fin location
-                       :location-wgs84        location-wgs84
-                       :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus verdicts))
+                       :kuntalupatunnukset    permit-ids
                        :lupapvm               (or (get-verdict-date application :lainvoimainen)
                                                   (get-paatospvm application))
                        :paatospvm             (get-paatospvm application)
@@ -264,7 +293,6 @@
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (util/find-first :general handlers) [:userId :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
-                       :kayttotarkoitukset    (get-usages application (att/get-operation-ids attachment))
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))
@@ -276,11 +304,11 @@
                        :closed                (ts->iso-8601-date closed)
                        :drawing-wgs84         (seq (map :geometry-wgs84 drawings))
                        :ramLink               (:ramLink attachment)
-                       :projectDescription    (:_projectDescriptionIndex application)
                        ; case-file metadata does not include these, but archival schema requires them
                        :myyntipalvelu         false
                        :nakyvyys              :julkinen}]
     (-> base-metadata
+        (merge (op-specific-data-for-attachment application attachment))
         su/remove-blank-keys
         (merge s2-metadata))))
 
@@ -290,7 +318,8 @@
   [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
   (if (or (get-paatospvm application)
           (foreman/foreman-app? application)
-          (valid-ya-state? application))
+          (valid-ya-state? application)
+          (archiving-project? application))
     (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                          (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                        attachments)
@@ -311,7 +340,8 @@
                                 metadata-fn
                                 application
                                 created
-                                set-application-state)))
+                                set-application-state
+                                user)))
       (when (and (document-ids case-file-archive-id)
                  (not (archival-states (keyword (get-in application [:processMetadata :tila])))))
         (files/with-temp-file libre-file
@@ -329,14 +359,16 @@
                                   metadata-fn
                                   application
                                   created
-                                  set-process-state)
+                                  set-process-state
+                                  user)
             (upload-and-set-state case-file-xml-id
                                   xml-fn
                                   "text/xml"
                                   xml-metadata-fn
                                   application
                                   created
-                                  set-process-state))))
+                                  set-process-state
+                                  user))))
       (doseq [attachment selected-attachments
               :when (not (archival-states (keyword (get-in attachment [:metadata :tila]))))]
         (let [file-id (get-in attachment [:latestVersion :fileId])
@@ -348,7 +380,8 @@
                                 metadata-fn
                                 application
                                 created
-                                set-attachment-state))))
+                                set-attachment-state
+                                user))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]

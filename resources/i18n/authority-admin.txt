@@ -415,3 +415,5 @@
 "triggers.title" "en" "Automated task"
 "triggers.title" "fi" "Automaattitehtävät"
 "triggers.title" "sv" "Automatuppgifter"
+"auth-admin.archiving.digitizing" "fi" "Digitoidut paperiluvat"
+"auth-admin.archiving.digitizing.tosFunction" "fi" "Oletustiedonohjausmenettely"

@@ -440,6 +440,7 @@
   (ensure-index :applications {:archived.application 1})
   (ensure-index :applications {:archived.completed 1})
   (ensure-index :applications {:attachments.id 1})
+  (ensure-index :applications {:permitType 1})                                ;; For application search
   (ensure-index :applications {:permitSubtype -1 :infoRequest 1})             ;; For application search
   (ensure-index :applications {:applicant 1})                                 ;; For application search
   (ensure-index :applications {:state 1})                                     ;; For application search

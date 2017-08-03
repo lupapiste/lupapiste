@@ -675,14 +675,20 @@
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
 
+(def kayttotarkoitus {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
+                      :body usages/rakennuksen-kayttotarkoitus})
+
 (def kaytto {:name "kaytto"
              :type :group
              :body [{:name "rakentajaTyyppi" :type :select :sortBy :displayname :required true
                      :body [{:name "liiketaloudellinen"}
                             {:name "muu"}
                             ei-tiedossa]}
-                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
-                     :body usages/rakennuksen-kayttotarkoitus}]})
+                    kayttotarkoitus]})
+
+(def kaytto-minimal {:name "kaytto"
+                     :type :group
+                     :body [kayttotarkoitus]})
 
 (def mitat {:name "mitat"
             :type :group
@@ -1315,6 +1321,15 @@
                 (approvable-top-level-groups rakennuksen-tiedot)
                 rakennustunnus)}
 
+   {:info {:name "archiving-project"
+           :i18name "uusiRakennus"
+           :approvable false
+           :accordion-fields buildingid-accordion-paths}
+    :body (body (assoc kuvaus :required false)
+                tunnus
+                kaytto-minimal
+                rakennustunnus)}
+
    {:info {:name "uusiRakennus"
            :approvable true
            :accordion-fields buildingid-accordion-paths}
@@ -1459,6 +1474,23 @@
            :accordion-fields hakija-accordion-paths
            }
     :body (schema-body-without-element-by-name ya-party turvakielto)}
+
+   {:info {:name "hakija-ark"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :deny-removing-last-document true
+           :approvable false
+           :type :party
+           :subtype :hakija
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
+           }
+    :body (henkilo-yritys-select-group :henkilo-body [henkilotiedot-minimal]
+                                       :yritys-body [{:name "yritysnimi" :type :string :required true :size :l}])}
 
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"

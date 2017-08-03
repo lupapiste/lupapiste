@@ -119,7 +119,7 @@
 (defquery party-document-names
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :states     states/all-application-states}
+   :states     states/all-application-or-archiving-project-states}
   [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
@@ -720,7 +720,8 @@
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-linking
-                      app/validate-authority-in-drafts]
+                      app/validate-authority-in-drafts
+                      permit/is-not-archiving-project]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
                       (fn [{data :data}] (when-not (mongo/valid-key? (:linkPermitId data)) (fail :error.invalid-db-key)))]}

@@ -30,7 +30,8 @@
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
-   (sc/optional-key :constructionTime) sc/Bool})
+   (sc/optional-key :constructionTime) sc/Bool
+   (sc/optional-key :disableResell)    sc/Bool})
 
 (sc/defschema BindableFile (sc/if :attachmentId NewVersion NewAttachment))
 
@@ -48,7 +49,7 @@
         attachment            (or
                                 (att/get-attachment-info application placeholder-id)
                                 (att/create-attachment! application
-                                                      (assoc (select-keys filedata [:group :contents :target :source])
+                                                      (assoc (select-keys filedata [:group :contents :target :source :disableResell])
                                                               :requested-by-authority (boolean (auth/application-authority? application user))
                                                         :created         created
                                                         :attachment-type type)))

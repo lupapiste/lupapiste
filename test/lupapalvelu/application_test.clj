@@ -468,12 +468,14 @@
           {:created 12345, :roles [:applicant :authority], :target {:type "application"}, :text "message2", :to nil, :type ..user-role.., :user user}])
 
     (fact application-state
-      (application-state ..any-user.. ..organization-id.. true) => :info
+      (application-state ..any-user.. ..organization-id.. true false) => :info
 
-      (application-state ..user.. ..organization-id.. false) => :open
+      (application-state ..any-user.. ..organization-id.. false true) => :open
+
+      (application-state ..user.. ..organization-id.. false false) => :open
       (provided (usr/user-is-authority-in-organization? ..user.. ..organization-id..) => true)
 
-      (application-state ..user.. ..organization-id.. false) => :draft
+      (application-state ..user.. ..organization-id.. false false) => :draft
       (provided (usr/user-is-authority-in-organization? ..user.. ..organization-id..) => false
                 (usr/rest-user? ..user..) => false))
 

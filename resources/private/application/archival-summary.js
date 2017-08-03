@@ -208,24 +208,31 @@
   }
 
   function initApplicationDocs(application) {
-    // Initialize archived non-attachment documents for application.
-    var applicationState = application.state();
-    var appDocId = application.id() + "-application";
-    var caseFileDocId = application.id() + "-case-file";
-    var docs = [ ko.observable({ documentNameKey: "applications.application",
-                                 metadata: application.metadata,
-                                 id: appDocId,
-                                 previewAction: "pdf-export",
-                                 documentType: "application" }) ];
+    if (!application.isArchivingProject()) {
+      // Initialize archived non-attachment documents for application.
+      var appDocId = application.id() + "-application";
+      var caseFileDocId = application.id() + "-case-file";
+      var docs = [ko.observable({
+        documentNameKey: "applications.application",
+        metadata: application.metadata,
+        id: appDocId,
+        previewAction: "pdf-export",
+        documentType: "application"
+      })];
 
-    if (["extinct", "closed", "foremanVerdictGiven", "acknowledged"].indexOf(applicationState) !== -1) {
-      docs.push( ko.observable({ documentNameKey: "caseFile.heading",
-                                 metadata: application.processMetadata,
-                                 id: caseFileDocId,
-                                 previewAction: "pdfa-casefile",
-                                 documentType: "case-file" }) );
+      if (lupapisteApp.models.applicationAuthModel.ok("application-in-final-archiving-state")) {
+        docs.push(ko.observable({
+          documentNameKey: "caseFile.heading",
+          metadata: application.processMetadata,
+          id: caseFileDocId,
+          previewAction: "pdfa-casefile",
+          documentType: "case-file"
+        }));
+      }
+      return docs;
+    } else {
+      return [];
     }
-    return docs;
   }
 
   function ArchivalSummaryModel(params) {
