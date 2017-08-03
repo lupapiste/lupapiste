@@ -77,6 +77,14 @@
                                 </span>
                               </div>
 
+                              <div data-bind="if: isArchivingProject() && kuntalupatunnus() !== null">
+                                <p data-bind="ltext: 'application.kuntalupatunnus'"></p>
+                                <span data-bind="text: kuntalupatunnus, attr: {'data-test-value': id}"
+                                      data-test-id="application-id"
+                                      class="application_summary_text">
+                                </span>
+                              </div>
+
                               <!-- Authorities: -->
                               <!-- ko ifnot: isArchivingProject -->
                               <div data-bind="component: 'handler-list'"></div>
