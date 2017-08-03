@@ -18212,6 +18212,7 @@ div.matti-autocomplete .ac__menu div.ac__term input {
 div.matti-autocomplete .ac__menu ul.ac__items {
   max-height: 10em;
   overflow-y: scroll;
+  overflow-x: hidden;
   list-style-type: none;
   padding-left: 0;
   padding-right: 0;
@@ -18219,6 +18220,9 @@ div.matti-autocomplete .ac__menu ul.ac__items {
 }
 
 div.matti-autocomplete .ac__menu ul.ac__items li {
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
   padding-top: 2px;
   padding-right: 2px;
   padding-left: 4px;

@@ -332,11 +332,15 @@ div.matti-autocomplete {
     ul.ac__items {
       max-height: 10em;
       overflow-y: scroll;
+      overflow-x: hidden;
       list-style-type: none;
       padding-left: 0;
       padding-right: 0;
       padding-bottom: 4px;
       li {
+        white-space: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
         padding-top: 2px;
         padding-right: 2px;
         padding-left: 4px;
