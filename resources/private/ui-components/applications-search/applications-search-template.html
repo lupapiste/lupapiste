@@ -20,6 +20,7 @@
               </div>
               <!-- /ko -->
 
+              <!-- ko ifnot: authorizationModel.ok('user-is-pure-digitizer') -->
               <button data-bind="click: create"
                       data-test-id="applications-create-new-inforequest"
                       class="positive application-create">
@@ -51,6 +52,7 @@
                 <i class="lupicon-circle-plus"></i>
                 <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
               </button>
+              <!-- /ko -->
               <!-- /ko -->
             </div>
 

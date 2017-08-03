@@ -14,10 +14,17 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   self.limits = ko.observableArray([10, 25, 50, 100]);
   self.currentLimit = ko.observable(100);
 
+  var searchResultType =  "all";
+  if (lupapisteApp.models.globalAuthModel.ok("user-is-pure-digitizer")) {
+    searchResultType = "archivingProjects";
+  } else if (lupapisteApp.models.currentUser.isAuthority()) {
+    searchResultType = "application";
+  }
+
   self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({
     defaultOperations: self.defaultOperations,
     sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
-    searchResultType: lupapisteApp.models.currentUser.isAuthority() ? "application" : "all",
+    searchResultType: searchResultType,
     currentLimit:     self.currentLimit
   });
 

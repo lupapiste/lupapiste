@@ -18,7 +18,7 @@
         roles (if organizationId
                 ((keyword organizationId) (:orgAuthz user))
                 (apply set/union (vals (:orgAuthz user))))
-        correct-role? (seq (set/intersection #{:authority :digitizer} roles))]
+        correct-role? (seq (set/intersection #{:authority :digitizer :archivist} roles))]
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
 
@@ -66,4 +66,10 @@
                               (all-roles :authority))
                       unauthorized)))]
    :feature    :digitizer}
+  (ok))
+
+(defquery digitizing-enabled
+  {:user-roles #{:authority}
+   :feature    :digitizer
+   :pre-checks [user-is-allowed-to-digitize]}
   (ok))
