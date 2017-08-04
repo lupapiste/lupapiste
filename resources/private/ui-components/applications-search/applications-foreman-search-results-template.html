@@ -29,9 +29,10 @@
                   data-test-col-name="urgent">
                 <div class="application-search-results__urgency"
                      data-bind="click: _.partialRight($parent.openApplication, 'notice'), clickBubble: false,
-                                attr: {title: _.trim($data.authorityNotice) ? loc('notice.prompt') + ': ' + _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])},
                                 css: $data.urgency">
-                  <i data-bind="css: $data.urgencyClass"></i>
+                  <i class="bubble-hover" data-bind="css: $data.urgencyClass">
+                    <span class="bubble-hover-text" data-bind="text: _.trim($data.authorityNotice) ? _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])"></span>
+                  </i>
                 </div>
               </td>
               <!-- /ko -->
@@ -39,8 +40,10 @@
               <td class="applications-search-results__indicator"
                   data-bind="if: $data.indicators > 0"
                   data-test-col-name="indicators">
-                <div data-bind="attr: {title: loc('info.title')}">
-                  <i class="lupicon-star"></i>
+                <div>
+                  <i class="bubble-hover lupicon-star">
+                    <span class="bubble-hover-text" data-bind="ltext:'info.title'"></span>                    
+                  </i>
                 </div>
               </td>
 
@@ -48,8 +51,10 @@
                   data-bind="if: $data.attachmentsRequiringAction > 0,
                              click: _.partialRight($parent.openApplication, 'attachments'), clickBubble: false"
                   data-test-col-name="newAttachments">
-                <div data-bind="attr: {title: loc('attachments.title')}">
-                  <i class="lupicon-paperclip"></i>
+                <div>
+                  <i class=" bubble-hover lupicon-paperclip">
+                      <span class="bubble-hover-text" data-bind="ltext:'attachments.title'"></span>                    
+                  </i>
                   <span data-bind="text: $data.attachmentsRequiringAction"></span>
                 </div>
               </td>
@@ -58,8 +63,10 @@
                   data-bind="if: $data.unseenComments > 0,
                              click: _.partialRight($parent.openApplication, 'conversation'), clickBubble: false"
                   data-test-col-name="unseenComments">
-                <div data-test-id="unseen-comments" data-bind="attr: {title: loc('conversation.title')}">
-                  <i class="lupicon-conversation"></i>
+                <div data-test-id="unseen-comments">
+                  <i class="bubble-hover lupicon-conversation">
+                    <span class="bubble-hover-text" data-bind="ltext:'conversation.messages'"></span>                    
+                  </i>
                   <span data-bind="text: $data.unseenComments"></span>
                 </div>
               </td>

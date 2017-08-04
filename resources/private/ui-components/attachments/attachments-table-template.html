@@ -51,8 +51,8 @@
               class="view-with-download">
               <a data-bind="fileLink: latestVersion"></a>
               <!-- ko if: $parent.archiveProblem( latestVersion ) -->
-                <i class="archive-problem lupicon-circle-info negative" data-test-id="archive-problem-icon">
-                  <span class="archive-problem-text" data-test-id="archive-problem-text" data-bind="ltext: latestVersion.archivabilityError"></span>                    
+                <i class="bubble-hover lupicon-circle-info negative" data-test-id="archive-problem-icon">
+                  <span class="bubble-hover-text" data-test-id="archive-problem-text" data-bind="ltext: latestVersion.archivabilityError"></span>                    
                 </i>
               <!-- /ko -->
               <div data-bind="downloadWithIcon: latestVersion"></div>
