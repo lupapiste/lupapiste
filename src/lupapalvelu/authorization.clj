@@ -121,7 +121,7 @@
 
 (defn company-authz? [roles application {{company-id :id company-role :role} :company :as user}]
   (->> (get-auths application company-id)
-       (filter (util/fn-> :company-role (contains? #{company-role nil})))
+       (filter (util/fn->> :company-role keyword (contains? #{(keyword company-role) nil})))
        (map (comp keyword :role))
        (some roles)))
 
