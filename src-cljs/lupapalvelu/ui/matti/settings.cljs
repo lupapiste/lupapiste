@@ -53,7 +53,8 @@
            (swap! state* #(conj % generic))))))))
 
 (defn name-edit [initial callback]
-  (components/text-edit initial callback {:required? true}))
+  (components/text-edit initial {:callback  callback
+                                 :required? true}))
 
 (rum/defcs type-edit < (components/initial-value-mixin ::selection)
   rum/reactive

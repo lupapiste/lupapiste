@@ -63,16 +63,18 @@
      [:div.col--vertical.col--full
       [:label.required (common/loc :phrase.tag)]
       (components/text-edit (:tag @local*)
-                            (fn [text] (swap! local* #(assoc % :tag text)))
-                            {:required? true
+                            {:callback   (fn [text]
+                                           (swap! local* #(assoc % :tag text)))
+                             :required?  true
                              :immediate? true})]]]
    [:div.row
     [:div.col-8
      [:div.col--vertical.col--full
       [:label.required (common/loc :phrase.phrase)]
       (components/textarea-edit (:phrase @local*)
-                                (fn [text] (swap! local* #(assoc % :phrase text)))
-                                {:required? true
+                                {:callback   (fn [text]
+                                               (swap! local* #(assoc % :phrase text)))
+                                 :required?  true
                                  :immediate? true})]]]
    [:div.row
     [:div.col-2.inner-margins

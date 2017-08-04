@@ -159,15 +159,15 @@
          [:div.col--vertical
           (empty-label)
           (components/autocomplete selected*
-                                   #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
-                                          sel-start (.-selectionStart text-node)
-                                          sel-end   (.-selectionEnd text-node)
-                                          old-text  (or (path/value path state) "")]
-                                      (reset! replaced* (subs old-text sel-start sel-end))
-                                      (update-text (s/join (concat (take sel-start old-text)
-                                                                   %
-                                                                   (drop sel-end old-text)))))
-                                   {:items (phrases/phrase-list-for-autocomplete (rum/react category*))})]]
+                                   {:items    (phrases/phrase-list-for-autocomplete (rum/react category*))
+                                    :callback #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+                                                     sel-start (.-selectionStart text-node)
+                                                     sel-end   (.-selectionEnd text-node)
+                                                     old-text  (or (path/value path state) "")]
+                                                 (reset! replaced* (subs old-text sel-start sel-end))
+                                                 (update-text (s/join (concat (take sel-start old-text)
+                                                                              %
+                                                                              (drop sel-end old-text)))))})]]
         [:div.col-3.col--right
          [:div.col--vertical
           (empty-label)
@@ -192,7 +192,7 @@
         [:div.col-12.col--full
          {:ref ref-id}
          (components/textarea-edit (path/state path state)
-                                   update-text)]]])))
+                                   {:callback update-text})]]])))
 
 ;; -------------------------------
 ;; Component instantiation

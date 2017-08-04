@@ -94,41 +94,47 @@
                                             value
                                             (atom value)))))})
 
-(defn- text-options [text* callback {:keys [required? test-id immediate?] :as options}]
+
+(defn- text-options [text* {:keys [callback required?
+                                   test-id immediate?] :as options}]
   (merge {:value     (rum/react text*)
           :class     (common/css-flags :required (and required?
-                                                      (-> text* rum/react s/trim s/blank?)))
+                                                      (-> text* rum/react
+                                                          s/trim s/blank?)))
           :on-change (fn [event]
                        (let [value (.. event -target -value)]
                          (common/reset-if-needed! text* value)
-                         (when immediate?
+                         (when (and callback immediate?)
                            (callback value))))}
-         (when (not immediate?)
+         (when (and callback (not immediate?))
            {:on-blur #(callback (.. % -target -value))})
          (when test-id
            {:data-test-id test-id})
-         (dissoc options :required? :test-id :immediate?)))
+         (dissoc options :callback :required? :test-id :immediate?)))
 
-;; Arguments Initial value, callback, options
+;; Arguments Initial value, options
+;; Initial value can be atom for two-way binding (see the mixin).
 ;; Options [all optional]
+;;  callback   change callback. Called depending on the immediate? option.
 ;;  required?  truthy if required.
 ;;  test-id    data-test-id attribute value
 ;;  immediate? If true, callback is called on change (default on blur).
 ;; In addition all the Rum options can be passed as well.
 (rum/defcs text-edit < (initial-value-mixin ::text)
   rum/reactive
-  [local-state _ callback & [options]]
+  [local-state _ & [options]]
   (let [text* (::text local-state)]
     [:input.grid-style-input
-     (assoc (text-options text* callback options)
+     (assoc (text-options text* options)
             :type "text")]))
 
+;; The same arguments as for text-edit.
 (rum/defcs textarea-edit < (initial-value-mixin ::text)
   rum/reactive
-  [local-state _ callback & [options]]
+  [local-state _ & [options]]
   (let [text* (::text local-state)]
     [:textarea.grid-style-input
-     (text-options text* callback options)]))
+     (text-options text* options)]))
 
 (defn- default-items-fn [items]
   (fn [term]
@@ -153,12 +159,13 @@
       (aset container "scrollTop" scroll))))
 
 ;; Parameters: initial-value callback options
+;; Initial value can be atom for two-way binding (see the mixin).
 ;; Options [optional]:
-;;   items: either list or function. The function argument is the
+;;   items  either list or function. The function argument is the
 ;;          filtering term. An item is a map with mandatory :text
 ;;          and :value keys and optional :group key.
-;;
-;;   [clear?] If truthy, clear button is shown when proper (default
+;;   [callback] change callback
+;;   [clear?] if truthy, clear button is shown when proper (default
 ;;            false).
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
@@ -169,15 +176,16 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} _ callback {:keys [items clear?]}]
+    :as       local-state} _ {:keys [items clear? callback]}]
   (let [items-fn (if (fn? items)
                    items
                    (default-items-fn items))
         open?    (rum/react open?*)
-        items    (items-fn (rum/react term*))
+        items    (vec (items-fn (rum/react term*)))
         set-selected (fn [value]
                        (reset! selected* value)
-                       (callback value))]
+                       (when callback
+                         (callback value)))]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.matti-autocomplete
@@ -210,10 +218,10 @@
                                                  (rum/ref local-state (str "item-" @current*))))))]
          [:div.ac__menu
           [:div.ac__term (text-edit @term*
-                                    (fn [text]
-                                      (reset! term* text)
-                                      (common/reset-if-needed! current* 0))
-                                    {:immediate?  true
+                                    {:callback (fn [text]
+                                                 (reset! term* text)
+                                                 (common/reset-if-needed! current* 0))
+                                     :immediate?  true
                                      :auto-focus  true
                                      ;; Delay is needed to make sure
                                      ;; that possible selection will
@@ -224,7 +232,7 @@
                                                      ;; Enter
                                                      13 (do
                                                           (select (some->> @current*
-                                                                           (get (vec items))
+                                                                           (get items)
                                                                            :value))
                                                           (.preventDefault %))
                                                      ;; Esc
@@ -236,7 +244,7 @@
                                                      :default)})]
           [:ul.ac__items
            {:ref "autocomplete-items"}
-           (loop [[x & xs]   (vec items)
+           (loop [[x & xs]   items
                   index      0
                   last-group ""
                   li-items   []]

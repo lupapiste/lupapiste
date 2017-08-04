@@ -33,16 +33,18 @@
    :optional-parameters [phrase-id]
    :input-validators    [phrases/valid-category
                          (partial action/non-blank-parameters [:tag :phrase])]
-   :pre-checks          [phrases/phrase-id-ok]}
+   :pre-checks          [phrases/phrase-id-ok]
+   :feature             :matti}
   [command]
   (phrases/upsert-phrase command))
 
 (defcommand delete-phrase
-  {:description "Delete existing phrase"
-   :user-roles #{:authorityAdmin}
-   :parameters [phrase-id]
+  {:description      "Delete an existing phrase."
+   :user-roles       #{:authorityAdmin}
+   :parameters       [phrase-id]
    :input-validators [(partial action/non-blank-parameters [:phrase-id])]
-   :pre-checks [phrases/phrase-id-exists]}
+   :pre-checks       [phrases/phrase-id-exists]
+   :feature          :matti}
   [{user :user}]
   (phrases/delete-phrase (usr/authority-admins-organization-id user)
                          phrase-id))

@@ -18225,7 +18225,9 @@ div.matti-autocomplete .ac__menu ul.ac__items {
 }
 
 div.matti-autocomplete .ac__menu ul.ac__items li {
+  cursor: default;
   font-size: 15px;
+  white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;
   padding-top: 2px;

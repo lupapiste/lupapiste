@@ -342,8 +342,9 @@ div.matti-autocomplete {
       padding-right: 0;
       padding-bottom: 4px;
       li {
+        cursor: default;
         font-size: 15px;
-        //white-space: nowrap;
+        white-space: nowrap;
         overflow-x: hidden;
         text-overflow: ellipsis;
         padding-top: 2px;
