@@ -84,10 +84,11 @@
 
 (defquery application-authorities
   {:user-roles #{:authority}
+   :org-authz-roles (conj roles/default-org-authz-roles :digitizer)
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app #{"authority"})))
+  (ok :authorities (app/application-org-authz-users app #{"authority" "digitizer"})))
 
 (defquery application-commenters
   {:user-roles #{:authority}

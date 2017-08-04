@@ -210,7 +210,7 @@
                   (basically the ones that are targeted to the :applicationDetails subdocument"
   [{:keys [searchText recipient operation area createdDate targetType]} user]
   {:pre-lookup (filter seq
-                       [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}}
+                       [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}}
                         (when-not (empty? recipient)
                          {:recipient.id {$in recipient}})
                         (when-not (empty? createdDate)

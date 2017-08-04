@@ -292,6 +292,10 @@
   (let [org-set (organization-ids-by-roles user roles/default-org-authz-roles)]
     (contains? org-set organization-id)))
 
+(defn user-has-role-in-organization? [user organization-id valid-org-authz-roles]
+  (let [org-set (organization-ids-by-roles user (set valid-org-authz-roles))]
+    (contains? org-set organization-id)))
+
 (defn validate-authority-in-organization
   "Validator: current user must be an authority. To be used in commands'
    :pre-check vectors."

@@ -21,8 +21,9 @@
 (defn- validate-receiver [{{:keys [organization]} :application
                            {:keys [recipientId]}    :data}]
   (when (and (not (ss/empty? recipientId))
-             (not (usr/user-is-authority-in-organization? (userid->session-summary recipientId)
-                                                          organization)))
+             (not (usr/user-has-role-in-organization? (userid->session-summary recipientId)
+                                                      organization
+                                                      (conj roles/default-org-authz-roles :digitizer))))
     (fail :error.invalid-assignment-receiver)))
 
 (defn- validate-assignment-id [{{:keys [assignmentId]} :data}]
