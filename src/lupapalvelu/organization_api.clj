@@ -806,7 +806,7 @@
    :parameters [name]
    :optional-parameters [roleId]
    :pre-checks [validate-handler-role-in-organization]
-   :input-validators [(partial action/map-parameters-with-required-keys [:name] i18n/all-languages)]
+   :input-validators [(partial localization-parameters [:name])]
    :user-roles #{:authorityAdmin}}
   [{user :user user-orgs :user-organizations}]
   (let [handler-role (org/create-handler-role roleId name)]
