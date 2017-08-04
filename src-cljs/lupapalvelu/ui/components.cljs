@@ -95,7 +95,7 @@
                                             (atom value)))))})
 
 (defn- text-options [text* callback {:keys [required? test-id immediate?] :as options}]
-  (merge {:value     @text*
+  (merge {:value     (rum/react text*)
           :class     (common/css-flags :required (and required?
                                                       (-> text* rum/react s/trim s/blank?)))
           :on-change (fn [event]

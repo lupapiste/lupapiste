@@ -11,30 +11,40 @@
             [sade.shared-util :as util]))
 
 (defn phrase-list-for-autocomplete [category]
-  (println "phrase-list:" category)
   (->> @state/phrases
        (filter #(util/=as-kw category (:category %)))
        (map (fn [{:keys [tag phrase]}]
               {:text (str tag " - " phrase)
                :value phrase}))))
 
+(defn non-empty-categories []
+  (filter #(util/find-by-key :category (name %)
+                             @state/phrases)
+          shared/phrase-categories))
+
 (defn- category-text [category]
   (path/loc [:phrase.category category]))
 
 (rum/defcs phrase-category-select < rum/reactive
   (components/initial-value-mixin ::selected)
-  [{selected* ::selected} _ callback]
-  [:select.dropdown
-   {:value  @selected*
-    :on-change #(let [selected (.. % -target -value)]
-                  (reset! selected* selected)
-                  (callback selected) )}
-   (->> shared/phrase-categories
-        (map name)
-        (map (fn [n] {:value n :text (category-text n)}))
-        (sort-by :text)
-        (map (fn [{:keys [value text]}]
-               [:option {:key value :value value} text])))])
+  [{selected* ::selected} _ callback & [include-empty?]]
+  (let [items (->> (if include-empty?
+                     shared/phrase-categories
+                     (non-empty-categories))
+                   (map name)
+                   (map (fn [n] {:value n :text (category-text n)}))
+                   (sort-by :text))
+        select (fn [value]
+                 (reset! selected* value)
+                 (callback value))]
+    (when-not (util/includes-as-kw? (map :value items) @selected*)
+      (select (-> items first :value)))
+    [:select.dropdown
+     {:value  @selected*
+      :on-change #(select (.. % -target -value))}
+     (map (fn [{:keys [value text]}]
+            [:option {:key value :value value} text])
+          items)]))
 
 (rum/defcs phrase-editor < rum/reactive
   (components/initial-value-mixin ::local)
@@ -47,7 +57,8 @@
       (phrase-category-select (:category @local*)
                               (fn [selected]
                                 (swap! local*
-                                       #(assoc % :category selected))))]]
+                                       #(assoc % :category selected)))
+                              true)]]
     [:div.col-2
      [:div.col--vertical.col--full
       [:label.required (common/loc :phrase.tag)]
@@ -138,67 +149,4 @@
       [:button.positive
        {:on-click #(reset! phrase* {:tag "" :category "paatosteksti" :phrase ""})}
        [:i.lupicon-circle-plus]
-       [:span (common/loc :phrase.add)]]
-      [:p]
-      (components/autocomplete ""
-                               #(println "Selected:" %)
-                               {:clear? true
-                                :items (concat (map #(hash-map :text % :value % :group "One")
-                                                    ["slipway"
-                                                     "flabbergast"
-                                                     "chondrify"
-                                                     "dinoceras"
-                                                     "conduplication"
-                                                     "jasperoid"
-                                                     "bottoms"
-                                                     "unkneeling"
-                                                     "ossified"
-                                                     "adelheid"
-                                                     "humaniser"
-                                                     "Undescendible harquebusier calcining fictioneer yeuk. Rearousing electrum broiler suckler lettice"])
-                                               (map #(hash-map :text % :value % :group "Two")
-                                                    ["precalculate"
-                                                     "squawker"
-                                                     "aecidia"
-                                                     "vend"
-                                                     "denuder"
-                                                     "remediless"
-                                                     "nullifier"
-                                                     "drabber"
-                                                     "meindert"
-                                                     "unfrilly"
-                                                     "Rewear ungenerosity benedicite telephone preenumerate depilation nonreformational unmesmeric. Perfective akmolinsk preacceptance acervate stabilising disruption febricula circumambulating. Dandiest annihilator nontautomeric hasted ungodlier hypophloeodal goldoni dvandva."
-                                                     "triapsidal"
-                                                     "uncultivated"
-                                                     "jellify"
-                                                     "unpitiful"
-                                                     "iciness"
-                                                     "gluier"
-                                                     "interdependence"
-                                                     "rubric"
-                                                     "podium"
-                                                     "roulade"
-                                                     "siliqua"
-                                                     "compete"
-                                                     "emetine"
-                                                     "calcicolous"
-                                                     "unfecund"
-                                                     "streamingly"
-                                                     "vidicon"
-                                                     "googly"
-                                                     "refrigerant"
-                                                     "lisbon"
-                                                     "belteshazzar"
-                                                     "roughly"
-                                                     "mtif"
-                                                     "garda"
-                                                     "liebig"
-                                                     "asymmetry"
-                                                     "uncapitulating"
-                                                     "cutch"
-                                                     "preknitted"]))})
-      [:p (str "Atom is Atom: " (instance? Atom (atom 8)))]
-      [:p (str "Atom is IAtom: " (instance? IAtom (atom 8)))]
-      [:p (str "Cursor is Atom: " (instance? Atom (rum/cursor-in (atom {}) [:foo])))]
-      [:p (str "Cursor is IAtom: " (instance? IAtom (rum/cursor-in (atom {}) [:foo])))]
-      [:p (str "Cursor is Cursor: " (instance? rum.cursor.Cursor (rum/cursor-in (atom {}) [:foo])))]])])
+       [:span (common/loc :phrase.add)]]])])

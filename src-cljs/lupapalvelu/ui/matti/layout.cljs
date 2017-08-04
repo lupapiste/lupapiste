@@ -131,11 +131,16 @@
 
 (rum/defcs matti-phrase-text < rum/reactive
   (rum/local nil ::category)
-  [{category* ::category :as local-state}
+  (rum/local "" ::selected)
+  (rum/local "" ::replaced)
+  [{category* ::category
+    selected* ::selected
+    replaced* ::replaced :as local-state}
    {:keys [state path schema] :as options} & [wrap-label?]]
   (letfn [(set-category [category]
             (when (util/not=as-kw category @category*)
-              (reset! category* (name category))))
+              (reset! category* (name category))
+              (reset! selected* "")))
           (update-text [text]
             (reset! (path/state path state) text)
             (path/meta-updated options))]
@@ -153,21 +158,36 @@
         [:div.col-6
          [:div.col--vertical
           (empty-label)
-          (components/autocomplete ""
-                                   #(let [index (-> (rum/ref local-state ref-id)
-                                                   .-firstChild
-                                                   .-selectionStart )
-                                          old-text (path/value path state)]
-                                      (update-text (s/join (concat (take index old-text)
+          (components/autocomplete selected*
+                                   #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+                                          sel-start (.-selectionStart text-node)
+                                          sel-end   (.-selectionEnd text-node)
+                                          old-text  (or (path/value path state) "")]
+                                      (reset! replaced* (subs old-text sel-start sel-end))
+                                      (update-text (s/join (concat (take sel-start old-text)
                                                                    %
-                                                                   (drop index old-text)))))
+                                                                   (drop sel-end old-text)))))
                                    {:items (phrases/phrase-list-for-autocomplete (rum/react category*))})]]
         [:div.col-3.col--right
          [:div.col--vertical
           (empty-label)
           [:div.inner-margins
-           [:button.primary.outline (common/loc :matti.clear)]
-           [:button.primary.outline (common/loc :phrase.undo)]]]]]
+           [:button.primary.outline
+            {:on-click (fn []
+                         (update-text "")
+                         (reset! selected* ""))}
+            (common/loc :matti.clear)]
+           [:button.primary.outline
+            {:disabled (let [phrase (rum/react selected*)]
+                         (or (s/blank? phrase)
+                             (not (re-find (re-pattern (goog.string/regExpEscape phrase))
+                                           (path/react path state)))))
+             :on-click (fn []
+                         (update-text (s/replace-first (path/value path state)
+                                                       @selected*
+                                                       @replaced*))
+                         (reset! selected* ""))}
+            (common/loc :phrase.undo)]]]]]
        [:div.row
         [:div.col-12.col--full
          {:ref ref-id}

@@ -67,9 +67,9 @@
 (defn fuzzy-re
   "Simplified Clojurescript version of sade.strings.fuzzy-re.
 
-  \"hello world\" -> #\"(?i)^.*hello.*world.*$\""
+  \"hello world\" -> #\"(?mi)^.*hello.*world.*$\""
   [term]
   (let [fuzzy (->> (s/split term #"\s")
                    (map goog.string/regExpEscape)
                    (s/join ".*"))]
-    (re-pattern (str "(?i)^.*" fuzzy ".*$"))))
+    (re-pattern (str "(?mi)^.*" fuzzy ".*$"))))

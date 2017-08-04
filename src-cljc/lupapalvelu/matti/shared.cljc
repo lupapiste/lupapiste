@@ -276,12 +276,17 @@
               (foremen-section :matti-foremen [:settings :foremen :0 :foremen] :matti-r.foremen )
               (reference-section :plans :matti-plans [:settings :plans :0 :plans])
               (reference-section :reviews :matti-reviews [:settings :reviews :0 :reviews])
+              {:id "matti-conditions"
+               :i18nkey [:phrase.category.lupaehdot]
+               :loc-prefix :phrase.category.lupaehdot
+               :grid {:columns 1
+                      :rows [[{:schema {:phrase-text {:category :lupaehdot}}}]]}
+               :_meta {:can-remove? true}}
               (text-section :matti-neighbours)
               {:id    "matti-appeal"
-               :grid  {:columns 6
-                       :rows    [[{:col    6
-                                   :id     "type"
-                                   :schema {:docgen "automatic-vs-manual"}}]]}
+               :grid  {:columns 1
+                       :rows    [[{:schema {:phrase-text {:category :muutoksenhaku
+                                                          :i18nkey [:phrase.category.muutoksenhaku] }}}]]}
                :_meta {:can-remove? true}}
               (text-section :matti-collateral)
               (text-section :matti-rights)
