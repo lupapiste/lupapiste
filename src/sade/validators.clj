@@ -105,4 +105,4 @@
 (def hex-string? (partial matches? #"^[0-9a-f]*$"))
 
 ;; Some of the very first applications have mongoid as applicationId.
-(def application-id? (partial matches? #"^([0-9a-f]{24}|LP-\d{3}-\d{4}-\d{5})$"))
+(def application-id? (partial matches? #"^([0-9a-f]{24}|L[PX]-\d{3}-\d{4}-\d{5})$"))

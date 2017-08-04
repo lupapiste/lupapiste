@@ -37,7 +37,8 @@
    "YI"  903
    "YL" 903
    "YM" 903
-   "VVVL" 903})
+   "VVVL" 903
+   "ARK" 901})
 
 (def usage-price-codes
   {"A" 905
@@ -157,6 +158,7 @@
    :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
    :maa-ainesten-kotitarveotto                                        "D"
    :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
+   :archiving-project                                                 "D"
    })
 
 (defn- export [collection query fields]

@@ -10,7 +10,8 @@
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.building :as building]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.coordinate :as coordinate]))
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
@@ -29,6 +30,16 @@
     (when (v/rakennustunnus? building-id)
       building-id)))
 
+(defn- pos-xml->location-map [point-xml building-id]
+  (try
+    (let [source-projection (common/->source-projection point-xml [:Point])
+          point-str (get-text point-xml :pos)
+          coords (ss/split point-str #" ")]
+      (when (and source-projection (= 2 (count coords)))
+        {:location (coordinate/convert source-projection common/to-projection 3 coords)
+         :location-wgs84 (coordinate/convert source-projection :WGS84 3 coords)}))
+    (catch Exception e (error e "Coordinate conversion failed for building " building-id))))
+
 (defn- ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
 
 (defn- ->building-ids [id-container xml-no-ns]
@@ -39,22 +50,25 @@
                            ss/trim (#(when-not (ss/blank? %) %)))
         edn            (-> xml-no-ns (select [id-container]) first xml->edn id-container)
         building-index (get-text xml-no-ns id-container :jarjestysnumero)]
-    {:propertyId   (get-text xml-no-ns id-container :kiinttun)
-     :buildingId   (first (remove ss/blank? [national-id local-short-id]))
-     :nationalId   national-id
-     :localId      local-id
-     :localShortId local-short-id
-     :index        building-index
-     :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
-     :area         (get-text xml-no-ns :kokonaisala)
-     :created      (some->> (get-text xml-no-ns :alkuHetki)
-                            cr/parse-datetime
-                            (cr/unparse-datetime :year))
-     :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
-                           (when (#{"toimenpideId" "Lupapiste" "Lupapistetunnus"} sovellus)
-                             tunnus))
-                         (->list (:muuTunnustieto edn)))
-     :description  (or (:rakennuksenSelite edn) building-index)}))
+    (merge
+      {:propertyId   (get-text xml-no-ns id-container :kiinttun)
+       :buildingId   (first (remove ss/blank? [national-id local-short-id]))
+       :nationalId   national-id
+       :localId      local-id
+       :localShortId local-short-id
+       :index        building-index
+       :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
+       :area         (get-text xml-no-ns :kokonaisala)
+       :created      (some->> (get-text xml-no-ns :alkuHetki)
+                              cr/parse-datetime
+                              (cr/unparse-datetime :year))
+       :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
+                             (when (#{"toimenpideId" "Lupapiste" "Lupapistetunnus"} sovellus)
+                               tunnus))
+                           (->list (:muuTunnustieto edn)))
+       :description  (or (:rakennuksenSelite edn) building-index)}
+      (-> (select1 xml-no-ns :sijaintitieto :Sijainti :piste :Point)
+          (pos-xml->location-map national-id)))))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
@@ -143,8 +157,7 @@
          (util/assoc-when-pred
            {:muutostyolaji                          ...notimplemented...
             :valtakunnallinenNumero                 (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
-            ;; TODO: Add support for kunnanSisainenPysyvaRakennusnumero (rakval krysp 2.1.6 +)
-            ;             :kunnanSisainenPysyvaRakennusnumero (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
+            :kunnanSisainenPysyvaRakennusnumero     (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
             :rakennusnro                            (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
             :manuaalinen_rakennusnro                ""
             :jarjestysnumero                        (get-text rakennus :rakennustunnus :jarjestysnumero)

@@ -27,6 +27,7 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
   self.isRejected = service.isRejected;
   self.isNotNeeded = service.isNotNeeded;
   self.isAuthority = lupapisteApp.models.currentUser.isAuthority;
+  self.isResellable = service.isResellable;
   self.testState = function( attachment ) {
     return _.get( service.attachmentApproval( attachment), "state", "neutral");
   };
@@ -69,6 +70,8 @@ LUPAPISTE.AttachmentsTableModel = function(params) {
       service.rejectAttachment(attachment.id);
     }
   };
+
+  self.toggleResell = service.toggleResell;
 
   self.authorities = accordionService.authorities;
 

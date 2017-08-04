@@ -5,7 +5,8 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.operations :as op]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.strings :as str]))
 
 (def attachment-groups [:parties :building-site :reports :technical-reports :operation])
 (def general-group-tag :general)
@@ -13,8 +14,11 @@
 
 (defn- enrich-op-with-accordion-fields [documents {op-id :id :as op}]
   (if-let [op-doc (util/find-first #(= (get-in % [:schema-info :op :id]) op-id) documents)]
-    (let [value (or (schemas/resolve-identifier op-doc)
-                    (schemas/resolve-accordion-field-values op-doc))]
+    (let [identifier (schemas/resolve-identifier op-doc)
+          value (if (str/blank? identifier)
+                  (when-let [acc-values (schemas/resolve-accordion-field-values op-doc)]
+                    (str/join " - " acc-values))
+                  identifier)]
       (cond-> op value (assoc :accordionFields value)))
     op))
 

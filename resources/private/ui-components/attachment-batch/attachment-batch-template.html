@@ -14,6 +14,9 @@
                   data-bind="ltext:'application.attachmentContents'"></span></th>
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
+        <!-- ko if: $component.showResell -->
+        <th class="td-center" data-bind="ltext:'digitizer.resellCheckbox'"></th>
+        <!-- /ko -->
         <!-- ko if: showSign -->
         <th class="td-center"  data-bind="ltext:'signAttachment.select'"></th>
         <!-- /ko -->
@@ -95,6 +98,13 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
+        <!-- ko if: $component.showResell -->
+        <td class="td-center">
+          <toggle params="value: $parent.cell( $data, 'disableResell' ).value,
+                          disable: $parent.rowDisabled( $data ),
+                          testId: 'batch-resell-' + $index()"></toggle>
+        </td>
+        <!-- /ko -->
         <!-- ko if: $component.showSign -->
         <td class="td-center">
           <toggle params="prefix: 'signbox',

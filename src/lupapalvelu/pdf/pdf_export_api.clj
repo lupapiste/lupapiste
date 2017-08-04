@@ -11,7 +11,8 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.roles :as roles]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.permit :as permit]))
 
 (defn ok [body]
   {:status  200
@@ -24,11 +25,12 @@
    :body "404"})
 
 (defraw pdf-export
-  {:parameters [:id]
-   :user-roles #{:applicant :authority :oirAuthority}
+  {:parameters       [:id]
+   :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles  roles/all-org-authz-roles
-   :states     states/all-states}
+   :states           states/all-states
+   :pre-checks       [permit/is-not-archiving-project]}
   [{:keys [user application lang]}]
   (if application
     (ok (-> application (a/with-masked-person-ids user) (pdf-export/generate lang)))

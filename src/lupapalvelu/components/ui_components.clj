@@ -379,6 +379,10 @@
                   :html ["copy.html"]
                   :js ["copy.js"]}
 
+   :digitizer    {:depends [:common-html :map :create]
+                  :html ["digitizer.html"]
+                  :js ["digitizer.js"]}
+
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
 
@@ -445,7 +449,7 @@
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications
                              :integration-message-monitor :application
-                             :statement :verdict :neighbors :docgen :create :copy :mypage :header :debug
+                             :statement :verdict :neighbors :docgen :create :copy :digitizer :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}
@@ -464,7 +468,8 @@
                               "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
-                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html" "matti-verdict-templates.html"]}
+                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
+                                "matti-verdict-templates.html" "archiving.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

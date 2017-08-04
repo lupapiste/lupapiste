@@ -20,8 +20,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.organization :as organization]
-            [clj-time.coerce :as c]
-            [clj-time.format :as f]))
+            [lupapalvelu.permit :as permit]))
 
 ;;
 ;; Query construction
@@ -96,7 +95,7 @@
           {:state {$ne "canceled"}})
         (case applicationType
           "unlimited"          {}
-          "inforequest"        {:state {$in ["open" "answered" "info"]}}
+          "inforequest"        {:state {$in ["open" "answered" "info"]} :permitType {$ne permit/ARK}}
           "application"        authority-application-states
           "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
           "verdict"            {:state {$in states/post-verdict-states}}
@@ -104,7 +103,9 @@
           "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           "readyForArchival"   (archival-query user)
-          {$and [{:state {$ne "canceled"}}
+          "archivingProjects"  {:permitType permit/ARK :state {$ne :archived}}
+          {$and [{:state {$ne "canceled"}
+                  :permitType {$ne permit/ARK}}
                  {$or [{:state {$ne "draft"}}
                        {:organization {$nin (->> user :orgAuthz keys (map name))}}]}]}))
       (when-not (empty? handlers)
@@ -216,6 +217,7 @@
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
+        _ (println query)
         query-total (mongo/count :applications query)
         skip        (or (util/->long (:skip params)) 0)
         limit       (or (util/->long (:limit params)) 10)
