@@ -41,14 +41,13 @@
     (fact "keyword as subtype value" (get-documents-by-subtype documents :keyword) => (just [(last documents)]))))
 
 (facts "invites"
-  (let [invite1 {:email "abba@example.com"}
+  (let [invite1 {:email "abba@example.com" :inviter "inviter1"}
         invite2 {:email "kiss@example.com"}
         app     {:auth [{:role "writer" :invite invite1}
-                        {:role "writer" :invite invite2}
+                        {:role "writer" :invite invite2 :type :company :inviter "inviter2"}
                         {:role "owner"}]}]
-    (fact "has two invites" (invites app) => (just invite1 invite2))
-    (fact "abba@example.com has one invite" (invite app "abba@example.com") => invite1)
-    (fact "jabba@example.com has no invite" (invite app "jabba@example.com") => nil)))
+    (fact "has two invites" (invites app) => (just (assoc invite1 :type nil :inviter "inviter1")
+                                                   (assoc invite2 :type :company :inviter "inviter2")))))
 
 (facts "owner-or-write-access?"
   (let [owner   {:id 1 :role "owner"}
