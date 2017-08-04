@@ -952,7 +952,7 @@
              :roleId (get-in sipoo-handler-roles [1 :id])
              :name {:fi {:handler "non-string kasittelija"}
                     :sv "Updated Swedish handlaggare"
-                    :en "Updated English handler"}) => (partial expected-failure? :error.missing-parameters))
+                    :en "Updated English handler"}) => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "cannot update with missing handler name localization"
     (command sipoo :upsert-handler-role

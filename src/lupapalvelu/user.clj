@@ -113,7 +113,7 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
            (sc/optional-key :companyFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/supported-language-schema
+           (sc/optional-key :language)            i18n/EnumSupportedLanguages
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
            (sc/optional-key :firstLogin)          sc/Bool})
 
@@ -132,7 +132,7 @@
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
                    :password                         (ssc/max-length-string 255)
-                   (sc/optional-key :language)       i18n/supported-language-schema})
+                   (sc/optional-key :language)       i18n/EnumSupportedLanguages})
 
 (defschema Handler
   {:id     ssc/ObjectIdStr

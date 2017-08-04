@@ -49,7 +49,7 @@
              :lastName  (max-length-string 64)
              :email     (sc/pred valid-email? "valid email")
              :personId  (sc/pred valid-hetu? "valid hetu")
-             (sc/optional-key :language)  i18n/supported-language-schema})
+             (sc/optional-key :language)  i18n/EnumSupportedLanguages})
 
 ;
 ; Utils:

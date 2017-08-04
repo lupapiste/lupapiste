@@ -52,8 +52,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
+   :name i18n/LocalizationStringMap
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -70,7 +70,7 @@
 
 (sc/defschema HandlerRole
   {:id                              ssc/ObjectIdStr
-   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
+   :name                            (i18n/localization-schema ssc/NonBlankStr)
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
@@ -86,7 +86,7 @@
 (sc/defschema DocStoreInfo
   {:docStoreInUse           sc/Bool
    :documentPrice           sc/Num
-   :organizationDescription (i18n/localization-schema sc/Str)})
+   :organizationDescription i18n/LocalizationStringMap})
 
 (def default-docstore-info
   {:docStoreInUse           false
@@ -95,7 +95,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name (i18n/localization-schema sc/Str)
+   :name i18n/LocalizationStringMap
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
