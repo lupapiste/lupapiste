@@ -284,9 +284,9 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonFunction = ko.pureComputed(function() {
-    if (lupapisteApp.models.applicationAuthModel.ok('submit-application')) {
+    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
       return self.submitApplication;
-    } else if (lupapisteApp.models.applicationAuthModel.ok('submit-archiving-project')) {
+    } else if (lupapisteApp.models.applicationAuthModel.ok("submit-archiving-project")) {
       return self.submitArchivingProject;
     } else {
       return false;
@@ -295,9 +295,9 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.submitButtonKey = ko.pureComputed(function() {
     if (self.isArchivingProject()) {
-      return lupapisteApp.models.currentUser.isArchivist() ? 'digitizer.archiveProject' : 'digitizer.submitProject';
+      return lupapisteApp.models.currentUser.isArchivist() ? "digitizer.archiveProject" : "digitizer.submitProject";
     } else {
-      return 'application.submitApplication';
+      return "application.submitApplication";
     }
   });
 
@@ -950,25 +950,25 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.requiredFieldSummaryButtonVisible = ko.pureComputed(function() {
-    return _.includes(['draft', 'open', 'submitted', 'complementNeeded'], ko.unwrap(self.state));
+    return _.includes(["draft", "open", "submitted", "complementNeeded"], ko.unwrap(self.state));
   });
 
   self.requiredFieldSummaryButtonKey = ko.pureComputed(function() {
     if (self.isArchivingProject()) {
-      return 'archivingProject.tabRequiredFieldSummary';
+      return "archivingProject.tabRequiredFieldSummary";
     } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
-      return 'application.tabRequiredFieldSummary.afterSubmitted';
+      return "application.tabRequiredFieldSummary.afterSubmitted";
     } else {
-      return 'application.tabRequiredFieldSummary';
+      return "application.tabRequiredFieldSummary";
     }
   });
 
   self.requiredFieldSummaryButtonClass = ko.pureComputed(function() {
     if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
-      _.includes(['draft', 'open'], ko.unwrap(self.state))) {
-      return 'link-btn-inverse';
+      _.includes(["draft", "open"], ko.unwrap(self.state))) {
+      return "link-btn-inverse";
     } else {
-      return 'link-btn';
+      return "link-btn";
     }
   });
 };
