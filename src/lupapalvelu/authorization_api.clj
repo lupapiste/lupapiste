@@ -104,13 +104,13 @@
    :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states}
   [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
-  (let [auth          (->> (cond (not (util/=as-kw invite-type :company)) user-id
-                                 (util/=as-kw company-role :admin)        company-id)
-                           (auth/get-auth application))
+  (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
+                            (util/=as-kw company-role :admin)        company-id)
+        auth          (auth/get-auth application auth-id)
         approved-auth (auth/approve-invite-auth auth user created)]
     (when approved-auth
       (update-application command
-        {:auth {$elemMatch {:invite.user.id (:id user)}}}
+        {:auth {$elemMatch {:invite.user.id auth-id}}}
         {$set {:modified created
                :auth.$   approved-auth}})
       (when-let [document-id (not-empty (get-in auth [:invite :documentId]))]
