@@ -24,7 +24,8 @@
 (def default-sipoo-docstore-info
   (assoc org/default-docstore-info
          :id "753-R"
-         :name (i18n/supported-langs-map (constantly "Sipoon rakennusvalvonta"))))
+         :name (i18n/supported-langs-map (constantly "Sipoon rakennusvalvonta"))
+         :municipalities [{:id "753", :name {:en "Sipoo", :fi "Sipoo", :sv "Sibbo"}}]))
 
 (facts "REST interface for organization docstore information"
 
