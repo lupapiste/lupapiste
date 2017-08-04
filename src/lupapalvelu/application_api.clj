@@ -108,6 +108,7 @@
                  closed"
    :user-roles roles/all-authenticated-user-roles
    :pre-checks [(action/some-pre-check
+                  permit/is-archiving-project
                   (action/and-pre-check
                     (permit/validate-permit-type-is :YA)
                     usr/validate-authority
