@@ -2,6 +2,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :refer :all]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.i18n :as i18n]
             [sade.core :refer :all]))
@@ -664,7 +665,18 @@
     :role "applicant"
     :architect true
     :company {:id "esimerkki" :role "admin" :submit true}}
-   ])
+
+   ;; Docstore
+   {:id "docstore"
+    :username "docstore"
+    :email ""
+    :firstName "Docstore"
+    :lastName "API-user"
+    :enabled true
+    :language "fi"
+    :role "docstore-api"
+    :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth
+    }])
 
 (def- ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
                                             :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    [[:muut :muu]]
@@ -876,7 +888,8 @@
                                         [{:type :application-id} {:type :backend-id}]
                                         [{:type :user}]
                                         [{:type :organization}]]}]
-                       :automatic-ok-for-attachments-enabled true}
+                       :automatic-ok-for-attachments-enabled true
+                       :docstore-info org/default-docstore-info}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.

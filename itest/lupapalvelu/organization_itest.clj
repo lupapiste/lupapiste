@@ -900,13 +900,13 @@
     (command pena :update-organization-name :org-id "753-R" :name {:fi "modified"}) => unauthorized?)
 
   (fact "illegal name map"
-    (command admin :update-organization-name :org-id "753-R" :name "modified") => (partial expected-failure? :error.invalid-type))
+    (command admin :update-organization-name :org-id "753-R" :name "modified") => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "illegal name key"
-    (command admin :update-organization-name :org-id "753-R" :name {:suomi "modified"}) => (partial expected-failure? :error.illegal-key))
+    (command admin :update-organization-name :org-id "753-R" :name {:suomi "modified"}) => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "illegal name value type"
-    (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.invalid-type))
+    (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "empty name value"
     (command admin :update-organization-name :org-id "753-R" :name {:fi ""}) => (partial expected-failure? :error.empty-organization-name))
@@ -1084,3 +1084,37 @@
                         :open-inforequest-email "",
                         :opening nil,
                         :permitType "P"}])))
+
+(defn update-docstore-info [org-id docStoreInUse documentPrice organizationDescription]
+  (command admin :update-docstore-info
+           :org-id org-id
+           :docStoreInUse docStoreInUse
+           :documentPrice documentPrice
+           :organizationDescription organizationDescription))
+
+(defn get-docstore-info [org-id]
+  (let [result (query admin :organization-by-id :organizationId org-id)]
+    (if (ok? result)
+      (-> result :data :docstore-info)
+      result)))
+
+(facts update-docstore-info
+
+  (fact "calling does not change other organization data"
+    (let [org (:data (query admin :organization-by-id :organizationId "753-R"))]
+      (update-docstore-info "753-R" true 1.0 (i18n/supported-langs-map (constantly "Description"))) => ok?
+      (dissoc org :docstore-info)
+      => (-> (query admin :organization-by-id :organizationId "753-R")
+             :data
+             (dissoc :docstore-info))))
+
+  (fact "calling updates organization's docstore info"
+    (update-docstore-info "753-R" true 1.0 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
+    (get-docstore-info "753-R")
+    => {:docStoreInUse true
+        :documentPrice 1.0
+        :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
+
+  (fact "can't set negative document price"
+    (update-docstore-info "753-R" true -1.0 "Description")
+    => (partial expected-failure? :error.illegal-number)))

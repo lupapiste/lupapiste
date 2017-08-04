@@ -59,7 +59,8 @@
    "dummy"
    "rest-api"
    "trusted-etl"
-   "trusted-salesforce"])
+   "trusted-salesforce"
+   "docstore-api"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -227,6 +228,9 @@
 
 (defn rest-user? [{role :role}]
   (= :rest-api (keyword role)))
+
+(defn docstore-user? [{role :role}]
+  (= :docstore-api (keyword role)))
 
 (defn admin? [{role :role}]
   (= :admin (keyword role)))

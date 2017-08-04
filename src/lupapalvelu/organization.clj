@@ -83,9 +83,19 @@
 (sc/defschema OrgId
   (sc/pred string?))
 
+(sc/defschema DocStoreInfo
+  {:docStoreInUse           sc/Bool
+   :documentPrice           sc/Num
+   :organizationDescription (i18n/localization-schema sc/Str)})
+
+(def default-docstore-info
+  {:docStoreInUse           false
+   :documentPrice           0.0
+   :organizationDescription (i18n/supported-langs-map (constantly ""))})
+
 (sc/defschema Organization
   {:id OrgId
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+   :name (i18n/localization-schema sc/Str)
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
@@ -143,7 +153,8 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
-   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates})
+   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
+   (sc/optional-key :docstore-info) DocStoreInfo})
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))

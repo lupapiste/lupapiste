@@ -3316,6 +3316,17 @@
                  $unset {:private ""}}
                 :multi true))
 
+
+(defmigration add-docstore-info
+  {:apply-when (pos? (mongo/count :organizations {:docstore-info {$exists false}}))}
+  (mongo/update :organizations
+                {:docstore-info {$exists false}}
+                {$set {:docstore-info
+                       {:docStoreInUse false
+                        :documentPrice 0.0
+                        :organizationDescription (i18n/supported-langs-map
+                                                  (constantly ""))}}}
+                :multi true))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.stamps :as stamps]
@@ -212,7 +212,8 @@
                                 :name          {:fi name :sv name :en name}
                                 :scope         (map (partial org/new-scope municipality) permit-types)
                                 :handler-roles [(org/create-handler-role)]
-                                :stamps        [(assoc stamps/default-stamp-data :id (mongo/create-id))]})
+                                :stamps        [(assoc stamps/default-stamp-data :id (mongo/create-id))]
+                                :docstore-info org/default-docstore-info})
   (ok))
 
 (defn- validate-map-with-optional-url-values [param command]
@@ -613,15 +614,7 @@
                         (when-not (or (usr/admin? user)
                                       (= org-id (usr/authority-admins-organization-id user)))
                           (fail :error.unauthorized)))]
-   :input-validators [(fn [{{name :name} :data}]
-                        (when-not (map? name)
-                          (fail :error.invalid-type)))
-                      (fn [{{name :name} :data}]
-                        (when-not (every? (set i18n/supported-langs) (keys name))
-                          (fail :error.illegal-key)))
-                      (fn [{{name :name} :data}]
-                        (when-not (every? string? (vals name))
-                          (fail :error.invalid-type)))
+   :input-validators [(partial partial-localization-parameters [:name])
                       (fn [{{name :name} :data}]
                         (when (some ss/blank? (vals name))
                           (fail :error.empty-organization-name)))]}
@@ -863,3 +856,21 @@
    (-> (usr/authority-admins-organization-id user)
        (util/find-by-id user-orgs)
        (org/remove-assignment-trigger triggerId)))
+
+(defcommand update-docstore-info
+  {:description "Updates organization's document store information"
+   :parameters [org-id docStoreInUse documentPrice organizationDescription]
+   :user-roles #{:admin}
+   :input-validators [(partial boolean-parameters [:docStoreInUse])
+                      (partial number-parameters  [:documentPrice])
+                      (fn [{{price :documentPrice} :data}]
+                        (when (neg? price)
+                          (fail :error.illegal-number)))
+                      (partial localization-parameters [:organizationDescription])]}
+  [{user :user created :created}]
+  (mongo/update-by-query :organizations
+      {:_id org-id}
+      {$set {:docstore-info {:docStoreInUse docStoreInUse
+                             :documentPrice documentPrice
+                             :organizationDescription organizationDescription}}})
+  (ok))

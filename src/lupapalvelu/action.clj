@@ -216,6 +216,31 @@
                             (partial sc/check schema)
                             "error.illegal-value:schema-validation"))
 
+(defn- localization? [partial? maybe-localization]
+  (and (map? maybe-localization)
+       (if partial?
+         (every? i18n/languages (keys maybe-localization))
+         (= i18n/languages (set (keys maybe-localization))))
+       (every? string? (vals maybe-localization))))
+
+(defn partial-localization-parameters
+  "Validates that the given parameters are maps with supported
+  language keywords (such as :fi) as keys and strings as values. Does
+  not require that all supported languages are included."
+  [params command]
+  (filter-params-of-command params command
+                            (complement (partial localization? true))
+                            "error.illegal-localization-value"))
+
+(defn localization-parameters
+  "Validates that the given parameters are maps with supported
+  language keywords (such as :fi) as keys and strings as values. All
+  supported languages must be included."
+  [params command]
+  (filter-params-of-command params command
+                            (complement (partial localization? false))
+                            "error.illegal-localization-value"))
+
 (defn update-application
   "Get current application from command (or fail) and run changes into it.
    Optionally returns the number of updated applications."

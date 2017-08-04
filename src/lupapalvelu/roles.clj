@@ -7,7 +7,7 @@
 ;;
 
 (def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
-(def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl :trusted-salesforce))
+(def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :docstore-api :trusted-etl :trusted-salesforce))
 
 (def default-authz-writer-roles #{:owner :writer})
 (def default-authz-reader-roles (conj default-authz-writer-roles :foreman :reader :guest :guestAuthority))

@@ -8064,6 +8064,12 @@ input.form-input.inline, input.inline.form-input--inline {
   width: 80%;
 }
 
+.form-input.textarea.oneline, .textarea.oneline.form-input--inline {
+  height: 24px;
+  resize: vertical;
+  width: 80%;
+}
+
 .form-input-and-unit {
   display: table;
   margin-right: 12px;

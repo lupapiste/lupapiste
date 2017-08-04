@@ -24,7 +24,52 @@
               </tr>
             </tbody>
           </table>
-          <button data-bind="ltext: 'save', click: updateOrganizationName" class="btn positive"></button>
+          <button data-bind="ltext: 'save',
+                             click: updateOrganizationName" class="btn positive"></button>
+
+          <h2>Aineistokauppa</h2>
+          <div class="docstore-setting">
+            <div>
+              <label data-bind="ltext: 'organization.docstore.enabled'" for="docstore-enabled"></label>
+              <input data-bind="checked: docstoreEnabled" id="docstore-enabled" type="checkbox"/>
+            </div>
+            <!-- ko if: docstoreEnabled -->
+            <div data-test-id="docstore-enabled-settings">
+              <label data-bind="ltext: 'organization.docstore.price'"
+                     for="docstore-price"></label>
+              <input data-bind="value: docstorePrice,
+                                valueUpdate: 'keyup',
+                                css: { warn: !validDocstorePrice() }"
+                     class="form-input"
+                     id="docstore-price" name="docstore-price"
+                     type="text"/>
+            </div>
+            <table data-test-id="docstore-description-table"
+                   class="table table-striped admin-settings">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'userinfo.language'"></th>
+                  <th data-bind="ltext: 'organization.docstore.description'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: docstoreDescs">
+                <tr>
+                  <td data-bind="ltext: 'lang.'+$data.lang"></td>
+                  <td class="value">
+                    <input type="text"
+                           data-bind="value: $data.description,
+                                      attr: {'data-test-id': 'docstore-desc-' + $data.lang }"
+                           class="form-input">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- /ko -->
+            <button data-bind="ltext: 'save',
+                               click: updateDocstoreInfo,
+                               enable: validDocstorePrice" class="btn positive"
+                    data-test-id="save-docstore-info"></button>
+          </div>
 
           <h2>Asetukset</h2>
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
