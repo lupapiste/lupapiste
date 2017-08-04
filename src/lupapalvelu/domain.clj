@@ -121,14 +121,6 @@
       (auth/has-organization-authz-roles? roles/commenter-org-authz-roles (:organization app) user)
       (auth/has-auth? app (get-in user [:company :id]))))
 
-(defn- remove-access-rights-from-company-invitation-auth [{invite :invite type :type :as auth}]
-  (cond-> auth (and (util/=as-kw :type :company) (not-empty invite)) (dissoc :id)))
-
-(defn- deny-access-for-invited-company-non-admin-users [{{company-role :role} :company :as user} authz]
-  (cond->> authz
-    (and company-role (not (util/=as-kw company-role :admin)))
-    (map remove-access-rights-from-company-invitation-auth)))
-
 (defn filter-application-content-for [application user]
   (when (seq application)
     (-> application
@@ -142,7 +134,6 @@
         (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
-        (update-in [:auth] (partial deny-access-for-invited-company-non-admin-users user))
         (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:company-notes] (partial pick-user-company-notes user))
         (filter-notice-from-application user))))
