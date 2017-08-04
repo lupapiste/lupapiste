@@ -256,15 +256,21 @@
           (util/fn->> (remove (comp ss/blank? :fi second))
                       (sort-by first))))
 
-(defn missing-localizations-excel-file [file lang & [options]]
+(defn missing-localizations-excel-file
+  "Writes missing localizations of given language to excel file to
+  a given file"
+  [file lang & [options]]
   (-> (default-i18n-files options)
       (txt-files->map)
       (missing-translations lang)
       (commons-resources/write-excel file)))
 
 (sc/defn ^:always-validate missing-localizations-excel
-  "Writes missing localizations of given language to excel file.
-   If file is not provided, will create the file to user home dir."
+  "Writes missing localizations of given language to excel file to
+  user home dir.
+
+  Possible options
+  - exclude: regexes that cause a translation file to be excluded on match"
   ([lang :- EnumSupportedLanguages]
    (missing-localizations-excel lang nil))
   ([lang    :- EnumSupportedLanguages
