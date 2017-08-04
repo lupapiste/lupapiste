@@ -469,6 +469,7 @@
         auth      (assoc (company->auth company)
                     :id      company-id
                     :role    "reader"
+                    :company-role :admin
                     :inviter (usr/summary caller)
                     :invite  {:user {:id company-id}
                               :created (now)
