@@ -40,6 +40,7 @@
    :lastName                         sc/Str
    :role                             (apply sc/enum all-authz-roles)
    (sc/optional-key :type)           (sc/enum :company :owner)
+   (sc/optional-key :company-role)   (sc/enum :admin :user)
    (sc/optional-key :name)           sc/Str
    (sc/optional-key :y)              ssc/FinnishY
    (sc/optional-key :unsubscribed)   sc/Bool
