@@ -91,7 +91,7 @@
       (command mikko :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "tilannimi"]]) => ok?)
 
     (fact "solita is invited to application"
-      (invite-company-and-accept-invitation pena application-id "solita"))
+      (invite-company-and-accept-invitation pena application-id "solita" kaino))
 
     (fact "kaino is allowed to update document"
       (command kaino :update-doc :id application-id :doc rakennus-doc-id :updates [["kiinteisto.maaraalaTunnus" "tilannimi"]]) => ok?)))

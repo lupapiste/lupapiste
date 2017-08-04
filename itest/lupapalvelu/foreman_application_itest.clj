@@ -45,7 +45,7 @@
                    :updates [["henkilo.yhteystiedot.email" "unknown@example.com"]]) => ok?
           (command apikey :update-doc :id application-id :doc hakija-contact-person  :collection "documents"
                    :updates [["_selected" "yritys"] ["yritys.yhteyshenkilo.yhteystiedot.email" "contact@example.com"]]) => ok?
-          (invite-company-and-accept-invitation apikey application-id "solita") => truthy
+          (invite-company-and-accept-invitation apikey application-id "solita" kaino) => truthy
           (command apikey :update-doc :id application-id :doc hakija-company  :collection "documents"
                    :updates [["_selected" "yritys"] ["yritys.companyId" "solita"]]) => ok?)
     {:hakija1 hakija1

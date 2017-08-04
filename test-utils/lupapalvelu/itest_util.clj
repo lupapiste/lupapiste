@@ -584,16 +584,9 @@
     (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
     foreman-app-id))
 
-(defn accept-company-invitation []
-  (let [email     (last-email)
-        [_ token] (re-find #"http.+/app/fi/welcome#!/accept-company-invitation/([A-Za-z0-9-]+)" (:plain (:body email)))]
-    (http-post (str (server-address) "/api/token/" token) {:follow-redirects false
-                                                           :throw-exceptions false})))
-
-
-(defn invite-company-and-accept-invitation [apikey app-id company-id]
+(defn invite-company-and-accept-invitation [apikey app-id company-id company-admin-apikey]
   (command apikey :company-invite :id app-id :company-id company-id) => ok?
-  (accept-company-invitation))
+  (command company-admin-apikey :approve-invite :id app-id :invite-type :company))
 
 (defn http-token-call
   ([token body]
