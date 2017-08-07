@@ -210,6 +210,9 @@
 (defn all-application-or-archiving-project-states-but [& drop-states]
   (difference all-application-or-archiving-project-states (drop-state-set drop-states)))
 
+(def all-application-or-archiving-project-states-but-draft-or-terminal
+  (all-application-or-archiving-project-states-but (conj terminal-states :draft)))
+
 (comment
   (require ['rhizome.viz :as 'viz])
   (require ['lupapalvelu.i18n :as 'i18n])
