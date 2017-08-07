@@ -8,6 +8,7 @@
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -20,6 +21,9 @@
 ;; -------------------------------
 ;; Miscellaneous components
 ;; -------------------------------
+
+(defn empty-label []
+  [:label {:dangerouslySetInnerHTML {:__html "&nbsp;"}}])
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
@@ -80,10 +84,6 @@
                       (path/meta-updated options))}
          text]]))])
 
-(defn thread-log [x]
-  (println "value:" x)
-  x)
-
 (defn- resolve-reference-list
   "List of :value, :text maps"
   [{:keys [path schema]}]
@@ -129,6 +129,71 @@
    (when-let [ts (path/react [:modified] state)]
      (common/loc :matti.last-saved (js/util.finnishDateAndTime ts)))])
 
+(rum/defcs matti-phrase-text < rum/reactive
+  (rum/local nil ::category)
+  (rum/local "" ::selected)
+  (rum/local "" ::replaced)
+  [{category* ::category
+    selected* ::selected
+    replaced* ::replaced :as local-state}
+   {:keys [state path schema] :as options} & [wrap-label?]]
+  (letfn [(set-category [category]
+            (when (util/not=as-kw category @category*)
+              (reset! category* (name category))
+              (reset! selected* "")))
+          (update-text [text]
+            (reset! (path/state path state) text)
+            (path/meta-updated options))]
+    (when-not @category*
+      (set-category (:category schema)))
+    (let [ref-id (str (path/id path) "-ref")]
+      [:div.matti-grid-12
+       (when (show-label? schema wrap-label?)
+         [:h4.matti-label (path/loc path schema)])
+       [:div.row
+        [:div.col-3
+         [:div.col--vertical
+          [:label (common/loc :phrase.add)]
+          (phrases/phrase-category-select @category* set-category)]]
+        [:div.col-6
+         [:div.col--vertical
+          (empty-label)
+          (components/autocomplete selected*
+                                   {:items    (phrases/phrase-list-for-autocomplete (rum/react category*))
+                                    :callback #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+                                                     sel-start (.-selectionStart text-node)
+                                                     sel-end   (.-selectionEnd text-node)
+                                                     old-text  (or (path/value path state) "")]
+                                                 (reset! replaced* (subs old-text sel-start sel-end))
+                                                 (update-text (s/join (concat (take sel-start old-text)
+                                                                              %
+                                                                              (drop sel-end old-text)))))})]]
+        [:div.col-3.col--right
+         [:div.col--vertical
+          (empty-label)
+          [:div.inner-margins
+           [:button.primary.outline
+            {:on-click (fn []
+                         (update-text "")
+                         (reset! selected* ""))}
+            (common/loc :matti.clear)]
+           [:button.primary.outline
+            {:disabled (let [phrase (rum/react selected*)]
+                         (or (s/blank? phrase)
+                             (not (re-find (re-pattern (goog.string/regExpEscape phrase))
+                                           (path/react path state)))))
+             :on-click (fn []
+                         (update-text (s/replace-first (path/value path state)
+                                                       @selected*
+                                                       @replaced*))
+                         (reset! selected* ""))}
+            (common/loc :phrase.undo)]]]]]
+       [:div.row
+        [:div.col-12.col--full
+         {:ref ref-id}
+         (components/textarea-edit (path/state path state)
+                                   {:callback update-text})]]])))
+
 ;; -------------------------------
 ;; Component instantiation
 ;; -------------------------------
@@ -166,7 +231,8 @@
        :reference-list (if (= :select (:type schema-value))
                          select-reference-list
                          multi-select-reference-list)
-       :multi-select   matti-multi-select) options wrap-label?)))
+       :multi-select   matti-multi-select
+       :phrase-text    matti-phrase-text) options wrap-label?)))
 
 (defmethod instantiate :loc-text
   [_ {:keys [schema]} & wrap-label?]

@@ -18113,6 +18113,141 @@ div.matti-settings-editor table.matti-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
+div.matti-phrases {
+  margin-top: 24px;
+}
+
+div.matti-phrases table.matti-phrases-table {
+  margin-top: 24px;
+}
+
+div.matti-phrases table.matti-phrases-table tr:hover {
+  background-color: white;
+}
+
+div.matti-phrases table.matti-phrases-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+div.matti-phrases table.matti-phrases-table th,
+div.matti-phrases table.matti-phrases-table th > div.like-btn {
+  cursor: pointer;
+}
+
+div.matti-phrases table.matti-phrases-table th i.icon-placeholder,
+div.matti-phrases table.matti-phrases-table th > div.like-btn i.icon-placeholder {
+  min-width: 22px;
+}
+
+div.matti-phrases table.matti-phrases-table td.phrase {
+  width: 100%;
+  max-width: 0;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+div.matti-autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+div.matti-autocomplete .ac--selected {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+div.matti-autocomplete .ac--selected span {
+  font-size: 15px;
+  box-sizing: border-box;
+  border: 1px solid #bbbbbb;
+  border-right: none;
+  min-height: 40px;
+  max-height: 40px;
+  height: 40px;
+  line-height: 38px;
+  padding-left: 12px;
+  min-width: 10em;
+  width: 100%;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+div.matti-autocomplete .ac--selected i {
+  box-sizing: border-box;
+  min-width: 22px;
+  width: 32px;
+}
+
+div.matti-autocomplete .ac--selected i.ac--chevron {
+  font-weight: bold;
+  border: 1px solid #bbbbbb;
+  border-left: none;
+}
+
+div.matti-autocomplete .ac--selected i.ac--clear {
+  padding-left: 12px;
+}
+
+div.matti-autocomplete .ac__menu {
+  background-color: white;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 888;
+  min-width: 20em;
+  width: 100%;
+  border: 1px solid #f39129;
+}
+
+div.matti-autocomplete .ac__menu div.ac__term {
+  padding: 4px 4px 4px 4px;
+  width: 100%;
+}
+
+div.matti-autocomplete .ac__menu div.ac__term input {
+  font-size: 15px;
+  width: 100%;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items {
+  max-height: 10em;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  list-style-type: none;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 4px;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li {
+  cursor: default;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-left: 4px;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--current {
+  background-color: #fbc732;
+  color: white;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--group {
+  font-weight: bold;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
+  padding-left: 10px;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

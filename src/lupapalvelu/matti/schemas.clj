@@ -31,7 +31,7 @@
 
 (defschema MattiCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum :r :p :ya :kt :ymp)})
+   :category (sc/enum "r" "p" "ya" "kt" "ymp")})
 
 (defschema MattiName
   {:fi sc/Str
@@ -44,15 +44,14 @@
          {:name    MattiName
           :deleted sc/Bool}))
 
-(def review-type (apply sc/enum (keys shared/review-type-map)))
+(def review-type (apply sc/enum (map name (keys shared/review-type-map))))
 
 (defschema MattiSettingsReview
   (merge MattiGeneric
          {:type review-type}))
 
 (defschema MattiSavedSettings
-  {:id       sc/Str
-   :modified ssc/Timestamp
+  {:modified ssc/Timestamp
    :draft    sc/Any})
 
 (defschema MattiPublishedSettings
@@ -77,9 +76,9 @@
 
 (defschema MattiSavedVerdictTemplates
   {:templates [MattiSavedTemplate]
-   :settings  {(sc/optional-key :r) MattiSavedSettings}
-   :reviews   [MattiSettingsReview]
-   :plans     [MattiGeneric]})
+   (sc/optional-key :settings)  {(sc/optional-key :r) MattiSavedSettings}
+   (sc/optional-key :reviews)   [MattiSettingsReview]
+   (sc/optional-key :plans)     [MattiGeneric]})
 
 (doc-schemas/defschemas 1
   (map (fn [m]
@@ -87,6 +86,14 @@
           :body (body m)})
        [matti-string verdict-text verdict-check
         verdict-giver automatic-vs-manual]))
+
+;; Phrases
+
+(defschema Phrase
+  {:id       ssc/ObjectIdStr
+   :category (apply sc/enum (map name shared/phrase-categories))
+   :tag      sc/Str
+   :phrase   sc/Str})
 
 ;; Schema utils
 
@@ -99,6 +106,7 @@
         reflist      (:reference-list data)
         date-delta   (:date-delta data)
         multi-select (:multi-select data)
+        phrase-text  (:phrase-text data)
         wrap         (fn [id schema data]
                        {id {:schema schema
                             :path   path
@@ -108,7 +116,8 @@
       docgen       (wrap :docgen (doc-schemas/get-schema {:name docgen}) docgen)
       date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
-      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select))))
+      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
+      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text))))
 
 (defn- parse-int [x]
   (let [n (-> x str name)]
@@ -230,6 +239,10 @@
   (cond
     (not-empty path) :error.invalid-value-path
     :else            (check-items value (get-in references (:path data)))))
+
+(defmethod validate-resolution :phrase-text
+  [{:keys [path schema value data] :as options}]
+  (schema-error (assoc options :path (conj path :text))))
 
 (defn validate-path-value
   "Error message if not valid, nil otherwise."

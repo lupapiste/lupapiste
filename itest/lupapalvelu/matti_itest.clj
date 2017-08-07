@@ -169,11 +169,7 @@
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path ["matti-verdict" "1" "valitus" "delta"]
-             :value -8) => (err :error.invalid-value)
-    (command sipoo :save-verdict-template-draft-value
-             :template-id id
-             :path ["matti-appeal" "0" "type"]
-             :value "bad") => (err :error.invalid-value)))
+             :value -8) => (err :error.invalid-value)))
 
 (facts "Reviews"
   (fact "Initially empty"

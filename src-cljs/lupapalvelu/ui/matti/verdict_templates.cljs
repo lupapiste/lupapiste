@@ -8,6 +8,7 @@
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.settings :as settings]
             [lupapalvelu.ui.matti.state :as state]
+            [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]))
 
 
@@ -164,17 +165,18 @@
      [:button.positive
       {:on-click #(service/new-template @state/current-category new-template)}
       [:i.lupicon-circle-plus]
-      [:span (common/loc "add")]]]))
+      [:span (common/loc :matti.add-verdict-template)]]]))
 
 (rum/defc verdict-templates < rum/reactive
   [_]
   (when (and (rum/react state/schemas)
-             (rum/react state/categories))
+             (rum/react state/categories)
+             (rum/react state/phrases))
     [:div
      (case (rum/react state/current-view)
        ::template (with-back-button (verdict-template (assoc shared/default-verdict-template
                                                              :state state/current-template)))
-       ::list     (verdict-template-list)
+       ::list     [:div (verdict-template-list) (phrases/phrases-table)]
        ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @state/current-category)))))]))
 
 (defonce args (atom {}))
@@ -193,5 +195,6 @@
     (service/fetch-template-list)
     (service/fetch-categories (fn [categories]
                                 (set-category (first categories))))
+    (service/fetch-organization-phrases)
     (reset-template nil)
     (mount-component)))

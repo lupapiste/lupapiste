@@ -4,9 +4,16 @@
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
+
+(defn command->organization
+  "User-organizations is not available for input-validators."
+  [{:keys [user user-organizations]}]
+  (util/find-by-id (usr/authority-admins-organization-id user)
+                   user-organizations ))
 
 (defn organization-categories [{scope :scope}]
   (->> (map (comp keyword ss/lower-case :permitType) scope)

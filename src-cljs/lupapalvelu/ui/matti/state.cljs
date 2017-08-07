@@ -16,3 +16,4 @@
 (def settings         (rum/cursor-in references [:settings]))
 (def reviews          (rum/cursor-in references [:reviews]))
 (def plans            (rum/cursor-in references [:plans]))
+(def phrases          (state-cursor :phrases))

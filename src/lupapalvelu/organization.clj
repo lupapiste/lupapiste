@@ -1,37 +1,37 @@
 (ns lupapalvelu.organization
-  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
-           [org.geotools.geojson.feature FeatureJSON]
+  (:import [java.util ArrayList]
+           [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.feature.simple SimpleFeatureBuilder SimpleFeatureTypeBuilder]
+           [org.geotools.geojson.feature FeatureJSON]
            [org.geotools.geojson.geom GeometryJSON]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
            [org.geotools.referencing.crs DefaultGeographicCRS]
-           [org.opengis.feature.simple SimpleFeature]
-           [java.util ArrayList])
+           [org.opengis.feature.simple SimpleFeature])
 
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+  (:require [cheshire.core :as json]
             [clojure.string :as s]
             [clojure.walk :as walk]
-            [monger.operators :refer :all]
-            [cheshire.core :as json]
-            [schema.core :as sc]
-            [sade.core :refer [ok fail fail!]]
-            [sade.env :as env]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.crypt :as crypt]
-            [sade.http :as http]
-            [sade.xml :as sxml]
-            [sade.schemas :as ssc]
+            [clojure.walk :refer [keywordize-keys]]
+            [lupapalvelu.attachment.stamp-schema :as stmp]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [me.raynes.fs :as fs]
-            [lupapalvelu.attachment.stamp-schema :as stmp]
-            [clojure.walk :refer [keywordize-keys]]
-            [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates]]))
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail fail!]]
+            [sade.crypt :as crypt]
+            [sade.env :as env]
+            [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.xml :as sxml]
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]))
 
 (def scope-skeleton
   {:permitType nil
@@ -154,7 +154,9 @@
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
    (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
-   (sc/optional-key :docstore-info) DocStoreInfo})
+   (sc/optional-key :docstore-info) DocStoreInfo
+   (sc/optional-key :phrases) [Phrase]})
+
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
