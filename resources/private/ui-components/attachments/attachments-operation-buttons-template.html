@@ -62,6 +62,13 @@
       <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
     </button>
     <button class="ghost"
+            data-bind="click: $data.startPrintingOrder,
+                       visible: $data.canOrderAttachmentPrints()"
+            data-test-id="order-attachment-prints">
+      <i class="lupicon-envelope"></i>
+      <span>MYLLY TILAUS</span>
+    </button>
+    <button class="ghost"
             data-bind="click: downloadAll,
                        visible: hasFiles()"
             data-test-id="download-all">

@@ -323,7 +323,8 @@
                           "book-appointment-filter-template.html"]}
 
 
-   :printing-order {:js ["printing-order.js"]
+   :printing-order {:depends [:common-html]
+                    :js ["printing-order.js"]
                     :html ["printing-order-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker

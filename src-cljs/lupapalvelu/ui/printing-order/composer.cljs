@@ -6,10 +6,14 @@
 
 (def log (.-log js/console))
 
+(rum/defc order-composer < rum/reactive
+          [_]
+          [:div [:p "hello world"]])
+
 (defn mount-component []
-  #_(rum/mount (stamp-editor (:auth-model @args))
+  (rum/mount (order-composer)
              (.getElementById js/document (:dom-id @args))))
 
 (defn ^:export start [domId componentParams]
-  (swap! args assoc :auth-model (aget componentParams "authModel") :dom-id (name domId))
+  (swap! args assoc :dom-id (name domId))
   (mount-component))
