@@ -138,7 +138,7 @@
         <tr class="reject-note-row"
             data-bind="css: {'even-row': util.isEven( $index() ),
                        'odd-row': util.isOdd( $index() )}">
-          <td colspan="7"
+          <td colspan="10"
               data-bind="component: {name: 'reject-note',
                          params: {attachmentId: id,
                          storeState: true,
@@ -149,7 +149,7 @@
         <!-- /ko -->
         <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
         <tr class="attachment-assignment-row" data-bind="testId: 'attachment-assignments-' + $data.id">
-          <td colspan="7">
+          <td colspan="10">
             <accordion-assignments params="documentAssignments: $component.assignments()[$data.id],
                                            applicationId: $component.appModel.id,
                                            authorities: $component.authorities"></accordion-assignments>
