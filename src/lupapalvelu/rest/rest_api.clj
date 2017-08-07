@@ -68,7 +68,7 @@
                      (catch Exception e#
                        (errorf "Possible schema error or other failure in %s: %s" ~path e#)
                        (resp/status 500 "Unknown server error")))))
-               (resp/status 404 (resp/json (fail :error.input-validation-error))))
+               (resp/status 400 (resp/json (fail :error.input-validation-error))))
              (resp/status 401 "Unauthorized"))
            basic-401)))))
 

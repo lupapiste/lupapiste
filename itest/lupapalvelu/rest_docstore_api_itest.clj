@@ -44,8 +44,8 @@
       => default-sipoo-docstore-info)
 
     (fact "organization - missing organization"
-          (-> (docstore-api-call organization-address {:id "Nonexistent"}) :body)
-          => (partial expected-failure? :error.missing-organization))
+          (-> (docstore-api-call organization-address {:id "Nonexistent"}))
+          => http404?)
 
     (fact "organizations"
       (-> (docstore-api-call organizations-address {}) :body :data)
@@ -63,8 +63,8 @@
      => [default-sipoo-docstore-info])
 
     (fact "organizations - invalid status"
-     (-> (docstore-api-call organizations-address {:status "zorblax"}) :body)
-     => (partial expected-failure? "error.input-validation-error")))
+     (-> (docstore-api-call organizations-address {:status "zorblax"}))
+     => http400?))
 
   (fact "Docstore user cannot access other REST endpoints"
         (api-call (str (server-address) "/rest/submitted-applications")
