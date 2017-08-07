@@ -9,7 +9,7 @@
   (partial expected-failure? error))
 
 (fact "No phrases yet"
-  (query sipoo :organization-phrases) => {:ok true})
+  (query sipoo :organization-phrases) => {:ok true :phrases []})
 
 (fact "Add new phrase"
   (command sipoo :upsert-phrase
@@ -48,6 +48,26 @@
           => (just [(contains {:category "vakuus"
                                :tag "Bah"
                                :phrase "Humbug"})]))))))
+
+(facts "Application phrases"
+  (fact "Phrases for 753-R application"
+    (let [app-id (create-app-id pena
+                                :operation :pientalo
+                                :propertyId sipoo-property-id)]
+      (fact "Application organization is 753-R"
+        (:organization (query-application pena app-id)) => "753-R")
+      (:phrases (query sonja :application-phrases :id app-id))
+      => (just [(contains {:category "vakuus"
+                           :tag      "Bah"
+                           :phrase   "Humbug"})])))
+  (fact "No phrases for 753-YA application"
+    (let [app-id (create-app-id pena
+                                :operation :ya-katulupa-vesi-ja-viemarityot
+                                :propertyId sipoo-property-id)]
+      (fact "Application organization is 753-YA"
+        (:organization (query-application pena app-id)) => "753-YA")
+      (:phrases (query sonja :application-phrases :id app-id))
+      => [])))
 
 (fact "Bad category"
   (command sipoo :upsert-phrase

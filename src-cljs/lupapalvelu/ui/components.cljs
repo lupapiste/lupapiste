@@ -158,7 +158,7 @@
     (when (integer? scroll)
       (aset container "scrollTop" scroll))))
 
-;; Parameters: initial-value callback options
+;; Parameters: initial-value options
 ;; Initial value can be atom for two-way binding (see the mixin).
 ;; Options [optional]:
 ;;   items  either list or function. The function argument is the
@@ -251,7 +251,8 @@
              (if x
                (let [{:keys [text value group]} x
                      group                      (-> (or group "") s/trim)
-                     li-items                   (if (= group last-group)
+                     li-items                   (if (or (s/blank? group)
+                                                        (= group last-group))
                                                   li-items
                                                   (conj li-items [:li.ac--group group]))]
                  (recur xs

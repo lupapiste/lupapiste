@@ -12,8 +12,9 @@
    :user-roles  #{:authorityAdmin}
    :feature     :matti}
   [command]
-  (ok (select-keys (matti/command->organization command)
-                   [:phrases])))
+  (ok :phrases (get (matti/command->organization command)
+                    :phrases
+                    [])))
 
 (defquery application-phrases
   {:description      "Phrases for the application organization."
@@ -24,7 +25,7 @@
    ;; TODO: Refine states
    :states           states/all-states}
   [{:keys [organization]}]
-  (ok (select-keys @organization [:phrases])))
+  (ok :phrases (get @organization :phrases [])))
 
 (defcommand upsert-phrase
   {:description         "Update old or create new phrase."
