@@ -37,20 +37,34 @@
     (docstore-api-call organizations-address {}) => http200?
     (docstore-api-call organization-address {:id "753-R"}) => http200?)
 
-  (fact "Queries return correct information"
-    (-> (docstore-api-call organization-address {:id "753-R"}) :body :data)
-    => default-sipoo-docstore-info
-    (-> (docstore-api-call organizations-address {}) :body :data)
-    => [default-sipoo-docstore-info]
-    (-> (docstore-api-call organizations-address {:status "all"}) :body :data)
-    => [default-sipoo-docstore-info]
-    (-> (docstore-api-call organizations-address {:status "active"}) :body :data)
-    => []
-    (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data)
-    => [default-sipoo-docstore-info]
+  (facts "Queries return correct information"
 
-    (-> (docstore-api-call organizations-address {:status "zorblax"}) :body)
-    => (partial expected-failure? "error.input-validation-error"))
+    (fact "organization"
+      (-> (docstore-api-call organization-address {:id "753-R"}) :body :data)
+      => default-sipoo-docstore-info)
+
+    (fact "organization - missing organization"
+          (-> (docstore-api-call organization-address {:id "Nonexistent"}) :body)
+          => (partial expected-failure? :error.missing-organization))
+
+    (fact "organizations"
+      (-> (docstore-api-call organizations-address {}) :body :data)
+      => [default-sipoo-docstore-info])
+
+    (fact "organizations - status=all"
+      (-> (docstore-api-call organizations-address {:status "all"}) :body :data)
+      => [default-sipoo-docstore-info])
+
+    (fact "organizations - status=active"
+      (-> (docstore-api-call organizations-address {:status "active"}) :body :data)
+      => [])
+    (fact "organizations - status=inactive"
+     (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data)
+     => [default-sipoo-docstore-info])
+
+    (fact "organizations - invalid status"
+     (-> (docstore-api-call organizations-address {:status "zorblax"}) :body)
+     => (partial expected-failure? "error.input-validation-error")))
 
   (fact "Docstore user cannot access other REST endpoints"
         (api-call (str (server-address) "/rest/submitted-applications")

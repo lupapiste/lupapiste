@@ -63,7 +63,7 @@
      :returns     OrganizationResponse}
   (if-let [docstore-info (first (get-docstore-infos {:_id id}))]
     {:ok true :data docstore-info}
-    (fail :error.missing-organization)))
+    (resp/status 404 (resp/json (fail :error.missing-organization)))))
 
 (defendpoint-for usr/docstore-user? "/rest/docstore/organizations" false
   {:summary     ""
