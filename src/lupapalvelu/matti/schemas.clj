@@ -31,7 +31,7 @@
 
 (defschema MattiCategory
   {:id       ssc/ObjectIdStr
-   :category (sc/enum :r :p :ya :kt :ymp)})
+   :category (sc/enum "r" "p" "ya" "kt" "ymp")})
 
 (defschema MattiName
   {:fi sc/Str
@@ -44,15 +44,14 @@
          {:name    MattiName
           :deleted sc/Bool}))
 
-(def review-type (apply sc/enum (keys shared/review-type-map)))
+(def review-type (apply sc/enum (map name (keys shared/review-type-map))))
 
 (defschema MattiSettingsReview
   (merge MattiGeneric
          {:type review-type}))
 
 (defschema MattiSavedSettings
-  {:id       sc/Str
-   :modified ssc/Timestamp
+  {:modified ssc/Timestamp
    :draft    sc/Any})
 
 (defschema MattiPublishedSettings
@@ -77,9 +76,9 @@
 
 (defschema MattiSavedVerdictTemplates
   {:templates [MattiSavedTemplate]
-   :settings  {(sc/optional-key :r) MattiSavedSettings}
-   :reviews   [MattiSettingsReview]
-   :plans     [MattiGeneric]})
+   (sc/optional-key :settings)  {(sc/optional-key :r) MattiSavedSettings}
+   (sc/optional-key :reviews)   [MattiSettingsReview]
+   (sc/optional-key :plans)     [MattiGeneric]})
 
 (doc-schemas/defschemas 1
   (map (fn [m]
@@ -92,7 +91,7 @@
 
 (defschema Phrase
   {:id       ssc/ObjectIdStr
-   :category (apply sc/enum shared/phrase-categories)
+   :category (apply sc/enum (map name shared/phrase-categories))
    :tag      sc/Str
    :phrase   sc/Str})
 

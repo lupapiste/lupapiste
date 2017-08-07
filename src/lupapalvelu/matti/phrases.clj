@@ -1,6 +1,6 @@
 (ns lupapalvelu.matti.phrases
   (:require [lupapalvelu.matti.matti :as matti]
-            [lupapalvelu.matti.schemas :as schemas]
+            [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
@@ -10,7 +10,7 @@
 (defn valid-category
   "Input validator for category parameter."
   [{data :data}]
-  (when-not (util/includes-as-kw? schemas/phrase-categories (:category data))
+  (when-not (util/includes-as-kw? shared/phrase-categories (:category data))
     (fail :error.invalid-category)))
 
 (defn phrase-id-exists [command]
