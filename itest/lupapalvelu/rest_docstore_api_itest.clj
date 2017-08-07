@@ -15,11 +15,11 @@
 (defn- api-call [address params]
   (http-get address (merge params {:throw-exceptions false})))
 
-(defn- docstore-api-call [address query-params]
-  (decode-response
-   (api-call address (merge {:basic-auth docstore-user-basic-auth}
-                            (when-not (empty? query-params)
-                              {:query-params query-params})))))
+(defn- docstore-api-call [address query-params & [undecoded?]]
+  (-> (api-call address (merge {:basic-auth docstore-user-basic-auth}
+                               (when-not (empty? query-params)
+                                 {:query-params query-params})))
+      ((if undecoded? identity decode-response))))
 
 (def default-sipoo-docstore-info
   (assoc org/default-docstore-info
@@ -44,7 +44,7 @@
       => default-sipoo-docstore-info)
 
     (fact "organization - missing organization"
-          (-> (docstore-api-call organization-address {:id "Nonexistent"}))
+          (-> (docstore-api-call organization-address {:id "Nonexistent"} true))
           => http404?)
 
     (fact "organizations"
@@ -63,7 +63,7 @@
      => [default-sipoo-docstore-info])
 
     (fact "organizations - invalid status"
-     (-> (docstore-api-call organizations-address {:status "zorblax"}))
+     (-> (docstore-api-call organizations-address {:status "zorblax"} true))
      => http400?))
 
   (fact "Docstore user cannot access other REST endpoints"
