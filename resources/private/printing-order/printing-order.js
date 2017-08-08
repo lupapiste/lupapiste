@@ -2,6 +2,15 @@ var printingOrder = (function() {
 
   hub.onPageLoad("printing-order", function() {
     pageutil.showAjaxWait();
+    if ( pageutil.subPage() ) {
+      if ( lupapisteApp.models.application.id() !== pageutil.subPage() ) {
+        // refresh as ID is undefined or LP-id in URL changed
+        var appId = pageutil.subPage();
+        repository.load(appId, _.noop, function(application) {
+          lupapisteApp.setTitle(application.title);
+        }, true);
+      }
+    }
     pageutil.hideAjaxWait();
   });
 
@@ -13,7 +22,8 @@ var printingOrder = (function() {
       backToApplication: function() {
         var id = pageutil.subPage();
         pageutil.openPage("application/" + id, "attachments");
-      }
+      },
+      tagGroupsModel: lupapisteApp.services.attachmentsService.getTagGroups("printing-order")
     });
   });
 

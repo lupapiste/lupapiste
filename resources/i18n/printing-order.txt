@@ -1,0 +1,2 @@
+"printing-order.composer.title.1" "fi" "Tilaa tulosteita - dokumenttien valinta (1/3)"
+"printing-order.composer.intro-text.1" "fi" "Valitse dokumentit, joista haluat tilata tulosteet"

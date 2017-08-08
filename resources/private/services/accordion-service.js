@@ -174,6 +174,28 @@ LUPAPISTE.AccordionService = function() {
     hub.send("accordionToolbar::toggleEditor", {show: show});
   };
 
+  self.getOperationLocalization = function(opId) {
+    var doc = self.getDocumentByOpId(opId);
+    if (util.getIn(doc, ["operation"])) {
+      var identifier = util.getIn(self.getIdentifier(doc.docId), ["value"]);
+      var opDescription = util.getIn(doc, ["operation", "description"]);
+      var accordionFields = docutils.accordionText(doc.accordionPaths, doc.data);
+      return loc([doc.operation.name(), "_group_label"]).toUpperCase() +
+               docutils.headerDescription(identifier, opDescription, accordionFields);
+    } else {
+      return "";
+    }
+  }
+
+  self.attachmentAccordionName = function(key) {
+    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i;
+    if (opIdRegExp.test(key)) {
+      return self.getOperationLocalization(opIdRegExp.exec(key)[1]);
+    } else {
+      return loc(["application", "attachments", key]).toUpperCase();
+    }
+  };
+
   hub.subscribe("accordionService::saveIdentifier", function(event) {
     var docId = event.docId;
     var value = event.value;

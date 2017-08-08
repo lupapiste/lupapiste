@@ -76,26 +76,11 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
     });
   }
 
-  function getOperationLocalization(operationId) {
-    var doc = accordionService && accordionService.getDocumentByOpId(operationId);
-    if (util.getIn(doc, ["operation"])) {
-      var identifier = util.getIn(accordionService.getIdentifier(doc.docId), ["value"]);
-      var opDescription = util.getIn(doc, ["operation", "description"]);
-      var accordionFields = docutils.accordionText(doc.accordionPaths, doc.data);
-      return loc([doc.operation.name(), "_group_label"]).toUpperCase() +
-               docutils.headerDescription(identifier, opDescription, accordionFields);
+  self.accordionName = self.disposedPureComputed(function() {
+    if (accordionService) {
+      return accordionService.attachmentAccordionName(_.last(groupPath));
     } else {
       return "";
-    }
-  }
-
-  self.accordionName = self.disposedPureComputed(function() {
-    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i;
-    var key = _.last(groupPath);
-    if (opIdRegExp.test(key)) {
-      return getOperationLocalization(opIdRegExp.exec(key)[1]);
-    } else {
-      return loc(["application", "attachments", key]).toUpperCase();
     }
   });
 
