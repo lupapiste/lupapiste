@@ -85,7 +85,8 @@
    :input-validators [(partial non-blank-parameters [:id :functionCode :reason])]
    :user-roles #{:authority}
    :org-authz-roles  #{:archivist}
-   :states states/all-but-draft}
+   :states states/all-but-draft
+   :pre-checks [permit/is-not-archiving-project]}
   [command]
   (update-tos-metadata functionCode command reason))
 

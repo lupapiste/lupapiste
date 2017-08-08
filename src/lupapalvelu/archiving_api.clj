@@ -5,7 +5,8 @@
             [lupapalvelu.archiving :as archiving]
             [lupapalvelu.application :as app]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.permit :as permit]))
 
 (defn validate-permanent-archive-enabled [{user-orgs :user-organizations app-org :organization app :application}]
   (when-not (if (:organization app)
@@ -46,7 +47,8 @@
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :org-authz-roles  #{:archivist}
-   :states           states/post-verdict-states}
+   :states           states/post-verdict-states
+   :pre-checks       [permit/is-not-archiving-project]}
   [{:keys [application created]}]
   (archiving/mark-application-archived application created :application)
   (ok))

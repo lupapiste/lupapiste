@@ -467,7 +467,8 @@
       attachmentsService.convertToPdfA(attachmentId);
     };
 
-    self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application);
+    self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application &&
+      lupapisteApp.models.applicationAuthModel.ok("mark-pre-verdict-phase-archived"));
     self.markApplicationArchived = function() {
       ajax
         .command("mark-pre-verdict-phase-archived", {id: ko.unwrap(params.application.id)})
