@@ -15,9 +15,9 @@
     <h1 data-bind="ltext: 'printing-order.composer.title.1'"></h1>
     <span data-bind="ltext: 'printing-order.composer.intro-text.1'"></span>
     <div class="bottom-marginM"></div>
-    <cljs-printing-order_composer params="{tagGroups: $data.tagGroupsModel}">
-      mm
-    </cljs-printing-order_composer>
+    <!-- ko ifnot: _.isEmpty($data.topGroups()) -->
+    <cljs-printing-order_composer params="{topGroups: $data.topGroups}"></cljs-printing-order_composer>
+    <!-- /ko -->
   </div>
 </section>
 </body>

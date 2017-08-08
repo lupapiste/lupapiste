@@ -23,7 +23,8 @@ var printingOrder = (function() {
         var id = pageutil.subPage();
         pageutil.openPage("application/" + id, "attachments");
       },
-      tagGroupsModel: lupapisteApp.services.attachmentsService.getTagGroups("printing-order")
+      tagGroupsModel: lupapisteApp.services.attachmentsService.getTagGroups("printing-order"),
+      topGroups: lupapisteApp.services.attachmentsService.getTagGroups("printing-order").getTagGroup("")
     });
   });
 
