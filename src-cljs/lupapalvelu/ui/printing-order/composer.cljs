@@ -1,10 +1,19 @@
 (ns lupapalvelu.ui.printing-order.composer
   (:require [rum.core :as rum]
             [lupapalvelu.ui.components :as uc]))
+(def empty-component-state {:attachments []})
+
+(defonce component-state (atom empty-component-state))
 
 (defonce args (atom {}))
 
 (def log (.-log js/console))
+
+(defn init
+  [init-state props]
+  (let [_ (-> (aget props ":rum/initial-state") :rum/args)]
+    (swap! component-state assoc :attachments (.apply js/lupapisteApp.services.attachmentsService.attachments))
+    init-state))
 
 (defn accordion-name [path]
   (js/lupapisteApp.services.accordionService.attachmentAccordionName path))
@@ -26,6 +35,8 @@
                          :level (inc level)}))]])
 
 (rum/defc order-composer < rum/reactive
+                           {:init         init
+                            :will-unmount (fn [& _] (reset! component-state empty-component-state))}
   [_]
   [:div
    (for [top-level-group (tag-groups "")]
