@@ -11,8 +11,7 @@
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.rum-util :as rum-util]
             [cljs-time.coerce :as tc]
-            [cljs-time.format :as tf]
-            [cljs-time.core :as t]))
+            [cljs-time.format :as tf]))
 
 (enable-console-print!)
 
@@ -257,7 +256,7 @@
                commit-fn (partial commit-inspection-date target-id)]
            (date/basic-datepicker date commit-fn idx))
          (when (:inspection-date row-target)
-           (tf/unparse date-formatter (doto (t/time-now) (.setTime (tc/to-long (:inspection-date row-target)))))))
+           (common/format-timestamp (:inspection-date row-target))))
        (when (and (not editingInspectionDate?) (auth/ok? auth-model :set-inspection-date) (not targetFinished?))
          [:a.inspection-summary-link
           {:on-click     (fn [_] (swap! selected-summary assoc-in [:targets idx :editingInspectionDate?] true))
