@@ -1,10 +1,7 @@
 (ns lupapalvelu.ui.printing-order.composer
   (:require [rum.core :as rum]
             [lupapalvelu.ui.util :as util]
-            [lupapalvelu.ui.common :refer [loc] :as common]
-            [cljs-time.format :as tf]
-            [cljs-time.core :as t]
-            [cljs-time.coerce :as tc]))
+            [lupapalvelu.ui.common :refer [loc] :as common]))
 
 (def empty-component-state {:attachments []
                             :tagGroups   []
