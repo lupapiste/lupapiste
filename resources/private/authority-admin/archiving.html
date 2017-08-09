@@ -4,7 +4,7 @@
        data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
                       if: organization.organizationId">
     <h1 data-bind="ltext: 'arkistointi'"></h1>
-    <section>
+    <section data-bind="if: lupapisteApp.models.globalAuthModel.ok('digitizing-enabled')">
       <h2 data-bind="ltext: 'auth-admin.archiving.digitizing'"></h2>
       <label for="digitizingTosFunction">
         <span data-bind="ltext: 'auth-admin.archiving.digitizing.tosFunction'"></span>
