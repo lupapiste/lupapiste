@@ -6,11 +6,14 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
+            [lupapalvelu.action :refer [application->command update-application]]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]))
@@ -408,3 +411,26 @@
       (if (> (count task-rakennus) (count new-buildings-with-states))
         (errorf "update-task-buildings: too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states)))
       updated-task)))
+
+(defn set-task-state [{created :created :as command} task-id state & [updates]]
+  (update-application command
+                      {:tasks {$elemMatch {:id task-id}}}
+                      (util/deep-merge
+                       {$set {:tasks.$.state state :modified created}}
+                       updates)))
+
+(defn mark-review-faulty [application task-id timestamp]
+  (let [command (assoc (application->command application)
+                       :created timestamp)
+        review-attachments (attachment/get-attachments-by-target-type-and-id application {:type "task" :id task-id})]
+    (doseq [att review-attachments]
+      (attachment/update-attachment-data! command
+                                          (:id att)
+                                          {:metadata.sailytysaika.arkistointi :ei
+                                           :metadata.sailytysaika.perustelu (i18n/loc "review.faulty-document")
+                                           :metadata.myyntipalvelu false
+                                           :metadata.tila :ei-arkistoida-virheellinen}
+                                          timestamp
+                                          :set-app-modified? false
+                                          :set-attachment-modified? false))
+    (set-task-state command task-id :faulty_review_task)))
