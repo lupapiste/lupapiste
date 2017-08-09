@@ -38,27 +38,34 @@
         lb (katselmuksen-laji a)]
     (and name-a (= name-a (or name-b lb)) la (= la lb))))
 
-(defn- bg-id [task]
+(defn- background-id [task]
   (get-in task [:data :muuTunnus :value]))
 
 (defn- non-empty-review-task? [task]
   (and (tasks/task-is-review? task) (not (empty-review-task? task))))
 
 (defn- merge-review-tasks
-  "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
-  [from-update from-mongo]
-  (let [faulty-tasks (filter #(util/=as-kw (:state %) :faulty_review_task) from-mongo)
-        from-mongo   (remove #(util/=as-kw (:state %) :faulty_review_task) from-mongo)]
-    (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s (+faulty: %s)" (count from-update) (count from-mongo) (count faulty-tasks))
-    (loop [from-update from-update
-           from-mongo from-mongo
+  "Returns a vector with two values:
+   0: Existing tasks left unchanged,
+   1: Completely new and updated existing review tasks."
+  [tasks-from-update tasks-from-mongo]
+  (let [faulty-tasks     (filter #(util/=as-kw (:state %) :faulty_review_task)
+                                 tasks-from-mongo)
+        tasks-from-mongo (remove #(util/=as-kw (:state %) :faulty_review_task)
+                                 tasks-from-mongo)]
+
+    (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s (+faulty: %s)"
+            (count tasks-from-update) (count tasks-from-mongo) (count faulty-tasks))
+
+    (loop [from-update tasks-from-update
+           from-mongo  tasks-from-mongo
            unchanged []
            added-or-updated []]
       (let [current (first from-mongo)
-            bg-id-current (bg-id current)
+            bg-id-current (background-id current)
             remaining (rest from-mongo)
             updated-id-match (when-not (ss/empty? bg-id-current)
-                               (util/find-first #(= bg-id-current (bg-id %)) from-update))
+                               (util/find-first #(= bg-id-current (background-id %)) from-update))
             updated-match (or updated-id-match
                               (first (filter #(or (reviews-have-same-name-and-type? current %)
                                                   (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
@@ -66,28 +73,39 @@
           (= current nil)
           ; Recursion end condition
           (let [added-or-updated (concat added-or-updated (filter non-empty-review-task? from-update))]
-            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
+            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s"
+                    (count unchanged) (count added-or-updated))
             [(concat faulty-tasks unchanged) added-or-updated])
 
-          (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
+          (or (not (tasks/task-is-review? current))
+              (not (empty-review-task?    current)))
           ;non-empty review tasks and all non-review tasks are left unchanged
-          (do
-            (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated))
+          (recur (remove #{updated-match} from-update)
+                 remaining
+                 (conj unchanged current)
+                 added-or-updated)
 
-          (and updated-match (not (empty-review-task? updated-match)))
+          (and updated-match
+               (not (empty-review-task? updated-match)))
           ; matching review found from backend system update => it replaces the existing one
-          (recur (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
+          (recur (remove #{updated-match} from-update)
+                 remaining
+                 unchanged
+                 (conj added-or-updated updated-match))
 
           :else
           ; this existing review is left unchanged
-          (recur from-update remaining (conj unchanged current) added-or-updated))))))
+          (recur from-update
+                 remaining
+                 (conj unchanged current)
+                 added-or-updated))))))
 
 (defn merge-maps-that-are-distinct-by [pred map-coll]
   (->> (group-by pred map-coll)
        vals
        (map #(apply merge %))))
 
-(defn reviews-preprocessed 
+(defn reviews-preprocessed
   "Review preprocessing: 1) Duplicate entry prevention (group-by review type, name, date and external id)
                          2) Collect all related building and attachment elements together
                          3) Merge into final results in which there are no duplicates by name or type but still
@@ -132,10 +150,10 @@
         attachments-by-task-id (apply hash-map
                                  (remove empty? (mapcat (fn [t]
                                   (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
-        updated-existing-and-added-tasks  (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
-        updated-tasks (apply concat updated-existing-and-added-tasks)
+        [unchanged-tasks added-and-updated-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
+        updated-tasks (concat unchanged-tasks added-and-updated-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
-        added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
+        added-tasks-with-updated-buildings (map update-buildings-with-context added-and-updated-tasks) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}
         state-updates (verdict/get-state-updates user created application app-xml)]
