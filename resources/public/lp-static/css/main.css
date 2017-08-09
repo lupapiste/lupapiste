@@ -10607,6 +10607,10 @@ tr.inspection-summary-template-row {
   border: none;
 }
 
+tr.not-in-printing-order {
+  color: #999999;
+}
+
 th, td {
   padding: 6px 12px;
   text-align: left;
@@ -11671,6 +11675,7 @@ div.attachments-table-container table.attachments-table .amount-controls > [clas
   position: relative;
   top: 4px;
   margin: 6px;
+  color: #f39129;
 }
 
 .attachment-state-icons {
@@ -19564,6 +19569,33 @@ div.review-tasks .faulty {
 
 div.foreman-history-container {
   padding-bottom: 6px;
+}
+
+div.printing-order-footer {
+  position: fixed;
+  left: 0px;
+  bottom: 0px;
+  width: 100%;
+  z-index: 2002;
+  background-color: #777777;
+  padding: 24px auto 24px auto;
+}
+
+div.printing-order-footer div {
+  width: 100%;
+  max-width: 1280px;
+  min-width: 640px;
+  margin: 0 auto;
+}
+
+div.printing-order-footer div button {
+  width: auto;
+  display: inline;
+  padding-right: 48px;
+}
+
+div.printing-order-footer div h2 {
+  font-weight: normal;
 }
 
 .ui-autocomplete-loading {

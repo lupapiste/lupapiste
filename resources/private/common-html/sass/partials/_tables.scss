@@ -94,6 +94,9 @@ tr {
     background: inherit;
     border: none;
   }
+  &.not-in-printing-order {
+    color: $gray153;
+  }
 }
 
 th, td {
@@ -403,6 +406,7 @@ div.attachments-table-container {
       position: relative;
       top: $baseline / 6;
       margin: $baseline / 4;
+      color: $orange-dark;
     }
 
   }

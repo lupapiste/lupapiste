@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.common
-  (:require [cljs-time.format :as tf]
+  (:require [clojure.string :as s]
+            [cljs-time.format :as tf]
             [cljs-time.coerce :as tc]
             [cljs-time.core :as t]))
 
