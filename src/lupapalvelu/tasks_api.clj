@@ -4,7 +4,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application application->command]]
             [lupapalvelu.application :as app]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.schemas :as schemas]
@@ -250,6 +250,22 @@
 
     (ok :integrationAvailable sent-to-krysp?)))
 
+(defn mark-review-faulty! [application task-id timestamp]
+  (let [command (assoc (application->command application)
+                       :created timestamp)
+        review-attachments (attachment/get-attachments-by-target-type-and-id application {:type "task" :id task-id})]
+    (doseq [att review-attachments]
+      (attachment/update-attachment-data! command
+                                          (:id att)
+                                          {:metadata.sailytysaika.arkistointi :ei
+                                           :metadata.sailytysaika.perustelu (i18n/loc "review.faulty-document")
+                                           :metadata.myyntipalvelu false
+                                           :metadata.tila :ei-arkistoida-virheellinen}
+                                          timestamp
+                                          :set-app-modified? false
+                                          :set-attachment-modified? false))
+    (set-state command task-id :faulty_review_task)))
+
 (defcommand mark-review-faulty
   {:description "Marks review done, generates PDF/A and sends data to backend"
    :parameters  [id taskId]
@@ -260,18 +276,7 @@
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application created :created :as command}]
-  (let [review-attachments (attachment/get-attachments-by-target-type-and-id application {:type "task" :id taskId})]
-    (doseq [att review-attachments]
-      (attachment/update-attachment-data! command
-                                          (:id att)
-                                          {:metadata.sailytysaika.arkistointi :ei
-                                           :metadata.sailytysaika.perustelu (i18n/loc "review.faulty-document")
-                                           :metadata.myyntipalvelu false
-                                           :metadata.tila :ei-arkistoida-virheellinen}
-                                          created
-                                          :set-app-modified? false
-                                          :set-attachment-modified? false))
-    (set-state command taskId :faulty_review_task)))
+  (mark-review-faulty! application taskId created))
 
 (defcommand resend-review-to-backing-system
   {:description "Resend review data to backend"
