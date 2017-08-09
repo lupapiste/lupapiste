@@ -391,7 +391,8 @@
        flatten))
 
 (defn get-state-updates [user created {current-state :state :as application} app-xml]
-  (let [new-state (->> (krysp-reader/application-state app-xml)
+  (let [new-state (->> (cr/strip-xml-namespaces app-xml)
+                       (krysp-reader/application-state)
                        krysp-reader/krysp-state->application-state)]
     (cond
       (nil? new-state) nil
