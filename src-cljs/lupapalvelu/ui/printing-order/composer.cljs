@@ -5,6 +5,7 @@
 
 (def empty-component-state {:attachments []
                             :tagGroups   []
+                            :order       {}
                             :id          nil})
 
 (defonce component-state (atom empty-component-state))
@@ -20,6 +21,7 @@
     (common/query "attachments-for-printing-order"
                   #(swap! component-state assoc :id app-id
                                                 :attachments (:attachments %)
+                                                :order       (zipmap (map :id (:attachments %)) (repeatedly (constantly 0)))
                                                 :tagGroups   (:tagGroups %))
                   :id app-id)
     init-state))
@@ -32,27 +34,38 @@
 
 (rum/defcs attachment-row < rum/reactive
                             (rum/local 0 ::amount)
-  [local-state {:keys [contents] :as att}]
-  (let [type-id-text (loc (str "attachmentType." (-> att :type :type-group) "." (-> att :type :type-id)))
+  [local-state idx {:keys [id contents modified] :as att}]
+  (let [order-cursor (rum/cursor-in component-state [:order id])
+        type-id-text (loc (str "attachmentType." (-> att :type :type-group) "." (-> att :type :type-id)))
         type-and-contents (cond
                             (= type-id-text contents) type-id-text
                             (not (empty? contents))   (str type-id-text " (" contents ")")
-                            :default                  type-id-text)]
+                            :default                  type-id-text)
+        commit-fn #(reset! order-cursor @(::amount local-state))]
+    (common/reset-if-needed! (::amount local-state) (rum/react order-cursor))
     [:tr
      [:td type-and-contents]
      [:td (-> att :latestVersion :filename)]
      [:td
-      (common/format-timestamp (:modified att))
+      (common/format-timestamp modified)
       " (" (-> att :latestVersion :user :firstName) " " (-> att :latestVersion :user :lastName) ")"]
      [:td.amount-controls
       [:i.lupicon-circle-minus
-       {:on-click (fn [_] (swap! (::amount local-state) #(max 0 (dec %))))}]
+       {:on-click (fn [_]
+                    (swap! (::amount local-state) #(max 0 (dec %)))
+                    (commit-fn))}]
       [:input
        {:type "text"
         :class "input-default"
-        :value @(::amount local-state)}]
+        :value @(::amount local-state)
+        :on-change identity
+        :on-blur   (fn [v]
+                     (reset! (::amount local-state) (-> v .-target .-value))
+                     (commit-fn))}]
       [:i.lupicon-circle-plus
-       {:on-click #(swap! (::amount local-state) inc)}]]]))
+       {:on-click (fn [_]
+                    (swap! (::amount local-state) inc)
+                    (commit-fn))}]]]))
 
 (rum/defcs accordion-group < rum/reactive
   (rum/local true ::group-open)
@@ -83,8 +96,8 @@
              [:th (loc "printing-order.composer.attachment-table.modified")]
              [:th (loc "printing-order.composer.attachment-table.copy-amount")]]]
            [:tbody
-            (for [att attachments-in-group]
-              (rum/with-key (attachment-row att) (util/unique-elem-id "attachment-row")))]]]])]]))
+            (for [[idx att] (map-indexed vector attachments-in-group)]
+              (rum/with-key (attachment-row idx att) (util/unique-elem-id "attachment-row")))]]]])]]))
 
 (rum/defc order-composer < rum/reactive
                            {:init         init
