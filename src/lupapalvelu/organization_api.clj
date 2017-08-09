@@ -448,14 +448,19 @@
   (org/update-organization organizationId {$set {:calendars-enabled enabled}})
   (ok))
 
-(defcommand set-organization-permanent-archive-enabled
-  {:parameters [enabled organizationId]
+(defcommand set-organization-boolean-attribute
+  {:parameters [enabled organizationId attribute]
    :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:organizationId])
+   :input-validators  [(partial non-blank-parameters [:organizationId :attribute])
                        (partial boolean-parameters [:enabled])]}
-  [{user :user}]
-  (org/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
-  (ok))
+  [_]
+  (when-let [org (->> (org/get-organization organizationId)
+                      org/parse-organization)]
+    (if-let [errors (->> (assoc org (keyword attribute) enabled)
+                         (sc/check org/Organization))]
+      (fail :error.illegal-key)
+      (do (org/update-organization organizationId {$set {attribute enabled}})
+          (ok)))))
 
 (defcommand set-organization-permanent-archive-start-date
   {:parameters [date]

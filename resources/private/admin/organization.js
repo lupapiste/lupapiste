@@ -7,6 +7,7 @@
     self.organization = ko.observable();
     self.names = ko.observableArray();
     self.permanentArchiveEnabled = ko.observable(false);
+    self.digitizerToolsEnabled = ko.observable(false);
     self.calendarsEnabled = ko.observable(false);
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
@@ -130,6 +131,7 @@
           isLoading = true;
           self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
+          self.digitizerToolsEnabled(result.data["digitizer-tools-enabled"]);
           self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
           self.docstorePrice(_.toString(_.get(result, "data.docstore-info.documentPrice")));
           self.docstoreDescs(_.map(util.getIn(result,["data", "docstore-info", "organizationDescription"]), wrapDesc));
@@ -218,16 +220,24 @@
         .call();
     };
 
-    self.permanentArchiveEnabled.subscribe(function(value) {
+    function setBooleanAttribute(name, value) {
       if (isLoading) {
         return;
       }
-      ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
-        .success(function() {
-          self.indicator(true);
-          self.organization()["permanent-archive-enabled"](value);
+      ajax.command("set-organization-boolean-attribute", {organizationId: self.organization().id(), enabled: value, attribute: name})
+        .success(function(res) {
+          util.showSavedIndicator(res);
+          self.organization()[name](value);
         })
         .call();
+    }
+
+    self.permanentArchiveEnabled.subscribe(function(value) {
+      setBooleanAttribute("permanent-archive-enabled", value);
+    });
+
+    self.digitizerToolsEnabled.subscribe(function(value) {
+      setBooleanAttribute("digitizer-tools-enabled", value);
     });
 
     self.calendarsEnabled.subscribe(function(value) {

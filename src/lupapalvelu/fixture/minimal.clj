@@ -441,6 +441,18 @@
     :username "lupasihteeri@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
+   ;; digitoija@jarvenpaa.fi / jarvenpaa
+   {:id "50ac77ecd2e6c2ea6e73f853"
+    :email "digitoija@jarvenpaa.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:186-R #{:digitizer}}
+    :firstName "Dingo"
+    :lastName "Digitoija"
+    :username "digitoija@jarvenpaa.fi"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f853"}}
 
    {:id "jarvenpaa-backend"
     :username "jarvenpaa-backend"

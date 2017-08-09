@@ -31,7 +31,8 @@
             [sade.util :as util]
             [sade.xml :as sxml]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]))
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [schema.coerce :as coerce]))
 
 (def scope-skeleton
   {:permitType nil
@@ -130,6 +131,7 @@
    (sc/optional-key :operations-attachments) sc/Any
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool
+   (sc/optional-key :digitizer-tools-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
@@ -160,6 +162,8 @@
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
+
+(def parse-organization (coerce/coercer! Organization coerce/json-coercion-matcher))
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist :digitizer])
 (def authority-roles

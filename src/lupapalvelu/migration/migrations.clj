@@ -3327,6 +3327,14 @@
                         :organizationDescription (i18n/supported-langs-map
                                                   (constantly ""))}}}
                 :multi true))
+
+(defmigration add-digitizer-tools-settings-to-orgs
+  {:apply-when (pos? (mongo/count :organizations {:digitizer-tools-enabled {$exists false}}))}
+  (mongo/update :organizations
+                {:digitizer-tools-enabled {$exists false}}
+                {$set {:digitizer-tools-enabled false}}
+                :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
