@@ -156,6 +156,16 @@
                         =>  [{:id id :name "Uusi nimi"}
                              {:id copy-id :name "Uusi nimi (kopio)"}]))))))))))))
 
+(fact "Delete nonexisting template"
+  (command sipoo :toggle-delete-verdict-template
+           :template-id "bad-id" :delete true)
+  => (err :error.verdict-template-not-found))
+
+(fact "Copy nonexisting template"
+  (command sipoo :copy-verdict-template
+           :template-id "bad-id")
+  => (err :error.verdict-template-not-found))
+
 (facts "Data path and value validation"
   (let [{id :id} (command sipoo :new-verdict-template :category "r")]
     (command sipoo :save-verdict-template-draft-value
@@ -400,6 +410,19 @@
                    :operation "pientalo" :template-id template-id)
           => ok?)
         (fact "Defaults are no longer empty"
+          (:templates (query sipoo :default-operation-verdict-templates))
+          => {:pientalo template-id})
+        (fact "Set template for another operation"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "muu-laajentaminen" :template-id template-id)
+          => ok?)
+        (fact "Defaults has two items"
+          (:templates (query sipoo :default-operation-verdict-templates))
+          => {:pientalo template-id :muu-laajentaminen template-id})
+        (fact "Empty template-id clears default"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "muu-laajentaminen" :template-id "")
+          => ok?
           (:templates (query sipoo :default-operation-verdict-templates))
           => {:pientalo template-id})
         (fact "Deleted template can no longer be default"

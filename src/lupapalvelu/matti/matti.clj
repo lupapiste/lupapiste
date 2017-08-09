@@ -271,5 +271,5 @@
   (let [path (util/kw-path :operation-verdict-templates operation)]
     (org/update-organization org-id
                              (if (ss/blank? template-id)
-                               {$unset path}
+                               {$unset {path true}}
                                {$set {path template-id}}))))

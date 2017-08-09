@@ -257,7 +257,8 @@ LUPAPISTE.OrganizationModel = function () {
     .call();
   }
 
-  hub.subscribe( "verdict-templates-changed", refreshVerdictTemplates );
+  // Sent from matti/service.cljs
+  hub.subscribe( "matti::verdict-templates-changed", refreshVerdictTemplates );
 
   self.init = function(data) {
     self.initialized = false;

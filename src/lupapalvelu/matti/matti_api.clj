@@ -13,62 +13,33 @@
 ;; Pre-checks
 ;; ----------------------------------
 
-
 (defn- verdict-template-check
   "Returns prechecker for template-id parameters.
    Condition parameters:
      :editable  Template must be editable (not deleted)
-     :published Template has been published
-     :blank     Template-id can be empty.
+     :published Template must hav been published
+     :blank     Template-id can be empty. Note: this does not
+                replace input-validator.
+     :named     Template name cannot be empty
    Template's existence is always checked unless :blank matches."
   [& conditions]
-  (let [{:keys [editable published blank]} (zipmap conditions (repeat true))]
+  (let [{:keys [editable published blank named]} (zipmap conditions (repeat true))]
     (fn [{{template-id :template-id} :data :as command}]
-      (if (ss/blank? template-id)
-        (when-not blank
-          (fail :error.missing-parameters))
-        (let [template  (some-> (matti/command->organization command)
-                                   (matti/verdict-template template-id)
-                                   matti/verdict-template-summary)]
-          (when-not template
-            (fail! :error.verdict-template-not-found))
-          (when (and editable (:deleted template))
-            (fail! :error.verdict-template-deleted))
-          (when (and published (-> template :published not))
-            (fail! :error.verdict-template-not-published)))))))
-
-(defn- verdict-template-exists [{data :data :as command}]
-  (when-not (matti/verdict-template (matti/command->organization command)
-                                    (:template-id data))
-    (fail :error.verdict-template-not-found)))
-
-(defn- check-template [{{template-id :template-id} :data :as command}
-                       check-fn]
-  (when template-id
-    (if-let [template (matti/verdict-template (matti/command->organization command)
-                                              template-id)]
-      (check-fn template)
-      (fail :error.verdict-template-not-found))))
-
-(defn- verdict-template-editable
-  "Template exists and is editable (not deleted)."
-  [command]
-  (check-template command
-                  #(when (:deleted %)
-                     (fail :error.verdict-template-deleted))))
-
-(defn- verdict-template-published
-  "Template exists and is published."
-  [command]
-  (check-template command
-                  #(when-not (seq (:versions %))
-                     (fail :error.verdict-template-not-published))))
-
-(defn- verdict-template-has-name
-  [command]
-  (check-template command
-                  #(when-not (-> % :name ss/not-blank?)
-                     (fail :error.verdict-template-name-missing))))
+      (when template-id
+        (if (ss/blank? template-id)
+          (when-not blank
+            (fail :error.missing-parameters))
+          (let [template (some-> (matti/command->organization command)
+                                 (matti/verdict-template template-id)
+                                 matti/verdict-template-summary)]
+            (when-not template
+              (fail! :error.verdict-template-not-found))
+            (when (and editable (:deleted template))
+              (fail! :error.verdict-template-deleted))
+            (when (and published (-> template :published not))
+              (fail! :error.verdict-template-not-published))
+            (when (and named (-> template :name ss/blank?))
+              (fail! :error.verdict-template-name-missing))))))))
 
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
@@ -150,7 +121,7 @@
    :feature          :matti
    :parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])]
-   :pre-checks       [verdict-template-editable]
+   :pre-checks       [(verdict-template-check :editable)]
    :user-roles       #{:authorityAdmin}}
   [{created :created :as command}]
   (matti/set-name (matti/command->organization command)
@@ -168,7 +139,7 @@
    ;; Value is validated upon saving according to the schema.
    :input-validators [(partial action/vector-parameters [:path])
                       (partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [verdict-template-editable]}
+   :pre-checks       [(verdict-template-check :editable)]}
   [{:keys [created] :as command}]
   (if-let [error (matti/save-draft-value (matti/command->organization command)
                                          template-id
@@ -185,8 +156,7 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [verdict-template-editable
-                      verdict-template-has-name]}
+   :pre-checks       [(verdict-template-check :editable :named)]}
   [{:keys [created user user-organizations] :as command}]
   (matti/publish-verdict-template (matti/command->organization command)
                                   template-id
@@ -218,7 +188,7 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [verdict-template-editable]}
+   :pre-checks       [(verdict-template-check :editable)]}
   [command]
   (let [template (matti/verdict-template (matti/command->organization command)
                                          template-id)]
@@ -232,7 +202,7 @@
    :parameters       [template-id delete]
    :input-validators [(partial action/non-blank-parameters [:template-id])
                       (partial action/boolean-parameters [:delete])]
-   :pre-checks       [verdict-template-exists]}
+   :pre-checks       [(verdict-template-check)]}
   [command]
   (matti/set-deleted (matti/command->organization command)
                      template-id
@@ -246,7 +216,7 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [verdict-template-exists]}
+   :pre-checks       [(verdict-template-check)]}
   [{:keys [created lang] :as command}]
   (ok (matti/copy-verdict-template (matti/command->organization command)
                                     template-id
@@ -405,7 +375,7 @@
 (defn- operation-vs-template-category
   "Operation permit type must belong to the template category."
   [{{:keys [operation template-id]} :data :as command}]
-  (when operation
+  (when (and operation (not (ss/blank? template-id)))
     (let [{category :category} (matti/verdict-template (matti/command->organization command)
                                                        template-id)]
       (when-not (and category
@@ -428,8 +398,7 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [operation template-id]
    :input-validators [(partial action/non-blank-parameters [:operation])]
-   :pre-checks       [verdict-template-published
-                      verdict-template-editable
+   :pre-checks       [(verdict-template-check :published :editable :blank)
                       organization-operation
                       operation-vs-template-category]}
   [{user :user}]
