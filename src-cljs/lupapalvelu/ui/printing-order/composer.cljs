@@ -69,7 +69,8 @@
           [:table.attachments-table.table-even-odd
            [:thead
             [:tr
-             [:th (loc "printing-order.composer.attachment-table.type-and-content")]
+             [:th.attachments-table--wide
+              (loc "printing-order.composer.attachment-table.type-and-content")]
              [:th (loc "printing-order.composer.attachment-table.filename")]
              [:th (loc "printing-order.composer.attachment-table.modified")]
              [:th (loc "printing-order.composer.attachment-table.copy-amount")]]]

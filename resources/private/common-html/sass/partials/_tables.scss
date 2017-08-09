@@ -380,6 +380,9 @@ div.attachments-table-container {
     td {
       vertical-align: top;
     }
+    .attachments-table--wide {
+      width: 60%;
+    }
     .attachments-table--widest {
       width: 80%;
     }

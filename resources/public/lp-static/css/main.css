@@ -11645,6 +11645,10 @@ div.attachments-table-container table.attachments-table td {
   vertical-align: top;
 }
 
+div.attachments-table-container table.attachments-table .attachments-table--wide {
+  width: 60%;
+}
+
 div.attachments-table-container table.attachments-table .attachments-table--widest {
   width: 80%;
 }
