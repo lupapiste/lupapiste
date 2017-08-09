@@ -30,7 +30,9 @@
 (defn attachment-in-group? [path attachment]
   (every? (fn [pathKey] (some #(= pathKey %) (:tags attachment))) path))
 
-(rum/defc attachment-row < rum/reactive [{:keys [contents] :as att}]
+(rum/defcs attachment-row < rum/reactive
+                            (rum/local 0 ::amount)
+  [local-state {:keys [contents] :as att}]
   (let [type-id-text (loc (str "attachmentType." (-> att :type :type-group) "." (-> att :type :type-id)))
         type-and-contents (cond
                             (= type-id-text contents) type-id-text
@@ -43,12 +45,14 @@
       (common/format-timestamp (:modified att))
       " (" (-> att :latestVersion :user :firstName) " " (-> att :latestVersion :user :lastName) ")"]
      [:td.amount-controls
-      [:i.lupicon-circle-minus]
+      [:i.lupicon-circle-minus
+       {:on-click (fn [_] (swap! (::amount local-state) #(max 0 (dec %))))}]
       [:input
        {:type "text"
         :class "input-default"
-        :value 1}]
-      [:i.lupicon-circle-plus]]]))
+        :value @(::amount local-state)}]
+      [:i.lupicon-circle-plus
+       {:on-click #(swap! (::amount local-state) inc)}]]]))
 
 (rum/defcs accordion-group < rum/reactive
   (rum/local true ::group-open)
