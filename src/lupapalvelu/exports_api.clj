@@ -38,14 +38,15 @@
    "YL" 903
    "YM" 903
    "VVVL" 903
-   "ARK" 901})
+   "ARK" 802})
 
 (def usage-price-codes
   {"A" 905
    "B" 906
    "C" 907
    "D" 908
-   "E" 909})
+   "E" 909
+   "Z" 801})
 
 (def price-classes-for-operation
   ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
@@ -158,7 +159,7 @@
    :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
    :maa-ainesten-kotitarveotto                                        "D"
    :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
-   :archiving-project                                                 "D"
+   :archiving-project                                                 "Z"
    })
 
 (defn- export [collection query fields]
