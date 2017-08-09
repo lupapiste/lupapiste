@@ -14,6 +14,8 @@
               <tr>
                 <th data-bind="ltext: permitType"
                     class="sot--full-width"></th>
+                <th data-bind="feature: 'matti',
+                               ltext: 'matti-verdict-template'"></th>
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
                 <th><span data-bind="ltext: 'auth-admin.inspection-summary-template', if: permitType === 'R'"></span></th>
                 <!-- /ko -->
@@ -28,6 +30,10 @@
             <tbody data-bind="foreach: operations">
               <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">
                 <td data-bind="text: text"></td>
+                <td data-bind="feature: 'matti'">
+                  <default-verdict-template params="organization: $root.organization,
+                                                    operation: $data"></default-verdict-template>
+                </td>
                 <!-- ko if: $root.authorization.ok("organization-inspection-summary-settings") -->
                 <td class="sot--center">
                   <!-- ko if: $parent.permitType === "R" -->

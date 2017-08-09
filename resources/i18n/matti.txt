@@ -253,3 +253,5 @@
 "phrase.category.kaava" "fi" "Kaavan käyttötarkoitus"
 "phrase.undo" "fi" "Kumoa fraasi"
 "phrase.undo" "en" "Undo phrase"
+"matti.choose-template" "fi" "Valitse päätöspohja"
+"matti.choose-template" "en" "Choose verdict template"

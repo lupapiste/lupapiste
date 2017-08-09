@@ -12,6 +12,31 @@
 ;; ----------------------------------
 ;; Pre-checks
 ;; ----------------------------------
+
+
+(defn- verdict-template-check
+  "Returns prechecker for template-id parameters.
+   Condition parameters:
+     :editable  Template must be editable (not deleted)
+     :published Template has been published
+     :blank     Template-id can be empty.
+   Template's existence is always checked unless :blank matches."
+  [& conditions]
+  (let [{:keys [editable published blank]} (zipmap conditions (repeat true))]
+    (fn [{{template-id :template-id} :data :as command}]
+      (if (ss/blank? template-id)
+        (when-not blank
+          (fail :error.missing-parameters))
+        (let [template  (some-> (matti/command->organization command)
+                                   (matti/verdict-template template-id)
+                                   matti/verdict-template-summary)]
+          (when-not template
+            (fail! :error.verdict-template-not-found))
+          (when (and editable (:deleted template))
+            (fail! :error.verdict-template-deleted))
+          (when (and published (-> template :published not))
+            (fail! :error.verdict-template-not-published)))))))
+
 (defn- verdict-template-exists [{data :data :as command}]
   (when-not (matti/verdict-template (matti/command->organization command)
                                     (:template-id data))
@@ -31,6 +56,13 @@
   (check-template command
                   #(when (:deleted %)
                      (fail :error.verdict-template-deleted))))
+
+(defn- verdict-template-published
+  "Template exists and is published."
+  [command]
+  (check-template command
+                  #(when-not (seq (:versions %))
+                     (fail :error.verdict-template-not-published))))
 
 (defn- verdict-template-has-name
   [command]
@@ -163,7 +195,7 @@
 
 (defquery verdict-templates
   {:description "Id, name, modified, published and deleted maps for
-  every verdict template. The response also includes category list."
+  every verdict template."
    :feature     :matti
    :user-roles  #{:authorityAdmin}}
   [command]
@@ -352,3 +384,55 @@
   (ok :plan (matti/plan (usr/authority-admins-organization user)
                         plan-id)
       :modified created))
+
+;; ------------------------------------------
+;; Default verdict templates for operations
+;; ------------------------------------------
+
+
+;; Operation related pre-checkers
+
+(defn- organization-operation
+  "Fails if the operation parameter is not selected for the
+  organization."
+  [{{operation :operation} :data :as command}]
+  (when operation
+    (when-not (-> (matti/command->organization command)
+                  :selected-operations
+                  (util/includes-as-kw? operation))
+      (fail :error.unknown-operation))))
+
+(defn- operation-vs-template-category
+  "Operation permit type must belong to the template category."
+  [{{:keys [operation template-id]} :data :as command}]
+  (when operation
+    (let [{category :category} (matti/verdict-template (matti/command->organization command)
+                                                       template-id)]
+      (when-not (and category
+                     (util/=as-kw (matti/operation->category operation)
+                                  category))
+        (fail :error.invalid-category)))))
+
+(defquery default-operation-verdict-templates
+  {:description "Map where keys are operations and values template
+  ids. Deleted templates are filtered out."
+   :feature     :matti
+   :user-roles  #{:authorityAdmin}}
+  [command]
+  (ok :templates (matti/operation-verdict-templates (matti/command->organization command))))
+
+(defcommand set-default-operation-verdict-template
+  {:description      "Set default verdict template for a selected operation
+  in the organization."
+   :feature          :matti
+   :user-roles       #{:authorityAdmin}
+   :parameters       [operation template-id]
+   :input-validators [(partial action/non-blank-parameters [:operation])]
+   :pre-checks       [verdict-template-published
+                      verdict-template-editable
+                      organization-operation
+                      operation-vs-template-category]}
+  [{user :user}]
+  (matti/set-operation-verdict-template (usr/authority-admins-organization-id user)
+                                        operation
+                                        template-id))

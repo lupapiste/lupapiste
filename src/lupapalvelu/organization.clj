@@ -155,9 +155,10 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
-   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
    (sc/optional-key :docstore-info) DocStoreInfo
-   (sc/optional-key :phrases) [Phrase]})
+   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
+   (sc/optional-key :phrases) [Phrase]
+   (sc/optional-key :operation-verdict-templates) {sc/Str sc/Str}})
 
 
 (sc/defschema SimpleOrg
