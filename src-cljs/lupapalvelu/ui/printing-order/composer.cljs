@@ -1,7 +1,10 @@
 (ns lupapalvelu.ui.printing-order.composer
   (:require [rum.core :as rum]
             [lupapalvelu.ui.util :as util]
-            [lupapalvelu.ui.common :as common]))
+            [lupapalvelu.ui.common :refer [loc] :as common]
+            [cljs-time.format :as tf]
+            [cljs-time.core :as t]
+            [cljs-time.coerce :as tc]))
 
 (def empty-component-state {:attachments []
                             :tagGroups   []
@@ -31,11 +34,17 @@
   (every? (fn [pathKey] (some #(= pathKey %) (:tags attachment))) path))
 
 (rum/defc attachment-row < rum/reactive [att]
-  [:tr
-   [:td (str "(" (:contents att) ")")]
-   [:td (-> att :latestVersion :filename)]
-   [:td "123456"]
-   [:td 1]])
+  (let [type-id-text (loc (str "attachmentType." (-> att :type :type-group) "." (-> att :type :type-id)))]
+    [:tr
+     [:td (apply str (flatten [type-id-text
+                      (when-not (empty? (:contents att))
+                        [" (" (:contents att) ")"])]))]
+     [:td (-> att :latestVersion :filename)]
+     [:td (common/format-timestamp (:modified att))]
+     [:td
+      [:i.lupicon-circle-minus]
+      1
+      [:i.lupicon-circle-plus]]]))
 
 (rum/defcs accordion-group < rum/reactive
   (rum/local true ::group-open)
@@ -43,7 +52,11 @@
   (let [attachments          (rum/react (rum/cursor-in component-state [:attachments]))
         attachments-in-group (filter (partial attachment-in-group? path) attachments)]
     [:div.rollup.rollup--open
-     [:button.rollup-button.rollup-status.secondary.attachments-accordion.toggled
+     [:button
+      {:class (conj ["rollup-button" "rollup-status" "attachments-accordion" "toggled"]
+                    (if (seq children)
+                      "secondary"
+                      "tertiary"))}
       [:span (accordion-name (last path))]]
      [:div.attachments-accordion-content
       (for [[child-key & _] children]
@@ -56,13 +69,13 @@
           [:table.attachments-table.table-even-odd
            [:thead
             [:tr
-             [:th (js/loc "printing-order.composer.attachment-table.type-and-content")]
-             [:th (js/loc "printing-order.composer.attachment-table.filename")]
-             [:th (js/loc "printing-order.composer.attachment-table.modified")]
-             [:th (js/loc "printing-order.composer.attachment-table.copy-amount")]]]
+             [:th (loc "printing-order.composer.attachment-table.type-and-content")]
+             [:th (loc "printing-order.composer.attachment-table.filename")]
+             [:th (loc "printing-order.composer.attachment-table.modified")]
+             [:th (loc "printing-order.composer.attachment-table.copy-amount")]]]
            [:tbody
             (for [att attachments-in-group]
-              (rum/with-key (attachment-row att) (str "attachment-row" (:id att))))]]]])]]))
+              (rum/with-key (attachment-row att) (util/unique-elem-id "attachment-row")))]]]])]]))
 
 (rum/defc order-composer < rum/reactive
                            {:init         init
