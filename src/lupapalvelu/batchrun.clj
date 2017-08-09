@@ -4,9 +4,12 @@
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.core.async :as async]
             [slingshot.slingshot :refer [try+]]
+            [clj-time.coerce :as c]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application :as app]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
@@ -14,24 +17,21 @@
             [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.krysp.reader]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [lupapalvelu.attachment :as attachment]
             [sade.util :refer [fn->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [clj-time.coerce :as c]
-            [sade.http :as http]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.prev-permit :as prev-permit])
+            [sade.http :as http])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -417,45 +417,65 @@
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
 (defn- fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
+  (logging/log-event :info {:run-by "Automatic review checking"
+                            :event "Fetch consecutively"
+                            :organization (:id organization)
+                            :application-count (count applications)
+                            :applications applications})
   (->> (map (fn [app]
               (try
-                (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s"
-                        (:id organization) permit-type (:id app))
                 (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
                 (catch Throwable t
-                  (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s"
-                          (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                  (logging/log-event :error {:run-by "Automatic review checking"
+                                             :application (:id app)
+                                             :organization (:id organization)
+                                             :exception (.getName (class t))
+                                             :message (.getMessage t)
+                                             :event (format "Unable to get reviews for %s from %s backend: %s - %s"  permit-type (:id organization))})
                   nil)))
             applications)
        (apply concat)
        (remove nil?)))
 
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
-  (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
-    (try+
-      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]"
-              (:id organization) permit-type (ss/join ", " (map :id applications)))
-      (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+  (try+
 
-      (catch SAXParseException e
-        (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
-        ;; Fallback into fetching xmls consecutively
-        (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+   (logging/log-event :info {:run-by "Automatic review checking"
+                             :event "Start fetching"
+                             :organization (:id organization)
+                             :application-count (count applications)
+                             :applications applications})
 
-      (catch [:sade.core/type :sade.core/fail
-              :status         404] _
-        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: Got HTTP status 404" permit-type (:id organization))
-        ;; Fallback into fetching xmls consecutively
-        (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+   (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+
+   (catch SAXParseException e
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization (:id organization)
+                                :event (format "Could not understand response when getting reviews in chunks from %s backend" (:id organization))})
+     ;; Fallback into fetching xmls consecutively
+     (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+
+   (catch [:sade.core/type :sade.core/fail
+           :status         404] _
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization (:id organization)
+                                :event (format "Unable to get reviews in chunks from %s backend: Got HTTP status 404" (:id organization))})
+     ;; Fallback into fetching xmls consecutively
+     (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
 
 
-      (catch [:sade.core/type :sade.core/fail] t
-        (errorf "error.integration - Unable to get reviews for %s backend: %s"
-                (:id organization) (select-keys t [:status :text])))
+   (catch [:sade.core/type :sade.core/fail] t
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization (:id organization)
+                                :event (format "Unable to get reviews from %s backend: %s" (:id organization) (select-keys t [:status :text]))}))
 
-      (catch Object o
-        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
-                permit-type (:id organization) (.getName (class o)) (get &throw-context :message ""))))))
+   (catch Object o
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization (:id organization)
+                                :exception (.getName (class o))
+                                :message (get &throw-context :message "")
+                                :event (format "Unable to get reviews in chunks from %s backend: %s - %s"
+                                               (:id organization) (.getName (class o)) (get &throw-context :message ""))}))))
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type]
@@ -485,13 +505,17 @@
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
          (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
 
-(defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
+(defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids permit-types]}]
   (let [applications (when (seq application-ids)
                        (mongo/select :applications {:_id {$in application-ids}}))
         organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
-        eraajo-user (user/batchrun-user (map :id organizations))]
-    (->> (pmap (partial fetch-review-updates-for-organization eraajo-user (now) applications [:R]) organizations)
-         (apply concat)
+        eraajo-user (user/batchrun-user (map :id organizations))
+        channel (async/chan)]
+    (run! (util/fn->> (fetch-review-updates-for-organization eraajo-user (now) applications [:R])
+                      (async/>!! channel)
+                      (async/thread))
+          organizations)
+    (->> (mapcat (fn [_] (async/<!! channel)) organizations)
          (run! (partial apply save-reviews-for-application eraajo-user)))))
 
 (defn check-for-reviews [& args]
