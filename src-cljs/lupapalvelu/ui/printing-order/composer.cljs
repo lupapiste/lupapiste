@@ -30,17 +30,24 @@
 (defn attachment-in-group? [path attachment]
   (every? (fn [pathKey] (some #(= pathKey %) (:tags attachment))) path))
 
-(rum/defc attachment-row < rum/reactive [att]
-  (let [type-id-text (loc (str "attachmentType." (-> att :type :type-group) "." (-> att :type :type-id)))]
+(rum/defc attachment-row < rum/reactive [{:keys [contents] :as att}]
+  (let [type-id-text (loc (str "attachmentType." (-> att :type :type-group) "." (-> att :type :type-id)))
+        type-and-contents (cond
+                            (= type-id-text contents) type-id-text
+                            (not (empty? contents))   (str type-id-text " (" contents ")")
+                            :default                  type-id-text)]
     [:tr
-     [:td (apply str (flatten [type-id-text
-                      (when-not (empty? (:contents att))
-                        [" (" (:contents att) ")"])]))]
+     [:td type-and-contents]
      [:td (-> att :latestVersion :filename)]
-     [:td (common/format-timestamp (:modified att))]
      [:td
+      (common/format-timestamp (:modified att))
+      " (" (-> att :latestVersion :user :firstName) " " (-> att :latestVersion :user :lastName) ")"]
+     [:td.amount-controls
       [:i.lupicon-circle-minus]
-      1
+      [:input
+       {:type "text"
+        :class "input-default"
+        :value 1}]
       [:i.lupicon-circle-plus]]]))
 
 (rum/defcs accordion-group < rum/reactive

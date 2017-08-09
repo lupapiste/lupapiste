@@ -11646,7 +11646,7 @@ div.attachments-table-container table.attachments-table td {
 }
 
 div.attachments-table-container table.attachments-table .attachments-table--wide {
-  width: 60%;
+  width: 50%;
 }
 
 div.attachments-table-container table.attachments-table .attachments-table--widest {
@@ -11659,6 +11659,18 @@ div.attachments-table-container table.attachments-table span.attachment-drawing-
   max-width: 7em;
   overflow-wrap: break-word;
   margin-right: -1px;
+}
+
+div.attachments-table-container table.attachments-table input[type=text] {
+  padding-left: 6px;
+  padding-right: 6px;
+  width: 24px;
+}
+
+div.attachments-table-container table.attachments-table .amount-controls > [class^="lupicon-"]:before, div.attachments-table-container table.attachments-table [class*=" lupicon-"]:before {
+  position: relative;
+  top: 4px;
+  margin: 6px;
 }
 
 .attachment-state-icons {

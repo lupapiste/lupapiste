@@ -381,7 +381,7 @@ div.attachments-table-container {
       vertical-align: top;
     }
     .attachments-table--wide {
-      width: 60%;
+      width: 50%;
     }
     .attachments-table--widest {
       width: 80%;
@@ -393,6 +393,18 @@ div.attachments-table-container {
       overflow-wrap: break-word;
       margin-right: -1px;
     }
+    input[type=text] {
+      padding-left: $baseline / 4;
+      padding-right: $baseline / 4;
+      width: $baseline;
+    }
+
+    .amount-controls > [class^="lupicon-"]:before, [class*=" lupicon-"]:before {
+      position: relative;
+      top: $baseline / 6;
+      margin: $baseline / 4;
+    }
+
   }
 }
 
