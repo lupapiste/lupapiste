@@ -158,7 +158,7 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :operation-verdict-templates) {sc/Str sc/Str}})
+   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}})
 
 
 (sc/defschema SimpleOrg

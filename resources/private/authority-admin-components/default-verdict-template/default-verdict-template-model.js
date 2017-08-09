@@ -15,17 +15,17 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
   var operation = params.operation;
 
   // Categories originally defined in matti.clj.
-  var categories = {r: ["r"],
-                    p: ["p"],
-                    ya: "ya",
-                    kt: ["kt", "mm"],
+  var categories = {r:   ["r"],
+                    p:   ["p"],
+                    ya:  ["ya"],
+                    kt:  ["kt", "mm"],
                     ymp: ["yi", "yl", "ym", "vvvl", "mal"]};
 
   var category = _.findKey( categories,
-                          function( arr ) {
-                            return _.includes( arr,
-                                               _.toLower(operation.permitType) );
-                          });
+                            function( arr ) {
+                              return _.includes( arr,
+                                                 _.toLower(operation.permitType) );
+                            });
 
   self.templates =  self.disposedComputed( function () {
     return _( verdictTemplates())
@@ -35,8 +35,6 @@ LUPAPISTE.DefaultVerdictTemplateModel = function( params ) {
     .sortBy( "name")
     .value();
   });
-
-
 
   self.value = self.disposedComputed( {
     read: function() {
