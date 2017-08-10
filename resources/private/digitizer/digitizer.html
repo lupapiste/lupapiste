@@ -4,37 +4,45 @@
 <section class="page container" id="create-archiving-project">
   <h1 data-bind="ltext: 'newRequest.createArchivingProject'"></h1>
   <div class="form-grid form-grid--no-border">
-    <div class="row">
-      <label>
-        <span data-bind="ltext: 'prev-permit-label-kuntalupatunnus'"></span>
-        <input data-bind="textInput: kuntalupatunnusFromPrevPermit" data-test-id="test-archiving-project-kuntalupatunnus"
-               type="text" autofocus="autofocus" name="kuntalupatunnus" />
-      </label>
-    </div>
+    <form data-bind="submit: function() { createArchivingProject(false, false); }">
+      <div class="row">
+        <label>
+          <span data-bind="ltext: 'prev-permit-label-kuntalupatunnus'"></span>
+          <input data-bind="textInput: kuntalupatunnusFromPrevPermit" data-test-id="test-archiving-project-kuntalupatunnus"
+                 type="text" autofocus="autofocus" name="kuntalupatunnus" />
+        </label>
+      </div>
 
-    <div class="row">
-      <label for="prev-permit-organization-select">
-        <span data-bind="ltext: 'prev-permit-label-organization'"></span>
-        <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
-                class="dropdown"
-                data-bind="options: organizationOptions,
-                             optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
-                             optionsValue: 'id',
-                             value: selectedPrevPermitOrganization,
-                             optionsCaption: loc('choose')">
-        </select>
-      </label>
-    </div>
+      <div class="row">
+        <label for="prev-permit-organization-select">
+          <span data-bind="ltext: 'prev-permit-label-organization'"></span>
+          <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+                  class="dropdown"
+                  data-bind="options: organizationOptions,
+                               optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
+                               optionsValue: 'id',
+                               value: selectedPrevPermitOrganization,
+                               optionsCaption: loc('choose')">
+          </select>
+        </label>
+      </div>
 
-    <!--<div data-bind="visible: needMorePrevPermitInfo">-->
-      <!--<p class="more-prev-app-info-needed-desc" data-bind="ltext:'more-prev-app-info-needed-desc'"></p>-->
-      <!--<label data-bind="ltext: 'prev-permit-label-address'" class="form-label" for="archiving-address-search"></label>-->
-      <!--<input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"-->
-             <!--id="archiving-address-search" type="text" class="form-input text" autofocus="autofocus" />-->
-    <!--</div>-->
+      <div>
+        <button data-bind="enable: creatingAppWithPrevPermitOk, css: {waiting: pending}"
+                data-test-id="test-prev-permit-create-button" class="btn btn-primary">
+          <i class="lupicon-search"></i>
+          <i class="wait spin lupicon-refresh"></i>
 
-    <div data-bind="visible: permitNotFound" class="row">
-      <div style="font-weight: bold; margin-bottom: 1rem;" data-bind="ltext: 'digitizer.prevPermitNotFound'"></div>
+          <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
+        </button>
+      </div>
+    </form>
+    
+    <div data-bind="visible: permitNotFound() || needMorePrevPermitInfo()" class="row">
+      <div style="font-weight: bold; margin-bottom: 1rem;">
+        <span data-bind="ltext: 'digitizer.prevPermitNotFound', visible: permitNotFound"></span>
+        <span data-bind="ltext: 'more-prev-app-info-needed-desc', visible: needMorePrevPermitInfo"></span>
+      </div>
       <div>
         <div class="create-application-search-box">
           <p data-bind="ltext: 'newRequest.locationInfo'"></p>
@@ -47,18 +55,6 @@
         </div>
         <div id="archiving-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
       </div>
-    </div>
-
-    <div data-bind="ifnot: permitNotFound">
-      <button data-bind="click: function() { createArchivingProject(false, false); },
-                         enable: creatingAppWithPrevPermitOk,
-                         css: {waiting: pending}"
-              data-test-id="test-prev-permit-create-button" class="btn btn-primary">
-        <i class="lupicon-search"></i>
-        <i class="wait spin lupicon-refresh"></i>
-
-        <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span>
-      </button>
     </div>
   </div>
 </section>
