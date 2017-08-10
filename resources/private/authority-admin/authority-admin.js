@@ -15,7 +15,9 @@
       editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
-      reservationPropertiesModel;
+      reservationPropertiesModel,
+      financialHandlerModel,
+      createFinancialHandlerModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -216,6 +218,69 @@
 
   }
 
+  function FinancialHandlerModel() {
+    var self = this;
+
+    self.data = ko.observable();
+
+    self.load = function() {
+      ajax
+        .query("get-organizations-financial-handlers")
+        .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
+        .call();
+    };
+
+    self["delete"] = function() {
+      ajax
+        .command("delete-financial-handler", {personId: this.id()})
+        .success(self.load)
+        .call();
+    };
+
+    self.openCreateModal = function()      {
+      createFinancialHandlerModel.copyFrom({});
+      LUPAPISTE.ModalDialog.open("#dialog-create-financial-handler");
+    };
+  }
+
+  function CreateFinancialHandlerModel() {
+    var self = this;
+
+    self.email = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.command = ko.observable();
+    self.error = ko.observable();
+    self.disabled = ko.computed(function() {
+      var emailOk = self.email() && util.isValidEmailAddress(self.email());
+      return !(emailOk);
+    });
+
+    self.copyFrom = function(data) {
+      self.email(data.email);
+      return self;
+    };
+
+    self.onSuccess = function() {
+      financialHandlerModel.load();
+      self.error(null);
+      LUPAPISTE.ModalDialog.close();
+    };
+
+    self.save = function(data) {
+      var financialHandler = ko.mapping.toJS(data);
+      console.log(financialHandler);
+/*      ajax.command("create-financial-handler", financialHandler)
+        .success(self.onSuccess)
+        .error(function(result) {
+          self.error(result.txt);
+        })
+        .call();*/
+      return false;
+    };
+
+  }
+
   function KopiolaitosModel() {
     var self = this;
 
@@ -389,6 +454,8 @@
   asianhallintaModel = new AsianhallintaModel();
   linkToVendorBackendModel = new LinkToVendorBackendModel();
   editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
+  financialHandlerModel = new FinancialHandlerModel();
+  createFinancialHandlerModel = new CreateFinancialHandlerModel();
 
   var usersTableConfig = {
       hideRoleFilter: true,
@@ -460,7 +527,9 @@
       organizationUsers:   organizationUsers,
       statementGivers:    statementGiversModel,
       createStatementGiver: createStatementGiverModel,
-      editRoles:           editRolesDialogModel
+      editRoles:           editRolesDialogModel,
+      financialHandler:  financialHandlerModel,
+      createFinancialHandler: createFinancialHandlerModel
       });
     $("#applications").applyBindings({
       organization:        organizationModel,
