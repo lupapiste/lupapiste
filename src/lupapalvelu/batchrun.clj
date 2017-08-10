@@ -522,8 +522,8 @@
         eraajo-user (user/batchrun-user (map :id organizations))
         channel (async/chan)]
     (run! (util/fn->> (fetch-review-updates-for-organization eraajo-user (now) applications [:R])
-                      (async/>!! channel)
-                      (async/thread))
+                      (async/>! channel)
+                      (async/go))
           organizations)
     (->> (map (fn [_] (async/<!! channel)) organizations)
          (run! (partial save-reviews eraajo-user)))))
