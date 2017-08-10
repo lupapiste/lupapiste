@@ -84,7 +84,7 @@
          :pitoPvm 1463097600000}]))
 
 (fact "merging the review vector with itself leaves everything unchanged"
-  (let [[unchanged added-or-updated] (merge-review-tasks reviews-fixture reviews-fixture)]
+  (let [[unchanged added-or-updated _] (merge-review-tasks reviews-fixture reviews-fixture)]
     (count unchanged) => (count reviews-fixture)
     (diff unchanged reviews-fixture) => [nil nil reviews-fixture]
     added-or-updated => empty?))
@@ -92,7 +92,7 @@
 (fact "review is updated on top of empty review"
   (let [mutated (-> (into [] reviews-fixture)
                     (assoc-in [2 :data :katselmus :pitoPvm :value] "13.05.2016"))
-        [unchanged added-or-updated] (merge-review-tasks mutated reviews-fixture)]
+        [unchanged added-or-updated _] (merge-review-tasks mutated reviews-fixture)]
     unchanged => (just (util/drop-nth 2 mutated) :in-any-order)
     added-or-updated => (just (nth mutated 2))))
 
@@ -100,7 +100,7 @@
       (let [mutated (-> (into [] reviews-fixture)
                         (assoc-in [2 :data :katselmus :pitoPvm :value] "2")
                         (assoc-in [2 :data :katselmuksenLaji :value] "13.05.2016"))
-            [_ added-or-updated] (merge-review-tasks mutated reviews-fixture)
+            [_ added-or-updated _] (merge-review-tasks mutated reviews-fixture)
             errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) added-or-updated))]
         added-or-updated => (just (nth mutated 2))
         (count errors) => 1

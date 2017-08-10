@@ -47,8 +47,9 @@
 (defn- merge-review-tasks
   "Returns a vector with two values:
    0: Existing tasks left unchanged,
-   1: Completely new and updated existing review tasks."
-  [tasks-from-update tasks-from-mongo]
+   1: Completely new and updated existing review tasks,
+   2: Reviews to be marked faulty"
+  [tasks-from-update tasks-from-mongo & [overwrite-background-reviews?]]
   (let [faulty-tasks     (filter #(util/=as-kw (:state %) :faulty_review_task)
                                  tasks-from-mongo)
         tasks-from-mongo (remove #(util/=as-kw (:state %) :faulty_review_task)
@@ -60,7 +61,8 @@
     (loop [from-update tasks-from-update
            from-mongo  tasks-from-mongo
            unchanged []
-           added-or-updated []]
+           added-or-updated []
+           new-faulty []]
       (let [current (first from-mongo)
             bg-id-current (background-id current)
             remaining (rest from-mongo)
@@ -71,34 +73,51 @@
                                                   (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
         (cond
           (= current nil)
-          ; Recursion end condition
+          ;; Recursion end condition
           (let [added-or-updated (concat added-or-updated (filter non-empty-review-task? from-update))]
-            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s"
-                    (count unchanged) (count added-or-updated))
-            [(concat faulty-tasks unchanged) added-or-updated])
+            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s new faulty %s"
+                    (count unchanged) (count added-or-updated) (count new-faulty))
+            [(concat faulty-tasks unchanged)
+             added-or-updated
+             new-faulty])
 
-          (or (not (tasks/task-is-review? current))
-              (not (empty-review-task?    current)))
-          ;non-empty review tasks and all non-review tasks are left unchanged
-          (recur (remove #{updated-match} from-update)
-                 remaining
-                 (conj unchanged current)
-                 added-or-updated)
-
-          (and updated-match
-               (not (empty-review-task? updated-match)))
-          ; matching review found from backend system update => it replaces the existing one
+          (and overwrite-background-reviews?
+               (tasks/task-is-review? current)
+               (= (-> current :source :type) "background")
+               updated-match)
+          ;; if existing background reviews can be overwritten by more
+          ;; recent ones, the existing one needs to be marked faulty
           (recur (remove #{updated-match} from-update)
                  remaining
                  unchanged
-                 (conj added-or-updated updated-match))
+                 (conj added-or-updated updated-match)
+                 (conj new-faulty current))
+
+          (or (not (tasks/task-is-review? current))
+              (not (empty-review-task?    current)))
+          ;; non-empty review tasks and all non-review tasks are left unchanged
+          (recur (remove #{updated-match} from-update)
+                 remaining
+                 (conj unchanged current)
+                 added-or-updated
+                 new-faulty)
+
+          (and updated-match
+               (not (empty-review-task? updated-match)))
+          ;; matching review found from backend system update => it replaces the existing one
+          (recur (remove #{updated-match} from-update)
+                 remaining
+                 unchanged
+                 (conj added-or-updated updated-match)
+                 new-faulty)
 
           :else
-          ; this existing review is left unchanged
+          ;; this existing review is left unchanged
           (recur from-update
                  remaining
                  (conj unchanged current)
-                 added-or-updated))))))
+                 added-or-updated
+                 new-faulty))))))
 
 (defn merge-maps-that-are-distinct-by [pred map-coll]
   (->> (group-by pred map-coll)
@@ -150,7 +169,7 @@
         attachments-by-task-id (apply hash-map
                                  (remove empty? (mapcat (fn [t]
                                   (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
-        [unchanged-tasks added-and-updated-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
+        [unchanged-tasks added-and-updated-tasks _] (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
         updated-tasks (concat unchanged-tasks added-and-updated-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context added-and-updated-tasks) ;; for pdf generation
