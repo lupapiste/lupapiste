@@ -400,6 +400,14 @@
                                      :event "Failed to save"
                                      :exception-message (.getMessage t)}))))))
 
+(defn- save-reviews [user applications-with-results]
+  (when (not-empty applications-with-results)
+    (logging/log-event :info {:run-by "Automatic review checking"
+                              :event "Save organization reviews"
+                              :organization-id (:organization (first (first applications-with-results)))
+                              :application-count (count applications-with-results)})
+    (run! (fn [[app result]] (save-reviews-for-application user app result)) applications-with-results)))
+
 (defn- read-reviews-for-application [user created application app-xml]
   (try
     (when (and application app-xml)
@@ -409,6 +417,8 @@
             (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
                                                                              :event "Reviews found"
                                                                              :updated-tasks updated-tasks})
+            (ok? result)                           (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "No reviews"})
             (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
                                                                               :event "Failed to read reviews"
                                                                               :validation-errors validation-errors}))
@@ -419,16 +429,16 @@
 (defn- fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
   (logging/log-event :info {:run-by "Automatic review checking"
                             :event "Fetch consecutively"
-                            :organization (:id organization)
+                            :organization-id (:id organization)
                             :application-count (count applications)
-                            :applications applications})
+                            :applications (map :id applications)})
   (->> (map (fn [app]
               (try
                 (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
                 (catch Throwable t
                   (logging/log-event :error {:run-by "Automatic review checking"
-                                             :application (:id app)
-                                             :organization (:id organization)
+                                             :application-id (:id app)
+                                             :organization-id (:id organization)
                                              :exception (.getName (class t))
                                              :message (.getMessage t)
                                              :event (format "Unable to get reviews for %s from %s backend: %s - %s"  permit-type (:id organization))})
@@ -441,16 +451,16 @@
   (try+
 
    (logging/log-event :info {:run-by "Automatic review checking"
-                             :event "Start fetching"
-                             :organization (:id organization)
+                             :event "Start fetching xmls"
+                             :organization-id (:id organization)
                              :application-count (count applications)
-                             :applications applications})
+                             :applications (map :id applications)})
 
    (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
 
    (catch SAXParseException e
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :event (format "Could not understand response when getting reviews in chunks from %s backend" (:id organization))})
      ;; Fallback into fetching xmls consecutively
      (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
@@ -458,7 +468,7 @@
    (catch [:sade.core/type :sade.core/fail
            :status         404] _
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :event (format "Unable to get reviews in chunks from %s backend: Got HTTP status 404" (:id organization))})
      ;; Fallback into fetching xmls consecutively
      (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
@@ -466,12 +476,12 @@
 
    (catch [:sade.core/type :sade.core/fail] t
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :event (format "Unable to get reviews from %s backend: %s" (:id organization) (select-keys t [:status :text]))}))
 
    (catch Object o
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :exception (.getName (class o))
                                 :message (get &throw-context :message "")
                                 :event (format "Unable to get reviews in chunks from %s backend: %s - %s"
@@ -503,7 +513,7 @@
                          (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
                               (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
-         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
+         (mapv (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
 
 (defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids permit-types]}]
   (let [applications (when (seq application-ids)
@@ -512,11 +522,11 @@
         eraajo-user (user/batchrun-user (map :id organizations))
         channel (async/chan)]
     (run! (util/fn->> (fetch-review-updates-for-organization eraajo-user (now) applications [:R])
-                      (async/>!! channel)
-                      (async/thread))
+                      (async/>! channel)
+                      (async/go))
           organizations)
-    (->> (mapcat (fn [_] (async/<!! channel)) organizations)
-         (run! (partial apply save-reviews-for-application eraajo-user)))))
+    (->> (map (fn [_] (async/<!! channel)) organizations)
+         (run! (partial save-reviews eraajo-user)))))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
