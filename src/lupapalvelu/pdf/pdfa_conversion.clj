@@ -48,7 +48,7 @@
   (pdf2pdf-command input-file output-file "-ad" "-au" "-rd" "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore"))
 
 (defn- pdftools-analyze-command [input-file output-file]
-  (pdf2pdf-command input-file output-file "-ma" "-rd" "-cl" "pdfa-2u"))
+  (pdf2pdf-command input-file output-file "-ma" "-rd" "-cl" "pdfa-2b"))
 
 (defn- parse-log-file [output-file]
   (try
@@ -92,7 +92,7 @@
                           (when (re-find #"Processing embedded file" log) "3")
                           "2")
         required-conformance (last (re-find #"The XMP property 'pdfaid:conformance' has the invalid value '(\w)'. Required is '\w" log))
-        level (ss/lower-case (or required-conformance (if (= required-part "1") "b" "u")))
+        level (ss/lower-case (or required-conformance "b"))
         cl (str "pdfa-" required-part level)
         not-prints (re-find #"The value of the key . is 'Not Print' but must be 'Print'" log)
         missing-appearances (re-find #"The appearance dictionary doesn't contain an entry" log)]
