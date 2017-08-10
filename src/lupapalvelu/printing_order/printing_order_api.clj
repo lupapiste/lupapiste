@@ -7,6 +7,10 @@
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
             [sade.util :as util]))
 
+(def omitted-attachment-type-groups
+  [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
+   :katselmukset_ja_tarkastukset :tietomallit])
+
 (defquery attachments-for-printing-order
   {:parameters       [id]
    :states           states/post-verdict-states
@@ -16,5 +20,6 @@
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
                         (map att/enrich-attachment)
+                        (remove #(util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile))))
       :tagGroups (att-tag-groups/attachment-tag-groups application)))
