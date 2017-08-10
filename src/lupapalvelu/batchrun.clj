@@ -400,6 +400,14 @@
                                      :event "Failed to save"
                                      :exception-message (.getMessage t)}))))))
 
+(defn- save-reviews [user applications-with-results]
+  (when (not-empty applications-with-results)
+    (logging/log-event :info {:run-by "Automatic review checking"
+                              :event "Save organization reviews"
+                              :organization-id (:organization (first (first applications-with-results)))
+                              :application-count (count applications-with-results)})
+    (run! (fn [[app result]] (save-reviews-for-application user app result)) applications-with-results)))
+
 (defn- read-reviews-for-application [user created application app-xml]
   (try
     (when (and application app-xml)
@@ -409,6 +417,8 @@
             (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
                                                                              :event "Reviews found"
                                                                              :updated-tasks updated-tasks})
+            (ok? result)                           (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "No reviews"})
             (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
                                                                               :event "Failed to read reviews"
                                                                               :validation-errors validation-errors}))
@@ -515,8 +525,8 @@
                       (async/>!! channel)
                       (async/thread))
           organizations)
-    (->> (mapcat (fn [_] (async/<!! channel)) organizations)
-         (run! (partial apply save-reviews-for-application eraajo-user)))))
+    (->> (map (fn [_] (async/<!! channel)) organizations)
+         (run! (partial save-reviews eraajo-user)))))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
