@@ -55,8 +55,8 @@
    :draft    sc/Any})
 
 (defschema MattiPublishedSettings
-  {:verdict [(apply sc/enum (keys shared/verdict-code-map))]
-   :foremen [(apply sc/enum shared/foreman-codes)]
+  {:verdict [(apply sc/enum (map name (keys shared/verdict-code-map)))]
+   :foremen [(apply sc/enum (map name shared/foreman-codes))]
    :reviews [{:id   ssc/ObjectIdStr
               :name MattiName
               :type review-type}]

@@ -12,7 +12,8 @@ jQuery(document).ready(function() {
                     {name: "select-inspection-summary-template-for-operation"},
                     {name: "handler-roles"},
                     {name: "triggers"},
-                    {name: "navi-sidebar"}];
+                    {name: "navi-sidebar"},
+                    {name: "default-verdict-template"}];
 
   ko.registerLupapisteComponents(components);
 });

@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.matti.service
   (:require [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.matti.state :as state]))
 
 (defn fetch-schemas []
@@ -18,7 +19,8 @@
 (defn- list-update-response [callback]
   (fn [response]
     (fetch-template-list)
-    (callback response)))
+    (callback response)
+    (hub/send "matti::verdict-templates-changed")))
 
 (defn fetch-categories [callback]
   (common/query "verdict-template-categories"
