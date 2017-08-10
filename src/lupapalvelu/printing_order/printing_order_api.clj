@@ -19,7 +19,8 @@
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
                         (map att/enrich-attachment)
-                        (remove #(util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group))))
+                        (remove #(and (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
+                                      (not (:forPrinting %))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile))))
       :tagGroups (att-tag-groups/attachment-tag-groups application)))
 
