@@ -513,7 +513,7 @@
                          (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
                               (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
-         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
+         (mapv (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
 
 (defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids permit-types]}]
   (let [applications (when (seq application-ids)
