@@ -21,11 +21,12 @@
       :value @amount*
       :on-change identity
       :on-blur   (fn [v]
-                   (if (and (pos? v) (integer? v))
-                     (do
-                       (reset! amount* (-> v .-target .-value))
-                       (commit-fn))
-                     (reset! amount* @state)))}]
+                   (let [n (js/parseInt (-> v .-target .-value))]
+                     (if (nat-int? n)
+                       (do
+                         (reset! amount* n)
+                         (commit-fn))
+                       (reset! amount* @state))))}]
     [:i.lupicon-circle-plus
      {:on-click (fn [_]
                   (swap! amount* inc)
