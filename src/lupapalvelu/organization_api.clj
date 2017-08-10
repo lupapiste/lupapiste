@@ -456,8 +456,8 @@
   [_]
   (when-let [org (->> (org/get-organization organizationId)
                       org/parse-organization)]
-    (if-let [errors (->> (assoc org (keyword attribute) enabled)
-                         (sc/check org/Organization))]
+    (if (->> (assoc org (keyword attribute) enabled)
+             (sc/check org/Organization))
       (fail :error.illegal-key)
       (do (org/update-organization organizationId {$set {attribute enabled}})
           (ok)))))

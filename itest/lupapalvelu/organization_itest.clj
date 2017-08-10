@@ -120,7 +120,7 @@
                                :inforequestEnabled (not (:inforequest-enabled orig-scope))
                                :applicationEnabled (not (:new-application-enabled orig-scope))
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
-                               :openInforequestEmail "someone@localhost"
+                               :openInforequestEmail "someone@localhost.localdomain"
                                :opening nil)
         updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
@@ -130,7 +130,7 @@
     (fact "inforequest-enabled" (:inforequest-enabled updated-scope) => (not (:inforequest-enabled orig-scope)))
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
-    (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
+    (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost.localdomain")))
 
 (fact "Admin - Add scope"
   (let [organization   (first (:organizations (query admin :organizations)))
@@ -377,19 +377,29 @@
   (fact "Valid attachment is ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))
 
-(facts "permanent-archive-can-be-set"
+(facts "Archiving features can be set"
   (let [organization  (first (:organizations (query admin :organizations)))
         id (:id organization)]
 
     (fact "Permanent archive can be enabled"
-      (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
+      (command admin "set-organization-boolean-attribute" :enabled true :organizationId id :attribute "permanent-archive-enabled") => ok?
       (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => true))
 
     (fact "Permanent archive can be disabled"
-      (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
+      (command admin "set-organization-boolean-attribute" :enabled false :organizationId id :attribute "permanent-archive-enabled") => ok?
       (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
-        (:permanent-archive-enabled updated-org) => false))))
+        (:permanent-archive-enabled updated-org) => false))
+
+    (fact "Digitizer tools can be enabled"
+      (command admin "set-organization-boolean-attribute" :enabled true :organizationId id :attribute "digitizer-tools-enabled") => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:digitizer-tools-enabled updated-org) => true))
+
+    (fact "Digitizer tools can be disabled"
+      (command admin "set-organization-boolean-attribute" :enabled false :organizationId id :attribute "digitizer-tools-enabled") => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:digitizer-tools-enabled updated-org) => false))))
 
 (facts "Organization names"
   (let [{names :names :as resp} (query pena :get-organization-names)]
