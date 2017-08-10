@@ -31,21 +31,22 @@
   [{group-open ::group-open} {:keys [level path children]}]
   (let [attachments          (rum/react (rum/cursor-in state/component-state [:attachments]))
         attachments-in-group (filter (partial attachment-in-group? path) attachments)]
-    [:div.rollup.rollup--open
-     [:button
-      {:class (conj ["rollup-button" "rollup-status" "attachments-accordion" "toggled"]
-                    (if (seq children)
-                      "secondary"
-                      "tertiary"))}
-      [:span (accordion-name (last path))]]
-     [:div.attachments-accordion-content
-      (for [[child-key & _] children]
-        (rum/with-key
-          (accordion-group {:path (conj path child-key)})
-          (util/unique-elem-id "accordion-sub-group")))
-      (when (and (empty? children) (seq attachments-in-group))
-        [:div.rollup-accordion-content-part
-         (files/files-table attachments-in-group)])]]))
+    (when (seq attachments-in-group)
+      [:div.rollup.rollup--open
+       [:button
+        {:class (conj ["rollup-button" "rollup-status" "attachments-accordion" "toggled"]
+                      (if (seq children)
+                        "secondary"
+                        "tertiary"))}
+        [:span (accordion-name (last path))]]
+       [:div.attachments-accordion-content
+        (for [[child-key & _] children]
+          (rum/with-key
+            (accordion-group {:path (conj path child-key)})
+            (util/unique-elem-id "accordion-sub-group")))
+        (when (empty? children)
+          [:div.rollup-accordion-content-part
+           (files/files-table attachments-in-group)])]])))
 
 (rum/defc order-composer-footer < rum/reactive
   []
