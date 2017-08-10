@@ -97,7 +97,7 @@
     added-or-updated => (just (nth mutated 2))))
 
 (fact "illegal review type causes failure"
-      (let [mutated (-> (into [] reviews-fixture)
+  (let [mutated (-> (into [] reviews-fixture)
                         (assoc-in [2 :data :katselmus :pitoPvm :value] "2")
                         (assoc-in [2 :data :katselmuksenLaji :value] "13.05.2016"))
             [_ added-or-updated _] (merge-review-tasks mutated reviews-fixture)
@@ -105,3 +105,21 @@
         added-or-updated => (just (nth mutated 2))
         (count errors) => 1
         (-> errors flatten first) => (contains {:result [:warn "illegal-value:select"]})))
+
+(fact "more recent review from XML does not overwrite the review in mongo"
+  (let [mutated (-> (into [] reviews-fixture)
+                    (assoc-in [1 :data :katselmus :pitoPvm :value] 1462838500000))
+        [unchanged added-or-updated _] (merge-review-tasks mutated reviews-fixture)]
+    (count unchanged) => (count reviews-fixture)
+    (diff unchanged reviews-fixture) => [nil nil reviews-fixture]
+    added-or-updated => empty?))
+
+(fact "more recent review from XML can overwrite if flag is passed to merge-review-tasks"
+      (let [mutated (-> (into [] reviews-fixture)
+                        (assoc-in [1 :data :katselmus :pitoPvm :value] 1462838500000))
+            [unchanged added-or-updated new-faulty] (merge-review-tasks mutated reviews-fixture true)]
+        (count unchanged)        => (dec (count reviews-fixture))
+        (count added-or-updated) => 1
+        (count new-faulty)       => 1
+        (first new-faulty)       => (second reviews-fixture)
+        (first added-or-updated) => (second mutated)))

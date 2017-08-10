@@ -84,7 +84,8 @@
           (and overwrite-background-reviews?
                (tasks/task-is-review? current)
                (= (-> current :source :type) "background")
-               updated-match)
+               updated-match
+               (not= updated-match current))
           ;; if existing background reviews can be overwritten by more
           ;; recent ones, the existing one needs to be marked faulty
           (recur (remove #{updated-match} from-update)
