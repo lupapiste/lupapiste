@@ -419,16 +419,16 @@
 (defn- fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
   (logging/log-event :info {:run-by "Automatic review checking"
                             :event "Fetch consecutively"
-                            :organization (:id organization)
+                            :organization-id (:id organization)
                             :application-count (count applications)
-                            :applications applications})
+                            :applications (map :id applications)})
   (->> (map (fn [app]
               (try
                 (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
                 (catch Throwable t
                   (logging/log-event :error {:run-by "Automatic review checking"
-                                             :application (:id app)
-                                             :organization (:id organization)
+                                             :application-id (:id app)
+                                             :organization-id (:id organization)
                                              :exception (.getName (class t))
                                              :message (.getMessage t)
                                              :event (format "Unable to get reviews for %s from %s backend: %s - %s"  permit-type (:id organization))})
@@ -441,16 +441,16 @@
   (try+
 
    (logging/log-event :info {:run-by "Automatic review checking"
-                             :event "Start fetching"
-                             :organization (:id organization)
+                             :event "Start fetching xmls"
+                             :organization-id (:id organization)
                              :application-count (count applications)
-                             :applications applications})
+                             :applications (map :id applications)})
 
    (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
 
    (catch SAXParseException e
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :event (format "Could not understand response when getting reviews in chunks from %s backend" (:id organization))})
      ;; Fallback into fetching xmls consecutively
      (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
@@ -458,7 +458,7 @@
    (catch [:sade.core/type :sade.core/fail
            :status         404] _
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :event (format "Unable to get reviews in chunks from %s backend: Got HTTP status 404" (:id organization))})
      ;; Fallback into fetching xmls consecutively
      (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
@@ -466,12 +466,12 @@
 
    (catch [:sade.core/type :sade.core/fail] t
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :event (format "Unable to get reviews from %s backend: %s" (:id organization) (select-keys t [:status :text]))}))
 
    (catch Object o
      (logging/log-event :error {:run-by "Automatic review checking"
-                                :organization (:id organization)
+                                :organization-id (:id organization)
                                 :exception (.getName (class o))
                                 :message (get &throw-context :message "")
                                 :event (format "Unable to get reviews in chunks from %s backend: %s - %s"
