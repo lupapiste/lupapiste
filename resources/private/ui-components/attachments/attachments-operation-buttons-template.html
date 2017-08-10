@@ -63,10 +63,10 @@
     </button>
     <button class="ghost"
             data-bind="click: $data.startPrintingOrder,
-                       visible: $data.canOrderAttachmentPrints()"
+                       visible: $data.printingOrderEnabled()"
             data-test-id="order-attachment-prints">
       <i class="lupicon-envelope"></i>
-      <span>MYLLY TILAUS</span>
+      <span data-bind="ltext: 'printing-order.start.ordering'"></span>
     </button>
     <button class="ghost"
             data-bind="click: downloadAll,

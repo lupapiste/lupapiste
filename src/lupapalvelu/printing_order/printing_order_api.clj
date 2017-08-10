@@ -1,5 +1,5 @@
 (ns lupapalvelu.printing-order.printing-order-api
-  (:require [lupapalvelu.action :refer [defquery]]
+  (:require [lupapalvelu.action :refer [defquery defcommand]]
             [sade.core :refer :all]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.attachment :as att]
@@ -14,12 +14,17 @@
 (defquery attachments-for-printing-order
   {:parameters       [id]
    :states           states/post-verdict-states
-   :user-roles       #{:authority :applicant}
-   :user-authz-roles roles/all-authz-roles
-   :org-authz-roles  roles/reader-org-authz-roles}
+   :user-roles       #{:applicant}
+   :user-authz-roles roles/all-authz-writer-roles}
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
                         (map att/enrich-attachment)
                         (remove #(util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile))))
       :tagGroups (att-tag-groups/attachment-tag-groups application)))
+
+(defcommand submit-printing-order
+            {:description ""
+             :parameters [id]
+             :states states/post-verdict-states
+             :user-roles #{:applicant}} [] ())

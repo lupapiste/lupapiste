@@ -9,3 +9,4 @@
 "printing-order.composer.total-amount" "fi" "Tilattavien tulosteiden määrä:"
 "printing-order.composer.show-pricing" "fi" "Näytä hinnasto"
 "printing-order.mylly.provided-by" "fi" "Palvelun tarjoaa Grano Oy"
+"printing-order.start.ordering" "fi" "Tilaa tulosteita"
