@@ -159,6 +159,7 @@
     self.data = ko.observableArray();
 
     self.load = function() {
+      console.log("Load statementGivers");
       ajax
         .query("get-organizations-statement-givers")
         .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
@@ -224,6 +225,7 @@
     self.data = ko.observable();
 
     self.load = function() {
+      console.log("Load financialHandlers");
       ajax
         .query("get-organizations-financial-handlers")
         .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
@@ -232,7 +234,7 @@
 
     self["delete"] = function() {
       ajax
-        .command("delete-financial-handler", {personId: this.id()})
+        .command("delete-financial-handler", {email: this.email()})
         .success(self.load)
         .call();
     };
@@ -270,12 +272,19 @@
     self.save = function(data) {
       var financialHandler = ko.mapping.toJS(data);
       console.log(financialHandler);
-/*      ajax.command("create-financial-handler", financialHandler)
-        .success(self.onSuccess)
-        .error(function(result) {
-          self.error(result.txt);
+      ajax
+        .command("create-user",
+          {email: self.email(),
+            role: "financialAuthority",
+            organization: "753-R",
+            enabled: "true",
+            firstName: self.firstName(),
+            lastName: self.lastName()})
+        .pending(self.searching)
+        .success(function() {
+          self.onSuccess();
         })
-        .call();*/
+        .call();
       return false;
     };
 

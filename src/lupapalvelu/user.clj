@@ -555,7 +555,7 @@
     (when (and org-authz (not (every? coll? (vals org-authz))))
       (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
 
-    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
+    (when-not (#{:authority :authorityAdmin :applicant :dummy :financialAuthority} user-role)
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)
