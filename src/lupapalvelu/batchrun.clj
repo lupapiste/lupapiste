@@ -400,18 +400,23 @@
                                      :event "Failed to save"
                                      :exception-message (.getMessage t)}))))))
 
-(defn- read-reviews-for-application [user created application app-xml]
+(defn- read-reviews-for-application
+  [user created application app-xml & [overwrite-background-reviews?]]
   (try
     (when (and application app-xml)
       (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
-        (let [{:keys [review-count updated-tasks validation-errors] :as result} (review/read-reviews-from-xml user created application app-xml)]
+        (let [{:keys [review-count updated-tasks validation-errors] :as result} (review/read-reviews-from-xml user created application app-xml overwrite-background-reviews?)]
           (cond
-            (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
-                                                                             :event "Reviews found"
-                                                                             :updated-tasks updated-tasks})
-            (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
-                                                                              :event "Failed to read reviews"
-                                                                              :validation-errors validation-errors}))
+            (and (ok? result) (pos? review-count))
+            (logging/log-event :info {:run-by "Automatic review checking"
+                                      :event "Reviews found"
+                                      :updated-tasks updated-tasks})
+
+            (fail? result)
+            (logging/log-event :error {:run-by "Automatic review checking"
+                                       :event "Failed to read reviews"
+                                       :validation-errors validation-errors}))
+
           result)))
     (catch Throwable t
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
@@ -476,21 +481,28 @@
                           :verdicts true
                           :history true}))))
 
-(defn fetch-review-updates-for-organization
-  [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
+(defn- fetch-review-updates-for-organization
+  [eraajo-user created applications permit-types {org-krysp :krysp :as organization} & [overwrite-background-reviews?]]
   (let [grouped-apps (if (seq applications)
                          (group-by :permitType applications)
                          (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
                               (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
-         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
+         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)])))))
 
-(defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
+(defn poll-verdicts-for-reviews
+  [& {:keys [application-ids organization-ids overwrite-background-reviews?]}]
   (let [applications (when (seq application-ids)
                        (mongo/select :applications {:_id {$in application-ids}}))
         organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
         eraajo-user (user/batchrun-user (map :id organizations))]
-    (->> (pmap (partial fetch-review-updates-for-organization eraajo-user (now) applications [:R]) organizations)
+    (->> (pmap #(fetch-review-updates-for-organization eraajo-user
+                                                       (now)
+                                                       applications
+                                                       [:R]
+                                                       %
+                                                       overwrite-background-reviews?)
+               organizations)
          (apply concat)
          (run! (partial apply save-reviews-for-application eraajo-user)))))
 
@@ -511,6 +523,16 @@
   (mongo/connect!)
   (poll-verdicts-for-reviews :organization-ids args)
   (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :organizations args}))
+
+(defn check-reviews-for-orgs [& args]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Review checking with overwrite" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
+  (logging/log-event :info {:run-by "Review checking with overwrite" :event "Started" :organizations args})
+  (mongo/connect!)
+  (poll-verdicts-for-reviews :organization-ids args
+                             :overwrite-background-reviews? true)
+  (logging/log-event :info {:run-by "Review checking with overwrite" :event "Finished" :organizations args}))
 
 (defn check-reviews-for-ids [& args]
   (when-not (system-not-in-lockdown?)
@@ -537,7 +559,7 @@
     (do
       (println "No application id given.")
       1)))
-  
+
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"

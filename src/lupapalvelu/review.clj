@@ -64,6 +64,8 @@
    1: Completely new and updated existing review tasks,
    2: Reviews to be marked faulty"
   [tasks-from-update tasks-from-mongo & [overwrite-background-reviews?]]
+  {:post [(let [[_ new-and-updated new-faulty] %]
+            (every? #(matching-task % new-and-updated) new-faulty))]}
   (let [faulty-tasks     (filter #(util/=as-kw (:state %) :faulty_review_task)
                                  tasks-from-mongo)
         tasks-from-mongo (remove #(util/=as-kw (:state %) :faulty_review_task)
@@ -164,7 +166,7 @@
 (defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
-  [user created application app-xml]
+  [user created application app-xml & [overwrite-background-reviews?]]
 
   (let [reviews (vec (reviews-preprocessed app-xml))
         buildings-summary (building-reader/->buildings-summary app-xml)
@@ -179,7 +181,11 @@
         attachments-by-task-id (apply hash-map
                                  (remove empty? (mapcat (fn [t]
                                   (when (:attachments t) [(:id t) (:attachments t)])) review-tasks)))
-        [unchanged-tasks added-and-updated-tasks _] (merge-review-tasks (map #(dissoc % :attachments) review-tasks) (:tasks application))
+        [unchanged-tasks
+         added-and-updated-tasks
+         new-faulty-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks)
+                                               (:tasks application)
+                                               overwrite-background-reviews?)
         updated-tasks (concat unchanged-tasks added-and-updated-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context added-and-updated-tasks) ;; for pdf generation
@@ -213,6 +219,7 @@
     (ok :review-count (count review-tasks)
         :updated-tasks (map :id updated-tasks)
         :updates (util/deep-merge task-updates building-updates state-updates)
+        :new-faulty-tasks (map :id new-faulty-tasks)
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
