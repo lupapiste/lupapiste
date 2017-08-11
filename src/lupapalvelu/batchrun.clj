@@ -525,8 +525,7 @@
                       (async/>! channel)
                       (async/go))
           organizations)
-    (->> (map (fn [_] (async/<!! channel)) organizations)
-         (run! (partial save-reviews eraajo-user)))))
+    (run! (fn [_] (save-reviews eraajo-user (async/<!! channel))) organizations)))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
