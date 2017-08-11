@@ -1474,9 +1474,9 @@
    {:info {:name "hakija-ark"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable false
            :type :party
            :subtype :hakija
