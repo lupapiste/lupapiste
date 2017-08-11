@@ -44,6 +44,20 @@
 (defn- non-empty-review-task? [task]
   (and (tasks/task-is-review? task) (not (empty-review-task? task))))
 
+(defn- matching-task
+  "For a given mongo-task, return a matching task from the XML update"
+  [mongo-task update-tasks]
+  (let [mongo-task-bg-id (background-id mongo-task)
+        updated-id-match (when-not (ss/empty? mongo-task-bg-id)
+                           (util/find-first #(= mongo-task-bg-id
+                                                (background-id %))
+                                            update-tasks))]
+    (or updated-id-match
+        (->> update-tasks
+             (filter #(or (reviews-have-same-name-and-type? mongo-task %)
+                          (reviews-have-same-type-other-than-muu-katselmus? mongo-task %)))
+             (first)))))
+
 (defn- merge-review-tasks
   "Returns a vector with two values:
    0: Existing tasks left unchanged,
@@ -64,13 +78,8 @@
            added-or-updated []
            new-faulty []]
       (let [current (first from-mongo)
-            bg-id-current (background-id current)
             remaining (rest from-mongo)
-            updated-id-match (when-not (ss/empty? bg-id-current)
-                               (util/find-first #(= bg-id-current (background-id %)) from-update))
-            updated-match (or updated-id-match
-                              (first (filter #(or (reviews-have-same-name-and-type? current %)
-                                                  (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
+            updated-match (matching-task current from-update)]
         (cond
           (= current nil)
           ;; Recursion end condition
@@ -177,6 +186,9 @@
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}
         state-updates (verdict/get-state-updates user created application app-xml)]
+
+    ;; Check that the number of buildings in buildings summary matches
+    ;; the number of buildings in the review data
     (doseq [task (filter #(and (tasks/task-is-review? %)
                                (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]
       (if-not (= (count buildings-summary)
@@ -184,6 +196,7 @@
         (errorf "buildings count %s != task rakennus count %s for id %s"
                 (count buildings-summary)
                 (-> task :data :rakennus count) (:id application))))
+
     (assert (map? application) "application is map")
     (assert (every? not-empty updated-tasks) "tasks not empty")
     (assert (every? map? updated-tasks) "tasks are maps")
@@ -192,6 +205,8 @@
 
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
+
+
     (when (some seq validation-errors)
       (doseq [error (remove empty? validation-errors)]
         (warnf "Backend task validation error, this was skipped: %s" (pr-str error))))
