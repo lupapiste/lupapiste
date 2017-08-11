@@ -19,9 +19,11 @@
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
                         (map att/enrich-attachment)
-                        (remove #(and (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
-                                      (not (:forPrinting %))))
-                        (filter (fn [att] (util/contains-value? (:tags att) :hasFile))))
+                        (remove #(and
+                                  (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
+                                  (not (:forPrinting %))))
+                        (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
+                        (filter #(= (-> % :latestVersion :contentType) "application/pdf")))
       :tagGroups (att-tag-groups/attachment-tag-groups application)))
 
 (defcommand submit-printing-order

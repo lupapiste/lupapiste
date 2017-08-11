@@ -65,6 +65,7 @@
             [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.perf-mon-api]
             [lupapalvelu.prev-permit-api]
+            [lupapalvelu.printing-order.printing-order-api]
             [lupapalvelu.property-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.reports.reports-api]
