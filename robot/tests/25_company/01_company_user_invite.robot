@@ -233,14 +233,16 @@ Mikko logs in, creates application and invites Solita
   Logout
 
 Solita accepts invite
-  Open last email
-  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
-  Click Element  xpath=(//a[contains(., 'accept-company-invitation')])
-  Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
-  Go to login page
+  User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo,
+  Click by test id  accept-invite-button
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
-Kaino logs in and could submit application
-  Kaino logs in
+Kaino Solita opens the application
+  Open application  ${appname}  ${propertyId}
+
+Kaino could submit application
   Open application  ${appname}  ${propertyId}
   Open tab  requiredFieldSummary
   Wait until  Test id enabled  application-submit-btn

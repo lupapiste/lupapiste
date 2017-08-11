@@ -26,7 +26,7 @@ LUPAPISTE.InvitesModel = function() {
   self.approveInvite = function(model) {
     hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
     ajax
-      .command("approve-invite", {id: model.application.id})
+      .command("approve-invite", {id: model.application.id, "invite-type": model.type})
       .success(self.updateInvites)
       .call();
     return false;
