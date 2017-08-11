@@ -12,7 +12,8 @@
    :katselmukset_ja_tarkastukset :tietomallit])
 
 (defquery attachments-for-printing-order
-  {:parameters       [id]
+  {:feature          :printing-order
+   :parameters       [id]
    :states           states/post-verdict-states
    :user-roles       #{:applicant}
    :user-authz-roles roles/all-authz-writer-roles}
