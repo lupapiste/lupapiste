@@ -15,7 +15,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [lupapalvelu.authorization :as auth]))
 
 (defn by-id [application collection id]
   (let [docs ((keyword collection) application)]
@@ -319,9 +320,14 @@
     {:pre [application document-id timestamp]}
     (if-let [document (domain/get-document-by-id application document-id)]
       (when-not (ss/blank? user-id)
-        (if-let [subject (user/get-user-by-id user-id)]
-          (set-subject-to-document application document subject path timestamp set-empty-values?)
-          (fail! :error.user-not-found)))
+        (let [company-auth (auth/auth-via-company application user-id)
+              company      (when company-auth
+                             (company/find-company-by-id (:id company-auth)))]
+          (if-let [subject (util/assoc-when (user/get-user-by-id user-id)
+                                            :companyId (:y company)
+                                            :companyName (:name company))]
+            (set-subject-to-document application document subject path timestamp set-empty-values?)
+            (fail! :error.user-not-found))))
       (fail :error.document-not-found))))
 
 (defn- company-fields [{auth :auth} company-id user]
