@@ -318,10 +318,10 @@
             var storedOrg = window.localStorage && window.localStorage.getItem(localStorageKey);
             if (storedOrg &&
               _.chain(self.organizationOptions())
-                .map('id')
+                .map("id")
                 .includes(window.localStorage.getItem(localStorageKey))
                 .value()) {
-              defaultOrg = storedOrg
+              defaultOrg = storedOrg;
             }
             self.selectedPrevPermitOrganization(defaultOrg);
           }
