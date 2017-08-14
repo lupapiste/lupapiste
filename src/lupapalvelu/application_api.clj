@@ -73,7 +73,7 @@
 (defquery application
   {:parameters       [:id]
    :states           states/all-states
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles  roles/reader-org-authz-roles}
   [{:keys [application user] :as command}]

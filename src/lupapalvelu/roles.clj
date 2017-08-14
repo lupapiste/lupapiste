@@ -6,7 +6,7 @@
 ;; Roles
 ;;
 
-(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
+(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin :financialAuthority})
 (def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :docstore-api :trusted-etl :trusted-salesforce))
 
 (def default-authz-writer-roles #{:owner :writer})

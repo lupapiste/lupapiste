@@ -6,6 +6,8 @@ LUPAPISTE.ApplicationsSearchTabsModel = function(params) {
 
   if (lupapisteApp.models.globalAuthModel.ok("user-is-pure-digitizer")) {
     self.tabs = ko.observableArray();
+  } else if (lupapisteApp.models.currentUser.isFinancialAuthority()) {
+    self.tabs = ko.observableArray(["all", "application", "construction", "canceled"]);
   } else {
     self.tabs = ko.observableArray(["all", "application", "construction", "inforequest", "canceled"]);
   }

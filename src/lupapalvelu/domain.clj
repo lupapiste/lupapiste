@@ -20,7 +20,7 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority})]
     (case (keyword (:role user))
       :applicant    (if-let [company-id (get-in user [:company :id])]
                       {$or [{:auth.id (:id user)} {:auth.id company-id}]}
@@ -30,6 +30,7 @@
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
       :trusted-salesforce {}
+      :financialAuthority {:organization {$in organizations}}
       (do
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results

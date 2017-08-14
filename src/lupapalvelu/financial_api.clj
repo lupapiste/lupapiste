@@ -9,7 +9,17 @@
   (let [org-id (usr/authority-admins-organization-id user)]
     (financial/fetch-organization-financial-handlers org-id)))
 
-(defcommand delete-financial-handle
+(defcommand create-financial-handler
+  {:parameters [:email]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :notified true
+   :user-roles #{:admin :authorityAdmin}}
+  [{user-data :data user :user}]
+  (let [org-id (usr/authority-admins-organization-id user)]
+    (financial/create-financial-handler user-data org-id user)))
+
+(defcommand delete-financial-handler
   {:parameters       [email]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]

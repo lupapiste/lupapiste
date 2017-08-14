@@ -60,7 +60,8 @@
    "rest-api"
    "trusted-etl"
    "trusted-salesforce"
-   "docstore-api"])
+   "docstore-api"
+   "financialAuthority"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -210,7 +211,7 @@
     (oir-authority? user)))
 
 (defn authority? [{role :role}]
-  (contains? #{:authority} (keyword role)))
+  (contains? #{:authority :financialAuthority} (keyword role)))
 
 (defn verified-person-id? [{pid :personId source :personIdSource :as user}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
@@ -249,6 +250,9 @@
 
 (defn company-admin? [user]
   (= (-> user :company :role) "admin"))
+
+(defn financial-authority? [{role :role}]
+  (= :financialAuthority (keyword role)))
 
 
 (defn organization-ids
