@@ -19,7 +19,7 @@
         roles (if organizationId
                 ((keyword organizationId) (:orgAuthz user))
                 (apply set/union (vals (:orgAuthz user))))
-        correct-role? (seq (set/intersection #{:authority :digitizer :archivist :authorityAdmin} roles))]
+        correct-role? (seq (set/intersection #{:digitizer :archivist :authorityAdmin} roles))]
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
 
