@@ -274,7 +274,7 @@
   ([lang :- EnumSupportedLanguages]
    (missing-localizations-excel lang nil))
   ([lang    :- EnumSupportedLanguages
-    options :- {:exclude [sc/Regex]}]
+    options :- (sc/maybe {:exclude [sc/Regex]})]
    (if (= lang "fi")
      (println "Oops, this does not work with Finnish as the target language.")
      (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
