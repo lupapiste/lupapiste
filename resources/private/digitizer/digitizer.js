@@ -37,6 +37,13 @@
 
     self.permitNotFound = ko.observable(false);
 
+    var localStorageKey = "digitizer-prev-permit-organization";
+    self.selectedPrevPermitOrganization.subscribe(function(organizationId) {
+      if (organizationId && window.localStorage) {
+        window.localStorage.setItem(localStorageKey, organizationId);
+      }
+    });
+
     self.resetLocation = function() {
       self.locationModel.reset();
       return self;
@@ -203,7 +210,16 @@
         .success(function(data) {
           self.organizationOptions(data.organizations);
           if (self.organizationOptions().length) {
-            self.selectedPrevPermitOrganization(self.organizationOptions()[0].id);
+            var defaultOrg = self.organizationOptions()[0].id;
+            var storedOrg = window.localStorage && window.localStorage.getItem(localStorageKey);
+            if (storedOrg &&
+              _.chain(self.organizationOptions())
+                .map('id')
+                .includes(window.localStorage.getItem(localStorageKey))
+                .value()) {
+              defaultOrg = storedOrg
+            }
+            self.selectedPrevPermitOrganization(defaultOrg);
           }
         })
         .call();
