@@ -204,16 +204,6 @@
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
-    // in case the user chooses to navigatw between applications and inforequests
-    // by manually editing URL hash in the browser window, let's make sure that they land
-    // on the correct page - this way we can prevent some mysterious errors resulting from
-    // incorrect components being initialized as a result of being on the "wrong page".
-    var isInfoRequest = applicationDetails.application.infoRequest;
-    if ((isInfoRequest && pageutil.getPage() === "application") ||
-        (!isInfoRequest && pageutil.getPage() === "inforequest")) {
-      pageutil.openApplicationPage(applicationDetails.application);
-    }
-
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       // Sensible empty default values for those properties not received from the backend.
       var app = _.merge( LUPAPISTE.EmptyApplicationModel(), applicationDetails.application);
@@ -458,6 +448,19 @@
   });
 
   hub.subscribe("application-loaded", function(e) {
+
+
+    // in case the user chooses to navigatw between applications and inforequests
+    // by manually editing URL hash in the browser window, let's make sure that they land
+    // on the correct page - this way we can prevent some mysterious errors resulting from
+    // incorrect components being initialized as a result of being on the "wrong page".
+    var isInfoRequest = e.applicationDetails.application.infoRequest;
+    if ((isInfoRequest && pageutil.getPage() === "application") ||
+        (!isInfoRequest && pageutil.getPage() === "inforequest")) {
+      pageutil.openApplicationPage(e.applicationDetails.application);
+      return;
+    }
+
     showApplication(e.applicationDetails, e.lightLoad);
     updateWindowTitle(e.applicationDetails.application.title);
   });
