@@ -103,7 +103,7 @@
           "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           "readyForArchival"   (archival-query user)
-          "archivingProjects"  {:permitType permit/ARK :state {$ne :archived}}
+          "archivingProjects"  {:permitType permit/ARK :state {$nin [:archived :canceled]}}
           {$and [{:state {$ne "canceled"}
                   :permitType {$ne permit/ARK}}
                  {$or [{:state {$ne "draft"}}
