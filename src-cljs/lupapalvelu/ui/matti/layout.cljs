@@ -22,8 +22,27 @@
 ;; Miscellaneous components
 ;; -------------------------------
 
-(defn empty-label []
-  [:label {:dangerouslySetInnerHTML {:__html "&nbsp;"}}])
+(defn vertical
+  "Convenience wrapper for vertical column cell.
+  Parameters [optional]: [options] component
+  Options [optional]:
+    col:  column width (default 1)
+    [align] column alignment (:left, :right, :center or :full)
+    [label]  keyword -> localization key
+             string  -> label string
+             Default is nbsp (see above)"
+  ([component]
+   (vertical {} component))
+  ([{:keys [col align label]} component]
+   [:div
+    {:class (cond->> [(str "col-" (or col 1))]
+              align (cons (str "col--" (name align))))}
+    [:div.col--vertical
+     [:label.matti-label (cond
+                           (keyword? label) (common/loc label)
+                           (string? label) label
+                           :default common/nbsp)]
+     component]]))
 
 (defn show-label? [{label? :label?} wrap-label?]
   (and wrap-label? (not (false? label?))))
@@ -107,7 +126,7 @@
          distinct)))
 
 (rum/defc select-reference-list < rum/reactive
-  [{:keys [state path schema ] :as options} & [wrap-label?]]
+  [{:keys [schema ] :as options} & [wrap-label?]]
   (let [options   (assoc options
                          :schema (assoc schema
                                         :body [{:body (map #(hash-map :name %)
@@ -119,7 +138,7 @@
       component)))
 
 (rum/defc multi-select-reference-list < rum/reactive
-  [{:keys [state path schema] :as options} & [wrap-label?]]
+  [{:keys [schema] :as options} & [wrap-label?]]
   (matti-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
                       wrap-label?))
 
@@ -151,13 +170,13 @@
        (when (show-label? schema wrap-label?)
          [:h4.matti-label (path/loc path schema)])
        [:div.row
-        [:div.col-3
+        [:div.col-3.col--full
          [:div.col--vertical
           [:label (common/loc :phrase.add)]
           (phrases/phrase-category-select @category* set-category)]]
-        [:div.col-6
+        [:div.col-5
          [:div.col--vertical
-          (empty-label)
+          (common/empty-label)
           (components/autocomplete selected*
                                    {:items    (phrases/phrase-list-for-autocomplete (rum/react category*))
                                     :callback #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
@@ -168,9 +187,9 @@
                                                  (update-text (s/join (concat (take sel-start old-text)
                                                                               %
                                                                               (drop sel-end old-text)))))})]]
-        [:div.col-3.col--right
+        [:div.col-4.col--right
          [:div.col--vertical
-          (empty-label)
+          (common/empty-label)
           [:div.inner-margins
            [:button.primary.outline
             {:on-click (fn []
@@ -195,6 +214,27 @@
                                    {:callback update-text})]]])))
 
 ;; -------------------------------
+;; View layout components
+;; -------------------------------
+
+(defmulti view-component (fn [cell-type & _]
+                           cell-type))
+
+(defmethod view-component :reference-list
+  [_ {:keys [state path schema ] :as options} & [wrap-label?]]
+  (let [span [:span (path/loc path schema (path/value path state))]]
+    (if (show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options span)
+      span)))
+
+(defmethod view-component :phrase-text
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  (let [span [:span.phrase-text (path/value path state)]]
+    (if (show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options span)
+      span)))
+
+;; -------------------------------
 ;; Component instantiation
 ;; -------------------------------
 
@@ -209,7 +249,7 @@
                                           :schema (service/schema schema-name)}
                                          :schema
                                          schema)
-        editing?    (path/meta? options :editing? )]
+        editing?    (path/react-meta? options :editing?)]
     (cond->> options
       editing?       docgen/docgen-component
       (not editing?) docgen/docgen-view
@@ -225,14 +265,16 @@
                                                  :schema schema-value)
                                           :schema
                                           schema)]
-    ((case cell-type
-       :list           matti-list
-       :date-delta     matti-date-delta
-       :reference-list (if (= :select (:type schema-value))
-                         select-reference-list
-                         multi-select-reference-list)
-       :multi-select   matti-multi-select
-       :phrase-text    matti-phrase-text) options wrap-label?)))
+    (if (path/react-meta? options :editing?)
+      ((case cell-type
+         :list           matti-list
+         :date-delta     matti-date-delta
+         :reference-list (if (= :select (:type schema-value))
+                           select-reference-list
+                           multi-select-reference-list)
+         :multi-select   matti-multi-select
+         :phrase-text    matti-phrase-text) options wrap-label?)
+      (view-component cell-type options wrap-label?))))
 
 (defmethod instantiate :loc-text
   [_ {:keys [schema]} & wrap-label?]

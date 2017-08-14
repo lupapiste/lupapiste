@@ -18309,6 +18309,24 @@ div.matti-settings-editor table.matti-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 
+div.matti-verdict div.matti-section div.section-header {
+  background-color: initial;
+  border: none;
+  border-top: 1px solid #dddddd;
+  padding: 0;
+}
+
+div.matti-verdict div.matti-section div.section-header div.verdict-buttons {
+  padding-top: 6px;
+  position: absolute;
+  right: 0;
+}
+
+div.matti-verdict div.matti-section div.section-body {
+  border: none;
+  padding: 0;
+}
+
 div.matti-phrases {
   margin-top: 24px;
 }
@@ -18340,6 +18358,10 @@ div.matti-phrases table.matti-phrases-table td.phrase {
   max-width: 0;
   text-overflow: ellipsis;
   overflow-x: hidden;
+}
+
+span.phrase-text {
+  white-space: pre-wrap;
 }
 
 div.matti-autocomplete {

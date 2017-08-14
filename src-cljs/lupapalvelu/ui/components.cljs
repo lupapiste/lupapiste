@@ -158,6 +158,11 @@
     (when (integer? scroll)
       (aset container "scrollTop" scroll))))
 
+(defn- set-selected  [selected* value callback]
+  (reset! selected* value)
+  (when callback
+    (callback value)))
+
 ;; Parameters: initial-value options
 ;; Initial value can be atom for two-way binding (see the mixin).
 ;; Options [optional]:
@@ -181,11 +186,7 @@
                    items
                    (default-items-fn items))
         open?    (rum/react open?*)
-        items    (vec (items-fn (rum/react term*)))
-        set-selected (fn [value]
-                       (reset! selected* value)
-                       (when callback
-                         (callback value)))]
+        items    (vec (items-fn (rum/react term*)))]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.matti-autocomplete
@@ -201,7 +202,7 @@
                  (not (s/blank? (rum/react selected*))))
         [:i.secondary.ac--clear.lupicon-remove
          {:on-click (fn [event]
-                      (set-selected "")
+                      (set-selected selected* "" callback)
                       (.stopPropagation event))}])]
      (when (rum/react open?*)
        (letfn [(close []
@@ -209,7 +210,7 @@
                  (reset! current* 0))
                (select [value]
                  (when value
-                   (set-selected value))
+                   (set-selected selected* value callback))
                  (close))
                (inc-current [n]
                  (when (pos? (count items))
@@ -275,3 +276,22 @@
   [:div.pprint
    [:div.title [:h4(or title "debug")]]
    [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])
+
+;; Dropwdown is a styled select.
+;; Parameters: initial-value options
+;; Options [optional]:
+;;   items list of :value, :text maps. Items are rendered ordered by
+;;         text.
+;;   [choose?] If true, the select caption (nil selection) is included. (default true)
+;;   [callback] Selection callback
+(rum/defcs dropdown < rum/reactive
+  (initial-value-mixin ::selected)
+  [{selected* ::selected} _ {:keys [items choose? callback]}]
+  [:select.dropdown
+   {:value (rum/react selected*)
+    :on-change #(set-selected selected* (.. % -target -value) callback)}
+   (cond->> (sort-by :text items)
+     choose? (cons {:text (common/loc "choose")})
+     true    (map (fn [{:keys [text value]}]
+                    [:option {:key   value
+                              :value value} text])))])

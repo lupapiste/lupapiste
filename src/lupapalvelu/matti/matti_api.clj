@@ -4,6 +4,7 @@
             [lupapalvelu.matti.matti :as matti]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -16,14 +17,18 @@
 (defn- verdict-template-check
   "Returns prechecker for template-id parameters.
    Condition parameters:
-     :editable  Template must be editable (not deleted)
-     :published Template must hav been published
-     :blank     Template-id can be empty. Note: this does not
-                replace input-validator.
-     :named     Template name cannot be empty
+     :editable    Template must be editable (not deleted)
+     :published   Template must hav been published
+     :blank       Template-id can be empty. Note: this does not
+                  replace input-validator.
+     :named       Template name cannot be empty
+     :application Template must belong to the same category as the
+                  application
+
    Template's existence is always checked unless :blank matches."
   [& conditions]
-  (let [{:keys [editable published blank named]} (zipmap conditions (repeat true))]
+  (let [{:keys [editable published blank named application]} (zipmap conditions
+                                                                     (repeat true))]
     (fn [{{template-id :template-id} :data :as command}]
       (when template-id
         (if (ss/blank? template-id)
@@ -39,7 +44,12 @@
             (when (and published (-> template :published not))
               (fail! :error.verdict-template-not-published))
             (when (and named (-> template :name ss/blank?))
-              (fail! :error.verdict-template-name-missing))))))))
+              (fail! :error.verdict-template-name-missing))
+            (when (and application
+                       (util/not=as-kw (:category template)
+                                       (-> command :application :permitType
+                                           shared/permit-type->category)))
+              (fail! :error.invalid-category))))))))
 
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
@@ -359,7 +369,6 @@
 ;; Default verdict templates for operations
 ;; ------------------------------------------
 
-
 ;; Operation related pre-checkers
 
 (defn- organization-operation
@@ -405,3 +414,31 @@
   (matti/set-operation-verdict-template (usr/authority-admins-organization-id user)
                                         operation
                                         template-id))
+
+;; ------------------------------------------
+;; Verdict API
+;; ------------------------------------------
+
+(defquery application-verdict-templates
+  {:description      "List of id, name, default? maps for suitable
+  application verdict templates."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :states           states/give-verdict-states}
+  [{:keys [application organization]}]
+  (ok :templates (matti/application-verdict-templates @organization
+                                                      application)))
+
+(defquery new-verdict-draft
+  {:description      "Composes new verdict draft from the latest published
+  template and its settings."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id template-id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [(verdict-template-check :application :published)]
+   :states           states/give-verdict-states}
+  [{:keys [application organization created]}]
+  (ok (matti/new-verdict-draft template-id application @organization created)))

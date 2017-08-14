@@ -201,7 +201,7 @@
 (defschema MattiVerdict
   {(sc/optional-key :id)       sc/Str ;; Id is created when the verdict is saved the first time
    (sc/optional-key :modified) sc/Int
-   :name                       sc/Str ;; Non-localized raw string
+   (sc/optional-key :name)     sc/Str ;; Non-localized raw string
    :sections                   [MattiVerdictSection]})
 
 (defn  complexity-section [id settings-path extra]
@@ -347,6 +347,31 @@
 
 (sc/validate MattiSettings r-settings)
 
+;; It is adivsabled to reuse ids from template when possible. This
+;; makes localization work automatically.
+(def verdict-schemas
+  {:r {:sections [{:id "matti-verdict"
+                   :grid {:columns 5
+                          :rows [[{:id "giver"
+                                   :schema {:docgen "matti-verdict-giver"}}
+                                  {:id "contact"
+                                   :align :full
+                                   :schema {:docgen "matti-verdict-contact"}}
+                                  {:id "section"
+                                   :schema {:docgen "matti-verdict-text"}}
+                                  {:id "verdict-code"
+                                   :align :full
+                                   :schema {:reference-list {:path       [:verdict]
+                                                             :type       :select
+                                                             :loc-prefix :matti-r}} }]
+                                 [{:col 3
+                                   :id "paatosteksti"
+                                   :schema {:phrase-text {:category :paatosteksti}}}
+                                  {:id "application-id"
+                                   :align :full
+                                   :schema {:docgen "matti-verdict-id"}}]]}}]}})
+
+(sc/validate MattiVerdict (:r verdict-schemas))
 
 ;; Schema utils
 
@@ -361,3 +386,14 @@
     (if (or (nil? schema) v)
       v
       (parent-value (:_parent schema) kw))))
+
+;; Other utils
+
+(defn permit-type->category [permit-type]
+  (when-let [kw (some-> permit-type
+                        s/lower-case
+                        keyword)]
+    (cond
+      (#{:r :p :ya} kw)              kw
+      (#{:kt :mm} kw)                :kt
+      (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))

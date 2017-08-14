@@ -609,6 +609,12 @@
        (ss/join ".")
        keyword))
 
+(defn split-kw-path
+  ":a.b.c -> [:a :b :c]"
+  [kw]
+  (map keyword
+       (ss/split (name kw) #"\.")))
+
 (defn get-in-tree
   "Gets a branch in (operation)tree by path. Tree should be represented as vectors of pairs.
   (get-in-tree [[:n1 [[:n11 :l11] [:n12 [[:n121 :l121]]]]] [:n2 [[:n21 :l21]]] [:n3 :l3]] [:n1 :n12])

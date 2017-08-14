@@ -223,15 +223,14 @@ div.matti-template-list {
 
 // Settings
 
-
 div.matti-settings {
-h2.matti-settings-title {
-  margin-top: 0;
-}
-.section-header {
-  background-color: initial;
-  border-bottom: none;
-}
+  h2.matti-settings-title {
+    margin-top: 0;
+  }
+  .section-header {
+    background-color: initial;
+    border-bottom: none;
+  }
 }
 
 // Reviews
@@ -248,6 +247,29 @@ div.matti-settings-editor {
     margin-top: 0;
   }
 }
+
+// Verdicts
+
+div.matti-verdict {
+  div.matti-section {
+    div.section-header {
+      background-color: initial;
+      border: none;
+      border-top: 1px solid $gray221;
+      padding: 0;
+      div.verdict-buttons {
+        padding-top: $marginS;
+        position: absolute;
+        right: 0;
+      }
+    }
+    div.section-body {
+      border: none;
+      padding: 0;
+    }
+  }
+}
+
 
 // Phrases
 
@@ -270,6 +292,10 @@ div.matti-phrases {
       overflow-x: hidden;
     }
   }
+}
+
+span.phrase-text {
+  white-space: pre-wrap;
 }
 
 // Autocomplete

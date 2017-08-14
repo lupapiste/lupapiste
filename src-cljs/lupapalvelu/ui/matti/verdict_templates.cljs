@@ -4,11 +4,11 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.matti.phrases :as phrases]
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.settings :as settings]
             [lupapalvelu.ui.matti.state :as state]
-            [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]))
 
 

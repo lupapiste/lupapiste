@@ -442,3 +442,8 @@
 "phrase.undo" "en" "Undo phrase"
 "phrase.undo" "fi" "Kumoa fraasi"
 "phrase.undo" "sv" "Upphäva frasen"
+"matti.choose-template" "fi" "Valitse päätöspohja"
+"matti.choose-template" "en" "Choose verdict template"
+"matti-verdict.section" "fi" "Pykälä"
+"matti-verdict.application-id" "fi" "Lupatunnus"
+"matti-verdict.application-id" "en" "Application ID"

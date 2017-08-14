@@ -16,12 +16,12 @@
 
 (defmethod docgen-label-wrap :default
   [{:keys [schema path] :as options} component]
-  (if (-> schema :body first :label false?)
-    component
-    [:div.col--vertical
+  [:div.col--vertical
+   (if (-> schema :body first :label false?)
+     (common/empty-label)
      [:label.matti-label {:for (path/id path)}
-      (docgen-loc options)]
-     component]))
+      (docgen-loc options)])
+   component])
 
 (defmethod docgen-label-wrap :checkbox
   [_ component]
@@ -114,6 +114,7 @@
     (common/reset-if-needed! text* @state)
     [tag
      (merge (docgen-attr options
+                         :disabled  (-> schema :body first :readonly)
                          :value     @text*
                          :on-change identity ;; A function is needed
                          :on-blur   (state-change options))

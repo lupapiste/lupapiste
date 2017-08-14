@@ -22,7 +22,7 @@
                           :disabled   disabled
                           :negate?    negate?})))
 
-(defn section-header
+(defn template-section-header
   [{:keys [state path i18nkey] :as options}]
   [:div.section-header.matti-grid-2
    [:div.row.row--tight
@@ -38,10 +38,10 @@
 
 (rum/defc section < rum/reactive
   {:key-fn path/key-fn}
-  [{:keys [state path id css] :as options}]
+  [{:keys [state path id css] :as options} & [header-fn]]
   [:div.matti-section
    {:class (path/css options)}
-   (section-header options)
+   ((or header-fn template-section-header) options)
    (when-not (path/react path state :removed)
      [:div.section-body (layout/matti-grid (shared/child-schema options
                                                                 :grid

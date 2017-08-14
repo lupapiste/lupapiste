@@ -279,11 +279,20 @@
 
                             <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
-                                <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
-                                   class="link-btn">
-                                    <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
-                                    <span data-bind="if: unseenVerdicts">
-                                        <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
+                              <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
+                                 class="link-btn">
+                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
+                                <span data-bind="if: unseenVerdicts">
+                                      <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
+
+                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
+                                           css: {'active': $parent.selectedTabName() === 'matti-verdict'}">
+                              <a data-bind="click: changeTab,
+                                            feature: 'matti'" href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
+                                 class="link-btn">
+                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
+                                <span data-bind="if: unseenVerdicts">
+                                  <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
                             <!-- In post-verdict states plus 'canceled' -->
                             <li data-bind="if: $root.authorization.ok('application-summary-tab-visible'), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
@@ -532,6 +541,13 @@
                                       visible: $root.authorization.ok('order-verdict-attachment-prints') && $root.verdictAttachmentPrintsOrderHistoryModel.historyItems().length"
                            href="#" data-test-id="test-open-prints-order-history"></a>
 
+                    </div>
+                    <!-- /ko -->
+
+                    <!-- Matti verdict tab -->
+                    <!-- ko if: selectedTabName() === 'matti-verdict' -->
+                    <div id="application-matti-verdict-tab" class="tab-content" data-bind="feature: 'matti'">
+                      <cljs-matti_verdicts></cljs-matti_verdicts>
                     </div>
                     <!-- /ko -->
 

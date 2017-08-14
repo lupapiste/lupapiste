@@ -13,7 +13,15 @@
                    :type :string})
 
 (def verdict-text {:name "matti-verdict-text"
-                   :type :text})
+                   :type :string})
+
+(def verdict-contact {:name  "matti-verdict-contact"
+                      :label false
+                      :type  :string})
+
+(def verdict-id {:name     "matti-verdict-id"
+                 :readonly true
+                 :type     :string})
 
 (def verdict-giver {:name "matti-verdict-giver"
                     :type :select
@@ -84,8 +92,8 @@
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [matti-string verdict-text verdict-check
-        verdict-giver automatic-vs-manual]))
+       [matti-string verdict-text verdict-contact verdict-check
+        verdict-giver verdict-id automatic-vs-manual]))
 
 ;; Phrases
 
@@ -94,6 +102,17 @@
    :category (apply sc/enum (map name shared/phrase-categories))
    :tag      sc/Str
    :phrase   sc/Str})
+
+
+;; Verdicts
+
+(defschema MattiVerdict
+  {:id                          ssc/ObjectIdStr
+   :template-id                 ssc/ObjectIdStr
+   ;; Verdict is draft until it is published
+   (sc/optional-key :published) ssc/Timestamp
+   :modified                    ssc/Timestamp
+   :data                        sc/Any})
 
 ;; Schema utils
 

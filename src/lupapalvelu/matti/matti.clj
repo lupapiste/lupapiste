@@ -12,24 +12,17 @@
 
 (defn command->organization
   "User-organizations is not available for input-validators."
-  [{:keys [user user-organizations]}]
-  (util/find-by-id (usr/authority-admins-organization-id user)
-                   user-organizations ))
-
-(defn permit-type->category [permit-type]
-  (when-let [kw (-> permit-type
-                    ss/lower-case
-                    keyword)]
-    (cond
-      (#{:r :p :ya} kw)              kw
-      (#{:kt :mm} kw)                :kt
-      (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+  [{:keys [user user-organizations organization]}]
+  (if organization
+    @organization
+    (util/find-by-id (usr/authority-admins-organization-id user)
+                     user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (map (comp permit-type->category :permitType) scope)))
+  (set (map (comp shared/permit-type->category :permitType) scope)))
 
 (defn operation->category [operation]
-  (permit-type->category (ops/permit-type-of-operation operation)))
+  (shared/permit-type->category (ops/permit-type-of-operation operation)))
 
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
@@ -273,3 +266,55 @@
                              (if (ss/blank? template-id)
                                {$unset {path true}}
                                {$set {path template-id}}))))
+
+(defn application-verdict-templates [{:keys [operation-verdict-templates
+                                             verdict-templates]}
+                                     {:keys [permitType primaryOperation]}]
+  (let [app-category  (shared/permit-type->category permitType)
+        app-operation (-> primaryOperation :name keyword)]
+    (->> verdict-templates
+         :templates
+         (filter (fn [{:keys [deleted versions category]}]
+                   (and (not deleted)
+                        (seq versions)
+                        (util/=as-kw category app-category))))
+         (map (fn [{:keys [id name]}]
+                {:id       id
+                 :name     name
+                 :default? (= id (get operation-verdict-templates
+                                      app-operation))})))))
+
+
+
+(defn data-draft
+  "Both keys and values of kmap are kw-paths. Keys are draft targets
+  and values data sources."
+  [kmap template]
+  (let [data (-> template :versions last :data)]
+    (reduce (fn [acc [k v]]
+              (assoc-in acc
+                        (util/split-kw-path k)
+                        (get-in data (split-kw-path v))))
+            {}
+            kmap)))
+
+(defmulti initial-draft-data (fn [template & _]
+                               (-> template :category keyword)))
+
+(defmethod initial-draft-data :r
+  [template application]
+  (assoc-in (data-draft {:matti-verdict.0.giver        :matti-verdict.2.giver
+                         :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
+                         :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
+                        template)
+            (util/split-kw-path :matti-verdict.1.application-id)
+            (:id application)))
+
+(defmethod initial-draft-data :foo
+  [a b])
+
+(defn new-verdict-draft [template-id  application organization timestamp]
+  (let [template (verdict-template organization template-id)]
+    {:data     (assoc (initial-draft-data template application)
+                      :modified timestamp)
+     :settings (-> template :versions last :settings)}))
