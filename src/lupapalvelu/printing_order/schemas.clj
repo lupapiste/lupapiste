@@ -9,14 +9,14 @@
                   (str "max-length[" l "]")))
 
 (sc/defschema ContactDetails
-              {:companyName                     (str-max-length 150)
-               (sc/optional-key :streetAddress) (str-max-length  50)
+              {:companyName                     (str-max-length  150)
+               (sc/optional-key :streetAddress) (str-max-length   50)
                (sc/optional-key :postalCode)    sc/Str
-               (sc/optional-key :city)          (str-max-length  50)
-               (sc/optional-key :firstName)     (str-max-length 150)
-               (sc/optional-key :surname)       (str-max-length 150)
-               (sc/optional-key :phone)         (str-max-length  25)
-               (sc/optional-key :email)         (str-max-length  50)})
+               (sc/optional-key :city)          (str-max-length   50)
+               (sc/optional-key :firstName)     (str-max-length  150)
+               (sc/optional-key :surname)       (str-max-length  150)
+               (sc/optional-key :phone)         (str-max-length   25)
+               (sc/optional-key :email)         (str-max-length 1024)})
 
 (def Orderer
   ContactDetails)
