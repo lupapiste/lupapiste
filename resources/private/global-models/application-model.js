@@ -629,10 +629,10 @@ LUPAPISTE.ApplicationModel = function() {
             ? "cancel-application-authority"
             : "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-      hub.send("show-dialog", {ltitle: "application.cancelApplication",
+      hub.send("show-dialog", {ltitle: self.isArchivingProject() ? "application.cancelArchivingProject" : "application.cancelApplication",
                                size: "medium",
-                               component: "textarea-dialog",
-                               componentParams: {text: loc("areyousure.cancel-application"),
+                               component: self.isArchivingProject() ? "yes-no-dialog" : "textarea-dialog",
+                               componentParams: {text: self.isArchivingProject() ? loc("areyousure.cancelArchivingProject") : loc("areyousure.cancel-application"),
                                                  yesFn: cancelApplicationAjax(command),
                                                  lyesTitle: "yes",
                                                  lnoTitle: "no",
