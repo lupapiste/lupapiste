@@ -223,7 +223,6 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-
 (defn save-review-updates [user application updates added-tasks-with-updated-buildings attachments-by-task-id]
   (let [update-result (update-application (application->command application) updates)
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection

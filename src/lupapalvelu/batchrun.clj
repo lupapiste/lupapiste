@@ -16,6 +16,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
+            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
@@ -490,21 +491,29 @@
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
          (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)])))))
 
+(defn mark-reviews-faulty [application {:keys [new-faulty-tasks]}]
+  (when (not (empty? new-faulty-tasks))
+    (let [timestamp (now)]
+     (doseq [task-id new-faulty-tasks]
+       (tasks/mark-review-faulty application task-id timestamp)))))
+
 (defn poll-verdicts-for-reviews
   [& {:keys [application-ids organization-ids overwrite-background-reviews?]}]
-  (let [applications (when (seq application-ids)
-                       (mongo/select :applications {:_id {$in application-ids}}))
+  (let [applications  (when (seq application-ids)
+                        (mongo/select :applications {:_id {$in application-ids}}))
         organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
-        eraajo-user (user/batchrun-user (map :id organizations))]
-    (->> (pmap #(fetch-review-updates-for-organization eraajo-user
-                                                       (now)
-                                                       applications
-                                                       [:R]
-                                                       %
-                                                       overwrite-background-reviews?)
-               organizations)
-         (apply concat)
-         (run! (partial apply save-reviews-for-application eraajo-user)))))
+        eraajo-user   (user/batchrun-user (map :id organizations))
+        fetch-results (->> (pmap #(fetch-review-updates-for-organization
+                                   eraajo-user
+                                   (now)
+                                   applications
+                                   [:R]
+                                   %
+                                   overwrite-background-reviews?)
+                                 organizations)
+                           (apply concat))]
+    (run! (partial apply mark-reviews-faulty) fetch-results)
+    (run! (partial apply save-reviews-for-application eraajo-user) fetch-results)))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
@@ -524,7 +533,7 @@
   (poll-verdicts-for-reviews :organization-ids args)
   (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :organizations args}))
 
-(defn check-reviews-for-orgs [& args]
+(defn overwrite-reviews-for-orgs [& args]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Review checking with overwrite" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
