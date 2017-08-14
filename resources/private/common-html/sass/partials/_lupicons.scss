@@ -65,6 +65,18 @@ $lupicon-size: 22px;
 // The rest is lupicon style definitions that are copied as is from lupicon style.css
 
 
+.lupicon-grip-diagonal:before {
+  content: "\e92c";
+}
+.lupicon-grip-horizontal:before {
+  content: "\e92d";
+}
+.lupicon-grip-vertical:before {
+  content: "\e92e";
+}
+.lupicon-minus:before {
+  content: "\e92f";
+}
 .lupicon-gear:before {
   content: "\e928";
 }
