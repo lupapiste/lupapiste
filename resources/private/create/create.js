@@ -82,6 +82,13 @@
       }
     });
 
+    var localStorageKey = "create-prev-permit-organization";
+    self.selectedPrevPermitOrganization.subscribe(function(organizationId) {
+      if (organizationId && window.localStorage) {
+        window.localStorage.setItem(localStorageKey, organizationId);
+      }
+    });
+
     self.findOperations = function(code) {
       municipalities.operationsForMunicipality(code, function(operations) {
         self.operations(operations);
@@ -307,7 +314,16 @@
         .success(function(data) {
           self.organizationOptions(data.organizations);
           if (self.organizationOptions().length) {
-            self.selectedPrevPermitOrganization(self.organizationOptions()[0].id);
+            var defaultOrg = self.organizationOptions()[0].id;
+            var storedOrg = window.localStorage && window.localStorage.getItem(localStorageKey);
+            if (storedOrg &&
+              _.chain(self.organizationOptions())
+                .map('id')
+                .includes(window.localStorage.getItem(localStorageKey))
+                .value()) {
+              defaultOrg = storedOrg
+            }
+            self.selectedPrevPermitOrganization(defaultOrg);
           }
         })
         .call();
