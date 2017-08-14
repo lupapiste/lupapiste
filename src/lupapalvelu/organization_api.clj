@@ -141,7 +141,7 @@
 (defquery user-organizations-for-archiving-project
   {:user-roles #{:authority}}
   [{user :user}]
-  (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}})))
+  (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:archivist :digitizer})}})))
 
 (defcommand update-organization
   {:description "Update organization details."
