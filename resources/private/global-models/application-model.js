@@ -378,14 +378,19 @@ LUPAPISTE.ApplicationModel = function() {
     if (!self.stateChanged()) {
       hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
       ajax.command("submit-archiving-project", {id: self.id()})
-        .success( self.reload)
+        .success(function(){
+          if (lupapisteApp.models.currentUser.isArchivist()) {
+            self.reloadToTab("archival");
+          } else {
+            self.reload();
+          }
+        })
         .onError("error.cannot-submit-application", cannotSubmitResponse)
         .onError("error.command-illegal-state", self.lightReload)
         .fuse(self.stateChanged)
         .processing(self.processing)
         .call();
       hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-      hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     }
     return false;
   };
