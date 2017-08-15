@@ -71,6 +71,8 @@
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vakuus :vaativuus
                          :rakennusoikeus :kaava})
+(def visibility (sc/enum :editing? :viewing?))
+
 (defschema MattiBase
   {(sc/optional-key :_meta)      meta-flags
    (sc/optional-key :css)        [sc/Keyword]
@@ -80,7 +82,11 @@
    ;; Absolute localisation terms. Overrides loc-prefix, does not
    ;; affect children. When the vector has more than one items, the
    ;; earlier localisations are arguments to the latter.
-   (sc/optional-key :i18nkey)    [sc/Keyword]})
+   (sc/optional-key :i18nkey)    [sc/Keyword]
+   ;; Show/hide depending on the edit/view mode. Default: always visible.
+   ;; If both are given, :show? overrides :hide?
+   (sc/optional-key :show?)      visibility
+   (sc/optional-key :hide?)      visibility})
 
 (defschema MattiComponent
   (merge MattiBase
@@ -199,7 +205,7 @@
           }))
 
 (defschema MattiVerdict
-  {(sc/optional-key :id)       sc/Str ;; Id is created when the verdict is saved the first time
+  {(sc/optional-key :id)       sc/Str
    (sc/optional-key :modified) sc/Int
    (sc/optional-key :name)     sc/Str ;; Non-localized raw string
    :sections                   [MattiVerdictSection]})
@@ -316,13 +322,15 @@
                       :rows    [[{:id     "verdict-code"
                                   :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
-                                                          :items (keys verdict-code-map)}}}]]}}
+                                                          :items (keys verdict-code-map)}}}]]}
+               :_meta {:editing? true}}
               {:id   "foremen"
                :grid {:columns 1
                       :rows    [[{:id     "foremen"
                                   :schema {:multi-select {:label?     false
                                                           :loc-prefix :matti-r
-                                                          :items foreman-codes}}}]]}}
+                                                          :items foreman-codes}}}]]}
+               :_meta {:editing? true}}
               {:id   "plans"
                :grid {:columns 1
                       :rows    [[{:id     "plans"
@@ -331,7 +339,8 @@
                                                             :item-key :id
                                                             :type     :multi-select
                                                             :term     {:path       [:plans]
-                                                                       :extra-path [:name]}}}}]]}}
+                                                                       :extra-path [:name]}}}}]]}
+               :_meta {:editing? true}}
               {:id   "reviews"
                :grid {:columns 1
                       :rows    [[{:id     "reviews"
@@ -340,7 +349,8 @@
                                                             :item-key :id
                                                             :type     :multi-select
                                                             :term     {:path       [:reviews]
-                                                                       :extra-path [:name]}}}}]]}}]})
+                                                                       :extra-path [:name]}}}}]]}
+               :_meta {:editing? true}}]})
 
 (def settings-schemas
   {:r r-settings})
@@ -353,10 +363,13 @@
   {:r {:sections [{:id "matti-verdict"
                    :grid {:columns 5
                           :rows [[{:id "giver"
-                                   :schema {:docgen "matti-verdict-giver"}}
-                                  {:id "contact"
-                                   :align :full
-                                   :schema {:docgen "matti-verdict-contact"}}
+                                   :col 2
+                                   :loc-prefix :matti-verdict-giver
+                                   :schema {:list {:title "matti-verdict.giver"
+                                                   :items [{:id "giver"
+                                                            :schema {:docgen "matti-verdict-giver"}}
+                                                           {:id "contact"
+                                                            :schema {:docgen "matti-verdict-contact"}}]}}}
                                   {:id "section"
                                    :schema {:docgen "matti-verdict-text"}}
                                   {:id "verdict-code"

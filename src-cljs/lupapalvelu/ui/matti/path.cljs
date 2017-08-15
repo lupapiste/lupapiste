@@ -33,8 +33,8 @@
         (remove #(re-matches #"^\d+$" %))
         (s/join ".")
         common/loc))
-  ([path {:keys [i18nkey locPrefix] :as schema} & extra]
-   (let [loc-prefix (or locPrefix
+  ([path {:keys [i18nkey] :as schema} & extra]
+   (let [loc-prefix (or (some-> schema :body first :locPrefix)
                         (shared/parent-value schema :loc-prefix))
          i18nkey (and i18nkey (flatten [i18nkey]))]
      (if (> (count i18nkey) 1)

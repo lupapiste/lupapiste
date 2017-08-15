@@ -214,29 +214,10 @@
                                    {:callback update-text})]]])))
 
 ;; -------------------------------
-;; View layout components
-;; -------------------------------
-
-(defmulti view-component (fn [cell-type & _]
-                           cell-type))
-
-(defmethod view-component :reference-list
-  [_ {:keys [state path schema ] :as options} & [wrap-label?]]
-  (let [span [:span (path/loc path schema (path/value path state))]]
-    (if (show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options span)
-      span)))
-
-(defmethod view-component :phrase-text
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [span [:span.phrase-text (path/value path state)]]
-    (if (show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options span)
-      span)))
-
-;; -------------------------------
 ;; Component instantiation
 ;; -------------------------------
+
+(declare view-component)
 
 (defmulti instantiate (fn [_ cell & _]
                       (schema-type cell)))
@@ -253,7 +234,7 @@
     (cond->> options
       editing?       docgen/docgen-component
       (not editing?) docgen/docgen-view
-      wrap-label?    (docgen/docgen-label-wrap options ))))
+      wrap-label?    (docgen/docgen-label-wrap options))))
 
 (defmethod instantiate :default
   [{:keys [state path] :as options} {:keys [schema id] :as cell} & [wrap-label?]]
@@ -281,12 +262,60 @@
   [:span
    (common/loc (name (:loc-text schema)))])
 
+;; -------------------------------
+;; View layout components
+;; -------------------------------
+
+(defmulti view-component (fn [cell-type & _]
+                           cell-type))
+
+(defmethod view-component :reference-list
+  [_ {:keys [state path schema ] :as options} & [wrap-label?]]
+  (let [span [:span (path/loc path schema (path/value path state))]]
+    (if (show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options span)
+      span)))
+
+(defmethod view-component :phrase-text
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  (let [span [:span.phrase-text (path/value path state)]]
+    (if (show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options span)
+      span)))
+
+(defmethod view-component :list
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  (let [component [:div (map-indexed (fn [i item]
+                                        (instantiate (assoc options
+                                                            :path (path/extend path
+                                                                    (when-not (:id item)
+                                                                      (str i))))
+                                                     (shared/child-schema item
+                                                                          :schema
+                                                                          schema)
+                                                     false))
+                                     (:items schema))]]
+    (if (show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options component)
+      component)))
+
+
 (defn- sub-options
   "Options for the subschema"
   [{:keys [state path]} subschema]
   (assoc subschema
          :state state
          :path (path/extend path (:id subschema))))
+
+(defn- visible? [{:keys [state path schema]}]
+  (let [{:keys [show? hide?]} schema
+        mode                  (if (path/meta? path :editing?)
+                                :editing?
+                                :viewing?)]
+    (cond
+      show?    (= show? mode)
+      hide?    (not= hide? mode)
+      :default true)))
 
 (defn matti-list [{:keys [schema state path] :as options} & [wrap-label?]]
   [:div.matti-list
@@ -301,7 +330,7 @@
                                                     (shared/child-schema item
                                                                          :schema
                                                                          schema)
-                                               wrap-label?)]
+                                                    false)]
                     [:div.item {:key   (str "item-" i)
                                 :class (path/css (sub-options options item)
                                                  (when (:align item)

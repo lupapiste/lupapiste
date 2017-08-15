@@ -295,3 +295,10 @@
      true    (map (fn [{:keys [text value]}]
                     [:option {:key   value
                               :value value} text])))])
+
+;; Prettyprints the contents of the given atom.
+(rum/defc pprint < rum/reactive
+  [a]
+  [:div.pprint
+   [:div.title [:h4"debug"]]
+   [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])

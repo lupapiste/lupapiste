@@ -303,15 +303,12 @@
 
 (defmethod initial-draft-data :r
   [template application]
-  (assoc-in (data-draft {:matti-verdict.0.giver        :matti-verdict.2.giver
+  (assoc-in (data-draft {:matti-verdict.0.giver.giver  :matti-verdict.2.giver
                          :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
                          :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
                         template)
             (util/split-kw-path :matti-verdict.1.application-id)
             (:id application)))
-
-(defmethod initial-draft-data :foo
-  [a b])
 
 (defn new-verdict-draft [template-id  application organization timestamp]
   (let [template (verdict-template organization template-id)]

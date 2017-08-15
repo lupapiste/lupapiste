@@ -74,6 +74,9 @@ $matti-grid-margin: 10px;
   > .item {
     display: inline-block;
   }
+  > .item + .item {
+    margin-left: $matti-grid-margin;
+  }
   > .item.item--full {
     display: block;
   }
@@ -388,5 +391,31 @@ div.matti-autocomplete {
         }
       }
     }
+  }
+}
+
+// For debugging
+.pprint {
+  padding: 4px;
+  font-size: 12px;
+  line-height: initial;
+  border: 1px solid $red-dark;
+  > .title {
+    text-align: center;
+    margin-top: -13px;
+    > h4 {
+      font-family: Consolas, "Lucida Console", monospace;
+      display: inline-block;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: $red-dark;
+      text-align: center;
+      background-color: white;
+      padding-left: 1em;
+      padding-right: 1em;
+    }}
+  > .code {
+    font-family: Consolas, "Lucida Console", monospace;
+    white-space: pre;
   }
 }

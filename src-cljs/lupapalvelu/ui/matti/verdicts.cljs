@@ -113,8 +113,8 @@
        ::list (verdict-list)
        ::verdict (with-back-button (verdict (assoc (get shared/verdict-schemas
                                                         (shared/permit-type->category (lupapisteApp.models.application.permitType)))
-                                                   :state state/current-verdict)))
-       )]))
+                                                   :state state/current-verdict))))
+     (components/pprint state/current-verdict)]))
 
 (defn mount-component []
   (when (common/feature? :matti)

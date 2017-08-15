@@ -7704,6 +7704,7 @@ input.grid-style-input {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
   -moz-appearance: none;
+  vertical-align: middle;
 }
 
 input.grid-style-input:focus {
@@ -7736,6 +7737,7 @@ input.grid-style-input--wide {
   -webkit-border-radius: 0px;
   -moz-appearance: none;
   width: 100%;
+  vertical-align: middle;
 }
 
 input.grid-style-input--wide:focus {
@@ -17978,6 +17980,10 @@ button.rollup-button {
   display: inline-block;
 }
 
+.matti-list > .item + .item {
+  margin-left: 10px;
+}
+
 .matti-list > .item.item--full {
   display: block;
 }
@@ -18466,9 +18472,47 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   padding-left: 10px;
 }
 
+<<<<<<< HEAD
 .order-grid-1 {
   width: 100%;
   color: #333333;
+=======
+.pprint {
+  padding: 4px;
+  font-size: 12px;
+  line-height: initial;
+  border: 1px solid #df3215;
+}
+
+.pprint > .title {
+  text-align: center;
+  margin-top: -13px;
+}
+
+.pprint > .title > h4 {
+  font-family: Consolas, "Lucida Console", monospace;
+  display: inline-block;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: #df3215;
+  text-align: center;
+  background-color: white;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.pprint > .code {
+  font-family: Consolas, "Lucida Console", monospace;
+  white-space: pre;
+}
+
+/* VIEWS
+------------------------------------------------------------------------------*/
+@media (max-width: 47.5em) {
+  body.welcome {
+    width: 41.25em;
+  }
+>>>>>>> LPK-3110 Matti list component related fixes.
 }
 
 .order-grid-1 .row {
