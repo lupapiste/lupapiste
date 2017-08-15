@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-funding-select-template">
+  <div class="funding-select-container">
+    <span data-bind="ltext: 'hankkeen-kuvaus.rahoitus._group_label'"></span>
+      <label data-bind="visible: label, ltext: 'hankkeen-kuvaus.rahoitus._group_label', css: labelClasses"></label>
+      <input type="checkbox" data-bind="checked: value,
+                                        css: inputClasses" />
+      <span data-bind="saveIndicator: indicator, label: false"></span>
+  </div>
+
+</script>

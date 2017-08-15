@@ -220,7 +220,8 @@
                     :companySelector
                     :buildingSelector
                     :newBuildingSelector
-                    :maaraalaTunnus])
+                    :maaraalaTunnus
+                    :fundingSelector])
 
 (defschema Special
   (merge GenInput
