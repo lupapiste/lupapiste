@@ -15,16 +15,28 @@
                                                localisationKeys: {missing: 'application.statement.missing'}}}"></div>
         </div>
         <button data-bind="click: toggleInviteSection,
-                           visible: authorization.ok('request-for-statement') && !showInviteSection()"
+                           visible: authorization.ok('request-for-statement') && !someDialogOpen()"
                 class="positive modal"
                 data-test-id="add-statement">
           <i class="lupicon-circle-plus"></i>
           <span data-bind="ltext: 'application.statement.add'"></span>
         </button>
+        <button data-bind="toggleClick: showElyStatementSection,
+                           visible: authorization.ok('ely-statement-request') && !someDialogOpen()"
+                class="positive modal"
+                data-test-id="add-ely-statement">
+          <i class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'application.ely-statement.add'"></span>
+        </button>
 
 
         <!-- ko if: showInviteSection -->
         <div data-bind="template: 'statement-invite-section'"></div>
+        <!-- /ko -->
+        <!-- ko if: showElyStatementSection() && elySubtypes().length > 0 -->
+        <bubble-dialog params="visible: showElyStatementSection, okFun: requestElyStatement, okEnabled: elyDataOk, buttonText: 'application.statement.add', buttonIcon: 'lupicon-circle-check'">
+          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}"></div>
+        </bubble-dialog>
         <!-- /ko -->
       </div>
 
@@ -56,7 +68,7 @@
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="statement-invite-section">
   <div id="invite-statement-givers-section">
-      <p id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></p>
+      <h3 id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></h3>
       <table class="table table-striped" data-test-id="table-application-statements-givers">
           <thead>
               <tr>
@@ -133,6 +145,30 @@
 
     <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
   </div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="ely-statement-request-bubble">
+  <h3 data-bind="ltext: 'application.ely-statement.request'"></h3>
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <label data-bind="ltext: 'application.ely-statement.subtype.select'" for="ely-subtypes" class="form-label form-label-text"></label>
+      <select class="dropdown" id="ely-subtypes" data-bind="value: elyData.subtype, options: elySubtypes, valueAllowUnset: true, optionsCaption: loc('choose')"></select>
+    </div>
+    <div class="row">
+      <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="ely-statement-saateText" class="form-label form-label-text"></label>
+      <textarea id="ely-statement-saateText" rows=10 class="really-long high"
+                data-bind="textInput: saateText, attr: {placeholder: loc('application.ely-statement.saateText-placeholder')}"></textarea>
+    </div>
+    <div class="row">
+      <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="ely-maaraaika"></label>
+      <input type="text" class="form-input" data-bind="datepicker: elyData.dueDate" id="ely-maaraaika"></input>
+    </div>
+    <div class="row">
+      <label class="form-label" data-bind="ltext: 'kieli'" for="ely-lang"></label>
+      <select class="dropdown" data-bind="value: elyData.lang, options: loc.supported, optionsText: loc" id="ely-lang"></input>
+    </div>
+  </div>
+
 </script>
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="neighbors-table-template">
