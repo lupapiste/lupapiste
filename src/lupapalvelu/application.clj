@@ -482,7 +482,7 @@
 
 (defn application-auth [user operation-name]
   (let [owner (merge (usr/user-in-role user :owner :type :owner)
-                     {:unsubscribed (#{:aiemmalla-luvalla-hakeminen :archiving-project} (keyword operation-name))})]
+                     {:unsubscribed (contains? #{:aiemmalla-luvalla-hakeminen :archiving-project} (keyword operation-name))})]
     (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
       [owner company]
       [owner])))
