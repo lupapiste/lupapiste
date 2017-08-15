@@ -131,8 +131,8 @@
   (sc/constrained sc/Str (every-pred ss/in-lower-case? (max-length-constraint 255)) "Username"))
 
 (defschema Timestamp
-  "A schema for timestamp"
-  (sc/pred (every-pred integer?) "Timestamp (long)"))
+  "A schema for timestamp. Min date 1.1.1900 and max date is 31.12.9999."
+  (sc/constrained sc/Int (every-pred (partial < -2208988800000) (partial > 253402214400000)) "Timestamp (long)"))
 
 (defschema TimeString
   "A schema for timestring hh:mm:ss.d"

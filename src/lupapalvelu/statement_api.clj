@@ -4,6 +4,7 @@
             [lupapalvelu.comment :as comment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.ely :as ely]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
@@ -14,6 +15,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.user-utils :as uu]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.xml.asianhallinta.core :as ah]
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -128,12 +130,34 @@
         users       (map (comp #(usr/get-or-create-user-by-email % user) :email) persons)
         persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
         metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-        statements  (map (partial statement/create-statement now metadata saateText dueDate) persons+uid)
+        statements  (map #(statement/create-statement now saateText dueDate % metadata) persons+uid)
         auth        (map #(usr/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
     (update-application command {$push {:statements {$each statements}
                                         :auth       {$each auth}}})
     (notifications/notify! :request-statement-new-user (assoc command :recipients (filter (comp new-emails :email) users)))
     (notifications/notify! :request-statement (assoc command :recipients (remove (comp new-emails :email) users)))))
+
+(defcommand ely-statement-request
+  {:parameters       [id subtype]
+   :optional-parameters [functionCode lang dueDate saateText]
+   :user-roles       #{:authority}
+   :states           #{:open :submitted :complementNeeded :sent}
+   :pre-checks       [statement/statement-in-sent-state-allowed]
+   :input-validators [ely/subtype-input-validator]
+   :feature          :ely-uspa
+   :description      "Sends request for statement to ELY-keskus via integration"}
+  [{:keys [application created user organization] :as command}]
+  (let [org @organization
+        submitted-application (mongo/by-id :submitted-applications id)
+        metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
+        ely-statement-giver (ely/ely-statement-giver subtype)
+        message-id (mongo/create-id)
+        ely-data  {:partner "ely"
+                   :subtype subtype
+                   :messageId message-id}
+        statement (statement/create-statement created saateText dueDate ely-statement-giver metadata ely-data)]
+    (ah/save-statement-request user application submitted-application org statement (or lang (:language user)))
+    (update-application command {$push {:statements statement}})))
 
 (defcommand delete-statement
   {:parameters [id statementId]

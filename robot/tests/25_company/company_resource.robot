@@ -11,28 +11,31 @@ Kaino logs in
   User logs in  kaino@solita.fi  ${password}  Kaino Solita
 
 Invite existing dummy user
-  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
+  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=False  ${submit}=True  ${names}=False
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
   Test id disabled  company-search-email
   Input text by test id  company-new-user-email  ${email}
   Click enabled by test id  company-search-email
   Test id disabled  company-new-user-email
+  ${initial-firstname}=  Set Variable If  ${names}  ${firstname}  ${EMPTY}
+  ${initial-lastname}=  Set Variable If  ${names}  ${lastname}  ${EMPTY}
 
-  Textfield value should be  jquery=[data-test-id=company-new-user-firstname]  ${EMPTY}
+
+  Textfield value should be  jquery=[data-test-id=company-new-user-firstname]  ${initial-firstname}
   Test id enabled  company-new-user-firstname
-  Textfield value should be  jquery=[data-test-id=company-new-user-lastname]  ${EMPTY}
+  Textfield value should be  jquery=[data-test-id=company-new-user-lastname]  ${initial-lastname}
   Test id enabled  company-new-user-lastname
   Input text by test id  company-new-user-firstname  ${firstname}
   Input text by test id  company-new-user-lastname  ${lastname}
-  Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
-  Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
+  Run keyword if  ${admin}  Click label  company-new-user-admin
+  Run keyword unless  ${submit}  Click label  company-new-user-submit
   Click enabled by test id  company-user-send-invite
   Wait Test id visible  company-add-user-done
   Click by test id  company-new-user-invited-close-dialog
 
 Invite existing user
-  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
+  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=False  ${submit}=True
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
   Test id disabled  company-search-email
@@ -46,8 +49,8 @@ Invite existing user
   Textfield should contain  jquery=[data-test-id=company-new-user-lastname]  ${lastname}
   Test id disabled  company-new-user-lastname
 
-  Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
-  Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
+  Run keyword if  ${admin}  Click label  company-new-user-admin
+  Run keyword unless  ${submit}  Click label  company-new-user-submit
   Click enabled by test id  company-user-send-invite
   Wait Test id visible  company-add-user-done
   Click by test id  company-new-user-invited-close-dialog

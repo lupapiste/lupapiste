@@ -7,7 +7,7 @@
             [ring.swagger.swagger2 :as rs]
             [ring.swagger.ui :as ui]
             [schema.core :as sc]
-            [sade.core :refer [fail!]]
+            [sade.core :refer [fail]]
             [sade.util :as util]
             [lupapalvelu.action :as action]
             [lupapalvelu.api-common :refer :all]
@@ -18,27 +18,44 @@
 
 (defonce endpoints (atom []))
 
-(defn valid-inputs? [request param-map]
-  (not-every? (fn [key]
-                (let [input-schema (or (get param-map key) sc/Any)
-                      input-val    (get request key)]
-                  (sc/check input-schema input-val))) (keys param-map)))
+(defn valid-inputs?
+  ([request param-map]
+   (and (valid-inputs? request (:required param-map) identity)
+        (valid-inputs? request (:optional param-map) sc/maybe)))
+  ([request param-map schema-fn]
+   (let [param-keys (keys param-map)]
+     (or (empty? param-keys)
+         (every? (fn [key]
+                   (let [input-schema (-> (or (get param-map key)
+                                              sc/Any)
+                                          (schema-fn))
+                         input-val    (get request key)]
+                     (not (sc/check input-schema input-val))))
+               param-keys)))))
 
-(defmacro defendpoint [path & content]
+(defn- param-schema-map [interspersed-keys-and-values]
+  (->> interspersed-keys-and-values
+       (partition 2)
+       (map vec)
+       (into {})))
+
+(defmacro defendpoint-for [role-check-fn path register-endpoint? & content]
   (let [meta-data (when (map? (first content)) (first content))
-        params (->> (util/select-values meta-data [:parameters :optional-parameters])
-                    (apply concat)
-                    (apply assoc {}))
-        letkeys (keys params)]
+        params {:required (->> (get meta-data :parameters)
+                               (param-schema-map))
+                :optional (->> (get meta-data :optional-parameters)
+                               (param-schema-map))}
+        letkeys (apply concat (->> params vals (map keys)))]
     `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
            retval-schema# (get ~meta-data :returns)]
-       (swap! endpoints conj {:method (keyword m#)
-                              :path   p#
-                              :meta   ~meta-data})
+       (when ~register-endpoint?
+         (swap! endpoints conj {:method (keyword m#)
+                                :path   p#
+                                :meta   ~meta-data}))
        (defpage ~path {:keys ~letkeys :as request#}
          (if-let [~'user (or (basic-authentication (request/ring-request))
                              (autologin/autologin  (request/ring-request)))]
-           (if (usr/rest-user? ~'user)
+           (if (~role-check-fn ~'user)
              ; Input schema validation
              (if (valid-inputs? request# ~params)
                (let [response-data# (do ~@content)]
@@ -51,9 +68,12 @@
                      (catch Exception e#
                        (errorf "Possible schema error or other failure in %s: %s" ~path e#)
                        (resp/status 500 "Unknown server error")))))
-               (resp/status 404 {:ok "false" :text :error.input-validation-error}))
+               (resp/status 400 (resp/json (fail :error.input-validation-error))))
              (resp/status 401 "Unauthorized"))
            basic-401)))))
+
+(defmacro defendpoint [path & content]
+  `(defendpoint-for usr/rest-user? ~path true ~@content))
 
 (defendpoint "/rest/submitted-applications"
   {:summary          "Organisaation kaikki j\u00e4tetyt hakemukset."

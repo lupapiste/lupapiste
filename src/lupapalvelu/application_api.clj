@@ -84,10 +84,11 @@
 
 (defquery application-authorities
   {:user-roles #{:authority}
+   :org-authz-roles (conj roles/default-org-authz-roles :digitizer)
    :states     (states/all-states-but :draft)
    :parameters [:id]}
   [{app :application}]
-  (ok :authorities (app/application-org-authz-users app #{"authority"})))
+  (ok :authorities (app/application-org-authz-users app #{"authority" "digitizer"})))
 
 (defquery application-commenters
   {:user-roles #{:authority}
@@ -97,19 +98,17 @@
   (ok :authorities (app/application-org-authz-users app #{"authority" "commenter"})))
 
 (defn validate-authority-in-applications-org
-  [command]
-  (let [org (get-in command [:application :organization])
-        org (keyword org)
-        org-authz (get-in command [:user :orgAuthz org])]
-    (when-not (contains? org-authz :authority)
-      (fail :error.unauthorized
-            :source ::validate-authority-in-applications-org))))
+  [{:keys [user application]}]
+  (when-not (usr/user-is-authority-in-organization? user (:organization application))
+    (fail :error.unauthorized
+          :source ::validate-authority-in-applications-org)))
 
 (defquery enable-accordions
   {:description "Pseudo-query for checking if accordions should be open or
                  closed"
    :user-roles roles/all-authenticated-user-roles
    :pre-checks [(action/some-pre-check
+                  permit/is-archiving-project
                   (action/and-pre-check
                     (permit/validate-permit-type-is :YA)
                     usr/validate-authority
@@ -122,7 +121,7 @@
 (defquery party-document-names
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :states     states/all-application-states}
+   :states     states/all-application-or-archiving-project-states}
   [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
@@ -723,7 +722,8 @@
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-linking
-                      app/validate-authority-in-drafts]
+                      app/validate-authority-in-drafts
+                      permit/is-not-archiving-project]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{data :data}] (when (= (:id data) (ss/trim (:linkPermitId data))) (fail :error.link-permit-self-reference)))
                       (fn [{data :data}] (when-not (mongo/valid-key? (:linkPermitId data)) (fail :error.invalid-db-key)))]}

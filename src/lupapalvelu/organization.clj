@@ -1,36 +1,38 @@
 (ns lupapalvelu.organization
-  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
-           [org.geotools.geojson.feature FeatureJSON]
+  (:import [java.util ArrayList]
+           [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.feature.simple SimpleFeatureBuilder SimpleFeatureTypeBuilder]
+           [org.geotools.geojson.feature FeatureJSON]
            [org.geotools.geojson.geom GeometryJSON]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
            [org.geotools.referencing.crs DefaultGeographicCRS]
-           [org.opengis.feature.simple SimpleFeature]
-           [java.util ArrayList])
+           [org.opengis.feature.simple SimpleFeature])
 
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+  (:require [cheshire.core :as json]
             [clojure.string :as s]
             [clojure.walk :as walk]
-            [monger.operators :refer :all]
-            [cheshire.core :as json]
-            [schema.core :as sc]
-            [sade.core :refer [ok fail fail!]]
-            [sade.env :as env]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.crypt :as crypt]
-            [sade.http :as http]
-            [sade.xml :as sxml]
-            [sade.schemas :as ssc]
+            [clojure.walk :refer [keywordize-keys]]
+            [lupapalvelu.attachment.stamp-schema :as stmp]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.matti.schemas :refer [MattiSavedVerdictTemplates Phrase]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [me.raynes.fs :as fs]
-            [lupapalvelu.attachment.stamp-schema :as stmp]
-            [clojure.walk :refer [keywordize-keys]]))
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail fail!]]
+            [sade.crypt :as crypt]
+            [sade.env :as env]
+            [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.xml :as sxml]
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [schema.coerce :as coerce]))
 
 (def scope-skeleton
   {:permitType nil
@@ -51,8 +53,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
+   :name i18n/LocalizationStringMap
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -69,7 +71,7 @@
 
 (sc/defschema HandlerRole
   {:id                              ssc/ObjectIdStr
-   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
+   :name                            (i18n/localization-schema ssc/NonBlankStr)
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
@@ -82,9 +84,19 @@
 (sc/defschema OrgId
   (sc/pred string?))
 
+(sc/defschema DocStoreInfo
+  {:docStoreInUse           sc/Bool
+   :documentPrice           sc/Num
+   :organizationDescription i18n/LocalizationStringMap})
+
+(def default-docstore-info
+  {:docStoreInUse           false
+   :documentPrice           0.0
+   :organizationDescription (i18n/supported-langs-map (constantly ""))})
+
 (sc/defschema Organization
   {:id OrgId
-   :name (zipmap i18n/all-languages (repeat sc/Str))
+   :name i18n/LocalizationStringMap
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
@@ -119,6 +131,7 @@
    (sc/optional-key :operations-attachments) sc/Any
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool
+   (sc/optional-key :digitizer-tools-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
@@ -141,12 +154,19 @@
    (sc/optional-key :inspection-summary) {(sc/optional-key :templates) [InspectionSummaryTemplate]
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
-   (sc/optional-key :stamps) [stmp/StampTemplate]})
+   (sc/optional-key :stamps) [stmp/StampTemplate]
+   (sc/optional-key :docstore-info) DocStoreInfo
+   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
+   (sc/optional-key :phrases) [Phrase]
+   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}})
+
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
 
-(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
+(def parse-organization (coerce/coercer! Organization coerce/json-coercion-matcher))
+
+(def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist :digitizer])
 (def authority-roles
   "Reader role has access to every application within org."
   (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))

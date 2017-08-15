@@ -7,5 +7,7 @@
   "A schema for natural number integer"
   (sc/constrained sc/Int (comp not neg?) "Natural number"))
 
+(def object-id-pattern #"^[0-9a-f]{24}$")
+
 (def ObjectIdStr
-  (sc/pred (partial matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
+  (sc/pred (partial matches? object-id-pattern) "ObjectId hex string"))

@@ -65,7 +65,7 @@
                          ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
@@ -92,7 +92,7 @@
                          ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
@@ -118,7 +118,7 @@
                          [:UusiAsia :Liitteet :Liite]
                          (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         permit-type    (:permitType application)
@@ -241,7 +241,7 @@
                          [:UusiAsia :Liitteet :Liite]
                          (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         permit-type    (:permitType application)
         docs           (common/documents-by-type-without-blanks (tools/unwrapped application)) => truthy
@@ -272,7 +272,7 @@
                          [:UusiAsia :Liitteet :Liite]
                          (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
         schema-version "ah-1.2"
-        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-uusi-asia-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         permit-type    (:permitType application)
@@ -300,7 +300,7 @@
 (facts "Unit tests - attachments-for-write"
 
   (fact "FileId and filename are returned"
-    (map keys (attachments-for-write {:attachments attachments})) => (has every? (just [:fileId :filename])))
+    (map keys (attachments-for-write attachments)) => (has every? (just [:fileId :filename])))
 
   (fact "Only latestVersions are returned"
     (let [for-write-ids (set (map :fileId (attachments-for-write attachments)))]

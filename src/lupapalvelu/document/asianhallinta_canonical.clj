@@ -3,6 +3,7 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.property :as p]
+            [lupapalvelu.document.attachments-canonical :as acanon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -11,15 +12,15 @@
             [lupapalvelu.i18n :as i18n]))
 
 
-;; UusiAsia, functions prefixed with ua-
+;; UusiAsia
 
-(def ^:private ua-root-element {:UusiAsia nil})
+(def ^:private root-element {:UusiAsia nil})
 
-(defn- ua-get-asian-tyyppi-string [application]
+(defn- get-asian-tyyppi-string [application]
   ; KasiteltavaHakemus, TODO tulossa Tiedoksianto (ilmoitukset)
   "KasiteltavaHakemus")
 
-(defn- ua-get-yhteystiedot [data]
+(defn- get-yhteystiedot [data]
   (util/strip-nils
     {:Jakeluosoite (get-in data [:osoite :katu])
      :Postinumero (get-in data [:osoite :postinumero])
@@ -28,43 +29,40 @@
      :Email (get-in data [:yhteystiedot :email])
      :Puhelinnumero (get-in data [:yhteystiedot :puhelin])}))
 
-(defn- ua-get-yhteyshenkilo [data]
+(defn- get-yhteyshenkilo [data]
   (util/strip-nils
     {:Etunimi (get-in data [:yhteyshenkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:yhteyshenkilo :henkilotiedot :sukunimi])
-     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))
+     :Yhteystiedot (get-yhteystiedot (:yhteyshenkilo data))
      :VainSahkoinenAsiointi (get-in data [:yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin])}))
 
-(defn- ua-get-henkilo [data]
-
-
-
+(defn- get-henkilo [data]
   (util/strip-nils
     {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
-     :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
+     :Yhteystiedot (get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
      :VainSahkoinenAsiointi (get-in data [:henkilo :kytkimet :vainsahkoinenAsiointiKytkin])
      :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
-(defn- ua-get-yritys [data]
+(defn- get-yritys [data]
   {:Nimi (get-in data [:yritys :yritysnimi])
    :Ytunnus (get-in data [:yritys :liikeJaYhteisoTunnus])
-   :Yhteystiedot (ua-get-yhteystiedot (:yritys data))
-   :Yhteyshenkilo (ua-get-yhteyshenkilo (:yritys data))})
+   :Yhteystiedot (get-yhteystiedot (:yritys data))
+   :Yhteyshenkilo (get-yhteyshenkilo (:yritys data))})
 
-(defn- ua-get-hakijat [documents]
+(defn- get-hakijat [documents]
   (when (seq documents)
     {:Hakija (map
                (fn [doc]
                  (let [hakija-data (:data doc)
                        sel (:_selected hakija-data)]
                    (if (= sel "yritys")
-                     {:Yritys (ua-get-yritys hakija-data)}
-                     {:Henkilo (ua-get-henkilo hakija-data)})))
+                     {:Yritys (get-yritys hakija-data)}
+                     {:Henkilo (get-henkilo hakija-data)})))
                documents)}))
 
-(defn- ua-get-maksaja [{data :data}]
+(defn- get-maksaja [{data :data}]
   (let [sel (:_selected data)
         maksaja-map (util/strip-empty-maps
                       (util/strip-nils
@@ -75,10 +73,10 @@
                                                  :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})}))]
 
     (if (= sel "yritys")
-      (util/strip-empty-maps (assoc-in maksaja-map [:Yritys] (ua-get-yritys data)))
-      (util/strip-empty-maps (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data))))))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Yritys] (get-yritys data)))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Henkilo] (get-henkilo data))))))
 
-(defn- ua-get-metatiedot [attachment]
+(defn- get-metatiedot [attachment]
   (let [op-names   (->> (map :name (:op attachment)) (remove nil?))
         type-group (get-in attachment [:type :type-group])
         type-id    (get-in attachment [:type :type-id])]
@@ -86,17 +84,17 @@
       type-id    (cons {:Avain "type-id"    :Arvo type-id})
       type-group (cons {:Avain "type-group" :Arvo type-group}))))
 
-(defn- ua-get-toimenpide [operation lang]
+(defn- get-toimenpide [operation lang]
   (util/strip-nils
     {:ToimenpideTunnus (:name operation)
      :ToimenpideTeksti (i18n/localize lang "operations" (:name operation))}))
 
-(defn- ua-get-toimenpiteet [{:keys [primaryOperation secondaryOperations]} lang]
+(defn- get-toimenpiteet [{:keys [primaryOperation secondaryOperations]} lang]
   (let [operations (conj secondaryOperations primaryOperation)]
     (when (seq operations)
-      {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})))
+      {:Toimenpide (map #(-> % (get-toimenpide lang)) operations)})))
 
-(defn- ua-get-viitelupa [linkPermit]
+(defn- get-viitelupa [linkPermit]
   (if (= (:type linkPermit) "lupapistetunnus")
     (util/strip-nils
      {:MuuTunnus {:Tunnus (:id linkPermit)
@@ -104,14 +102,14 @@
     (util/strip-nils
      {:AsianTunnus (:id linkPermit)})))
 
-(defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
+(defn- get-viiteluvat [{:keys [linkPermitData]}]
   (when (seq linkPermitData)
-    {:Viitelupa (map ua-get-viitelupa linkPermitData)}))
+    {:Viitelupa (map get-viitelupa linkPermitData)}))
 
-(defn- ua-get-sijaintipiste [{:keys [location]}]
+(defn- get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (first location) " " (second location))})
 
-(defn- ua-get-liite
+(defn- get-liite
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
   [attachment link]
   (let [attachment-type (get-in attachment [:type :type-id])
@@ -123,21 +121,22 @@
        :Tyyppi (get-in attachment [:latestVersion :contentType])
        :LinkkiLiitteeseen link
        :Luotu (util/to-xml-date (:modified attachment))
-       :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}})))
+       :Metatiedot {:Metatieto (get-metatiedot attachment)}})))
 
 ;; Public
 
-(defn get-attachments-as-canonical [attachments begin-of-link & [target]]
-  (not-empty
-    (for [attachment attachments
-          :when (and (:latestVersion attachment)
-                  (not= "statement" (-> attachment :target :type))
-                  (not= "verdict" (-> attachment :target :type))
-                  (or (nil? target) (= target (:target attachment))))
-          :let [file-id (get-in attachment [:latestVersion :fileId])
-                attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                link (str begin-of-link attachment-file-name)]]
-      (ua-get-liite attachment link))))
+(defn get-attachments-as-canonical
+  ([attachments begin-of-link]
+    (get-attachments-as-canonical attachments begin-of-link acanon/no-statements-no-verdicts))
+  ([attachments begin-of-link pred]
+   (not-empty
+     (for [attachment attachments
+           :when (and (:latestVersion attachment)
+                      (pred attachment))
+           :let [file-id (get-in attachment [:latestVersion :fileId])
+                 attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                 link (str begin-of-link attachment-file-name)]]
+       (get-liite attachment link)))))
 
 (defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
   {:Kuvaus "Vireille tullut hakemus"
@@ -171,21 +170,21 @@
 
 (defn application-to-asianhallinta-canonical
   "Return canonical, does not contain attachments"
-  [application lang]
+  [application lang & [type]]
   (let [documents (tools/unwrapped (common/documents-without-blanks application))]
-    (-> ua-root-element
-      (assoc-in [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
+    (-> root-element
+      (assoc-in [:UusiAsia :Tyyppi] (or type (get-asian-tyyppi-string application)))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
-      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (domain/get-applicant-documents documents)))
-      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (domain/get-documents-by-subtype documents "maksaja"))))
+      (assoc-in [:UusiAsia :Hakijat] (get-hakijat (domain/get-applicant-documents documents)))
+      (assoc-in [:UusiAsia :Maksaja] (get-maksaja (first (domain/get-documents-by-subtype documents "maksaja"))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
-      (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
-      (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
+      (assoc-in [:UusiAsia :Toimenpiteet] (get-toimenpiteet application lang))
+      (assoc-in [:UusiAsia :Sijainti] (get-sijaintipiste application))
       (assoc-in [:UusiAsia :Kiinteistotunnus] (p/to-human-readable-property-id (:propertyId application)))
-      (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
+      (assoc-in [:UusiAsia :Viiteluvat] (get-viiteluvat application)))))
 
 (defn application-to-asianhallinta-taydennys-asiaan-canonical
   "Return TaydennysAsiaan canonical"

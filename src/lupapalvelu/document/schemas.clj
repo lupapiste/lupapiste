@@ -53,9 +53,8 @@
 
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
-                 :approvable :removable :deny-removing-last-document
+                 :approvable :removable-by :last-removable-by
                  :disableable
-                 :removable-only-by-authority
                  :user-authz-roles
                  :group-help :section-help
                  :after-update
@@ -68,9 +67,6 @@
                  :accordion-fields
                  :blacklist
                  :copy-action})
-
-(def updateable-keys #{:removable})
-(def immutable-keys (set/difference info-keys updateable-keys))
 
 (def select-one-of-key "_selected")
 
@@ -124,10 +120,10 @@
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
 
-(defn with-current-schema-info [document]
-  (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
-    (update document :schema-info merge current-info)))
-
+(defn with-current-schema-info [{{op :op} :schema-info :as document}]
+  (->> document :schema-info get-schema :info
+       (merge (when (map? op) {:removable-by :all})) ; Operation documents are removable by default
+       (update document :schema-info merge)))
 
 (defn select-one-of-schema? [{schema-name :name :as schema}]
   (= select-one-of-key (name schema-name)))
@@ -675,14 +671,20 @@
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
 
+(def kayttotarkoitus {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
+                      :body usages/rakennuksen-kayttotarkoitus})
+
 (def kaytto {:name "kaytto"
              :type :group
              :body [{:name "rakentajaTyyppi" :type :select :sortBy :displayname :required true
                      :body [{:name "liiketaloudellinen"}
                             {:name "muu"}
                             ei-tiedossa]}
-                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
-                     :body usages/rakennuksen-kayttotarkoitus}]})
+                    kayttotarkoitus]})
+
+(def kaytto-minimal {:name "kaytto"
+                     :type :group
+                     :body [kayttotarkoitus]})
 
 (def mitat {:name "mitat"
             :type :group
@@ -1315,6 +1317,15 @@
                 (approvable-top-level-groups rakennuksen-tiedot)
                 rakennustunnus)}
 
+   {:info {:name "archiving-project"
+           :i18name "uusiRakennus"
+           :approvable false
+           :accordion-fields buildingid-accordion-paths}
+    :body (body (assoc kuvaus :required false)
+                tunnus
+                kaytto-minimal
+                rakennustunnus)}
+
    {:info {:name "uusiRakennus"
            :approvable true
            :accordion-fields buildingid-accordion-paths}
@@ -1383,9 +1394,9 @@
    {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1399,9 +1410,9 @@
    {:info {:name "hakija-r"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1415,9 +1426,9 @@
    {:info {:name "hakija-tj"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1431,9 +1442,9 @@
    {:info {:name "hakija-kt"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1447,9 +1458,9 @@
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1460,12 +1471,29 @@
            }
     :body (schema-body-without-element-by-name ya-party turvakielto)}
 
+   {:info {:name "hakija-ark"
+           :i18name "osapuoli"
+           :order 3
+           :removable-by :all
+           :repeating true
+           :last-removable-by :none
+           :approvable false
+           :type :party
+           :subtype :hakija
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
+           }
+    :body (henkilo-yritys-select-group :henkilo-body [henkilotiedot-minimal]
+                                       :yritys-body [{:name "yritysnimi" :type :string :required true :size :l}])}
+
    {:info {:name "ilmoittaja"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document true
+           :last-removable-by :none
            :approvable true
            :type :party
            :subtype :hakija
@@ -1479,9 +1507,8 @@
    {:info {:name "hakijan-asiamies"
            :i18name "osapuoli"
            :order 3
-           :removable true
+           :removable-by :all
            :repeating true
-           :deny-removing-last-document false
            :approvable true
            :type :party
            :subtype :hakijan-asiamies
@@ -1495,8 +1522,7 @@
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"
            :order 4
-           :removable  true
-           :removable-only-by-authority true
+           :removable-by :authority
            :approvable true
            :accordion-fields designer-accordion-paths
            :type :party
@@ -1510,7 +1536,7 @@
            :i18name "osapuoli"
            :repeating true
            :order 5
-           :removable true
+           :removable-by :all
            :approvable true
            :disableable true
            :redraw-on-approval true
@@ -1529,7 +1555,7 @@
    {:info {:name "tyonjohtaja"
            :i18name "osapuoli"
            :order 2
-           :removable true
+           :removable-by :all
            :repeating true
            :approvable true
            :type :party
@@ -1539,7 +1565,7 @@
    {:info {:name "tyonjohtaja-v2"
            :i18name "osapuoli"
            :order 2
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :type :party
@@ -1552,8 +1578,8 @@
            :i18name "osapuoli"
            :repeating true
            :order 6
-           :removable true
-           :removable-only-by-authority true
+           :removable-by :all
+           :last-removable-by :authority
            :approvable true
            :subtype :maksaja
            :section-help "schemas.maksaja.section.help"
@@ -1598,12 +1624,12 @@
            :order 3
            :repeating true
            :no-repeat-button true
-           :removable true
+           :removable-by :all
            :type :location
            :copy-action :clear}
     :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
-   {:info {:name "aloitusoikeus" :removable false :approvable true}
+   {:info {:name "aloitusoikeus" :removable-by :none :approvable true}
     :body (body kuvaus)}
 
    {:info {:name "lisatiedot"
@@ -1613,7 +1639,7 @@
             :layout :full-width}]}
 
    {:info {:name "paatoksen-toimitus-rakval"
-           :removable false
+           :removable-by :none
            :approvable true
            :order 300
            :blacklist [:neighbor]

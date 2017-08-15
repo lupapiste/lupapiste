@@ -55,7 +55,8 @@
      :tags ["test1" "test2"]}
     {:role "authority"}) => {"$and"
                                [{:auth.id "123"}
-                                {"$and" [{:state {"$ne" "canceled"}}
+                                {"$and" [{:permitType {"$ne" "ARK"},
+                                          :state {"$ne" "canceled"}}
                                          {"$or" [{:state {"$ne" "draft"}}
                                                  {:organization {"$nin" []}}]}]}
                                 {"$or" [{:auth.id {"$in" ["321"]}} {:handlers.userId  {"$in" ["321"]}}]}
@@ -148,24 +149,24 @@
 
 (fact "Should make event quyery with correct event type"
       (make-query {} {:event {:eventType ["warranty-period-end"], :start 123, :end 134}} {})
-       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+       => {"$and" [{"$and" [{:permitType {"$ne" "ARK"} :state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
                   {"$and" [{:warrantyEnd {"$gte" 123, "$lt" 134}}]}]})
 
 (fact "Shouldnt make event query when event type is empty"
       (make-query {} {:event {:eventType [], :start 123, :end 134}} {})
-       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}]})
+       => {"$and" [{"$and" [{:permitType {"$ne" "ARK"} :state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}]})
 
 (facts "Event queries are correct"
        (make-query {} {:event {:eventType ["warranty-period-end"], :start 123, :end 134}} {})
-       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+       => {"$and" [{"$and" [{:permitType {"$ne" "ARK"} :state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
                    {"$and" [{:warrantyEnd {"$gte" 123, "$lt" 134}}]}]}
 
        (make-query {} {:event {:eventType ["license-period-start"], :start 123, :end 134}} {})
-       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+       => {"$and" [{"$and" [{:permitType {"$ne" "ARK"} :state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
                    {"$and" [{:documents.data.tyoaika-alkaa-ms.value {"$gte" 123, "$lt" 134}}]}]}
 
        (make-query {} {:event {:eventType ["license-period-end"], :start 123, :end 134}} {})
-       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+       => {"$and" [{"$and" [{:permitType {"$ne" "ARK"} :state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
                    {"$and" [{:documents.data.tyoaika-paattyy-ms.value {"$gte" 123, "$lt" 134}}]}]})
 
 (fact "public-fields"

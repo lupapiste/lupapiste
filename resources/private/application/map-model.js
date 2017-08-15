@@ -172,7 +172,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
-    if (application.infoRequest) {
+    if (application.infoRequest && pageutil.getPage() === "inforequest") {
 
       // Marker map visibility handling [https://issues.solita.fi/browse/LPK-79].
       // In html, could not hide "#inforequest-marker-map" with knockout's "visible" binding, because Openlayers would then try to incorrectly initialize the map.
@@ -185,13 +185,18 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       //   I.e. call "if (inforequestMarkerMap) inforequestMarkerMap.clear().destroy();" (create a forwarding destroy() method to gis.js)
       //   But this is even uglier than the jQuery option.
       //
-      if (authorizationModel.ok("inforequest-markers")) {
-        var irMarkersMap = getOrCreateMap("inforequest-markers");
-        irMarkersMap.clear().updateSize().center(x, y, 14);
-        setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
-        $("#inforequest-marker-map").show();
-      } else {
-        $("#inforequest-marker-map").hide();
+      try {
+        if (authorizationModel.ok("inforequest-markers") && !_.isUndefined($("#inforequest-marker-map"))) {
+          var irMarkersMap = getOrCreateMap("inforequest-markers");
+          irMarkersMap.clear().updateSize().center(x, y, 14);
+          setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
+          $("#inforequest-marker-map").show();
+        } else {
+          $("#inforequest-marker-map").hide();
+        }
+      } catch (e) {
+        error("Unable to get or create map for inforequest-markers", e);
+        return;
       }
 
     }

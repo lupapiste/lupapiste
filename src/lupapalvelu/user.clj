@@ -59,7 +59,8 @@
    "dummy"
    "rest-api"
    "trusted-etl"
-   "trusted-salesforce"])
+   "trusted-salesforce"
+   "docstore-api"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -112,7 +113,7 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
            (sc/optional-key :companyFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/supported-language-schema
+           (sc/optional-key :language)            i18n/EnumSupportedLanguages
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
            (sc/optional-key :firstLogin)          sc/Bool})
 
@@ -131,7 +132,7 @@
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
                    :password                         (ssc/max-length-string 255)
-                   (sc/optional-key :language)       i18n/supported-language-schema})
+                   (sc/optional-key :language)       i18n/EnumSupportedLanguages})
 
 (defschema Handler
   {:id     ssc/ObjectIdStr
@@ -198,15 +199,18 @@
     with-org-auth
     (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
+(defn oir-authority? [{role :role}]
+  (contains? #{:oirAuthority} (keyword role)))
+
 (defn virtual-user?
   "True if user exists only in session, not in database"
-  [{:keys [role impersonating]}]
+  [{:keys [impersonating] :as user}]
   (or
     impersonating
-    (contains? #{:oirAuthority} (keyword role))))
+    (oir-authority? user)))
 
 (defn authority? [{role :role}]
-  (contains? #{:authority :oirAuthority} (keyword role)))
+  (contains? #{:authority} (keyword role)))
 
 (defn verified-person-id? [{pid :personId source :personIdSource :as user}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
@@ -224,6 +228,9 @@
 
 (defn rest-user? [{role :role}]
   (= :rest-api (keyword role)))
+
+(defn docstore-user? [{role :role}]
+  (= :docstore-api (keyword role)))
 
 (defn admin? [{role :role}]
   (= :admin (keyword role)))
@@ -282,7 +289,11 @@
       org/get-organization))
 
 (defn user-is-authority-in-organization? [user organization-id]
-  (let [org-set (organization-ids-by-roles user #{:authority})]
+  (let [org-set (organization-ids-by-roles user roles/default-org-authz-roles)]
+    (contains? org-set organization-id)))
+
+(defn user-has-role-in-organization? [user organization-id valid-org-authz-roles]
+  (let [org-set (organization-ids-by-roles user (set valid-org-authz-roles))]
     (contains? org-set organization-id)))
 
 (defn validate-authority-in-organization

@@ -114,7 +114,7 @@ var pageutil = (function($) {
 
   // Extracts application id from the current hash.
   function hashApplicationId() {
-    var match = /LP-[\d-]+/.exec( _.get( window, "location.hash", ""));
+    var match = /L[PX]-[\d-]+/.exec( _.get( window, "location.hash", ""));
     return _.first( match );
   }
 

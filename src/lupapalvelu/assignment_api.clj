@@ -7,7 +7,8 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.env :as env]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.roles :as roles]))
 
 ;; Helpers and validators
 
@@ -20,8 +21,9 @@
 (defn- validate-receiver [{{:keys [organization]} :application
                            {:keys [recipientId]}    :data}]
   (when (and (not (ss/empty? recipientId))
-             (not (usr/user-is-authority-in-organization? (userid->session-summary recipientId)
-                                                          organization)))
+             (not (usr/user-has-role-in-organization? (userid->session-summary recipientId)
+                                                      organization
+                                                      (conj roles/default-org-authz-roles :digitizer))))
     (fail :error.invalid-assignment-receiver)))
 
 (defn- validate-assignment-id [{{:keys [assignmentId]} :data}]
@@ -46,19 +48,21 @@
   {:description "Return the assignments for the current application"
    :parameters [id]
    :pre-checks [assignments-enabled-for-application]
-   :states (conj states/all-application-states-but-draft-or-terminal :acknowledged) ;LPK-2519
+   :states (conj states/all-application-or-archiving-project-states-but-draft-or-terminal :acknowledged) ;LPK-2519
    :user-roles #{:authority}
+   :org-authz-roles (conj roles/default-org-authz-roles :digitizer)
    :categories #{:documents}}
   [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
 
 (defquery assignment-targets
-  {:description "Possible assignment targets per application for frontend"
-   :parameters [id lang]
-   :user-roles #{:authority}
-   :pre-checks [assignments-enabled-for-application]
+  {:description      "Possible assignment targets per application for frontend"
+   :parameters       [id lang]
+   :user-roles       #{:authority}
+   :org-authz-roles  (conj roles/default-org-authz-roles :digitizer)
+   :pre-checks       [assignments-enabled-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :states   (conj states/all-application-states-but-draft-or-terminal :acknowledged)}
+   :states           (conj states/all-application-or-archiving-project-states-but-draft-or-terminal :acknowledged)}
   [{:keys [application]}]
   (ok :targets (assignment/assignment-targets application)))
 
@@ -103,13 +107,14 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
+   :org-authz-roles  (conj roles/default-org-authz-roles :digitizer)
    :parameters       [id recipientId targets description]
    :input-validators [(partial action/non-blank-parameters [:description])
                       (partial action/vector-parameters [:targets])]
    :pre-checks       [validate-receiver
                       assignments-enabled-for-application
                       disallow-impersonation]
-   :states           states/all-application-states-but-draft-or-terminal}
+   :states           states/all-application-or-archiving-project-states-but-draft-or-terminal}
   [{user         :user
     created      :created
     application  :application}]
@@ -130,7 +135,7 @@
    :pre-checks       [validate-receiver
                       validate-assignment-id
                       disallow-impersonation]
-   :states           states/all-application-states-but-draft-or-terminal}
+   :states           states/all-application-or-archiving-project-states-but-draft-or-terminal}
   [_]
   (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
                                                       :description description})))

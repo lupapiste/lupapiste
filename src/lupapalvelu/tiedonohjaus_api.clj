@@ -1,5 +1,5 @@
 (ns lupapalvelu.tiedonohjaus-api
-  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters] :as action]
+  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters boolean-parameters] :as action]
             [sade.core :refer [ok fail fail!]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
@@ -11,10 +11,9 @@
             [schema.core :as s]
             [taoensso.timbre :as timbre]
             [lupapiste-commons.schema-utils :as schema-utils]
-            [lupapalvelu.attachment-api :as aa]
             [lupapalvelu.application :as a]
-            [lupapalvelu.archiving-api :as archiving-api]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapiste-commons.operations :as operations]))
 
 (defn- target-is-not-archived [target-type {{attachment-id :attachmentId} :data {:keys [metadata processMetadata attachments]} :application}]
   (let [md (case target-type
@@ -34,7 +33,7 @@
 (defn- store-function-code [operation function-code user]
   (let [orgId (user/authority-admins-organization-id user)
         organization (o/get-organization orgId)
-        operation-valid? (some #{operation} (:selected-operations organization))
+        operation-valid? (some #{operation} (concat (:selected-operations organization) (map name operations/archiving-project-operations)))
         code-valid? (some #{function-code} (map :code (t/available-tos-functions orgId)))]
     (if (and operation-valid? code-valid?)
       (do (o/update-organization orgId {$set {(str "operations-tos-functions." operation) function-code}})
@@ -77,7 +76,7 @@
   {:parameters [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
-   :states states/pre-verdict-but-draft}
+   :states (conj states/pre-verdict-but-draft :underReview)}
   [command]
   (update-tos-metadata functionCode command))
 
@@ -86,7 +85,8 @@
    :input-validators [(partial non-blank-parameters [:id :functionCode :reason])]
    :user-roles #{:authority}
    :org-authz-roles  #{:archivist}
-   :states states/all-but-draft}
+   :states states/all-but-draft
+   :pre-checks [permit/is-not-archiving-project]}
   [command]
   (update-tos-metadata functionCode command reason))
 
@@ -203,18 +203,33 @@
                                               :processMetadata processed-metadata}})
     (ok {:metadata processed-metadata})))
 
+(defcommand set-myyntipalvelu-for-attachment
+  {:parameters [:id attachmentId myyntipalvelu]
+   :categories #{:attachments}
+   :input-validators [(partial non-blank-parameters [:id :attachmentId])
+                      (partial boolean-parameters [:myyntipalvelu])]
+   :user-roles #{:authority}
+   :org-authz-roles #{:authority :archivist :digitizer}
+   :states states/all-but-draft
+   :pre-checks [(partial target-is-not-archived :attachment)]}
+   [{:keys [application created]}]
+   (if (pos? (t/update-metadata-attribute! application created attachmentId :myyntipalvelu myyntipalvelu))
+     (ok)
+     (fail :error.invalid-id)))
+
 (defquery case-file-data
   {:parameters [:id lang]
    :input-validators [(partial action/non-blank-parameters [:lang])]
    :user-roles #{:authority}
-   :states states/all-application-states}
+   :states states/all-application-states
+   :pre-checks [(permit/validate-permit-type-is-not permit/ARK)]}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application lang)))
 
 (defquery tos-operations-enabled
   {:user-roles #{:authority}
    :categories #{:attachments}
-   :states states/all-application-states}
+   :states states/all-application-or-archiving-project-states}
   (ok))
 
 

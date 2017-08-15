@@ -3,7 +3,7 @@
             [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
             [sade.env :as env]
-            [lupapalvelu.action :refer [defcommand defraw]]
+            [lupapalvelu.action :refer [defcommand defraw disallow-impersonation]]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mime :as mime]
@@ -40,6 +40,7 @@
    :optional-parameters [id]
    :input-validators [file-mime-type-accepted
                       file-size-legal]
+   :pre-checks       [disallow-impersonation]
    :states           states/all-states}
   [{:keys [application]}]
   (let [{:keys [ok] :as result} (file-upload/save-files application files (vetuma/session-id))]

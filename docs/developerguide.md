@@ -163,7 +163,7 @@ Luodaan vielä lupapisteelle tietokanta ja käyttäjätunnukset:
 
     echo  'use lupapiste;
     db.createUser({user: "lupapiste-user", pwd: "lupapiste-password", roles: [{role: "readWrite", db: "lupapiste"}]});' | docker exec -i lupapiste-mongo mongo -u admin-tunnus -p admin-salasana admin
-    
+
 Nyt seuraavalla komennolla pitäisi päästä `lupapiste`-kantaan käyttäjänä `lupapiste-user`:
 
     docker exec -it lupapiste-mongo mongo -u lupapiste-user -p lupapiste-password lupapiste
@@ -291,13 +291,20 @@ JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>*
 Frontend:
 - [KnockoutJS](http://knockoutjs.com/documentation/introduction.html)
 - [jQuery](http://api.jquery.com/)
-- [lo-dash](http://lodash.com/)
+- [Lodash](http://lodash.com/)
+- [ClojureScript](https://clojurescript.org/)
+- [Rum](https://github.com/tonsky/rum)
 
 Backend:
 - [Clojure](http://clojure.org/)
 - [MongoDB](http://docs.mongodb.org/)
 
 # Frontend arkkitehtuuri
+
+## ClojureScript-vinkkejä
+
+Mystisissä ongelmissa (esim. toimii kehitysympäristössä muttei QA:lla)
+juurisyynä voi olla puutteelliset externit (ks. `lupapiste-externs.js`).
 
 ## Single Page kompositio
 

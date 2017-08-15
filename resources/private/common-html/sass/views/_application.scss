@@ -405,6 +405,16 @@ $preamble-min-height: 280px; // at least the size of the map container
             display: inline-block;
           }
         }
+        &.underReview {
+          .underReview-box {
+            @include active-state;
+          }
+        }
+        &.archived {
+          .archived-box {
+            @include active-state;
+          }
+        }
         &.final {
           .final-box {
             @include active-state;
@@ -545,6 +555,9 @@ $preamble-min-height: 280px; // at least the size of the map container
   }
   h2 {
     margin-top: 1.5em;
+  }
+  i {
+    cursor: default;
   }
 }
 

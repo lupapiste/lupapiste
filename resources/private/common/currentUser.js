@@ -102,6 +102,13 @@ LUPAPISTE.CurrentUser = function() {
     return self.role() === "applicant" || isOutsideAuthority();
   });
 
+  self.isArchivist = ko.pureComputed(function() {
+    var app = lupapisteApp.models.application;
+    var orgAuths = util.getIn(self.orgAuthz, [ko.unwrap(app.organization)]);
+    return self.role() === "authority" && app &&
+      _.includes(orgAuths, "archivist");
+  });
+
   // Role in the context of the current application.
   self.applicationRole = _.cond( [[self.isAuthority, _.constant( "authority")],
                                   [self.isApplicant, _.constant( "applicant")],

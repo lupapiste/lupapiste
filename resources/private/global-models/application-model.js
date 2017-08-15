@@ -73,6 +73,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.tosFunction = ko.observable(null);
   self.metadata = ko.observable();
   self.processMetadata = ko.observable();
+  self.kuntalupatunnus = ko.observable();
 
   // Options
   self.optionMunicipalityHearsNeighbors = ko.observable(false);
@@ -126,6 +127,10 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.summaryAvailable = ko.pureComputed(function() {
     return lupapisteApp.models.applicationAuthModel.ok("application-summary-tab-visible");
+  });
+
+  self.isArchivingProject = ko.pureComputed(function() {
+    return self.permitType() === "ARK";
   });
 
   self.openTask = function( taskId ) {
@@ -278,6 +283,23 @@ LUPAPISTE.ApplicationModel = function() {
     return !self.stateChanged() && !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
   });
 
+  self.submitButtonFunction = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+      return self.submitApplication;
+    } else if (lupapisteApp.models.applicationAuthModel.ok("submit-archiving-project")) {
+      return self.submitArchivingProject;
+    } else {
+      return false;
+    }
+  });
+
+  self.submitButtonKey = ko.pureComputed(function() {
+    if (self.isArchivingProject()) {
+      return lupapisteApp.models.currentUser.isArchivist() ? "digitizer.archiveProject" : "digitizer.submitProject";
+    } else {
+      return "application.submitApplication";
+    }
+  });
 
   self.reload = function() {
     self.submitErrors([]);
@@ -348,6 +370,27 @@ LUPAPISTE.ApplicationModel = function() {
             {title: loc("no")}
       );
       hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
+    }
+    return false;
+  };
+
+  self.submitArchivingProject = function() {
+    if (!self.stateChanged()) {
+      hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
+      ajax.command("submit-archiving-project", {id: self.id()})
+        .success(function(){
+          if (lupapisteApp.models.currentUser.isArchivist()) {
+            self.reloadToTab("archival");
+          } else {
+            self.reload();
+          }
+        })
+        .onError("error.cannot-submit-application", cannotSubmitResponse)
+        .onError("error.command-illegal-state", self.lightReload)
+        .fuse(self.stateChanged)
+        .processing(self.processing)
+        .call();
+      hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
     }
     return false;
   };
@@ -591,10 +634,10 @@ LUPAPISTE.ApplicationModel = function() {
             ? "cancel-application-authority"
             : "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-      hub.send("show-dialog", {ltitle: "application.cancelApplication",
+      hub.send("show-dialog", {ltitle: self.isArchivingProject() ? "application.cancelArchivingProject" : "application.cancelApplication",
                                size: "medium",
-                               component: "textarea-dialog",
-                               componentParams: {text: loc("areyousure.cancel-application"),
+                               component: self.isArchivingProject() ? "yes-no-dialog" : "textarea-dialog",
+                               componentParams: {text: self.isArchivingProject() ? loc("areyousure.cancelArchivingProject") : loc("areyousure.cancel-application"),
                                                  yesFn: cancelApplicationAjax(command),
                                                  lyesTitle: "yes",
                                                  lnoTitle: "no",
@@ -909,5 +952,28 @@ LUPAPISTE.ApplicationModel = function() {
       })
       .call();
     return false;
+  });
+
+  self.requiredFieldSummaryButtonVisible = ko.pureComputed(function() {
+    return _.includes(["draft", "open", "submitted", "complementNeeded"], ko.unwrap(self.state));
+  });
+
+  self.requiredFieldSummaryButtonKey = ko.pureComputed(function() {
+    if (self.isArchivingProject()) {
+      return "archivingProject.tabRequiredFieldSummary";
+    } else if (lupapisteApp.models.applicationAuthModel.ok("approve-application")) {
+      return "application.tabRequiredFieldSummary.afterSubmitted";
+    } else {
+      return "application.tabRequiredFieldSummary";
+    }
+  });
+
+  self.requiredFieldSummaryButtonClass = ko.pureComputed(function() {
+    if (lupapisteApp.models.applicationAuthModel.ok("approve-application") ||
+      _.includes(["draft", "open"], ko.unwrap(self.state))) {
+      return "link-btn-inverse";
+    } else {
+      return "link-btn";
+    }
   });
 };

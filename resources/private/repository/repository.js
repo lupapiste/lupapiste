@@ -79,6 +79,7 @@ var repository = (function() {
           application.allowedAttachmentTypes = sortedAttachmentTypes;
 
           application.tosFunction = application.tosFunction === undefined ? null : application.tosFunction;
+          application.kuntalupatunnus = util.getIn(application.verdicts, [0, "kuntalupatunnus"]);
 
           application.propertyIdSource = application.propertyIdSource || "";
 

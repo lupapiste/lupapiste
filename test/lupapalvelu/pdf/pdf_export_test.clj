@@ -26,7 +26,13 @@
                        "task-katselmus"
                        "tyonjohtaja"
                        "approval-model-with-approvals"
-                       "approval-model-without-approvals"})
+                       "approval-model-without-approvals"
+                       ;; Matti
+                       "matti-string"
+                       "matti-verdict-text"
+                       "matti-verdict-giver"
+                       "automatic-vs-manual"
+                       "matti-verdict-check"})
 
 (defn- localized-doc-headings [schema-names]
   (map #(loc (str % "._group_label")) schema-names))

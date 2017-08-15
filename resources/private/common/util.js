@@ -470,6 +470,10 @@ var util = (function($) {
     return m ? m.format( dateFormats.fi ) : dateArg;
   }
 
+  function finnishDateAndTime( timestamp ) {
+    return moment( timestamp ).format( "D.M.YYYY, HH:mm:ss");
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -522,7 +526,8 @@ var util = (function($) {
     isOdd: isOdd,
     isEven: isEven,
     finnishDate: finnishDate,
-    toMoment: toMoment
+    toMoment: toMoment,
+    finnishDateAndTime: finnishDateAndTime
   };
 
 })(jQuery);

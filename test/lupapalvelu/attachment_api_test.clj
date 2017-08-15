@@ -158,6 +158,6 @@
          (execute delete-command) => {:ok true}
          (provided
            (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
-           (archiving-util/mark-application-archived-if-done anything anything) => nil
+           (archiving-util/mark-application-archived-if-done anything anything nil) => nil
            (action/update-application anything anything) => nil
            (assignment/remove-target-from-assignments anything anything) => nil)))

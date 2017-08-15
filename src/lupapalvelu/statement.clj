@@ -8,12 +8,13 @@
             [sade.strings :as ss]
             [sade.validators :as v]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.integrations.ely :as ely]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
 ;;
 ;; Common
@@ -47,14 +48,21 @@
    :nothing-to-add                  sc/Bool         ;; indicator that user has read the statement and has nothing to add
    (sc/optional-key :text)          sc/Str})        ;; reply text that user has written
 
+(defschema ExternalData
+  "Identification data for external statement from integrations"
+  {:partner                      (sc/eq "ely")
+   :subtype                      (apply sc/enum ely/all-statement-types)
+   (sc/optional-key :externalId) sc/Str
+   (sc/optional-key :messageId)  sc/Str})
+
 (defschema Statement
   {:id                              ssc/ObjectIdStr ;; statement id
    :state                           (apply sc/enum statement-states) ;; handling state of the statement
+   :requested                       ssc/Timestamp   ;; when requested
    (sc/optional-key :saateText)     sc/Str          ;; cover note for statement, written by authority
    (sc/optional-key :status)        (apply sc/enum statement-statuses) ;; status indicator
    (sc/optional-key :text)          sc/Str          ;; statement text written by statement giver
    (sc/optional-key :dueDate)       ssc/Timestamp   ;; due date for statement to be given
-   (sc/optional-key :requested)     ssc/Timestamp   ;; when requested
    (sc/optional-key :given)         ssc/Timestamp   ;; when given
    (sc/optional-key :reminder-sent) ssc/Timestamp   ;; for remiders sent week after the request
    (sc/optional-key :modified)      ssc/Timestamp   ;; last modified
@@ -63,9 +71,10 @@
    (sc/optional-key :editor-id)     usr/Id          ;; id of the user last edited the statement
    (sc/optional-key :reply)         Reply
    :person                          StatementGiver
+   (sc/optional-key :external)      ExternalData
    (sc/optional-key :metadata)      {sc/Any sc/Any}})
 
-(defn create-statement [now metadata saate-text due-date person]
+(defn create-statement [now saate-text due-date person & [metadata external]]
   (sc/validate Statement
                (cond-> {:id        (mongo/create-id)
                         :person    person
@@ -73,7 +82,8 @@
                         :state     :requested}
                  saate-text     (assoc :saateText saate-text)
                  due-date       (assoc :dueDate due-date)
-                 (seq metadata) (assoc :metadata metadata))))
+                 (seq metadata) (assoc :metadata metadata)
+                 (seq external) (assoc :external external))))
 
 (defn get-statement [{:keys [statements]} id]
   (util/find-by-id id statements))

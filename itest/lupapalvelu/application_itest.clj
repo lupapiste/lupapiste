@@ -898,7 +898,7 @@
                (query pena :application-organization-archive-enabled :id app-id )
                => {:ok false :text "error.archive-not-enabled"})
          (fact "Enable archive in Sipoo"
-               (command admin :set-organization-permanent-archive-enabled :enabled true :organizationId "753-R"))
+               (command admin :set-organization-boolean-attribute :attribute "permanent-archive-enabled" :enabled true :organizationId "753-R"))
          (fact "Archive enabled"
                (query pena :application-organization-archive-enabled :id app-id )
                => ok?)))

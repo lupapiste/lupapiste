@@ -130,7 +130,7 @@
   (prop/for-all [doc (gen/bind (->> (map (comp :name :info) party-doc-schemas)
                                     gen/elements)
                                #(ssg/generator (data-schema/doc-data-schema % true)))]
-                (if (= "tyonjohtaja-v2" (doc-name doc))
+                (if (#{"tyonjohtaja-v2" "hakija-ark"} (doc-name doc))
                   (nil? (party-doc-user-id doc))
                   (party-doc-user-id doc))))
 

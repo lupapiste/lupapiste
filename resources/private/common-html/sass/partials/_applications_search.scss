@@ -164,10 +164,8 @@ div.search {
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
   div {
-    text-align: center;
     height: auto !important;
     padding: 0 $marginS !important;
-    white-space: nowrap;
     i {
       display: table-cell;
     }
@@ -186,6 +184,7 @@ div.search {
       color: $orange-dark;
     }
   }
+  @include icon-bubble-hover;
 }
 
 .application-search-result__table, .application-foreman-search-result__table {

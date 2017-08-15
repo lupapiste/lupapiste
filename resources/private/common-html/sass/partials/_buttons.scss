@@ -344,7 +344,9 @@ button.function {
 
 }
 
-.ghost:disabled, ghost.disabled, .ghost.waiting {
+@mixin ghost-disabled ($cls) {
+  .#{$cls}:disabled, #{$cls}.disabled, .#{$cls}.waiting,
+  .btn.#{$cls}.disabled, .btn.#{$cls}.waiting{
   @include disabled( $gray187, $gray246 );
   border-color: $gray221 !important;
   &:hover, &:active, &:disabled {
@@ -352,11 +354,14 @@ button.function {
                      }
  }
 
-button.ghost {
+button.#{$cls} {
   &:disabled, &:disabled:hover {
     border-color: $gray221 !important;
   }
  }
+}
+
+@include ghost-disabled( ghost );
 
 @include button-div-a-i-span( 'ghost.positive' ) {
   @include function($green-dark, $green-hover, $green-active,
@@ -399,6 +404,14 @@ $sidebar-button-color: $gray238;
   max-width: $sidebar-icon-width;
 }
 
+@include ghost-disabled( outline );
+
+
+@include button-div-a-i-span( 'primary.outline' ) {
+  @include function($orange-dark, $orange-hover, $orange-active,
+                    $orange-dark, $orange-hover, $orange-active,
+                    white, white);
+}
 
 // Link button is a link that is laid out as button.
 // However, no background or borders.
@@ -544,7 +557,10 @@ i.toggle {
   padding-left: $icon-pad;
 }
 
-
+button.no-border,
+btn.no-border {
+  border: none;
+}
 
 // DataTable tweaks.
 
@@ -626,11 +642,6 @@ i.toggle {
 // Buttons between docgen sections
 div.docgen-content > section + button {
   margin-bottom: $marginL;
-}
-
-#login-button span {
-  text-align: center;
-  width: 200px;
 }
 
 button {

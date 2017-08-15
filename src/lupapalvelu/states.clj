@@ -53,6 +53,8 @@
 (def ya-jatkoaika-state-graph common-states/ya-jatkoaika-state-graph)
 (def ya-tyolupa-state-graph default-application-state-graph)
 
+(def ark-state-graph common-states/ark-state-graph)
+
 ; TODO draft versions this forward
 
 (def
@@ -89,15 +91,15 @@
    :final []})
 
 
-(def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent})
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complementNeeded :sent :underReview})
 
-(def pre-sent-application-states #{:draft :open :submitted :complementNeeded})
+(def pre-sent-application-states #{:draft :open :submitted :complementNeeded :underReview})
 
-(def create-doc-states #{:draft :answered :open :submitted :complementNeeded})
+(def create-doc-states #{:draft :answered :open :submitted :complementNeeded :underReview})
 
-(def update-doc-states #{:draft :open :submitted :complementNeeded})
+(def update-doc-states #{:draft :open :submitted :complementNeeded :underReview})
 
-(def approve-doc-states #{:open :submitted :complementNeeded})
+(def approve-doc-states #{:open :submitted :complementNeeded :underReview})
 
 
 ;;
@@ -130,6 +132,7 @@
 (def verdict-given-states #{:verdictGiven                   ; R + others
                             :foremanVerdictGiven :acknowledged ; foreman applications
                             :finished :agreementPrepared :agreementSigned  ; YA cases
+                            :archived ; Archiving projects (ARK)
                             })
 
 (def post-verdict-states
@@ -155,7 +158,9 @@
 
 (def all-states (->> all-graphs (map keys) (apply concat) set))
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
-(def all-application-states (difference all-states all-inforequest-states))
+(def all-archiving-project-states (-> ark-state-graph keys set (disj :canceled :open)))
+(def all-application-states (difference all-states all-inforequest-states all-archiving-project-states))
+(def all-application-or-archiving-project-states (difference all-states all-inforequest-states))
 
 (defn terminal-state? [graph state]
   {:pre [(map? graph) (keyword? state)]}
@@ -183,6 +188,10 @@
 
 (def post-verdict-but-terminal (difference post-verdict-states terminal-states))
 
+(def archival-final-states (-> terminal-states
+                               (disj :extinct :canceled :answered :registered)
+                               (conj :foremanVerdictGiven :underReview)))
+
 (defn- drop-state-set [drop-states]
   (cond
     (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))
@@ -198,6 +207,11 @@
 (defn all-inforequest-states-but [& drop-states]
   (difference all-inforequest-states (drop-state-set drop-states)))
 
+(defn all-application-or-archiving-project-states-but [& drop-states]
+  (difference all-application-or-archiving-project-states (drop-state-set drop-states)))
+
+(def all-application-or-archiving-project-states-but-draft-or-terminal
+  (all-application-or-archiving-project-states-but (conj terminal-states :draft)))
 
 (comment
   (require ['rhizome.viz :as 'viz])

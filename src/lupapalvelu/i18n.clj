@@ -14,7 +14,10 @@
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
-(def all-languages [:fi :sv :en])
+;;
+;; Supported languages
+;;
+
 (def supported-langs (if (env/feature? :english)
                        [:fi :sv :en]
                        [:fi :sv]))
@@ -22,6 +25,29 @@
 
 (defn supported-lang? [lang]
   (contains? (set supported-langs) (keyword lang)))
+
+(def languages (-> supported-langs set))
+
+(defn supported-langs-map
+  "Return a map {:a (f :a) :b (f :b) ... } where :a, :b, ... are the supported languages"
+  [f]
+  (into {} (map (juxt identity f)
+                supported-langs)))
+
+(defn localization-schema
+  "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
+  [value-type]
+  (supported-langs-map (constantly value-type)))
+
+(sc/defschema EnumSupportedLanguages (apply sc/enum (map name languages)))
+
+(sc/defschema LocalizationStringMap
+  (localization-schema sc/Str))
+
+
+;;
+;; Loading translations from files
+;;
 
 (def common-translations-filename "shared_translations.txt")
 
@@ -65,25 +91,6 @@
 
 (defn get-localizations []
   (get-or-load-localizations))
-
-(def languages (-> supported-langs set))
-
-(def supported-language-schema (apply sc/enum (map name languages)))
-
-(defn supported-langs-map
-  "Return a map {:a (f :a) :b (f :b) ... } where :a, :b, ... are the supported languages"
-  [f]
-  (into {} (map (juxt identity f)
-                supported-langs)))
-
-(defn localization-schema
-  "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
-  [value-type]
-  (supported-langs-map (constantly value-type)))
-
-(defn with-default-localization [loc-map default]
-  (merge (localization-schema default)
-         loc-map))
 
 (defn valid-language
   "Input validator for lang parameter. Accepts also empty lang."
@@ -157,6 +164,10 @@
              loc (localizer ~lang)]
      ~@body))
 
+(defn with-default-localization [loc-map default]
+  (merge (localization-schema default)
+         loc-map))
+
 (defn localize-and-fill
   "Fills {n} markers in the loc-string with values. For example, if
   English loc-string for a term 'hello' would be 'Hi there {0}!',
@@ -176,6 +187,10 @@
             (range (count values)))))
 
 
+;;
+;; Middleware
+;;
+
 (defn lang-middleware [handler]
   (fn [request]
     (let [lang (or (get-in request [:params :lang])
@@ -183,6 +198,11 @@
                    (name default-lang))]
       (with-lang lang
         (handler request)))))
+
+
+;;
+;; Create missing translation excels and merge them back into translation files
+;;
 
 (defn read-lines [lines]
   (reduce (fn [m line]
@@ -220,8 +240,14 @@
        (map commons-resources/txt->map)
        merge-localization-maps))
 
-(defn- default-i18n-files []
-  (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$"))
+(defn- default-i18n-files [& [options]]
+  (->> (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
+       (remove (fn [file]
+                 (when (:exclude options)
+                   (some #(when (re-matches % (.getName file))
+                            (do (println (.getName file) "matched" % "and is excluded")
+                                true))
+                         (:exclude options)))))))
 
 (defn missing-translations [localization-map lang]
   (update (commons-resources/missing-translations localization-map
@@ -230,21 +256,35 @@
           (util/fn->> (remove (comp ss/blank? :fi second))
                       (sort-by first))))
 
-(defn missing-localizations-excel
-  "Writes missing localizations of given language to excel file.
-   If file is not provided, will create the file to user home dir."
-  ([lang]
-   (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
-         filename (str (System/getProperty "user.home")
-                       "/lupapiste_translations_"
-                       date-str "_" (name lang)
-                       ".xlsx")]
-        (missing-localizations-excel (io/file filename) lang)))
-  ([file lang]
-   (-> (default-i18n-files)
-       (txt-files->map)
-       (missing-translations lang)
-       (commons-resources/write-excel file))))
+(defn missing-localizations-excel-file
+  "Writes missing localizations of given language to excel file to
+  a given file"
+  [file lang & [options]]
+  (-> (default-i18n-files options)
+      (txt-files->map)
+      (missing-translations lang)
+      (commons-resources/write-excel file)))
+
+(sc/defn ^:always-validate missing-localizations-excel
+  "Writes missing localizations of given language to excel file to
+  user home dir.
+
+  Possible options
+  - exclude: regexes that cause a translation file to be excluded on match"
+  ([lang :- EnumSupportedLanguages]
+   (missing-localizations-excel lang nil))
+  ([lang    :- EnumSupportedLanguages
+    options :- (sc/maybe {:exclude [sc/Regex]})]
+   (if (= lang "fi")
+     (println "Oops, this does not work with Finnish as the target language.")
+     (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
+           filename (str (System/getProperty "user.home")
+                         "/lupapiste_translations_"
+                         date-str "_" (name lang)
+                         ".xlsx")]
+       (missing-localizations-excel-file (io/file filename) lang options)
+       (println "Missing localizations written to excel file in:")
+       (println filename)))))
 
 (defn- all-localizations-excel
   ([] (all-localizations-excel (default-i18n-files)))
@@ -288,7 +328,9 @@
 
 
                                  (not= (:fi v) (:fi v-new))
-                                 (throw (ex-info "Finnish text used for translation does not match the one found in current source"
+                                 (throw (ex-info (str "Finnish text \"" (:fi v)
+                                                      "\" used for translation does not match the one found in current source \""
+                                                      (:fi v-new) "\"")
                                                  {:source {k v}
                                                   :new    {k-new v-new}}))
 

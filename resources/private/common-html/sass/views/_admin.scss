@@ -57,8 +57,12 @@
   .users-table {
     .filters {
       margin-bottom: $marginM;
+      .filter {
+        margin-right: $marginM;
+      }
     }
   }
+
   #modal-dialog-content-component {
     select, input[type=text] {
       display: block;
@@ -70,10 +74,11 @@
   }
 }
 
-form.organizations-search {
+form.organizations-search, form.xml-download {
   input.textinput {
     display: inline-block;
     width: 20em;
     vertical-align: middle;
   }
 }
+

@@ -16,7 +16,8 @@
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen]
             [clojure.test :refer [is]]
-            [sade.schema-generators :as ssg]))
+            [sade.schema-generators :as ssg]
+            [sade.schema-utils :as ssu]))
 
 ;;
 ;; ==============================================================================
@@ -70,7 +71,7 @@
 (fact authority?
   (authority? {:role "authority"})  => truthy
   (authority? {:role :authority})   => truthy
-  (authority? {:role :oirAuthority}) => truthy
+  (authority? {:role :oirAuthority}) => falsey
   (authority? {:role "applicant"})  => falsey
   (authority? {})                   => falsey
   (authority? nil)                  => falsey)
@@ -108,13 +109,13 @@
   => passing-quick-check)
 
 (def user-and-organization-id-generator
-  (gen/let [org-ids (gen/set (ssg/generator OrgId)
-                             {:num-elements 10})
-            org-id (gen/elements org-ids)
-            user (ssg/generator User {OrgId (gen/elements org-ids)})]
+  (gen/let [org-ids (gen/vector-distinct (ssg/generator OrgId)
+                                         {:min-elements 1})
+            user (-> (ssu/select-keys User [:id :role :username :email :enabled :orgAuthz])
+                     (ssg/generator {OrgId (gen/elements org-ids)}))]
     (let [user (with-org-auth user)]
       {:user user
-       :organization-id org-id})))
+       :organization-id (rand-nth org-ids)})))
 
 (def user-is-authority-in-organization-prop
   (prop/for-all [{:keys [user organization-id]} user-and-organization-id-generator]
@@ -122,7 +123,8 @@
           organization-id (name organization-id)
           is-authority-in-org? (user-is-authority-in-organization? user organization-id)]
       (= is-authority-in-org?
-         (contains? users-roles-in-organization :authority)))))
+         (or (contains? users-roles-in-organization :authority)
+             (contains? users-roles-in-organization :approver))))))
 
 (fact :qc user-is-authority-in-organization?-spec
   (quick-check 100 user-is-authority-in-organization-prop :max-size 50)

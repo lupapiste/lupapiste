@@ -75,7 +75,7 @@
                          {:company {$exists (= company :yes)}}))
                 {:lastName 1 :firstName 1 :email 1 :phone 1
                  :companyName 1 :street 1 :zip 1 :city 1 :architect 1
-                 :allowDirectMarketing 1 :company.id 1}))
+                 :allowDirectMarketing 1 :company.id 1 :company.role 1}))
 
 (defn- company-map []
   (reduce (fn [acc {:keys [id y name locked]}]
@@ -87,10 +87,11 @@
   (let [users (user-list company allow professional)]
     (if (not= company :no)
       (let [companies (company-map)]
-        (map #(if-let [company (get companies (-> % :company :id))]
-                (assoc % :company company)
-                %)
-             users))
+        (map #(let [{:keys [id role]} (:company %)]
+                (if-let [company (get companies id)]
+                  (assoc % :company (assoc company :role role))
+                  %))
+               users))
       users)))
 
 (defn- safe-local-date [timestamp]
@@ -98,6 +99,12 @@
     (if (and ts (pos? ts))
       (util/to-local-date ts)
       "")))
+
+(defn- company-role-in-finnish [role]
+  (get {:admin "yll\u00e4pit\u00e4j\u00e4"
+        :user  "k\u00e4ytt\u00e4j\u00e4"}
+       (keyword role)
+       ""))
 
 (defn user-report-cell-def [row key]
   (let [defs    {:lastName             "Sukunimi"
@@ -114,10 +121,12 @@
                                         :path   [:company :name]}
                  :company.y            {:header "Y-tunnus"
                                         :path   [:company :y]}
+                 :company.role         {:header "Yritystilirooli"
+                                        :path   [:company :role]
+                                        :fun    company-role-in-finnish}
                  :company.locked       {:header "Yritystili suljettu"
                                         :path   [:company :locked]
-                                        :fun    safe-local-date
-                                        }}
+                                        :fun    safe-local-date}}
         key-def (get defs key)]
     (if (map? key-def)
       {:header (:header key-def)
@@ -132,7 +141,8 @@
         columns (concat [:lastName :firstName :email :phone :companyName
                          :street :zip :city :architect :allowDirectMarketing]
                         (when-not (= company :no)
-                          [:company.name :company.y :company.locked]))
+                          [:company.name :company.y
+                           :company.role :company.locked]))
         headers (map #(:header (user-report-cell-def nil %)) columns)
         rows    (for [row data]
                   (map #(:value (user-report-cell-def row %)) columns))]

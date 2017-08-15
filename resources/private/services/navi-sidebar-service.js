@@ -9,11 +9,16 @@ LUPAPISTE.NaviSidebarService = function() {
 
   var animate = ko.observable();
 
+  var showArchivingMenu = ko.pureComputed(function() {
+    return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
+      lupapisteApp.models.globalAuthModel.ok("digitizing-enabled");
+  });
+
   var menus = {
     authorityAdmin: [{icon: "lupicon-user",
                       page: "users",
                       loc: "auth-admin.users"},
-                     {icon: "lupicon-documents",
+                     {icon: "lupicon-gear",
                       page: "applications",
                       loc: "auth-admin.application-settings"},
                      {icon: "lupicon-hammer",
@@ -22,7 +27,7 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-paperclip",
                       page: "attachments",
                       loc: "auth-admin.operations-attachments"},
-                     {icon: "lupicon-external-link",
+                     {icon: "lupicon-link",
                       page: "backends",
                       loc: "auth-admin.backends"},
                      {icon: "lupicon-add-area",
@@ -37,12 +42,21 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-stamp",
                       page: "stamp-editor",
                       loc: "auth-admin.stamp-editor"},
+                     {icon: "lupicon-archives",
+                      page: "archiving",
+                      loc: "arkistointi",
+                      showIf: showArchivingMenu,
+                      feature: "digitizer"},
                      {icon: "lupicon-calendar",
                       page: "organization-calendars",
                       loc: "auth-admin.organization-calendars",
                       showIf: lupapisteApp.models.globalAuthModel
                               .ok("calendars-enabled"),
-                      feature: "ajanvaraus"}],
+                      feature: "ajanvaraus"},
+                     {icon: "lupicon-circle-section-sign",
+                      page: "matti-verdict-templates",
+                      loc: "matti.verdict-templates",
+                      feature: "matti"}],
     admin: [{icon: "lupicon-download",
              page: "admin",
              loc: "admin.xml"},

@@ -261,21 +261,20 @@
 (defn feature-to-address-details [lang feature]
   (when (seq feature)
     (let [lang3 (get {"fi" "fin", "sv" "swe"} lang "fin")
-          osoitteet (clojure.data.zip.xml/xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite)
+          osoitteet (sxml/select feature [:oso:Osoitepiste :oso:osoite :oso:Osoite])
           osoite (first (or
-                         (seq (filter #(xml1-> % :oso:kieli (text= lang3)) osoitteet))
+                         (seq (filter (util/fn-> (sxml/select1 :oso:kieli) sxml/text (= lang3)) osoitteet))
                          osoitteet))
-          katunumero (xml1-> osoite :oso:katunumero text)
-          xy (ss/split (xml1-> feature :oso:Osoitepiste :oso:sijainti :gml:Point :gml:pos text) #"\s")]
-      {:street (xml1-> osoite :oso:katunimi text)
-       :number (if (or (nil? katunumero) (= "0" katunumero))
-                 (xml1-> osoite :oso:jarjestysnumero text)
-                 katunumero)
-       :municipality (xml1-> feature :oso:Osoitepiste :oso:kuntatunnus text)
+          xy (-> feature (sxml/select1 :oso:Osoitepiste :oso:sijainti :gml:Point :gml:pos) sxml/text (ss/split #"\s"))]
+      {:street (-> osoite (sxml/select1 :oso:katunimi) sxml/text)
+       :number (util/find-first (util/fn->> (contains? #{nil "0"}) not)
+                                [(-> osoite (sxml/select1 :oso:katunumero) sxml/text)
+                                 (-> osoite (sxml/select1 :oso:jarjestysnumero) sxml/text)])
+       :municipality (-> feature (sxml/select1 :oso:Osoitepiste :oso:kuntatunnus) sxml/text)
        :x (util/->double (first xy))
        :y (util/->double (second xy))
-       :name {:fi (xml1-> feature :oso:Osoitepiste :oso:kuntanimiFin text)
-              :sv (xml1-> feature :oso:Osoitepiste :oso:kuntanimiSwe text)}})))
+       :name {:fi (-> feature (sxml/select1 :oso:Osoitepiste :oso:kuntanimiFin) sxml/text)
+              :sv (-> feature (sxml/select1 :oso:Osoitepiste :oso:kuntanimiSwe) sxml/text)}})))
 
 (defn krysp-to-address-details [lang feature]
   (when (map? feature)

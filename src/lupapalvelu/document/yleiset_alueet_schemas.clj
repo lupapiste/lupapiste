@@ -16,7 +16,7 @@
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
            :type :group
            :subtype :hankkeen-kuvaus
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :order 60
@@ -75,7 +75,7 @@
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
            :type :group
            :subtype :hankkeen-kuvaus
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :order 60
@@ -84,7 +84,7 @@
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :i18name "osapuoli"
            :type :party
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :accordion-fields hakija-accordion-paths
@@ -93,7 +93,7 @@
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :i18name "osapuoli"
            :type :party
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :order 62
@@ -102,7 +102,7 @@
     :body yleiset-alueet-maksaja}
    {:info {:name "tyoaika"                                                 ;; alkuPvm / loppuPvm
            :type :group
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :order 63
@@ -110,7 +110,7 @@
     :body tyo-aika}
    {:info {:name "tyo-aika-for-jatkoaika"                                  ;; (alkuPvm /) loppuPvm
            :type :group
-           :removable false
+           :removable-by :none
            :repeating false
            :approvable true
            :order 63
@@ -137,7 +137,7 @@
 #_(def tapahtumien-syotto                                                       ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
           :order 68
-          :removable true
+          :removable-by :all
           :repeating true}
    :body <kartalta valitut paikat>})                                            ;; sijainninSelitysteksti, sijaintitieto
 
@@ -167,7 +167,7 @@
   1
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
-           :removable false
+           :removable-by :none
            :approvable true
            :repeating false
            :order 64}
@@ -182,7 +182,7 @@
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :subtype :hankkeen-kuvaus
-           :removable false
+           :removable-by :none
            :approvable true
            :repeating false
            :order 65

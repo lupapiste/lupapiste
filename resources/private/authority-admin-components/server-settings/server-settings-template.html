@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="server-settings-template">
   <h3 data-bind="ltext: header"></h3>
-  <table class="table table-striped">
+  <table class="table table-striped admin-settings">
     <thead>
       <tr>
         <th data-bind="ltext: 'auth-admin.parameter'"></th>
@@ -10,7 +10,7 @@
     <tbody>
       <tr>
         <td data-bind="ltext: urlLabel"></td>
-        <td class="serversettings--wide">
+        <td class="serversettings--wide value">
           <input type="url"
                  data-bind="value: url, 
                             disable: readOnly,
@@ -19,7 +19,7 @@
       </tr>
       <tr>
         <td data-bind="ltext: 'auth-admin.server.username'"></td>
-        <td class="serversettings--wide">
+        <td class="serversettings--wide value">
           <input type="text"
                  data-bind="value: username, 
                             disable: readOnly,
@@ -28,7 +28,7 @@
       </tr>
       <tr>
         <td data-bind="ltext: 'auth-admin.server.password'"></td>
-        <td class="serversettings--wide">
+        <td class="serversettings--wide value">
           <input data-bind="value: password, 
                             disable:readOnly, 
                             attr: {placeholder:passwordPlaceholder,

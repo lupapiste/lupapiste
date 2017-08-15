@@ -1491,7 +1491,7 @@ label.mandatory:after {
 }
 
 // Dropdown menus.
-select.dropdown {
+select.dropdown, .dataTables_length select {
   color: $gray51;
   border: 1px solid $gray187;
   border-radius: 0 0 0 0;
@@ -1525,7 +1525,7 @@ select.dropdown {
     background: {
       image: url( "/lp-static/img/lupicon-chevron-down-gray187.png");
       color: $gray246;
-  }
+    }
   }
   &:focus {
     background-image: url( "/lp-static/img/lupicon-chevron-down-orange-light.png");
@@ -1534,7 +1534,7 @@ select.dropdown {
 }
 
 // Remove system arrow on IE10 and later.
-select.dropdown::-ms-expand {
+select.dropdown::-ms-expand,.dataTables_length select::-ms-expand {
   display: none;
 }
 

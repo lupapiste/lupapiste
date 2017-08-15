@@ -11,37 +11,20 @@
     font-variant: normal;
     font-weight: 100;
   }
-  label{
-    margin: 16px 0 20px 0;
-    line-height: 16px;
-    font-size: 14px;
-    color: black;
-    vertical-align: baseline;
-  }
+
   #login-button {
-    /* max-width: 250px; */
-    /* width: 90%; */
-    text-align: center;
     margin: {
       top: 20px;
       bottom: 10px;
     }
     display: block;
   }
-  a {
-    text-decoration: none;
-    color: #0078ff;
-
-    &:hover {
-      text-decoration: underline;
-    }
+  .welcome-login-section {
+    width: 80%;
+    max-width: 80%;
   }
-}
-
-.login-input {
-  /* max-width: 250px; */
-  /* width: 90%; */
-  box-sizing:border-box;
-  -moz-box-sizing:border-box;
-  height: 32px;
+  .welcome-login-form {
+    //width: 50%;
+    //max-width: 80%;
+  }
 }

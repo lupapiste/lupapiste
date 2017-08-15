@@ -147,21 +147,23 @@
 (def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
 
 (defn property-info-by-wkt-proxy [request] ;example: wkt=POINT(404271+6693892)&radius=100
-  (let [{wkt :wkt radius :radius :or {wkt ""}} (:params request)
-        type (re-find wdk-type-pattern wkt)
-        coords (ss/replace wkt wdk-type-pattern "")
-        features (case type
-                   "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
-                             (if (and (ss/numeric? radius) (> (Long/parseLong radius) 10))
-                               (wfs/property-info-by-radius x y radius)
-                               (wfs/property-info-by-point x y)))
-                   "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
-                   "POLYGON" (let [outterring (first (ss/split coords #"\)" 1))] ;;; pudotetaan reiat pois
-                               (wfs/property-info-by-polygon (ss/split (ss/replace outterring #"[\(\)]" "") #",")))
-                   nil)]
-    (if features
-      (resp/json (map wfs/feature-to-property-info features))
-      (resp/status 503 "Service temporarily unavailable"))))
+  (if-let [wkt (get-in request [:params :wkt])]
+    (let [{radius :radius} (:params request)
+          type (re-find wdk-type-pattern wkt)
+          coords (ss/replace wkt wdk-type-pattern "")
+          features (case type
+                     "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
+                               (if (and (ss/numeric? radius) (> (Long/parseLong radius) 10))
+                                 (wfs/property-info-by-radius x y radius)
+                                 (wfs/property-info-by-point x y)))
+                     "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
+                     "POLYGON" (let [outterring (first (ss/split coords #"\)" 1))] ;;; pudotetaan reiat pois
+                                 (wfs/property-info-by-polygon (ss/split (ss/replace outterring #"[\(\)]" "") #",")))
+                     nil)]
+      (if features
+        (resp/json (map wfs/feature-to-property-info features))
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Missing required wkt parameter")))
 
 (defn create-layer-object [layer-name]
   (let [layer-category (cond

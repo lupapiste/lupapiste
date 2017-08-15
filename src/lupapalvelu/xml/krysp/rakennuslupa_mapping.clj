@@ -385,15 +385,16 @@
                            krysp-version
                            begin-of-link
                            attachment-target]
-  (let [attachments (filter #(= attachment-target (:target %)) (:attachments application))
+  (let [target-pred #(= attachment-target (:target %))
+        attachments (filter target-pred  (:attachments application))
         poytakirja  (some #(when (katselmus-pk? (:type %)) %) attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
-                                                        begin-of-link attachment-target))
+                                                        begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
         canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
-                                     begin-of-link attachment-target))
+                                     begin-of-link (every-pred target-pred attachments-canon/no-statements-no-verdicts)))
         canonical-pk (:Liite canonical-pk-liite)
 
         all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))

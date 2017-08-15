@@ -1,6 +1,6 @@
 <script type="text/x-jquery-tmpl" id="organization-name-editor-template" class="ko-template">
   <div>
-    <table data-test-id="organization-name-table">
+    <table data-test-id="organization-name-table" class="admin-settings">
       <thead>
         <tr>
           <th data-bind="ltext: 'userinfo.language'"></th>
@@ -10,10 +10,9 @@
       <tbody data-bind="foreach: names">
         <tr>
           <td data-bind="ltext: 'lang.'+$data.lang"></td>
-          <td>
+          <td class="value">
             <input type="text" data-bind="value: $data.name,
-                                          attr: {'data-test-id': 'organization-name.'+$data.lang}"
-                   class="form-input">
+                                          attr: {'data-test-id': 'organization-name.'+$data.lang}">
           </td>
         </tr>
       </tbody>
