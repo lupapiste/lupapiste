@@ -707,7 +707,10 @@
   (let [state (keyword state)
         graph (sm/state-graph application)
         verdict-state (sm/verdict-given-state application)
-        target (if (= state :appealed) :appealed verdict-state)]
+        target (cond
+                 (= state :appealed) :appealed
+                 (= state :archived) :open
+                 :else verdict-state)]
     (set (cons state (remove #{:canceled} (target graph))))))
 
 (defn valid-new-state
