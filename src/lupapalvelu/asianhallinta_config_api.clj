@@ -16,11 +16,16 @@
       (ok :scope scope)
       (fail :error.unknown-organization))))
 
+(defn not-r-permit [{data :data}]
+  (when (= "R" (:permitType data))
+    (fail :error.invalid-permit-type)))
+
 (defcommand save-asianhallinta-config
   {:parameters [permitType municipality enabled version]
    :input-validators [(partial action/non-blank-parameters [:permitType :municipality])
                       (partial action/string-parameters [:version])
-                      (partial action/boolean-parameters [:enabled])]
+                      (partial action/boolean-parameters [:enabled])
+                      not-r-permit]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
