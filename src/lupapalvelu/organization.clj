@@ -71,7 +71,7 @@
 
 (sc/defschema HandlerRole
   {:id                              ssc/ObjectIdStr
-   :name                            (i18n/localization-schema ssc/NonBlankStr)
+   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
@@ -96,7 +96,7 @@
 
 (sc/defschema Organization
   {:id OrgId
-   :name i18n/LocalizationStringMap
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
