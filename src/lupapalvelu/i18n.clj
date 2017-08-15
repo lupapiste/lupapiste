@@ -18,6 +18,8 @@
 ;; Supported languages
 ;;
 
+(def all-languages [:fi :sv :en])
+
 (def supported-langs (if (env/feature? :english)
                        [:fi :sv :en]
                        [:fi :sv]))
