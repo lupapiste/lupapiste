@@ -49,25 +49,25 @@
            (files/files-table attachments-in-group)])]])))
 
 (rum/defc order-composer-footer < rum/reactive
-  []
-  (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        total-amount (reduce + (vals order-rows))]
-    [:div.printing-order-footer
-     [:div
-      [:button.tertiary.rollup-button
-       [:h2 (str (loc "printing-order.composer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
-      [:button.tertiary.rollup-button
-       [:h2 (str (loc "printing-order.composer.price") " " 0 "€")]]
-      [:button.tertiary.rollup-button
-       [:h2 (loc "printing-order.composer.show-pricing")]]
-      [:button.tertiary.rollup-button
-       [:h2 (loc "printing-order.mylly.provided-by")]]]]))
+  [total-amount]
+  [:div.printing-order-footer
+   [:div
+    [:button.tertiary.rollup-button
+     [:h2 (str (loc "printing-order.composer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
+    [:button.tertiary.rollup-button
+     [:h2 (str (loc "printing-order.composer.price") " " 0 "€")]]
+    [:button.tertiary.rollup-button
+     [:h2 (loc "printing-order.composer.show-pricing")]]
+    [:button.tertiary.rollup-button
+     [:h2 (loc "printing-order.mylly.provided-by")]]]])
 
 (rum/defc order-composer < rum/reactive
                            {:init         init
                             :will-unmount state/will-unmount}
   [ko-app]
-  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
+  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))
+        order-rows (rum/react (rum/cursor-in state/component-state [:order]))
+        total-amount (reduce + (vals order-rows))]
     [:div
      [:div.attachments-accordions
       (for [[path-key & children] tag-groups]
@@ -75,9 +75,10 @@
           (accordion-group {:path       [path-key]
                             :children   children})
           (util/unique-elem-id "accordion-group")))]
-     (order-composer-footer)
+     (order-composer-footer total-amount)
      [:div.operation-button-row
       [:button.positive
+       {:disabled (not (pos-int? total-amount))}
        [:span (loc "printing-order.composer.button.next.1")]
        [:i.lupicon-chevron-right]]]]))
 

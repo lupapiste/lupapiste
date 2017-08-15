@@ -8,7 +8,7 @@
 (rum/defcs amount-controls < rum/reactive (rum/local 0 ::amount)
   [local-state state]
   (let [amount* (::amount local-state)
-       commit-fn #(reset! state @amount*)]
+        commit-fn #(reset! state @amount*)]
    (common/reset-if-needed! (::amount local-state) @state)
    [:div.amount-controls
     [:i.lupicon-circle-minus
