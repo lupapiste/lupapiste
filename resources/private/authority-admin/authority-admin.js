@@ -225,21 +225,21 @@
 
     self.load = function() {
       ajax
-        .query("get-organizations-financial-authority-app-handlers")
+        .query("get-organizations-financial-handlers")
         .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
         .call();
     };
 
     self["delete"] = function() {
       ajax
-        .command("delete-financial-authority-app-handler", {email: this.email()})
+        .command("delete-financial-handler", {email: this.email()})
         .success(self.load)
         .call();
     };
 
     self.openCreateModal = function()      {
       createFinancialHandlerModel.copyFrom({});
-      LUPAPISTE.ModalDialog.open("#dialog-create-financial-authority-app-handler");
+      LUPAPISTE.ModalDialog.open("#dialog-create-financial-handler");
     };
   }
 
