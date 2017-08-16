@@ -35,7 +35,7 @@
         <div data-bind="template: 'statement-invite-section'"></div>
         <!-- /ko -->
         <!-- ko if: showElyStatementSection() && elySubtypes().length > 0 -->
-        <bubble-dialog params="visible: showElyStatementSection, okFun: requestElyStatement, okEnabled: elyDataOk, buttonText: 'application.statement.add', buttonIcon: 'lupicon-circle-check'">
+        <bubble-dialog params="visible: showElyStatementSection, okFun: requestElyStatement, okEnabled: elyDataOk, buttonText: 'application.statement.add', buttonIcon: 'lupicon-circle-check', waiting: submitting">
           <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}, feature: 'ely-uspa'"></div>
         </bubble-dialog>
         <!-- /ko -->

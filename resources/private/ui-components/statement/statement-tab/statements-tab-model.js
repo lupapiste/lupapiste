@@ -30,6 +30,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
     ajax.command("ely-statement-request", _.merge(ko.mapping.toJS(self.elyData),
                                                   {id: self.application.id(),
                                                    dueDate: self.elyData.dueDate() ? new Date(self.elyData.dueDate()).getTime() : null}))
+      .pending(self.submitting)
       .success(function(resp) {
         util.showSavedIndicator(resp);
         repository.load(self.application.id(), self.submitting, null, true);
