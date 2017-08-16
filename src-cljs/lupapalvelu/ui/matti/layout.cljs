@@ -16,6 +16,11 @@
 (defn schema-type [schema-type]
   (-> schema-type :schema keys first keyword))
 
+(defn- pathify [path]
+  (if (keyword? path)
+    (util/split-kw-path path)
+    path))
+
 (declare matti-list)
 
 ;; -------------------------------
@@ -108,8 +113,10 @@
   [{:keys [path schema]}]
   (let [{:keys [item-key item-loc-prefix term]}        schema
         {:keys [extra-path match-key] term-path :path} term
+        extra-path (pathify extra-path)
+        term-parth (pathify term-path)
         match-key                                      (or match-key item-key)]
-    (->> (path/value (:path schema) state/references)
+    (->> (path/value (pathify (:path schema)) state/references)
          (remove :deleted) ; Safe for non-maps
          (map (fn [x]
                 (let [v (if item-key (item-key x) x)]
@@ -131,7 +138,7 @@
                          :schema (assoc schema
                                         :body [{:sortBy :displayName
                                                 :body (map #(hash-map :name %)
-                                                           (distinct (path/react (:path schema)
+                                                           (distinct (path/react (pathify (:path schema))
                                                                                  state/references)))}]))
         component (docgen/docgen-select options)]
     (if (show-label? schema wrap-label?)

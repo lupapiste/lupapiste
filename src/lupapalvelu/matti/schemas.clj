@@ -181,7 +181,7 @@
     (some-> data :schema :list) (item-data (get-in data [:schema :list :items]) path)
     (:schema data)              (resolve-path-schema (:schema data) path) ;; Leaf
     (:sections data)            (item-data (:sections data) path)
-    ;; Must be before grid for section properties (pdf, removed)
+    ;; Must be before grid for section properties (removed)
     (nil? xs)                   (resolve-path-schema data path)
     (:grid data)                (cell-data (:grid data) path)))
 
@@ -260,11 +260,16 @@
                            :path (conj path :items)))
       (check-items value (:items data))))
 
+(defn- get-path [{path :path}]
+  (if (keyword? path)
+    (util/split-kw-path path)
+    path))
+
 (defmethod validate-resolution :reference-list
   [{:keys [path schema data value references] :as options}]
   (cond
     (not-empty path) :error.invalid-value-path
-    :else            (check-items value (get-in references (:path data)))))
+    :else            (check-items value (get-in references (get-path data)))))
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]

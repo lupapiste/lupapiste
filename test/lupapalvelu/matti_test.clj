@@ -22,10 +22,11 @@
                                   ["matti-verdict" "2" "giver"]))
     => (contains {:path []
                   :schema {:info {:name "matti-verdict-giver" :version 1}
-                           :body '({:name "matti-verdict-giver"
-                                   :type :select
-                                   :body [{:name "viranhaltija"}
-                                          {:name "lautakunta"}]})}
+                           :body '({:locPrefix "matti-verdict"
+                                    :name "matti-verdict-giver"
+                                    :type :select
+                                    :body [{:name "viranhaltija"}
+                                           {:name "lautakunta"}]})}
                   :data "matti-verdict-giver"}))
 
   (fact "docgen: checkbox"
@@ -41,7 +42,7 @@
     (:reference-list (schemas/schema-data shared/default-verdict-template
                                           ["matti-verdict" "2" "1" "verdict-code"]))
     => (contains {:path [:verdict-code],
-                  :data (contains {:path [:settings :verdict :0 :verdict-code]
+                  :data (contains {:path :settings.verdict.0.verdict-code
                                    :type :select})}))
 
   (fact "reference-list: multi-select"
@@ -182,22 +183,22 @@
     => :error.invalid-value-path)
   (facts "Section data"
     (fact "No schema override"
-      (schemas/validate-path-value test-template ["one" :pdf] true)
+      (schemas/validate-path-value test-template ["one" :removed] true)
       => :error.invalid-value-path)
     (fact "Section schema override"
-      (schemas/validate-path-value test-template ["one" :pdf] true {:schema-overrides {:section shared/MattiVerdictSection}})
+      (schemas/validate-path-value test-template ["one" :removed] true {:schema-overrides {:section shared/MattiVerdictSection}})
       => nil)
     (fact "Section schema override, but bad value"
-      (schemas/validate-path-value test-template ["one" :pdf] "bad" {:schema-overrides {:section shared/MattiVerdictSection}})
+      (schemas/validate-path-value test-template ["one" :removed] "bad" {:schema-overrides {:section shared/MattiVerdictSection}})
       => :error.invalid-value)
     (fact "No schema override, non-primitive value"
-      (schemas/validate-path-value test-template ["one" :pdf] {:foo "bar"})
+      (schemas/validate-path-value test-template ["one" :removed] {:foo "bar"})
       => :error.invalid-value
-      (schemas/validate-path-value test-template ["one" :pdf] [:foo "bar"])
+      (schemas/validate-path-value test-template ["one" :removed] [:foo "bar"])
       => :error.invalid-value
-      (schemas/validate-path-value test-template ["one" :pdf] #{1 2})
+      (schemas/validate-path-value test-template ["one" :removed] #{1 2})
       => :error.invalid-value
-      (schemas/validate-path-value test-template ["one" :pdf] '(1 2))
+      (schemas/validate-path-value test-template ["one" :removed] '(1 2))
       => :error.invalid-value))
   (facts "Date delta"
     (schemas/validate-path-value test-template [:one :row :b :delta] 4)

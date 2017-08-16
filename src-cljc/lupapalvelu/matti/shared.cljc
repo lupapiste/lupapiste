@@ -95,14 +95,18 @@
   (merge MattiBase
          {(sc/optional-key :label?) sc/Bool})) ;; Show label? Default true
 
+(def path-type (sc/conditional
+                keyword? sc/Keyword    ;; Joined kw-path (e.g. :one.two.three)
+                :else    [sc/Keyword]  ;; Vector path [:one :two :three]
+                ))
+
 (defschema MattiReferenceList
   "Component that builds schema from an external source. Each item is
   the id property of the target value or the the value itself."
   (merge MattiComponent
          ;; Path is interpreted by the implementation. In Matti the
-         ;; path typically refers to the settings. Path is a joined
-         ;; kw-path (e.g., :foo.bar.0.hii)
-         {:path                              [sc/Keyword]
+         ;; path typically refers to the settings.
+         {:path                              path-type
           :type                              (sc/enum :select :multi-select)
           ;; By default, an item value is the same as
           ;; source. If :item-key is given, then the corresponding
@@ -117,10 +121,10 @@
           {;; The path contains sources with corresponding fi, sv and
            ;; en localisations (if not extra-path given). The matching
            ;; is done by :item-key
-           :path                         [sc/Keyword]
+           :path                         path-type
            ;; Additional path within matched term that contains the
            ;; lang properties.
-           (sc/optional-key :extra-path) [sc/Keyword]
+           (sc/optional-key :extra-path) path-type
            ;; Key for the source property that should match the
            ;; value. For example, the value list might be just ids and
            ;; the match-key could by :id. Default value is the same as
@@ -157,7 +161,7 @@
 (defschema MattiReference
   "Displays the referenced value."
   (merge MattiComponent
-         {:path                   sc/Keyword ;; Joined kw-path (e.g., :foo.bar.0.hii)
+         {:path                   path-type
           (sc/optional-key :type) (sc/enum :docgen)}))
 
 (def schema-type-alternatives
@@ -275,7 +279,7 @@
                                   {:align  :full
                                    :col    2
                                    :id     "verdict-code"
-                                   :schema {:reference-list {:path       [:settings :verdict :0 :verdict-code]
+                                   :schema {:reference-list {:path       :settings.verdict.0.verdict-code
                                                              :type       :select
                                                              :loc-prefix :matti-r}}}
                                   {}
