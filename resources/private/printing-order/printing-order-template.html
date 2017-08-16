@@ -12,9 +12,6 @@
       </a>
     </div>
     <div class="hr"></div>
-    <h1 data-bind="ltext: 'printing-order.composer.title.1'"></h1>
-    <span data-bind="ltext: 'printing-order.composer.intro-text.1'"></span>
-    <div class="bottom-marginM"></div>
 
     <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'printing-order' && !_.isEmpty(applicationModel.id()) -->
     <cljs-printing-order_composer params="{app: applicationModel}"></cljs-printing-order_composer>

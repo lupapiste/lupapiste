@@ -61,13 +61,9 @@
     [:button.tertiary.rollup-button
      [:h2 (loc "printing-order.mylly.provided-by")]]]])
 
-(rum/defc order-composer < rum/reactive
-                           {:init         init
-                            :will-unmount state/will-unmount}
-  [ko-app]
-  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))
-        order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        total-amount (reduce + (vals order-rows))]
+(rum/defc composer-phase1 < rum/reactive
+  [total-amount]
+  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
     [:div
      [:div.attachments-accordions
       (for [[path-key & children] tag-groups]
@@ -75,12 +71,39 @@
           (accordion-group {:path       [path-key]
                             :children   children})
           (util/unique-elem-id "accordion-group")))]
-     (order-composer-footer total-amount)
      [:div.operation-button-row
       [:button.positive
-       {:disabled (not (pos-int? total-amount))}
+       {:on-click #(state/proceed-phase2)
+        :disabled (not (pos-int? total-amount))}
        [:span (loc "printing-order.composer.button.next.1")]
        [:i.lupicon-chevron-right]]]]))
+
+(rum/defc order-composer < rum/reactive
+                           {:init         init
+                            :will-unmount state/will-unmount}
+  [ko-app]
+  (let [phase      (rum/react (rum/cursor-in state/component-state [:phase]))
+        order-rows (rum/react (rum/cursor-in state/component-state [:order]))
+        total-amount (reduce + (vals order-rows))]
+    [:div
+     [:h1 (loc (str "printing-order.composer.title." phase))]
+     [:span (loc (str "printing-order.composer.intro-text." phase))]
+     [:div.bottom-marginM]
+     (when (= phase 1)
+       (composer-phase1 total-amount))
+     (when (= phase 2)
+       [:div
+        [:div
+         [:h2 "Tilaajan tiedot"]
+         []]
+        [:div.operation-button-row
+         [:button.secondary
+          [:i.lupicon-chevron-left]
+          [:span (loc "printing-order.composer.button.prev.2")]]
+         [:button.positive
+          [:span (loc "printing-order.composer.button.next.2")]
+          [:i.lupicon-chevron-right]]]])
+     (order-composer-footer total-amount)]))
 
 (defonce args (atom {}))
 
