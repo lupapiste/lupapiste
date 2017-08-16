@@ -4,6 +4,7 @@
             [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.common :refer [loc] :as common]
             [lupapalvelu.ui.printing-order.files :as files]
+            [lupapalvelu.ui.printing-order.components :as poc]
             [lupapalvelu.ui.printing-order.state :as state]))
 
 (def log (.-log js/console))
@@ -82,37 +83,31 @@
   []
   (let []
     [:div.order-grid-4
-     [:div.row
-      [:div.col-4
-       [:span.row-text.order-grid-header (loc "printing-order.orderer-details")]]]
-     [:div.row
-      [:div.col-1
-       [:div "Etunimi"]
-       [:input.grid-style-input--wide
-        {:type "text"}]]
-      [:div.col-1
-       [:div "Etunimi"]
-       [:input.grid-style-input--wide
-        {:type "text"}]]
-      [:div.col-2
-       [:div "Etunimi"]
-       [:input.grid-style-input--wide
-        {:type "text"}]]]
-     [:div.row
-      [:div.col-1
-       [:div "Etunimi"]
-       [:input.grid-style-input--wide
-        {:type "text"}]]
-      [:div.col-1
-       [:div "Etunimi"]
-       [:input.grid-style-input--wide
-        {:type "text"}]]
-      [:div.col-2
-       [:div "Etunimi"]
-       [:input.grid-style-input--wide
-        {:type "text"}]]]
+     [:div.order-section
+      [:div.row
+       [:div.col-4
+        [:span.order-grid-header (loc "printing-order.orderer-details")]]]
+      [:div.row
+       (poc/grid-text-input :col-1 "etunimi" true)
+       (poc/grid-text-input :col-1 "sukunimi" true)
+       (poc/grid-text-input :col-2 "printing-order.company-name")]
+      [:div.row
+       (poc/grid-text-input :col-2 "printing-order.address" true)
+       (poc/grid-text-input :col-1 "printing-order.postal-code" true)
+       (poc/grid-text-input :col-1 "printing-order.city" true)]
+      [:div.row
+       (poc/grid-text-input :col-2 "printing-order.email" true)
+       (poc/grid-text-input :col-1 "printing-order.phone")]]
+     [:div.order-section
+      [:div.row
+       [:div.col-4
+        [:span.order-grid-header (loc "printing-order.payer-details")]]]
+      [:div.row
+       (poc/grid-radio-button :col-1 "printing-order.payer.same-as-orderer")
+       (poc/grid-radio-button :col-1 "printing-order.payer.other-than-orderer")]]
      [:div.operation-button-row
       [:button.secondary
+       {:on-click #(state/back-to-phase1)}
        [:i.lupicon-chevron-left]
        [:span (loc "printing-order.phase2.button.prev")]]
       [:button.positive

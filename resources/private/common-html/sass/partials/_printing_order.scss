@@ -7,6 +7,10 @@ $matti-grid-margin: 10px;
   min-height: 1px; // Enforce rendering of empty column.
   padding-left: $matti-grid-margin * 3;
 
+  div.radio-wrapper {
+    width: 100%;
+  }
+
   label.required:after {
     content: " *";
     color: $label-required-star-color;
@@ -72,5 +76,9 @@ $matti-grid-margin: 10px;
 span.order-grid-header {
   font-size: 17px;
   font-weight: bold;
+}
+
+div.order-section {
+  padding-bottom: $matti-grid-margin * 2;
 }
 

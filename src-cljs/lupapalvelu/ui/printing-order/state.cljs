@@ -13,3 +13,9 @@
 
 (defn proceed-phase2 []
   (swap! component-state assoc :phase 2))
+
+(defn back-to-phase1 []
+  (swap! component-state assoc :phase 1))
+
+(defn proceed-phase3 []
+  (swap! component-state assoc :phase 3))

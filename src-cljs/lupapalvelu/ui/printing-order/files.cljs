@@ -58,10 +58,10 @@
     [:thead
      [:tr
       [:th.attachments-table--wide
-       (loc "printing-order.composer.files-table.type-and-content")]
-      [:th (loc "printing-order.composer.files-table.filename")]
-      [:th (loc "printing-order.composer.files-table.modified")]
-      [:th (loc "printing-order.composer.files-table.copy-amount")]]]
+       (loc "printing-order.files-table.type-and-content")]
+      [:th (loc "printing-order.files-table.filename")]
+      [:th (loc "printing-order.files-table.modified")]
+      [:th (loc "printing-order.files-table.copy-amount")]]]
     [:tbody
      (for [file files]
        (rum/with-key (file-row file) (util/unique-elem-id "file-row")))]]])
