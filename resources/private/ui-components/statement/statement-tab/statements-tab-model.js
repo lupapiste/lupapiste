@@ -30,8 +30,13 @@ LUPAPISTE.StatementsTabModel = function(params) {
     ajax.command("ely-statement-request", _.merge(ko.mapping.toJS(self.elyData),
                                                   {id: self.application.id(),
                                                    dueDate: self.elyData.dueDate() ? new Date(self.elyData.dueDate()).getTime() : null}))
-      .success(function() {
-        //console.log("jeej", ko.mapping.toJS(self.elyData));
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        repository.load(self.application.id(), self.submitting, null, true);
+        self.showElyStatementSection(false);
+        self.elyData.subtype(null);
+        self.elyData.saateText(null);
+        self.elyData.dueDate(null);
       })
       .onError("error.integration.create-message", function(e) {
         LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);

@@ -168,7 +168,8 @@
                    :messageId message-id}
         statement (statement/create-statement created saateText dueDate ely-statement-giver metadata ely-data)]
     (ah/save-statement-request user application submitted-application org statement (or lang (:language user)))
-    (update-application command {$push {:statements statement}})))
+    (update-application command {$push {:statements statement}})
+    (ok :text :ely.statement.sent)))
 
 (defcommand delete-statement
   {:parameters [id statementId]
