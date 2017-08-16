@@ -38,6 +38,12 @@
 (def verdict-check {:name "matti-verdict-check"
                     :type :checkbox})
 
+(def complexity {:name "matti-complexity"
+                 :type :select
+                 :locPrefix "matti"
+                 :body (map #(hash-map :name %)
+                            ["small" "medium" "large" "extra-large"])})
+
 (defschema MattiCategory
   {:id       ssc/ObjectIdStr
    :category (sc/enum "r" "p" "ya" "kt" "ymp")})
@@ -94,7 +100,7 @@
          {:info {:name (:name m)}
           :body (body m)})
        [matti-string verdict-text verdict-contact verdict-check
-        verdict-giver verdict-id automatic-vs-manual]))
+        verdict-giver verdict-id automatic-vs-manual complexity]))
 
 ;; Phrases
 

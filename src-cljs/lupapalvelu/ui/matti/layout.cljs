@@ -129,7 +129,8 @@
   [{:keys [schema ] :as options} & [wrap-label?]]
   (let [options   (assoc options
                          :schema (assoc schema
-                                        :body [{:body (map #(hash-map :name %)
+                                        :body [{:sortBy :displayName
+                                                :body (map #(hash-map :name %)
                                                            (distinct (path/react (:path schema)
                                                                                  state/references)))}]))
         component (docgen/docgen-select options)]

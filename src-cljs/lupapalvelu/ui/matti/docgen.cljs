@@ -1,9 +1,10 @@
 (ns lupapalvelu.ui.matti.docgen
   "Rudimentary support for docgen subset in the Matti context."
-  (:require [rum.core :as rum]
-            [lupapalvelu.ui.matti.path :as path]
+  (:require [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.matti.shared :as shared]))
+            [lupapalvelu.ui.matti.path :as path]
+            [rum.core :as rum]
+            [sade.shared_util :as util]))
 
 (defn docgen-loc [{:keys [path schema]} & extra]
   (path/loc path schema extra))
@@ -45,7 +46,11 @@
 
 (rum/defc docgen-select < rum/reactive
   [{:keys [schema state path] :as options}]
-  (let [local-state (path/state path state)]
+  (let [local-state (path/state path state)
+        sort-fn (if (some->> schema :body first
+                             :sortBy (util/=as-kw :displayName))
+                  (partial sort-by :text)
+                  identity)]
     [:select.dropdown
      (docgen-attr options
                   :value     (rum/react local-state)
@@ -57,7 +62,7 @@
                   :text  (if-let [item-loc (:item-loc-prefix schema)]
                            (path/loc [item-loc n])
                            (docgen-loc options n))}))
-          (sort-by :text)
+          sort-fn
           (cons {:value ""
                  :text  (common/loc "selectone")})
           (map (fn [{:keys [value text]}]

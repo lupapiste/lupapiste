@@ -31,8 +31,6 @@
     [:div.col-1.col--right
      (if (path/meta? options :can-remove?)
        [:span
-        (when-not (path/value path state :removed)
-          (section-checkbox options :pdf))
         (section-checkbox options :removed {:negate? true})]
        [:span.row-text (common/loc :matti.always-in-verdict)])]]])
 

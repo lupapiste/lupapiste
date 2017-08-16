@@ -150,7 +150,10 @@
           [:tbody
            (for [{:keys [id name published deleted]} filtered]
              [:tr {:key id}
-              [:td name]
+              [:td (if deleted
+                     name
+                     [:a {:on-click #(service/fetch-template id reset-template)}
+                      name])]
               [:td (js/util.finnishDate published)]
               [:td
                [:div.matti-buttons

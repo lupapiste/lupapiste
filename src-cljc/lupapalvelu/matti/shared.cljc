@@ -72,8 +72,6 @@
                          :muutoksenhaku :vakuus :vaativuus
                          :rakennusoikeus :kaava})
 
-
-
 (defschema MattiVisible
   (let [visibility (sc/enum :editing? :viewing?)]
     {;; Show/hide depending on the edit/view mode. Default: always visible.
@@ -102,7 +100,8 @@
   the id property of the target value or the the value itself."
   (merge MattiComponent
          ;; Path is interpreted by the implementation. In Matti the
-         ;; path typically refers to the settings.
+         ;; path typically refers to the settings. Path is a joined
+         ;; kw-path (e.g., :foo.bar.0.hii)
          {:path                              [sc/Keyword]
           :type                              (sc/enum :select :multi-select)
           ;; By default, an item value is the same as
@@ -158,7 +157,7 @@
 (defschema MattiReference
   "Displays the referenced value."
   (merge MattiComponent
-         {:path                   sc/Keyword  ;; Joined kw-path (e.g., :foo.bar.0.hii)
+         {:path                   sc/Keyword ;; Joined kw-path (e.g., :foo.bar.0.hii)
           (sc/optional-key :type) (sc/enum :docgen)}))
 
 (def schema-type-alternatives
@@ -213,9 +212,7 @@
 (defschema MattiVerdictSection
   (merge MattiSection
          {;; Section removed from the template. Note: the data is not cleared.
-          (sc/optional-key :removed) sc/Bool
-          (sc/optional-key :pdf)     sc/Bool ;; Section included in the verdict pdf.
-          }))
+          (sc/optional-key :removed) sc/Bool}))
 
 (defschema MattiVerdict
   {(sc/optional-key :id)       sc/Str
@@ -223,27 +220,20 @@
    (sc/optional-key :name)     sc/Str ;; Non-localized raw string
    :sections                   [MattiVerdictSection]})
 
-(defn  complexity-section [id settings-path extra]
+(defn  multi-section [id settings-path extra]
   {:id    (name id)
    :grid  {:columns 1
-           :rows    (mapv (fn [complexity]
-                            [{:id (name complexity)
-                              :schema {:reference-list (merge {:i18nkey [(->> complexity
-                                                                              name
-                                                                              (str "matti.complexity.")
-                                                                              keyword)
-                                                                         :matti.complexity.label]
-                                                               :type    :multi-select
-                                                               :path    settings-path}
-                                                              extra)}}])
-                          [:small :medium :large :extra-large])}
+           :rows    [[{:schema {:reference-list (merge {:label? false
+                                                        :type   :multi-select
+                                                        :path   settings-path}
+                                                       extra)}}]]}
    :_meta {:can-remove? true}})
 
 (defn foremen-section [id settings-path loc-prefix]
-  (complexity-section id settings-path {:item-loc-prefix loc-prefix}))
+  (multi-section id settings-path {:item-loc-prefix loc-prefix}))
 
 (defn reference-section [ref id settings-path]
-  (complexity-section id settings-path {:term {:path       [ref]
+  (multi-section id settings-path {:term {:path       [ref]
                                                :extra-path [:name]
                                                :match-key  :id}}))
 
@@ -287,7 +277,12 @@
                                    :id     "verdict-code"
                                    :schema {:reference-list {:path       [:settings :verdict :0 :verdict-code]
                                                              :type       :select
-                                                             :loc-prefix :matti-r}}}]
+                                                             :loc-prefix :matti-r}}}
+                                  {}
+                                  {:align :full
+                                   :col 2
+                                   :id "complexity"
+                                   :schema {:docgen "matti-complexity"}}]
                                  [{:col    12
                                    :id     "paatosteksti"
                                    :schema {:phrase-text {:category :paatosteksti}}}]]}
