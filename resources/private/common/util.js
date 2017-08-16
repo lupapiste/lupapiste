@@ -247,11 +247,7 @@ var util = (function($) {
   }
 
   function showSavedIndicator(response) {
-    if (response.ok) {
-      hub.send("indicator", {style: "positive"});
-    } else {
-      hub.send("indicator", {style: "negative", message: response.text});
-    }
+    hub.send("indicator", {style: response.ok ? "positive" : "negative", message: response.text});
   }
 
   function showSavedIndicatorIcon(response) {

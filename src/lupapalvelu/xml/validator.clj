@@ -142,7 +142,8 @@
 ; be generated from a single source.
 
 (def- rakval-validators
-  {"2.1.2" common-validator-2_1_0
+  {"ah-1.3" asianhallinta-validator-1_3
+   "2.1.2" common-validator-2_1_0
    "2.1.3" common-validator-2_1_1
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3

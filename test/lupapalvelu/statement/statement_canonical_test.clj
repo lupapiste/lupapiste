@@ -13,7 +13,7 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
-(def sonja-requester {:firstName "Sonja" :lastName "Sibbo" :organization {:fi "Sipoo"}})
+(def sonja-requester {:firstName "Sonja" :lastName "Sibbo" :organization {:name {:fi "Sipoo"}}})
 
 (fact "statement to canonical"
   (let [statement (stmnt/create-statement 123 "saate" (util/get-timestamp-from-now :day 7) (ssg/generate stmnt/StatementGiver))

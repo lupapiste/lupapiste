@@ -15,13 +15,13 @@
   07.01.09 Rakennussuojelu
   06.05.09  Teiden suoja- ja n\u00e4kem\u00e4alueelle rakentaminen (poikkeamisluvat).
   06.05.10 Teiden suoja- ja n\u00e4kem\u00e4alueen ulkopuolelle rakentaminen (naapurin kuuleminen)"
-  ["Lausuntopyynt\u00f6 maisematy\u00f6luvasta"
+  ["Lausuntopyynt\u00f6 rakennusluvasta"
+   "Lausuntopyynt\u00f6 naapurin kuulemisesta teiden suoja- ja n\u00e4kem\u00e4alueen ulkopuolelle rakentamisesta"
+   "Lausuntopyynt\u00f6 maisematy\u00f6luvasta"
    "Lausuntopyynt\u00f6 purkamisaikomuksesta"
    "Lausuntopyynt\u00f6 purkamislupahakemuksesta"
-   "Lausuntopyynt\u00f6 rakennusluvasta"
    "Lausuntopyynt\u00f6 rakennusj\u00e4rjestyksest\u00e4"
-   "Lausuntopyynt\u00f6 suojeluesityksest\u00e4"
-   "Lausuntopyynt\u00f6 naapurin kuulemisesta teiden suoja- ja n\u00e4kem\u00e4alueen ulkopuolelle rakentamisesta"])
+   "Lausuntopyynt\u00f6 suojeluesityksest\u00e4"])
 
 (def p-statement-types
   "ELY statement types for P.
