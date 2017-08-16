@@ -21,7 +21,8 @@
           <i class="lupicon-circle-plus"></i>
           <span data-bind="ltext: 'application.statement.add'"></span>
         </button>
-        <button data-bind="toggleClick: showElyStatementSection,
+        <button data-bind="feature: 'ely-uspa',
+                           toggleClick: showElyStatementSection,
                            visible: authorization.ok('ely-statement-request') && !someDialogOpen()"
                 class="positive modal"
                 data-test-id="add-ely-statement">
@@ -35,7 +36,7 @@
         <!-- /ko -->
         <!-- ko if: showElyStatementSection() && elySubtypes().length > 0 -->
         <bubble-dialog params="visible: showElyStatementSection, okFun: requestElyStatement, okEnabled: elyDataOk, buttonText: 'application.statement.add', buttonIcon: 'lupicon-circle-check'">
-          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}"></div>
+          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}, feature: 'ely-uspa'"></div>
         </bubble-dialog>
         <!-- /ko -->
       </div>
