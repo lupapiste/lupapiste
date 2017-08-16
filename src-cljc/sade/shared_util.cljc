@@ -1,6 +1,7 @@
 (ns sade.shared-util
   "Required and passed-through by sade.util"
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojure.string :as s]))
 
 (defn find-first
   "Returns first element from coll for which (pred item)
@@ -44,3 +45,8 @@
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
   [pred m]
   (into {} (filter (fn [[_ v]] (pred v)) m)))
+
+(defn split-kw-path
+  ":a.b.c -> [:a :b :c]"
+  [kw]
+  (map keyword (s/split (name (or kw "")) #"\.")))

@@ -591,7 +591,8 @@
 
 (defn is-latest-of?
   "Compares timestamp ts to given timestamps.
-   Returns true if ts is greater than all given timestamps, false if even one of them is greater (or equal)"
+   Returns true if ts is greater than all given timestamps, false if
+  even one of them is greater (or equal)"
   [ts timestamps]
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
@@ -609,11 +610,7 @@
        (ss/join ".")
        keyword))
 
-(defn split-kw-path
-  ":a.b.c -> [:a :b :c]"
-  [kw]
-  (map keyword
-       (ss/split (name kw) #"\.")))
+(def split-kw-path shared/split-kw-path)
 
 (defn get-in-tree
   "Gets a branch in (operation)tree by path. Tree should be represented as vectors of pairs.

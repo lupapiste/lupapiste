@@ -71,22 +71,27 @@
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vakuus :vaativuus
                          :rakennusoikeus :kaava})
-(def visibility (sc/enum :editing? :viewing?))
+
+
+
+(defschema MattiVisible
+  (let [visibility (sc/enum :editing? :viewing?)]
+    {;; Show/hide depending on the edit/view mode. Default: always visible.
+    ;; If both are given, :show? overrides :hide?
+    (sc/optional-key :show?)      visibility
+    (sc/optional-key :hide?)      visibility}))
 
 (defschema MattiBase
-  {(sc/optional-key :_meta)      meta-flags
-   (sc/optional-key :css)        [sc/Keyword]
-   ;; If an schema ancestor has :loc-prefix then localization term is
-   ;; loc-prefix + last, where last is the last path part.
-   (sc/optional-key :loc-prefix) sc/Keyword
-   ;; Absolute localisation terms. Overrides loc-prefix, does not
-   ;; affect children. When the vector has more than one items, the
-   ;; earlier localisations are arguments to the latter.
-   (sc/optional-key :i18nkey)    [sc/Keyword]
-   ;; Show/hide depending on the edit/view mode. Default: always visible.
-   ;; If both are given, :show? overrides :hide?
-   (sc/optional-key :show?)      visibility
-   (sc/optional-key :hide?)      visibility})
+  (merge MattiVisible
+         {(sc/optional-key :_meta)      meta-flags
+          (sc/optional-key :css)        [sc/Keyword]
+          ;; If an schema ancestor has :loc-prefix then localization term is
+          ;; loc-prefix + last, where last is the last path part.
+          (sc/optional-key :loc-prefix) sc/Keyword
+          ;; Absolute localisation terms. Overrides loc-prefix, does not
+          ;; affect children. When the vector has more than one items, the
+          ;; earlier localisations are arguments to the latter.
+          (sc/optional-key :i18nkey)    [sc/Keyword]}))
 
 (defschema MattiComponent
   (merge MattiBase
@@ -150,6 +155,12 @@
           (sc/optional-key :delta)   (sc/constrained sc/Int (comp not neg?))
           :unit                      (sc/enum :days :years)}))
 
+(defschema MattiReference
+  "Displays the referenced value."
+  (merge MattiComponent
+         {:path                   sc/Keyword  ;; Joined kw-path (e.g., :foo.bar.0.hii)
+          (sc/optional-key :type) (sc/enum :docgen)}))
+
 (def schema-type-alternatives
   {:docgen         sc/Str
    :list           (sc/recursive #'MattiList)
@@ -157,7 +168,8 @@
    :phrase-text    MattiPhraseText
    :loc-text       sc/Keyword ;; Localisation term shown as text.
    :date-delta     MattiDateDelta
-   :multi-select   MattiMultiSelect})
+   :multi-select   MattiMultiSelect
+   :reference      MattiReference})
 
 (defn make-conditional [m]
   (->> (reduce (fn [a [k v]]
@@ -187,9 +199,10 @@
   (merge MattiBase
          {:columns (apply sc/enum (range 1 13)) ;; Grid size (.matti-grid-n)
           :rows    [(sc/conditional
-                     :row {(sc/optional-key :id)  sc/Str
-                           (sc/optional-key :css) [sc/Keyword]
-                           :row                   [MattiCell]}
+                     :row (merge MattiVisible
+                                 {(sc/optional-key :id)  sc/Str
+                                  (sc/optional-key :css) [sc/Keyword]
+                                  :row                   [MattiCell]})
                      :else [MattiCell])]}))
 
 (defschema MattiSection
@@ -360,29 +373,40 @@
 ;; It is adivsabled to reuse ids from template when possible. This
 ;; makes localization work automatically.
 (def verdict-schemas
-  {:r {:sections [{:id "matti-verdict"
-                   :grid {:columns 5
-                          :rows [[{:id "giver"
-                                   :col 2
-                                   :loc-prefix :matti-verdict-giver
-                                   :schema {:list {:title "matti-verdict.giver"
-                                                   :items [{:id "giver"
-                                                            :schema {:docgen "matti-verdict-giver"}}
-                                                           {:id "contact"
-                                                            :schema {:docgen "matti-verdict-contact"}}]}}}
-                                  {:id "section"
-                                   :schema {:docgen "matti-verdict-text"}}
-                                  {:id "verdict-code"
-                                   :align :full
-                                   :schema {:reference-list {:path       [:verdict]
-                                                             :type       :select
-                                                             :loc-prefix :matti-r}} }]
-                                 [{:col 3
-                                   :id "paatosteksti"
-                                   :schema {:phrase-text {:category :paatosteksti}}}
-                                  {:id "application-id"
-                                   :align :full
-                                   :schema {:docgen "matti-verdict-id"}}]]}}]}})
+  {:r {:sections [{:id   "matti-verdict"
+                   :grid {:columns 6
+                          :rows    [[{:loc-prefix :matti-verdict.giver
+                                      :show?      :viewing?
+                                      :schema     {:reference {:path :matti-verdict.0.giver.contact}}}
+                                     {:id     "giver"
+                                      :col    2
+                                      :show?  :editing?
+                                      :schema {:list {:title "matti-verdict.giver"
+                                                      :items [{:id     "giver"
+                                                               :schema {:docgen "matti-verdict-giver"}}
+                                                              {:id     "contact"
+                                                               :show?  :editing?
+                                                               :schema {:docgen "matti-verdict-contact"}}]}}}
+                                     {:id     "section"
+                                      :schema {:docgen "matti-verdict-text"}}
+                                     {:show? :viewing?}
+                                     {:col    2
+                                      :id     "verdict-code"
+                                      :align  :full
+                                      :schema {:reference-list {:path       [:verdict]
+                                                                :type       :select
+                                                                :loc-prefix :matti-r}} }]
+                                    [{:col    5
+                                      :id     "paatosteksti"
+                                      :show?  :editing?
+                                      :schema {:phrase-text {:category :paatosteksti}}}
+                                     {:col    3
+                                      :hide?  :editing?
+                                      :schema {:reference {:path :matti-verdict.1.paatosteksti}}}
+                                     {:col    2
+                                      :id     "application-id"
+                                      :show?  :viewing?
+                                      :schema {:docgen "matti-verdict-id"}}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

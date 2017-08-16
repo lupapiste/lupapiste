@@ -297,8 +297,8 @@
                               :value value} text])))])
 
 ;; Prettyprints the contents of the given atom.
-(rum/defc pprint < rum/reactive
-  [a]
+(rum/defc debug-atom < rum/reactive
+  [a & [title]]
   [:div.pprint
-   [:div.title [:h4"debug"]]
+   [:div.title [:h4(or title "debug")]]
    [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])

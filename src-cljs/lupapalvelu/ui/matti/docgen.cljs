@@ -134,9 +134,8 @@
     :text       (text-edit options :textarea.grid-style-input)))
 
 ;; ---------------------------------------
-;; Multimethods
+;; Docgen view components
 ;; ---------------------------------------
-
 
 (defmulti docgen-view docgen-type)
 
