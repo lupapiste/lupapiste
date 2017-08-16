@@ -247,7 +247,7 @@
       (data-type #{:text :string}) (check sc/Str)
       (= data-type :checkbox)      (check sc/Bool)
       ;; TODO: Nil handling should follow valueAllowUnset.
-      (= data-type :select)        (when-not (nil? value)
+      (= data-type :select)        (when (seq value)
                                      (check-items [value] names))
       (= data-type :radioGroup)    (check-items [value] names)
       :else                        :error.invalid-value))
@@ -269,7 +269,8 @@
   [{:keys [path schema data value references] :as options}]
   (cond
     (not-empty path) :error.invalid-value-path
-    :else            (check-items value (get-in references (get-path data)))))
+    :else            (when (seq value) ;; Empty selection is allowed.
+                       (check-items value (get-in references (get-path data))))))
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]

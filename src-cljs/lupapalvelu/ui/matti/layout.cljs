@@ -16,11 +16,6 @@
 (defn schema-type [schema-type]
   (-> schema-type :schema keys first keyword))
 
-(defn- pathify [path]
-  (if (keyword? path)
-    (util/split-kw-path path)
-    path))
-
 (declare matti-list)
 
 ;; -------------------------------
@@ -113,10 +108,10 @@
   [{:keys [path schema]}]
   (let [{:keys [item-key item-loc-prefix term]}        schema
         {:keys [extra-path match-key] term-path :path} term
-        extra-path (pathify extra-path)
-        term-parth (pathify term-path)
+        extra-path (path/pathify extra-path)
+        term-parth (path/pathify term-path)
         match-key                                      (or match-key item-key)]
-    (->> (path/value (pathify (:path schema)) state/references)
+    (->> (path/value (path/pathify (:path schema)) state/references)
          (remove :deleted) ; Safe for non-maps
          (map (fn [x]
                 (let [v (if item-key (item-key x) x)]
@@ -138,7 +133,7 @@
                          :schema (assoc schema
                                         :body [{:sortBy :displayName
                                                 :body (map #(hash-map :name %)
-                                                           (distinct (path/react (pathify (:path schema))
+                                                           (distinct (path/react (path/pathify (:path schema))
                                                                                  state/references)))}]))
         component (docgen/docgen-select options)]
     (if (show-label? schema wrap-label?)
@@ -232,13 +227,16 @@
 
 (defmethod instantiate :docgen
   [{:keys [state path]} {:keys [schema id]} & [wrap-label?]]
-  (let [schema-name (:docgen schema)
-        options     (shared/child-schema {:state  state
-                                          :path   (path/extend path id)
-                                          :schema (service/schema schema-name)}
-                                         :schema
-                                         schema)
-        editing?    (path/react-meta? options :editing?)]
+  (let [docgen   (:docgen schema)
+        schema-name (get docgen :name docgen)
+        options  (shared/child-schema {:state  state
+                                       :path   (path/extend path id)
+                                       :schema (cond-> (service/schema schema-name)
+                                                 ;; Additional, non-legacy properties
+                                                 (map? docgen) (merge (dissoc docgen :name)))}
+                                      :schema
+                                      schema)
+        editing? (path/react-meta? options :editing?)]
     (cond->> options
       editing?       docgen/docgen-component
       (not editing?) docgen/docgen-view

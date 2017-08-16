@@ -72,12 +72,24 @@
                          :muutoksenhaku :vakuus :vaativuus
                          :rakennusoikeus :kaava})
 
+(def path-type (sc/conditional
+                keyword? sc/Keyword    ;; Joined kw-path (e.g. :one.two.three)
+                :else    [sc/Keyword]  ;; Vector path [:one :two :three]
+                ))
+
 (defschema MattiVisible
   (let [visibility (sc/enum :editing? :viewing?)]
     {;; Show/hide depending on the edit/view mode. Default: always visible.
-    ;; If both are given, :show? overrides :hide?
-    (sc/optional-key :show?)      visibility
-    (sc/optional-key :hide?)      visibility}))
+     ;; If both are given, :show? overrides :hide?
+     (sc/optional-key :show?) visibility
+     (sc/optional-key :hide?) visibility}))
+
+(defschema MattiEnabled
+  "Component is enabled/disabled if the path value is truthy. Empty
+  strings/collections are interpreted as falsey. Default: enabled. If
+  both are given, :enabled? orverrides :disabled?"
+  {(sc/optional-key :enabled?)  path-type
+   (sc/optional-key :disabled?) path-type})
 
 (defschema MattiBase
   (merge MattiVisible
@@ -94,11 +106,6 @@
 (defschema MattiComponent
   (merge MattiBase
          {(sc/optional-key :label?) sc/Bool})) ;; Show label? Default true
-
-(def path-type (sc/conditional
-                keyword? sc/Keyword    ;; Joined kw-path (e.g. :one.two.three)
-                :else    [sc/Keyword]  ;; Vector path [:one :two :three]
-                ))
 
 (defschema MattiReferenceList
   "Component that builds schema from an external source. Each item is
@@ -161,11 +168,18 @@
 (defschema MattiReference
   "Displays the referenced value."
   (merge MattiComponent
-         {:path                   path-type
-          (sc/optional-key :type) (sc/enum :docgen)}))
+         {:path path-type}))
+
+(defschema MattiDocgen
+  "Additional properties for old school docgen definitions. Shortcut
+  is to use just the schema name (see below)."
+  (merge MattiEnabled
+         {:name sc/Str}))
 
 (def schema-type-alternatives
-  {:docgen         sc/Str
+  {:docgen         (sc/conditional
+                    :name MattiDocgen
+                    :else sc/Str)
    :list           (sc/recursive #'MattiList)
    :reference-list MattiReferenceList
    :phrase-text    MattiPhraseText
@@ -286,7 +300,8 @@
                                   {:align :full
                                    :col 2
                                    :id "complexity"
-                                   :schema {:docgen "matti-complexity"}}]
+                                   :schema {:docgen {:enabled? :matti-verdict.2.verdict-code
+                                                     :name "matti-complexity"}}}]
                                  [{:col    12
                                    :id     "paatosteksti"
                                    :schema {:phrase-text {:category :paatosteksti}}}]]}
@@ -350,8 +365,8 @@
                                                             :path     [:plans]
                                                             :item-key :id
                                                             :type     :multi-select
-                                                            :term     {:path       [:plans]
-                                                                       :extra-path [:name]}}}}]]}
+                                                            :term     {:path       :plans
+                                                                       :extra-path :name}}}}]]}
                :_meta {:editing? true}}
               {:id   "reviews"
                :grid {:columns 1
@@ -360,8 +375,8 @@
                                                             :path     [:reviews]
                                                             :item-key :id
                                                             :type     :multi-select
-                                                            :term     {:path       [:reviews]
-                                                                       :extra-path [:name]}}}}]]}
+                                                            :term     {:path       :reviews
+                                                                       :extra-path :name}}}}]]}
                :_meta {:editing? true}}]})
 
 (def settings-schemas

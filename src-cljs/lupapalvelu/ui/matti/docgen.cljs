@@ -28,11 +28,12 @@
   [_ component]
   component)
 
-(defn docgen-attr [{:keys [path]} & kv]
+(defn docgen-attr [{:keys [path] :as options} & kv]
   (let [id (path/id path)]
     (assoc (apply hash-map kv)
            :key id
-           :id  id)))
+           :id  id
+           :disabled (path/disabled? options))))
 
 (defn- state-change [{:keys [state path] :as options}]
   (let [handler (common/event->state (path/state path state))]
@@ -110,6 +111,7 @@
 
 
 (rum/defcs text-edit < (rum/local "" ::text)
+  rum/reactive
   {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."

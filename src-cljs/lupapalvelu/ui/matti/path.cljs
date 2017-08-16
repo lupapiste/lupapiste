@@ -1,8 +1,9 @@
 (ns lupapalvelu.ui.matti.path
-  (:require [rum.core :as rum]
-            [lupapalvelu.ui.common :as common]
+  (:require [clojure.string :as s]
             [lupapalvelu.matti.shared :as shared]
-            [clojure.string :as s]))
+            [lupapalvelu.ui.common :as common]
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
 (defn state [path state]
   (rum/cursor-in state (map keyword path)))
@@ -107,3 +108,24 @@
   "Rum key-fn, where key is the path id."
   [{path :path}]
   (id path))
+
+(defn pathify
+  "Splits kw-path if necessary."
+  [path]
+  (if (keyword? path)
+    (util/split-kw-path path)
+    path))
+
+(defn- truthy [v]
+  (cond
+    (sequential? v) (seq v)
+    (string? v) (seq v)
+    :else v))
+
+(defn disabled?
+  "Component disabled status as defined in MattiEnabled schema."
+  [{:keys [state schema]}]
+  (let [{:keys [enabled? disabled?]} schema]
+    (cond
+      enabled?  (-> enabled?  pathify (react state) truthy not)
+      disabled? (-> disabled? pathify (react state) truthy))))
