@@ -1,0 +1,76 @@
+$matti-grid-margin: 10px;
+
+@mixin order-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * (100% / $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $matti-grid-margin * 3;
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+@mixin order-grid ($columns) {
+  .order-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    .row {
+      @include clearfix;
+      padding: $matti-grid-margin 0;
+      @for $i from 1 through $columns {
+        .col-#{$i} {
+          @include order-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
+    }
+  }
+}
+
+@for $i from 1 through 12 {
+  @include order-grid( $i );
+}
+
+span.order-grid-header {
+  font-size: 17px;
+  font-weight: bold;
+}
+

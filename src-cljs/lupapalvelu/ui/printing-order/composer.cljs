@@ -53,11 +53,11 @@
   [:div.printing-order-footer
    [:div
     [:button.tertiary.rollup-button
-     [:h2 (str (loc "printing-order.composer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
+     [:h2 (str (loc "printing-order.footer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
     [:button.tertiary.rollup-button
-     [:h2 (str (loc "printing-order.composer.price") " " 0 "€")]]
+     [:h2 (str (loc "printing-order.footer.price") " " 0 "€")]]
     [:button.tertiary.rollup-button
-     [:h2 (loc "printing-order.composer.show-pricing")]]
+     [:h2 (loc "printing-order.show-pricing")]]
     [:button.tertiary.rollup-button
      [:h2 (loc "printing-order.mylly.provided-by")]]]])
 
@@ -75,7 +75,48 @@
       [:button.positive
        {:on-click #(state/proceed-phase2)
         :disabled (not (pos-int? total-amount))}
-       [:span (loc "printing-order.composer.button.next.1")]
+       [:span (loc "printing-order.phase1.button.next")]
+       [:i.lupicon-chevron-right]]]]))
+
+(rum/defc composer-phase2 < rum/reactive
+  []
+  (let []
+    [:div.order-grid-4
+     [:div.row
+      [:div.col-4
+       [:span.row-text.order-grid-header (loc "printing-order.orderer-details")]]]
+     [:div.row
+      [:div.col-1
+       [:div "Etunimi"]
+       [:input.grid-style-input--wide
+        {:type "text"}]]
+      [:div.col-1
+       [:div "Etunimi"]
+       [:input.grid-style-input--wide
+        {:type "text"}]]
+      [:div.col-2
+       [:div "Etunimi"]
+       [:input.grid-style-input--wide
+        {:type "text"}]]]
+     [:div.row
+      [:div.col-1
+       [:div "Etunimi"]
+       [:input.grid-style-input--wide
+        {:type "text"}]]
+      [:div.col-1
+       [:div "Etunimi"]
+       [:input.grid-style-input--wide
+        {:type "text"}]]
+      [:div.col-2
+       [:div "Etunimi"]
+       [:input.grid-style-input--wide
+        {:type "text"}]]]
+     [:div.operation-button-row
+      [:button.secondary
+       [:i.lupicon-chevron-left]
+       [:span (loc "printing-order.phase2.button.prev")]]
+      [:button.positive
+       [:span (loc "printing-order.phase2.button.next")]
        [:i.lupicon-chevron-right]]]]))
 
 (rum/defc order-composer < rum/reactive
@@ -86,23 +127,13 @@
         order-rows (rum/react (rum/cursor-in state/component-state [:order]))
         total-amount (reduce + (vals order-rows))]
     [:div
-     [:h1 (loc (str "printing-order.composer.title." phase))]
-     [:span (loc (str "printing-order.composer.intro-text." phase))]
+     [:h1 (loc (str "printing-order.phase" phase ".title"))]
+     [:span (loc (str "printing-order.phase" phase ".intro-text"))]
      [:div.bottom-marginM]
      (when (= phase 1)
        (composer-phase1 total-amount))
      (when (= phase 2)
-       [:div
-        [:div
-         [:h2 "Tilaajan tiedot"]
-         []]
-        [:div.operation-button-row
-         [:button.secondary
-          [:i.lupicon-chevron-left]
-          [:span (loc "printing-order.composer.button.prev.2")]]
-         [:button.positive
-          [:span (loc "printing-order.composer.button.next.2")]
-          [:i.lupicon-chevron-right]]]])
+       (composer-phase2))
      (order-composer-footer total-amount)]))
 
 (defonce args (atom {}))
