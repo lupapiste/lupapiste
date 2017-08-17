@@ -36,7 +36,7 @@
         <!-- /ko -->
         <!-- ko if: showElyStatementSection() && elySubtypes().length > 0 -->
         <bubble-dialog params="visible: showElyStatementSection, okFun: requestElyStatement, okEnabled: elyDataOk, buttonText: 'application.statement.add', buttonIcon: 'lupicon-circle-check', waiting: submitting">
-          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}, feature: 'ely-uspa'"></div>
+          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}, feature: 'ely-uspa'" data-test-id="ely-statement-bubble"></div>
         </bubble-dialog>
         <!-- /ko -->
       </div>
