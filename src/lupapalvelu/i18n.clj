@@ -43,8 +43,11 @@
 
 (sc/defschema EnumSupportedLanguages (apply sc/enum (map name languages)))
 
+;; The languages are hard coded (with English optional) to avoid failing smoketests
 (sc/defschema LocalizationStringMap
-  (localization-schema sc/Str))
+  {:fi                   sc/Str
+   :sv                   sc/Str
+   (sc/optional-key :en) sc/Str})
 
 
 ;;
