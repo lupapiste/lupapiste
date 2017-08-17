@@ -23,7 +23,7 @@
          :tasks      (if (.equalsIgnoreCase "aloituskokous" (get-in source-document [:data :katselmuksenLaji :value]))
                        {:type-group "katselmukset_ja_tarkastukset" :type-id "aloituskokouksen_poytakirja"}
                        {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"})
-         :verdicts   {:type-group (if (= permit-type "R") "paatoksenteko" "muut")
+         :verdicts   {:type-group (if (#{"R" "ARK"} permit-type) "paatoksenteko" "muut")
                       :type-id "paatos"}
          {:type-group "muut" :type-id "muu"})
        att-type/attachment-type))
