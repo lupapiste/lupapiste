@@ -14,9 +14,15 @@
    [:input.grid-style-input--wide
     {:type "text"}]])
 
-(rum/defc grid-radio-button [col-class ltext]
+(rum/defc grid-radio-button < rum/reactive
+  [state value col-class ltext]
   [:div
    {:class (name col-class)}
    [:div
     {:class ["radio-wrapper"]}
-    [:label.radio-label (loc ltext)]]])
+    [:input {:type    "radio"
+             :checked (= (rum/react state) value)
+             :value   value}]
+    [:label.radio-label
+     {:on-click #(reset! state value)}
+     (loc ltext)]]])

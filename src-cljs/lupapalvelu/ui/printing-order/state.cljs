@@ -3,7 +3,11 @@
 (def empty-component-state {:attachments []
                             :tagGroups   []
                             :order       {}
+                            :contacts    {:payer-same-as-orderer true
+                                          :delivery-same-as-orderer true
+                                          :orderer {}}
                             :phase       2
+
                             :id          nil})
 
 (defonce component-state (atom empty-component-state))

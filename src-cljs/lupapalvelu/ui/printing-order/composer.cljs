@@ -81,7 +81,7 @@
 
 (rum/defc composer-phase2 < rum/reactive
   []
-  (let []
+  (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])]
     [:div.order-grid-4
      [:div.order-section
       [:div.row
@@ -103,8 +103,15 @@
        [:div.col-4
         [:span.order-grid-header (loc "printing-order.payer-details")]]]
       [:div.row
-       (poc/grid-radio-button :col-1 "printing-order.payer.same-as-orderer")
-       (poc/grid-radio-button :col-1 "printing-order.payer.other-than-orderer")]]
+       (poc/grid-radio-button payer-option true  :col-1 "printing-order.payer.same-as-orderer")
+       (poc/grid-radio-button payer-option false :col-1 "printing-order.payer.other-than-orderer")]]
+     [:div.order-section
+      [:div.row
+       [:div.col-4
+        [:span.order-grid-header "Toimitusosoite"]]]
+      [:div.row
+       #_(poc/grid-radio-button :col-1 "printing-order.payer.same-as-orderer")
+       #_(poc/grid-radio-button :col-1 "printing-order.payer.other-than-orderer")]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase1)}
