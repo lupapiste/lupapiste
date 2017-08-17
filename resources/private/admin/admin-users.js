@@ -247,6 +247,7 @@
           {username: self.username(),
             role: "financialAuthority",
             email: self.email(),
+            lastName: loc("financialAuthority"),
             enabled: "true"})
         .pending(self.searching)
         .success(function(r) {

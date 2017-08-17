@@ -8,6 +8,8 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
 
   self.selectValue = ko.observable( self.value() );
   self.indicator = ko.observable().extend({notify: "always"});
+  self.processing = ko.observable();
+  self.pending = ko.observable();
 
   var latestSaved = self.value();
 
@@ -20,9 +22,29 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
     }
   };
 
+  var invite = function() {
+    ajax.command("invite-financial-handler",
+      { id: params.applicationId,
+        documentId: self.documentId,
+        path: params.path})
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function() {
+        console.log("success");
+        repository.load(params.applicationId);
+      })
+      .error(function(d) {
+        console.log("error");
+        console.log(d);
+      })
+      .call();
+  };
+
   var saveFunding = function(value) {
     doSave(value);
-    //invite
+    console.log(self.documentId);
+    console.log(params);
+    invite();
   };
 
   var reset = function() {

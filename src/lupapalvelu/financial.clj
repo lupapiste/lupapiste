@@ -6,12 +6,13 @@
     [lupapalvelu.user-utils :as uu]
     [lupapalvelu.token :as token]
     [lupapalvelu.ttl :as ttl]
-    [sade.env :as env]))
+    [lupapalvelu.authorization-api :as auth]
+    [lupapalvelu.action :as action]
+    [sade.env :as env]
+    [sade.util :as util]))
 
-(defn fetch-organization-financial-handlers [org-id]
-  (let [query {$and [{:role "financialAuthority"}, (usr/org-authz-match [org-id])]}
-        financial-handlers (usr/find-users query)]
-    (ok :data financial-handlers)))
+(defn get-financial-user []
+  (usr/get-user {:role "financialAuthority"}))
 
 (defn create-financial-handler [user-data caller]
   [caller user-data]
@@ -22,5 +23,15 @@
         :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
         :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))
 
-(defn delete-organization-financial-handler [email org-id]
-  (usr/update-user-by-email email {:role "financialAuthority"} {$unset {(str "orgAuthz." org-id) ""}}))
+(defn invite-financial-handler [command]
+  (let [financial-authority (get-financial-user)
+        updated-data (assoc (:data command) :email (:email financial-authority))
+        updated-data (assoc updated-data :text "")
+        updated-data (assoc updated-data :documentName "")
+        updated-data (assoc updated-data :role "writer")
+        command (assoc command :data updated-data)]
+    (auth/send-invite! command)
+    (action/update-application command
+                        {:auth {$elemMatch {:invite.user.id (:id financial-authority)}}}
+                        {$set {:modified (now)
+                               :auth.$   (assoc financial-authority :inviter (usr/batchrun-user-data) :inviteAccepted (now))}})))

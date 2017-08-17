@@ -1,13 +1,7 @@
 (ns lupapalvelu.financial-api
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.financial :as financial]))
-
-(defquery get-organizations-financial-handlers
-  {:user-roles #{:authorityAdmin}}
-  [{user :user}]
-  (let [org-id (usr/authority-admins-organization-id user)]
-    (financial/fetch-organization-financial-handlers org-id)))
+            [lupapalvelu.financial :as financial]
+            [lupapalvelu.application :as application]))
 
 (defcommand create-financial-handler
   {:parameters [:email]
@@ -18,25 +12,13 @@
   [{user-data :data user :user}]
     (financial/create-financial-handler user-data user))
 
-(defcommand delete-financial-handler
-  {:parameters       [email]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :user-roles       #{:authorityAdmin}}
-  [{user :user}]
-  (let [org-id (usr/authority-admins-organization-id user)]
-    (financial/delete-organization-financial-handler email org-id)))
-
 (defcommand invite-financial-handler
-  {:parameters [:id :email :text :documentName :documentId :path :role]
+  {:parameters [:id :documentId :path]
    :categories #{:documents}
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator
-                      role-validator]
-   :states     (states/all-application-states-but [:canceled])
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      action/email-validator]
    :user-roles #{:applicant :authority}
    :pre-checks  [application/validate-authority-in-drafts]
    :notified   true}
   [command]
-  ; emal text
-  (send-invite! command))
+  (financial/invite-financial-handler command))
