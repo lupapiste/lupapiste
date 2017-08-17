@@ -122,10 +122,43 @@
     (string? v) (seq v)
     :else v))
 
+(defn- path-truthy [{state :state :as options} kw-path]
+  (let [[x & [k] :as path] (pathify kw-path)]
+    (truthy (if (= x :_meta )
+              (react-meta? options k )
+              (react path state)))))
+
+(defn- paths-result
+  "Result is calculated be calling op-fn (e.g., some) to path-truthy
+  results of every path. Result is nil for empty/nil paths."
+  [options op-fn paths]
+  (let [paths (->> [paths] flatten (remove nil?))]
+    (when (seq paths)
+      (->> paths
+           (map (partial path-truthy options))
+           (op-fn identity )))))
+
+(defn- flag?
+  "and-flag: schema key for NOT-ALL (or empty/nil) condition.
+   or-flag:  schema key for ANY (or empty/nil) condition.
+  True if, both conditions met."
+  [{:keys [state schema] :as options} and-flag or-flag]
+  (let [results (->> [(->> schema and-flag (paths-result options not-every?))
+                      (->> schema or-flag (paths-result options some))]
+                     (remove nil?))]
+    (when (seq results)
+      (every? identity results))))
+
 (defn disabled?
   "Component disabled status as defined in MattiEnabled schema."
-  [{:keys [state schema]}]
-  (let [{:keys [enabled? disabled?]} schema]
-    (cond
-      enabled?  (-> enabled?  pathify (react state) truthy not)
-      disabled? (-> disabled? pathify (react state) truthy))))
+  [options]
+  (flag? options :enabled? :disabled?))
+
+(defn enabled? [options] (not (disabled? options)))
+
+(defn not-visible?
+  "Component not-visible status as defined in MattiVisible schema."
+  [options]
+  (flag? options :show? :hide?))
+
+(defn visible? [options] (not (not-visible? options)))

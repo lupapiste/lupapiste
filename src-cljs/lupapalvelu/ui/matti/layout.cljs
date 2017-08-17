@@ -322,16 +322,6 @@
          :state state
          :path (path/extend path (:id subschema))))
 
-(defn- visible? [{:keys [state path schema] :as options}]
-  (let [{:keys [show? hide?]} schema
-        mode                  (if (path/meta? options :editing?)
-                                :editing?
-                                :viewing?)]
-    (cond
-      show?    (= show? mode)
-      hide?    (not= hide? mode)
-      :default true)))
-
 (defn matti-list [{:keys [schema state path] :as options} & [wrap-label?]]
   [:div.matti-list
    {:class (path/css (sub-options options schema))}
@@ -345,7 +335,7 @@
                         item-schema (shared/child-schema item
                                                          :schema
                                                          schema)]
-                    (when (visible? (assoc item-options :schema item-schema))
+                    (when (path/visible? (assoc item-options :schema item-schema))
                       (when-let [component (instantiate item-options
                                                         item-schema
                                                         false)]
@@ -363,9 +353,9 @@
    (map-indexed (fn [row-index row]
                   (let [row-index (get row :id row-index)]
                     ;; Row visibility
-                    (when (visible? {:state  state
-                                     :schema row
-                                     :path   (path/extend path (str row-index))})
+                    (when (path/visible? {:state  state
+                                          :schema row
+                                          :path   (path/extend path (str row-index))})
                       [:div.row {:class (some->> row :css (map name) s/join )}
                        (map-indexed (fn [col-index {:keys [col align schema id] :as cell}]
                                       (let [col-path (path/extend path
@@ -373,9 +363,9 @@
                                                        (when-not id
                                                          (str col-index)))]
                                         ;; Cell visibility
-                                        (when (visible? {:state state
-                                                         :schema cell
-                                                         :path col-path})
+                                        (when (path/visible? {:state state
+                                                              :schema cell
+                                                              :path col-path})
                                           [:div {:class (path/css (sub-options options cell)
                                                                   (str "col-" (or col 1))
                                                                   (when align (str "col--" (name align))))}

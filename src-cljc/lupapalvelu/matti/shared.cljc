@@ -73,23 +73,29 @@
                          :rakennusoikeus :kaava})
 
 (def path-type (sc/conditional
-                keyword? sc/Keyword    ;; Joined kw-path (e.g. :one.two.three)
-                :else    [sc/Keyword]  ;; Vector path [:one :two :three]
+                ;; Joined kw-path (e.g. :one.two.three)
+                keyword? sc/Keyword
+                ;; Vector path [:one :two :three] or vector of joined
+                ;; kw-paths [:one.two.three :four.five], depending on
+                ;; the schema.
+                :else    [sc/Keyword]
                 ))
-
-(defschema MattiVisible
-  (let [visibility (sc/enum :editing? :viewing?)]
-    {;; Show/hide depending on the edit/view mode. Default: always visible.
-     ;; If both are given, :show? overrides :hide?
-     (sc/optional-key :show?) visibility
-     (sc/optional-key :hide?) visibility}))
 
 (defschema MattiEnabled
   "Component is enabled/disabled if the path value is truthy. Empty
-  strings/collections are interpreted as falsey. Default: enabled. If
-  both are given, :enabled? orverrides :disabled?"
-  {(sc/optional-key :enabled?)  path-type
-   (sc/optional-key :disabled?) path-type})
+  strings/collections are interpreted as falsey. Default: enabled.
+  Paths are either joined kw-path or vector of joined kw-paths. In
+  other words, each vector item denotes full path. If both are given,
+  both are taken into account. On conflicts, :disabled?
+  overrides :enabled?. Paths starting with :_meta are interpreted as
+  _meta queries."
+  {(sc/optional-key :enabled?)  path-type   ;; True if ALL truthy.
+   (sc/optional-key :disabled?) path-type}) ;; True if ANY truthy
+
+(defschema MattiVisible
+  "Similar to MattiEnabled."
+  {(sc/optional-key :show?) path-type   ;; True if ALL truthy.
+   (sc/optional-key :hide?) path-type}) ;; True if ANY truthy.
 
 (defschema MattiBase
   (merge MattiVisible
@@ -300,8 +306,7 @@
                                   {:align :full
                                    :col 2
                                    :id "complexity"
-                                   :schema {:docgen {:enabled? :matti-verdict.2.verdict-code
-                                                     :name "matti-complexity"}}}]
+                                   :schema {:docgen {:name "matti-complexity"}}}]
                                  [{:col    12
                                    :id     "paatosteksti"
                                    :schema {:phrase-text {:category :paatosteksti}}}]]}
@@ -390,20 +395,20 @@
   {:r {:sections [{:id   "matti-verdict"
                    :grid {:columns 6
                           :rows    [[{:loc-prefix :matti-verdict.giver
-                                      :show?      :viewing?
+                                      :hide?      :_meta.editing?
                                       :schema     {:reference {:path :matti-verdict.0.giver.contact}}}
                                      {:id     "giver"
                                       :col    2
-                                      :show?  :editing?
+                                      :show?  :_meta.editing?
                                       :schema {:list {:title "matti-verdict.giver"
                                                       :items [{:id     "giver"
                                                                :schema {:docgen "matti-verdict-giver"}}
                                                               {:id     "contact"
-                                                               :show?  :editing?
+                                                               :show?  :_meta.editing?
                                                                :schema {:docgen "matti-verdict-contact"}}]}}}
                                      {:id     "section"
                                       :schema {:docgen "matti-verdict-text"}}
-                                     {:show? :viewing?}
+                                     {:hide? :_meta.editing?}
                                      {:col    2
                                       :id     "verdict-code"
                                       :align  :full
@@ -412,14 +417,14 @@
                                                                 :loc-prefix :matti-r}} }]
                                     [{:col    5
                                       :id     "paatosteksti"
-                                      :show?  :editing?
+                                      :show?  :_meta.editing?
                                       :schema {:phrase-text {:category :paatosteksti}}}
                                      {:col    3
-                                      :hide?  :editing?
+                                      :hide?  :_meta.editing?
                                       :schema {:reference {:path :matti-verdict.1.paatosteksti}}}
                                      {:col    2
                                       :id     "application-id"
-                                      :show?  :viewing?
+                                      :hide?  :_meta.editing?
                                       :schema {:docgen "matti-verdict-id"}}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
