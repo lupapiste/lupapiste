@@ -24,7 +24,7 @@
       (docgen-loc options)])
    component])
 
-(defmethod docgen-label-wrap :checkbox
+#_(defmethod docgen-label-wrap :checkbox
   [_ component]
   component)
 

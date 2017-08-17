@@ -36,7 +36,13 @@
                                   {:name "manual"}]})
 
 (def verdict-check {:name "matti-verdict-check"
+                    :label false
                     :type :checkbox})
+
+(def in-verdict {:name "required-in-verdict"
+                 :label false
+                 :i18nkey "matti.template-removed"
+                 :type :checkbox})
 
 (def complexity {:name "matti-complexity"
                  :type :select
@@ -100,7 +106,8 @@
          {:info {:name (:name m)}
           :body (body m)})
        [matti-string verdict-text verdict-contact verdict-check
-        verdict-giver verdict-id automatic-vs-manual complexity]))
+        in-verdict verdict-giver verdict-id automatic-vs-manual
+        complexity]))
 
 ;; Phrases
 

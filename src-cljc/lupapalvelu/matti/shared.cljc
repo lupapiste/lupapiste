@@ -78,27 +78,26 @@
                 ;; Vector path [:one :two :three] or vector of joined
                 ;; kw-paths [:one.two.three :four.five], depending on
                 ;; the schema.
-                :else    [sc/Keyword]
-                ))
+                :else    [sc/Keyword]))
 
 (defschema MattiEnabled
   "Component is enabled/disabled if the path value is truthy. Empty
   strings/collections are interpreted as falsey. Default: enabled.
   Paths are either joined kw-path or vector of joined kw-paths. In
   other words, each vector item denotes full path. If both are given,
-  both are taken into account. On conflicts, :disabled?
-  overrides :enabled?. Paths starting with :_meta are interpreted as
-  _meta queries."
-  {(sc/optional-key :enabled?)  path-type   ;; True if ALL truthy.
+  both are taken into account. On conflicts, component is enabled.
+  Paths starting with :_meta are interpreted as _meta queries."
+  {(sc/optional-key :enabled?)  path-type   ;; True if ANY truthy.
    (sc/optional-key :disabled?) path-type}) ;; True if ANY truthy
 
 (defschema MattiVisible
   "Similar to MattiEnabled."
-  {(sc/optional-key :show?) path-type   ;; True if ALL truthy.
+  {(sc/optional-key :show?) path-type   ;; True if ANY truthy.
    (sc/optional-key :hide?) path-type}) ;; True if ANY truthy.
 
 (defschema MattiBase
   (merge MattiVisible
+         MattiEnabled
          {(sc/optional-key :_meta)      meta-flags
           (sc/optional-key :css)        [sc/Keyword]
           ;; If an schema ancestor has :loc-prefix then localization term is
@@ -129,6 +128,8 @@
           ;; item-loc-prefix supports item-key.
           (sc/optional-key :item-loc-prefix) sc/Keyword
           (sc/optional-key :id)              sc/Str
+          ;; Separator string between items when viewed. Default ", "
+          (sc/optional-key :separator)       sc/Str
           ;; Term definition resolves the localization for the value.
           (sc/optional-key :term)
           {;; The path contains sources with corresponding fi, sv and
@@ -140,7 +141,7 @@
            (sc/optional-key :extra-path) path-type
            ;; Key for the source property that should match the
            ;; value. For example, the value list might be just ids and
-           ;; the match-key could by :id. Default value is the same as
+           ;; the match-key could be :id. Default value is the same as
            ;; item-key.
            (sc/optional-key :match-key)  sc/Keyword}}))
 
@@ -258,8 +259,8 @@
 
 (defn reference-section [ref id settings-path]
   (multi-section id settings-path {:term {:path       [ref]
-                                               :extra-path [:name]
-                                               :match-key  :id}}))
+                                          :extra-path [:name]
+                                          :match-key  :id}}))
 
 (defn text-section [id]
   {:id (name id)
@@ -412,7 +413,7 @@
                                      {:col    2
                                       :id     "verdict-code"
                                       :align  :full
-                                      :schema {:reference-list {:path       [:verdict]
+                                      :schema {:reference-list {:path       :verdict
                                                                 :type       :select
                                                                 :loc-prefix :matti-r}} }]
                                     [{:col    5
@@ -425,7 +426,33 @@
                                      {:col    2
                                       :id     "application-id"
                                       :hide?  :_meta.editing?
-                                      :schema {:docgen "matti-verdict-id"}}]]}}]}})
+                                      :schema {:docgen "matti-verdict-id"}}]]}}
+                  {:id   "requirements"
+                   :grid {:columns 7
+                          :rows    (map-indexed (fn [i [loc-prefix path term? separator?]]
+                                                  (let [check-path (keyword (str "requirements." i ".included"))]
+                                                    {:show? [:_meta.editing? check-path]
+                                                     :row   [{:col    4
+                                                              :schema {:reference-list
+                                                                       (merge {:enabled?   check-path
+                                                                               :loc-prefix loc-prefix
+                                                                               :path       path
+                                                                               :type       :multi-select}
+                                                                              (when term?
+                                                                                {:item-key :id
+                                                                                 :term     {:path       path
+                                                                                            :extra-path :name
+                                                                                            :match-key  :id}})
+                                                                              (when separator?
+                                                                                {:separator " \u2013 "}))}}
+                                                             {:col    2
+                                                              :align  :right
+                                                              :show?  :_meta.editing?
+                                                              :id     "included"
+                                                              :schema {:docgen "required-in-verdict"}}]}))
+                                                [[:matti-r.foremen :foremen false false]
+                                                 [:matti-plans :plans true false]
+                                                 [:matti-reviews :reviews true true]])}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

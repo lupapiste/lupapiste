@@ -89,6 +89,7 @@
         {:key item-id}
         [:input {:type    "checkbox"
                  :id      item-id
+                 :disabled (path/disabled? options)
                  :checked checked}]
         [:label.matti-checkbox-label
          {:for      item-id
@@ -108,8 +109,8 @@
   [{:keys [path schema]}]
   (let [{:keys [item-key item-loc-prefix term]}        schema
         {:keys [extra-path match-key] term-path :path} term
-        extra-path (path/pathify extra-path)
-        term-parth (path/pathify term-path)
+        extra-path                                     (path/pathify extra-path)
+        term-parth                                     (path/pathify term-path)
         match-key                                      (or match-key item-key)]
     (->> (path/value (path/pathify (:path schema)) state/references)
          (remove :deleted) ; Safe for non-maps
@@ -123,8 +124,8 @@
                                                                                         state/references))
                                                           (get-in (cond->> [(keyword (common/get-current-language))]
                                                                     extra-path (concat extra-path))))
-                            item-loc-prefix          (path/loc [item-loc-prefix v])
-                            :else                    (path/loc path schema v))})))
+                            item-loc-prefix           (path/loc [item-loc-prefix v])
+                            :else                     (path/loc path schema v))})))
          distinct)))
 
 (rum/defc select-reference-list < rum/reactive
@@ -279,7 +280,11 @@
 
 (defmethod view-component :reference-list
   [_ {:keys [state path schema ] :as options} & [wrap-label?]]
-  (let [span [:span (path/loc path schema (path/value path state))]]
+  (let [values (set (flatten [(path/value path state)]))
+        span [:span (->> (resolve-reference-list options)
+                         (filter #(contains? values (:value %)))
+                         (map :text)
+                         (s/join (get schema :separator ", ")))]]
     (if (show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))

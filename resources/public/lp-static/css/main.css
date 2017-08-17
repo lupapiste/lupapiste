@@ -18478,6 +18478,7 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   color: #333333;
 =======
 .pprint {
+  margin-top: 6px;
   padding: 4px;
   font-size: 12px;
   line-height: initial;

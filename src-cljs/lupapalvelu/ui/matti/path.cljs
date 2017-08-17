@@ -37,6 +37,7 @@
   ([path {:keys [i18nkey] :as schema} & extra]
    (let [loc-prefix (or (some-> schema :body first :locPrefix)
                         (shared/parent-value schema :loc-prefix))
+         i18nkey (or i18nkey (some-> schema :body first :i18nkey))
          i18nkey (and i18nkey (flatten [i18nkey]))]
      (if (> (count i18nkey) 1)
        (->> (concat i18nkey extra)
@@ -139,11 +140,11 @@
            (op-fn identity )))))
 
 (defn- flag?
-  "and-flag: schema key for NOT-ALL (or empty/nil) condition.
+  "not-any-flag: schema key for NOT-ANY (or empty/nil) condition.
    or-flag:  schema key for ANY (or empty/nil) condition.
   True if, both conditions met."
-  [{:keys [state schema] :as options} and-flag or-flag]
-  (let [results (->> [(->> schema and-flag (paths-result options not-every?))
+  [{:keys [state schema] :as options} not-any-flag or-flag]
+  (let [results (->> [(->> schema not-any-flag (paths-result options not-any?))
                       (->> schema or-flag (paths-result options some))]
                      (remove nil?))]
     (when (seq results)
