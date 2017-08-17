@@ -15,9 +15,7 @@
       editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
-      reservationPropertiesModel,
-      financialHandlerModel,
-      createFinancialHandlerModel;
+      reservationPropertiesModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -218,74 +216,6 @@
 
   }
 
-  function FinancialHandlerModel() {
-    var self = this;
-
-    self.data = ko.observable();
-
-    self.load = function() {
-      ajax
-        .query("get-organizations-financial-handlers")
-        .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
-        .call();
-    };
-
-    self["delete"] = function() {
-      ajax
-        .command("delete-financial-handler", {email: this.email()})
-        .success(self.load)
-        .call();
-    };
-
-    self.openCreateModal = function()      {
-      createFinancialHandlerModel.copyFrom({});
-      LUPAPISTE.ModalDialog.open("#dialog-create-financial-handler");
-    };
-  }
-
-  function CreateFinancialHandlerModel() {
-    var self = this;
-
-    self.email = ko.observable();
-    self.firstName = ko.observable();
-    self.lastName = ko.observable();
-    self.searching = ko.observable();
-    self.error = ko.observable();
-    self.disabled = ko.computed(function() {
-      var emailOk = self.email() && util.isValidEmailAddress(self.email());
-      return !(emailOk);
-    });
-
-    self.copyFrom = function(data) {
-      self.email(data.email);
-      return self;
-    };
-
-    self.onSuccess = function() {
-      financialHandlerModel.load();
-      self.error(null);
-      LUPAPISTE.ModalDialog.close();
-    };
-
-    self.save = function(data) {
-      var financialHandler = ko.mapping.toJS(data);
-      self.searching(true);
-      ajax
-        .command("create-financial-authority-app-handler",
-          {email: self.email(),
-            enabled: "true",
-            firstName: self.firstName(),
-            lastName: self.lastName()})
-        .pending(self.searching)
-        .success(function() {
-          self.onSuccess();
-        })
-        .call();
-      return false;
-    };
-
-  }
-
   function KopiolaitosModel() {
     var self = this;
 
@@ -459,8 +389,6 @@
   asianhallintaModel = new AsianhallintaModel();
   linkToVendorBackendModel = new LinkToVendorBackendModel();
   editRolesDialogModel = new LUPAPISTE.EditRolesDialogModel(organizationModel);
-  financialHandlerModel = new FinancialHandlerModel();
-  createFinancialHandlerModel = new CreateFinancialHandlerModel();
 
   var usersTableConfig = {
       hideRoleFilter: true,
@@ -491,7 +419,6 @@
       usersList = users.create($("#users .admin-users-table"), usersTableConfig);
     }
     statementGiversModel.load();
-    financialHandlerModel.load();
   });
 
   hub.onPageLoad("backends", function() {
@@ -533,9 +460,7 @@
       organizationUsers:   organizationUsers,
       statementGivers:    statementGiversModel,
       createStatementGiver: createStatementGiverModel,
-      editRoles:           editRolesDialogModel,
-      financialHandler:  financialHandlerModel,
-      createFinancialHandler: createFinancialHandlerModel
+      editRoles:           editRolesDialogModel
       });
     $("#applications").applyBindings({
       organization:        organizationModel,

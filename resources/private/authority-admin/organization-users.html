@@ -107,34 +107,6 @@
             <i class="lupicon-circle-plus"></i><span data-bind="ltext: 'auth-admin.statement-person.add'"></span>
           </button>
         </section>
-
-        <section>
-          <h2 data-bind="ltext: 'auth-admin.financial-handlers'"></h2>
-          <table class="table">
-            <thead>
-            <tr>
-              <th data-bind="ltext: 'auth-admin.financial-handler'"></th>
-              <th data-bind="ltext: 'userinfo.email'"></th>
-              <th data-bind="ltext: 'auth-admin.actions'"></th>
-            </tr>
-            </thead>
-            <tbody data-bind="foreach: financialHandler.data()">
-            <tr data-test-type="financial-handler-row">
-              <td data-bind="text: $data.firstName() + ' ' + $data.lastName()"></td>
-              <td data-bind="text: email"></td>
-              <td>
-                  <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('delete-financial-handler')">
-                    [<a href="#" data-bind="click: $root.financialHandler.delete, ltext: 'remove'" data-test-id="remove-financial-handler" class="modal"></a>]
-                  </span>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-          <button data-bind="click: $root.financialHandler.openCreateModal"
-                  data-test-id="create-financial-handler" class="modal btn btn-primary">
-            <i class="lupicon-circle-plus"></i><span>Lisää rahoituskäsittelijä</span>
-          </button>
-        </section>
       </div>
 
       <div id="dialog-create-statement-giver" class="window autosized">
@@ -153,30 +125,6 @@
             <button data-test-id="create-statement-giver-save" class="btn btn-primary btn-dialog" id="statement-giver-save" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
             <div data-bind="visible: error" >
               <div data-bind="ltext: error" id="statement-giver-error" class="context-error"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="dialog-create-financial-handler" class="window autosized">
-        <div class="dialog-header">
-          <p data-bind="ltext: 'auth-admin.create-financial-handler'"></p>
-          <p class="dialog-close close lupicon-remove"></p>
-        </div>
-        <div class="dialog-content">
-          <div data-bind="with: $root.createFinancialHandler">
-            <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label"></label>
-            <input class="form-input" data-bind="textInput: email" id="financial-handler-email" type="email"/>
-
-            <label data-bind="ltext: 'userinfo.firstName'" class="form-label"></label>
-            <input class="form-input" data-bind="textInput: firstName" id="financial-handler-firstName" type="text"/>
-
-            <label data-bind="ltext: 'userinfo.lastName'" class="form-label"></label>
-            <input class="form-input" data-bind="textInput: lastName" id="financial-handler-lastName" type="text"/>
-
-            <button data-test-id="create-financial-handler-save" class="btn btn-primary btn-dialog" id="financial-handler-save" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
-            <div data-bind="visible: error" >
-              <div data-bind="ltext: error" id="financial-handler-error" class="context-error"></div>
             </div>
           </div>
         </div>
