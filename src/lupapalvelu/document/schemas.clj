@@ -1322,7 +1322,7 @@
            :approvable false
            :accordion-fields buildingid-accordion-paths}
     :body (body (assoc kuvaus :required false)
-                tunnus
+                (assoc tunnus :required false)
                 kaytto-minimal
                 rakennustunnus)}
 

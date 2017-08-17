@@ -18,7 +18,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [lupapalvelu.permit :as permit]))
 
 ;;
 ;; Invites
@@ -79,7 +80,8 @@
                       role-validator]
    :states     (states/all-application-states-but [:canceled])
    :user-roles #{:applicant :authority}
-   :pre-checks  [application/validate-authority-in-drafts]
+   :pre-checks  [application/validate-authority-in-drafts
+                 permit/is-not-archiving-project]
    :notified   true}
   [command]
   (send-invite! command))
