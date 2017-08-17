@@ -16,8 +16,7 @@
    :notified true
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data user :user}]
-  (let [org-id (usr/authority-admins-organization-id user)]
-    (financial/create-financial-handler user-data org-id user)))
+    (financial/create-financial-handler user-data user))
 
 (defcommand delete-financial-handler
   {:parameters       [email]
