@@ -27,3 +27,17 @@
   [{user :user}]
   (let [org-id (usr/authority-admins-organization-id user)]
     (financial/delete-organization-financial-handler email org-id)))
+
+(defcommand invite-financial-handler
+  {:parameters [:id :email :text :documentName :documentId :path :role]
+   :categories #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator
+                      role-validator]
+   :states     (states/all-application-states-but [:canceled])
+   :user-roles #{:applicant :authority}
+   :pre-checks  [application/validate-authority-in-drafts]
+   :notified   true}
+  [command]
+  ; emal text
+  (send-invite! command))
