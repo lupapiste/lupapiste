@@ -287,25 +287,39 @@
 
 
 (defn data-draft
-  "Both keys and values of kmap are kw-paths. Keys are draft targets
-  and values data sources."
+  "Kmap keys are draft targets (kw-paths). Values are either kw-paths or maps with :path and :fn properties. Paths denote data sources. :fn is the source handler function (default identity)."
   [kmap template]
   (let [data (-> template :versions last :data)]
     (reduce (fn [acc [k v]]
-              (assoc-in acc
-                        (util/split-kw-path k)
-                        (get-in data (split-kw-path v))))
+              (let [v-path (get v :path v)
+                    v-fn( get v :fn identity)]
+                (assoc-in acc
+                          (util/split-kw-path k)
+                          (v-fn (get-in data (split-kw-path v-path))))))
             {}
             kmap)))
 
 (defmulti initial-draft-data (fn [template & _]
                                (-> template :category keyword)))
 
+(defn- kw-format [& xs]
+  (keyword (apply format xs)))
+
 (defmethod initial-draft-data :r
   [template application]
-  (assoc-in (data-draft {:matti-verdict.0.giver.giver  :matti-verdict.2.giver
-                         :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
-                         :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
+  (assoc-in (data-draft (merge {:matti-verdict.0.giver.giver  :matti-verdict.2.giver
+                                :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
+                                :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
+                               (reduce-kv (fn [acc i v]
+                                            (assoc acc
+                                                   (kw-format "requirements.%s.0" i)
+                                                   (kw-format "matti-%s.0.0" (name v))
+                                                   (kw-format "requirements.%s.included" i)
+                                                   {:path (kw-format "matti-%s.removed" (name v))
+                                                    :fn not}))
+                                          {}
+                                          [:foremen :plans :reviews])
+                               {:requirements.3.other :matti-conditions.0.0})
                         template)
             (util/split-kw-path :matti-verdict.1.application-id)
             (:id application)))

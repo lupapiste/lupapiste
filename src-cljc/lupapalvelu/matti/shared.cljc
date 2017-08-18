@@ -85,7 +85,7 @@
   strings/collections are interpreted as falsey. Default: enabled.
   Paths are either joined kw-path or vector of joined kw-paths. In
   other words, each vector item denotes full path. If both are given,
-  both are taken into account. On conflicts, component is enabled.
+  both are taken into account. On conflicts, component is disabled.
   Paths starting with :_meta are interpreted as _meta queries."
   {(sc/optional-key :enabled?)  path-type   ;; True if ANY truthy.
    (sc/optional-key :disabled?) path-type}) ;; True if ANY truthy
@@ -429,30 +429,35 @@
                                       :schema {:docgen "matti-verdict-id"}}]]}}
                   {:id   "requirements"
                    :grid {:columns 7
-                          :rows    (map-indexed (fn [i [loc-prefix path term? separator?]]
-                                                  (let [check-path (keyword (str "requirements." i ".included"))]
-                                                    {:show? [:_meta.editing? check-path]
-                                                     :row   [{:col    4
-                                                              :schema {:reference-list
-                                                                       (merge {:enabled?   check-path
-                                                                               :loc-prefix loc-prefix
-                                                                               :path       path
-                                                                               :type       :multi-select}
-                                                                              (when term?
-                                                                                {:item-key :id
-                                                                                 :term     {:path       path
-                                                                                            :extra-path :name
-                                                                                            :match-key  :id}})
-                                                                              (when separator?
-                                                                                {:separator " \u2013 "}))}}
-                                                             {:col    2
-                                                              :align  :right
-                                                              :show?  :_meta.editing?
-                                                              :id     "included"
-                                                              :schema {:docgen "required-in-verdict"}}]}))
-                                                [[:matti-r.foremen :foremen false false]
-                                                 [:matti-plans :plans true false]
-                                                 [:matti-reviews :reviews true true]])}}]}})
+                          :rows    (concat (map-indexed (fn [i [loc-prefix path term? separator?]]
+                                                          (let [check-path (keyword (str "requirements." i ".included"))]
+                                                            {:show? [:_meta.editing? check-path]
+                                                             :row   [{:col    4
+                                                                      :schema {:reference-list
+                                                                               (merge {:enabled?   check-path
+                                                                                       :loc-prefix loc-prefix
+                                                                                       :path       path
+                                                                                       :type       :multi-select}
+                                                                                      (when term?
+                                                                                        {:item-key :id
+                                                                                         :term     {:path       path
+                                                                                                    :extra-path :name
+                                                                                                    :match-key  :id}})
+                                                                                      (when separator?
+                                                                                        {:separator " \u2013 "}))}}
+                                                                     {:col    2
+                                                                      :align  :right
+                                                                      :show?  :_meta.editing?
+                                                                      :id     "included"
+                                                                      :schema {:docgen "required-in-verdict"}}]}))
+                                                        [[:matti-r.foremen :foremen false false]
+                                                         [:matti-plans :plans true false]
+                                                         [:matti-reviews :reviews true true]])
+                                           [[{:col    6
+                                              :id     "other"
+                                              :align  :full
+                                              :schema {:phrase-text {:i18nkey [:phrase.category.lupaehdot]
+                                                                     :category :lupaehdot}}}]])}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

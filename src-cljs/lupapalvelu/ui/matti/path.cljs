@@ -142,13 +142,13 @@
 (defn- flag?
   "not-any-flag: schema key for NOT-ANY (or empty/nil) condition.
    or-flag:  schema key for ANY (or empty/nil) condition.
-  True if, both conditions met."
+  True if either conditions met."
   [{:keys [state schema] :as options} not-any-flag or-flag]
   (let [results (->> [(->> schema not-any-flag (paths-result options not-any?))
                       (->> schema or-flag (paths-result options some))]
                      (remove nil?))]
     (when (seq results)
-      (every? identity results))))
+      (some identity results))))
 
 (defn disabled?
   "Component disabled status as defined in MattiEnabled schema."
