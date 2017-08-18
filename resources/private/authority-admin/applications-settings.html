@@ -17,7 +17,7 @@
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.title'"></h2>
-        <div class="blockbox-wrapper">
+        <div class="blockbox-wrapper" data-test-id="automatic-ok-wrapper">
           <input type="checkbox" id="automatic-ok-for-attachments-enabled" data-test-id="automatic-ok-for-attachments-enabled"
                  data-bind="checked: organization.automaticOkForAttachments, enable: lupapisteApp.models.globalAuthModel.ok('set-automatic-ok-for-attachments')"/>
           <label for="automatic-ok-for-attachments-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.automatic-ok-for-attachments.enabled'"></label>

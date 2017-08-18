@@ -75,13 +75,13 @@ Sonja logs out
 *** Keywords ***
 
 Unselect set automatic ok for attachments checkbox
-    Wait Until Element Is Visible  automatic-ok-for-attachments-enabled
-    Focus  automatic-ok-for-attachments-enabled
+    Element should be visible by test id  automatic-ok-wrapper
     Checkbox Should Be Selected  automatic-ok-for-attachments-enabled
-    Unselect Checkbox  automatic-ok-for-attachments-enabled
+    Click label  automatic-ok-for-attachments-enabled
+    Checkbox Should not Be Selected  automatic-ok-for-attachments-enabled
 
 Select set automatic ok for attachments checkbox
-    Wait Until Element Is Visible  automatic-ok-for-attachments-enabled
-    Focus  automatic-ok-for-attachments-enabled
+    Element should be visible by test id  automatic-ok-wrapper
     Checkbox Should Not Be Selected  automatic-ok-for-attachments-enabled
-    Select Checkbox  automatic-ok-for-attachments-enabled
+    Click label  automatic-ok-for-attachments-enabled
+    Checkbox Should Be Selected  automatic-ok-for-attachments-enabled
