@@ -45,6 +45,44 @@
        (remove-watch instance-atom :update-instance)
        (reset! instance-atom nil))}))
 
+(defn date-state-mixin
+  "Variation of the datepicker-mixin that together with
+  initial-value-mixin facilitates easier binding between Pikaday and
+  the corresponding client Rum component. See
+  lupapalvelu.ui.components.date-edit for an example.
+
+  Options [optional]:
+
+    date-key: Key used for the date in initial-value-mixin.
+
+    [pikaday-options]: Map of Pikaday options that override the
+           defaults. Map keys will be camelCased automatically."
+  [date-key & [pikaday-options]]
+  {:did-mount
+   (fn [state]
+     (let [dom-node        (rum/dom-node state)
+           date*           (date-key state)
+           default-options {:format           (loc "date.format")
+                            :show-week-number true
+                            :first-day        1
+                            :position         "bottom left"
+                            :field            dom-node
+                            :default-date     @date*
+                            :set-default-date true
+                            :i18n             (pikaday-i18n)
+                            :on-select        #(reset! date* %)}
+           opts            (opts-transform (merge default-options
+                                                  pikaday-options))
+           pikaday*        (atom (js/Pikaday. opts))]
+       (add-watch date* :update-instance
+                  (fn [new]
+                    (.setDate @pikaday* new true)))
+       (assoc state ::pikaday pikaday*)))
+   :will-unmount
+   (fn [state]
+     (.destroy (-> state ::pikaday deref))
+     (remove-watch (date-key state) :update-instance))})
+
 
 (rum/defcs datepicker < (datepicker-mixin)
   [state datepicker-args commit-fn test-id]
@@ -56,10 +94,10 @@
   (let [date-atom (atom date)]
   (datepicker {:date-atom date-atom
                :pikaday-attrs
-                          {:format         (loc "date.format")
-                           :i18n           (pikaday-i18n)
-                           :showWeekNumber true
-                           :firstDay       1
-                           :position       "bottom left"}}
+               {:format         (loc "date.format")
+                :i18n           (pikaday-i18n)
+                :showWeekNumber true
+                :firstDay       1
+                :position       "bottom left"}}
               commit-fn
               (str "inspection-date-input-" idx))))

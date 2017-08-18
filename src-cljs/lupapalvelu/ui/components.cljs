@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.components
   (:require [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
             [rum.core :as rum]
             [sade.shared-util :as util])
@@ -302,3 +303,17 @@
   [:div.pprint
    [:div.title [:h4(or title "debug")]]
    [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])
+
+;; Special options (all optional):
+;;   callback: on-blur callback
+;; The rest of the options are passed to the underlying input.
+(rum/defcs date-edit < rum/reactive
+  (initial-value-mixin ::date)
+  (datepicker/date-state-mixin ::date)
+  [{date* ::date :as local-state} _ {:keys [callback] :as options}]
+  [:input.dateinput (merge {:type      "text"
+                            :value     @date*
+                            :on-blur #(set-selected date*
+                                                      (.. % -target -value)
+                                                      callback)}
+                           (dissoc options :callback))])
