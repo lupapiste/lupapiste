@@ -43,7 +43,7 @@ New applications do not have statements
 Sonja sees indicators from pre-filled fields
   Sonja logs in
   # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
-  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[contains(@class,'lupicon-star')]
 
 Sonja adds five statement givers to application
   Open application  ${appname}  ${appPropertyId}
@@ -205,7 +205,7 @@ Veikko from Tampere can give statement (and attach something to it as well)
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[contains(@class, 'lupicon-star')]
 
 There is no possibility to delete the generated statement pdf attachment
   Open application  ${appname}  ${appPropertyId}
