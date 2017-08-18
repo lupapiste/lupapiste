@@ -114,7 +114,7 @@
 (defn has-organization-authz-roles?
   "Returns true if user has requested roles in organization"
   [requested-authz-roles organization-id user]
-  (and (or (usr/authority? user) (usr/authority-admin? user))
+  (and (or (usr/authority? user) (usr/authority-admin? user) (usr/oir-authority? user))
        requested-authz-roles
        (some requested-authz-roles (org-authz organization-id user))))
 
