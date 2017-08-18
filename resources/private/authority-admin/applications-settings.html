@@ -8,11 +8,11 @@
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.required-fields-obligatory.title'"></h2>
-        <div class="blockbox-wrapper">
-          <input type="checkbox" id="required-fields-obligatory-enabled" data-test-id="required-fields-obligatory-enabled"
-                 data-bind="checked: organization.appRequiredFieldsFillingObligatory, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
-          <label for="required-fields-obligatory-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.required-fields-obligatory.enabled'"></label>
-        </div>
+        <toggle params="value: organization.appRequiredFieldsFillingObligatory,
+                                ltext: 'auth-admin.required-fields-obligatory.enabled',
+                                prefix: 'blockbox',
+                                enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory'),
+                                testId: 'required-fields-obligatory-enabled'"></toggle>
       </section>
 
       <section>
@@ -26,11 +26,11 @@
 
       <section>
         <h2 data-bind="ltext: 'auth-admin.extended-construction-waste-report.title'"></h2>
-        <div class="blockbox-wrapper">
-          <input type="checkbox" id="extended-construction-waste-report-enabled" data-test-id="extended-construction-waste-report-enabled"
-                 data-bind="checked: organization.extendedConstructionWasteReportEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report')" />
-          <label for="extended-construction-waste-report-enabled" class="blockbox-label" data-bind="ltext: 'auth-admin.extended-construction-waste-report.enabled'"></label>
-        </div>
+        <toggle params="value: organization.extendedConstructionWasteReportEnabled,
+                        ltext: 'auth-admin.extended-construction-waste-report.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-extended-construction-waste-report'),
+                        testId: 'extended-construction-waste-report-enabled'"></toggle>
       </section>
 
       <section>
