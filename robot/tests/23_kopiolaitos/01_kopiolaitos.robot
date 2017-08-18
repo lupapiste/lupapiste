@@ -139,14 +139,14 @@ Sonja opens the kopiolaitos order history dialog
   Element should be visible  //div[@id='dialog-verdict-attachment-prints-order-history']//button[@data-test-id='verdict-attachment-prints-history-ok']
 
 The history dialog includes the order item
-  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']  1
-  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//span[@data-test-id='print-order-ordererOrganization']  Sipoon rakennusvalvonta, Sonja Sibbo
-  Element should be visible  //div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//span[@data-test-id='print-order-timestamp']
+  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]  1
+  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]//span[@data-test-id='print-order-ordererOrganization']  Sipoon rakennusvalvonta, Sonja Sibbo
+  Element should be visible  //div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]//span[@data-test-id='print-order-timestamp']
 
-  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-type']  Muu liite
-  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-contents']  Muu muu muu liite
-  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-filename']  ${PNG_TESTFILE_NAME}
-  Textfield value should be  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//input[@data-test-id='test-order-amount']  2
+  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]//td[@data-test-id='test-order-attachment-type']  Muu liite
+  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]//td[@data-test-id='test-order-attachment-contents']  Muu muu muu liite
+  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]//td[@data-test-id='test-order-attachment-filename']  ${PNG_TESTFILE_NAME}
+  Textfield value should be  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[contains(@class, 'history-item')]//input[@data-test-id='test-order-amount']  2
 
 Sonja closes the order history dialog
   Scroll and click test id  verdict-attachment-prints-history-ok

@@ -112,22 +112,22 @@ Marker count by type is
 
 Total Inforequest info card count on map is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@class='inforequest-card']  ${amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[contains(@class, 'inforequest-card')]  ${amount}
 
 Verify info card by app id
   [Arguments]  ${app-id}  ${title}  ${operation}  ${comment}
   Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h2[@data-test-id='inforequest-title']  ${title}
   Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/h3[@data-test-id='inforequest-operation']  ${operation}
-  Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/div[@class='inforequest-comment']/blockquote  ${comment}
+  Element text should be  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/div[contains(@class, 'inforequest-comment')]/blockquote  ${comment}
   Element should not be visible  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']/a[@data-test-id='inforequest-link']
 
 Comment count on the info card of current inforequest is
   [Arguments]  ${amount}
   ${app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']//div[@class='inforequest-comment']  ${amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${app-id}']//div[contains(@class, 'inforequest-comment')]  ${amount}
 
 Total inforequest comment count on the info cards is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[@class='inforequest-card']//div[@class='inforequest-comment']  ${amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map-contents']//div[contains(@class, 'inforequest-card')]//div[contains(@class, 'inforequest-comment')]  ${amount}
 
 

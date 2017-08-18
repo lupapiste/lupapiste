@@ -71,7 +71,7 @@ Sven logs in and sees language indicator
   Sven logs in
   Wait test id visible  indicator-primary
   # User note about language should have link to mypage
-  Element should contain  xpath=//div[@data-test-id='indicator-primary']//div[@class='indicator-message']  K\u00e4yt\u00e4t Lupapistett\u00e4
+  Element should contain  xpath=//div[@data-test-id='indicator-primary']//div[contains(@class, 'indicator-message')]  K\u00e4yt\u00e4t Lupapistett\u00e4
   Click element  jquery=div.indicator-close
   No such test id  indicator-primary
   Language is  FI

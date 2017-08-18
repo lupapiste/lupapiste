@@ -31,8 +31,8 @@ Solita accepts invitation
 Mikko accepts invitation
   Mikko logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
-  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  ${appname}, Sipoo,
-  Element Text Should Be  xpath=//div[@class='invitation']//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
+  Element Should Contain  xpath=//div[contains(@class, 'invitation')][1]//h3  ${appname}, Sipoo,
+  Element Text Should Be  xpath=//div[contains(@class, 'invitation')]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
   Logout
@@ -94,7 +94,7 @@ Owner is invited to foreman app, approves invitation
 
 Applicant sees sent invitations on the foreman application
   Open tab  parties
-  Wait until  Xpath Should Match X Times  //table//tr[@class="party"]  4
+  Wait until  Xpath Should Match X Times  //table//tr[contains(@class, 'party')]  4
   Logout
 
 Foreman can see application
@@ -262,11 +262,11 @@ Authority can view draft foreman application, but can't use commands
 
 ...application actions
   # Application actions only exportPDF is visible
-  Element should be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-pdf-btn"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="add-operation"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-add-link-permit-btn"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-btn"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-authority-btn"]
+  Element should be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-pdf-btn"]
+  Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="add-operation"]
+  Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-add-link-permit-btn"]
+  Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-cancel-btn"]
+  Element should not be visible  xpath=//div[contains(@class, 'application_actions')]//button[@data-test-id="application-cancel-authority-btn"]
   Logout
 
 Frontend errors check

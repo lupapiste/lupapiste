@@ -18,10 +18,10 @@ Mikko adds an operation
   Click enabled by test id  add-operation
   Wait Until  Element Should Be Visible  add-operation
   Wait Until  Title Should Be  ${appname} - Lupapiste
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
-  Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
+  Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
 
 Application contains two operations
@@ -30,12 +30,12 @@ Application contains two operations
 
 Add another operation
   Click enabled by test id  add-operation
-  Wait Until  Element Should Be Visible  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
+  Wait Until  Element Should Be Visible  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Title Should Be  ${appname} - Lupapiste
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Vapaa-ajan asunnon tai saunarakennuksen rakentaminen"]
-  Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Vapaa-ajan asunnon tai saunarakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
 
 Application contains three operations
@@ -46,9 +46,9 @@ Application contains three operations
 
 Primary operation can be changed
   Open accordion editors
-  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="kerrostalo-rivitalo"]/i[@class="lupicon-star"]
-  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]/i[@class="lupicon-star"]
-  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]/i[@class="lupicon-star"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="kerrostalo-rivitalo"]/i[contains(@class, 'lupicon-star')]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]/i[contains(@class, 'lupicon-star')]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]/i[contains(@class, 'lupicon-star')]
 
   Click Element  //button[@data-op-name="muu-uusi-rakentaminen"]
 

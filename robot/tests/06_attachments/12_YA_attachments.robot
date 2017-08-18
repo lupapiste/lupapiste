@@ -66,5 +66,5 @@ Upload batch file and check for grouping
 
 Only one attachment grouping is available
   [Arguments]  ${grouping}
-  Wait until  Xpath Should Match X Times  //div[@data-test-id='attachment-group-autocomplete']//ul[@class='tags']/li  0
-  Element text should be  xpath=//div[@data-test-id='attachment-group-autocomplete']//span[@class='selection-text']  ${grouping}
+  Wait until  Xpath Should Match X Times  //div[@data-test-id='attachment-group-autocomplete']//ul[contains(@class, 'tags')]/li  0
+  Element text should be  xpath=//div[@data-test-id='attachment-group-autocomplete']//span[contains(@class, 'selection-text')]  ${grouping}

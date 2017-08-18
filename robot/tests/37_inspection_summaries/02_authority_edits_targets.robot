@@ -42,19 +42,19 @@ Create a new inspection summary
 View summary targets
   Wait until  Select From List by label  xpath=//select[@data-test-id="summaries-select"]  Uusi pohja 1 -
   Wait until  Element should be visible by test id  target-0
-  Element should contain  //tr[@data-test-id="target-0"]/td[@class="target-name"]  AA
-  Element should contain  //tr[@data-test-id="target-1"]/td[@class="target-name"]  BB
-  Element should contain  //tr[@data-test-id="target-2"]/td[@class="target-name"]  CC
+  Element should contain  //tr[@data-test-id="target-0"]/td[contains(@class, 'target-name')]  AA
+  Element should contain  //tr[@data-test-id="target-1"]/td[contains(@class, 'target-name')]  BB
+  Element should contain  //tr[@data-test-id="target-2"]/td[contains(@class, 'target-name')]  CC
 
 Edit targets
   Edit target name on an existing inspection summary  1  Perustukset valettu
-  Element should contain  //tr[@data-test-id="target-0"]/td[@class="target-name"]  AA
-  Element should contain  //tr[@data-test-id="target-2"]/td[@class="target-name"]  CC
+  Element should contain  //tr[@data-test-id="target-0"]/td[contains(@class, 'target-name')]  AA
+  Element should contain  //tr[@data-test-id="target-2"]/td[contains(@class, 'target-name')]  CC
 
 Remove a target
   Click by test id  remove-icon-0
   Confirm yes no dialog
-  Element should contain  //tr[@data-test-id="target-1"]/td[@class="target-name"]  CC
+  Element should contain  //tr[@data-test-id="target-1"]/td[contains(@class, 'target-name')]  CC
   Element should not be visible by test id  target-2
 
 Add new target

@@ -86,7 +86,7 @@ Sonja can delete statement
 
 Sonja can't give statement to Ronjas statement nor see the draft
   Open statement  ronja.sibbo@sipoo.fi
-  Wait until  Element should contain  //div[@class="statement-info"]//p  Lausunto tulee
+  Wait until  Element should contain  //div[contains(@class, 'statement-info')]//p  Lausunto tulee
   Element should not be visible  statement-type-select
   Element should not be visible  statement-text
 

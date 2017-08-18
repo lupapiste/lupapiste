@@ -69,7 +69,7 @@ Error indicator disappears when valid value is input
   Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
 Huoneistot info for Uusirakennus is correct
-  Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class="huoneistot-table"]//tbody//tr  1
+  Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  1
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-test-id='huoneistot.0.huoneistonumero']  000
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.0.muutostapa"]  lis\u00e4ys
 
@@ -87,7 +87,7 @@ Huoneistot info for Uusirakennus is correct
   Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
   List selection should be  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.huoneistoTyyppi']  Asuinhuoneisto
-  Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class='huoneistot-table']//tbody//tr  2
+  Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  2
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//i[@data-test-class="delete-schemas.huoneistot"]
@@ -97,7 +97,7 @@ Mikko removes apartment
   Wait for jQuery
   Open accordions  info
   Wait Until  Element Should Not Be Visible  xpath=//tr[@data-test-id='huoneistot-row-0']
-  Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class="huoneistot-table"]//tbody//tr  1
+  Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  1
 
 Mikko can't set "other" building material
   Open accordions  info

@@ -82,10 +82,10 @@ Sonja adds owners - luonnollinen henkilo
   Scroll to top
   Start drawing a point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
-  Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Lönnroth, Tage
-  Wait until  Element Should Contain  xpath=//span[@class='owner-street']  Präståkersvägen 1
-  Wait until  Element Should Contain  xpath=//span[@class='owner-zip']  04130
-  Wait until  Element Should Contain  xpath=//span[@class='owner-city']  SIBBO
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-name')]  Lönnroth, Tage
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-street')]  Präståkersvägen 1
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-zip')]  04130
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-city')]  SIBBO
   Test id visible  no-owner-for-75341600380014
   Test id visible  neighbor-manual-add-hint
   Click by test id  modal-dialog-submit-button
@@ -100,11 +100,11 @@ Sonja adds owners - kuolinpesä
   Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div  -50  -50
   Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div  -50   50
   Double Click Element  xpath=//div[@id='neighbors-map']/div
-  Wait until  Element Should Contain  xpath=//span[@class='owner-nameOfDeceased']  Palm, Paul Olavi
-  Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Ruhtinas, Birgitta
-  Wait until  Element Should Contain  xpath=//span[@class='owner-street']  Saastamoisenkatu 17
-  Wait until  Element Should Contain  xpath=//span[@class='owner-zip']  70620
-  Wait until  Element Should Contain  xpath=//span[@class='owner-city']  KUOPIO
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-nameOfDeceased')]  Palm, Paul Olavi
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-name')]  Ruhtinas, Birgitta
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-street')]  Saastamoisenkatu 17
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-zip')]  70620
+  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-city')]  KUOPIO
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='modal-dialog-submit-button']
   No such test id  neighbor-manual-add-hint
   Click by test id  modal-dialog-submit-button

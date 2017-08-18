@@ -173,4 +173,4 @@ Set company name
 
 Select operation branch
   [Arguments]  ${text}
-  Wait Until  Click element  //div[@class="tree-content"]//*[text()=${text}]
+  Wait Until  Click element  //div[contains(@class, 'tree-content')]//*[text()=${text}]

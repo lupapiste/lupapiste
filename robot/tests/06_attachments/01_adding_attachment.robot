@@ -62,7 +62,7 @@ Download all buttons are now visible
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
   Wait Until  Delete attachment  muut.muu
-  Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+  Wait Until  Element should not be visible  xpath=//div[contains(@class, 'attachments-table')]//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Download all buttons are gone again
   No such test id  download-all
@@ -83,7 +83,7 @@ Mikko deletes also the attachment template
   [Tags]  attachments
   Return to application
   Wait Until  Delete attachment  muut.muu
-  Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+  Wait Until  Element should not be visible  xpath=//div[contains(@class, 'attachments-table')]//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds png attachment one more time
   [Tags]  attachments
@@ -182,7 +182,7 @@ Mikko deletes attachment
 # Comment is present after delete
 #   [Tags]  attachments
 #   Open side panel  conversation
-#   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
+#   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[contains(@class, 'deleted')]  1
 #   Close side panel  conversation
 
 Mikko adds png attachment one more time again
