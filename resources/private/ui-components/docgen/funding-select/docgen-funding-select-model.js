@@ -24,43 +24,53 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
 
   var invite = function() {
     ajax.command("invite-financial-handler",
-      { id: params.applicationId,
-        documentId: self.documentId,
-        path: params.path})
+      {id: params.applicationId,
+       documentId: self.documentId,
+       path: params.path})
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
-        console.log("success");
         repository.load(params.applicationId);
-      })
-      .error(function(d) {
-        console.log("error");
-        console.log(d);
       })
       .call();
   };
 
-  var saveFunding = function(value) {
-    doSave(value);
-    console.log(self.documentId);
-    console.log(params);
+  var removeInvitation = function() {
+    ajax.command("remove-financial-handler-invitation",
+      {id: params.applicationId})
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function() {
+        repository.load(params.applicationId);
+      })
+      .call();
+  };
+
+  var saveFunding = function() {
+    doSave(true);
     invite();
   };
 
-  var reset = function() {
-    self.selectValue(false);
+  var removeFunding = function() {
+    doSave(false);
+    removeInvitation();
   };
 
   self.disposedSubscribe(self.selectValue, function (value) {
     if (value === true) {
       LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("hankkeen-kuvaus.rahoitus.areysure"),
-        loc("hankkeen-kuvaus.rahoitus.help"),
-        {title: loc("yes"), fn: function() {saveFunding(value)}},
-        {title: loc("no"), fn: function() {reset()}}
+        loc("hankkeen-kuvaus.rahoitus.add.areysure"),
+        loc("hankkeen-kuvaus.rahoitus.add.help"),
+        {title: loc("yes"), fn: function() {saveFunding()}},
+        {title: loc("no"), fn: function() {reset(self.selectValue(false))}}
       );
     } else {
-      doSave(value);
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("hankkeen-kuvaus.rahoitus.remove.areysure"),
+        loc("hankkeen-kuvaus.rahoitus.remove.help"),
+        {title: loc("yes"), fn: function() {removeFunding()}},
+        {title: loc("no"), fn: function() {self.selectValue(true)}}
+      );
     }
   });
 };

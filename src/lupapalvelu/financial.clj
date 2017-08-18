@@ -34,4 +34,9 @@
     (action/update-application command
                         {:auth {$elemMatch {:invite.user.id (:id financial-authority)}}}
                         {$set {:modified (now)
-                               :auth.$   (assoc financial-authority :inviter (usr/batchrun-user-data) :inviteAccepted (now))}})))
+                               :auth.$   (util/assoc-when-pred financial-authority util/not-empty-or-nil? :inviter usr/batchrun-user-data)}})))
+
+(defn remove-financial-handler-invitation [command]
+  (let [financial-authority (get-financial-user)
+        username (:username financial-authority)]
+    (auth/do-remove-auth command username)))

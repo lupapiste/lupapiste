@@ -7,7 +7,6 @@
   {:parameters [:email]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :notified true
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data user :user}]
     (financial/create-financial-handler user-data user))
@@ -22,3 +21,12 @@
    :notified   true}
   [command]
   (financial/invite-financial-handler command))
+
+(defcommand remove-financial-handler-invitation
+  {:parameters [:id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:applicant :authority}
+   :pre-checks  [application/validate-authority-in-drafts]
+   :notified true}
+  [command]
+  (financial/remove-financial-handler-invitation command))
