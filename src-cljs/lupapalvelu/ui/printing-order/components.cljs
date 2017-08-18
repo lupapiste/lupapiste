@@ -4,15 +4,24 @@
             [lupapalvelu.ui.common :refer [loc] :as common]
             [lupapalvelu.ui.printing-order.state :as state]))
 
-(rum/defc grid-text-input [col-class ltext required?]
-  [:div
-   {:class (name col-class)}
-   [:label
-    (when required?
-      {:class "required"})
-    (loc ltext)]
-   [:input.grid-style-input--wide
-    {:type "text"}]])
+(rum/defcs grid-text-input < (rum/local "" ::text)
+  [local-state path col-class ltext required?]
+  (let [text* (::text local-state)
+        state (rum/cursor-in state/component-state path)
+        commit-fn (fn [v]
+                    (reset! text* (-> v .-target .-value))
+                    (reset! state @text*))]
+    [:div
+     {:class (name col-class)}
+     [:label
+      (when required?
+        {:class "required"})
+      (loc ltext)]
+     [:input.grid-style-input--wide
+      {:type "text"
+       :value     @text*
+       :on-change identity ;; A function is needed
+       :on-blur   commit-fn}]]))
 
 (rum/defc grid-radio-button < rum/reactive
   [state value col-class ltext]

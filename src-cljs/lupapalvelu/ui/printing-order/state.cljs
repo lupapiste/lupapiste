@@ -5,9 +5,12 @@
                             :order       {}
                             :contacts    {:payer-same-as-orderer true
                                           :delivery-same-as-orderer true
-                                          :orderer {}}
-                            :phase       2
-
+                                          :orderer {}
+                                          :payer {}
+                                          :delivery {}}
+                            :billingReference ""
+                            :deliveryInstructions ""
+                            :phase       1
                             :id          nil})
 
 (defonce component-state (atom empty-component-state))

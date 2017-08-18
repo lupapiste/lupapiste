@@ -79,45 +79,59 @@
        [:span (loc "printing-order.phase1.button.next")]
        [:i.lupicon-chevron-right]]]]))
 
+(rum/defc contact-form
+  [path]
+  [:div
+   [:div.row
+    (poc/grid-text-input (conj path :firstName) :col-1 "etunimi" true)
+    (poc/grid-text-input (conj path :lastName) :col-1 "sukunimi" true)
+    (poc/grid-text-input (conj path :companyName) :col-2 "printing-order.company-name")]
+   [:div.row
+    (poc/grid-text-input (conj path :address) :col-2 "printing-order.address" true)
+    (poc/grid-text-input (conj path :postalCode) :col-1 "printing-order.postal-code" true)
+    (poc/grid-text-input (conj path :city) :col-1 "printing-order.city" true)]
+   [:div.row
+    (poc/grid-text-input (conj path :email) :col-2 "printing-order.email" true)
+    (poc/grid-text-input (conj path :phoneNumber) :col-1 "printing-order.phone")]])
+
 (rum/defc composer-phase2 < rum/reactive
   []
-  (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])]
+  (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])
+        delivery-option (rum/cursor-in state/component-state [:contacts :delivery-same-as-orderer])]
     [:div.order-grid-4
      [:div.order-section
       [:div.row
        [:div.col-4
         [:span.order-grid-header (loc "printing-order.orderer-details")]]]
-      [:div.row
-       (poc/grid-text-input :col-1 "etunimi" true)
-       (poc/grid-text-input :col-1 "sukunimi" true)
-       (poc/grid-text-input :col-2 "printing-order.company-name")]
-      [:div.row
-       (poc/grid-text-input :col-2 "printing-order.address" true)
-       (poc/grid-text-input :col-1 "printing-order.postal-code" true)
-       (poc/grid-text-input :col-1 "printing-order.city" true)]
-      [:div.row
-       (poc/grid-text-input :col-2 "printing-order.email" true)
-       (poc/grid-text-input :col-1 "printing-order.phone")]]
+      (contact-form [:contacts :orderer])]
      [:div.order-section
       [:div.row
        [:div.col-4
         [:span.order-grid-header (loc "printing-order.payer-details")]]]
       [:div.row
        (poc/grid-radio-button payer-option true  :col-1 "printing-order.payer.same-as-orderer")
-       (poc/grid-radio-button payer-option false :col-1 "printing-order.payer.other-than-orderer")]]
+       (poc/grid-radio-button payer-option false :col-1 "printing-order.payer.other-than-orderer")]
+      (when (false? (rum/react payer-option))
+        (contact-form [:contacts :payer]))]
      [:div.order-section
       [:div.row
        [:div.col-4
-        [:span.order-grid-header "Toimitusosoite"]]]
+        [:span.order-grid-header (loc "printing-order.delivery-details")]]]
       [:div.row
-       #_(poc/grid-radio-button :col-1 "printing-order.payer.same-as-orderer")
-       #_(poc/grid-radio-button :col-1 "printing-order.payer.other-than-orderer")]]
+       (poc/grid-radio-button delivery-option true  :col-1 "printing-order.delivery.same-as-orderer")
+       (poc/grid-radio-button delivery-option false :col-1 "printing-order.delivery.other-than-orderer")]
+      (when (false? (rum/react delivery-option))
+        (contact-form [:contacts :delivery]))
+      [:div.row
+       (poc/grid-text-input [:billingReference] :col-2 "printing-order.billing-reference")
+       (poc/grid-text-input [:deliveryInstructions] :col-2 "printing-order.delivery-instructions")]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase1)}
        [:i.lupicon-chevron-left]
        [:span (loc "printing-order.phase2.button.prev")]]
       [:button.positive
+       {:on-click #(state/proceed-phase3)}
        [:span (loc "printing-order.phase2.button.next")]
        [:i.lupicon-chevron-right]]]]))
 
@@ -136,6 +150,8 @@
        (composer-phase1 total-amount))
      (when (= phase 2)
        (composer-phase2))
+     (when (= phase 3)
+       (str @state/component-state))
      (order-composer-footer total-amount)]))
 
 (defonce args (atom {}))

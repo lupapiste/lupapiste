@@ -10367,6 +10367,10 @@ textarea.grid-style-input.really-high {
   height: 320px;
 }
 
+textarea.grid-style-input.wide {
+  width: 100%;
+}
+
 .no-wrap-whitespace {
   white-space: nowrap;
 }
