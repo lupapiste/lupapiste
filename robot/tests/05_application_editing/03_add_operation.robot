@@ -34,7 +34,7 @@ Add another operation
   Title Should Be  ${appname} - Lupapiste
   Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Vapaa-ajan asunnon tai saunarakennuksen rakentaminen"]
+  Wait and click  //section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[text()="Vapaa-ajan asunnon, saunarakennuksen tai vierasmajan rakentaminen"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[contains(@class, 'tree-content')]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
 
@@ -42,7 +42,7 @@ Application contains three operations
   Open accordions  info
   Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
-  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
+  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon, saunarakennuksen tai vierasmajan rakentaminen
 
 Primary operation can be changed
   Open accordion editors
@@ -60,7 +60,7 @@ Primary operation can be changed
 
   Wait Until  Element should Contain  xpath=//span[@data-test-id="test-application-primary-operation"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
+  Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon, saunarakennuksen tai vierasmajan rakentaminen
   Logout
 
 Frontend errors check
