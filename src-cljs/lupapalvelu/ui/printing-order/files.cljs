@@ -33,7 +33,8 @@
                   (commit-fn))}]]))
 
 (rum/defc file-row < rum/reactive
-  [{:keys [id contents modified latestVersion type] :as att}]
+  [{:keys [id contents modified latestVersion type] :as att} opts]
+  (js/console.log (clj->js opts))
   (let [order-cursor (rum/cursor-in state/component-state [:order id])
         in-printing-order? (pos? (rum/react order-cursor))
         type-id-text (loc (str "attachmentType." (-> type :type-group) "." (-> type :type-id)))
@@ -49,10 +50,12 @@
      [:td
       (common/format-timestamp modified)
       " (" (-> latestVersion :user :firstName) " " (-> latestVersion :user :lastName) ")"]
-     [:td (amount-controls order-cursor)]]))
+     [:td (if (some #{:read-only} opts)
+            @order-cursor
+            (amount-controls order-cursor))]]))
 
 (rum/defc files-table < rum/reactive
-  [files]
+  [files & opts]
   [:div.attachments-table-container
    [:table.attachments-table.table-even-odd
     [:thead
@@ -64,4 +67,4 @@
       [:th (loc "printing-order.files-table.copy-amount")]]]
     [:tbody
      (for [file files]
-       (rum/with-key (file-row file) (util/unique-elem-id "file-row")))]]])
+       (rum/with-key (file-row file opts) (util/unique-elem-id "file-row")))]]])

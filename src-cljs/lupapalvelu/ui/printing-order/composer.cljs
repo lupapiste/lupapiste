@@ -49,22 +49,24 @@
           [:div.rollup-accordion-content-part
            (files/files-table attachments-in-group)])]])))
 
-(rum/defc order-composer-footer < rum/reactive
-  [total-amount]
-  [:div.printing-order-footer
-   [:div
-    [:button.tertiary.rollup-button
-     [:h2 (str (loc "printing-order.footer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
-    [:button.tertiary.rollup-button
-     [:h2 (str (loc "printing-order.footer.price") " " 0 "€")]]
-    [:button.tertiary.rollup-button
-     [:h2 (loc "printing-order.show-pricing")]]
-    [:button.tertiary.rollup-button
-     [:h2 (loc "printing-order.mylly.provided-by")]]]])
+(rum/defc order-composer-footer < rum/reactive []
+  (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
+        total-amount (reduce + (vals order-rows))]
+    [:div.printing-order-footer
+     [:div
+      [:button.tertiary.rollup-button
+       [:h2 (str (loc "printing-order.footer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
+      [:button.tertiary.rollup-button
+       [:h2 (str (loc "printing-order.footer.price") " " 0 "€")]]
+      [:button.tertiary.rollup-button
+       [:h2 (loc "printing-order.show-pricing")]]
+      [:button.tertiary.rollup-button
+       [:h2 (loc "printing-order.mylly.provided-by")]]]]))
 
-(rum/defc composer-phase1 < rum/reactive
-  [total-amount]
-  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
+(rum/defc composer-phase1 < rum/reactive []
+  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))
+        order-rows (rum/react (rum/cursor-in state/component-state [:order]))
+        total-amount (reduce + (vals order-rows))]
     [:div
      [:div.attachments-accordions
       (for [[path-key & children] tag-groups]
@@ -94,29 +96,23 @@
     (poc/grid-text-input (conj path :email) :col-2 "printing-order.email" true)
     (poc/grid-text-input (conj path :phoneNumber) :col-1 "printing-order.phone")]])
 
-(rum/defc composer-phase2 < rum/reactive
-  []
+(rum/defc composer-phase2 < rum/reactive []
   (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])
-        delivery-option (rum/cursor-in state/component-state [:contacts :delivery-same-as-orderer])]
+        delivery-option (rum/cursor-in state/component-state [:contacts :delivery-same-as-orderer])
+        conditions-accepted-option (rum/cursor-in state/component-state [:conditionsAccepted])]
     [:div.order-grid-4
      [:div.order-section
-      [:div.row
-       [:div.col-4
-        [:span.order-grid-header (loc "printing-order.orderer-details")]]]
+      (poc/section-header "printing-order.orderer-details")
       (contact-form [:contacts :orderer])]
      [:div.order-section
-      [:div.row
-       [:div.col-4
-        [:span.order-grid-header (loc "printing-order.payer-details")]]]
+      (poc/section-header "printing-order.payer-details")
       [:div.row
        (poc/grid-radio-button payer-option true  :col-1 "printing-order.payer.same-as-orderer")
        (poc/grid-radio-button payer-option false :col-1 "printing-order.payer.other-than-orderer")]
       (when (false? (rum/react payer-option))
         (contact-form [:contacts :payer]))]
      [:div.order-section
-      [:div.row
-       [:div.col-4
-        [:span.order-grid-header (loc "printing-order.delivery-details")]]]
+      (poc/section-header "printing-order.delivery-details")
       [:div.row
        (poc/grid-radio-button delivery-option true  :col-1 "printing-order.delivery.same-as-orderer")
        (poc/grid-radio-button delivery-option false :col-1 "printing-order.delivery.other-than-orderer")]
@@ -124,7 +120,14 @@
         (contact-form [:contacts :delivery]))
       [:div.row
        (poc/grid-text-input [:billingReference] :col-2 "printing-order.billing-reference")
-       (poc/grid-text-input [:deliveryInstructions] :col-2 "printing-order.delivery-instructions")]]
+       (poc/grid-textarea-input [:deliveryInstructions] :col-2 "printing-order.delivery-instructions")]]
+     [:div.order-section
+      (poc/section-header "printing-order.conditions.heading")
+      [:div.row
+       [:div.col-4
+        [:span (loc "printing-order.conditions.text")]]]
+      [:div.row
+       (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept")]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase1)}
@@ -135,24 +138,42 @@
        [:span (loc "printing-order.phase2.button.next")]
        [:i.lupicon-chevron-right]]]]))
 
+(rum/defc composer-phase3 < rum/reactive []
+  (let [order (rum/react (rum/cursor-in state/component-state [:order]))
+        attachments-selected (->> @state/component-state
+                                  :attachments
+                                  (filter (fn [{id :id}]
+                                            (pos? (get order id)))))]
+    [:div.order-grid-4
+     [:div.order-section
+      (poc/section-header "printing-order.summary.documents")
+      (files/files-table attachments-selected :read-only)]
+     [:div.operation-button-row
+      [:button.secondary
+       {:on-click #(state/back-to-phase2)}
+       [:i.lupicon-chevron-left]
+       [:span (loc "printing-order.phase3.button.prev")]]
+      [:button.positive
+       {:on-click #(state/submit-order)}
+       [:span (loc "printing-order.phase3.button.submit")]
+       [:i.lupicon-chevron-right]]]]))
+
 (rum/defc order-composer < rum/reactive
                            {:init         init
                             :will-unmount state/will-unmount}
   [ko-app]
-  (let [phase      (rum/react (rum/cursor-in state/component-state [:phase]))
-        order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        total-amount (reduce + (vals order-rows))]
+  (let [phase (rum/react (rum/cursor-in state/component-state [:phase]))]
     [:div
      [:h1 (loc (str "printing-order.phase" phase ".title"))]
      [:span (loc (str "printing-order.phase" phase ".intro-text"))]
      [:div.bottom-marginM]
      (when (= phase 1)
-       (composer-phase1 total-amount))
+       (composer-phase1))
      (when (= phase 2)
        (composer-phase2))
      (when (= phase 3)
-       (str @state/component-state))
-     (order-composer-footer total-amount)]))
+       (composer-phase3))
+     (order-composer-footer)]))
 
 (defonce args (atom {}))
 

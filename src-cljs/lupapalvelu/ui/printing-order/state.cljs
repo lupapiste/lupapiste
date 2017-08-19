@@ -10,6 +10,7 @@
                                           :delivery {}}
                             :billingReference ""
                             :deliveryInstructions ""
+                            :conditionsAccepted false
                             :phase       1
                             :id          nil})
 
@@ -21,8 +22,14 @@
 (defn proceed-phase2 []
   (swap! component-state assoc :phase 2))
 
+(defn proceed-phase3 []
+  (swap! component-state assoc :phase 3))
+
 (defn back-to-phase1 []
   (swap! component-state assoc :phase 1))
 
-(defn proceed-phase3 []
-  (swap! component-state assoc :phase 3))
+(defn back-to-phase2 []
+  (swap! component-state assoc :phase 2))
+
+(defn submit-order []
+  (js/console.log (clj->js @component-state)))
