@@ -13,6 +13,7 @@
   [local-state path col-class ltext required?]
   (let [text* (::text local-state)
         state (rum/cursor-in state/component-state path)
+        _ (common/reset-if-needed! text* @state)
         commit-fn (fn [v]
                     (reset! text* (-> v .-target .-value))
                     (reset! state @text*))]
@@ -67,8 +68,22 @@
    [:div
     {:class ["checkbox-wrapper"]}
     [:input {:type    "checkbox"
-             :checked (= (rum/react state) value)
-             :value   value}]
+             :checked (true? (rum/react state))
+             :value   true}]
     [:label.checkbox-label
      {:on-click #(swap! state not)}
      (loc ltext)]]])
+
+(rum/defc contact-form [path]
+  [:div
+   [:div.row
+    (grid-text-input (conj path :firstName) :col-1 "etunimi" true)
+    (grid-text-input (conj path :lastName) :col-1 "sukunimi" true)
+    (grid-text-input (conj path :companyName) :col-2 "printing-order.company-name")]
+   [:div.row
+    (grid-text-input (conj path :address) :col-2 "printing-order.address" true)
+    (grid-text-input (conj path :postalCode) :col-1 "printing-order.postal-code" true)
+    (grid-text-input (conj path :city) :col-1 "printing-order.city" true)]
+   [:div.row
+    (grid-text-input (conj path :email) :col-2 "printing-order.email" true)
+    (grid-text-input (conj path :phoneNumber) :col-1 "printing-order.phone")]])

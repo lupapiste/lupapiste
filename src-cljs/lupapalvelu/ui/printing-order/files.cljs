@@ -34,7 +34,6 @@
 
 (rum/defc file-row < rum/reactive
   [{:keys [id contents modified latestVersion type] :as att} opts]
-  (js/console.log (clj->js opts))
   (let [order-cursor (rum/cursor-in state/component-state [:order id])
         in-printing-order? (pos? (rum/react order-cursor))
         type-id-text (loc (str "attachmentType." (-> type :type-group) "." (-> type :type-id)))

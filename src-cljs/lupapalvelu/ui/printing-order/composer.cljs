@@ -2,6 +2,7 @@
   (:require [rum.core :as rum]
             [lupapalvelu.ui.attachment.components :as attc]
             [lupapalvelu.ui.util :as util]
+            [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.common :refer [loc] :as common]
             [lupapalvelu.ui.printing-order.files :as files]
             [lupapalvelu.ui.printing-order.components :as poc]
@@ -81,20 +82,13 @@
        [:span (loc "printing-order.phase1.button.next")]
        [:i.lupicon-chevron-right]]]]))
 
-(rum/defc contact-form
-  [path]
-  [:div
-   [:div.row
-    (poc/grid-text-input (conj path :firstName) :col-1 "etunimi" true)
-    (poc/grid-text-input (conj path :lastName) :col-1 "sukunimi" true)
-    (poc/grid-text-input (conj path :companyName) :col-2 "printing-order.company-name")]
-   [:div.row
-    (poc/grid-text-input (conj path :address) :col-2 "printing-order.address" true)
-    (poc/grid-text-input (conj path :postalCode) :col-1 "printing-order.postal-code" true)
-    (poc/grid-text-input (conj path :city) :col-1 "printing-order.city" true)]
-   [:div.row
-    (poc/grid-text-input (conj path :email) :col-2 "printing-order.email" true)
-    (poc/grid-text-input (conj path :phoneNumber) :col-1 "printing-order.phone")]])
+(rum/defc proceed-to-phase3-button < rum/reactive []
+  (let [valid-order? (rum/react (rum-util/derived-atom [state/component-state] state/valid-order?))]
+    [:button.positive
+     {:on-click #(state/proceed-phase3)
+      :disabled (false? valid-order?)}
+     [:span (loc "printing-order.phase2.button.next")]
+     [:i.lupicon-chevron-right]]))
 
 (rum/defc composer-phase2 < rum/reactive []
   (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])
@@ -103,21 +97,21 @@
     [:div.order-grid-4
      [:div.order-section
       (poc/section-header "printing-order.orderer-details")
-      (contact-form [:contacts :orderer])]
+      (poc/contact-form [:contacts :orderer])]
      [:div.order-section
       (poc/section-header "printing-order.payer-details")
       [:div.row
        (poc/grid-radio-button payer-option true  :col-1 "printing-order.payer.same-as-orderer")
        (poc/grid-radio-button payer-option false :col-1 "printing-order.payer.other-than-orderer")]
       (when (false? (rum/react payer-option))
-        (contact-form [:contacts :payer]))]
+        (poc/contact-form [:contacts :payer]))]
      [:div.order-section
       (poc/section-header "printing-order.delivery-details")
       [:div.row
        (poc/grid-radio-button delivery-option true  :col-1 "printing-order.delivery.same-as-orderer")
        (poc/grid-radio-button delivery-option false :col-1 "printing-order.delivery.other-than-orderer")]
       (when (false? (rum/react delivery-option))
-        (contact-form [:contacts :delivery]))
+        (poc/contact-form [:contacts :delivery]))
       [:div.row
        (poc/grid-text-input [:billingReference] :col-2 "printing-order.billing-reference")
        (poc/grid-textarea-input [:deliveryInstructions] :col-2 "printing-order.delivery-instructions")]]
@@ -133,10 +127,7 @@
        {:on-click #(state/back-to-phase1)}
        [:i.lupicon-chevron-left]
        [:span (loc "printing-order.phase2.button.prev")]]
-      [:button.positive
-       {:on-click #(state/proceed-phase3)}
-       [:span (loc "printing-order.phase2.button.next")]
-       [:i.lupicon-chevron-right]]]]))
+      (proceed-to-phase3-button)]]))
 
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))

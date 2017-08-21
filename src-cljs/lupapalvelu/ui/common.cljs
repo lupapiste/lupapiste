@@ -10,10 +10,10 @@
 (defn loc [& args]
   (apply js/loc (map name args)))
 
-(def date-formatter (tf/formatter "d.M.yyyy"))
+(def fi-date-formatter (tf/formatter "d.M.yyyy"))
 
 (defn format-timestamp [tstamp]
-  (tf/unparse date-formatter (doto (t/time-now) (.setTime (tc/to-long tstamp)))))
+  (tf/unparse fi-date-formatter (doto (t/time-now) (.setTime (tc/to-long tstamp)))))
 
 (defn query [query-name success-fn & kvs]
   (-> (js/ajax.query (clj->js query-name) (-> (apply hash-map kvs) clj->js))
