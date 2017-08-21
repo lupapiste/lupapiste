@@ -15,24 +15,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.state-machine :as sm]))
+            [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]))
 
-(defn- error-and-fail! [error-msg fail-key]
-  (error error-msg)
-  (fail! fail-key))
-
-(defn- unzip-file [path-to-zip target-dir]
-  (if-not (and (fs/exists? path-to-zip) (fs/exists? target-dir))
-    (error-and-fail! (str "Could not find file " path-to-zip) :error.integration.asianhallinta-file-not-found)
-    (util/unzip path-to-zip target-dir)))
-
-(defn- ensure-attachments-present! [unzipped-path attachments]
-  (let [attachment-paths (->> attachments
-                              (map :LinkkiLiitteeseen)
-                              (map fs/base-name))]
-    (doseq [filename attachment-paths]
-      (when (empty? (fs/find-files unzipped-path (ss/escaped-re-pattern filename)))
-        (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
 
 (defn- build-verdict [{:keys [AsianPaatos]} timestamp]
   {:id              (mongo/create-id)
@@ -73,68 +58,56 @@
   (when-not (-> (org/resolve-organization-scope municipality permit-type)
                 (get-in [:caseManagement :ftpUser])
                 (= ftp-user))
-    (error-and-fail!
-     (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized)))
+    (ah-reader/error-and-fail!
+     (str "FTP user " ftp-user " is not allowed to make changes to application " application-id)
+     :error.integration.asianhallinta.unauthorized)))
 
 (defn- check-application-is-in-correct-state! [{application-id :id current-state :state :as application}]
   (when-not (#{:constructionStarted :sent (sm/verdict-given-state application)} (keyword current-state))
-    (error-and-fail!
-     (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state)))
+    (ah-reader/error-and-fail!
+     (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict")
+     :error.integration.asianhallinta.wrong-state)))
 
-(defn process-ah-verdict [path-to-zip ftp-user system-user]
-  (let [tmp-dir (fs/temp-dir (str "ah"))]
-    (try
-      (let [unzipped-path (unzip-file path-to-zip tmp-dir)
-            xmls (fs/find-files unzipped-path #".*xml$")
-            timestamp (core/now)]
-        ;; path must contain exactly one xml
-        (when-not (= (count xmls) 1)
-          (error-and-fail! (str "Expected to find one xml, found " (count xmls) " for user " ftp-user) :error.integration.asianhallinta-wrong-number-of-xmls))
 
-        ;; parse XML
-        (let [parsed-xml (-> (first xmls) slurp xml/parse cr/strip-xml-namespaces xml/xml->edn)
-              attachments (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
-                              (util/ensure-sequential :Liite)
-                              :Liite)
-              application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])]
-          ;; Check that all referenced attachments were included in zip
-          (ensure-attachments-present! unzipped-path attachments)
+(defn process-ah-verdict [parsed-xml unzipped-path ftp-user system-user]
+  (let [xml-edn   (xml/xml->edn parsed-xml)
+        timestamp (core/now)
+        application-id (get-in xml-edn [:AsianPaatos :HakemusTunnus])
+        attachments (-> (get-in xml-edn [:AsianPaatos :Liitteet])
+                        (util/ensure-sequential :Liite)
+                        :Liite)]
+    (when-not application-id
+      (ah-reader/error-and-fail!
+        (str "ah-verdict - Application id is nil for user " ftp-user)
+        :error.integration.asianhallinta.no-application-id))
+    (let [application (domain/get-application-no-access-checking application-id)
+          verdict-given-state (sm/verdict-given-state application)]
 
-          (when-not application-id
-            (error-and-fail! (str "ah-verdict - Application id is nil for user " ftp-user) :error.integration.asianhallinta.no-application-id))
+      (check-ftp-user-has-right-to-modify-app! ftp-user application)
+      (check-application-is-in-correct-state! application)
 
-          ;; Create verdict
-          ;; -> fetch application
-          (let [application (domain/get-application-no-access-checking application-id)
-                verdict-given-state (sm/verdict-given-state application)]
+      ;; -> build update clause
+      ;; -> update-application
+      (let [new-verdict   (build-verdict xml-edn timestamp)
+            command       (assoc (action/application->command application) :action :process-ah-verdict)
+            poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
+            update-clause (util/deep-merge
+                            {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
+                            (when (= :sent (keyword (:state application)))
+                              (application/state-transition-update verdict-given-state timestamp application system-user)))]
 
-            (check-ftp-user-has-right-to-modify-app! ftp-user application)
-            (check-application-is-in-correct-state! application)
+        (action/update-application command update-clause)
+        (doseq [attachment attachments]
+          (insert-attachment!
+            application
+            attachment
+            unzipped-path
+            (:id new-verdict)
+            poytakirja-id
+            timestamp))
+        (notifications/notify! :application-state-change command)
+        (ok)))))
 
-            ;; -> build update clause
-            ;; -> update-application
-            (let [new-verdict   (build-verdict parsed-xml timestamp)
-                  command       (assoc (action/application->command application) :action :process-ah-verdict)
-                  poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
-                  update-clause (util/deep-merge
-                                 {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
-                                 (when (= :sent (keyword (:state application)))
-                                   (application/state-transition-update verdict-given-state timestamp application system-user)))]
-
-              (action/update-application command update-clause)
-              (doseq [attachment attachments]
-                (insert-attachment!
-                 application
-                 attachment
-                 unzipped-path
-                 (:id new-verdict)
-                 poytakirja-id
-                 timestamp))
-              (notifications/notify! :application-state-change command)
-              (ok)))))
-      (catch Throwable e
-        (if-let [error-key (some-> e ex-data :text)]
-          (fail error-key)
-          (throw e)))
-      (finally
-        (fs/delete-dir tmp-dir)))))
+(defmethod ah-reader/handle-asianhallinta-message :AsianPaatos
+  [parsed-xml unzipped-path ftp-user system-user]
+  (process-ah-verdict parsed-xml unzipped-path ftp-user system-user))
