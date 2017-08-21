@@ -176,7 +176,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :statementId])]
    :states     #{:open :submitted :complementNeeded :sent}
    :user-roles #{:authority}
-   :pre-checks [statement/statement-not-given]}
+   :pre-checks [statement/statement-not-given
+                statement/not-ely-statement]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 

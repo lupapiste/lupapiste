@@ -119,6 +119,10 @@
   (when-not (->> statementId (get-statement application) :state keyword post-given-states)
     (fail :error.statement-not-given)))
 
+(defn not-ely-statement [{{:keys [statementId]} :data application :application}]
+  (when (= "ely" (->> statementId (get-statement application) :external :partner))
+    (fail :error.ely-statement)))
+
 (defn replies-enabled [{{permit-type :permitType} :application}]
   (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type) ; FIXME set in permit meta data
     (fail :error.organization-has-not-enabled-statement-replies)))

@@ -51,4 +51,11 @@
         (fact "external config ok"
           (get ely-statement :external) => (just {:partner "ely"
                                                   :messageId string?
-                                                  :subtype statement-subtype}))))))
+                                                  :subtype statement-subtype}))))
+    (fact "Statement allowed actions"
+      (let [ely-statement (-> (query-application mikko (:id app))
+                              :statements
+                              first)
+            ely-id (:id ely-statement)]
+        (fact "delete-statement not possible"
+          sonja =not=> (allowed? :delete-statement :id (:id app) :statementId ely-id))))))
