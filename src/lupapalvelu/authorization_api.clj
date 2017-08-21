@@ -39,7 +39,7 @@
         my-invites (filter #(= id (get-in % [:user :id])) invites)]
     (ok :invites my-invites)))
 
-(def settable-roles #{:writer :foreman})
+(def settable-roles #{:writer :foreman :financialAuthority})
 (def changeable-roles #{:writer :foreman})
 
 (defn- valid-role [role]
