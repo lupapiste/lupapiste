@@ -27,10 +27,12 @@
    :input-validators [(partial action/non-blank-parameters [:month :year])]
    :parameters       [month year]}
   [_]
-  (let [data (reps/applications-per-month-per-permit-type
-               (read-string month) (read-string year))
+  (let [month-number (read-string month)
+        year-number (read-string year)
+        data (reps/applications-per-month-per-permit-type
+               month-number year-number)
         designer-and-foreman (reps/designer-and-foreman-applications-per-month
-                               (read-string month) (read-string year))]
+                               month-number year-number)]
     (ok :applications (map (fn [{permitType :permitType :as m}]
                              (if (= permitType "R")
                                (assoc m :operations designer-and-foreman)
