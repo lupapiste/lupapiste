@@ -27,8 +27,8 @@
   function ApplicationsReport() {
     var self = this;
 
-    self.monthInput = ko.observable("8");
-    self.yearInput = ko.observable("2017");
+    self.monthInput = ko.observable(moment().format("M"));
+    self.yearInput = ko.observable(moment().format("YYYY"));
     self.monthValue = ko.observable();
     self.yearValue = ko.observable();
     self.results = ko.observableArray();

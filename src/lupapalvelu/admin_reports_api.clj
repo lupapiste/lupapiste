@@ -27,6 +27,10 @@
    :input-validators [(partial action/non-blank-parameters [:month :year])]
    :parameters       [month year]}
   [_]
+  (when-not (and (re-matches #"[0-9]+" month)
+                 (#{1 2 3 4 5 6 7 8 9 10 11 12} (read-string month))
+                 (re-matches #"[0-9]{4}" year))
+    (fail! :error.invalid-month-or-year))
   (let [month-number (read-string month)
         year-number (read-string year)
         data (reps/applications-per-month-per-permit-type
