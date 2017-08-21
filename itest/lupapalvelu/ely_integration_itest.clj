@@ -2,8 +2,10 @@
   (:require [midje.sweet :refer :all]
             [clojure.data.xml :as xml]
             [clojure.java.io :as io]
+            [schema.core :as sc]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.integrations.ely :as ely]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
@@ -51,7 +53,13 @@
         (fact "external config ok"
           (get ely-statement :external) => (just {:partner "ely"
                                                   :messageId string?
-                                                  :subtype statement-subtype}))))
+                                                  :subtype statement-subtype}))
+
+        (fact "valid integration-message saved to db"
+          (let [resp (:body (get-by-id :integration-messages (get-in ely-statement [:external :messageId])))]
+            resp => ok?
+            (sc/check messages/IntegrationMessage (:data resp)) => nil))))
+
     (fact "Statement allowed actions"
       (let [ely-statement (-> (query-application mikko (:id app))
                               :statements
