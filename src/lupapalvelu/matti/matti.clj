@@ -293,7 +293,6 @@
   if :skip-nil? is true the nil value entries are skipped (default
   false)."
   [kmap template]
-  #_(>pprint {:kmap kmap :template template})
   (let [data (-> template :versions last :data)]
     (reduce (fn [acc [k v]]
               (let [v-path (get v :path v)
@@ -331,10 +330,9 @@
                                (reduce (fn [acc k]
                                          (let [s (name k)]
                                            (assoc acc
-                                                  (kw-format "dates.deltas.%s" s)
+                                                  (kw-format "matti-dates.deltas.%s" s)
                                                   {:path      (kw-format "matti-verdict.1.%s" s)
-                                                   ;; Value must be non-empty initially.
-                                                   :fn #(when (:enabled %) " ")
+                                                   :fn #(when (:enabled %) "")
                                                    :skip-nil? true})))
                                        {}
                                        [:julkipano :anto :valitus :lainvoimainen

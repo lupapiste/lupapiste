@@ -356,7 +356,11 @@
    {:class (path/css (sub-options options grid)
                      (str "matti-grid-" (:columns grid)))}
    (map-indexed (fn [row-index row]
-                  (let [row-index (get row :id row-index)]
+                  (let [row-index (get row :id row-index)
+                        row-schema (shared/child-schema (if (map? row)
+                                                          row
+                                                          {:row row})
+                                                        grid)]
                     ;; Row visibility
                     (when (path/visible? {:state  state
                                           :schema row
@@ -383,7 +387,7 @@
                                                                  :path col-path)
                                                           (shared/child-schema cell
                                                                                :schema
-                                                                               (shared/child-schema cell grid))
+                                                                               (shared/child-schema cell row-schema))
                                                           true))])))
                                     (get row :row row))])))
                 (:rows grid))])

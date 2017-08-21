@@ -224,9 +224,11 @@
          {:columns (apply sc/enum (range 1 13)) ;; Grid size (.matti-grid-n)
           :rows    [(sc/conditional
                      :row (merge MattiVisible
-                                 {(sc/optional-key :id)  sc/Str
-                                  (sc/optional-key :css) [sc/Keyword]
-                                  :row                   [MattiCell]})
+                                 {(sc/optional-key :id)         sc/Str
+                                  ;; The same semantics as in MattiBase.
+                                  (sc/optional-key :loc-prefix) sc/Keyword
+                                  (sc/optional-key :css)        [sc/Keyword]
+                                  :row                          [MattiCell]})
                      :else [MattiCell])]}))
 
 (defschema MattiSection
@@ -393,95 +395,93 @@
 ;; It is adivsabled to reuse ids from template when possible. This
 ;; makes localization work automatically.
 (def verdict-schemas
-  {:r {:sections [{:id   "matti-dates"
-                   :grid {:columns 7
-                          :rows    [[{:id     "verdict"
-                                      :schema {:docgen "matti-date"}}]
-                                    {:id  "deltas"
-                                     :css [:matti-date]
-                                     :row [{:show?      :dates.deltas.julkipano
-                                            :loc-prefix :matti-verdict.julkipano
-                                            :schema     {:docgen "matti-date"}}
-                                           {:show?      :dates.deltas.anto
-                                            :loc-prefix :matti-verdict.anto
-                                            :schema     {:docgen "matti-date"}}
-                                           {:show?      :dates.deltas.valitus
-                                            :loc-prefix :matti-verdict.valitus
-                                            :schema     {:docgen "matti-date"}}
-                                           {:show?      :dates.deltas.lainvoimainen
-                                            :loc-prefix :matti-verdict.lainvoimainen
-                                            :schema     {:docgen "matti-date"}}
-                                           {:show?      :dates.deltas.aloitettava
-                                            :loc-prefix :matti-verdict.aloitettava
-                                            :schema     {:docgen "matti-date"}}
-                                           {:show?      :dates.deltas.voimassa
-                                            :loc-prefix :matti-verdict.voimassa
-                                            :schema     {:docgen "matti-date"}}]}]}}
-                  {:id   "matti-verdict"
-                   :grid {:columns 6
-                          :rows    [[{:loc-prefix :matti-verdict.giver
-                                      :hide?      :_meta.editing?
-                                      :schema     {:reference {:path :matti-verdict.0.giver.contact}}}
-                                     {:id     "giver"
-                                      :col    2
-                                      :show?  :_meta.editing?
-                                      :schema {:list {:title "matti-verdict.giver"
-                                                      :items [{:id     "giver"
-                                                               :schema {:docgen "matti-verdict-giver"}}
-                                                              {:id     "contact"
-                                                               :show?  :_meta.editing?
-                                                               :schema {:docgen "matti-verdict-contact"}}]}}}
-                                     {:id     "section"
-                                      :schema {:docgen "matti-verdict-text"}}
-                                     {:hide? :_meta.editing?}
-                                     {:col    2
-                                      :id     "verdict-code"
-                                      :align  :full
-                                      :schema {:reference-list {:path       :verdict
-                                                                :type       :select
-                                                                :loc-prefix :matti-r}} }]
-                                    [{:col    5
-                                      :id     "paatosteksti"
-                                      :show?  :_meta.editing?
-                                      :schema {:phrase-text {:category :paatosteksti}}}
-                                     {:col    3
-                                      :hide?  :_meta.editing?
-                                      :schema {:reference {:path :matti-verdict.1.paatosteksti}}}
-                                     {:col    2
-                                      :id     "application-id"
-                                      :hide?  :_meta.editing?
-                                      :schema {:docgen "matti-verdict-id"}}]]}}
-                  {:id   "requirements"
-                   :grid {:columns 7
-                          :rows    (concat (map-indexed (fn [i [loc-prefix path term? separator?]]
-                                                          (let [check-path (keyword (str "requirements." i ".included"))]
-                                                            {:show? [:_meta.editing? check-path]
-                                                             :row   [{:col    4
-                                                                      :schema {:reference-list
-                                                                               (merge {:enabled?   check-path
-                                                                                       :loc-prefix loc-prefix
-                                                                                       :path       path
-                                                                                       :type       :multi-select}
-                                                                                      (when term?
-                                                                                        {:item-key :id
-                                                                                         :term     {:path       path
-                                                                                                    :extra-path :name
-                                                                                                    :match-key  :id}})
-                                                                                      (when separator?
-                                                                                        {:separator " \u2013 "}))}}
-                                                                     {:col    2
-                                                                      :align  :right
-                                                                      :show?  :_meta.editing?
-                                                                      :id     "included"
-                                                                      :schema {:docgen "required-in-verdict"}}]}))
-                                                        [[:matti-r.foremen :foremen false false]
-                                                         [:matti-plans :plans true false]
-                                                         [:matti-reviews :reviews true true]])
-                                           [[{:col    6
-                                              :id     "other"
-                                              :align  :full
-                                              :schema {:phrase-text {:i18nkey  [:phrase.category.lupaehdot]
-                                                                     :category :lupaehdot}}}]])}}]}})
+  {:r
+   {:sections
+    [{:id   "matti-dates"
+      :grid {:columns 7
+             :rows    [[{:id     "verdict"
+                         :schema {:docgen "matti-date"}}
+                        {:id     "automatic"
+                         :col    2
+                         :show?  :_meta.editing?
+                         :schema {:docgen {:name "matti-verdict-check"}}}]
+                       {:id         "deltas"
+                        :css        [:matti-date]
+                        :loc-prefix :matti-verdict
+                        :row        (map (fn [kw]
+                                           (let [id (name kw)]
+                                             {:show?  (keyword (str "matti-dates.deltas."
+                                                                    id))
+                                              :id     id
+                                              :schema {:docgen {:name      "matti-date"
+                                                                :disabled? :matti-dates.0.automatic}}}))
+                                         [:julkipano :anto :valitus
+                                          :lainvoimainen :aloitettava :voimassa])}]}}
+     {:id   "matti-verdict"
+      :grid {:columns 6
+             :rows    [[{:loc-prefix :matti-verdict.giver
+                         :hide?      :_meta.editing?
+                         :schema     {:reference {:path :matti-verdict.0.giver.contact}}}
+                        {:id     "giver"
+                         :col    2
+                         :show?  :_meta.editing?
+                         :schema {:list {:title "matti-verdict.giver"
+                                         :items [{:id     "giver"
+                                                  :schema {:docgen "matti-verdict-giver"}}
+                                                 {:id     "contact"
+                                                  :show?  :_meta.editing?
+                                                  :schema {:docgen "matti-verdict-contact"}}]}}}
+                        {:id     "section"
+                         :schema {:docgen "matti-verdict-text"}}
+                        {:hide? :_meta.editing?}
+                        {:col    2
+                         :id     "verdict-code"
+                         :align  :full
+                         :schema {:reference-list {:path       :verdict
+                                                   :type       :select
+                                                   :loc-prefix :matti-r}} }]
+                       [{:col    5
+                         :id     "paatosteksti"
+                         :show?  :_meta.editing?
+                         :schema {:phrase-text {:category :paatosteksti}}}
+                        {:col    3
+                         :hide?  :_meta.editing?
+                         :schema {:reference {:path :matti-verdict.1.paatosteksti}}}
+                        {:col    2
+                         :id     "application-id"
+                         :hide?  :_meta.editing?
+                         :schema {:docgen "matti-verdict-id"}}]]}}
+     {:id   "requirements"
+      :grid {:columns 7
+             :rows    (concat (map-indexed (fn [i [loc-prefix path term? separator?]]
+                                             (let [check-path (keyword (str "requirements." i ".included"))]
+                                               {:show? [:_meta.editing? check-path]
+                                                :row   [{:col    4
+                                                         :schema {:reference-list
+                                                                  (merge {:enabled?   check-path
+                                                                          :loc-prefix loc-prefix
+                                                                          :path       path
+                                                                          :type       :multi-select}
+                                                                         (when term?
+                                                                           {:item-key :id
+                                                                            :term     {:path       path
+                                                                                       :extra-path :name
+                                                                                       :match-key  :id}})
+                                                                         (when separator?
+                                                                           {:separator " \u2013 "}))}}
+                                                        {:col    2
+                                                         :align  :right
+                                                         :show?  :_meta.editing?
+                                                         :id     "included"
+                                                         :schema {:docgen "required-in-verdict"}}]}))
+                                           [[:matti-r.foremen :foremen false false]
+                                            [:matti-plans :plans true false]
+                                            [:matti-reviews :reviews true true]])
+                              [[{:col    6
+                                 :id     "other"
+                                 :align  :full
+                                 :schema {:phrase-text {:i18nkey  [:phrase.category.lupaehdot]
+                                                        :category :lupaehdot}}}]])}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

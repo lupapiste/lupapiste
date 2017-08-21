@@ -120,7 +120,6 @@
 (defn- truthy [v]
   (cond
     (sequential? v) (seq v)
-    (string? v) (seq v)
     :else v))
 
 (defn- path-truthy [{state :state :as options} kw-path]

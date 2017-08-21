@@ -443,3 +443,4 @@
 "matti-verdict.application-id" "fi" "Lupatunnus"
 "matti-verdict.application-id" "en" "Application ID"
 "matti-dates.verdict" "fi" "Päätöspvm"
+"matti-dates.automatic" "fi" "Lasketaan muut päivät automaattisesti"
