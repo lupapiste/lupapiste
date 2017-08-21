@@ -25,6 +25,7 @@
 
 (defn invite-financial-handler [command]
   (let [financial-authority (get-financial-user)
+        financial-authority (assoc financial-authority :role "reader")
         updated-data (assoc (:data command) :email (:email financial-authority))
         updated-data (assoc updated-data :text "")
         updated-data (assoc updated-data :documentName "")
