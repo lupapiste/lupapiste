@@ -42,7 +42,9 @@
         (fact "Tyyppi is correct"
           (sxml/get-text xml [:UusiAsia :Tyyppi]) => "Lausuntopyynt\u00f6")
         (fact "TyypinTarkenne is correct"
-          (sxml/get-text xml [:UusiAsia :TyypinTarkenne]) => statement-subtype)))
+          (sxml/get-text xml [:UusiAsia :TyypinTarkenne]) => statement-subtype)
+        (fact "messageId is written"
+          (sxml/select1-attribute-value xml [:UusiAsia] :messageId) => string?)))
 
     (fact "ELY statement is saved to application"
       (let [statements (:statements (query-application mikko (:id app)))
