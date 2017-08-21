@@ -32,9 +32,11 @@
     self.monthValue = ko.observable();
     self.yearValue = ko.observable();
     self.results = ko.observableArray();
+    self.totalCount = ko.observable();
 
     self.reset = function() {
       self.results([]);
+      self.totalCount();
       self.monthValue(self.monthInput());
       self.yearValue(self.yearInput());
     }
@@ -44,6 +46,7 @@
       ajax.query("applications-per-month-report", {month: self.monthInput(), year: self.yearInput()})
       .success(function(res) {
         self.results(res.applications);
+        self.totalCount(_.sumBy(res.applications, "count"));
       })
       .call();
     };
