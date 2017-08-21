@@ -14,7 +14,6 @@
                    {value: ko.observable(), label: "Suoramarkkinointilupa",
                     arg: "allow"}];
 
-
     self.link = ko.pureComputed( function() {
       return "/api/raw/user-report?"
            + _(self.values)
@@ -25,8 +24,34 @@
     });
   }
 
+  function ApplicationsReport() {
+    var self = this;
+
+    self.monthInput = ko.observable("8");
+    self.yearInput = ko.observable("2017");
+    self.monthValue = ko.observable();
+    self.yearValue = ko.observable();
+    self.results = ko.observableArray();
+
+    self.reset = function() {
+      self.results([]);
+      self.monthValue(self.monthInput());
+      self.yearValue(self.yearInput());
+    }
+
+    self.fetch = function() {
+    self.reset();
+      ajax.query("applications-per-month-report", {month: self.monthInput(), year: self.yearInput()})
+      .success(function(res) {
+        self.results(res.applications);
+      })
+      .call();
+    };
+  }
+
   $(function() {
-    $("#reports").applyBindings( new UserReport());
+    $("#reports").applyBindings({users: new UserReport(),
+                                 applications: new ApplicationsReport()});
   });
 
 })();

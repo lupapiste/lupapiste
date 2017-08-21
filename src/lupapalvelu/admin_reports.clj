@@ -368,7 +368,8 @@
 (defn applications-per-month-per-permit-type [month year]
   (->> (applications-per-month-query month year {:_id "$permitType"
                                                  :count {$sum 1}} nil)
-       (map #(set/rename-keys % {:_id :permitType}))))
+       (map #(set/rename-keys % {:_id :permitType}))
+       (sort-by (comp - :count))))
 
 (defn designer-and-foreman-applications-per-month [month year]
   (applications-per-month-query month year
