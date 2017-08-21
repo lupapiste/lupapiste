@@ -52,7 +52,7 @@ Rakentaminen tab contains 3 review tasks (katselmus)
   Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//div[contains(@class, 'review-tasks')]//tbody/tr  3
 
 Rakentaminen tab contains 3 requirements (lupamaarays)
-  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[contains(@class, 'tasks')]//tbody/tr  3
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-test-id='lupamaaraykset']//tbody/tr  3
 
 Katselmukset
   Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
