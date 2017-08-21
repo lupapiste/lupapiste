@@ -101,7 +101,7 @@ Sonja adds owners - kuolinpesä
   Click Element At Coordinates  xpath=//div[@id='neighbors-map']/div  -50   50
   Double Click Element  xpath=//div[@id='neighbors-map']/div
   Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-nameOfDeceased')]  Palm, Paul Olavi
-  Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-name')]  Ruhtinas, Birgitta
+  Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Ruhtinas, Birgitta
   Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-street')]  Saastamoisenkatu 17
   Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-zip')]  70620
   Wait until  Element Should Contain  xpath=//span[contains(@class, 'owner-city')]  KUOPIO
