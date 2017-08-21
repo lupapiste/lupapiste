@@ -27,7 +27,7 @@ Sonja sees all her organizations in the dropdown of the organization filter auto
   Click Element  xpath=//div[@data-test-id="organization-filter-component"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should be visible  xpath=//div[@data-test-id="organization-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
   Xpath should match X times  //div[@data-test-id="organization-filter-component"]//ul[contains(@class, 'autocomplete-result')]//li[contains(@class,"autocomplete-result-item")]  3
-  Element text should be  xpath=//div[@data-test-id="organization-filter-component"]//ul[contains(@class, 'autocomplete-result')]//li[contains(@class, 'autocomplete-result-item')][2]  Sipoon yleisten alueiden rakentaminen
+  Element text should be  xpath=//div[@data-test-id="organization-filter-component"]//ul[contains(@class, 'autocomplete-result')]//li[@class='autocomplete-result-item'][2]  Sipoon yleisten alueiden rakentaminen
   Click Element  xpath=//div[@data-test-id="organization-filter-component"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should not be visible  xpath=//div[@data-test-id="organization-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
 
