@@ -18507,6 +18507,10 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   white-space: pre;
 }
 
+.dateinput.dateinput--safe {
+  max-width: 90%;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

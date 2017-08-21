@@ -287,15 +287,23 @@
 
 
 (defn data-draft
-  "Kmap keys are draft targets (kw-paths). Values are either kw-paths or maps with :path and :fn properties. Paths denote data sources. :fn is the source handler function (default identity)."
+  "Kmap keys are draft targets (kw-paths). Values are either kw-paths
+  or maps with :path, :fn and :skip-nil? properties. Paths denote data
+  sources. :fn is the source handler function (default identity),
+  if :skip-nil? is true the nil value entries are skipped (default
+  false)."
   [kmap template]
+  #_(>pprint {:kmap kmap :template template})
   (let [data (-> template :versions last :data)]
     (reduce (fn [acc [k v]]
               (let [v-path (get v :path v)
-                    v-fn( get v :fn identity)]
-                (assoc-in acc
-                          (util/split-kw-path k)
-                          (v-fn (get-in data (split-kw-path v-path))))))
+                    v-fn   (get v :fn identity)
+                    value  (v-fn (get-in data (util/split-kw-path v-path)))]
+                (if (and (nil? value) (:skip-nil? v))
+                  acc
+                  (assoc-in acc
+                            (util/split-kw-path k)
+                            value))))
             {}
             kmap)))
 
@@ -316,10 +324,21 @@
                                                    (kw-format "matti-%s.0.0" (name v))
                                                    (kw-format "requirements.%s.included" i)
                                                    {:path (kw-format "matti-%s.removed" (name v))
-                                                    :fn not}))
+                                                    :fn   not}))
                                           {}
                                           [:foremen :plans :reviews])
-                               {:requirements.3.other :matti-conditions.0.0})
+                               {:requirements.3.other :matti-conditions.0.0}
+                               (reduce (fn [acc k]
+                                         (let [s (name k)]
+                                           (assoc acc
+                                                  (kw-format "dates.deltas.%s" s)
+                                                  {:path      (kw-format "matti-verdict.1.%s" s)
+                                                   ;; Value must be non-empty initially.
+                                                   :fn #(when (:enabled %) " ")
+                                                   :skip-nil? true})))
+                                       {}
+                                       [:julkipano :anto :valitus :lainvoimainen
+                                        :aloitettava :voimassa]))
                         template)
             (util/split-kw-path :matti-verdict.1.application-id)
             (:id application)))

@@ -160,9 +160,9 @@
       (aset container "scrollTop" scroll))))
 
 (defn- set-selected  [selected* value callback]
-  (reset! selected* value)
-  (when callback
-    (callback value)))
+  (when (common/reset-if-needed! selected* value)
+    (when callback
+      (callback value))))
 
 ;; Parameters: initial-value options
 ;; Initial value can be atom for two-way binding (see the mixin).
@@ -307,13 +307,15 @@
 ;; Special options (all optional):
 ;;   callback: on-blur callback
 ;; The rest of the options are passed to the underlying input.
+;; Note: date format is always the Finnish format (21.8.2017).
 (rum/defcs date-edit < rum/reactive
   (initial-value-mixin ::date)
-  (datepicker/date-state-mixin ::date)
+  (datepicker/date-state-mixin ::date {:format "D.M.YYYY"})
   [{date* ::date :as local-state} _ {:keys [callback] :as options}]
-  [:input.dateinput (merge {:type      "text"
-                            :value     @date*
-                            :on-blur #(set-selected date*
-                                                      (.. % -target -value)
-                                                      callback)}
-                           (dissoc options :callback))])
+  [:input.dateinput.dateinput--safe
+   (merge {:type      "text"
+           :value     @date*
+           :on-blur #(set-selected date*
+                                   (.. % -target -value)
+                                   callback)}
+          (dissoc options :callback))])

@@ -393,7 +393,31 @@
 ;; It is adivsabled to reuse ids from template when possible. This
 ;; makes localization work automatically.
 (def verdict-schemas
-  {:r {:sections [{:id   "matti-verdict"
+  {:r {:sections [{:id   "matti-dates"
+                   :grid {:columns 7
+                          :rows    [[{:id     "verdict"
+                                      :schema {:docgen "matti-date"}}]
+                                    {:id  "deltas"
+                                     :css [:matti-date]
+                                     :row [{:show?      :dates.deltas.julkipano
+                                            :loc-prefix :matti-verdict.julkipano
+                                            :schema     {:docgen "matti-date"}}
+                                           {:show?      :dates.deltas.anto
+                                            :loc-prefix :matti-verdict.anto
+                                            :schema     {:docgen "matti-date"}}
+                                           {:show?      :dates.deltas.valitus
+                                            :loc-prefix :matti-verdict.valitus
+                                            :schema     {:docgen "matti-date"}}
+                                           {:show?      :dates.deltas.lainvoimainen
+                                            :loc-prefix :matti-verdict.lainvoimainen
+                                            :schema     {:docgen "matti-date"}}
+                                           {:show?      :dates.deltas.aloitettava
+                                            :loc-prefix :matti-verdict.aloitettava
+                                            :schema     {:docgen "matti-date"}}
+                                           {:show?      :dates.deltas.voimassa
+                                            :loc-prefix :matti-verdict.voimassa
+                                            :schema     {:docgen "matti-date"}}]}]}}
+                  {:id   "matti-verdict"
                    :grid {:columns 6
                           :rows    [[{:loc-prefix :matti-verdict.giver
                                       :hide?      :_meta.editing?
@@ -456,7 +480,7 @@
                                            [[{:col    6
                                               :id     "other"
                                               :align  :full
-                                              :schema {:phrase-text {:i18nkey [:phrase.category.lupaehdot]
+                                              :schema {:phrase-text {:i18nkey  [:phrase.category.lupaehdot]
                                                                      :category :lupaehdot}}}]])}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))

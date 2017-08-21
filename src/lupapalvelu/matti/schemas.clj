@@ -1,9 +1,11 @@
 (ns lupapalvelu.matti.schemas
-  (:require [clojure.set :as set]
+  (:require [clj-time.format :as timef]
+            [clojure.set :as set]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
             [lupapalvelu.matti.shared :as shared]
             [sade.schemas :as ssc]
+            [sade.strings :as ss]
             [sade.util :as util]
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
@@ -49,6 +51,9 @@
                  :locPrefix "matti"
                  :body (map #(hash-map :name %)
                             ["small" "medium" "large" "extra-large"])})
+
+(def date {:name "matti-date"
+           :type :date})
 
 (defschema MattiCategory
   {:id       ssc/ObjectIdStr
@@ -107,7 +112,7 @@
           :body (body m)})
        [matti-string verdict-text verdict-contact verdict-check
         in-verdict verdict-giver verdict-id automatic-vs-manual
-        complexity]))
+        complexity date]))
 
 ;; Phrases
 
@@ -239,6 +244,19 @@
       (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
 
+(def finnish-date (timef/formatter-local "d.M.yyyy"))
+
+(defn check-date
+  "The date is always in the Finnish format: 21.8.2017. Day and month
+  zero-padding is accepted. Empty string is a valid date."
+  [value]
+  (let [trimmed (ss/trim (str value))]
+    (when-not (ss/blank? trimmed)
+      (try (when-not (timef/parse-local-date finnish-date trimmed)
+             :error.invalid-value)
+           (catch Exception _
+             :error.invalid-value)))))
+
 (defmethod validate-resolution :docgen
   [{:keys [path schema value data] :as options}]
   ;; TODO: Use the old-school docgen validation if possible
@@ -254,9 +272,10 @@
       (data-type #{:text :string}) (check sc/Str)
       (= data-type :checkbox)      (check sc/Bool)
       ;; TODO: Nil handling should follow valueAllowUnset.
-      (= data-type :select)        (when (seq value)
+      (= data-type :select)        (when-not (ss/blank? (str value))
                                      (check-items [value] names))
       (= data-type :radioGroup)    (check-items [value] names)
+      (= data-type :date)          (check-date value)
       :else                        :error.invalid-value))
   )
 

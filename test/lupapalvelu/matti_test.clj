@@ -35,6 +35,7 @@
     => (contains {:path []
                   :schema {:info {:name "matti-verdict-check", :version 1}
                            :body '({:name "matti-verdict-check"
+                                    :label false
                                     :type :checkbox})}
                   :data "matti-verdict-check"}))
 
@@ -94,7 +95,9 @@
                                     {:id "select"
                                      :schema {:docgen "matti-verdict-giver"}}
                                     {:id "radio"
-                                     :schema {:docgen "automatic-vs-manual"}}]}]}}]})
+                                     :schema {:docgen "automatic-vs-manual"}}
+                                    {:id "date"
+                                     :schema {:docgen "matti-date"}}]}]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/MattiVerdict test-template)
@@ -104,6 +107,7 @@
   (fact "No row id"
     (let [result {:schema {:info {:name "matti-verdict-check" :version 1}
                            :body '({:name "matti-verdict-check"
+                                    :label false
                                     :type :checkbox})}
                   :data   "matti-verdict-check"
                   :path []}]
@@ -338,12 +342,12 @@
       => nil
       (schemas/validate-path-value test-template [:three :docgen :select] nil)
       => nil
+      (schemas/validate-path-value test-template [:three :docgen :select] "")
+      => nil
       (fact "bad path"
         (schemas/validate-path-value test-template [:three :docgen :select :bad] "hello")
         => :error.invalid-value-path)
       (fact "bad value"
-        (schemas/validate-path-value test-template [:three :docgen :select] "")
-        => :error.invalid-value
         (schemas/validate-path-value test-template [:three :docgen :select] 1234)
         => :error.invalid-value
         (schemas/validate-path-value test-template [:three :docgen :select] [:lautakunta :viranhaltija])
@@ -364,4 +368,36 @@
         (schemas/validate-path-value test-template [:three :docgen :radio] [:automatic :manual])
         => :error.invalid-value
         (schemas/validate-path-value test-template [:three :docgen :radio] nil)
-        => :error.invalid-value))))
+        => :error.invalid-value))
+    (facts "date"
+      (schemas/validate-path-value test-template [:three :docgen :date] "21.8.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "21.08.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "02.8.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "02.08.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "2.08.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "2.8.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "24.12.2017")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] "")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :date] nil)
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template [:three :docgen :date :bad] "1.2.2017")
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template [:three :docgen :date] "41.8.2017")
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :date] "Aug 21, 2017")
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :date] "21.8.")
+        => :error.invalid-value
+        (schemas/validate-path-value test-template [:three :docgen :date] 12344566)
+        => :error.invalid-value)
+      )))

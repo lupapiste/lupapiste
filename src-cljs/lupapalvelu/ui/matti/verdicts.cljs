@@ -87,13 +87,17 @@
                         [:i.lupicon-circle-plus]
                         [:span (common/loc :application.verdict.add)]])]]))
 
+
 (rum/defc verdict-list < rum/reactive
   []
   [:div
    [:h2 (common/loc "application.tabVerdict")]
    [:p "Application id:" (rum/react state/application-id)]
    [:p "Permit type:" (lupapisteApp.models.application.permitType)]
-   (new-verdict)])
+   (new-verdict)
+   (lupapalvelu.ui.components.datepicker/basic-datepicker nil identity 8)
+   (components/date-edit "16.08.2018" {:callback #(println "Päivämäärä:" %)})
+   (components/date-edit "12.03.2017" {:disabled true :callback #(println "Päivämäärä:" %)})])
 
 (rum/defc verdicts < rum/reactive
   {:will-mount   (fn [state]

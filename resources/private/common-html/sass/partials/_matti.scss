@@ -420,3 +420,9 @@ div.matti-autocomplete {
     white-space: pre;
   }
 }
+
+// The default input width is browser specific and the dateinput
+// especially does not play nicely with matti-grid.
+.dateinput.dateinput--safe {
+  max-width: 90%;
+}

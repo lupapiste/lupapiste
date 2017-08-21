@@ -2,6 +2,7 @@
   "Rudimentary support for docgen subset in the Matti context."
   (:require [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.path :as path]
             [rum.core :as rum]
             [sade.shared_util :as util]))
@@ -23,10 +24,6 @@
      [:label.matti-label {:for (path/id path)}
       (docgen-loc options)])
    component])
-
-#_(defmethod docgen-label-wrap :checkbox
-  [_ component]
-  component)
 
 (defn docgen-attr [{:keys [path] :as options} & kv]
   (let [id (path/id path)]
@@ -127,6 +124,11 @@
                          :on-blur   (state-change options))
             attr)]))
 
+(rum/defc docgen-date < rum/reactive
+  [{:keys [schema path state] :as options}]
+  (components/date-edit (path/state path state)
+                        (docgen-attr options
+                                     :callback #(path/meta-updated options))))
 
 ;; ---------------------------------------
 ;; Component dispatch
@@ -138,7 +140,8 @@
     :checkbox   (docgen-checkbox options)
     :radioGroup (docgen-radio-group options)
     :string     (text-edit options :input.grid-style-input {:type "text"})
-    :text       (text-edit options :textarea.grid-style-input)))
+    :text       (text-edit options :textarea.grid-style-input)
+    :date       (docgen-date options)))
 
 ;; ---------------------------------------
 ;; Docgen view components
