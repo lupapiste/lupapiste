@@ -9,7 +9,10 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [swiss.arrows :refer :all]
-            )
+            [monger.collection :as collection]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            [clojure.set :as set])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
 
 (defn string->keyword
@@ -344,3 +347,32 @@
     (->> [:plan :actual :extended-waste :extended-other]
          (map (partial waste-sheet data))
          (excel-response "waste-report"))))
+
+(defn- month-start-as-timestamp [month year]
+  (-> (t/date-time year month 1)
+      local/to-local-date-time
+      tc/to-long))
+
+(defn applications-per-month-query [month year group-clause filter-query]
+  (let [start-ts (month-start-as-timestamp month year)
+        end-ts   (month-start-as-timestamp (inc month) year)
+        match-query {$and [{:submitted {$gt start-ts}}
+                           {:submitted {$lt end-ts}}]}
+        aggregate  (remove nil?
+                     [{"$match" match-query}
+                      (when filter-query
+                        {"$match" filter-query})
+                      {"$group" group-clause}])]
+    (collection/aggregate (mongo/get-db) "applications" aggregate)))
+
+(defn applications-per-month-per-permit-type [month year]
+  (->> (applications-per-month-query month year {:_id "$permitType"
+                                                 :count {$sum 1}} nil)
+       (map #(set/rename-keys % {:_id :permitType}))))
+
+(defn designer-and-foreman-applications-per-month [month year]
+  (applications-per-month-query month year
+                                {:_id "$primaryOperation.name"
+                                 :count {$sum 1}}
+    {:primaryOperation.name {$in [:tyonjohtajan-nimeaminen-v2
+                                  :suunnittelijan-nimeaminen]}}))
