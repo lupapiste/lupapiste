@@ -1,10 +1,13 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
   (:require [sade.core :refer [ok fail fail!] :as core]
+            [sade.common-reader :as cr]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [sade.xml :as xml]
-            [pandect.core :as pandect]
             [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :as action]
@@ -12,13 +15,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.state-machine :as sm]
-            [clojure.string :as s]
-            [clojure.java.io :as io]
-            [sade.common-reader :as cr]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.state-machine :as sm]))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -52,7 +49,7 @@
 
 (defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id timestamp]
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
-        file          (fs/file (s/join "/" [unzipped-path filename]))
+        file          (fs/file (ss/join "/" [unzipped-path filename]))
         file-size     (.length file)
         orgs          (org/resolve-organizations
                         (:municipality application)
