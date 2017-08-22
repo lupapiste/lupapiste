@@ -16,7 +16,8 @@
 
 (defn create-financial-handler [user-data caller]
   [caller user-data]
-  (let [user (usr/create-new-user caller user-data :send-email false)
+  (let [_ (clojure.pprint/pprint user-data)
+        user (usr/create-new-user caller user-data :send-email false)
         token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
     (ok :id (:id user)
         :user user
