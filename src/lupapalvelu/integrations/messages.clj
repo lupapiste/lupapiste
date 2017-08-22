@@ -2,6 +2,7 @@
   "Namespace to handle integration messages metadata via db"
   (:require [schema.core :as sc]
             [sade.schemas :as ssc]
+            [monger.operators :refer [$set]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states])
   (:import (com.mongodb WriteConcern)))
@@ -32,5 +33,6 @@
   [message :- IntegrationMessage]
   (mongo/insert :integration-messages message WriteConcern/UNACKNOWLEDGED))
 
-(defn mark-acknowledged-and-return [message-id timestamp]
+(sc/defn ^:always-validate mark-acknowledged-and-return :- IntegrationMessage
+  [message-id timestamp]
   (mongo/with-id (mongo/update-one-and-return :integration-messages {:_id message-id} {$set {:acknowledged timestamp}})))
