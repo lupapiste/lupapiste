@@ -408,7 +408,13 @@ var util = (function($) {
     var url = identLogoutUrl();
     var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
     if (url) {
-      window.location = _.escape(url) + "?return=" + suffix;
+      ajax.deleteReq("/api/vetuma/user")
+        .success(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        })
+        .error(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        }).call();
     }
   }
 
@@ -416,7 +422,13 @@ var util = (function($) {
     var url = identLogoutUrl();
     var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
     if (url) {
-      window.location = _.escape(url) + "?return=" + suffix;
+      ajax.deleteReq("/api/vetuma/user")
+        .success(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        })
+        .error(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        }).call();
     }
   }
 
