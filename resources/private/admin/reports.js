@@ -39,7 +39,7 @@
       self.totalCount();
       self.monthValue(self.monthInput());
       self.yearValue(self.yearInput());
-    }
+    };
 
     self.fetch = function() {
     self.reset();

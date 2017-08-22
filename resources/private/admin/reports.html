@@ -31,7 +31,7 @@
           </div>
         </div>
         <!-- ko with: $data.applications -->
-        <h3>Jätetyt hakemukset</h3>
+        <h3>J&auml;tetyt hakemukset</h3>
         <div class="form-grid">
           <div class="row">
             <div class="col-1">
@@ -54,7 +54,7 @@
           <!-- ko ifnot: _.isEmpty(results()) -->
           <div class="row">
             <div class="col-4">
-              <span class="h3">Jätetyt hakemukset
+              <span class="h3">J&auml;tetyt hakemukset
                  <span data-bind="text: monthValue"></span> / <span data-bind="text: yearValue"></span></span>
             </div>
           </div>
@@ -74,7 +74,7 @@
                       <!-- ko foreach: $data.operations -->
                       <p>
                         <i>
-                          sisältää:<br />
+                          sis&auml;lt&auml;&auml:<br />
                           - <span data-bind="ltext: 'operations.' + $data._id"></span>: <span data-bind="text: $data.count"></span> kpl
                         </i>
                       </p>
@@ -85,7 +85,7 @@
                 </tbody>
                 <tfoot>
                   <tr>
-                    <th>Yhteensä</th>
+                    <th>Yhteens&auml;</th>
                     <th><span data-bind="text: totalCount"></span></th>
                   </tr>
                 </tfoot>
