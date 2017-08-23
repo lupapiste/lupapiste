@@ -30,7 +30,7 @@
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
       :trusted-salesforce {}
-      :financialAuthority {:organization {$in organizations}}
+      :financialAuthority {:auth.id (:id user)}
       (do
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results
@@ -53,6 +53,7 @@
       :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["canceled"]}}
       :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
+      :financialAuthority {:state {$nin ["canceled"]}}
       {})))
 
 (defn- only-authority-sees [user checker items]
