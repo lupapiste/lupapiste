@@ -6,7 +6,7 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
 
   var service = params.service || lupapisteApp.services.documentDataService;
 
-  self.selectValue = ko.observable( self.value() );
+  self.selectValue = ko.observable(self.value());
   self.indicator = ko.observable().extend({notify: "always"});
   self.processing = ko.observable();
   self.pending = ko.observable();
@@ -61,8 +61,6 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
     self.reset(true);
     self.selectValue(value);
     LUPAPISTE.ModalDialog.close();
-    //self.unsubscribe(self.selectValue);
-    //repository.load(params.applicationId);
   };
 
   self.disposedSubscribe(self.selectValue, function (value) {
