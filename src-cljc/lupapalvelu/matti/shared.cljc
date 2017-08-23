@@ -300,16 +300,11 @@
                                    :col    3
                                    :schema {:docgen "matti-verdict-giver"}}
                                   {:align  :full
-                                   :col    2
+                                   :col    3
                                    :id     "verdict-code"
                                    :schema {:reference-list {:path       :settings.verdict.0.verdict-code
                                                              :type       :select
-                                                             :loc-prefix :matti-r}}}
-                                  {}
-                                  {:align :full
-                                   :col 2
-                                   :id "complexity"
-                                   :schema {:docgen {:name "matti-complexity"}}}]
+                                                             :loc-prefix :matti-r}}}]
                                  [{:col    12
                                    :id     "paatosteksti"
                                    :schema {:phrase-text {:category :paatosteksti}}}]]}
@@ -330,6 +325,14 @@
                                                           :i18nkey [:phrase.category.muutoksenhaku] }}}]]}
                :_meta {:can-remove? true}}
               (text-section :matti-collateral)
+              {:id "matti-complexity"
+               :grid {:columns 1
+                      :rows [[{:loc-prefix :matti-complexity
+                               :schema {:docgen "matti-complexity"}}]
+                             [{:id "text"
+                               :schema {:phrase-text {:label? false
+                                                      :category :vaativuus}}}]]}
+               :_meta {:can-remove? true}}
               (text-section :matti-rights)
               (text-section :matti-purpose)
               (text-section :matti-statements)
@@ -481,7 +484,15 @@
                                  :id     "other"
                                  :align  :full
                                  :schema {:phrase-text {:i18nkey  [:phrase.category.lupaehdot]
-                                                        :category :lupaehdot}}}]])}}]}})
+                                                        :category :lupaehdot}}}]])}}
+     {:id   "matti-complexity"
+      :grid {:columns 6
+             :rows    [[{:col    5
+                         :schema {:docgen "matti-complexity"}}]
+                       [{:col    5
+                         :id     "text"
+                         :schema {:phrase-text {:label?   false
+                                                :category :vaativuus}}}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

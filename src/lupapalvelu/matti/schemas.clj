@@ -1,8 +1,8 @@
 (ns lupapalvelu.matti.schemas
-  (:require [clj-time.format :as timef]
-            [clojure.set :as set]
+  (:require [clojure.set :as set]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
+            [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.shared :as shared]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
@@ -48,7 +48,6 @@
 
 (def complexity {:name "matti-complexity"
                  :type :select
-                 :locPrefix "matti"
                  :body (map #(hash-map :name %)
                             ["small" "medium" "large" "extra-large"])})
 
@@ -151,7 +150,8 @@
                             :data   data}})]
     (cond
       (:grid data) (wrap :section shared/MattiSection data)
-      docgen       (wrap :docgen (doc-schemas/get-schema {:name docgen}) docgen)
+      docgen       (wrap :docgen (doc-schemas/get-schema
+                                  {:name (get docgen :name docgen)}) docgen)
       date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
       multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
@@ -244,18 +244,14 @@
       (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
 
-(def finnish-date (timef/formatter-local "d.M.yyyy"))
-
 (defn check-date
   "The date is always in the Finnish format: 21.8.2017. Day and month
   zero-padding is accepted. Empty string is a valid date."
   [value]
   (let [trimmed (ss/trim (str value))]
-    (when-not (ss/blank? trimmed)
-      (try (when-not (timef/parse-local-date finnish-date trimmed)
-             :error.invalid-value)
-           (catch Exception _
-             :error.invalid-value)))))
+    (when-not (or (ss/blank? trimmed)
+                  (date/parse-finnish-date trimmed))
+      :error.invalid-value)))
 
 (defmethod validate-resolution :docgen
   [{:keys [path schema value data] :as options}]

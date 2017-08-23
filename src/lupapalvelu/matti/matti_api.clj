@@ -443,5 +443,5 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :pre-checks       [(verdict-template-check :application :published)]
    :states           states/give-verdict-states}
-  [{:keys [application organization created]}]
-  (ok (matti/new-verdict-draft template-id application @organization created)))
+  [command]
+  (ok (matti/new-verdict-draft template-id command)))

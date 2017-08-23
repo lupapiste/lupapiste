@@ -1,6 +1,6 @@
 (ns lupapalvelu.matti-test
   (:require [clj-time.core :as time]
-            [lupapalvelu.matti.matti :as matti]
+            [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared  :as shared]
             [midje.sweet :refer :all]
@@ -62,44 +62,46 @@
     => (contains {:path [:verdict-code]})))
 
 (def test-template
-  {:name "test"
-   :sections [{:id "one"
+  {:name     "test"
+   :sections [{:id   "one"
                :grid {:columns 4
-                      :rows [[{:col 2
-                               :id "a"
-                               :schema {:docgen "matti-verdict-check"}}]
-                             {:id "row"
-                              :row [{:col 2
-                                     :id "b"
-                                     :schema {:date-delta {:unit :years}}}
-                                    {:id "c"
-                                     :schema {:phrase-text {:category :paatosteksti}}}]}]}}
-              {:id "two"
+                      :rows    [[{:col    2
+                                  :id     "a"
+                                  :schema {:docgen "matti-verdict-check"}}]
+                                {:id  "row"
+                                 :row [{:col    2
+                                        :id     "b"
+                                        :schema {:date-delta {:unit :years}}}
+                                       {:id     "c"
+                                        :schema {:phrase-text {:category :paatosteksti}}}]}]}}
+              {:id   "two"
                :grid {:columns 2
-                      :rows [[{}
-                              {:id "c"
-                               :schema {:multi-select {:items [:foo :bar]}}}]
-                             {:id "list-row"
-                              :row [{:id "d"
-                                     :schema {:list
-                                              {:items [{:schema {:docgen "matti-string"}}
-                                                       {:id "delta"
-                                                        :schema {:date-delta {:unit :days}}}
-                                                       {:id "ref"
-                                                        :schema {:reference-list {:type :select
-                                                                                  :path [:path :to :somewhere]}}}
-                                                       ]}}}]}]}}
-              {:id "three"
+                      :rows    [[{}
+                                 {:id     "c"
+                                  :schema {:multi-select {:items [:foo :bar]}}}]
+                                {:id  "list-row"
+                                 :row [{:id     "d"
+                                        :schema {:list
+                                                 {:items [{:schema {:docgen "matti-string"}}
+                                                          {:id     "delta"
+                                                           :schema {:date-delta {:unit :days}}}
+                                                          {:id     "ref"
+                                                           :schema {:reference-list {:type :select
+                                                                                     :path [:path :to :somewhere]}}}
+                                                          ]}}}]}]}}
+              {:id   "three"
                :grid {:columns 4
-                      :rows [{:id "docgen"
-                              :row [{:id "text"
-                                     :schema {:docgen "matti-verdict-text"}}
-                                    {:id "select"
-                                     :schema {:docgen "matti-verdict-giver"}}
-                                    {:id "radio"
-                                     :schema {:docgen "automatic-vs-manual"}}
-                                    {:id "date"
-                                     :schema {:docgen "matti-date"}}]}]}}]})
+                      :rows    [{:id  "docgen"
+                                 :row [{:id     "text"
+                                        :schema {:docgen "matti-verdict-text"}}
+                                       {:id     "select"
+                                        :schema {:docgen "matti-verdict-giver"}}
+                                       {:id     "radio"
+                                        :schema {:docgen "automatic-vs-manual"}}
+                                       {:id     "date"
+                                        :schema {:docgen "matti-date"}}
+                                       {:id     "as-map"
+                                        :schema {:docgen {:name "matti-complexity"}}}]}]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/MattiVerdict test-template)
@@ -401,6 +403,21 @@
         (schemas/validate-path-value test-template [:three :docgen :date] "21.8.")
         => :error.invalid-value
         (schemas/validate-path-value test-template [:three :docgen :date] 12344566)
+        => :error.invalid-value))
+    (facts "Docgen schema definition as a map"
+      (schemas/validate-path-value test-template [:three :docgen :as-map] "large")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :as-map] "extra-large")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :as-map] "")
+      => nil
+      (schemas/validate-path-value test-template [:three :docgen :as-map] nil)
+      => nil
+      (fact "bad path"
+        (schemas/validate-path-value test-template [:three :docgen :as-map :bad] "medium")
+        => :error.invalid-value-path)
+      (fact "bad value"
+        (schemas/validate-path-value test-template [:three :docgen :as-map] "bad")
         => :error.invalid-value))))
 
 (defn work-day
@@ -408,25 +425,27 @@
    work-day id from from)
   ([id from to]
    (fact {:midje/description (format "%s next work day: %s -> %s" id from to)}
-     (matti/forward-to-work-day (matti/parse-finnish-date from))
-     => (matti/parse-finnish-date to))))
+     (date/forward-to-work-day (date/parse-finnish-date from))
+     => (date/parse-finnish-date to))))
 
 (defn holiday [id s result]
   (fact {:midje/description (format "%s %s -> %s" id s result)}
-    (matti/holiday? (matti/parse-finnish-date s)) => result))
+    (date/holiday? (date/parse-finnish-date s)) => result))
 
 (facts "Date parsing"
-  (matti/parse-finnish-date "1.2.2017")
-  => (time/date-time 2017 2 1)
-  (matti/parse-finnish-date "01.2.2017")
-  => (time/date-time 2017 2 1)
-  (matti/parse-finnish-date "1.02.2017")
-  => (time/date-time 2017 2 1)
-  (matti/parse-finnish-date "01.02.2017")
-  => (time/date-time 2017 2 1))
+  (date/parse-finnish-date "1.2.2017")
+  => (time/local-date 2017 2 1)
+  (date/parse-finnish-date "01.2.2017")
+  => (time/local-date 2017 2 1)
+  (date/parse-finnish-date "1.02.2017")
+  => (time/local-date 2017 2 1)
+  (date/parse-finnish-date "01.02.2017")
+  => (time/local-date 2017 2 1)
+  (date/parse-finnish-date "88.77.2017")
+  = nil)
 
 (facts "Date unparsing"
-  (matti/finnish-date (time/date-time 2017 2 1))
+  (date/finnish-date (time/local-date 2017 2 1))
   => "1.2.2017")
 
 (facts "Holidays"
