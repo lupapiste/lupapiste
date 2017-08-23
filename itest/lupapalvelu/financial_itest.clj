@@ -22,5 +22,13 @@
       (command sonja :invite-financial-handler :id application-id :documentId doc-id :path ["rahoitus"]) => ok?
       (get-in (last-email) [:body :plain]) => (contains "sähköpostiosoitteella massi.mies@mail.com"))
 
-    (fact "Financial authority has rights to application")))
+    (fact "Financial authority has rights to application"
+      (let [fetched-application (query-application sonja application-id)
+            financial-auth (second (:auth fetched-application))]
+        (:email financial-auth) => "massi.mies@mail.com"
+        (:role financial-auth) => "financialAuthority"))
+
+    (fact "Financial authority can be removed from application"
+      (command sonja :remove-financial-handler-invitation :id application-id) => ok?
+      (count (:auth (query-application sonja application-id))) => 1)))
 
