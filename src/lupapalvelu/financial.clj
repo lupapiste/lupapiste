@@ -7,6 +7,7 @@
     [lupapalvelu.ttl :as ttl]
     [lupapalvelu.authorization-api :as auth]
     [lupapalvelu.action :as action]
+    [lupapalvelu.notifications :as notifications]
     [sade.env :as env]
     [sade.util :as util]))
 
@@ -29,6 +30,7 @@
         updated-data (assoc updated-data :text "")
         updated-data (assoc updated-data :documentName "")
         updated-data (assoc updated-data :role "financialAuthority")
+        updated-data (assoc updated-data :notification "invite-financial-authority")
         command (assoc command :data updated-data)
         caller (:user command)]
     (auth/send-invite! command)
@@ -40,4 +42,5 @@
 (defn remove-financial-handler-invitation [command]
   (let [financial-authority (get-financial-user)
         username (:username financial-authority)]
-    (auth/do-remove-auth command username)))
+    (auth/do-remove-auth command username)
+    (notifications/notify! :remove-financial-authority-invitation (assoc command :recipients [financial-authority]))))

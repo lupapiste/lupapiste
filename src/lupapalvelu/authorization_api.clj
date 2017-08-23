@@ -58,8 +58,9 @@
       (fail :invite.already-has-auth)
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
-            email-template (if (= notification "invite-to-prev-permit")
-                             :invite-to-prev-permit
+            email-template (case notification
+                             "invite-to-prev-permit" :invite-to-prev-permit
+                             "invite-financial-authority" :invite-financial-authority
                              :invite)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
