@@ -15,7 +15,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.permit :as permit]
-            [lupapiste-commons.states :as common-states]))
+            [lupapalvelu.states :as states]))
 
 (def kayttotarkoitus-hinnasto (delay (xls/read-map "kayttotarkoitus-hinnasto.xlsx")))
 
@@ -271,7 +271,7 @@
   (merge operation-schema
          {(sc/optional-key :displayNameFi) sc/Str
           (sc/optional-key :displayNameSv) sc/Str
-          :priceClass                      (sc/enum "A" "B" "C" "D" "E" "F")
+          :priceClass                      (sc/enum "A" "B" "C" "D" "E" "F" "Z")
           :priceCode                       (sc/maybe (apply sc/enum 900 (vals permit-type-price-codes)))
           :usagePriceCode                  (sc/maybe (apply sc/enum (vals usage-price-codes)))
           :use                             (sc/maybe sc/Str)
@@ -286,10 +286,7 @@
           :archived                          archiving/archived-ts-keys-schema
           :infoRequest                       sc/Bool
           :municipality                      sc/Str
-          :state                             (apply sc/enum
-                                                    "info"
-                                                    "answered"
-                                                    (map name (keys common-states/all-transitions-graph)))
+          :state                             (apply sc/enum (map name states/all-states))
           (sc/optional-key :openInfoRequest) (sc/maybe sc/Bool)
           :organization                      sc/Str
           (sc/optional-key :permitSubtype)   (sc/maybe sc/Str)
