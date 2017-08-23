@@ -208,8 +208,8 @@
 
     self.userDetailsOk = ko.computed(function() {
       var emailOk = self.email() && util.isValidEmailAddress(self.email());
-      var usernameOk = self.username();
-      return emailOk && usernameOk;
+      var nameOk = self.name();
+      return emailOk && nameOk;
     });
 
     self.createdUserUsername = ko.observable();
@@ -223,9 +223,7 @@
       return self
         .phase(1)
         .email("")
-        .username("")
-        .firstName("")
-        .lastName("")
+        .name("")
         .searching(false)
         .userAdded(false);
     };

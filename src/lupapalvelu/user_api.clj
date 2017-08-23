@@ -383,7 +383,7 @@
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
    :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
-   :user-roles #{:applicant :authority :authorityAdmin :admin}}
+   :user-roles #{:applicant :authority :authorityAdmin :admin :financialAuthority}}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))

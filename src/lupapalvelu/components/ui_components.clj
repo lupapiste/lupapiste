@@ -542,7 +542,7 @@
    :financial-authority-app {:depends []
                              :js ["financial-authority-app.js"]}
    :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
-                             :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components]}
+                             :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
    })
 
 ; Make sure all dependencies are resolvable:

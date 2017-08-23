@@ -10,6 +10,7 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
   self.indicator = ko.observable().extend({notify: "always"});
   self.processing = ko.observable();
   self.pending = ko.observable();
+  self.reset = ko.observable(false);
 
   var latestSaved = self.value();
 
@@ -56,21 +57,33 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
     removeInvitation();
   };
 
+  var reset = function (value) {
+    self.reset(true);
+    self.selectValue(value);
+    LUPAPISTE.ModalDialog.close();
+    //self.unsubscribe(self.selectValue);
+    //repository.load(params.applicationId);
+  };
+
   self.disposedSubscribe(self.selectValue, function (value) {
-    if (value === true) {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("hankkeen-kuvaus.rahoitus.add.areysure"),
-        loc("hankkeen-kuvaus.rahoitus.add.help"),
-        {title: loc("yes"), fn: function() {saveFunding()}},
-        {title: loc("no"), fn: function() {reset(self.selectValue(false))}}
-      );
+    if (self.reset() === false) {
+      if (value === true) {
+        LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("hankkeen-kuvaus.rahoitus.add.areysure"),
+          loc("hankkeen-kuvaus.rahoitus.add.help"),
+          {title: loc("yes"), fn: function() {saveFunding()}},
+          {title: loc("no"), fn: function() {reset(false)}}
+        );
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("hankkeen-kuvaus.rahoitus.remove.areysure"),
+          loc("hankkeen-kuvaus.rahoitus.remove.help"),
+          {title: loc("yes"), fn: function() {removeFunding()}},
+          {title: loc("no"), fn: function() {reset(true)}}
+        );
+      }
     } else {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("hankkeen-kuvaus.rahoitus.remove.areysure"),
-        loc("hankkeen-kuvaus.rahoitus.remove.help"),
-        {title: loc("yes"), fn: function() {removeFunding()}},
-        {title: loc("no"), fn: function() {self.selectValue(true)}}
-      );
+      self.reset(false);
     }
   });
 };

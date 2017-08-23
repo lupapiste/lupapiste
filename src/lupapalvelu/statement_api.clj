@@ -82,7 +82,7 @@
 (defquery get-possible-statement-statuses
   {:description "Provides the possible statement statuses according to the krysp version in use."
    :parameters [:id]
-   :user-roles #{:authority :applicant}
+   :user-roles #{:authority :applicant :financialAuthority}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :states states/all-application-states}

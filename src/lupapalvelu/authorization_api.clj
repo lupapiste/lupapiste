@@ -31,7 +31,7 @@
     (map #(assoc % :application (select-keys application [:id :address :primaryOperation :municipality])))))
 
 (defquery invites
-  {:user-roles #{:applicant :authority :oirAuthority}}
+  {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}}
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
