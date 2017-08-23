@@ -7,6 +7,7 @@
             [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
+            [sade.util :as util]
             [sade.xml :as sxml]
             [sade.coordinate :as coordinate]
             [sade.dummy-email-server :as dummy-email-server]
@@ -331,3 +332,92 @@
           ; Note that these checks are highly dependent on the PDF structure. Check if your (raw source) PDF content has changed if these fail.
           (re-seq #"(?ms)\(Kiinteist.{1,4}tunnus\).{1,200}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
           (re-seq #"(?ms)\(Tila\).{1,200}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))
+
+(facts "Automatic checking for reviews - overwriting existing reviews"
+  (mongo/with-db db-name
+    (mongo/remove-many :applications {})
+    (against-background [(coordinate/convert anything anything anything anything) => nil]
+      (let [application-id (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "submitted 16"))]
+
+        (facts "Initial state of applications before krysp reading is sane"
+          (fact "approve app"          (local-command sonja :approve-application :id application-id :lang "fi") => ok?)
+          (fact "give verdict for app" (give-local-verdict sonja application-id :verdictId "verdict-vg" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+
+          (let [application (query-application local-query sonja application-id) => truthy]
+
+            (fact "verdictGiven"
+                  (:state application) => "verdictGiven"))
+          => truthy)
+
+        (fact "first batchrun"
+
+          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+                application (query-application local-query sonja application-id) => truthy]
+            (fact "application reviews contain the one that will be changed"
+              (->> application :tasks (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
+                                                           "29.09.2014"))
+                 :data :katselmus :huomautukset :kuvaus :value) => (contains "aloituskokouksessa")))
+          => truthy
+
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id] :application-id anything)
+                    => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                           (ss/replace #"LP-186-2014-90009" application-id)
+                           (sxml/parse-string "utf-8"))))
+
+        (fact "second batchrun, no overwrite"
+
+          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+                application (query-application local-query sonja application-id) => truthy]
+
+            (fact "application state is updated from verdictGive to constructionStarted"
+                  (:state application) => "constructionStarted")
+
+            (fact "application reviews are not updated"
+              (->> application :tasks (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
+                                                           "29.09.2014"))
+                   :data :katselmus :huomautukset :kuvaus :value) => (contains "aloituskokouksessa")) ;; <- NOTE!
+
+            (fact "there are no faulty attachments"
+              (let [faulty-attachments (->> application :attachments
+                                            (filter #(= (-> % :metadata :tila)
+                                                        "ei-arkistoida-virheellinen")))]
+                faulty-attachments => empty?)))
+          => truthy
+
+          ;; Review query is made only for applications in eligible state -> xml found for verdict given application
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id] :application-id anything)
+             => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                    (ss/replace #"LP-186-2014-90009" application-id)
+                    (ss/replace #"aloituskokouksessa" "aloituskoKKouksessa") ;; <- NOTE!
+                    (sxml/parse-string "utf-8"))))
+
+        (fact "second batchrun, overwrite"
+
+          (let [application-before-rewrite (query-application local-query sonja application-id) => truthy
+                old-task (->> application-before-rewrite :tasks
+                              (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
+                                                   "29.09.2014")))
+                poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
+                application (query-application local-query sonja application-id) => truthy
+                overwritten-task (->> application :tasks
+                                      (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
+                                                           "29.09.2014")))]
+
+            (fact "one of the application reviews is updated"
+              (->> overwritten-task :data :katselmus :huomautukset :kuvaus :value)
+              => (contains "aloituskoKKouksessa"))  ;; <- NOTE!
+
+            (fact "the overwritten review attachment is marked faulty"
+              (let [faulty-attachments (->> application :attachments
+                                            (filter #(= (-> % :metadata :tila)
+                                                        "ei-arkistoida-virheellinen")))]
+                (count faulty-attachments) => 1
+                (:target (first faulty-attachments))
+                => {:type "task", :id (:id old-task)})))
+          => truthy
+
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id] :application-id anything)
+            => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                   (ss/replace #"LP-186-2014-90009" application-id)
+                   (ss/replace #"aloituskokouksessa" "aloituskoKKouksessa") ;; <- NOTE!
+                   (sxml/parse-string "utf-8"))))))))
