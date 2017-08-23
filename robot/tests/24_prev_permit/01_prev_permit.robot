@@ -101,5 +101,6 @@ State select check
 
 Change application state
   [Arguments]  ${state}
+  Click by test id  change-state-select
   Select From List By Value  jquery=[data-test-id=change-state-select]  ${state}
   State select check  ${state}
