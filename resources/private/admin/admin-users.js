@@ -197,11 +197,81 @@
 
   var restApiUsers = new RestApiUsers();
 
+  function FinancialHandlerUser() {
+    var self = this;
+
+    self.email = ko.observable();
+    self.name = ko.observable();
+    self.phase = ko.observable(0);
+    self.searching = ko.observable();
+    self.userAdded = ko.observable();
+
+    self.userDetailsOk = ko.computed(function() {
+      var emailOk = self.email() && util.isValidEmailAddress(self.email());
+      var usernameOk = self.username();
+      return emailOk && usernameOk;
+    });
+
+    self.createdUserUsername = ko.observable();
+    self.createdPw = ko.observable();
+
+    self.createdUserlinkFi = ko.observable();
+    self.createdUserlinkSv = ko.observable();
+    self.createdUserUsername = ko.observable();
+
+    self.clean = function() {
+      return self
+        .phase(1)
+        .email("")
+        .username("")
+        .firstName("")
+        .lastName("")
+        .searching(false)
+        .userAdded(false);
+    };
+
+    self.dialog = function() {
+      if (!self._dialog) {
+        self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
+        self._dialog.createMask();
+      }
+      return self._dialog;
+    };
+
+    self.addFinancialHandlerUser = function () {
+      self.clean().dialog().open("#add-financial-user-to-organization-dialog");
+    };
+
+    self.next = function() {
+      self.searching(true).phase(2);
+      ajax
+        .command("create-financial-handler",
+          {username: self.email(),
+            role: "financialAuthority",
+            email: self.email(),
+            firstName: self.name(),
+            lastName: "",
+            enabled: "true"})
+        .pending(self.searching)
+        .success(function(r) {
+          self.userAdded(true);
+          self.createdUserUsername(r.username);
+          self.createdUserlinkFi(r.linkFi);
+          self.createdUserlinkSv(r.linkSv);
+          usersList.redraw();
+        })
+        .call();
+    };
+  }
+
+  var financialHandlerUser = new FinancialHandlerUser();
+
   $(function() {
     $("#admin").applyBindings({});
     $("#users").applyBindings({
       authorityAdminUsers: authorityAdminUsers,
-      restApiUsers: restApiUsers
+      restApiUsers: restApiUsers,
+      financialHandlerUser: financialHandlerUser
     });
   });
 

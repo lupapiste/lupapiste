@@ -71,6 +71,8 @@
 (fact authority?
   (authority? {:role "authority"})  => truthy
   (authority? {:role :authority})   => truthy
+  (authority? {:role "financialAuthority"}) => truthy
+  (authority? {:role :financialAuthority}) => truthy
   (authority? {:role :oirAuthority}) => falsey
   (authority? {:role "applicant"})  => falsey
   (authority? {})                   => falsey
@@ -82,6 +84,12 @@
   (applicant? {:role "authority"})  => falsey
   (applicant? {})                   => falsey
   (applicant? nil)                  => falsey)
+
+(fact financial-authority?
+  (financial-authority? {:role "financialAuthority"}) => truthy
+  (financial-authority? {:role :financialAuthority}) => truthy
+  (financial-authority? {:role "authority"}) => falsey
+  (financial-authority? {:role :authority}) => falsey)
 
 (fact same-user?
   (same-user? {:id "foo"} {:id "foo"}) => truthy

@@ -69,7 +69,7 @@
 
 (defquery application-guests
   {:description "List of application guests and guest authorities."
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :financialAuthority}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :parameters [:id]

@@ -40,7 +40,7 @@
         my-invites (filter #(= id (get-in % [:user :id])) invites)]
     (ok :invites my-invites)))
 
-(def settable-roles #{:writer :foreman})
+(def settable-roles #{:writer :foreman :financialAuthority})
 (def changeable-roles #{:writer :foreman})
 
 (defn- valid-role [role]
@@ -119,7 +119,7 @@
     flatten
     (zipmap <> (repeat ""))))
 
-(defn- do-remove-auth [{application :application :as command} username]
+(defn do-remove-auth [{application :application :as command} username]
   (let [username (ss/canonize-email username)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))

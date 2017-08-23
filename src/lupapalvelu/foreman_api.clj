@@ -99,7 +99,7 @@
     (fail :error.application-not-found)))
 
 (defquery foreman-applications
-  {:user-roles #{:applicant :authority :oirAuthority}
+  {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states           states/all-states
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles  roles/reader-org-authz-roles

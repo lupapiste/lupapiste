@@ -538,6 +538,11 @@
                     "application-bulletins/bulletins-search/bulletins-search-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
+
+   :financial-authority-app {:depends []
+                             :js ["financial-authority-app.js"]}
+   :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
+                             :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components]}
    })
 
 ; Make sure all dependencies are resolvable:

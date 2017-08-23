@@ -124,6 +124,11 @@
            not-empty
            (fail :error.unknown-tag :tags)))
 
+(defn validate-is-financial-authority []
+  (fn [{user :user}]
+    (when-not (usr/financial-authority? user)
+      unauthorized)))
+
 ;;
 ;; API:
 ;;

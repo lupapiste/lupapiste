@@ -20,13 +20,13 @@
 ;;
 
 (defn get-subpage-link [{:keys [id subpage-id]} subpage lang {role :role :or {role "applicant"}}]
-  (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role: " role))
+  (assert (#{"applicant" "authority" "dummy" "financialAuthority"} role) (str "Unsupported role: " role))
   (assert (#{"attachment" "statement" "neighbors" "verdict"} subpage) (str "Unsupported subpage: " subpage))
   (let [full-path (ss/join "/" (remove nil? [subpage id subpage-id]))]
     (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!/" full-path)))
 
 (defn get-application-link [{:keys [infoRequest id]} tab lang {role :role :or {role "applicant"}}]
-  (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
+  (assert (#{"applicant" "authority" "dummy" "financialAuthority"} role) (str "Unsupported role " role))
   (let [suffix (if (and (not (ss/blank? tab)) (not (ss/starts-with tab "/"))) (str "/" tab) tab)
         permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]

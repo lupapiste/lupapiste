@@ -88,7 +88,8 @@
             [lupapalvelu.campaign-api]
             [lupapalvelu.digitizer-api]
             [lupapalvelu.matti.matti-api]
-            [lupapalvelu.matti.phrases-api])
+            [lupapalvelu.matti.phrases-api]
+            [lupapalvelu.financial-api])
 
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]

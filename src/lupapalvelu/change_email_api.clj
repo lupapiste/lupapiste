@@ -60,12 +60,13 @@
 
 (defcommand change-email-init
   {:parameters [email]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :financialAuthority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified   true
    :pre-checks [(some-pre-check validate-has-verified-person-id
-                                (com/validate-has-company-role :any))]
+                                (com/validate-has-company-role :any)
+                                (com/validate-is-financial-authority))]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (change-email/init-email-change user email))

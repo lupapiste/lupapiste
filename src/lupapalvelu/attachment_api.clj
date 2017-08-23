@@ -126,7 +126,7 @@
    :parameters [:id]
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states states/all-states}
   [{user :user assignments :application-assignments :as command}]
   (ok :attachments (map (partial att/enrich-attachment-with-trigger-tags (maybe-assignments assignments user))
@@ -138,7 +138,7 @@
    :categories #{:attachments}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
   [{{attachments :attachments :as application} :application user :user assignments :application-assignments :as command}]
@@ -152,7 +152,7 @@
    :parameters [:id]
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states states/all-states}
   [{application :application}]
   (ok :groups (att-tags/attachment-groups-for-application application)))
@@ -162,7 +162,7 @@
    :parameters [:id]
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states states/all-application-or-archiving-project-states}
   [{application :application user :user assignments :application-assignments}]
   (ok :attachmentsFilters
@@ -176,7 +176,7 @@
    :parameters [:id]
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states states/all-application-or-archiving-project-states}
   [{application :application}]
   (ok :tagGroups (att-tag-groups/attachment-tag-groups application)))
@@ -188,7 +188,7 @@
 (defquery attachment-types
   {:parameters [:id]
    :user-authz-roles roles/all-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states     states/all-states}
   [{application :application}]
   (ok :attachmentTypes (att-type/get-attachment-types-for-application application)))
@@ -240,7 +240,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states     states/all-states}
   [{{attachments :attachments} :application}]
   (->> (ram/resolve-ram-links attachments attachmentId)
@@ -405,7 +405,7 @@
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
@@ -414,7 +414,7 @@
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id false (partial att/get-attachment-file-as! user)))
@@ -433,7 +433,7 @@
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
@@ -443,7 +443,7 @@
    :categories       #{:attachments}
    :optional-parameters [:download]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id download]} :data user :user}]
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id) (= download "true")))
@@ -458,7 +458,7 @@
 
 (defraw "download-all-attachments"
   {:parameters [:id]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states     states/all-states
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles}
@@ -476,7 +476,7 @@
 
 (defraw "download-attachments"
   {:parameters [:id ids]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states states/all-states
    :user-authz-roles roles/all-authz-roles
    :input-validators [(partial action/non-blank-parameters [:ids])]
