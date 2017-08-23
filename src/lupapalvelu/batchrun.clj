@@ -471,7 +471,8 @@
                                  :organization organization-id
                                  :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
                   (merge app/timestamp-key
-                         {:state true
+                         {:attachments true
+                          :state true
                           :municipality true
                           :address true
                           :permitType true
