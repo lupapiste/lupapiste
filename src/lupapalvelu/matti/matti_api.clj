@@ -419,6 +419,9 @@
 ;; Verdict API
 ;; ------------------------------------------
 
+;; TODO: Make sure that the functionality (including notifications)
+;; and constraints are in sync with the legacy verdict API.
+
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
   application verdict templates."

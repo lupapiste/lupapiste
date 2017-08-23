@@ -198,22 +198,22 @@
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
-                        :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
+                        :jvm-opts     ["-Djava.awt.headless=true" "-Xmx1G"]}
              :intellij {:test-paths ["itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :figwheel {:server-port 3666
-             :css-dirs ["resources/public/lp-static/css/main.css"]}
+             :css-dirs    ["resources/public/lp-static/css/main.css"]}
   :sass {:target-path  "resources/public/lp-static/css/"
          :source-paths ["resources/private/common-html/sass/"]
          :output-style :compressed}
   :jvm-opts ["-Dfile.encoding=UTF-8"]
-  :nitpicker {:exts ["clj" "js" "html"]
+  :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
-  :repositories [["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
+  :repositories [["mygrid-repository" {:url       "http://www.mygrid.org.uk/maven/repository"
                                        :snapshots false}]
                  ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
-                 ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
+                 ["com.levigo.jbig2" {:url       "http://jbig2-imageio.googlecode.com/svn/maven-repository"
                                       :snapshots false}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
