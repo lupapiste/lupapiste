@@ -201,7 +201,7 @@
     var self = this;
 
     self.email = ko.observable();
-    self.username = ko.observable();
+    self.name = ko.observable();
     self.phase = ko.observable(0);
     self.searching = ko.observable();
     self.userAdded = ko.observable();
@@ -224,6 +224,8 @@
         .phase(1)
         .email("")
         .username("")
+        .firstName("")
+        .lastName("")
         .searching(false)
         .userAdded(false);
     };
@@ -244,10 +246,11 @@
       self.searching(true).phase(2);
       ajax
         .command("create-financial-handler",
-          {username: self.username(),
+          {username: self.email(),
             role: "financialAuthority",
             email: self.email(),
-            lastName: loc("financialAuthority"),
+            firstName: self.name(),
+            lastName: "",
             enabled: "true"})
         .pending(self.searching)
         .success(function(r) {

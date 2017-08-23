@@ -123,3 +123,6 @@
 "admin.add-dialog.financialUserAdded" "en" ""
 "admin.add-dialog.financialUserAdded" "fi" "Rahoituskäsittelijä lisätty onnistuneesti"
 "admin.add-dialog.financialUserAdded" "sv" ""
+"financialAuthority.name" "en" "Name"
+"financialAuthority.name" "fi" "Nimi"
+"financialAuthority.name" "sv" "Namn"
