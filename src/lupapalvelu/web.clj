@@ -16,6 +16,7 @@
             [noir.cookies :as cookies]
             [monger.operators :refer [$set $push $elemMatch]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
+            [sade.files :as files]
             [sade.env :as env]
             [sade.http :as http]
             [sade.util :as util]
@@ -50,7 +51,8 @@
             [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
             [clj-time.local :as local]
-            [lupapalvelu.tasks :as tasks])
+            [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -813,6 +815,29 @@
                                 (usr/batchrun-user [(:organization application)])
                                 "fi")
       (resp/status 200 "PROCESSED")))
+
+  (defn override-xml [xml-file overrides]
+    (let [xml            (enlive/xml-resource xml-file)
+          overridden-xml (reduce (fn [nodes override]
+                                   (enlive/transform nodes
+                                                     (->> (:selector override)
+                                                          (map keyword))
+                                                     (enlive/content (:value override))))
+                                 xml overrides)]
+      (apply str (enlive/emit* overridden-xml))))
+
+  (defpage [:post "/dev/ah/message-response"] {:keys [id messageId]} ; LPK-3126
+    (let [xml (-> (io/resource "asianhallinta/sample/ah-example-response.xml")
+                  (enlive/xml-resource)
+                  (enlive/transform [:ah:AsianTunnusVastaus :ah:HakemusTunnus] (enlive/content id))
+                  (enlive/transform [:ah:AsianTunnusVastaus] (enlive/set-attr :messageId messageId)))
+          xml-s (apply str (enlive/emit* xml))
+          temp (files/temp-file "asianhallinta" ".xml")]
+      (spit temp xml-s)
+      (files/with-zip-file [(.getPath temp)]
+                           (ah-reader/process-message zip-file (env/value :ely :sftp-user) (usr/batchrun-user ["123"])))
+      (io/delete-file temp)
+      (resp/status 200 (resp/json {:ok true}))))
 
   (defpage [:get "/dev/filecho/:filename"] {filename :filename}
     (->> filename
