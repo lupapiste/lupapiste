@@ -13,6 +13,7 @@
 
 (sc/defschema IntegrationMessage
   {:id                            ssc/ObjectIdStr
+   :direction                     (sc/enum "in" "out")
    :messageType                   sc/Str
    :partner                       (apply sc/enum partners)
    :output-dir                    sc/Str
