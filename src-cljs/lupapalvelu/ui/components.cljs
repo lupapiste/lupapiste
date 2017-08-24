@@ -79,3 +79,9 @@
       {:for      input-id
        :on-click #(handler-fn (not (value-fn value)))}
       (common/loc label)]]))
+
+(rum/defc debug-atom < rum/reactive
+          [a & [title]]
+          [:div.pprint
+           [:div.title [:h4(or title "debug")]]
+           [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])

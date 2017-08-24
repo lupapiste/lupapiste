@@ -62,7 +62,7 @@
      (loc ltext)]]])
 
 (rum/defc grid-checkbox < rum/reactive
-  [state col-class ltext]
+  [state col-class ltext required?]
   [:div
    {:class (name col-class)}
    [:div
@@ -70,8 +70,11 @@
     [:input {:type    "checkbox"
              :checked (true? (rum/react state))
              :value   true}]
-    [:label.checkbox-label
-     {:on-click #(swap! state not)}
+    [:label
+     {:on-click #(swap! state not)
+      :class (if required?
+               ["checkbox-label" "required"]
+               "checkbox-label")}
      (loc ltext)]]])
 
 (rum/defc contact-form [path]

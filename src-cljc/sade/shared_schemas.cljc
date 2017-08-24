@@ -11,3 +11,21 @@
 
 (def ObjectIdStr
   (sc/pred (partial matches? object-id-pattern) "ObjectId hex string"))
+
+(defn valid-email? [email]
+  (try
+    (boolean (re-matches #".+@.+\..+" email))
+    (catch java.lang.Exception _
+      false)))
+
+(defn in-lower-case? [^String s]
+  (if s
+    (= s (.toLowerCase s))
+    false))
+
+(defn max-length-constraint [max-len]
+  (fn [v] (<= (count v) max-len)))
+
+(defschema Email
+           "A simple schema for email"
+  (sc/constrained sc/Str (every-pred valid-email? in-lower-case? (max-length-constraint 254)) "Email"))

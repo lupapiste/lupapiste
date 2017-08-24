@@ -93,7 +93,7 @@
 (rum/defc composer-phase2 < rum/reactive []
   (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])
         delivery-option (rum/cursor-in state/component-state [:contacts :delivery-same-as-orderer])
-        conditions-accepted-option (rum/cursor-in state/component-state [:conditionsAccepted])]
+        conditions-accepted-option (rum/cursor-in state/component-state [:conditions-accepted])]
     [:div.order-grid-4
      [:div.order-section
       (poc/section-header "printing-order.orderer-details")
@@ -121,7 +121,7 @@
        [:div.col-4
         [:span (loc "printing-order.conditions.text")]]]
       [:div.row
-       (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept")]]
+       (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept" true)]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase1)}
@@ -164,6 +164,7 @@
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))
+     [:div (lupapalvelu.ui.components/debug-atom (rum/cursor-in state/component-state [:contacts]))]
      (order-composer-footer)]))
 
 (defonce args (atom {}))
