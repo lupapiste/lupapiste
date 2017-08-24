@@ -81,7 +81,7 @@
 
 (defquery comments
   {:parameters [id]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/comment-user-authz-roles
    :org-authz-roles roles/commenter-org-authz-roles
    :states states/all-states}
@@ -91,7 +91,7 @@
 (defcommand add-comment
   {:parameters [id text target roles]
    :optional-parameters [to mark-answered openApplication]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :states     commenting-states
    :user-authz-roles roles/comment-user-authz-roles
    :org-authz-roles roles/commenter-org-authz-roles
@@ -113,7 +113,7 @@
   (let [to-user   (and to (or (usr/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))
         ensured-visibility (if (seq roles)
                              (remove nil? (conj (set roles) (:role user) (:role to-user)))
-                             #{:authority :applicant :oirAuthority})]
+                             #{:authority :applicant :oirAuthority :financialAuthority})]
     (update-application command
       (util/deep-merge
         (comment/comment-mongo-update (:state application) text target (application/user-role user application) mark-answered user to-user created ensured-visibility)
