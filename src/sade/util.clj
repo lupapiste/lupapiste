@@ -7,13 +7,16 @@
             [clojure.java.io :as io]
             [clojure.walk :refer [postwalk prewalk]]
             [me.raynes.fs :as fs]
+            [me.raynes.fs.compression :as fsc]
             [sade.core :refer [fail!]]
+            [sade.files :as files]
             [sade.shared-util :as shared]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]])
   (:import [java.util.jar JarFile]
-           [org.joda.time LocalDateTime]))
+           [org.joda.time LocalDateTime]
+           [java.io ByteArrayOutputStream]))
 
 ;;
 ;; Nil-safe number utilities
@@ -643,3 +646,30 @@
                 coll)
         first
         seq)))
+
+(defn- slurp-bytes [fpath]
+  (with-open [data (io/input-stream (fs/file fpath))]
+    (with-open [out (ByteArrayOutputStream.)]
+      (io/copy data out)
+      (.toByteArray out))))
+
+(defn- zip-files! [file fpaths]
+  (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
+    (with-open [zip (fsc/make-zip-stream filename-content-pairs)]
+      (io/copy zip (fs/file file)))
+    file))
+
+(defn build-zip! [fpaths]
+  (let [temp-file (files/temp-file "build-zip-temp-file" ".zip")]
+    (zip-files! temp-file fpaths)
+    temp-file))
+
+(defmacro with-zip-file
+  "zips given filepaths to temporary zipfile and binds zip path to 'zip-file' symbol
+  which can be used in body."
+  [fpaths & body]
+  `(let [temp-file# (build-zip! ~fpaths)
+         ~'zip-file (.getPath temp-file#)]
+     (try
+       ~@body
+       (finally (io/delete-file temp-file#)))))

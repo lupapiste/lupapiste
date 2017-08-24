@@ -13,17 +13,14 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations-api]
             [lupapalvelu.verdict-api] ; for notification definition
-            [me.raynes.fs.compression :as fsc]
             [me.raynes.fs :as fs]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now] :as core]
             [sade.common-reader :as cr]
             [sade.env :as env]
-            [sade.files :as files]
             [sade.util :as util]
             [sade.email]
-            [sade.dummy-email-server :as dummy-email])
-  (:import (java.io ByteArrayOutputStream)))
+            [sade.dummy-email-server :as dummy-email]))
 
 
 (def db-name (str "test_xml_asianhallinta_verdict-itest_" (now)))
@@ -58,30 +55,6 @@
 
 (def parsed-example-ah-xml-no-paatoskoodi
   (util/dissoc-in parsed-example-ah-xml [:AsianPaatos :PaatosKoodi]))
-
-(defn- slurp-bytes [fpath]
-  (with-open [data (io/input-stream (fs/file fpath))]
-    (with-open [out (ByteArrayOutputStream.)]
-      (io/copy data out)
-      (.toByteArray out))))
-
-(defn- zip-files! [file fpaths]
-  (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
-    (with-open [zip (fsc/make-zip-stream filename-content-pairs)]
-      (io/copy zip (fs/file file)))
-    file))
-
-(defn- build-zip! [fpaths]
-  (let [temp-file (files/temp-file "ah-verdict-itest" ".zip")]
-    (zip-files! temp-file fpaths)
-    temp-file))
-
-(defmacro with-zip-file [fpaths & body]
-  `(let [temp-file# (build-zip! ~fpaths)
-         ~'zip-file (.getPath temp-file#)]
-     (try
-       ~@body
-       (finally (io/delete-file temp-file#)))))
 
 (defn- create-local-ah-app []
   (create-and-submit-local-application
@@ -120,11 +93,10 @@
     [(app/make-application-id anything) => "LP-297-2015-00001"]
     (fact "Successful batchrun"
       (mongo/with-db db-name
-        (let [temp-file (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
-              zip (fs/copy temp-file (fs/file (str local-target-folder "/verdict1.zip")))
-              _   (io/delete-file temp-file)
-              app (create-local-ah-app)
-              app-id (:id app)]
+        (util/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+          (let [_ (fs/copy (io/file zip-file) (fs/file (str local-target-folder "/verdict1.zip")))
+                app (create-local-ah-app)
+                app-id (:id app)]
           (generate-documents app pena true)
           (local-command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
 
@@ -137,17 +109,16 @@
             (count (util/get-files-by-regex (str local-target-folder "/archive") #"verdict1\.zip$")) => 1)
 
           (fact "application has verdict"
-            (count (:verdicts (query-application local-query pena app-id))) => 1)))))
+            (count (:verdicts (query-application local-query pena app-id))) => 1))))))
 
   (against-background
     [(app/make-application-id anything) => "LP-297-2015-00002"]
     (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
       (mongo/with-db db-name
-        (let [temp-file (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
-              zip (fs/copy temp-file (fs/file (str local-target-folder "/verdict2.zip")))
-              _ (io/delete-file temp-file)
-              app (create-local-ah-app)
-              app-id (:id app)]
+        (util/with-zip-file [example-ah-attachment-path example-ah-attachment2-path]
+          (let [_ (fs/copy (io/file zip-file) (fs/file (str local-target-folder "/verdict2.zip")))
+                app (create-local-ah-app)
+                app-id (:id app)]
 
           (generate-documents app pena true)
           (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
@@ -161,7 +132,7 @@
             (count (util/get-files-by-regex (str local-target-folder "/error") #"verdict2\.zip$")) => 1)
 
           (fact "application doesn't have verdict"
-            (count (:verdicts (query-application local-query pena app-id))) => 0)))))
+            (count (:verdicts (query-application local-query pena app-id))) => 0))))))
   (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict error result"
     (mongo/with-db db-name
       (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
@@ -183,7 +154,7 @@
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
     (fixture/apply-fixture "minimal")
-    (with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+    (util/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
       (let [application (create-local-ah-app)
             AsianPaatos (:AsianPaatos parsed-example-ah-xml)]
 
@@ -256,7 +227,7 @@
     (app/make-application-id anything) => "LP-297-2015-00001"))
 
 (facts "unit tests"
-  (with-zip-file [example-ah-xml-path example-ah-attachment-path]
+  (util/with-zip-file [example-ah-xml-path example-ah-attachment-path]
     (fact* "Can unzip passed zipfile"
            (let [tmp-dir    (fs/temp-dir "ah-unzip-test")
                  unzip-path (unzip-file zip-file tmp-dir) =not=> (throws Exception)
@@ -305,15 +276,15 @@
 
   (fact "If xml message missing from zip"
     (mongo/with-db db-name
-      (with-zip-file [example-ah-attachment-path] ; xml is missing
+      (util/with-zip-file [example-ah-attachment-path] ; xml is missing
         (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
 
   (fact "If attachment files missing from zip"
     (mongo/with-db db-name
-      (with-zip-file [example-ah-xml-path] ;attachment is missing
+      (util/with-zip-file [example-ah-xml-path] ;attachment is missing
         (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
 
   (fact "If xml message references an application that the ftp user cannot access"
     (mongo/with-db db-name
-      (with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+      (util/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
         (ah-reader/process-message zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
