@@ -20,7 +20,8 @@
 (defn- ensure-attachments-present! [unzipped-path attachments]
   (when (seq attachments)
     (let [attachment-paths (->> attachments
-                                (map :LinkkiLiitteeseen)
+                                (map xml/xml->edn)
+                                (map (comp :LinkkiLiitteeseen :Liite))
                                 (map fs/base-name))]
       (doseq [filename attachment-paths]
         (when (empty? (fs/find-files unzipped-path (ss/escaped-re-pattern filename)))
@@ -51,7 +52,7 @@
 
       (catch Throwable e
         (if-let [error-key (some-> e ex-data :text)]
-          (fail error-key)
-          (throw e)))
+          (fail error-key)                                  ; If it was 'controlled' exception, return :ok false
+          (throw e)))                                       ; else throw it forward
       (finally
         (fs/delete-dir tmp-dir)))))

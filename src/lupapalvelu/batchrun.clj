@@ -375,8 +375,11 @@
                        ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
-        (logging/log-event :info {:run-by "Asianhallinta reader"
-                                  :event (if (ok? result)  "Succesfully processed message" "Failed to process message") :zip-path zip-path})
+        (logging/log-event (if (ok? result) :info :error)
+                           (util/assoc-when {:run-by "Asianhallinta reader"
+                                             :event (if (ok? result)  "Succesfully processed message" "Failed to process message")
+                                             :zip-path zip-path}
+                                            :text (:text result)))
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
 

@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.batchrun :as batch]
             [lupapalvelu.xml.asianhallinta.verdict :as ahk]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
@@ -95,7 +96,8 @@
         verdict-id (:verdictId new-verdict-resp)]
     (local-command velho :save-verdict-draft :id application-id :verdictId verdict-id :backendId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "")))
 
-(testable-privates lupapalvelu.xml.asianhallinta.verdict unzip-file build-verdict)
+(testable-privates lupapalvelu.xml.asianhallinta.verdict build-verdict)
+(testable-privates lupapalvelu.xml.asianhallinta.reader unzip-file)
 
 
 (def local-target-folder (str (env/value :outgoing-directory) "/dev_ah_kuopio/asianhallinta/to_lupapiste"))
@@ -112,8 +114,6 @@
 (def test-file (.replace "/dev/null" "/" env/file-separator))
 
 (facts "Batchrun"
-  (mongo/with-db db-name
-    (fixture/apply-fixture "minimal"))
   (setup-target-folder!)
 
   (against-background
@@ -167,15 +167,18 @@
       (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
       (provided
         (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
-        (ahk/process-ah-verdict anything anything anything) => (sade.core/fail "nope")
-        (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Failed to process ah-verdict", :zip-path test-file} ) => "bonk")))
+        (ah-reader/process-message anything anything anything) => (sade.core/fail "nope")
+        (lupapalvelu.logging/log-event :error {:run-by "Asianhallinta reader",
+                                               :event "Failed to process message",
+                                               :zip-path test-file
+                                               :text "nope"}) => "bonk")))
   (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict ok result"
     (mongo/with-db db-name
       (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
       (provided
         (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
-        (ahk/process-ah-verdict anything anything anything) => (sade.core/ok)
-        (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Succesfully processed ah-verdict", :zip-path test-file} ) => "bonk"))))
+        (ah-reader/process-message anything anything anything) => (sade.core/ok)
+        (lupapalvelu.logging/log-event :info {:run-by "Asianhallinta reader", :event "Succesfully processed message", :zip-path test-file}) => "bonk"))))
 
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
@@ -185,7 +188,7 @@
             AsianPaatos (:AsianPaatos parsed-example-ah-xml)]
 
         (fact "If application in wrong state, return error"
-          (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta.wrong-state"))
+          (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta.wrong-state"))
 
         ; generate docs, set application to 'sent' state by moving it to asianhallinta
         (generate-documents application pena true)
@@ -197,7 +200,7 @@
 
           (fact* "Creates verdict based on xml"
             (:verdicts application) => empty?
-            (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => ok?
+            (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => ok?
             (let [application (query-application local-query pena (:id application))
                   verdicts (:verdicts application) =not=> empty?
                   new-verdict (last verdicts)
@@ -236,7 +239,7 @@
                 (generate-documents application pena true)
                 (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
 
-                (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user)
+                (ah-reader/process-message zip-file "dev_ah_kuopio" system-user)
 
                 (let [application (query-application local-query velho app-id)
                       new-verdict (last (:verdicts application))]
@@ -298,19 +301,19 @@
 (facts "Errorenous, return error"
   (fact "If passed zip file is missing"
     (mongo/with-db db-name
-      (ahk/process-ah-verdict "/foo/bar" "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-file-not-found")))
+      (ah-reader/process-message "/foo/bar" "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-file-not-found")))
 
   (fact "If xml message missing from zip"
     (mongo/with-db db-name
       (with-zip-file [example-ah-attachment-path] ; xml is missing
-        (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
+        (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
 
   (fact "If attachment files missing from zip"
     (mongo/with-db db-name
       (with-zip-file [example-ah-xml-path] ;attachment is missing
-        (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
+        (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
 
   (fact "If xml message references an application that the ftp user cannot access"
     (mongo/with-db db-name
       (with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
-        (ahk/process-ah-verdict zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
+        (ah-reader/process-message zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
