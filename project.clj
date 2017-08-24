@@ -155,7 +155,8 @@
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.7"]
                                   [pdfboxing "0.1.13"]
-                                  [com.cemerick/piggieback "0.2.1"]]
+                                  [com.cemerick/piggieback "0.2.1"]
+                                  [binaryage/devtools "0.9.4"]]
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
@@ -180,7 +181,8 @@
                                                          :asset-path "/lp-static/js/out"
                                                          :parallel-build true
                                                          :pretty-print true
-                                                         :optimizations :none}}}}}
+                                                         :optimizations :none
+                                                         :preloads  [devtools.preload]}}}}}
              :uberjar  {:main lupapalvelu.main
                         :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
                                                                         :output-to "resources/public/lp-static/js/rum-app.js"
