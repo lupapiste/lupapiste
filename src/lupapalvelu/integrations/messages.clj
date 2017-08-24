@@ -34,6 +34,6 @@
   [message :- IntegrationMessage]
   (mongo/insert :integration-messages message WriteConcern/UNACKNOWLEDGED))
 
-(sc/defn ^:always-validate mark-acknowledged-and-return :- IntegrationMessage
+(sc/defn ^:always-validate mark-acknowledged-and-return :- (sc/maybe IntegrationMessage)
   [message-id timestamp]
   (mongo/with-id (mongo/update-one-and-return :integration-messages {:_id message-id} {$set {:acknowledged timestamp}})))
