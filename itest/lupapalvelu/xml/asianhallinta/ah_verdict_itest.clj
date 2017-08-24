@@ -10,13 +10,13 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations-api]
             [lupapalvelu.verdict-api] ; for notification definition
             [me.raynes.fs :as fs]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now] :as core]
             [sade.common-reader :as cr]
+            [sade.files :as files]
             [sade.env :as env]
             [sade.util :as util]
             [sade.email]
@@ -93,7 +93,7 @@
     [(app/make-application-id anything) => "LP-297-2015-00001"]
     (fact "Successful batchrun"
       (mongo/with-db db-name
-        (util/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+        (files/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
           (let [_ (fs/copy (io/file zip-file) (fs/file (str local-target-folder "/verdict1.zip")))
                 app (create-local-ah-app)
                 app-id (:id app)]
@@ -115,7 +115,7 @@
     [(app/make-application-id anything) => "LP-297-2015-00002"]
     (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
       (mongo/with-db db-name
-        (util/with-zip-file [example-ah-attachment-path example-ah-attachment2-path]
+        (files/with-zip-file [example-ah-attachment-path example-ah-attachment2-path]
           (let [_ (fs/copy (io/file zip-file) (fs/file (str local-target-folder "/verdict2.zip")))
                 app (create-local-ah-app)
                 app-id (:id app)]
@@ -154,7 +154,7 @@
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
     (fixture/apply-fixture "minimal")
-    (util/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+    (files/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
       (let [application (create-local-ah-app)
             AsianPaatos (:AsianPaatos parsed-example-ah-xml)]
 
@@ -227,7 +227,7 @@
     (app/make-application-id anything) => "LP-297-2015-00001"))
 
 (facts "unit tests"
-  (util/with-zip-file [example-ah-xml-path example-ah-attachment-path]
+  (files/with-zip-file [example-ah-xml-path example-ah-attachment-path]
     (fact* "Can unzip passed zipfile"
            (let [tmp-dir    (fs/temp-dir "ah-unzip-test")
                  unzip-path (unzip-file zip-file tmp-dir) =not=> (throws Exception)
@@ -276,15 +276,15 @@
 
   (fact "If xml message missing from zip"
     (mongo/with-db db-name
-      (util/with-zip-file [example-ah-attachment-path] ; xml is missing
+      (files/with-zip-file [example-ah-attachment-path] ; xml is missing
         (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
 
   (fact "If attachment files missing from zip"
     (mongo/with-db db-name
-      (util/with-zip-file [example-ah-xml-path] ;attachment is missing
+      (files/with-zip-file [example-ah-xml-path] ;attachment is missing
         (ah-reader/process-message zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
 
   (fact "If xml message references an application that the ftp user cannot access"
     (mongo/with-db db-name
-      (util/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+      (files/with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
         (ah-reader/process-message zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
