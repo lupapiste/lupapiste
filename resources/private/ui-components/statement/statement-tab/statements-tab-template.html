@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="statements-tab-template">
+<script class="ko-template" type="text/x-jquery-tmpl" id="statements-tab-template">
 
       <div class="application-statements">
 
@@ -19,98 +15,30 @@
                                                localisationKeys: {missing: 'application.statement.missing'}}}"></div>
         </div>
         <button data-bind="click: toggleInviteSection,
-                           visible: authorization.ok('request-for-statement') && !showInviteSection()"
+                           visible: authorization.ok('request-for-statement') && !someDialogOpen()"
                 class="positive modal"
                 data-test-id="add-statement">
           <i class="lupicon-circle-plus"></i>
           <span data-bind="ltext: 'application.statement.add'"></span>
         </button>
+        <button data-bind="feature: 'ely-uspa',
+                           toggleClick: showElyStatementSection,
+                           visible: authorization.ok('ely-statement-request') && !someDialogOpen()"
+                class="positive modal"
+                data-test-id="add-ely-statement">
+          <i class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'application.ely-statement.add'"></span>
+        </button>
 
 
         <!-- ko if: showInviteSection -->
-        <div id="invite-statement-givers-section">
-
-            <p id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></p>
-
-            <table class="table table-striped" data-test-id="table-application-statements-givers">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th data-bind="ltext: 'application.statement.desc'"></th>
-                        <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
-                        <th data-bind="ltext: 'userinfo.email'"></th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: combinedData">
-                    <tr class="statement-giver-row" data-bind="{attr: {'data-test-email': email()}}">
-                        <td>
-                          <input class="form-input full-width" type="checkbox"
-                                 data-bind="checkedValue: $data,
-                                            checked: $component.selectedPersons,
-                                            attr: {'id': 'statement-giver-checkbox-' + $index(),
-                                                   'data-test-id': 'statement-giver-checkbox-' + $index(),
-                                                   'name': 'statementGiverSelectedPerson-' + $index(),
-                                                   'disabled': errors().length != 0}" />
-                        </td>
-                        <!-- ko if: readonly -->
-                        <td>
-                          <span data-bind="text: text, attr: {'data-test-id': 'statement-giver-role-text-' + $index()}"></span>
-                        </td>
-                        <td>
-                          <span data-bind="text: name, attr: {'data-test-id': 'statement-giver-name-' + $index()}"></span>
-                        </td>
-                        <td>
-                          <span data-bind="text: email, attr: {'data-test-id': 'statement-giver-email-' + $index()}"></span>
-                        </td>
-                        <!-- /ko -->
-                        <!-- ko ifnot: readonly -->
-                        <td>
-                          <input class="form-input full-width" type="text" data-bind="textInput: text,
-                                                                           attr: {'data-test-id': 'statement-giver-role-text-' + $index(),
-                                                                                  'readonly': readonly}"></input>
-                        </td>
-                        <td>
-                          <input class="form-input full-width" type="text" data-bind="textInput: name,
-                                                                           attr: {'data-test-id': 'statement-giver-name-' + $index(),
-                                                                                  'readonly': readonly}"></input>
-                        </td>
-                        <td>
-                          <input class="form-input full-width" type="text" data-bind="textInput: email,
-                                                                           attr: {'data-test-id': 'statement-giver-email-' + $index(),
-                                                                                  'readonly': readonly}"></input>
-                        </td>
-                        <!-- /ko -->
-                    </tr>
-                </tbody>
-            </table>
-
-            <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="invite-statement-giver-saateText" class="form-label form-label-text"></label>
-            <textarea id="invite-statement-giver-saateText" rows=10 class="form-input textarea really-long high"
-                      data-bind="textInput: saateText, attr: {placeholder: loc('application.invite-statement-giver-saateText-placeholder')}"></textarea>
-
-
-            <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="add-statement-giver-maaraaika"></label>
-            <input type="text" class="form-input" data-bind="datepicker: maaraaika" id="add-statement-giver-maaraaika"></input>
-
-            <button data-bind="click: send, disable: disabled"
-                    class="positive modal"
-                    data-test-id="add-statement-giver">
-              <i class="lupicon-circle-check"></i>
-              <span data-bind="ltext: 'application.statement.add'"></span>
-            </button>
-
-            <button data-bind="click: toggleInviteSection"
-                    class="neutral modal"
-                    data-test-id="cancel-add-statement-giver">
-                <i class="lupicon-remove"></i>
-                <span data-bind="ltext: 'cancel'"></span>
-            </button>
-
-          <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
-
-        </div>
+        <div data-bind="template: 'statement-invite-section'"></div>
         <!-- /ko -->
-
+        <!-- ko if: showElyStatementSection() && elySubtypes().length > 0 -->
+        <bubble-dialog params="visible: showElyStatementSection, okFun: requestElyStatement, okEnabled: elyDataOk, buttonText: 'application.statement.add', buttonIcon: 'lupicon-circle-check', waiting: submitting">
+          <div data-bind="template: {name:'ely-statement-request-bubble', data: $parent}, feature: 'ely-uspa'" data-test-id="ely-statement-bubble"></div>
+        </bubble-dialog>
+        <!-- /ko -->
       </div>
 
       <!-- ko if: $root.authorization.ok('neighbors-statement-enabled') -->
@@ -137,9 +65,114 @@
         </div>
       <!-- /ko -->
 
-    </script>
+</script>
 
-    <script type="text/x-jquery-tmpl" id="neighbors-table-template">
+<script class="ko-template" type="text/x-jquery-tmpl" id="statement-invite-section">
+  <div id="invite-statement-givers-section">
+      <h3 id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></h3>
+      <table class="table table-striped" data-test-id="table-application-statements-givers">
+          <thead>
+              <tr>
+                  <th></th>
+                  <th data-bind="ltext: 'application.statement.desc'"></th>
+                  <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                  <th data-bind="ltext: 'userinfo.email'"></th>
+              </tr>
+          </thead>
+          <tbody data-bind="foreach: combinedData">
+              <tr class="statement-giver-row" data-bind="{attr: {'data-test-email': email()}}">
+                  <td>
+                    <input class="form-input full-width" type="checkbox"
+                           data-bind="checkedValue: $data,
+                                      checked: $component.selectedPersons,
+                                      attr: {'id': 'statement-giver-checkbox-' + $index(),
+                                             'data-test-id': 'statement-giver-checkbox-' + $index(),
+                                             'name': 'statementGiverSelectedPerson-' + $index(),
+                                             'disabled': errors().length != 0}" />
+                  </td>
+                  <!-- ko if: readonly -->
+                  <td>
+                    <span data-bind="text: text, attr: {'data-test-id': 'statement-giver-role-text-' + $index()}"></span>
+                  </td>
+                  <td>
+                    <span data-bind="text: name, attr: {'data-test-id': 'statement-giver-name-' + $index()}"></span>
+                  </td>
+                  <td>
+                    <span data-bind="text: email, attr: {'data-test-id': 'statement-giver-email-' + $index()}"></span>
+                  </td>
+                  <!-- /ko -->
+                  <!-- ko ifnot: readonly -->
+                  <td>
+                    <input class="form-input full-width" type="text" data-bind="textInput: text,
+                                                                     attr: {'data-test-id': 'statement-giver-role-text-' + $index(),
+                                                                            'readonly': readonly}"></input>
+                  </td>
+                  <td>
+                    <input class="form-input full-width" type="text" data-bind="textInput: name,
+                                                                     attr: {'data-test-id': 'statement-giver-name-' + $index(),
+                                                                            'readonly': readonly}"></input>
+                  </td>
+                  <td>
+                    <input class="form-input full-width" type="text" data-bind="textInput: email,
+                                                                     attr: {'data-test-id': 'statement-giver-email-' + $index(),
+                                                                            'readonly': readonly}"></input>
+                  </td>
+                  <!-- /ko -->
+              </tr>
+          </tbody>
+      </table>
+
+      <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="invite-statement-giver-saateText" class="form-label form-label-text"></label>
+      <textarea id="invite-statement-giver-saateText" rows=10 class="form-input textarea really-long high"
+                data-bind="textInput: saateText, attr: {placeholder: loc('application.invite-statement-giver-saateText-placeholder')}"></textarea>
+
+
+      <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="add-statement-giver-maaraaika"></label>
+      <input type="text" class="form-input" data-bind="datepicker: maaraaika" id="add-statement-giver-maaraaika"></input>
+
+      <button data-bind="click: send, disable: disabled"
+              class="positive modal"
+              data-test-id="add-statement-giver">
+        <i class="lupicon-circle-check"></i>
+        <span data-bind="ltext: 'application.statement.add'"></span>
+      </button>
+
+      <button data-bind="click: toggleInviteSection"
+              class="neutral modal"
+              data-test-id="cancel-add-statement-giver">
+          <i class="lupicon-remove"></i>
+          <span data-bind="ltext: 'cancel'"></span>
+      </button>
+
+    <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
+  </div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="ely-statement-request-bubble">
+  <h3 data-bind="ltext: 'application.ely-statement.request'"></h3>
+  <div class="form-grid form-grid--no-border">
+    <div class="row">
+      <label data-bind="ltext: 'application.ely-statement.subtype.select'" for="ely-subtypes" class="form-label form-label-text"></label>
+      <select class="dropdown" id="ely-subtypes" data-bind="value: elyData.subtype, options: elySubtypes, valueAllowUnset: true, optionsCaption: loc('choose'), optionsText: loc"></select>
+    </div>
+    <div class="row">
+      <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="ely-statement-saateText" class="form-label form-label-text"></label>
+      <textarea id="ely-statement-saateText" rows=10 class="really-long high"
+                data-bind="textInput: elyData.saateText, attr: {placeholder: loc('application.ely-statement.saateText-placeholder')}"></textarea>
+    </div>
+    <div class="row">
+      <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="ely-maaraaika"></label>
+      <input type="text" class="form-input" data-bind="datepicker: elyData.dueDate" id="ely-maaraaika"></input>
+    </div>
+    <div class="row">
+      <label class="form-label" data-bind="ltext: 'kieli'" for="ely-lang"></label>
+      <select class="dropdown" data-bind="value: elyData.lang, options: loc.supported, optionsText: loc" id="ely-lang"></input>
+    </div>
+  </div>
+
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="neighbors-table-template">
       <div data-bind="ifnot: neighbors() && neighbors().length > 0">
         <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
       </div>
@@ -213,7 +246,4 @@
           </tbody>
         </table>
       </div>
-    </script>
-  </section>
-</body>
-</html>
+</script>

@@ -7,6 +7,7 @@
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
             [clojure.string :as s]
+            [lupapalvelu.ui.components :as components]
             [rum.core :as rum]))
 
 (defn settings-updater [{:keys [path state]}]
@@ -51,37 +52,11 @@
            (swap! state* #(assoc % index generic))
            (swap! state* #(conj % generic))))))))
 
-(defn css-flags
-  "List of keys with truthy values.
-  (css-flags :foo true :bar false) => '(\"foo\")"
-  [& flags]
-  (->> (apply hash-map flags)
-       (filter (fn [[k v]] v))
-       keys
-       (map name)))
+(defn name-edit [initial callback]
+  (components/text-edit initial {:callback  callback
+                                 :required? true}))
 
-(defn initial-value-mixin
-  "Assocs to component's local state local-key with atom that is
-  initialized to the first component argument."
-  [local-key]
-  {:will-mount (fn [state]
-                 (assoc state local-key (-> state
-                                            :rum/args
-                                            first
-                                            atom)))})
-
-(rum/defcs name-edit < (initial-value-mixin ::text)
-  rum/reactive
-  [local-state _ callback]
-  (let [text* (::text local-state)]
-    [:input.grid-style-input
-     {:value     @text*
-      :type      "text"
-      :class     (css-flags :required (-> text* rum/react s/trim s/blank?))
-      :on-change (common/event->state text*)
-      :on-blur   #(callback (.. % -target -value))}]))
-
-(rum/defcs type-edit < (initial-value-mixin ::selection)
+(rum/defcs type-edit < (components/initial-value-mixin ::selection)
   rum/reactive
   [local-state _ callback]
   (let [selection* (::selection local-state)]

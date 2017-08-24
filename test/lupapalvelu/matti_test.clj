@@ -67,7 +67,9 @@
                              {:id "row"
                               :row [{:col 2
                                      :id "b"
-                                     :schema {:date-delta {:unit :years}}}]}]}}
+                                     :schema {:date-delta {:unit :years}}}
+                                    {:id "c"
+                                     :schema {:phrase-text {:category :paatosteksti}}}]}]}}
               {:id "two"
                :grid {:columns 2
                       :rows [[{}
@@ -81,7 +83,8 @@
                                                         :schema {:date-delta {:unit :days}}}
                                                        {:id "ref"
                                                         :schema {:reference-list {:type :select
-                                                                                  :path [:path :to :somewhere]}}}]}}}]}]}}
+                                                                                  :path [:path :to :somewhere]}}}
+                                                       ]}}}]}]}}
               {:id "three"
                :grid {:columns 4
                       :rows [{:id "docgen"
@@ -282,6 +285,11 @@
           (schemas/validate-path-value test-template path
                                        ["ref2" :ref3 "ref2"] opts)
           => :error.duplicate-items))))
+  (facts "Phrase text"
+    (schemas/validate-path-value test-template [:one :row :c] "Hello")
+    => nil
+    (schemas/validate-path-value test-template [:one :row :c] {})
+    => :error.invalid-value)
   (facts "Docgen"
     (facts "checkbox"
       (schemas/validate-path-value test-template ["one" "0" "0"] true)

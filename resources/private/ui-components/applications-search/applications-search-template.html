@@ -6,10 +6,21 @@
       <!-- ko ifnot: noApplications() -->
       <div class="applications-search-top">
         <div class="container">
-
           <div class="applications-search-control">
             <h1 data-bind="ltext: 'navigation'"></h1>
             <div class="button-group">
+              <!-- ko if: authorizationModel.ok('create-archiving-project') -->
+              <div data-bind="feature: 'digitizer'" style="display:inline-block">
+              <button data-bind="click: createArchivingProject"
+                      data-test-id="applications-create-archiving project"
+                      class="positive application-create">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'newRequest.createArchivingProject'"></span>
+              </button>
+              </div>
+              <!-- /ko -->
+
+              <!-- ko ifnot: authorizationModel.ok('user-is-pure-digitizer') -->
               <button data-bind="click: create"
                       data-test-id="applications-create-new-inforequest"
                       class="positive application-create">
@@ -41,6 +52,7 @@
                 <i class="lupicon-circle-plus"></i>
                 <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
               </button>
+              <!-- /ko -->
               <!-- /ko -->
             </div>
 
@@ -93,60 +105,80 @@
           <h1 class="bottom-marginL" data-bind="ltext: missingTitle"></h1>
 
           <div class="missing-wrapper">
-            <div class="first-box app-type-box">
-              <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.inforequest.title'"></h2>
-              <p data-bind="lhtml: 'applications.missing.inforequest.desc'"></p>
-            </div>
-
-            <div class="middle-box app-type-box">
-              <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.application.title'"></h2>
-              <p data-bind="lhtml: 'applications.missing.application.desc'"></p>
-            </div>
-
-            <div class="last-box missing-prev-permit-box app-type-box">
-              <h2 class="bottom-marginM" data-bind="ltext: 'applications.createWithPrevPermit.title'"></h2>
-              <p data-bind="ltext: 'applications.createWithPrevPermit.desc'"></p>
-            </div>
-
-            <!-- ko if: lupapisteApp.models.currentUser.isApplicant() || lupapisteApp.models.currentUser.isCompanyUser() -->
-            <div class="last-box app-type-box" data-test-id="applications-no-application">
-              <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.no-application.title'"></h2>
-              <p data-bind="lhtml: 'applications.missing.no-application.desc'"></p>
-            </div>
+            <!-- ko if: authorizationModel.ok('user-is-pure-digitizer') && authorizationModel.ok('create-archiving-project') -->
+              <div class="first-box app-type-box">
+                <h2 class="bottom-marginM" data-bind="ltext: 'newRequest.createArchivingProject'"></h2>
+                <p data-bind="ltext: 'applications.missing.archiving-project.desc'"></p>
+              </div>
             <!-- /ko -->
+            <!-- ko ifnot: authorizationModel.ok('user-is-pure-digitizer') && authorizationModel.ok('create-archiving-project') -->
+              <div class="first-box app-type-box">
+                <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.inforequest.title'"></h2>
+                <p data-bind="lhtml: 'applications.missing.inforequest.desc'"></p>
+              </div>
 
+              <div class="middle-box app-type-box">
+                <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.application.title'"></h2>
+                <p data-bind="lhtml: 'applications.missing.application.desc'"></p>
+              </div>
+
+              <div class="last-box missing-prev-permit-box app-type-box">
+                <h2 class="bottom-marginM" data-bind="ltext: 'applications.createWithPrevPermit.title'"></h2>
+                <p data-bind="ltext: 'applications.createWithPrevPermit.desc'"></p>
+              </div>
+
+              <!-- ko if: lupapisteApp.models.currentUser.isApplicant() || lupapisteApp.models.currentUser.isCompanyUser() -->
+              <div class="last-box app-type-box" data-test-id="applications-no-application">
+                <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.no-application.title'"></h2>
+                <p data-bind="lhtml: 'applications.missing.no-application.desc'"></p>
+              </div>
+              <!-- /ko -->
+            <!-- /ko -->
           </div>
 
           <div class="missing-wrapper">
-            <div class="first-box app-type-button">
-              <p><button
-                data-bind="click: create"
-                data-test-id="applications-create-new-inforequest"
-                class="positive application-create">
-                <i class="lupicon-circle-plus"></i>
-                <span data-bind="ltext: 'newRequest.newInforequest'"></span>
-              </button></p>
-            </div>
+            <!-- ko if: authorizationModel.ok('user-is-pure-digitizer') && authorizationModel.ok('create-archiving-project') -->
+              <div class="first-box app-type-button">
+                <p><button
+                  data-bind="click: createArchivingProject"
+                  data-test-id="applications-create-archiving project"
+                  class="positive application-create">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'newRequest.createArchivingProject'"></span>
+                </button></p>
+              </div>
+            <!-- /ko -->
+            <!-- ko ifnot: authorizationModel.ok('user-is-pure-digitizer') && authorizationModel.ok('create-archiving-project') -->
+              <div class="first-box app-type-button">
+                <p><button
+                  data-bind="click: create"
+                  data-test-id="applications-create-new-inforequest"
+                  class="positive application-create">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'newRequest.newInforequest'"></span>
+                </button></p>
+              </div>
 
-            <div class="middle-box app-type-button">
-              <p><button
-                data-bind="click: create"
-                data-test-id="applications-create-new-application"
-                class="positive application-create">
-                <i class="lupicon-circle-plus"></i>
-                <span data-bind="ltext: 'newRequest.newApplication'"></span>
-              </button></p>
-            </div>
+              <div class="middle-box app-type-button">
+                <p><button
+                  data-bind="click: create"
+                  data-test-id="applications-create-new-application"
+                  class="positive application-create">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'newRequest.newApplication'"></span>
+                </button></p>
+              </div>
 
-            <div class="last-box missing-prev-permit-box app-type-button">
-              <p><button
-                data-bind="click: createWithPrevPermit"
-                data-test-id="applications-create-with-prev-permit"
-                class="positive application-create">
-                <i class="lupicon-circle-plus"></i>
-                <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
-              </button></p>
-            </div>
+              <div class="last-box missing-prev-permit-box app-type-button">
+                <p><button
+                  data-bind="click: createWithPrevPermit"
+                  data-test-id="applications-create-with-prev-permit"
+                  class="positive application-create">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span>
+                </button></p>
+              </div>
+            <!-- /ko -->
 
           </div>
         </div>

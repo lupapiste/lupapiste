@@ -10,7 +10,7 @@ Open statement
   Wait Until  Positive indicator should not be visible
   Scroll to top
   Wait and click  xpath=(//div[@id='application-statement-tab']//a[@data-test-email="open-statement-${email}"])[${index}]
-  Wait until  element should be visible  xpath=//div[@class='statement-top']//div[@class='tabs-container']
+  Wait until  element should be visible  xpath=//div[contains(@class, 'statement-top')]//div[contains(@class, 'tabs-container')]
 
 Invite read-only statement giver
   [Arguments]  ${email}  ${date}
@@ -61,7 +61,7 @@ Invite 'manual' statement giver
 
 Statement count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[@class="statement-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[contains(@class, 'statement-row')]  ${amount}
 
 Statement is disabled
   Wait until  Element should be disabled  statement-type-select

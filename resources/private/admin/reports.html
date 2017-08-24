@@ -8,7 +8,7 @@
         <h2>Raportit</h2>
         <p><b>Huom:</b> Raporttien generointi voi kest&auml;&auml; jokusen tovin.</p>
         <h3>K&auml;ytt&auml;j&auml;t</h3>
-        <div class="form-grid" id="admin-user-report">
+        <div class="form-grid" id="admin-user-report" data-bind="with: $data.users">
           <div class="row">
             <!-- ko foreach: values -->
             <div class="col-1">
@@ -30,6 +30,78 @@
             </div>
           </div>
         </div>
+        <!-- ko with: $data.applications -->
+        <h3>J&auml;tetyt hakemukset</h3>
+        <div class="form-grid">
+          <div class="row">
+            <div class="col-1">
+              <label>Kuukausi</label>
+              <input type="text" data-bind="value: $data.monthInput" />
+            </div>
+            <div class="col-1">
+              <label>Vuosi</label>
+              <input type="text" data-bind="value: $data.yearInput" />
+            </div>
+            <div class="col-1">&nbsp;</div>
+            <div class="col-1">
+              <a class="btn primary"
+                 data-bind="click: fetch">
+                <i class="lupicon-download"></i>
+                <span>Lataa raportti</span>
+              </a>
+            </div>
+          </div>
+          <!-- ko ifnot: _.isEmpty(results()) -->
+          <div class="row">
+            <div class="col-4">
+              <span class="h3">J&auml;tetyt hakemukset
+                 <span data-bind="text: monthValue"></span> / <span data-bind="text: yearValue"></span></span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-2">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Lupatyyppi</th>
+                    <th>Lukum&auml;&auml;r&auml;</th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: results">
+                  <tr>
+                    <td>
+                      <span data-bind="ltext: $data.permitType"></span>
+                      <!-- ko foreach: $data.operations -->
+                      <p>
+                        <i>
+                          sis&auml;lt&auml;&auml:<br />
+                          - <span data-bind="ltext: 'operations.' + $data._id"></span>: <span data-bind="text: $data.count"></span> kpl
+                        </i>
+                      </p>
+                      <!-- /ko -->
+                    </td>
+                    <td style="vertical-align: top"><span data-bind="text: $data.count"></span></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th>Yhteens&auml;</th>
+                    <th><span data-bind="text: totalCount"></span></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="col-2">
+              <a class="btn negative"
+                 data-bind="click: reset">
+                <i class="lupicon-remove"></i>
+                <span>Sulje</span>
+              </a>
+            </div>
+          </div>
+          <!-- /ko -->
+        </div>
+        <!-- /ko -->
         <h3>Rakennusj&auml;tteet</h3>
         <div class="form-grid">
           <div class="row">

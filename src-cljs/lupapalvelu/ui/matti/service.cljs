@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.matti.service
   (:require [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.matti.state :as state]))
 
 (defn fetch-schemas []
@@ -18,7 +19,8 @@
 (defn- list-update-response [callback]
   (fn [response]
     (fetch-template-list)
-    (callback response)))
+    (callback response)
+    (hub/send "matti::verdict-templates-changed")))
 
 (defn fetch-categories [callback]
   (common/query "verdict-template-categories"
@@ -101,3 +103,24 @@
                                              (callback response))}
                   (keyword (str (name generic-type) "-id")) gen-id)
          updates))
+
+;; Phrases
+
+(defn fetch-organization-phrases []
+  (common/query "organization-phrases"
+                #(reset! state/phrases (get % :phrases []))))
+
+(defn upsert-phrase [phrase-map callback]
+  (apply common/command
+         "upsert-phrase"
+         (fn []
+           (fetch-organization-phrases)
+           (callback))
+         (flatten (into [] phrase-map))))
+
+(defn delete-phrase [phrase-id callback]
+  (common/command {:command "delete-phrase"
+                   :success (fn []
+                              (fetch-organization-phrases)
+                              (callback))}
+                  :phrase-id phrase-id))

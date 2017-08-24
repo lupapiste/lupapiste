@@ -48,7 +48,7 @@
   (pdf2pdf-command input-file output-file "-ad" "-au" "-rd" "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore"))
 
 (defn- pdftools-analyze-command [input-file output-file]
-  (pdf2pdf-command input-file output-file "-ma" "-rd" "-cl" "pdfa-2u"))
+  (pdf2pdf-command input-file output-file "-ma" "-rd" "-cl" "pdfa-2b"))
 
 (defn- parse-log-file [output-file]
   (try
@@ -92,7 +92,7 @@
                           (when (re-find #"Processing embedded file" log) "3")
                           "2")
         required-conformance (last (re-find #"The XMP property 'pdfaid:conformance' has the invalid value '(\w)'. Required is '\w" log))
-        level (ss/lower-case (or required-conformance (if (= required-part "1") "b" "u")))
+        level (ss/lower-case (or required-conformance "b"))
         cl (str "pdfa-" required-part level)
         not-prints (re-find #"The value of the key . is 'Not Print' but must be 'Print'" log)
         missing-appearances (re-find #"The appearance dictionary doesn't contain an entry" log)]
@@ -101,9 +101,9 @@
     (debug "Determined required compliance to be:" cl)
      cl))
 
-(defn- run-pdf-to-pdf-a-conversion [input-file output-file opts]
+(defn- run-pdf-to-pdf-a-conversion [input-file output-file opts & [forced-cl]]
   {:pre [(instance? File input-file) (instance? File output-file)]}
-  (let [cl (compliance-level input-file output-file opts)
+  (let [cl (or forced-cl (compliance-level input-file output-file opts))
         {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
     (cond
@@ -116,11 +116,19 @@
                                            parse-missing-fonts-from-log-lines)]
                           {:pdfa? false
                            :missing-fonts fonts}
-                          {:pdfa? false
-                           :conversionLog (cons (if (= exit 5)
-                                                  "PDF/A conversion failed because it can't be done losslessly"
-                                                  "PDF/A conversion failed probably because of a typography / font related error")
-                                                (replace-file-names-in-log  log-lines input-file output-file))})
+                          (if-not forced-cl
+                            ; Retry with another compliance level
+                            (run-pdf-to-pdf-a-conversion input-file
+                                                         output-file
+                                                         opts
+                                                         (if (= "pdfa-1b" cl)
+                                                           "pdfa-2b"
+                                                           "pdfa-1b"))
+                            {:pdfa? false
+                             :conversionLog (cons (if (= exit 5)
+                                                    "PDF/A conversion failed because it can't be done losslessly"
+                                                    "PDF/A conversion failed because of an error in the PDF structure")
+                                                  (replace-file-names-in-log  log-lines input-file output-file))}))
       (= exit 10) (do
                     (error "pdf2pdf - not a valid license")
                     {:pdfa? false

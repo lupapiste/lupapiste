@@ -137,6 +137,17 @@
     (notifications/notify! :request-statement-new-user (assoc command :recipients (filter (comp new-emails :email) users)))
     (notifications/notify! :request-statement (assoc command :recipients (remove (comp new-emails :email) users)))))
 
+
+(defquery ely-statement-types
+  {:parameters [id]
+   :description "Returns possible ELY statement types for application"
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:authority}                                ; default-org-authz-roles
+   :states     (states/all-application-states-but :draft :canceled)}
+  [{{:keys [permitType]} :application}]
+  (ok :statementTypes (permit/get-metadata permitType :ely-statement-types)))
+
+
 (defcommand ely-statement-request
   {:parameters       [id subtype]
    :optional-parameters [functionCode lang dueDate saateText]
@@ -156,15 +167,17 @@
                    :subtype subtype
                    :messageId message-id}
         statement (statement/create-statement created saateText dueDate ely-statement-giver metadata ely-data)]
-    (ah/save-statement-request user application submitted-application org statement (or lang (:language user)))
-    (update-application command {$push {:statements statement}})))
+    (ah/save-statement-request command submitted-application org statement (or lang (:language user)))
+    (update-application command {$push {:statements statement}})
+    (ok :text :ely.statement.sent)))
 
 (defcommand delete-statement
   {:parameters [id statementId]
    :input-validators [(partial action/non-blank-parameters [:id :statementId])]
    :states     #{:open :submitted :complementNeeded :sent}
    :user-roles #{:authority}
-   :pre-checks [statement/statement-not-given]}
+   :pre-checks [statement/statement-not-given
+                statement/not-ely-statement]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 

@@ -1,0 +1,20 @@
+<section class="page" id="archiving">
+  <navi-sidebar></navi-sidebar>
+  <div class="container container--authority-admin"
+       data-bind="css: lupapisteApp.services.naviSidebarService.containerCss,
+                      if: organization.organizationId">
+    <h1 data-bind="ltext: 'arkistointi'"></h1>
+    <section data-bind="if: lupapisteApp.models.globalAuthModel.ok('digitizing-enabled')">
+      <h2 data-bind="ltext: 'auth-admin.archiving.digitizing'"></h2>
+      <label for="digitizingTosFunction">
+        <span data-bind="ltext: 'auth-admin.archiving.digitizing.tosFunction'"></span>
+      </label><br>
+      <select class="dropdown" id="digitizingTosFunction"
+              data-bind="options: $root.organization.tosFunctions,
+                         optionsText: 'name',
+                         optionsValue: 'code',
+                         value: $root.organization.archivingProjectTosFunction,
+                         valueAllowUnset: true"></select>
+    </section>
+  </div>
+</section>

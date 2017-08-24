@@ -28,10 +28,10 @@ Sonja sees all her operations in the dropdown of the operations filter autocompl
   Wait until  Element should be visible  xpath=//div[@data-test-id="operation-filter-item"]
   Wait until  Element should be visible  xpath=//div[@data-test-id="operations-filter-component"]
   Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
-  Wait until  Element should be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
   Autocomplete option list should contain  operations-filter-component  Kiinteistötoimitukset  Kaavat ja kaavamuutokset  Ympäristölupa  Vapautushakemus vesijohtoon ja viemäriverkostoon liittämisvelvollisuudesta  Rakentamisen lupa  Poikkeamisen hakeminen  Maa-aineksen ottolupa  Ympäristöilmoitus  Yleisten alueiden lupa
   Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
-  Wait until  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
   # BUG in closing the dropdown - sometimes does not close but flickers -> false error
 
 Sonja selects the Asuinkerrostalo operation and sees only that application

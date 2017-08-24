@@ -19,17 +19,17 @@ Authority admin goes to the application page
   Sipoo logs in
   Go to page  applications
 
-Sees assignments are enabled
-  Checkbox should not be selected  extended-construction-waste-report-enabled
+Sees waste reports are not enabled
+  Checkbox wrapper not selected by test id  extended-construction-waste-report-enabled
 
 Enable extended construction waste report for organization
-  Select checkbox  extended-construction-waste-report-enabled
+  Click label by test id  extended-construction-waste-report-enabled-label
   Wait until  Positive indicator should be visible
-  Checkbox should be selected  extended-construction-waste-report-enabled
+  Checkbox wrapper selected by test id  extended-construction-waste-report-enabled
 
 Checkbox remains checked after refresh
   Reload page and kill dev-box
-  Wait until  Checkbox should be selected  extended-construction-waste-report-enabled
+  Checkbox wrapper selected by test id  extended-construction-waste-report-enabled
 
 Authority admin logs out
   Logout

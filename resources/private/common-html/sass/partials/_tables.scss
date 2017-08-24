@@ -450,6 +450,45 @@ div.suti-admin-container .serversettings--wide {
   }
 }
 
+@mixin icon-bubble-hover($size: false, $marginleft: false) {
+  .bubble-hover {
+    position: relative;
+    @if $marginleft {margin-left: $marginleft;}
+    @if $size {font-size: $size;}
+    cursor: default;
+  }
+  .bubble-hover .bubble-hover-text {
+    visibility: hidden;
+    width: 250px;
+    background-color: white;
+    border: 2px solid $negative;
+    color: $grey-text;
+    padding: 10px;
+    border-radius: 6px;
+    z-index: 1;
+    bottom: 100%;
+    left: 100%;
+    font-size: 15px;
+    // margin-top: -50px;
+    position: absolute;
+    white-space: pre-line;
+  }
+  /* No arrow for bubble-hover */
+  /*.bubble-hover .bubble-hover-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: $negative transparent transparent transparent;
+  }*/
+  .bubble-hover:hover .bubble-hover-text {
+    visibility: visible;
+  }
+}
+
 .view-with-download {
   .download {
     white-space: nowrap;
@@ -460,41 +499,7 @@ div.suti-admin-container .serversettings--wide {
       text-decoration: underline;
     }
   }
-  .archive-problem {
-    position: relative;
-    margin-left: 5px;
-    font-size: 15px;
-    cursor: default;
-  }
-  .archive-problem .archive-problem-text {
-    visibility: hidden;
-    width: 200px;
-    background-color: white;
-    border: 2px solid $negative;
-    color: $grey-text;
-    text-align: center;
-    padding: 10px;
-    border-radius: 6px;
-    z-index: 1;
-    top: -20px;
-    left: 110%;
-    font-size: 15px;
-    margin-left: 10px;
-    position: absolute;
-  }
-  .archive-problem .archive-problem-text::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 100%;
-    margin-top: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: transparent $negative transparent transparent;
-  }
-  .archive-problem:hover .archive-problem-text {
-    visibility: visible;
-  }
+  @include icon-bubble-hover(15px, 5px);
 }
 
 th.full-width-column {

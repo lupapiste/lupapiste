@@ -483,7 +483,7 @@
 (when pdfa/pdf2pdf-enabled?
   (facts "Explictly convert to PDF/A"
     (fact "Temporarily disable permanent archive for Jarvenpaa"
-      (command admin :set-organization-permanent-archive-enabled
+      (command admin :set-organization-boolean-attribute :attribute "permanent-archive-enabled"
                :enabled false :organizationId "186-R"))
     (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
           application-id (:id application)
@@ -509,7 +509,7 @@
       (fact "version number is set" (:version v1) => {:major 1 :minor 0})
 
       (fact "Enable permanent archive for Jarvenpaa"
-        (command admin :set-organization-permanent-archive-enabled
+        (command admin :set-organization-boolean-attribute :attribute "permanent-archive-enabled"
                  :enabled true :organizationId "186-R"))
       (command raktark-jarvenpaa :convert-to-pdfa :id application-id :attachmentId attachment-id) => ok?
 

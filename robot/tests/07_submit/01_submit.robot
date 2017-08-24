@@ -45,12 +45,9 @@ Sonja can submit application
 Sipoo marks required fields obligatory
   Sipoo logs in
   Go to page  applications
-  Wait Until  Element Should Be Visible  required-fields-obligatory-enabled
-  Focus  required-fields-obligatory-enabled
-  Checkbox Should Not Be Selected  required-fields-obligatory-enabled
-  Select Checkbox  required-fields-obligatory-enabled
-  Wait for jQuery
-  Wait Until  Checkbox Should Be Selected  required-fields-obligatory-enabled
+  Checkbox wrapper not selected by test id  required-fields-obligatory-enabled
+  Click label by test id  required-fields-obligatory-enabled-label
+  Checkbox wrapper selected by test id  required-fields-obligatory-enabled
   Logout
 
 Mikko logs in
@@ -72,13 +69,10 @@ Mikko can not submit application because there are "missing required" items on t
 Sipoo marks required fields not obligatory
   Sipoo logs in
   Go to page  applications
-  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
-  Focus  xpath=//input[@id='required-fields-obligatory-enabled']
-  Checkbox Should Be Selected  id=required-fields-obligatory-enabled
-  Sleep  0.5s
-  Unselect Checkbox  id=required-fields-obligatory-enabled
-  Wait for jQuery
-  Wait Until  Checkbox Should Not Be Selected  id=required-fields-obligatory-enabled
+  Checkbox wrapper selected by test id  required-fields-obligatory-enabled
+  Click label by test id  required-fields-obligatory-enabled-label
+  Positive indicator should be visible
+  Checkbox wrapper not selected by test id  required-fields-obligatory-enabled
   Logout
 
 Sonja logs in and adds new attachment template

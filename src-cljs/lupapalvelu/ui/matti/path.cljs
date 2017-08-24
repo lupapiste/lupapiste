@@ -65,11 +65,7 @@
   path. Path is shortened until the value is found. Nil if value not
   found. Key can be also be key sequence."
   [path state* & key]
-  (latest-helper value path state* key)
-  #_(let [v (value path state* key)]
-    (if (or (some? v) (empty? path))
-      v
-      (latest (drop-last path) state* key))))
+  (latest-helper value path state* key))
 
 (defn meta?
   "Truthy if _meta value for the given key is found either within

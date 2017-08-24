@@ -45,7 +45,7 @@
   (str "assignment-" tag-id))
 
 (defn- assignment-in-user-organization-query [user]
-  {:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}})
+  {:application.organization {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}})
 
 (defn- organization-query-for-user [user query]
   (merge query (assignment-in-user-organization-query user)))
@@ -210,7 +210,7 @@
                   (basically the ones that are targeted to the :applicationDetails subdocument"
   [{:keys [searchText recipient operation area createdDate targetType]} user]
   {:pre-lookup (filter seq
-                       [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}}
+                       [{:application.organization {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}}
                         (when-not (empty? recipient)
                          {:recipient.id {$in recipient}})
                         (when-not (empty? createdDate)

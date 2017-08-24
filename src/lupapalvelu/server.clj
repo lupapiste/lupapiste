@@ -69,6 +69,7 @@
             [lupapalvelu.property-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.reports.reports-api]
+            [lupapalvelu.rest.docstore-api]
             [lupapalvelu.rest.rest-api]
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.ssokeys-api]
@@ -86,7 +87,10 @@
             [lupapalvelu.ya-extension-api]
             [lupapalvelu.admin-reports-api]
             [lupapalvelu.campaign-api]
-            [lupapalvelu.matti.matti-api])
+            [lupapalvelu.digitizer-api]
+            [lupapalvelu.matti.matti-api]
+            [lupapalvelu.matti.phrases-api])
+
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]
            [fi.lupapiste.jmx ServerFactory]))

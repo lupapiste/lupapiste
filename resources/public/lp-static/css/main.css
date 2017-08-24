@@ -801,6 +801,22 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-grip-diagonal:before {
+  content: "\e92c";
+}
+
+.lupicon-grip-horizontal:before {
+  content: "\e92d";
+}
+
+.lupicon-grip-vertical:before {
+  content: "\e92e";
+}
+
+.lupicon-minus:before {
+  content: "\e92f";
+}
+
 .lupicon-gear:before {
   content: "\e928";
 }
@@ -11724,6 +11740,20 @@ div.suti-admin-container .serversettings--wide {
   color: #df3215;
 }
 
+.view-with-download {
+  /* No arrow for bubble-hover */
+  /*.bubble-hover .bubble-hover-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: $negative transparent transparent transparent;
+  }*/
+}
+
 .view-with-download .download {
   white-space: nowrap;
 }
@@ -11736,42 +11766,30 @@ div.suti-admin-container .serversettings--wide {
   text-decoration: underline;
 }
 
-.view-with-download .archive-problem {
+.view-with-download .bubble-hover {
   position: relative;
   margin-left: 5px;
   font-size: 15px;
   cursor: default;
 }
 
-.view-with-download .archive-problem .archive-problem-text {
+.view-with-download .bubble-hover .bubble-hover-text {
   visibility: hidden;
-  width: 200px;
+  width: 250px;
   background-color: white;
   border: 2px solid #df3215;
   color: #333333;
-  text-align: center;
   padding: 10px;
   border-radius: 6px;
   z-index: 1;
-  top: -20px;
-  left: 110%;
+  bottom: 100%;
+  left: 100%;
   font-size: 15px;
-  margin-left: 10px;
   position: absolute;
+  white-space: pre-line;
 }
 
-.view-with-download .archive-problem .archive-problem-text::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 100%;
-  margin-top: -10px;
-  border-width: 10px;
-  border-style: solid;
-  border-color: transparent #df3215 transparent transparent;
-}
-
-.view-with-download .archive-problem:hover .archive-problem-text {
+.view-with-download .bubble-hover:hover .bubble-hover-text {
   visibility: visible;
 }
 
@@ -14644,13 +14662,22 @@ div.search i {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
+  /* No arrow for bubble-hover */
+  /*.bubble-hover .bubble-hover-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: $negative transparent transparent transparent;
+  }*/
 }
 
 .applications-search-results__indicator div {
-  text-align: center;
   height: auto !important;
   padding: 0 6px !important;
-  white-space: nowrap;
 }
 
 .applications-search-results__indicator div i {
@@ -14670,6 +14697,31 @@ div.search i {
 
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
+}
+
+.applications-search-results__indicator .bubble-hover {
+  position: relative;
+  cursor: default;
+}
+
+.applications-search-results__indicator .bubble-hover .bubble-hover-text {
+  visibility: hidden;
+  width: 250px;
+  background-color: white;
+  border: 2px solid #df3215;
+  color: #333333;
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 1;
+  bottom: 100%;
+  left: 100%;
+  font-size: 15px;
+  position: absolute;
+  white-space: pre-line;
+}
+
+.applications-search-results__indicator .bubble-hover:hover .bubble-hover-text {
+  visibility: visible;
 }
 
 .application-search-result__table th, .application-foreman-search-result__table th {
@@ -18100,6 +18152,141 @@ div.matti-settings-editor table.matti-editor-table tr:hover {
 
 div.matti-settings-editor table.matti-editor-table tr:hover:nth-child(even) {
   background: #f6f6f6;
+}
+
+div.matti-phrases {
+  margin-top: 24px;
+}
+
+div.matti-phrases table.matti-phrases-table {
+  margin-top: 24px;
+}
+
+div.matti-phrases table.matti-phrases-table tr:hover {
+  background-color: white;
+}
+
+div.matti-phrases table.matti-phrases-table tr:hover:nth-child(even) {
+  background: #f6f6f6;
+}
+
+div.matti-phrases table.matti-phrases-table th,
+div.matti-phrases table.matti-phrases-table th > div.like-btn {
+  cursor: pointer;
+}
+
+div.matti-phrases table.matti-phrases-table th i.icon-placeholder,
+div.matti-phrases table.matti-phrases-table th > div.like-btn i.icon-placeholder {
+  min-width: 22px;
+}
+
+div.matti-phrases table.matti-phrases-table td.phrase {
+  width: 100%;
+  max-width: 0;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+}
+
+div.matti-autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+div.matti-autocomplete .ac--selected {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+div.matti-autocomplete .ac--selected span {
+  font-size: 15px;
+  box-sizing: border-box;
+  border: 1px solid #bbbbbb;
+  border-right: none;
+  min-height: 40px;
+  max-height: 40px;
+  height: 40px;
+  line-height: 38px;
+  padding-left: 12px;
+  min-width: 10em;
+  width: 100%;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+div.matti-autocomplete .ac--selected i {
+  box-sizing: border-box;
+  min-width: 22px;
+  width: 32px;
+}
+
+div.matti-autocomplete .ac--selected i.ac--chevron {
+  font-weight: bold;
+  border: 1px solid #bbbbbb;
+  border-left: none;
+}
+
+div.matti-autocomplete .ac--selected i.ac--clear {
+  padding-left: 12px;
+}
+
+div.matti-autocomplete .ac__menu {
+  background-color: white;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 888;
+  min-width: 20em;
+  width: 100%;
+  border: 1px solid #f39129;
+}
+
+div.matti-autocomplete .ac__menu div.ac__term {
+  padding: 4px 4px 4px 4px;
+  width: 100%;
+}
+
+div.matti-autocomplete .ac__menu div.ac__term input {
+  font-size: 15px;
+  width: 100%;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items {
+  max-height: 10em;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  list-style-type: none;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 4px;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li {
+  cursor: default;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  padding-top: 2px;
+  padding-right: 2px;
+  padding-left: 4px;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--current {
+  background-color: #fbc732;
+  color: white;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--group {
+  font-weight: bold;
+}
+
+div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
+  padding-left: 10px;
 }
 
 .order-grid-1 {
@@ -22005,6 +22192,26 @@ span.icon_clear:before {
 
 .application_summary .application_summary_info .state-indication div.agreementSigned .agreementPrepared-box {
   display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.underReview .underReview-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.underReview .underReview-box:after {
+  border-left: 11px solid #2ca92c;
+}
+
+.application_summary .application_summary_info .state-indication div.archived .archived-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+
+.application_summary .application_summary_info .state-indication div.archived .archived-box:after {
+  border-left: 11px solid #2ca92c;
 }
 
 .application_summary .application_summary_info .state-indication div.final .final-box {

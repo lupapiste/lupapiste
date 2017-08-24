@@ -11,8 +11,8 @@ Suite Setup  Apply minimal fixture now
 Admin adds new tags
   Sipoo logs in
   Go to page  applications
-  Wait until  Element should be visible  xpath=//div[@class="tags-editor-component"]//li[@class='tag'][1]
-  ${tagCount} =  Get Matching Xpath Count  xpath=//div[@class="tags-editor-component"]//li[@class="tag"]
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')][1]
+  ${tagCount} =  Get Matching Xpath Count  xpath=//div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')]
   Click by test id  add-tag-button
   Input text by test id  edit-tag-input-${tagCount}  kalamaa
   Wait until  Element should contain  xpath=//span[@data-test-id="tag-label-${tagCount}"]  kalamaa
@@ -36,7 +36,7 @@ Sonja sets tags for application
   Open side panel  notice
   Select from autocomplete  div#notice-panel  ylämaa
   Select from autocomplete  div#notice-panel  kalamaa
-  Wait until  Xpath should match X times  //div[@id='notice-panel']//ul[@class="tags"]//li[@class="tag"]  2
+  Wait until  Xpath should match X times  //div[@id='notice-panel']//ul[contains(@class, 'tags')]//li[contains(@class, 'tag')]  2
 
 Sonja sees tags component where tags are grouped by organizations
   Go to page  applications
@@ -61,8 +61,8 @@ Sonja uses tags filter by selecting tag from autocomplete
 Admin removes the last tag
   Sipoo logs in
   Go to page  applications
-  Wait until  Element should be visible  xpath=//div[@class="tags-editor-component"]//li[@class='tag'][1]
-  ${tagCount} =  Get Matching Xpath Count  xpath=//div[@class="tags-editor-component"]//li[@class="tag"]
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')][1]
+  ${tagCount} =  Get Matching Xpath Count  xpath=//div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')]
   ${lastTagIndex} =  Evaluate  ${tagCount} - 1
   Wait until  Element Should Be Visible  xpath=//span[@data-test-id="tag-label-${lastTagIndex}"]
   Click by test id  remove-tag-button-${lastTagIndex}
@@ -70,17 +70,17 @@ Admin removes the last tag
   Wait until  Saved
   Wait until  Saved gone
   Wait until  Element Should Not Be Visible  xpath=//span[@data-test-id="tag-label-${lastTagIndex}"]
-  Wait until  Xpath should match x times  //div[@class="tags-editor-component"]//li[@class="tag"]  2
+  Wait until  Xpath should match x times  //div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')]  2
 
 Edit ylämaa to alamaa
-  Xpath should match x times  //div[@class="tags-editor-component"]//li[@class="tag"]  2
-  Click element  xpath=//li[@class='tag' and span[contains(., 'ylämaa')]]//span[contains(@class, 'tag-edit')]
-  Wait until  Element should be visible  xpath=//li[@class='tag' and span[contains(., 'ylämaa')]]/input
+  Xpath should match x times  //div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')]  2
+  Click element  xpath=//li[contains(@class, 'tag') and span[contains(., 'ylämaa')]]//span[contains(@class, 'tag-edit')]
+  Wait until  Element should be visible  xpath=//li[contains(@class, 'tag') and span[contains(., 'ylämaa')]]/input
   Input text by test id  edit-tag-input-0  alamaa
   Focus  xpath=//button[@data-test-id="add-tag-button"]
   Wait until  Saved
   Wait until  Saved gone
-  Wait until  Xpath should match x times  //div[@class="tags-editor-component"]//li[@class="tag"]  2
+  Wait until  Xpath should match x times  //div[contains(@class, 'tags-editor-component')]//li[contains(@class, 'tag')]  2
   [Teardown]  Logout
 
 Ronja logs in, sees that tag kalamaa is gone, and label for ylämaa changed to alamaa
@@ -88,8 +88,8 @@ Ronja logs in, sees that tag kalamaa is gone, and label for ylämaa changed to a
   Open application  ${appname}  ${propertyId}
   Wait until  Element should be visible  //div[@id='side-panel']//button[@id='open-notice-side-panel']
   Open side panel  notice
-  Wait until  Xpath should match X times  //div[@id="notice-panel"]//ul[@class="tags"]//li[@class="tag"]  1
-  Element text should be  xpath=//div[@id="notice-panel"]//ul[@class="tags"]//li//span  alamaa
+  Wait until  Xpath should match X times  //div[@id="notice-panel"]//ul[contains(@class, 'tags')]//li[contains(@class, 'tag')]  1
+  Element text should be  xpath=//div[@id="notice-panel"]//ul[contains(@class, 'tags')]//li//span  alamaa
 
 Ronja doesn't have grouping in tags component, as she belongs only to one organization
   Go to page  applications

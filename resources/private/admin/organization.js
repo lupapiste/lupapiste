@@ -7,6 +7,7 @@
     self.organization = ko.observable();
     self.names = ko.observableArray();
     self.permanentArchiveEnabled = ko.observable(false);
+    self.digitizerToolsEnabled = ko.observable(false);
     self.calendarsEnabled = ko.observable(false);
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
@@ -32,6 +33,31 @@
       error: null,
       errorMessageTerm: null
     };
+
+    self.docstoreEnabled = ko.observable(false);
+    self.docstorePrice = ko.observable("");
+    self.docstoreDescs = ko.observableArray();
+
+    self.validDocstorePrice = ko.pureComputed(function () {
+      var price = util.parseFloat(self.docstorePrice());
+      return !_.isNaN(price) && ( price >= 0.0);
+    });
+
+    self.updateDocstoreInfo = function() {
+      var descs = _(self.docstoreDescs()).map(unWrapDesc).fromPairs().value();
+      var documentPrice = util.parseFloat(self.docstorePrice());
+      ajax.command("update-docstore-info",
+                   {"org-id":                self.organization().id(),
+                    docStoreInUse:           self.docstoreEnabled(),
+                    documentPrice:           documentPrice,
+                    organizationDescription: descs})
+        .success(util.showSavedIndicator)
+        .error(function(resp) {
+          util.showErrorDialog(resp);
+        })
+        .call();
+    };
+
 
     function organizationCommand( command, params ) {
       ajax.command( command,
@@ -69,12 +95,28 @@
         .call();
     }
 
+    function wrapLoc(k, v, lang) {
+      return _.set({lang: lang}, k, ko.observable(v));
+    }
+
+    function unWrapLoc(o, k) {
+      return [o.lang, util.getIn(o, [k])];
+    }
+
     function wrapName(name, lang) {
-      return {lang: lang, name: ko.observable(name)};
+      return wrapLoc("name", name, lang);
     }
 
     function unWrapName(o) {
-      return [o.lang, util.getIn(o, ["name"])];
+      return unWrapLoc(o, "name");
+    }
+
+    function wrapDesc(desc, lang) {
+      return wrapLoc("description", desc, lang);
+    }
+
+    function unWrapDesc(o) {
+      return unWrapLoc(o, "description");
     }
 
     self.open = function(orgId) {
@@ -89,6 +131,10 @@
           isLoading = true;
           self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
+          self.digitizerToolsEnabled(result.data["digitizer-tools-enabled"]);
+          self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
+          self.docstorePrice(_.toString(_.get(result, "data.docstore-info.documentPrice")));
+          self.docstoreDescs(_.map(util.getIn(result,["data", "docstore-info", "organizationDescription"]), wrapDesc));
           self.calendarsEnabled(result.data["calendars-enabled"]);
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
@@ -174,16 +220,24 @@
         .call();
     };
 
-    self.permanentArchiveEnabled.subscribe(function(value) {
+    function setBooleanAttribute(name, value) {
       if (isLoading) {
         return;
       }
-      ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
-        .success(function() {
-          self.indicator(true);
-          self.organization()["permanent-archive-enabled"](value);
+      ajax.command("set-organization-boolean-attribute", {organizationId: self.organization().id(), enabled: value, attribute: name})
+        .success(function(res) {
+          util.showSavedIndicator(res);
+          self.organization()[name](value);
         })
         .call();
+    }
+
+    self.permanentArchiveEnabled.subscribe(function(value) {
+      setBooleanAttribute("permanent-archive-enabled", value);
+    });
+
+    self.digitizerToolsEnabled.subscribe(function(value) {
+      setBooleanAttribute("digitizer-tools-enabled", value);
     });
 
     self.calendarsEnabled.subscribe(function(value) {

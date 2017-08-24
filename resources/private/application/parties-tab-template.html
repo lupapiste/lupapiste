@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" -->
+    <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" && !$data.isArchivingProject() -->
     <div data-bind="component: 'application-guests'"></div>
     <!-- /ko -->
 
@@ -56,12 +56,14 @@
         <!-- /ko -->
     </div>
 
+    <!-- ko ifnot: $data.isArchivingProject() -->
     <button data-bind="click: $parent.addPartyModel.init, visible: $parent.authorization.ok('create-doc')"
             class="secondary modal"
             data-test-id="add-party">
         <i class="lupicon-circle-plus"></i>
         <span data-bind="ltext: 'application.addParty'"></span>
     </button>
+    <!-- /ko -->
 
     <div class="process-nav">
         <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">

@@ -9,6 +9,11 @@ LUPAPISTE.NaviSidebarService = function() {
 
   var animate = ko.observable();
 
+  var showArchivingMenu = ko.pureComputed(function() {
+    return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
+      lupapisteApp.models.globalAuthModel.ok("digitizing-enabled");
+  });
+
   var menus = {
     authorityAdmin: [{icon: "lupicon-user",
                       page: "users",
@@ -37,6 +42,11 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-stamp",
                       page: "stamp-editor",
                       loc: "auth-admin.stamp-editor"},
+                     {icon: "lupicon-archives",
+                      page: "archiving",
+                      loc: "arkistointi",
+                      showIf: showArchivingMenu,
+                      feature: "digitizer"},
                      {icon: "lupicon-calendar",
                       page: "organization-calendars",
                       loc: "auth-admin.organization-calendars",

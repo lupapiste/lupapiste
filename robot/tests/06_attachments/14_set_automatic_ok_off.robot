@@ -19,7 +19,7 @@ Sonja adds an attachment and it is ok
     [Tags]  attachments
     Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Miumau  Asuinkerrostalon tai rivitalon rakentaminen
     Scroll to  tr[data-test-type='muut.muu']
-    Element should be visible  xpath=//button[@class="btn-icon-only positive no-events"]
+    Element should be visible  xpath=//button[contains(@class, 'btn-icon-only positive no-events')]
 
 Sonja deletes the attachment and logs out
     [Tags]  attachments
@@ -43,7 +43,7 @@ Sonja adds an attachment and it's not ok
     Open tab  attachments
     Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Maumiu  Asuinkerrostalon tai rivitalon rakentaminen
     Scroll to  tr[data-test-type='muut.muu']
-    Element should not be visible  xpath=//button[@class="btn-icon-only positive no-events"]
+    Element should not be visible  xpath=//button[contains(@class, 'btn-icon-only positive no-events')]
 
 Sonja deletes the file and logs out
     [Tags]  attachments
@@ -66,7 +66,7 @@ Sonja adds an attachment and it's ok she likes doing it a lot
     Open application  ${appname}  ${propertyId}
     Open tab  attachments
     Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Miumiu  Asuinkerrostalon tai rivitalon rakentaminen
-    Element should be visible  xpath=//button[@class="btn-icon-only positive no-events"]
+    Element should be visible  xpath=//button[contains(@class, 'btn-icon-only positive no-events')]
 
 Sonja logs out
     [Tags]  attachments
@@ -75,13 +75,13 @@ Sonja logs out
 *** Keywords ***
 
 Unselect set automatic ok for attachments checkbox
-    Wait Until Element Is Visible  automatic-ok-for-attachments-enabled
-    Focus  automatic-ok-for-attachments-enabled
+    Element should be visible by test id  automatic-ok-wrapper
     Checkbox Should Be Selected  automatic-ok-for-attachments-enabled
-    Unselect Checkbox  automatic-ok-for-attachments-enabled
+    Click label  automatic-ok-for-attachments-enabled
+    Checkbox Should not Be Selected  automatic-ok-for-attachments-enabled
 
 Select set automatic ok for attachments checkbox
-    Wait Until Element Is Visible  automatic-ok-for-attachments-enabled
-    Focus  automatic-ok-for-attachments-enabled
+    Element should be visible by test id  automatic-ok-wrapper
     Checkbox Should Not Be Selected  automatic-ok-for-attachments-enabled
-    Select Checkbox  automatic-ok-for-attachments-enabled
+    Click label  automatic-ok-for-attachments-enabled
+    Checkbox Should Be Selected  automatic-ok-for-attachments-enabled

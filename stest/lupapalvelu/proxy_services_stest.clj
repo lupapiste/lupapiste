@@ -117,7 +117,7 @@
   (fact "missing params"
     (let [response (property-info-by-wkt-proxy {:params {}})]
       response => map?
-      (:status response) => 503))
+      (:status response) => 400))
 
   (fact "404271,6693892"
     (property-info-for-75341600380021 {:wkt "POINT(404271 6693892)"})))

@@ -137,7 +137,7 @@
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
   ([{permit-type :permitType :as application} type]
-   (if (#{:P :R} (keyword permit-type))
+   (if (#{:P :R :ARK} (keyword permit-type))
      {:type-group "paatoksenteko" :type-id type}
      {:type-group "muut" :type-id type})))
 
@@ -191,17 +191,19 @@
 
 (defn find-verdicts-from-xml
   "Returns a monger update map"
-  [{:keys [application user created organization] :as command} app-xml]
-  {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [organization (if organization @organization (org/get-organization (:organization application)))]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml organization))]
-      (inspection-summary/process-verdict-given application)
-      (util/deep-merge
-        {$set {:verdicts verdicts-with-attachments, :modified created}}
-        (get-task-updates application created verdicts-with-attachments app-xml)
-        (permit/read-verdict-extras-xml application app-xml)
-        (when-not (states/post-verdict-states (keyword (:state application)))
-          (application/state-transition-update (sm/verdict-given-state application) created application user))))))
+  ([command app-xml]
+    (find-verdicts-from-xml command app-xml true))
+  ([{:keys [application user created organization] :as command} app-xml update-state?]
+   {:pre [(every? command [:application :user :created]) app-xml]}
+   (let [organization (if organization @organization (org/get-organization (:organization application)))]
+     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml organization))]
+       (inspection-summary/process-verdict-given application)
+       (util/deep-merge
+         {$set {:verdicts verdicts-with-attachments, :modified created}}
+         (get-task-updates application created verdicts-with-attachments app-xml)
+         (permit/read-verdict-extras-xml application app-xml)
+         (when (and update-state? (not (states/post-verdict-states (keyword (:state application)))))
+           (application/state-transition-update (sm/verdict-given-state application) created application user)))))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
@@ -389,7 +391,8 @@
        flatten))
 
 (defn get-state-updates [user created {current-state :state :as application} app-xml]
-  (let [new-state (->> (krysp-reader/application-state app-xml)
+  (let [new-state (->> (cr/strip-xml-namespaces app-xml)
+                       (krysp-reader/application-state)
                        krysp-reader/krysp-state->application-state)]
     (cond
       (nil? new-state) nil

@@ -59,7 +59,8 @@
    "dummy"
    "rest-api"
    "trusted-etl"
-   "trusted-salesforce"])
+   "trusted-salesforce"
+   "docstore-api"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -112,7 +113,7 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
            (sc/optional-key :companyFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/supported-language-schema
+           (sc/optional-key :language)            i18n/EnumSupportedLanguages
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
            (sc/optional-key :firstLogin)          sc/Bool})
 
@@ -131,7 +132,7 @@
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
                    :password                         (ssc/max-length-string 255)
-                   (sc/optional-key :language)       i18n/supported-language-schema})
+                   (sc/optional-key :language)       i18n/EnumSupportedLanguages})
 
 (defschema Handler
   {:id     ssc/ObjectIdStr
@@ -228,6 +229,9 @@
 (defn rest-user? [{role :role}]
   (= :rest-api (keyword role)))
 
+(defn docstore-user? [{role :role}]
+  (= :docstore-api (keyword role)))
+
 (defn admin? [{role :role}]
   (= :admin (keyword role)))
 
@@ -286,6 +290,10 @@
 
 (defn user-is-authority-in-organization? [user organization-id]
   (let [org-set (organization-ids-by-roles user roles/default-org-authz-roles)]
+    (contains? org-set organization-id)))
+
+(defn user-has-role-in-organization? [user organization-id valid-org-authz-roles]
+  (let [org-set (organization-ids-by-roles user (set valid-org-authz-roles))]
     (contains? org-set organization-id)))
 
 (defn validate-authority-in-organization

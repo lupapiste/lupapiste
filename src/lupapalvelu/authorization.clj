@@ -114,7 +114,7 @@
 (defn has-organization-authz-roles?
   "Returns true if user has requested roles in organization"
   [requested-authz-roles organization-id user]
-  (and (or (usr/authority? user) (usr/authority-admin? user))
+  (and (or (usr/authority? user) (usr/authority-admin? user) (usr/oir-authority? user))
        requested-authz-roles
        (some requested-authz-roles (org-authz organization-id user))))
 
@@ -122,6 +122,9 @@
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
   (boolean (has-organization-authz-roles? #{:authority :approver} (:organization application) user)))
+
+(defn application-role [application user]
+  (if (application-authority? application user) :authority :applicant))
 
 ;;
 ;; Enrich auth array

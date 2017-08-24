@@ -15,7 +15,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.permit :as permit]
-            [lupapiste-commons.states :as common-states]))
+            [lupapalvelu.states :as states]))
 
 (def kayttotarkoitus-hinnasto (delay (xls/read-map "kayttotarkoitus-hinnasto.xlsx")))
 
@@ -37,14 +37,16 @@
    "YI"  903
    "YL" 903
    "YM" 903
-   "VVVL" 903})
+   "VVVL" 903
+   "ARK" 802})
 
 (def usage-price-codes
   {"A" 905
    "B" 906
    "C" 907
    "D" 908
-   "E" 909})
+   "E" 909
+   "Z" 801})
 
 (def price-classes-for-operation
   ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
@@ -157,6 +159,7 @@
    :ilmoitus-poikkeuksellisesta-tilanteesta                           "D"
    :maa-ainesten-kotitarveotto                                        "D"
    :maastoliikennelaki-kilpailut-ja-harjoitukset                      "D"
+   :archiving-project                                                 "Z"
    })
 
 (defn- export [collection query fields]
@@ -268,7 +271,7 @@
   (merge operation-schema
          {(sc/optional-key :displayNameFi) sc/Str
           (sc/optional-key :displayNameSv) sc/Str
-          :priceClass                      (sc/enum "A" "B" "C" "D" "E" "F")
+          :priceClass                      (sc/enum "A" "B" "C" "D" "E" "F" "Z")
           :priceCode                       (sc/maybe (apply sc/enum 900 (vals permit-type-price-codes)))
           :usagePriceCode                  (sc/maybe (apply sc/enum (vals usage-price-codes)))
           :use                             (sc/maybe sc/Str)
@@ -283,10 +286,7 @@
           :archived                          archiving/archived-ts-keys-schema
           :infoRequest                       sc/Bool
           :municipality                      sc/Str
-          :state                             (apply sc/enum
-                                                    "info"
-                                                    "answered"
-                                                    (map name (keys common-states/all-transitions-graph)))
+          :state                             (apply sc/enum (map name states/all-states))
           (sc/optional-key :openInfoRequest) (sc/maybe sc/Bool)
           :organization                      sc/Str
           (sc/optional-key :permitSubtype)   (sc/maybe sc/Str)

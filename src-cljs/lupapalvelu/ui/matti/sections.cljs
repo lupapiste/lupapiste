@@ -23,11 +23,11 @@
                           :negate?    negate?})))
 
 (defn section-header
-  [{:keys [state path] :as options}]
+  [{:keys [state path i18nkey] :as options}]
   [:div.section-header.matti-grid-2
    [:div.row.row--tight
     [:div.col-1
-     [:span.row-text.section-title (path/loc path)]]
+     [:span.row-text.section-title (path/loc (or i18nkey path))]]
     [:div.col-1.col--right
      (if (path/meta? options :can-remove?)
        [:span

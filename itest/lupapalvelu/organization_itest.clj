@@ -120,7 +120,7 @@
                                :inforequestEnabled (not (:inforequest-enabled orig-scope))
                                :applicationEnabled (not (:new-application-enabled orig-scope))
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
-                               :openInforequestEmail "someone@localhost"
+                               :openInforequestEmail "someone@localhost.localdomain"
                                :opening nil)
         updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
@@ -130,7 +130,7 @@
     (fact "inforequest-enabled" (:inforequest-enabled updated-scope) => (not (:inforequest-enabled orig-scope)))
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
-    (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
+    (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost.localdomain")))
 
 (fact "Admin - Add scope"
   (let [organization   (first (:organizations (query admin :organizations)))
@@ -377,19 +377,29 @@
   (fact "Valid attachment is ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))
 
-(facts "permanent-archive-can-be-set"
+(facts "Archiving features can be set"
   (let [organization  (first (:organizations (query admin :organizations)))
         id (:id organization)]
 
     (fact "Permanent archive can be enabled"
-      (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
+      (command admin "set-organization-boolean-attribute" :enabled true :organizationId id :attribute "permanent-archive-enabled") => ok?
       (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => true))
 
     (fact "Permanent archive can be disabled"
-      (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
+      (command admin "set-organization-boolean-attribute" :enabled false :organizationId id :attribute "permanent-archive-enabled") => ok?
       (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
-        (:permanent-archive-enabled updated-org) => false))))
+        (:permanent-archive-enabled updated-org) => false))
+
+    (fact "Digitizer tools can be enabled"
+      (command admin "set-organization-boolean-attribute" :enabled true :organizationId id :attribute "digitizer-tools-enabled") => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:digitizer-tools-enabled updated-org) => true))
+
+    (fact "Digitizer tools can be disabled"
+      (command admin "set-organization-boolean-attribute" :enabled false :organizationId id :attribute "digitizer-tools-enabled") => ok?
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
+        (:digitizer-tools-enabled updated-org) => false))))
 
 (facts "Organization names"
   (let [{names :names :as resp} (query pena :get-organization-names)]
@@ -900,13 +910,13 @@
     (command pena :update-organization-name :org-id "753-R" :name {:fi "modified"}) => unauthorized?)
 
   (fact "illegal name map"
-    (command admin :update-organization-name :org-id "753-R" :name "modified") => (partial expected-failure? :error.invalid-type))
+    (command admin :update-organization-name :org-id "753-R" :name "modified") => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "illegal name key"
-    (command admin :update-organization-name :org-id "753-R" :name {:suomi "modified"}) => (partial expected-failure? :error.illegal-key))
+    (command admin :update-organization-name :org-id "753-R" :name {:suomi "modified"}) => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "illegal name value type"
-    (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.invalid-type))
+    (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "empty name value"
     (command admin :update-organization-name :org-id "753-R" :name {:fi ""}) => (partial expected-failure? :error.empty-organization-name))
@@ -952,7 +962,7 @@
              :roleId (get-in sipoo-handler-roles [1 :id])
              :name {:fi {:handler "non-string kasittelija"}
                     :sv "Updated Swedish handlaggare"
-                    :en "Updated English handler"}) => (partial expected-failure? :error.missing-parameters))
+                    :en "Updated English handler"}) => (partial expected-failure? :error.illegal-localization-value))
 
   (fact "cannot update with missing handler name localization"
     (command sipoo :upsert-handler-role
@@ -1084,3 +1094,37 @@
                         :open-inforequest-email "",
                         :opening nil,
                         :permitType "P"}])))
+
+(defn update-docstore-info [org-id docStoreInUse documentPrice organizationDescription]
+  (command admin :update-docstore-info
+           :org-id org-id
+           :docStoreInUse docStoreInUse
+           :documentPrice documentPrice
+           :organizationDescription organizationDescription))
+
+(defn get-docstore-info [org-id]
+  (let [result (query admin :organization-by-id :organizationId org-id)]
+    (if (ok? result)
+      (-> result :data :docstore-info)
+      result)))
+
+(facts update-docstore-info
+
+  (fact "calling does not change other organization data"
+    (let [org (:data (query admin :organization-by-id :organizationId "753-R"))]
+      (update-docstore-info "753-R" true 1.0 (i18n/supported-langs-map (constantly "Description"))) => ok?
+      (dissoc org :docstore-info)
+      => (-> (query admin :organization-by-id :organizationId "753-R")
+             :data
+             (dissoc :docstore-info))))
+
+  (fact "calling updates organization's docstore info"
+    (update-docstore-info "753-R" true 1.0 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
+    (get-docstore-info "753-R")
+    => {:docStoreInUse true
+        :documentPrice 1.0
+        :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
+
+  (fact "can't set negative document price"
+    (update-docstore-info "753-R" true -1.0 "Description")
+    => (partial expected-failure? :error.illegal-number)))

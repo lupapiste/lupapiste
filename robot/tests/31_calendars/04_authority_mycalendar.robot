@@ -61,6 +61,6 @@ Authority suggests an appointment
 Appointment is visible in mycalendar list view
   Go to page  mycalendar
   Click by test id  view-toggle-list
-  Wait until  Element should be visible  xpath=//div[@class='calendar-pending-action-item']
+  Wait until  Element should be visible  xpath=//div[contains(@class, 'calendar-pending-action-item')]
   Logout
 

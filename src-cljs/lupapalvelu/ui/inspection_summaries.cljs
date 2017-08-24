@@ -15,6 +15,8 @@
 
 (enable-console-print!)
 
+(defonce args (atom {}))
+
 (defn find-by-key
   "Return item from sequence col of maps where element k (keyword) matches value v."
   [k v col]
@@ -219,6 +221,7 @@
         application-id (:applicationId @component-state)
         summary-id (:id @selected-summary)
         target-id (:id row-target)
+        application-auth-model (:auth-model @args)
         auth-model (rum/react (rum-util/derived-atom [component-state] (partial auth/get-auth-model :inspection-summaries summary-id)))
         locked? (:locked @selected-summary)
         targetFinished? (:finished row-target)
@@ -247,7 +250,7 @@
          (attc/view-with-download-small-inline latest)
          (when-not (or locked? targetFinished?)
            (attc/delete-attachment-link attachment remove-attachment-success))])
-      (when (and target-id (not locked?) (not targetFinished?))
+      (when (and (auth/ok? application-auth-model :upload-file-authenticated) target-id (not locked?) (not targetFinished?))
         [:div (attc/upload-link (partial got-files (:id row-target)))])]
      [:td
       [:div.inspection-date-row
@@ -424,8 +427,6 @@
       (when (auth/ok? auth-model :toggle-inspection-summary-locking)
         [:div.row
          (toggle-inspection-summary-locking-button (:locked summary))])]]))
-
-(defonce args (atom {}))
 
 (defn mount-component []
   (rum/mount (inspection-summaries (:app @args) (:auth-model @args))

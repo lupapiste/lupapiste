@@ -80,13 +80,13 @@ Mikko creates another digging application from the same sijoitus application
 
 Sijoitus application now has two links
   Open the request at index  sijoitus-app  3
-  Wait until  Xpath Should Match X Times  //span[@class="link-permit"]  2
+  Wait until  Xpath Should Match X Times  //span[contains(@class, 'link-permit')]  2
 
 *** Keywords ***
 
 Click digging tree item by text
   [Arguments]  ${itemName}
-  Wait and click  //section[@id="create-digging-permit"]//div[@class="tree-content"]//*[text()=${itemName}]
+  Wait and click  //section[@id="create-digging-permit"]//div[contains(@class, 'tree-content')]//*[text()=${itemName}]
 
 Select digging operations path YA kayttolupa kaivu
   Set animations off

@@ -322,6 +322,18 @@
         (action/application->command application)
         updates))))
 
+(defn update-metadata-attribute! [{:keys [attachments] :as application} now attachment-id attr value]
+  (let [{:keys [id metadata]} (first (filter #(= (:id %) attachment-id) attachments))]
+    (when id
+      (let [new-metadata (assoc metadata (keyword attr) value)]
+        (when-not (= metadata new-metadata)
+          (action/update-application
+            (action/application->command application)
+            {:attachments.id id}
+            {$set {:modified               now
+                   :attachments.$.metadata new-metadata}}
+            :return-count? true))))))
+
 (defn- classification-xml [organization tos-function]
   (if-let [xml-str (get-from-toj-api organization false tos-function "/classification")]
     (with-open [reader (StringReader. xml-str)]

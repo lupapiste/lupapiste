@@ -9,7 +9,7 @@
     {:LausuntoTunnus (get statement :id)
      :Saateteksti (get statement :saateText)
      :Pyytaja     (ss/trim
-                    (str (get-in requester [:organization (keyword lang)])
+                    (str (get-in requester [:organization :name (keyword lang)])
                          " (" (usr/full-name requester) ")"))
      :PyyntoPvm   (util/to-xml-date (get statement :requested))
      :Maaraaika   (util/to-xml-date (get statement :dueDate))

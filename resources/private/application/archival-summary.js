@@ -17,7 +17,7 @@
   }
 
 
-  function GroupModel(groupName, groupDesc, attachments, building) {
+  function GroupModel(groupName, groupDesc, attachments) {
     var self = this;
 
     ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -28,13 +28,7 @@
     });
     self.attachments = ko.observableArray(sortedAttachments);
     self.groupName = groupName;
-    var fullGroupDesc = "";
-    if (groupDesc) {
-      fullGroupDesc += " - " + groupDesc;
-    }
-    if (building) {
-      fullGroupDesc += " - " + building;
-    }
+    var fullGroupDesc = groupDesc || "";
     // computed name, depending if attachments belongs to operation or not
     self.name = self.disposedComputed( function() {
       if (loc.hasTerm(["operations", self.groupName])) {
@@ -54,7 +48,7 @@
 
   var groupLists = {};
 
-  function getGroupList(groupListId, attachments, buildings) {
+  function getGroupList(groupListId, attachments) {
     // Group list for attachments grouped by archived/not-archived and pre-/postverdict
     if (_.isEmpty(attachments)) {
       return [];
@@ -64,7 +58,7 @@
       if (!groupList.initializedGroups[group]) {
         var op = _.first(util.getIn(attachments, [0, "op"]));
         var opDescription = op ? operationDescription(op.id) : "";
-        var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, opDescription, attachments, buildings[op.id]);
+        var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, opDescription, attachments);
         groupList.initializedGroups[group] = groupModel;
       } else {
         groupList.initializedGroups[group].attachments(attachments);
@@ -208,24 +202,31 @@
   }
 
   function initApplicationDocs(application) {
-    // Initialize archived non-attachment documents for application.
-    var applicationState = application.state();
-    var appDocId = application.id() + "-application";
-    var caseFileDocId = application.id() + "-case-file";
-    var docs = [ ko.observable({ documentNameKey: "applications.application",
-                                 metadata: application.metadata,
-                                 id: appDocId,
-                                 previewAction: "pdf-export",
-                                 documentType: "application" }) ];
+    if (!application.isArchivingProject()) {
+      // Initialize archived non-attachment documents for application.
+      var appDocId = application.id() + "-application";
+      var caseFileDocId = application.id() + "-case-file";
+      var docs = [ko.observable({
+        documentNameKey: "applications.application",
+        metadata: application.metadata,
+        id: appDocId,
+        previewAction: "pdf-export",
+        documentType: "application"
+      })];
 
-    if (["extinct", "closed", "foremanVerdictGiven", "acknowledged"].indexOf(applicationState) !== -1) {
-      docs.push( ko.observable({ documentNameKey: "caseFile.heading",
-                                 metadata: application.processMetadata,
-                                 id: caseFileDocId,
-                                 previewAction: "pdfa-casefile",
-                                 documentType: "case-file" }) );
+      if (lupapisteApp.models.applicationAuthModel.ok("application-in-final-archiving-state")) {
+        docs.push(ko.observable({
+          documentNameKey: "caseFile.heading",
+          metadata: application.processMetadata,
+          id: caseFileDocId,
+          previewAction: "pdfa-casefile",
+          documentType: "case-file"
+        }));
+      }
+      return docs;
+    } else {
+      return [];
     }
-    return docs;
   }
 
   function ArchivalSummaryModel(params) {
@@ -257,29 +258,31 @@
       return _.filter(postAttachments(), isArchived);
     });
 
-    var buildings = _
-      .chain(params.application._js.buildings)
-      .filter(function(val) {
-        return val.operationId && (val.nationalId || val.localId);
-      })
-      .keyBy("operationId")
-      .mapValues(function(val) {
-        return val.nationalId || val.localId;
-      })
-      .value();
-
-    self.archivedGroups = self.disposedPureComputed(function() {
-      return getGroupList("archived-pre", archivedPreAttachments(), buildings);
-    });
-    self.archivedPostGroups = self.disposedPureComputed(function() {
-      return getGroupList("archived-post", archivedPostAttachments(), buildings);
-    });
-    self.notArchivedGroups = self.disposedPureComputed(function() {
-      return getGroupList("not-archived-pre", _.reject(preAttachments(), isArchived), buildings);
-    });
-    self.notArchivedPostGroups = self.disposedPureComputed(function() {
-      return getGroupList("not-archived-post", _.reject(postAttachments(), isArchived), buildings);
-    });
+    if(params.application.isArchivingProject()) {
+      self.archivedGroups = self.disposedPureComputed(function() {
+        var atts = attachmentsService.applyFilters(self.attachments(), [["hasFile"]]);
+        return getGroupList("archived-pre", _.filter(atts, isArchived));
+      });
+      self.notArchivedGroups = self.disposedPureComputed(function() {
+        var atts = attachmentsService.applyFilters(self.attachments(), [["hasFile"]]);
+        return getGroupList("not-archived-pre", _.reject(atts, isArchived));
+      });
+      self.archivedPostGroups = ko.observable();
+      self.notArchivedPostGroups = ko.observable();
+    } else {
+      self.archivedGroups = self.disposedPureComputed(function () {
+        return getGroupList("archived-pre", archivedPreAttachments());
+      });
+      self.archivedPostGroups = self.disposedPureComputed(function () {
+        return getGroupList("archived-post", archivedPostAttachments());
+      });
+      self.notArchivedGroups = self.disposedPureComputed(function () {
+        return getGroupList("not-archived-pre", _.reject(preAttachments(), isArchived));
+      });
+      self.notArchivedPostGroups = self.disposedPureComputed(function () {
+        return getGroupList("not-archived-post", _.reject(postAttachments(), isArchived));
+      });
+    }
 
     self.archivedDocuments = self.disposedPureComputed(function() {
       return _.filter(mainDocuments(), isArchived);
@@ -464,7 +467,8 @@
       attachmentsService.convertToPdfA(attachmentId);
     };
 
-    self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application);
+    self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application &&
+      lupapisteApp.models.applicationAuthModel.ok("mark-pre-verdict-phase-archived"));
     self.markApplicationArchived = function() {
       ajax
         .command("mark-pre-verdict-phase-archived", {id: ko.unwrap(params.application.id)})

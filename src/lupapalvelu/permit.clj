@@ -156,6 +156,16 @@
    :ely-statement-types ely/mm-kt-statement-types
    :wfs-krysp-ns-name "maankaytonmuutos"})
 
+(defpermit ARK "Arkistointiprojekti"
+  {:subtypes                         []
+   :state-graph                      states/ark-state-graph
+   :allow-state-change               :all
+   :sftp-directory                   ""
+   :allowed-task-schemas             #{}
+   :multiple-parties-allowed         false
+   :extra-statement-selection-values false
+   :ely-statement-types              []})
+
 ;;
 ;; Helpers
 ;;
@@ -330,3 +340,11 @@
 
 (defn is-ya-permit [permit-type]
   (= permit-type (name YA)))
+
+(defn is-archiving-project [{{:keys [permitType]} :application}]
+  (when-not (= permitType (name ARK))
+    (fail :error.unsupported-permit-type)))
+
+(defn is-not-archiving-project [{{:keys [permitType]} :application}]
+  (when (= permitType (name ARK))
+    (fail :error.unsupported-permit-type)))

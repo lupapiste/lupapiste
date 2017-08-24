@@ -32,6 +32,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
+  self.isArchivingProject = lupapisteApp.models.application.isArchivingProject;
 
   var reload = function() {
     self.queryAll();
@@ -613,6 +614,24 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.requiresAuthorityAction = function(attachment) {
     return attachmentState(attachment) === self.REQUIRES_AUTHORITY_ACTION;
+  };
+
+  self.isResellable = function(attachment) {
+    return util.getIn(attachment, ["metadata", "myyntipalvelu"]) === true;
+  };
+
+  self.toggleResell = function(attachment) {
+    ajax
+      .command("set-myyntipalvelu-for-attachment",
+        {
+          id: self.applicationId(),
+          attachmentId: attachment.id,
+          myyntipalvelu: !self.isResellable(attachment)
+        })
+      .success(function() {
+        self.queryOne(attachment.id, {triggerCommand: "set-myyntipalvelu-for-attachment"});
+      })
+      .call();
   };
 
   // True if the attachment is needed but does not have file yet.

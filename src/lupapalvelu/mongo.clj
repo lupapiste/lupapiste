@@ -440,6 +440,7 @@
   (ensure-index :applications {:archived.application 1})
   (ensure-index :applications {:archived.completed 1})
   (ensure-index :applications {:attachments.id 1})
+  (ensure-index :applications {:permitType 1})                                ;; For application search
   (ensure-index :applications {:permitSubtype -1 :infoRequest 1})             ;; For application search
   (ensure-index :applications {:applicant 1})                                 ;; For application search
   (ensure-index :applications {:state 1})                                     ;; For application search
@@ -466,6 +467,8 @@
   (ensure-index :buildingCache {:propertyId 1} {:unique true})
   (ensure-index :ssoKeys {:ip 1} {:unique true})
   (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1})
+  (ensure-index :integration-messages {:application.id 1})
+  (ensure-index :integration-messages {:created -1})
   (infof "ensure-indexes took %d ms" (- (now) ts)))
 
 (defn clear! []

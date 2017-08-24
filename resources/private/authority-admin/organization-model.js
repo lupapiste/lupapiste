@@ -50,6 +50,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.validateVerdictGivenDate = ko.observable(true);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
+  self.archivingProjectTosFunction = ko.observable();
   self.permanentArchiveEnabled = ko.observable(true);
   self.permanentArchiveInUseSince = ko.observable();
   self.features = ko.observable();
@@ -196,6 +197,25 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  function setTosFunctionForOperation(operationId, functionCode) {
+    var cmd = functionCode !== null ? "set-tos-function-for-operation" : "remove-tos-function-from-operation";
+    var data = {operation: operationId};
+    if (functionCode !== null) {
+      data.functionCode = functionCode;
+    }
+    ajax.command(cmd, data)
+      .success(util.showSavedIndicator)
+      .error(util.showSavedIndicator)
+      .call();
+  }
+
+  ko.computed(function() {
+    var tosFunction = self.archivingProjectTosFunction();
+    if (self.initialized) {
+      setTosFunctionForOperation("archiving-project", tosFunction);
+    }
+  });
+
   var sectionEnabled = ko.observable();
 
   self.verdictSectionEnabled = ko.computed( {
@@ -218,6 +238,27 @@ LUPAPISTE.OrganizationModel = function () {
     self.inspectionSummaryTemplates(event.templates);
     self.operationsInspectionSummaryTemplates(_.get(event, "operations-templates"));
   });
+
+
+  // Matti verdict templates
+  self.verdictTemplates = ko.observableArray( [] );
+  self.defaultOperationVerdictTemplates = ko.observable( {} );
+
+  function refreshVerdictTemplates() {
+    ajax.query( "verdict-templates")
+    .success( function( res ) {
+      self.verdictTemplates( _.get( res, "verdict-templates", [] )  );
+    })
+    .call();
+    ajax.query( "default-operation-verdict-templates")
+    .success( function( res ) {
+      self.defaultOperationVerdictTemplates( _.get( res, "templates", {} )  );
+    })
+    .call();
+  }
+
+  // Sent from matti/service.cljs
+  hub.subscribe( "matti::verdict-templates-changed", refreshVerdictTemplates );
 
   self.init = function(data) {
     self.initialized = false;
@@ -263,17 +304,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     var operationsTosFunctions = organization["operations-tos-functions"] || {};
 
-    var setTosFunctionForOperation = function(operationId, functionCode) {
-      var cmd = functionCode !== null ? "set-tos-function-for-operation" : "remove-tos-function-from-operation";
-      var data = {operation: operationId};
-      if (functionCode !== null) {
-        data.functionCode = functionCode;
-      }
-      ajax
-        .command(cmd, data)
-        .success(self.load)
-        .call();
-    };
+    self.archivingProjectTosFunction(operationsTosFunctions["archiving-project"]);
 
     self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], []).join("; "));
     self.submitNotificationEmails(util.getIn(organization, ["notifications", "submit-notification-emails"], []).join("; "));
@@ -351,10 +382,11 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
+    if( features.enabled( "matti")) {
+      refreshVerdictTemplates();
+    }
     self.initialized = true;
   };
-
-
 
   self.isSectionOperation = function ( $data )  {
     return self.sectionOperations.indexOf( $data.id ) >= 0;

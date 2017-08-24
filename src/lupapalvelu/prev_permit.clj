@@ -24,7 +24,9 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.application :as app]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.review :as review]
+            [lupapalvelu.user :as user]))
 
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
@@ -40,7 +42,7 @@
          (info "Prev permit application creation, not inviting the invalid email address received from backing system: " %)
          nil)))))
 
-(defn- get-applicant-type [applicant]
+(defn get-applicant-type [applicant]
   (-> applicant (select-keys [:henkilo :yritys]) keys first))
 
 (defn- applicant-field-values [applicant {:keys [name] :as element}]
@@ -118,11 +120,11 @@
     (= koodi "Rakennusvalvonta-asian laskun maksaja") "maksaja"
     (= koodi "Hakijan asiamies")                      "asiamies"))
 
-(defn- osapuoli->party-document [party]
+(defn osapuoli->party-document [party]
   (if-let [schema-name (osapuoli-kuntaRoolikoodi->doc-schema (:kuntaRooliKoodi party))]
     (osapuoli->osapuoli-doc party schema-name)))
 
-(defn- suunnittelija->party-document [party]
+(defn suunnittelija->party-document [party]
   (if-let [schema-name (suunnittelijaRoolikoodi->doc-schema (:suunnittelijaRoolikoodi party))]
     (designer->designer-doc party schema-name)))
 
@@ -193,7 +195,7 @@
 
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
-(defn- document-data->op-document [{:keys [schema-version] :as application} data]
+(defn document-data->op-document [{:keys [schema-version] :as application} data]
   (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
         doc (assoc-in doc [:schema-info :op] op)
@@ -212,7 +214,7 @@
                            (when-not (ss/blank? vahainenPoikkeaminen)
                              [["poikkeamat"] vahainenPoikkeaminen])))) buildings))
 
-(defn- do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
+(defn do-create-application-from-previous-permit [command operation xml app-info location-info authorize-applicants]
   (let [{:keys [hakijat]} app-info
         buildings-and-structures (building-reader/->buildings-and-structures xml)
         document-datas (schema-datas app-info buildings-and-structures)
@@ -243,13 +245,17 @@
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
 
+    (let [updated-application (mongo/by-id :applications (:id created-application))
+          {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)]
+      (review/save-review-updates user/batchrun-user-data updated-application updates added-tasks-with-updated-buildings attachments-by-task-id))
+
     (invite-applicants command hakijat authorize-applicants)
 
     (let [fetched-application (mongo/by-id :applications (:id created-application))]
       (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
       fetched-application)))
 
-(defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
+(defn enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and
     (not (ss/blank? address))
     (not (ss/blank? propertyId))

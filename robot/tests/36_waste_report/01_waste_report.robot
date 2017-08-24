@@ -9,8 +9,10 @@ Resource       ../../common_resource.robot
 Sipoo authority enables extended waste report
   Sipoo logs in
   Go to page  applications
-  Select checkbox  extended-construction-waste-report-enabled
+  Checkbox wrapper not selected by test id  extended-construction-waste-report-enabled
+  Click label by test id  extended-construction-waste-report-enabled-label
   Wait until  Positive indicator should be visible
+  Checkbox wrapper selected by test id  extended-construction-waste-report-enabled
   Logout
 
 Pena logs in and creates application

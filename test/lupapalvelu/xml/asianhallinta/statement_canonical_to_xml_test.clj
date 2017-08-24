@@ -23,7 +23,7 @@
 (mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-mapping
                       create-statement-request-canonical)
 
-(def sonja-requester {:firstName "Sonja" :lastName "Sibbo" :organization {:fi "Sipoo"}})
+(def sonja-requester {:firstName "Sonja" :lastName "Sibbo" :organization {:name {:fi "Sipoo"}}})
 
 (def attachments [{:id :attachment1
                    :type {:type-group "paapiirustus"

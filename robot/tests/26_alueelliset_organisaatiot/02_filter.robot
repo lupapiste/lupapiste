@@ -188,7 +188,7 @@ Sonja saves foobar filter
 *** Keywords ***
 Handler filter should contain text
   [Arguments]  ${text}
-  Wait until  Element should be visible  //div[@data-test-id="handler-filter-component"]//span[@class="autocomplete-selection"]//span[contains(text(), "${text}")]
+  Wait until  Element should be visible  //div[@data-test-id="handler-filter-component"]//span[contains(@class, 'autocomplete-selection')]//span[contains(text(), "${text}")]
 
 Sorting Should Be Set As Ascending
   [Arguments]  ${field name}

@@ -7,6 +7,7 @@
             [sade.core :refer :all]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.server]
             [lupapalvelu.states :as states]
@@ -16,6 +17,9 @@
 (defn returns [])
 (def ok-status   {:ok true})
 (def fail-status {:ok false})
+(defn localization-error [params]
+  {:ok false :text "error.illegal-localization-value" :parameters params})
+
 
 (testable-privates lupapalvelu.action has-required-user-role and-2-pre-check)
 
@@ -257,6 +261,18 @@
     (map-parameters-with-required-keys [:foo] [:x] {:data {}})                         => {:ok false :text "error.unknown-type" :parameters [:foo]}
     (map-parameters-with-required-keys [:foo] [:x] {:data {:foo nil}})                 => {:ok false :text "error.unknown-type" :parameters [:foo]}
     (map-parameters-with-required-keys [:foo] [:x] {:data {:foo {:y "aa"}}})           => {:ok false :text "error.map-parameters-with-required-keys" :parameters [:foo] :required-keys [:x]})
+
+  (fact "localization-parameters"
+    (localization-parameters [:name] {:data {:name (i18n/supported-langs-map str)}})                       => nil
+    (localization-parameters [:name] {:data {:name (dissoc (i18n/supported-langs-map str) :fi)}})          => (localization-error [:name])
+    (localization-parameters [:name] {:data {:name ""}})                                                   => (localization-error [:name])
+    (localization-parameters [:name] {:data {:name (assoc (i18n/supported-langs-map str) :esperanto "")}}) => (localization-error [:name]))
+
+  (fact "partial-localization-parameters"
+    (partial-localization-parameters [:name] {:data {:name (i18n/supported-langs-map str)}})               => nil
+    (partial-localization-parameters [:name] {:data {:name (dissoc (i18n/supported-langs-map str) :fi)}})  => nil
+    (localization-parameters [:name] {:data {:name ""}})                                                   => (localization-error [:name])
+    (localization-parameters [:name] {:data {:name (assoc (i18n/supported-langs-map str) :esperanto "")}}) => (localization-error [:name]))
 
   (facts "feature requirements"
    (against-background
