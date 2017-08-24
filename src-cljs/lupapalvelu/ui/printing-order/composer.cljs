@@ -20,6 +20,7 @@
                                     :order       (zipmap (map :id (:attachments %)) (repeatedly (constantly 0)))
                                     :tagGroups   (:tagGroups %))
       :id app-id)
+
     init-state))
 
 (defn accordion-name [path]
@@ -161,6 +162,7 @@
      (when (= phase 1)
        (composer-phase1))
      (when (= phase 2)
+       (log (.street js/lupapisteApp.models.currentUser))
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))

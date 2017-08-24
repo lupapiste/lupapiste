@@ -121,3 +121,4 @@ lupapisteApp.services.cardService = {};
 lupapisteApp.models = {};
 lupapisteApp.models.currentUser = {};
 lupapisteApp.models.currentUser.displayName = function() {};
+lupapisteApp.models.currentUser.street = function() {};

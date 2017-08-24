@@ -57,4 +57,4 @@
   (swap! component-state assoc :phase 2))
 
 (defn submit-order []
-  (js/console.log (clj->js @component-state)))
+  (js/console.log @component-state))
