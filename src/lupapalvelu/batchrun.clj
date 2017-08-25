@@ -349,7 +349,7 @@
     (remove nil?)
     distinct))
 
-(defn fetch-asianhallinta-verdicts []
+(defn fetch-asianhallinta-messages []
   (let [ah-organizations (mongo/select :organizations
                                        {"scope.caseManagement.ftpUser" {$exists true}}
                                        {"scope.caseManagement.ftpUser" 1})
@@ -383,12 +383,12 @@
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
-(defn check-for-asianhallinta-verdicts [& args]
+(defn check-for-asianhallinta-messages [& args]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Asianhallinta reader" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-asianhallinta-verdicts))
+  (fetch-asianhallinta-messages))
 
 (defn orgs-for-review-fetch [& organization-ids]
   (mongo/select :organizations (merge {:krysp.R.url {$exists true},

@@ -102,7 +102,7 @@
 
           (count (:verdicts (query-application local-query pena app-id))) => 0
 
-          (batch/fetch-asianhallinta-verdicts)
+          (batch/fetch-asianhallinta-messages)
 
           (fact "Zip has been moved from to_lupapiste to archive folder"
             (count (util/get-files-by-regex local-target-folder #"verdict1\.zip$")) => 0
@@ -125,7 +125,7 @@
 
           (count (:verdicts (query-application local-query pena app-id))) => 0
 
-          (batch/fetch-asianhallinta-verdicts)
+          (batch/fetch-asianhallinta-messages)
 
           (fact "Zip has been moved from to_lupapiste to error folder"
             (count (util/get-files-by-regex local-target-folder #"verdict2\.zip$")) => 0
@@ -133,9 +133,9 @@
 
           (fact "application doesn't have verdict"
             (count (:verdicts (query-application local-query pena app-id))) => 0))))))
-  (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict error result"
+  (fact "fetch-asianhallinta-messages logs proess-ah-verdict error result"
     (mongo/with-db db-name
-      (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
+      (lupapalvelu.batchrun/fetch-asianhallinta-messages) => nil
       (provided
         (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
         (ah-reader/process-message anything anything anything) => (sade.core/fail "nope")
@@ -143,9 +143,9 @@
                                                :event "Failed to process message",
                                                :zip-path test-file
                                                :text "nope"}) => "bonk")))
-  (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict ok result"
+  (fact "fetch-asianhallinta-messages logs proess-ah-verdict ok result"
     (mongo/with-db db-name
-      (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
+      (lupapalvelu.batchrun/fetch-asianhallinta-messages) => nil
       (provided
         (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
         (ah-reader/process-message anything anything anything) => (sade.core/ok)
