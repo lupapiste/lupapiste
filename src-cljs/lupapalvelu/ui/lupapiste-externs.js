@@ -107,6 +107,7 @@ lupapisteApp.services.publishBulletinService = {};
 lupapisteApp.services.documentDataService = {};
 lupapisteApp.services.sidePanelService = {};
 lupapisteApp.services.accordionService = {};
+lupapisteApp.services.accordionService.attachmentAccordionName = function() {};
 lupapisteApp.services.verdictAppealService = {};
 lupapisteApp.services.scrollService = {};
 lupapisteApp.services.ramService = {};
