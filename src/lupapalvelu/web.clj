@@ -49,6 +49,7 @@
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
+            [lupapalvelu.oauth :as oauth]
             [clj-time.core :as time]
             [clj-time.local :as local]
             [lupapalvelu.tasks :as tasks]
@@ -480,6 +481,11 @@
       (fail? response) (resp/status 404 (resp/json response))
       :else (resp/status 404 (resp/json (fail :error.unknown))))))
 
+(defpage [:get "/oauth/authorize"]
+  {foo :foo}
+  #_(resp/status 200 (resp/json foo))
+  (hiccup.core/html (oauth/authorization-page-hiccup)))
+
 ;;
 ;; Cross-site request forgery protection
 ;;
@@ -585,6 +591,8 @@
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac))
+
+
 
 ;;
 ;; dev utils:
