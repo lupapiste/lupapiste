@@ -42,25 +42,30 @@
    :model-fn       statement-giver-model})
 
 (defcommand create-statement-giver
-  {:parameters [email text]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :notified   true
-   :user-roles #{:authorityAdmin}}
+  {:description         "Creates new statement giver into the organization. If
+  the email is an existing authority, her name is used. Name parameter
+  and ultimately the email are fallbacks."
+   :parameters          [email text]
+   :optional-parameters [name]
+   :input-validators    [(partial action/non-blank-parameters [:email :text])
+                         action/email-validator]
+   :notified            true
+   :user-roles          #{:authorityAdmin}}
   [{data :data user :user}]
-  (let [organization (organization/get-organization (usr/authority-admins-organization-id user))
-        email           (ss/canonize-email email)
+  (let [organization       (organization/get-organization (usr/authority-admins-organization-id user))
+        email              (ss/canonize-email email)
         statement-giver-id (mongo/create-id)]
     (if-let [{fname :firstName lname :lastName :as authority} (uu/authority-by-email user email)]
       (do
         (organization/update-organization (:id organization) {$push
                                                               {:statementGivers
-                                                               {:id statement-giver-id
-                                                                :text text
+                                                               {:id    statement-giver-id
+                                                                :text  (ss/trim text)
                                                                 :email email
-                                                                :name (if-not (and (empty? fname) (empty? lname))
-                                                                        (str fname " " lname)
-                                                                        email)}}})
+                                                                :name  (cond
+                                                                         (ss/not-blank? fname) (str fname " " lname)
+                                                                         (ss/not-blank? name)  (ss/trim name)
+                                                                         :default              email)}}})
         (notifications/notify! :add-statement-giver  {:user authority
                                                       :data {:text text :organization organization}})
         (ok :id statement-giver-id))

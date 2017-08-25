@@ -231,8 +231,9 @@
 
 (defn fetch-organization-statement-givers [org-or-id]
   (let [organization (if (map? org-or-id) org-or-id (organization/get-organization org-or-id))
-        statement-givers (->> (or (:statementGivers organization) [])
-                              (sort-by (juxt :text :name)))]
+        statement-givers (sort-by (juxt (comp ss/trim ss/lower-case :text)
+                                        (comp ss/trim ss/lower-case :name))
+                                  (or (:statementGivers organization) []))]
     (ok :data statement-givers)))
 
 ;;

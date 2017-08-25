@@ -20,14 +20,34 @@ Statement giver can be deleted - no questions asked
 
 Authorities from own municipality can be added as statement giver
   Create statement giver  ronja.sibbo@sipoo.fi  Pelastusviranomainen
+  Statement giver is  ronja.sibbo@sipoo.fi  Pelastusviranomainen  Ronja Sibbo
 
 Authorities from different municipality can be added as statement giver
-  Create statement giver  veikko.viranomainen@tampere.fi  Tampereen luvat
+  Create statement giver  veikko.viranomainen@tampere.fi  Tampereen luvat  Veikko the Man
+  Statement giver is  veikko.viranomainen@tampere.fi  Tampereen luvat  Veikko Viranomainen
 
 Authority can be a statement giver multiple times
   Create statement giver  luukas.lukija@sipoo.fi  Rakennuslausunto
   Create statement giver  sonja.sibbo@sipoo.fi  Erityislausunto
-  Logout
+
+Invite non-existing user as a statement giver
+  Create statement giver  bob@example.com  Builder  Bob
+  Statement giver is  bob@example.com  Builder  Bob
+
+Invite non-existing user as a statement giver, non name given
+  Create statement giver  dot@example.com  Designer
+  Statement giver is  dot@example.com  Designer  dot@example.com
+
+Bad email results in an error message
+  Click enabled by test id  create-statement-giver
+  Wait until  Element should be visible  //label[@for='statement-giver-email']
+  Element should not be visible  statement-giver-error
+  Input text  statement-giver-name  Bad
+  Input text  statement-giver-email  bademail
+  Input text  statement-giver-text  Bad
+  Click enabled by test id  create-statement-giver-save
+  Wait until    Element should be visible  statement-giver-error
+  [Teardown]  Logout
 
 New applications do not have statements
   Mikko logs in
@@ -51,8 +71,8 @@ Sonja adds five statement givers to application
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
   Wait and click   xpath=//button[@data-test-id="add-statement"]
   Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-  # We now have 4 statement givers and one empty row (for adding a new statement giver), so there is 5 rows visible
-  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='statement-giver-checkbox-4']
+  # We now have 6 statement givers and one empty row (for adding a new statement giver), so there is 7 rows visible
+  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='statement-giver-checkbox-6']
 
   Wait until  Input text  invite-statement-giver-saateText  Tama on saateteksti.
   Invite read-only statement giver  ronja.sibbo@sipoo.fi  01.06.2018
@@ -63,7 +83,7 @@ Sonja adds five statement givers to application
 
   # Checkbox selection and maaraaika are cleared, the saate text stays filled with value.
   Wait Until  Checkbox Should Not Be Selected  statement-giver-checkbox-0
-  Checkbox Should Not Be Selected  statement-giver-checkbox-4
+  Checkbox Should Not Be Selected  statement-giver-checkbox-6
   Wait Until  Textfield Value Should Be  //input[contains(@id,'add-statement-giver-maaraaika')]  ${empty}
   Wait Until  Textarea Value Should Be  //*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
 
@@ -73,7 +93,7 @@ Sonja adds five statement givers to application
   Invite read-only statement giver  sonja.sibbo@sipoo.fi  04.06.2018
 
   # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
-  Invite 'manual' statement giver  4  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
+  Invite 'manual' statement giver  6  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
   Statement count is  6
   Positive indicator should not be visible
 
