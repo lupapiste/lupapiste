@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
-  (:require [sade.core :refer [ok fail fail!] :as core]
+  (:require [sade.core :refer [ok fail fail! error-and-fail!] :as core]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -15,8 +15,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]))
+            [lupapalvelu.state-machine :as sm]))
 
 
 (defn- build-verdict [{:keys [AsianPaatos]} timestamp]
@@ -58,13 +57,13 @@
   (when-not (-> (org/resolve-organization-scope municipality permit-type)
                 (get-in [:caseManagement :ftpUser])
                 (= ftp-user))
-    (ah-reader/error-and-fail!
+    (error-and-fail!
      (str "FTP user " ftp-user " is not allowed to make changes to application " application-id)
      :error.integration.asianhallinta.unauthorized)))
 
 (defn- check-application-is-in-correct-state! [{application-id :id current-state :state :as application}]
   (when-not (#{:constructionStarted :sent (sm/verdict-given-state application)} (keyword current-state))
-    (ah-reader/error-and-fail!
+    (error-and-fail!
      (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict")
      :error.integration.asianhallinta.wrong-state)))
 
@@ -77,7 +76,7 @@
                         (util/ensure-sequential :Liite)
                         :Liite)]
     (when-not application-id
-      (ah-reader/error-and-fail!
+      (error-and-fail!
         (str "ah-verdict - Application id is nil for user " ftp-user)
         :error.integration.asianhallinta.no-application-id))
     (let [application (domain/get-application-no-access-checking application-id)
@@ -108,6 +107,3 @@
         (notifications/notify! :application-state-change command)
         (ok)))))
 
-(defmethod ah-reader/handle-asianhallinta-message :AsianPaatos
-  [parsed-xml unzipped-path ftp-user system-user]
-  (process-ah-verdict parsed-xml unzipped-path ftp-user system-user))

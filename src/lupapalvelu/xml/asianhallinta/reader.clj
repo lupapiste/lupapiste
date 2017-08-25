@@ -6,11 +6,9 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
-            [sade.common-reader :as cr]))
-
-(defn error-and-fail! [error-msg fail-key]
-  (error error-msg)
-  (fail! fail-key))
+            [sade.common-reader :as cr]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
+            [lupapalvelu.xml.asianhallinta.response :as ah-response]))
 
 (defn- unzip-file [path-to-zip target-dir]
   (if-not (and (fs/exists? path-to-zip) (fs/exists? target-dir))
@@ -30,6 +28,12 @@
             :error.integration.asianhallinta-missing-attachment))))))
 
 (defmulti handle-asianhallinta-message (fn [parsed-xml _ _ _] (:tag parsed-xml)))
+(defmethod handle-asianhallinta-message :AsianPaatos
+  [parsed-xml unzipped-path ftp-user system-user]
+  (ah-verdict/process-ah-verdict parsed-xml unzipped-path ftp-user system-user))
+(defmethod handle-asianhallinta-message :AsianTunnusVastaus
+  [parsed-xml _ ftp-user system-user]
+  (ah-response/asian-tunnus-vastaus-handler parsed-xml ftp-user system-user))
 
 (defn process-message [path-to-zip ftp-user system-user]
   (let [tmp-dir (fs/temp-dir (str "ah"))]

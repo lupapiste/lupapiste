@@ -14,12 +14,12 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.ely :as ely]
+            [lupapalvelu.integrations.messages :as msgs]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.asianhallinta.response :as ah-response]))
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
 ;;
 ;; Common
@@ -201,8 +201,11 @@
   (when-not (= ftp-user (get-in statement [:person :id]))
     (fail! :error.unauthorized :source ::validate-external-statement-update)))
 
-(defmethod ah-response/handle-response-message :statement   ; LPK-3126
-  [responded-message xml-edn ftp-user _]
+(sc/defn handle-ah-response-message
+  "LPK-3126 handler for :statement target IntegrationMessages"
+  [responded-message :- msgs/IntegrationMessage
+   xml-edn
+   ftp-user]
   (let [application-id (get-in xml-edn [:AsianTunnusVastaus :HakemusTunnus])
         partners-id (get-in xml-edn [:AsianTunnusVastaus :AsianTunnus])
         received-ts (-> xml-edn (get-in [:AsianTunnusVastaus :VastaanotettuPvm]) (cr/to-timestamp))
