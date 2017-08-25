@@ -79,12 +79,11 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.openDeleteDialog = function(model) {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("statement.delete.header"),
-        loc("statement.delete.message"),
-        {title: loc("yes"), fn: _.partial(deleteStatementFromServer, model.id())},
-        {title: loc("no")}
-    );
+    hub.send("show-dialog", {ltitle: "statement.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "statement.delete.message",
+                                               yesFn: _.partial(deleteStatementFromServer, model.id())}});
   };
 
 };
