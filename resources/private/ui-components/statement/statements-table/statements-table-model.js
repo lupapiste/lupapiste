@@ -52,8 +52,8 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return util.getIn(statement, ["person", "userId"]) === user.id();
   };
 
-  self.isRemovable = function() {
-    return self.authorization.ok("delete-statement");
+  self.isRemovable = function(statement) {
+    return user.isAuthority()  && !self.isGiven(statement);
   };
 
   self.canAccessStatement = function(statement) {
