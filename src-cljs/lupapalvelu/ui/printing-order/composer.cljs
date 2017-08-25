@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.printing-order.composer
   (:require [rum.core :as rum]
             [lupapalvelu.ui.attachment.components :as attc]
+            [lupapalvelu.ui.components :as comp]
             [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.common :refer [loc] :as common]
@@ -166,7 +167,7 @@
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))
-     [:div (lupapalvelu.ui.components/debug-atom (rum/cursor-in state/component-state [:contacts]))]
+     [:div (comp/debug-atom (rum/cursor-in state/component-state [:conditions-accepted]))]
      (order-composer-footer)]))
 
 (defonce args (atom {}))

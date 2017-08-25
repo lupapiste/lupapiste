@@ -34,12 +34,13 @@
          nil?)))
 
 (defn valid-order? []
-  (let [{:keys [orderer payer delivery conditions-accepted
-                payer-same-as-orderer delivery-same-as-orderer ]} (:contacts @component-state)]
+  (let [{:keys [orderer payer delivery
+                payer-same-as-orderer delivery-same-as-orderer]} (:contacts @component-state)
+        conditions-accepted (:conditions-accepted @component-state)]
     (and (valid-contact? orderer)
          (or payer-same-as-orderer (valid-contact? payer))
          (or delivery-same-as-orderer (valid-contact? delivery))
-         conditions-accepted)))
+         (true? conditions-accepted))))
 
 (defn will-unmount [& _]
   (reset! component-state empty-component-state))
