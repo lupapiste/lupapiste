@@ -358,7 +358,7 @@
                     (get-asianhallinta-ftp-users ah-organizations))
         eraajo-user (user/batchrun-user (map :id ah-organizations))]
     (logging/log-event :info {:run-by "Asianhallinta reader"
-                              :event (format "Reader process start - %d ftp users to be checked")})
+                              :event (format "Reader process start - %d ftp users to be checked" (count ftp-users))})
     (doseq [ftp-user ftp-users
             :let [path (str
                          (env/value :outgoing-directory) "/"
