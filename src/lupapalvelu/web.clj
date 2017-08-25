@@ -836,8 +836,9 @@
       (spit temp xml-s)
       (let [result (files/with-zip-file
                      [(.getPath temp)]
-                     (ah-reader/process-message zip-file ftp-user (usr/batchrun-user ["123"])))]
-
+                     (ah-reader/process-message zip-file
+                                                (or ftp-user (env/value :ely :sftp-user))
+                                                (usr/batchrun-user ["123"])))]
         (io/delete-file temp)
         (resp/status 200 (resp/json result)))))
 
