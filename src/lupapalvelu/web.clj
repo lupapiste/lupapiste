@@ -826,7 +826,7 @@
                                  xml overrides)]
       (apply str (enlive/emit* overridden-xml))))
 
-  (defpage [:post "/dev/ah/message-response"] {:keys [id messageId]} ; LPK-3126
+  (defpage [:post "/dev/ah/message-response"] {:keys [id messageId ftp-user]} ; LPK-3126
     (let [xml (-> (io/resource "asianhallinta/sample/ah-example-response.xml")
                   (enlive/xml-resource)
                   (enlive/transform [:ah:AsianTunnusVastaus :ah:HakemusTunnus] (enlive/content id))
@@ -834,10 +834,12 @@
           xml-s (apply str (enlive/emit* xml))
           temp (files/temp-file "asianhallinta" ".xml")]
       (spit temp xml-s)
-      (files/with-zip-file [(.getPath temp)]
-                           (ah-reader/process-message zip-file (env/value :ely :sftp-user) (usr/batchrun-user ["123"])))
-      (io/delete-file temp)
-      (resp/status 200 (resp/json {:ok true}))))
+      (let [result (files/with-zip-file
+                     [(.getPath temp)]
+                     (ah-reader/process-message zip-file ftp-user (usr/batchrun-user ["123"])))]
+
+        (io/delete-file temp)
+        (resp/status 200 (resp/json result)))))
 
   (defpage [:get "/dev/filecho/:filename"] {filename :filename}
     (->> filename

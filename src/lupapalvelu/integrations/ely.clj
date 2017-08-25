@@ -1,13 +1,14 @@
 (ns lupapalvelu.integrations.ely
   "ELY-keskus USPA integraatio"
-  (:require [sade.core :refer :all]))
+  (:require [sade.core :refer :all]
+            [sade.env :as env]))
 
 (defn ely-statement-giver [subtype]
   {:userId "ely-uspa"
-   :id     "ely-uspa"
-   :email "ely-uspa@lupapiste.fi"
-   :name "ELY-keskus"
-   :text subtype})
+   :id     (env/value :ely :sftp-user)
+   :email  "ely-uspa@lupapiste.fi"
+   :name   "ELY-keskus"
+   :text   subtype})
 
 (def r-statement-types
   "ELY statement types for R.
