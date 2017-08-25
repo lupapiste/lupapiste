@@ -826,7 +826,7 @@
                                  xml overrides)]
       (apply str (enlive/emit* overridden-xml))))
 
-  (defpage [:post "/dev/ah/message-response"] {:keys [id messageId ftp-user]} ; LPK-3126
+  (defpage [:get "/dev/ah/message-response"] {:keys [id messageId ftp-user]} ; LPK-3126
     (let [xml (-> (io/resource "asianhallinta/sample/ah-example-response.xml")
                   (enlive/xml-resource)
                   (enlive/transform [:ah:AsianTunnusVastaus :ah:HakemusTunnus] (enlive/content id))

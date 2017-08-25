@@ -74,17 +74,17 @@
       (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))
             external-data (:external ely-statement)]
         (fact "Random FTP user can't update statement"
-          (-> (decoded-simple-post (str (server-address) "/dev/ah/message-response")
-                                   {:form-params {:id (:id app)
-                                                  :ftp-user "foo"
-                                                  :messageId (:messageId external-data)}})
+          (-> (decoded-get (str (server-address) "/dev/ah/message-response")
+                                   {:query-params {:id (:id app)
+                                                   :ftp-user "foo"
+                                                   :messageId (:messageId external-data)}})
               :body) => (partial expected-failure? :error.unauthorized))
 
         ; Mock XML unzipping and messageId parsing from AsianTunnusVastaus
-        (-> (decoded-simple-post (str (server-address) "/dev/ah/message-response")
-                                 {:form-params {:id (:id app)
-                                                :ftp-user (env/value :ely :sftp-user)
-                                                :messageId (:messageId external-data)}})
+        (-> (decoded-get (str (server-address) "/dev/ah/message-response")
+                                 {:query-params {:id (:id app)
+                                                 :ftp-user (env/value :ely :sftp-user)
+                                                 :messageId (:messageId external-data)}})
             :body) => ok?
 
         (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
