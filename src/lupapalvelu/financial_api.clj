@@ -1,7 +1,8 @@
 (ns lupapalvelu.financial-api
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.financial :as financial]
-            [lupapalvelu.application :as application]))
+            [lupapalvelu.application :as application]
+            [lupapalvelu.states :as states]))
 
 (defcommand create-financial-handler
   {:parameters [:email]
@@ -30,3 +31,13 @@
    :notified true}
   [command]
   (financial/remove-financial-handler-invitation command))
+
+(defcommand notify-organizations-housing-office
+  {:parameters [:id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:applicant :authority}
+   :states states/post-submitted-states
+   :pre-checks [application/validate-authority-in-drafts]
+   :notified true}
+  [command]
+  (financial/notify-housing-office command))

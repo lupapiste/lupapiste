@@ -43,3 +43,6 @@
         username (:username financial-authority)]
     (auth/do-remove-auth command username)
     (notifications/notify! :remove-financial-authority-invitation (assoc command :recipients [financial-authority]))))
+
+(defn notify-housing-office [command]
+  (ok))

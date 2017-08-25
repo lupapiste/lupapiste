@@ -121,3 +121,6 @@
 "email.title.remove-financial-authority-invitation" "en" ""
 "email.title.remove-financial-authority-invitation" "fi" "Valtuutus poistettu ARA-hankkeesta"
 "email.title.remove-financial-authority-invitation" "sv" ""
+"email.title.organization-housing-office" "en" ""
+"email.title.organization-housing-office" "fi" "{{address}}, {{municipality}} - uusi ARA rahoitteinen hakemus"
+"email.title.organization-housing-office" "sv" ""
