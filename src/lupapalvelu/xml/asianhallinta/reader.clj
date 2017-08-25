@@ -2,7 +2,7 @@
   "Read asianhallinta messages from SFTP"
   (:require [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
-            [sade.core :refer [ok fail fail!]]
+            [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
