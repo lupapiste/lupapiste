@@ -31,7 +31,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.getExternalText = function(statement) {
     var externalInfo = statement.external;
-    if ( externalInfo.acknowledged() && externalInfo.externalId() ) {
+    if ( externalInfo && externalInfo.acknowledged && externalInfo.externalId ) {
       var partnerText = loc("application.statement.external-partner.in." + externalInfo.partner());
       var acknowledgedDateStr = moment(externalInfo.acknowledged()).format("D.M.YYYY");
       var fullText = loc("application.statement.external.received",
