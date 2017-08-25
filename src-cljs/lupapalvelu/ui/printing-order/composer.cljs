@@ -16,16 +16,24 @@
   (let [[ko-app] (-> (aget props ":rum/initial-state") :rum/args)
         app-id   (aget ko-app "_js" "id")]
     (common/query "attachments-for-printing-order"
-      #(swap! state/component-state assoc :id app-id
-                                    :attachments (:attachments %)
-                                    :order       (zipmap (map :id (:attachments %)) (repeatedly (constantly 0)))
-                                    :tagGroups   (:tagGroups %))
+      (fn [result]
+        (swap! state/component-state assoc
+               :id app-id
+               :attachments (:attachments result)
+               :order       (zipmap (map :id (:attachments result)) (repeatedly (constantly 0)))
+               :tagGroups   (:tagGroups result))
+        (swap! state/component-state assoc-in [:contacts :orderer]
+               {:firstName (.firstName js/lupapisteApp.models.currentUser)
+                :lastName  (.lastName js/lupapisteApp.models.currentUser)
+                :address   (.street js/lupapisteApp.models.currentUser)
+                :postalCode (.zip js/lupapisteApp.models.currentUser)
+                :city       (.city js/lupapisteApp.models.currentUser)
+                :email      (.email js/lupapisteApp.models.currentUser)}))
       :id app-id)
-
     init-state))
 
 (defn accordion-name [path]
-  (js/lupapisteApp.services.accordionService.attachmentAccordionName path))
+  (.attachmentAccordionName js/lupapisteApp.services.accordionService path))
 
 (defn attachment-in-group? [path attachment]
   (every? (fn [pathKey] (some #(= pathKey %) (:tags attachment))) path))
@@ -61,7 +69,7 @@
        [:h2 (str (loc "printing-order.footer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
       [:button.tertiary.rollup-button
        [:h2 (str (loc "printing-order.footer.price") " " 0 "€")]]
-      [:button.tertiary.rollup-button
+      [:button.tertiary.rollup-buttonx
        [:h2 (loc "printing-order.show-pricing")]]
       [:button.tertiary.rollup-button
        [:h2 (loc "printing-order.mylly.provided-by")]]]]))

@@ -125,5 +125,10 @@ lupapisteApp.services.cardService = {};
 
 lupapisteApp.models = {};
 lupapisteApp.models.currentUser = {};
+lupapisteApp.models.currentUser.firstName = function() {};
+lupapisteApp.models.currentUser.lastName = function() {};
 lupapisteApp.models.currentUser.displayName = function() {};
 lupapisteApp.models.currentUser.street = function() {};
+lupapisteApp.models.currentUser.zip = function() {};
+lupapisteApp.models.currentUser.city = function() {};
+lupapisteApp.models.currentUser.email = function() {};
