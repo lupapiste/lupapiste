@@ -29,6 +29,25 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
   };
 
+  self.getExternalText = function(statement) {
+    var externalInfo = statement.external;
+    if ( externalInfo.acknowledged() && externalInfo.externalId() ) {
+      var partnerText = loc("application.statement.external-partner.in." + externalInfo.partner());
+      var acknowledgedDateStr = moment(externalInfo.acknowledged()).format("D.M.YYYY");
+      var fullText = loc("application.statement.external.received",
+                         partnerText,
+                         acknowledgedDateStr,
+                         externalInfo.externalId());
+      return fullText;
+    } else {
+      return "";
+    }
+  };
+
+  self.isExternal = function(statement) {
+    return _.isObject(statement.external);
+  };
+
   var isStatementOwner = function(statement) {
     return util.getIn(statement, ["person", "userId"]) === user.id();
   };
