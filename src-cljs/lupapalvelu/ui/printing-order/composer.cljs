@@ -11,25 +11,43 @@
 
 (def log (.-log js/console))
 
+(defn- init-user-details
+  ([]
+   (init-user-details nil))
+  ([company]
+   (swap! state/component-state assoc-in [:contacts :orderer]
+          (merge
+            {:firstName (.firstName js/lupapisteApp.models.currentUser)
+             :lastName  (.lastName js/lupapisteApp.models.currentUser)
+             :address   (.street js/lupapisteApp.models.currentUser)
+             :postalCode (.zip js/lupapisteApp.models.currentUser)
+             :city       (.city js/lupapisteApp.models.currentUser)
+             :email      (.email js/lupapisteApp.models.currentUser)}
+            (when company
+              {:companyName (:name company)
+               :address (:address1 company)
+               :postalCode (:zip company)
+               :city (:po company)})))))
+
 (defn init
   [init-state props]
   (let [[ko-app] (-> (aget props ":rum/initial-state") :rum/args)
-        app-id   (aget ko-app "_js" "id")]
+        app-id   (.id ko-app)
+        company-id (.id js/lupapisteApp.models.currentUser.company)]
     (common/query "attachments-for-printing-order"
       (fn [result]
         (swap! state/component-state assoc
                :id app-id
                :attachments (:attachments result)
                :order       (zipmap (map :id (:attachments result)) (repeatedly (constantly 0)))
-               :tagGroups   (:tagGroups result))
-        (swap! state/component-state assoc-in [:contacts :orderer]
-               {:firstName (.firstName js/lupapisteApp.models.currentUser)
-                :lastName  (.lastName js/lupapisteApp.models.currentUser)
-                :address   (.street js/lupapisteApp.models.currentUser)
-                :postalCode (.zip js/lupapisteApp.models.currentUser)
-                :city       (.city js/lupapisteApp.models.currentUser)
-                :email      (.email js/lupapisteApp.models.currentUser)}))
+               :tagGroups   (:tagGroups result)))
       :id app-id)
+    (if (and company-id (.userHasRole ko-app #js {:id company-id} "writer"))
+      (common/query "company"
+        (fn [result]
+          (init-user-details (:company result)))
+        :company company-id)
+      (init-user-details))
     init-state))
 
 (defn accordion-name [path]
@@ -171,7 +189,6 @@
      (when (= phase 1)
        (composer-phase1))
      (when (= phase 2)
-       (log (.street js/lupapisteApp.models.currentUser))
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))
