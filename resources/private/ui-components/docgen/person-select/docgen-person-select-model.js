@@ -58,6 +58,7 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
           $("#invite-document-path").val(self.myNs).change();
           $("#invite-document-id").val(self.documentId).change();
           $("#invite-email").val(selectedUser.email).change();
+          $("#invite-text").val(loc("comment.placeholder")).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus-yrityskayttaja-suunnittelijaksi");
         } else {
           self.doSetUserToDocument(value);

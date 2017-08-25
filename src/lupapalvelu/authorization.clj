@@ -78,11 +78,14 @@
 (defn has-some-auth-role? [{auth :auth} user-id roles]
   (has-auth? {:auth (get-auths-by-roles {:auth auth} roles)} user-id))
 
-(defn has-auth-via-company? [{auth :auth} user-id]
-  (or (if-let [company (get (usr/get-user-by-id user-id) :company)]
-        (let [company-auth (util/find-by-id (:id company) auth)]
-          (and company-auth (some #{(:role company-auth)} #{"writer" "owner"}))))
-      false))
+(defn auth-via-company [{auth :auth} user-id]
+  (if-let [company (get (usr/get-user-by-id user-id) :company)]
+    (let [company-auth (util/find-by-id (:id company) auth)]
+      (when (some #{(:role company-auth)} #{"writer" "owner"})
+        company-auth))))
+
+(defn has-auth-via-company? [application user-id]
+  (or (auth-via-company application user-id) false))
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   {:pre [(seq inviter) (seq invited) application-id role timestamp]}
