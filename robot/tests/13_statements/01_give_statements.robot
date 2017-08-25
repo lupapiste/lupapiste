@@ -80,7 +80,7 @@ Sonja adds five statement givers to application
 Sonja can delete statement
   Element should be visible by test id  delete-statement-5
   Scroll and click test id  delete-statement-5
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Statement count is  5
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
@@ -241,6 +241,6 @@ Luukas logs in but cannot edit statement
 
 Luukas can still delete (empty) statement
   Scroll and click test id  delete-statement-3
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Element should not be visible  jquery=tr.statement-row i.lupicon-remove
   Logout

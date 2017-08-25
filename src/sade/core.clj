@@ -1,5 +1,6 @@
 (ns sade.core
-  (:require [slingshot.slingshot :refer [throw+ try+]]))
+  (:require [slingshot.slingshot :refer [throw+ try+]]
+            [taoensso.timbre :refer [error]]))
 
 (defn fail [text & args]
   (let [map-args (if (map? (first args)) (first args) (apply hash-map args))]
@@ -30,3 +31,7 @@
 
 (defmacro def- [item value]
   `(def ^{:private true} ~item ~value))
+
+(defn error-and-fail! [error-msg fail-key]
+  (error error-msg)
+  (fail! fail-key))

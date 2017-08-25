@@ -7,13 +7,16 @@
             [clojure.java.io :as io]
             [clojure.walk :refer [postwalk prewalk]]
             [me.raynes.fs :as fs]
+            [me.raynes.fs.compression :as fsc]
             [sade.core :refer [fail!]]
+            [sade.files :as files]
             [sade.shared-util :as shared]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]])
   (:import [java.util.jar JarFile]
-           [org.joda.time LocalDateTime]))
+           [org.joda.time LocalDateTime]
+           [java.io ByteArrayOutputStream]))
 
 ;;
 ;; Nil-safe number utilities

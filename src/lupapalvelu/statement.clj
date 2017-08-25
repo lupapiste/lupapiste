@@ -1,15 +1,20 @@
 (ns lupapalvelu.statement
   (:require [clojure.set]
+            [taoensso.timbre :refer [warnf]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.core :refer :all]
+            [sade.common-reader :as cr]
             [sade.util :as util]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.validators :as v]
+            [lupapalvelu.action :as action]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations.ely :as ely]
+            [lupapalvelu.integrations.messages :as msgs]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
@@ -53,7 +58,8 @@
   {:partner                      (sc/eq "ely")
    :subtype                      (apply sc/enum ely/all-statement-types)
    (sc/optional-key :externalId) sc/Str
-   (sc/optional-key :messageId)  sc/Str})
+   (sc/optional-key :messageId)  sc/Str
+   (sc/optional-key :acknowledged) ssc/Timestamp})
 
 (defschema Statement
   {:id                              ssc/ObjectIdStr ;; statement id
@@ -187,6 +193,38 @@
                                   selectedPersons)
                             (fail :error.email))]
     (or non-blank-string-keys has-invalid-email)))
+
+(defn validate-external-statement-update!
+  "Ensure statement is external and has correct statement giver, compared to ftp-user.
+  In ELY case lupapalvelu.integrations.ely/ely-statement-giver id should match with ftp-user."
+  [statement ftp-user]
+  (when-not (= ftp-user (get-in statement [:person :id]))
+    (fail! :error.unauthorized :source ::validate-external-statement-update)))
+
+(sc/defn handle-ah-response-message
+  "LPK-3126 handler for :statement target IntegrationMessages"
+  [responded-message :- msgs/IntegrationMessage
+   xml-edn
+   ftp-user]
+  (let [application-id (get-in xml-edn [:AsianTunnusVastaus :HakemusTunnus])
+        partners-id (get-in xml-edn [:AsianTunnusVastaus :AsianTunnus])
+        received-ts (-> xml-edn (get-in [:AsianTunnusVastaus :VastaanotettuPvm]) (cr/to-timestamp))
+
+        statement-id (get-in responded-message [:target :id])
+        application (domain/get-application-no-access-checking application-id [:statements])
+        statement   (get-statement application statement-id)
+        command (action/application->command {:id application-id})]
+    (if statement
+      (do
+        (validate-external-statement-update! statement ftp-user)
+        (when-let [updated (update-statement
+                             (update statement :state keyword) ; Schema...
+                             (:modify-id statement)
+                             :external
+                             (assoc (:external statement) :externalId partners-id :acknowledged received-ts))]
+          (action/update-application command {:statements {$elemMatch {:id statement-id}}} {$set {:statements.$ updated}})))
+      (warnf "No statement found for ah response-message (%s), statementId in original message was: %s", (:id responded-message) statement-id))))
+
 ;;
 ;; Statement givers
 ;;

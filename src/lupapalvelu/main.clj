@@ -9,7 +9,7 @@
                "smoketest"                  'lupapalvelu.smoketest.lupamonster/-main
                "reminders"                  'lupapalvelu.batchrun/send-reminder-emails
                "check-verdicts"             'lupapalvelu.batchrun/check-for-verdicts
-               "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-verdicts
+               "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-messages
                "check-reviews"              'lupapalvelu.batchrun/check-for-reviews
                "check-reviews-for-orgs"     'lupapalvelu.batchrun/check-reviews-for-orgs
                "check-reviews-for-ids"      'lupapalvelu.batchrun/check-reviews-for-ids
