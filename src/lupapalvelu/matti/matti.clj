@@ -340,13 +340,73 @@
             (util/split-kw-path :matti-verdict.1.application-id)
             (:id application)))
 
-(defn new-verdict-draft [template-id {:keys [application organization created] :as command}]
+(defn new-verdict-draft [template-id {:keys [application organization created]
+                                      :as   command}]
   (let [template (verdict-template @organization template-id)
-        data     (initial-draft-data template application)]
+        version  (-> template :versions last)
+        draft    {:id       (mongo/create-id)
+                  :data     (initial-draft-data template application)
+                  :modified created}]
     (action/update-application command
                                {$push {:matti-verdicts
-                                       {:id (mongo/create-id)
-                                        :template-id template-id
-                                        :data        data}}})
-    {:data     (assoc data :modified created)
-     :settings (-> template :versions last :settings)}))
+                                       (assoc draft
+                                              :template {:id         template-id
+                                                         :version-id (:id version)})}})
+    {:verdict  draft
+     :settings (:settings version)}))
+
+(defn verdict-summary [verdict]
+  (select-keys verdict [:id :published :modified]))
+
+(defn command->verdict [{:keys [data application]}]
+  (util/find-by-id (:verdict-id data) (:matti-verdicts application)))
+
+(defn verdict-settings [verdict organization]
+  (let [{:keys [id version-id]} (:template verdict)
+        settings (->>  id
+                       (verdict-template organization)
+                       :versions
+                       (util/find-by-id version-id)
+                       :settings)]
+    settings))
+
+(defn delete-verdict [verdict-id command]
+  (action/update-application command
+                             {$pull {:matti-verdicts {:id verdict-id}}}))
+
+(defn- listify
+  "Transforms argument into list if it is not sequential. Nil results
+  in empty list."
+  [a]
+  (cond
+    (sequential? a) a
+    (nil? a)        '()
+    :default        (list a)))
+
+(defn- verdict-update [{:keys [data created application] :as command} update]
+  (let [{verdict-id :verdict-id} data]
+    (action/update-application command
+                               {:matti-verdicts {$elemMatch {:id verdict-id}}}
+                               (assoc-in update
+                                         [$set :matti-verdicts.$.modified]
+                                         created))))
+
+(defn edit-verdict [{{:keys [verdict-id path value]} :data
+                     organization                    :organization
+                     application                     :application
+                     :as                             command}]
+  (let [verdict (command->verdict command)
+        schema  (-> application
+                    :permitType
+                    shared/permit-type->category
+                    shared/verdict-schemas)]
+    (if-let [error (schemas/validate-path-value
+                    schema
+                    path value
+                    {:schema-overrides {:section shared/MattiVerdictSection}
+                     :references       (verdict-settings verdict
+                                                         @organization)})]
+      {:errors [[path error]]}
+      (let [updated (assoc-in (:data verdict) (map keyword path) value)]
+        (verdict-update command {$set {:matti-verdicts.$.data updated}})
+        {}))))

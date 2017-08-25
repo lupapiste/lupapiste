@@ -442,7 +442,7 @@
   (date/parse-finnish-date "01.02.2017")
   => (time/local-date 2017 2 1)
   (date/parse-finnish-date "88.77.2017")
-  = nil)
+  => nil)
 
 (facts "Date unparsing"
   (date/finnish-date (time/local-date 2017 2 1))

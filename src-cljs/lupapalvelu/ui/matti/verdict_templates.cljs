@@ -45,17 +45,15 @@
 
 (defn reset-template [{:keys [id name modified published draft] :as template}]
   (reset! state/current-template
-          (if template
+          (when template
             (assoc draft
                    :name name
                    :id id
                    :modified modified
                    :published published
-                   :_meta
-                   {:updated   updater
-                    :can-edit? true?
-                    :editing? true})
-            nil))
+                   :_meta {:updated   updater
+                           :can-edit? true?
+                           :editing? true})))
   (reset! state/current-view (if template ::template ::list)))
 
 (defn with-back-button [component]

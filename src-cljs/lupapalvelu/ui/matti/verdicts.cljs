@@ -15,8 +15,18 @@
 
 (defonce args (atom {}))
 
-(defn reset-verdict [{:keys [data settings] :as verdict}]
-  (reset! state/current-verdict data)
+(defn updater [{:keys [state path]}]
+  (service/edit-verdict @state/application-id
+                        (path/value [:id] state/current-verdict)
+                        path
+                        (path/value path state)
+                        (common/response->state state :modified)))
+
+(defn reset-verdict [{:keys [verdict settings]}]
+  (reset! state/current-verdict (when verdict
+                                  (assoc-in verdict
+                                            [:data :_meta]
+                                            {:updated updater})))
   (reset! state/references settings)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
@@ -25,9 +35,11 @@
     (when (common/reset-if-needed! state/application-id app-id)
       (if app-id
         (do (service/fetch-application-verdict-templates app-id)
-            (service/fetch-application-phrases app-id))
+            (service/fetch-application-phrases app-id)
+            (service/fetch-verdict-list app-id))
         (do (reset! state/template-list [])
-            (reset! state/phrases []))))))
+            (reset! state/phrases [])
+            (reset! state/verdict-list nil))))))
 
 (defn with-back-button [component]
   [:div
@@ -55,7 +67,7 @@
    [:div.matti-grid-2
     [:div.row.row--tight
      [:div.col-2.col--right
-      (layout/last-saved options)]]]
+      (layout/last-saved {:state state/current-verdict})]]]
    (for [sec sections]
      (sections/section (assoc sec
                               :path (path/extend (:id sec))
@@ -65,9 +77,7 @@
 
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)
-  (rum/local :small ::complexity)
-  [{template* ::template
-    complexity* ::complexity}]
+  [{template* ::template}]
   (let [items (map #(set/rename-keys % {:id :value :name :text})
                    (rum/react state/template-list))]
     (when-not (rum/react template*)
@@ -89,11 +99,19 @@
 
 
 (rum/defc verdict-list < rum/reactive
-  []
+  [verdicts app-id]
   [:div
    [:h2 (common/loc "application.tabVerdict")]
-   [:p "Application id:" (rum/react state/application-id)]
-   [:p "Permit type:" (lupapisteApp.models.application.permitType)]
+   [:ol
+    (map (fn [{:keys [id published modified]}]
+           [:li {:key id}
+            [:a {:on-click #(service/open-verdict app-id id reset-verdict)}
+             (js/sprintf "Published: %s, Modified: %s"
+                         (js/util.finnishDate published)
+                         (js/util.finnishDateAndTime modified))]
+            [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}
+             ]])
+         verdicts)]
    (new-verdict)])
 
 (rum/defc verdicts < rum/reactive
@@ -108,13 +126,14 @@
   []
   (when (and (rum/react state/application-id)
              (rum/react state/schemas)
-             (rum/react state/phrases))
+             (rum/react state/phrases)
+             (rum/react state/verdict-list))
     [:div
      (case (rum/react state/current-view)
-       ::list (verdict-list)
+       ::list (verdict-list @state/verdict-list @state/application-id)
        ::verdict (with-back-button (verdict (assoc (get shared/verdict-schemas
                                                         (shared/permit-type->category (lupapisteApp.models.application.permitType)))
-                                                   :state state/current-verdict))))
+                                                   :state (rum/cursor-in state/current-verdict [:data])))))
      (components/debug-atom state/current-verdict "state/current-verdict")
      (components/debug-atom state/references "state/references")]))
 

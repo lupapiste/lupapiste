@@ -19,3 +19,4 @@
 (def phrases          (state-cursor :phrases))
 (def application-id   (state-cursor :application-id))
 (def current-verdict  (state-cursor :current-verdict))
+(def verdict-list     (state-cursor :verdict-list))

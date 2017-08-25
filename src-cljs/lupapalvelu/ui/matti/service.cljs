@@ -141,8 +141,35 @@
                 #(reset! state/template-list (:templates %))
                 :id app-id))
 
+(defn fetch-verdict-list [app-id]
+  (common/query "matti-verdicts"
+                #(reset! state/verdict-list (:verdicts %))
+                :id app-id))
+
 (defn new-verdict-draft [app-id template-id callback]
-  (common/query "new-verdict-draft"
+  (common/command {:command "new-matti-verdict-draft"
+                   :success #(do (fetch-verdict-list app-id)
+                                 (callback %))}
+                  :id app-id
+                  :template-id template-id))
+
+(defn open-verdict [app-id verdict-id callback]
+  (common/query "matti-verdict"
                 callback
                 :id app-id
-                :template-id template-id))
+                :verdict-id verdict-id))
+
+(defn delete-verdict [app-id verdict-id callback]
+  (common/command {:command "delete-matti-verdict"
+                   :success #(do (fetch-verdict-list app-id)
+                                 (callback %))}
+                  :id app-id
+                  :verdict-id verdict-id))
+
+(defn edit-verdict [app-id verdict-id path value callback]
+  (common/command {:command "edit-matti-verdict"
+                   :success callback}
+                  :id app-id
+                  :verdict-id verdict-id
+                  :path path
+                  :value value))

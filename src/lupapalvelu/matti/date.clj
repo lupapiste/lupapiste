@@ -44,10 +44,10 @@
         e    (easter year)]
     (contains? #{(time/local-date year 1 1)     ;; New Year
                  (time/local-date year 1 6)     ;; Epiphany
-                 (time/minus e (time/days 2))  ;; Good Friday
-                 (time/plus e (time/days 1))   ;; Easter Monday
+                 (time/minus e (time/days 2))   ;; Good Friday
+                 (time/plus e (time/days 1))    ;; Easter Monday
                  (time/local-date year 5 1)     ;; May Day
-                 (time/plus e (time/days 39))  ;; Ascension Day
+                 (time/plus e (time/days 39))   ;; Ascension Day
                  (forward-to-week-day (time/local-date year 6 19) 5) ;; Mid-summer eve
                  (time/local-date year 12 6)    ;; Independence Day
                  (time/local-date year 12 24)   ;; Christmas eve
