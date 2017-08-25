@@ -277,10 +277,9 @@
 
 (defpage [:delete "/api/vetuma/user"] []
   (if-let [session (vetuma-session)]
-    (if (lupapalvelu.ident.session/delete-user session)
-      (response/json {:ok true})
-      (response/status 500 "removing vetuma session failed"))
-    (response/status 404 (str "no vetuma session for session id: " (session-id)))))
+    (lupapalvelu.ident.session/delete-user session))
+  ; Always return 200 ok.
+  (response/json {:ok true}))
 
 (defn session-pre-check [_]
   (when (empty? (vetuma-session))
