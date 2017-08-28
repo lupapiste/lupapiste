@@ -59,12 +59,16 @@
     [:title "Lupapiste"]]
    [:body
     header
-    [:section
-     content]]])
+    [:section.page.welcome-page.visible
+     [:div.container
+      content]]]])
 
 
 
-(defn authorization-page-hiccup []
+(defn authorization-page-hiccup [client-id scope lang]
   (content-to-template
     [:div
-     "MORO"]))
+     [:h2 "Hyväksy tietojen luovutus"]
+     [:div
+      [:i.lupicon-circle-attention.primary {:style "vertical-align: middle"}]
+      [:span {:style "vertical-align: middle; margin-left: 5px;"} "Olet kirjautunut sisään Lupapisteeseen yrityksen Kallen suunnittelutoimisto käyttäjänä Kaino Solita (kaino@solita.fi)"]]]))
