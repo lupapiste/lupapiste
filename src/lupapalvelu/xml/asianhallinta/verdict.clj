@@ -31,16 +31,12 @@
                                 :paatoskoodi     (or (:PaatosKoodi AsianPaatos) (:PaatoksenTunnus AsianPaatos)) ; PaatosKoodi is not required
                                 :id              (mongo/create-id)}]}]})
 
-(defn- insert-attachment! [unzipped-path application attachment type target timestamp]
+(defn- insert-attachment! [unzipped-path application attachment type target timestamp user]
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
         file          (fs/file (ss/join "/" [unzipped-path filename]))
         file-size     (.length file)
-        orgs          (org/resolve-organizations
-                        (:municipality application)
-                        (:permitType application))
-        batchrun-user (user/batchrun-user (map :id orgs))
         attachment-id (mongo/create-id)]
-    (attachment/upload-and-attach! {:application application :user batchrun-user}
+    (attachment/upload-and-attach! {:application application :user user}
                                    {:attachment-id attachment-id
                                     :attachment-type type
                                     :target target
@@ -102,7 +98,8 @@
             attachment
             {:type-group "muut" :type-id "paatos"}
             {:type "verdict" :id (:id new-verdict) :poytakirjaId poytakirja-id}
-            timestamp))
+            timestamp
+            system-user))
         (notifications/notify! :application-state-change command)
         (ok)))))
 
