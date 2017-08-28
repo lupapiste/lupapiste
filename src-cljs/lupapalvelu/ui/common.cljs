@@ -10,8 +10,9 @@
 (defn loc [& args]
   (apply js/loc (map name args)))
 
-(defn loc-html [& args]
-  [:label {:dangerouslySetInnerHTML {:__html (apply loc args)}}])
+(defn loc-html [tag & args]
+  [tag
+   {:dangerouslySetInnerHTML {:__html (apply loc args)}}])
 
 (def fi-date-formatter (tf/formatter "d.M.yyyy"))
 
