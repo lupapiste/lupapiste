@@ -31,7 +31,7 @@
                                 :paatoskoodi     (or (:PaatosKoodi AsianPaatos) (:PaatoksenTunnus AsianPaatos)) ; PaatosKoodi is not required
                                 :id              (mongo/create-id)}]}]})
 
-(defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id timestamp]
+(defn- insert-attachment! [unzipped-path application attachment type target timestamp]
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
         file          (fs/file (ss/join "/" [unzipped-path filename]))
         file-size     (.length file)
@@ -39,11 +39,10 @@
                         (:municipality application)
                         (:permitType application))
         batchrun-user (user/batchrun-user (map :id orgs))
-        target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
         attachment-id (mongo/create-id)]
     (attachment/upload-and-attach! {:application application :user batchrun-user}
                                    {:attachment-id attachment-id
-                                    :attachment-type {:type-group "muut" :type-id "paatos"}
+                                    :attachment-type type
                                     :target target
                                     :required false
                                     :locked true
@@ -98,11 +97,11 @@
         (action/update-application command update-clause)
         (doseq [attachment attachments]
           (insert-attachment!
+            unzipped-path
             application
             attachment
-            unzipped-path
-            (:id new-verdict)
-            poytakirja-id
+            {:type-group "muut" :type-id "paatos"}
+            {:type "verdict" :id (:id new-verdict) :poytakirjaId poytakirja-id}
             timestamp))
         (notifications/notify! :application-state-change command)
         (ok)))))
