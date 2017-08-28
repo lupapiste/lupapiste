@@ -482,9 +482,14 @@
       :else (resp/status 404 (resp/json (fail :error.unknown))))))
 
 (defpage [:get "/oauth/authorize"]
-  {foo :foo}
-  #_(resp/status 200 (resp/json foo))
-  (hiccup.core/html (oauth/authorization-page-hiccup)))
+  {:keys [client_id scope lang]}
+  (if-not (logged-in? (request/ring-request))
+    (let [{:keys [uri query-string] :as request} (request/ring-request)]
+      (ssess/merge-to-session
+        request
+        (resp/redirect (str (env/value :host) "/app/" (or lang "fi") "/welcome#!/login"))
+        {:redirect-after-login (str uri "?" query-string)}))
+    (hiccup.core/html (oauth/authorization-page-hiccup client_id scope lang))))
 
 ;;
 ;; Cross-site request forgery protection
