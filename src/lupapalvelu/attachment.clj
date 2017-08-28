@@ -258,7 +258,8 @@
 (defn get-attachment-info
   "gets an attachment from application or nil"
   [application attachment-id]
-  (first (get-attachments-infos application [attachment-id])))
+  (when-not (ss/blank? attachment-id)
+    (first (get-attachments-infos application [attachment-id]))))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
