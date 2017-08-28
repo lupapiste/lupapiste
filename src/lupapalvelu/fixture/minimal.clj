@@ -688,7 +688,20 @@
     :language "fi"
     :role "docstore-api"
     :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth
-    }])
+    }
+   ;; Solita admin:  financial / admin
+   {:id "financial"
+    :email "financial@ara.fi"
+    :enabled true
+    :role "financialAuthority"
+    :language "fi"
+    :firstName "Rahoituskäsittelijä"
+    :lastName ""
+    :phone ""
+    :username "financial"
+    :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
+              :apikey "5087ba34c2e667024fbd5999"}}
+   ])
 
 (def- ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
                                             :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    [[:muut :muu]]
