@@ -31,7 +31,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.getExternalText = function(statement) {
     var externalInfo = statement.external;
-    if ( externalInfo.acknowledged() && externalInfo.externalId() ) {
+    if ( externalInfo && externalInfo.acknowledged && externalInfo.externalId ) {
       var partnerText = loc("application.statement.external-partner.in." + externalInfo.partner());
       var acknowledgedDateStr = moment(externalInfo.acknowledged()).format("D.M.YYYY");
       var fullText = loc("application.statement.external.received",
@@ -52,8 +52,8 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return util.getIn(statement, ["person", "userId"]) === user.id();
   };
 
-  self.isRemovable = function() {
-    return self.authorization.ok("delete-statement");
+  self.isRemovable = function(statement) {
+    return !self.isExternal(statement) && user.isAuthority()  && !self.isGiven(statement);
   };
 
   self.canAccessStatement = function(statement) {

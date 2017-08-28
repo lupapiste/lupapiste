@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   User authenticates to Julkipano.fi via Vetuma
+Documentation   User authenticates to Julkipano.fi via Suomi.fi
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
@@ -10,7 +10,7 @@ Resource        ../common_keywords/ident_helpers.robot
 
 *** Test Cases ***
 
-User can authenticate via Vetuma
+User can authenticate via Suomi.fi
   [Tags]  integration
   Create bulletins  1
   Go to bulletins page
@@ -32,7 +32,7 @@ User can logout after authentication
   Click by test id  vetuma-logout
   Wait Until  Element should not be visible  //div[@data-test-id='user-nav-menu']
 
-User is shown error when authentication via Vetuma canceled
+User is shown an error when authentication via Suomi.fi is canceled
   [Tags]  integration
   Go to bulletins page
   Open bulletin by index  1
@@ -40,5 +40,4 @@ User is shown error when authentication via Vetuma canceled
   Open bulletin tab  info
   Start authentication but cancel it  vetuma-init
   Wait Until  Element should be visible by test id  indicator-negative
-  Page should contain  Vetuma-tunnistautuminen peruutettiin
-
+  Page should contain  Suomi.fi-tunnistautuminen peruutettiin

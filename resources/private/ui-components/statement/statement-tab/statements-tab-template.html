@@ -161,12 +161,14 @@
                 data-bind="textInput: elyData.saateText, attr: {placeholder: loc('application.ely-statement.saateText-placeholder')}"></textarea>
     </div>
     <div class="row">
-      <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="ely-maaraaika"></label>
-      <input type="text" class="form-input" data-bind="datepicker: elyData.dueDate" id="ely-maaraaika"></input>
-    </div>
-    <div class="row">
+      <div class="col-1">
+        <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="ely-maaraaika"></label>
+        <input type="text" class="form-input" data-bind="datepicker: elyData.dueDate" id="ely-maaraaika"></input>
+      </div>
+      <div class="col-1">
       <label class="form-label" data-bind="ltext: 'kieli'" for="ely-lang"></label>
-      <select class="dropdown" data-bind="value: elyData.lang, options: loc.supported, optionsText: loc" id="ely-lang"></input>
+        <select class="form-input dropdown" data-bind="value: elyData.lang, options: loc.supported, optionsText: loc" id="ely-lang"></select>
+      </div>
     </div>
   </div>
 

@@ -357,6 +357,8 @@
                     (conj (get-asianhallinta-ftp-users ah-organizations) (env/value :ely :sftp-user))
                     (get-asianhallinta-ftp-users ah-organizations))
         eraajo-user (user/batchrun-user (map :id ah-organizations))]
+    (logging/log-event :info {:run-by "Asianhallinta reader"
+                              :event (format "Reader process start - %d ftp users to be checked" (count ftp-users))})
     (doseq [ftp-user ftp-users
             :let [path (str
                          (env/value :outgoing-directory) "/"
@@ -381,7 +383,8 @@
                                              :zip-path zip-path}
                                             :text (:text result)))
         (when-not (fs/rename zip target)
-          (errorf "Failed to rename %s to %s" zip-path target))))))
+          (errorf "Failed to rename %s to %s" zip-path target))))
+    (logging/log-event :info {:run-by "Asianhallinta reader" :event "Reader process finished"})))
 
 (defn check-for-asianhallinta-messages [& args]
   (when-not (system-not-in-lockdown?)

@@ -28,7 +28,7 @@
               </thead>
               <tbody data-bind="foreach: $data.statements">
                   <tr class="statement-row"
-                      data-bind="click: _.partial($component.openStatement, 'statement'), attr: {'data-test-email':$data.person.email()}">
+                      data-bind="click: _.partial($component.openStatement, 'statement'), attr: {'data-test-email':$data.person.email(), 'data-message-id':$data.external && $data.external.messageId()}">
                       <td>
                         <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data),
                                                                 attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>

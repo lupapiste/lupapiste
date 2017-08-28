@@ -138,18 +138,13 @@
       (lupapalvelu.batchrun/fetch-asianhallinta-messages) => nil
       (provided
         (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
-        (ah-reader/process-message anything anything anything) => (sade.core/fail "nope")
-        (lupapalvelu.logging/log-event :error {:run-by "Asianhallinta reader",
-                                               :event "Failed to process message",
-                                               :zip-path test-file
-                                               :text "nope"}) => "bonk")))
+        (ah-reader/process-message anything anything anything) => (sade.core/fail "nope"))))
   (fact "fetch-asianhallinta-messages logs proess-ah-verdict ok result"
     (mongo/with-db db-name
       (lupapalvelu.batchrun/fetch-asianhallinta-messages) => nil
       (provided
         (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
-        (ah-reader/process-message anything anything anything) => (sade.core/ok)
-        (lupapalvelu.logging/log-event :info {:run-by "Asianhallinta reader", :event "Succesfully processed message", :zip-path test-file}) => "bonk"))))
+        (ah-reader/process-message anything anything anything) => (sade.core/ok)))))
 
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name

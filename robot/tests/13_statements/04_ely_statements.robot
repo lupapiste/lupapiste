@@ -12,6 +12,8 @@ Variables       ../../common_variables.py
 Sonja sets up application by filling person details and submitting
   Sonja logs in
   Create application the fast way  ely-statements  753-416-25-22  kerrostalo-rivitalo
+  ${id}=  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
+  Set Suite Variable  ${appId}  ${id}
   Open tab  parties
   Open accordions  parties
   Select From List  xpath=//section[@data-doc-type='hakija-r']//select[@data-test-id='henkilo.userId']  Sibbo Sonja
@@ -44,6 +46,18 @@ Sonja statement to ELY
   Positive indicator should be visible
   Positive indicator should not be visible
   Statement count is  1
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
+
+Time flies and ELY acknowledges statement request
+  ${messageId}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]@data-message-id
+  Go to  ${SERVER}/dev/ah/message-response?id=${appId}&messageId=${messageId}
+  Wait until  Page should contain  "ok":true
+  Go back
+  Wait until  Element should be visible  xpath=//section[@id='application']//tr[@data-message-id='${messageId}']
+  # Information about acknowledgedment has been saved to statement
+  # (hardcoded value 1006789 from ah-example-response.xml)
+  Element should contain  xpath=//tr[@data-message-id='${messageId}']//td//span[@data-test-id='external-received']  1006789
+
 
 Frontend errors
   There are no frontend errors
