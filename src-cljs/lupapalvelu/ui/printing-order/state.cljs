@@ -42,6 +42,36 @@
          (or delivery-same-as-orderer (valid-contact? delivery))
          (true? conditions-accepted))))
 
+(defn contact-summary-lines [contact]
+  (let [{:keys [firstName lastName companyName address postalCode city email phoneNumber]} contact]
+    (remove nil? [companyName
+                  (str firstName " " lastName)
+                  address
+                  (str postalCode " " city)
+                  email
+                  phoneNumber])))
+
+(defn- payer []
+  (let [{:keys [payer-same-as-orderer orderer payer]} (-> @component-state :contacts)]
+    (if payer-same-as-orderer
+      orderer
+      payer)))
+
+(defn- delivery-address []
+  (let [{:keys [delivery-same-as-orderer orderer delivery]} (-> @component-state :contacts)]
+    (if delivery-same-as-orderer
+      orderer
+      delivery)))
+
+(defn orderer-summary-lines []
+  (contact-summary-lines (-> @component-state :contacts :orderer)))
+
+(defn payer-summary-lines []
+  (contact-summary-lines (payer)))
+
+(defn delivery-address-summary-lines []
+  (contact-summary-lines (delivery-address)))
+
 (defn will-unmount [& _]
   (reset! component-state empty-component-state))
 

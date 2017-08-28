@@ -76,9 +76,52 @@ $matti-grid-margin: 10px;
 span.order-grid-header {
   font-size: 17px;
   font-weight: bold;
+  width: 100%;
+  display: inline-block;
+}
+
+div.order-summary-contacts-block {
+  box-sizing: border-box;
+  border: 1px solid $gray187;
+  padding: 0px $baseline / 2;
+}
+
+span.order-summary-line {
+  width: 100%;
+  display: inline-block;
 }
 
 div.order-section {
   padding-bottom: $matti-grid-margin * 2;
+
+  div.attachments-table-container {
+    padding:0;
+  }
 }
 
+.order-summary-pricing-block {
+  background-color: $gray246;
+  border-top: 1px solid $gray221;
+
+  table {
+    margin-bottom: 0px;
+
+    tr {
+      background: none;
+      border: none;
+    }
+
+    td.first {
+      width: 50%;
+    }
+
+    td.second {
+      width: 35%;
+      text-align: right;
+    }
+
+    td.third {
+      width: 15%;
+    }
+  }
+}

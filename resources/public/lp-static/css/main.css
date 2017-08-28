@@ -21376,10 +21376,54 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 span.order-grid-header {
   font-size: 17px;
   font-weight: bold;
+  width: 100%;
+  display: inline-block;
+}
+
+div.order-summary-contacts-block {
+  box-sizing: border-box;
+  border: 1px solid #bbbbbb;
+  padding: 0px 12px;
+}
+
+span.order-summary-line {
+  width: 100%;
+  display: inline-block;
 }
 
 div.order-section {
   padding-bottom: 20px;
+}
+
+div.order-section div.attachments-table-container {
+  padding: 0;
+}
+
+.order-summary-pricing-block {
+  background-color: #f6f6f6;
+  border-top: 1px solid #dddddd;
+}
+
+.order-summary-pricing-block table {
+  margin-bottom: 0px;
+}
+
+.order-summary-pricing-block table tr {
+  background: none;
+  border: none;
+}
+
+.order-summary-pricing-block table td.first {
+  width: 50%;
+}
+
+.order-summary-pricing-block table td.second {
+  width: 35%;
+  text-align: right;
+}
+
+.order-summary-pricing-block table td.third {
+  width: 15%;
 }
 
 /* VIEWS

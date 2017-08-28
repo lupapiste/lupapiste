@@ -63,7 +63,9 @@
        (loc "printing-order.files-table.type-and-content")]
       [:th (loc "printing-order.files-table.filename")]
       [:th (loc "printing-order.files-table.modified")]
-      [:th (loc "printing-order.files-table.copy-amount")]]]
+      [:th
+       {:style {:width "15%"}}
+       (loc "printing-order.files-table.copy-amount")]]]
     [:tbody
      (for [file files]
        (rum/with-key (file-row file opts) (util/unique-elem-id "file-row")))]]])

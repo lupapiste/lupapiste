@@ -157,16 +157,71 @@
        [:span (loc "printing-order.phase2.button.prev")]]
       (proceed-to-phase3-button)]]))
 
+(rum/defc order-pricing-table < rum/reactive []
+  (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
+        total-amount (reduce + (vals order-rows))]
+    [:table
+     [:thead
+      [:tr
+       [:td.first
+        [:span.h3 (str (loc "printing-order.summary.total-amount") ": " total-amount " " (loc "unit.kpl"))]]
+       [:td.second
+        [:span.h3 (loc "printing-order.summary.total-price")]]
+       [:td.third
+        [:span.h3 "50.00 €"]]]
+      [:tr
+       [:td.first]
+       [:td.second
+        [:span "Sis. alv (24%)"]]
+       [:td.third
+        [:span "9.67 €"]]]]]))
+
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))
         attachments-selected (->> @state/component-state
                                   :attachments
                                   (filter (fn [{id :id}]
                                             (pos? (get order id)))))]
-    [:div.order-grid-4
+    [:div.order-grid-3
      [:div.order-section
       (poc/section-header "printing-order.summary.documents")
       (files/files-table attachments-selected :read-only)]
+     [:div.order-summary-pricing-block (order-pricing-table)]
+     [:div.order-section " "]
+     [:div.order-summary-contacts-block
+      [:div.row
+       [:div.col-1
+        [:span.order-grid-header (loc "printing-order.orderer-details")]
+        [:span.order-summary-line
+         (for [line (state/orderer-summary-lines)]
+           [:span.order-summary-line
+            {:key (util/unique-elem-id)}
+            line])]]
+       [:div.col-1
+        [:span.order-grid-header (loc "printing-order.payer-details")]
+        (for [line (state/payer-summary-lines)]
+          [:span.order-summary-line
+           {:key (util/unique-elem-id)}
+           line])]
+       [:div.col-1
+        [:span.order-grid-header (loc "printing-order.delivery-details")]
+        (for [line (state/delivery-address-summary-lines)]
+          [:span.order-summary-line
+           {:key (util/unique-elem-id)}
+           line])]]
+      [:div.row
+       [:div.col-1
+        [:span.order-grid-header (loc "printing-order.billing-reference")]
+        [:span.order-summary-line (-> @state/component-state :billingReference)]]
+       [:div.col-1
+        [:span.order-grid-header (loc "printing-order.delivery-instructions")]
+        [:span.order-summary-line (-> @state/component-state :deliveryInstructions)]]]]
+     [:div.order-section " "]
+     [:div.order-section
+      (poc/section-header "printing-order.conditions.heading")
+      [:div.row
+       [:div.col-4
+        [:span (loc "printing-order.conditions.text")]]]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase2)}
@@ -192,7 +247,7 @@
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))
-     [:div (comp/debug-atom (rum/cursor-in state/component-state [:conditions-accepted]))]
+     [:div (comp/debug-atom (rum/cursor-in state/component-state [:contacts]))]
      (order-composer-footer)]))
 
 (defonce args (atom {}))
