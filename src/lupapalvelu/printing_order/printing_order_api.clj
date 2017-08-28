@@ -27,6 +27,22 @@
                         (filter #(= (-> % :latestVersion :contentType) "application/pdf")))
       :tagGroups (att-tag-groups/attachment-tag-groups application)))
 
+(defquery printing-order-pricing
+  {:feature          :printing-order
+   :states           states/post-verdict-states
+   :user-roles       #{:applicant}
+   :user-authz-roles roles/all-authz-writer-roles}
+  [_]
+  (ok :pricing {:delivery 6.95
+                :volume  [{:min    1
+                           :max    6
+                           :fixed 90}
+                          {:min    7
+                           :max   12
+                           :fixed 180}
+                          {:min   13
+                           :additionalInformation "ABCDEFGHIJKLMNOP"}]}))
+
 (defcommand submit-printing-order
             {:description ""
              :parameters [id]
