@@ -15,12 +15,30 @@
 
 (defonce args (atom {}))
 
-(defn updater [{:keys [state path]}]
+(defn update-changes-and-errors [{:keys [state path]}]
+  (fn [{:keys [modified changes errors] :as response}]
+    (swap! state (fn [state]
+                   (let [state (reduce (fn [acc [k v]]
+                                         (assoc-in acc (map keyword k) v))
+                                       state
+                                       changes)]
+                     (reduce (fn [acc [k v]]
+                               (assoc-in acc
+                                         (cons :_errors (map keyword k))
+                                         v))
+                             (assoc-in state
+                                       (cons :_errors (map keyword path))
+                                       nil)
+                             errors))))
+    (when modified
+      (swap! state/current-verdict #(assoc % :modified modified)))))
+
+(defn updater [{:keys [state path] :as options}]
   (service/edit-verdict @state/application-id
                         (path/value [:id] state/current-verdict)
                         path
                         (path/value path state)
-                        (common/response->state state :modified)))
+                        (update-changes-and-errors options)))
 
 (defn reset-verdict [{:keys [verdict settings]}]
   (reset! state/current-verdict (when verdict

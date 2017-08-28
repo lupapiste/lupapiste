@@ -25,12 +25,16 @@
       (docgen-loc options)])
    component])
 
-(defn docgen-attr [{:keys [path] :as options} & kv]
+(defn warning? [{:keys [path state]}]
+  (path/react (cons :_errors path) state ))
+
+(defn docgen-attr [{:keys [path state] :as options} & kv]
   (let [id (path/id path)]
     (assoc (apply hash-map kv)
            :key id
            :id  id
-           :disabled (path/disabled? options))))
+           :disabled (path/disabled? options)
+           :class (common/css-flags :warning (warning? options)))))
 
 (defn- state-change [{:keys [state path] :as options}]
   (let [handler (common/event->state (path/state path state))]

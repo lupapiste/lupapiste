@@ -162,6 +162,9 @@ $section-border: 1px solid $gray51;
 
 span.formatted {
   white-space: pre-wrap;
+  &.warning {
+    color: $negative;
+  }
 }
 
 .matti-label {
@@ -425,4 +428,7 @@ div.matti-autocomplete {
 // especially does not play nicely with matti-grid.
 .dateinput.dateinput--safe {
   max-width: 90%;
+  &.warning {
+    border-color: $negative;
+  }
 }

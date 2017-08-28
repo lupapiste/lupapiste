@@ -442,5 +442,5 @@
 "matti-verdict.section" "fi" "Pykälä"
 "matti-verdict.application-id" "fi" "Lupatunnus"
 "matti-verdict.application-id" "en" "Application ID"
-"matti-dates.verdict" "fi" "Päätöspvm"
-"matti-dates.automatic" "fi" "Lasketaan muut päivät automaattisesti"
+"matti-dates.verdict-date" "fi" "Päätöspvm"
+"matti-dates.automatic-verdict-dates" "fi" "Lasketaan muut päivät automaattisesti"

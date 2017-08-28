@@ -18226,6 +18226,10 @@ span.formatted {
   white-space: pre-wrap;
 }
 
+span.formatted.warning {
+  color: #df3215;
+}
+
 .matti-label {
   font-size: 15px;
   font-weight: bold;
@@ -18509,6 +18513,10 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 
 .dateinput.dateinput--safe {
   max-width: 90%;
+}
+
+.dateinput.dateinput--safe.warning {
+  border-color: #df3215;
 }
 
 /* VIEWS

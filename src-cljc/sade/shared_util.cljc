@@ -15,6 +15,11 @@
   [k v col]
   (some (fn [m] (when (= v (get m k)) m)) col))
 
+(defn find-by-id
+  "Return item from sequence col of maps where :id matches id."
+  [id col]
+  (find-by-key :id id col))
+
 (defn =as-kw
   "Converts arguments to keywords and compares if they are the same"
   ([x] true)

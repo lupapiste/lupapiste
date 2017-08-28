@@ -1,5 +1,6 @@
 (ns lupapalvelu.matti.shared
   (:require [clojure.string :as s]
+            [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
 (declare MattiList)
@@ -402,9 +403,9 @@
    {:sections
     [{:id   "matti-dates"
       :grid {:columns 7
-             :rows    [[{:id     "verdict"
+             :rows    [[{:id     "verdict-date"
                          :schema {:docgen "matti-date"}}
-                        {:id     "automatic"
+                        {:id     "automatic-verdict-dates"
                          :col    2
                          :show?  :_meta.editing?
                          :schema {:docgen {:name "matti-verdict-check"}}}]
@@ -417,7 +418,7 @@
                                                                     id))
                                               :id     id
                                               :schema {:docgen {:name      "matti-date"
-                                                                :disabled? :matti-dates.0.automatic}}}))
+                                                                :disabled? :matti-dates.0.automatic-verdict-dates}}}))
                                          [:julkipano :anto :valitus
                                           :lainvoimainen :aloitettava :voimassa])}]}}
      {:id   "matti-verdict"
@@ -509,6 +510,24 @@
     (if (or (nil? schema) v)
       v
       (parent-value (:_parent schema) kw))))
+
+(defn cell-path
+  "Path (vector of strings) for the cell with an explicit (non-index)
+  cell-id. Returns the first match so it is advisable to make sure
+  that ids are unique. Schema must have sections."
+  [{sections :sections} cell-id]
+  (letfn [(find-in-row [row-path row]
+            (when-let [cell (util/find-by-id cell-id (get row :row row))]
+              (conj row-path cell-id)))
+          (find-in-section [{:keys [id grid]}]
+            (loop [i 0
+                   [x & xs] (:rows grid)]
+              (if-let [path (find-in-row  [id (get x :id (str i))]
+                                         x)]
+                path
+                (when (seq xs)
+                  (recur (inc i) xs)))))]
+    (some find-in-section sections)))
 
 ;; Other utils
 

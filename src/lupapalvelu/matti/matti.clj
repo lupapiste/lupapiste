@@ -1,6 +1,7 @@
 (ns lupapalvelu.matti.matti
   (:require [lupapalvelu.action :as action]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.mongo :as mongo]
@@ -361,14 +362,12 @@
 (defn command->verdict [{:keys [data application]}]
   (util/find-by-id (:verdict-id data) (:matti-verdicts application)))
 
-(defn verdict-settings [verdict organization]
-  (let [{:keys [id version-id]} (:template verdict)
-        settings (->>  id
-                       (verdict-template organization)
-                       :versions
-                       (util/find-by-id version-id)
-                       :settings)]
-    settings))
+(defn verdict-template-for-verdict [verdict organization]
+  (let [{:keys [id version-id]} (:template verdict)]
+    (->>  id
+          (verdict-template organization)
+          :versions
+          (util/find-by-id version-id))))
 
 (defn delete-verdict [verdict-id command]
   (action/update-application command
@@ -391,22 +390,92 @@
                                          [$set :matti-verdicts.$.modified]
                                          created))))
 
+(defn- verdict-changes-update [command changes]
+  (when (seq changes)
+    (verdict-update command {$set (reduce (fn [acc [k v]]
+                                            (assoc acc
+                                                   (keyword (str "matti-verdicts.$.data."
+                                                                 (name k)))
+                                                   v))
+                                          {}
+                                          changes)})))
+
+(defn update-automatic-verdict-dates [{:keys [category template verdict-data]}]
+  (let [verdict-schema  (category shared/verdict-schemas)
+        template-schema shared/default-verdict-template
+        datestring      (get-in verdict-data (shared/cell-path verdict-schema
+                                                               "verdict-date"))
+        automatic?      (get-in verdict-data (shared/cell-path verdict-schema
+                                                               "automatic-verdict-dates"))]
+    (when (and automatic? (ss/not-blank? datestring))
+      (reduce (fn [acc kw]
+                (let [cell-id           (name kw)
+                      path              (shared/cell-path template-schema
+                                                          cell-id)
+                      unit              (-> (schemas/schema-data template-schema
+                                                                 path)
+                                            :date-delta :data :unit)
+                      {:keys [delta
+                              enabled]} (get-in (:data template) path)]
+                  (if enabled
+                    (assoc acc
+                           (apply util/kw-path (shared/cell-path verdict-schema
+                                                           cell-id))
+                           (date/parse-and-forward datestring
+                                                   (util/->long delta)
+                                                   unit))
+                    acc)))
+              {}
+              [:julkipano :anto :valitus :lainvoimainen
+               :aloitettava :voimassa]))))
+
+;; Additional changes to the verdict data.
+;; Methods options include category, template, verdict-data, path and value.
+;; Changes is called after value has already been updated into mongo.
+;; The method result is a changes for verdict data.
+(defmulti changes (fn [{:keys [category path]}]
+                    ;; Dispatcher result: [:category :last-path-part]
+                    [category (keyword (last path))]))
+
+(defmethod changes :default [_])
+
+(defmethod changes [:r :verdict-date]
+  [options]
+  (update-automatic-verdict-dates options))
+
+(defmethod changes [:r :automatic-verdict-dates]
+  [options]
+  (update-automatic-verdict-dates options))
+
 (defn edit-verdict [{{:keys [verdict-id path value]} :data
                      organization                    :organization
                      application                     :application
+                     created                         :created
                      :as                             command}]
-  (let [verdict (command->verdict command)
-        schema  (-> application
-                    :permitType
-                    shared/permit-type->category
-                    shared/verdict-schemas)]
+  (let [verdict  (command->verdict command)
+        category (-> application
+                     :permitType
+                     shared/permit-type->category)
+        schema   (category shared/verdict-schemas)
+        template (verdict-template-for-verdict verdict
+                                               @organization)]
     (if-let [error (schemas/validate-path-value
                     schema
                     path value
                     {:schema-overrides {:section shared/MattiVerdictSection}
-                     :references       (verdict-settings verdict
-                                                         @organization)})]
+                     :references       (:settings template)})]
       {:errors [[path error]]}
-      (let [updated (assoc-in (:data verdict) (map keyword path) value)]
+      (let [path    (map keyword path)
+            updated (assoc-in (:data verdict) path value)]
         (verdict-update command {$set {:matti-verdicts.$.data updated}})
-        {}))))
+        {:modified created
+         :changes  (let [options {:path     path
+                                  :value    value
+                                  :verdict-data updated
+                                  :template template
+                                  :category category}
+                         changed (changes options)]
+                     (verdict-changes-update command changed)
+                     (map (fn [[k v]]
+                            [(util/split-kw-path k) v])
+                          changed))}))))

@@ -154,11 +154,7 @@
         (m k)))))
 
 (defalias find-by-key shared/find-by-key)
-
-(defn find-by-id
-  "Return item from sequence col of maps where :id matches id."
-  [id col]
-  (some (fn [m] (when (= id (:id m)) m)) col))
+(defalias find-by-id  shared/find-by-id)
 
 (defn replace-by-id
   "Return col of maps where elements are replaced by item when element :id matches item :id"

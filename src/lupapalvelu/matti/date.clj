@@ -79,3 +79,15 @@
 
 (defn finnish-date [date]
   (timef/unparse-local-date finnish-formatter date))
+
+(defn parse-and-forward
+  "Parses s and forwards it for n days or years depending on the
+  unit (:days or :years). The result is always work day as a Finnish
+  date (string)"
+  [s n unit]
+  (some-> (parse-finnish-date s)
+          (time/plus ((if (= unit :days)
+                        time/days
+                        time/years) n))
+          forward-to-work-day
+          finnish-date))
