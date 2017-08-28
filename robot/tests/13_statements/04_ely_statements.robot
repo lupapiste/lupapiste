@@ -46,6 +46,7 @@ Sonja statement to ELY
   Positive indicator should be visible
   Positive indicator should not be visible
   Statement count is  1
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
 
 Time flies and ELY acknowledges statement request
   ${messageId}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]@data-message-id

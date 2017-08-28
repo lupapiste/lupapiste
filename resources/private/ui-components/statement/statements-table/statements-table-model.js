@@ -53,7 +53,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.isRemovable = function(statement) {
-    return user.isAuthority()  && !self.isGiven(statement);
+    return !self.isExternal(statement) && user.isAuthority()  && !self.isGiven(statement);
   };
 
   self.canAccessStatement = function(statement) {
