@@ -228,7 +228,7 @@
 
 (defquery fetch-validation-errors
   {:parameters       [:id]
-   :user-roles       #{:applicant :authority :financialAuthority}
+   :user-roles       #{:applicant :authority}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles  roles/reader-org-authz-roles
    :states           states/all-states}

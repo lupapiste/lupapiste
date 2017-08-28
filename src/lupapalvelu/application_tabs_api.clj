@@ -34,7 +34,7 @@
 (defquery application-info-tab-visible
   {:parameters [id]
    :states states/all-application-or-archiving-project-states
-   :user-roles #{:authority :applicant :financialAuthority}
+   :user-roles #{:authority :applicant}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :pre-checks [(fn-> state-before-last-canceled
@@ -45,7 +45,7 @@
 (defquery application-summary-tab-visible
   {:parameters [id]
    :states states/all-application-or-archiving-project-states
-   :user-roles #{:authority :applicant :financialAuthority}
+   :user-roles #{:authority :applicant}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :pre-checks [(fn-> state-before-last-canceled
@@ -56,7 +56,7 @@
 (defquery application-verdict-tab-visible
   {:parameters [id]
    :states states/all-application-states
-   :user-roles #{:authority :applicant :financialAuthority}
+   :user-roles #{:authority :applicant}
    :user-authz-roles roles/all-authz-roles
    :org-authz-roles roles/reader-org-authz-roles
    :pre-checks [(fn [{:keys [application]}]

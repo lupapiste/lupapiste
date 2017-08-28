@@ -291,13 +291,20 @@
 ;; Command router
 ;;
 
+; FIXME This is bit ugly hack to get needed rights for financial authority without adding
+; it into all queries. Should be removed when user-roles handling is updated.
+(defn- allowed-financial-authority [allowed-roles user-role parameters]
+  (and (= user-role :financialAuthority)
+       (allowed-roles :applicant)
+       (contains? (set (map keyword parameters)) :id)))
+
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-user-role [command {user-roles :user-roles :as meta-data}]
+(defn- has-required-user-role [command {user-roles :user-roles parameters :parameters :as meta-data}]
   (let [allowed-roles (or user-roles #{})
         user-role (-> command :user :role keyword)]
-    (or (allowed-roles :anonymous) (allowed-roles user-role))))
+    (or (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
