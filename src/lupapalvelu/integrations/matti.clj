@@ -38,8 +38,7 @@
 (sc/defn get-op-data :- operation [op]
   (-> (select-keys op [:id :name :description])
       (assoc :displayName {:fi (i18n/localize :fi "operations" (:name op))
-                           :sv (i18n/localize :sv "operations" (:name op))})
-      (util/assoc-when :building (get build-mapping (:id op)))))
+                           :sv (i18n/localize :sv "operations" (:name op))})))
 
 (defn build-operations [{:keys [primaryOperation secondaryOperations]}]
   (cons (get-op-data primaryOperation) (map get-op-data secondaryOperations)))
