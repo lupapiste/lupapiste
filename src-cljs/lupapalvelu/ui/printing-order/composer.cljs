@@ -4,7 +4,7 @@
             [lupapalvelu.ui.components :as comp]
             [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.rum-util :as rum-util]
-            [lupapalvelu.ui.common :refer [loc] :as common]
+            [lupapalvelu.ui.common :refer [loc loc-html] :as common]
             [lupapalvelu.ui.printing-order.files :as files]
             [lupapalvelu.ui.printing-order.components :as poc]
             [lupapalvelu.ui.printing-order.state :as state]))
@@ -103,6 +103,8 @@
           (accordion-group {:path       [path-key]
                             :children   children})
           (util/unique-elem-id "accordion-group")))]
+     [:div.order-section
+      [:span (loc-html "printing-order.mylly.provided-by")]]
      [:div.operation-button-row
       [:button.positive
        {:on-click #(state/proceed-phase2)
@@ -147,9 +149,11 @@
       (poc/section-header "printing-order.conditions.heading")
       [:div.row
        [:div.col-4
-        [:span (loc "printing-order.conditions.text")]]]
+        [:span (loc-html "printing-order.conditions.text")]]]
       [:div.row
        (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept" true)]]
+     [:div.order-section
+      [:span (loc-html "printing-order.mylly.provided-by")]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase1)}
@@ -221,7 +225,14 @@
       (poc/section-header "printing-order.conditions.heading")
       [:div.row
        [:div.col-4
-        [:span (loc "printing-order.conditions.text")]]]]
+        [:span (loc-html "printing-order.conditions.text")]]]
+      [:div.row
+       [:div.col-4
+        [:label.like-btn
+         [:i.lupicon-circle-check.positive]
+         [:span (loc "printing-order.conditions.accepted")]]]]]
+     [:div.order-section
+      [:span (loc-html "printing-order.mylly.provided-by")]]
      [:div.operation-button-row
       [:button.secondary
        {:on-click #(state/back-to-phase2)}
