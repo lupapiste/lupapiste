@@ -7,8 +7,9 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [sade.common-reader :as cr]
-            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [lupapalvelu.xml.asianhallinta.response :as ah-response]))
+            [lupapalvelu.xml.asianhallinta.response :as ah-response]
+            [lupapalvelu.xml.asianhallinta.statement :as ah-statement]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]))
 
 (defn- unzip-file [path-to-zip target-dir]
   (if-not (and (fs/exists? path-to-zip) (fs/exists? target-dir))
@@ -34,6 +35,9 @@
 (defmethod handle-asianhallinta-message :AsianTunnusVastaus
   [parsed-xml _ ftp-user system-user]
   (ah-response/asian-tunnus-vastaus-handler parsed-xml ftp-user system-user))
+(defmethod handle-asianhallinta-message :LausuntoVastaus
+  [parsed-xml unzipped-path ftp-user system-user]
+  (ah-statement/statement-response-handler parsed-xml unzipped-path ftp-user system-user))
 
 (defn process-message [path-to-zip ftp-user system-user]
   (let [tmp-dir (fs/temp-dir (str "ah"))]

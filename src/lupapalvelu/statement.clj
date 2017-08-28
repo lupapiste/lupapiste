@@ -194,6 +194,10 @@
                             (fail :error.email))]
     (or non-blank-string-keys has-invalid-email)))
 
+;;
+;; Asianhallinta statement handling
+;;
+
 (defn validate-external-statement-update!
   "Ensure statement is external and has correct statement giver, compared to ftp-user.
   In ELY case lupapalvelu.integrations.ely/ely-statement-giver id should match with ftp-user."
@@ -222,8 +226,39 @@
                              (:modify-id statement)
                              :external
                              (assoc (:external statement) :externalId partners-id :acknowledged received-ts))]
-          (action/update-application command {:statements {$elemMatch {:id statement-id}}} {$set {:statements.$ updated}})))
+          (action/update-application command
+                                     {:statements {$elemMatch {:id statement-id}}}
+                                     {$set {:statements.$ updated}})))
       (warnf "No statement found for ah response-message (%s), statementId in original message was: %s", (:id responded-message) statement-id))))
+
+(defn save-ah-statement-response
+  "Save statement response data from asianhallinta LausuntoVastaus to application statement.
+   Validation of required data has been made on reader side.
+   Returns updated statement on success"
+  [app-id ftp-user statement-data]
+  (let [app (domain/get-application-no-access-checking app-id)
+        statement (get-statement app (:id statement-data))
+        add-giver (fn [name]
+                    (if (ss/not-blank? (:giver statement-data))
+                    (str name " (" (:giver statement-data) ")")
+                      name))
+        command (action/application->command {:id app-id})]
+    (if statement
+      (do
+        (validate-external-statement-update! statement ftp-user)
+        (when-let [updated (update-statement
+                             (update statement :state keyword)
+                             (:modify-id statement)
+                             :status (:status statement-data)
+                             :state  :given
+                             :given  (:given statement-data)
+                             :text   (:text statement-data)
+                             :person (update (:person statement) :name add-giver))]
+          (action/update-application command
+                                     {:statements {$elemMatch {:id (:id statement)}}}
+                                     {$set {:statements.$ updated}})
+          updated))
+      (warnf "No statement found for ah statement response, app-id: %s, statement: %s", app-id (:id statement)))))
 
 ;;
 ;; Statement givers

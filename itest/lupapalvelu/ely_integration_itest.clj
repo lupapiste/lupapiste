@@ -10,11 +10,12 @@
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.xml :as sxml]))
+            [sade.xml :as sxml]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
-(facts "ELY statement-request"
+(facts "ELY statement process"                              ; LPK-2941
   (let [app (create-and-submit-application mikko :propertyId sipoo-property-id :operation "poikkeamis")
         statement-subtype "Lausuntopyynt\u00f6 poikkeamishakemuksesta"]
     (generate-documents app mikko)                          ; generate documents so generated XML is valid
@@ -89,5 +90,26 @@
 
         (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
           (fact "Statement is acknowledged by ELY"
+            (get-in ely-statement [:external :acknowledged]) => pos?
+            (get-in ely-statement [:external :externalId]) => string?))))
+
+    (fact "ELY sends statement response"
+      (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+        (fact "Statement response is processed correctly"
+          (-> (decoded-get (str (server-address) "/dev/ah/statement-response")
+                           {:query-params {:id (:id app)
+                                           :ftp-user (env/value :ely :sftp-user)
+                                           :statement-id (:id ely-statement)}})
+              :body) => ok?)
+
+        (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+          (fact "State is given"
+            (:state ely-statement) => "given")
+          (fact "Values from XML are saved to statement"
+            (get-in ely-statement [:person :name]) => (contains "Eija Esimerkki")
+            (:status ely-statement) => "puollettu"
+            (:text ely-statement) => "Hyv\u00e4 homma"
+            (util/to-xml-date (:given ely-statement)) => "2017-05-07")
+          (fact "Old data is OK"
             (get-in ely-statement [:external :acknowledged]) => pos?
             (get-in ely-statement [:external :externalId]) => string?))))))
