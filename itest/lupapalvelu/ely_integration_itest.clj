@@ -96,6 +96,12 @@
 
     (fact "ELY sends statement response"
       (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+        (fact "Random FTP user can't update statement"
+          (-> (decoded-get (str (server-address) "/dev/ah/statement-response")
+                           {:query-params {:id (:id app)
+                                           :ftp-user "foo"
+                                           :statement-id (:id ely-statement)}})
+              :body) => (partial expected-failure? :error.unauthorized))
         (fact "Statement response is processed correctly"
           (-> (decoded-get (str (server-address) "/dev/ah/statement-response")
                            {:query-params {:id (:id app)
