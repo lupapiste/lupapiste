@@ -695,7 +695,7 @@
     :enabled true
     :role "financialAuthority"
     :language "fi"
-    :firstName "Rahoituskäsittelijä"
+    :firstName "Rahoitusk\u00e4sittelij\u00e4"
     :lastName ""
     :phone ""
     :username "financial"

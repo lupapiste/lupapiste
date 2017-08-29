@@ -23,7 +23,7 @@
     (fact "Financial authority get invitation"
       (last-email)
       (command sonja :invite-financial-handler :id application-id :documentId doc-id :path ["rahoitus"]) => ok?
-      (get-in (last-email) [:body :plain]) => (contains "sähköpostiosoitteella financial@ara.fi"))
+      (get-in (last-email) [:body :plain]) => (contains "s\u00e4hk\u00f6postiosoitteella financial@ara.fi"))
 
     (fact "Financial authority has rights to application"
       (let [fetched-application (query-application sonja application-id)
