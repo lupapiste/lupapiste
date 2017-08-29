@@ -5,8 +5,9 @@
             [lupapalvelu.ui.util :as util]
             [lupapalvelu.ui.rum-util :as rum-util]
             [lupapalvelu.ui.common :refer [loc loc-html] :as common]
-            [lupapalvelu.ui.printing-order.files :as files]
             [lupapalvelu.ui.printing-order.components :as poc]
+            [lupapalvelu.ui.printing-order.files :as files]
+            [lupapalvelu.ui.printing-order.pricing :as pricing]
             [lupapalvelu.ui.printing-order.state :as state]
             [lupapalvelu.ui.printing-order.transitions :as transitions]))
 
@@ -43,6 +44,8 @@
                :order       (zipmap (map :id (:attachments result)) (repeatedly (constantly 0)))
                :tagGroups   (:tagGroups result)))
       :id app-id)
+    (common/query "printing-order-pricing"
+      #(swap! state/component-state assoc :pricing (:pricing %)))
     (if (and company-id (.userHasRole ko-app #js {:id company-id} "writer"))
       (common/query "company"
         (fn [result]
@@ -57,7 +60,7 @@
     [:div.printing-order-footer
      [:div
       [:button.tertiary.rollup-button
-       [:h2 (str (loc "printing-order.footer.total-amount") " " total-amount " " (loc "unit.kpl"))]]
+       [:h2 (loc "printing-order.footer.total-amount" (str total-amount))]]
       [:button.tertiary.rollup-button
        [:h2 (str (loc "printing-order.footer.price") " " 0 "€")]]
       [:button.tertiary.rollup-buttonx
@@ -66,16 +69,13 @@
        (loc-html :h2 "printing-order.mylly.provided-by")]]]))
 
 (rum/defc composer-phase1 < rum/reactive []
-  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))
-        order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        total-amount (reduce + (vals order-rows))]
-    [:div
-     [:div.attachments-accordions
-      (for [[path-key & children] tag-groups]
-        (rum/with-key
-          (files/files-accordion-group {:path       [path-key]
-                                        :children   children})
-          (util/unique-elem-id "accordion-group")))]]))
+  (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
+    [:div.attachments-accordions
+     (for [[path-key & children] tag-groups]
+       (rum/with-key
+         (files/files-accordion-group {:path       [path-key]
+                                       :children   children})
+         (util/unique-elem-id "accordion-group")))]))
 
 (rum/defc composer-phase2 < rum/reactive []
   (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])
@@ -110,25 +110,6 @@
       [:div.row
        (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept" true)]]]))
 
-(rum/defc order-pricing-table < rum/reactive []
-  (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        total-amount (reduce + (vals order-rows))]
-    [:table
-     [:thead
-      [:tr
-       [:td.first
-        [:span.h3 (str (loc "printing-order.summary.total-amount") ": " total-amount " " (loc "unit.kpl"))]]
-       [:td.second
-        [:span.h3 (loc "printing-order.summary.total-price")]]
-       [:td.third
-        [:span.h3 "50.00 €"]]]
-      [:tr
-       [:td.first]
-       [:td.second
-        [:span "Sis. alv (24%)"]]
-       [:td.third
-        [:span "9.67 €"]]]]]))
-
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))
         attachments-selected (->> @state/component-state
@@ -139,7 +120,7 @@
      [:div.order-section
       (poc/section-header "printing-order.summary.documents")
       (files/files-table attachments-selected :read-only)]
-     [:div.order-summary-pricing-block (order-pricing-table)]
+     (pricing/order-summary-pricing)
      [:div.order-section " "]
      [:div.order-summary-contacts-block
       [:div.row
