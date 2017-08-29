@@ -486,10 +486,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-check)]
    :states           states/give-verdict-states}
-  [{:keys [organization] :as command}]
-  (let [verdict (matti/command->verdict command)]
-    (ok {:verdict  (select-keys verdict [:id :data :modified :published])
-         :settings (matti/verdict-settings verdict @organization)})))
+  [command]
+  (ok (matti/open-verdict command)))
 
 (defcommand delete-matti-verdict
   {:description      "Deletes verdict. Published verdicts cannot be

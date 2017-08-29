@@ -444,3 +444,8 @@
 "matti-verdict.application-id" "en" "Application ID"
 "matti-dates.verdict-date" "fi" "Päätöspvm"
 "matti-dates.automatic-verdict-dates" "fi" "Lasketaan muut päivät automaattisesti"
+"neighbors.neighbor-states" "en" "Neighbours"
+"neighbors.neighbor-states" "fi" "Naapurit"
+"neighbors.neighbor-states" "sv" "Grannar"
+"neighbors.closed" "fi" "Merkitty kuulluksi {0}"
+"neighbors.open" "fi" "Avoin"

@@ -432,3 +432,14 @@ div.matti-autocomplete {
     border-color: $negative;
   }
 }
+
+.neighbor-states {
+  .tabby__row.neighbor > .tabby__cell {
+    vertical-align: top;
+    padding-top: 0;
+    padding-bottom: 0;
+    &.property-id {
+      white-space: nowrap;
+    }
+  }
+}

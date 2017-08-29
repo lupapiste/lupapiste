@@ -87,10 +87,11 @@
      [:div.col-2.col--right
       (layout/last-saved {:state state/current-verdict})]]]
    (for [sec sections]
-     (sections/section (assoc sec
-                              :path (path/extend (:id sec))
-                              :state state)
-                       verdict-section-header))])
+     (when-not (path/value [(:id sec) :removed] state)
+       (sections/section (assoc sec
+                                :path (path/extend (:id sec))
+                                :state state)
+                         verdict-section-header)))])
 
 
 (rum/defcs new-verdict < rum/reactive

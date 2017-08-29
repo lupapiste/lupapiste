@@ -61,6 +61,8 @@ util.partyFullName = function() {};
 util.finnishDateAndTime = function() {};
 util.finnishDate = function() {};
 util.toMoment = function() {};
+util.prop = {};
+util.prop.toHumanFormat = function() {};
 
 var sprintf = function() {};
 

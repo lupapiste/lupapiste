@@ -286,6 +286,17 @@
                  :default? (= id (get operation-verdict-templates
                                       app-operation))})))))
 
+(defn neighbors
+  "Application neighbors data in a format suitable for verdicts: list
+  of property-id, done (timestamp) maps."
+  [{neighbors :neighbors}]
+  (map (fn [{:keys [propertyId status]}]
+         {:property-id propertyId
+          :done (:created (util/find-by-key :state
+                                            "mark-done"
+                                            status))})
+       neighbors))
+
 (defn data-draft
   "Kmap keys are draft targets (kw-paths). Values are either kw-paths
   or maps with :path, :fn and :skip-nil? properties. Paths denote data
@@ -314,32 +325,38 @@
 
 (defmethod initial-draft-data :r
   [template application]
-  (assoc-in (data-draft (merge {:matti-verdict.0.giver.giver  :matti-verdict.2.giver
-                                :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
-                                :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
-                               (reduce-kv (fn [acc i v]
-                                            (assoc acc
-                                                   (kw-format "requirements.%s.0" i)
-                                                   (kw-format "matti-%s.0.0" (name v))
-                                                   (kw-format "requirements.%s.included" i)
-                                                   {:path (kw-format "matti-%s.removed" (name v))
-                                                    :fn   not}))
-                                          {}
-                                          [:foremen :plans :reviews])
-                               {:requirements.3.other :matti-conditions.0.0}
-                               (reduce (fn [acc k]
-                                         (let [s (name k)]
-                                           (assoc acc
-                                                  (kw-format "matti-dates.deltas.%s" s)
-                                                  {:path      (kw-format "matti-verdict.1.%s" s)
-                                                   :fn #(when (:enabled %) "")
-                                                   :skip-nil? true})))
-                                       {}
-                                       [:julkipano :anto :valitus :lainvoimainen
-                                        :aloitettava :voimassa]))
-                        template)
-            (util/split-kw-path :matti-verdict.1.application-id)
-            (:id application)))
+  (assoc-in (data-draft
+             (merge {:matti-verdict.0.giver.giver  :matti-verdict.2.giver
+                     :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
+                     :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
+                    (reduce-kv (fn [acc i v]
+                                 (assoc acc
+                                        (kw-format "requirements.%s.0" i)
+                                        (kw-format "matti-%s.0.0" (name v))
+                                        (kw-format "requirements.%s.included" i)
+                                        {:path (kw-format "matti-%s.removed" (name v))
+                                         :fn   not}))
+                               {}
+                               [:foremen :plans :reviews])
+                    {:requirements.3.other :matti-conditions.0.0}
+                    (reduce (fn [acc k]
+                              (let [s (name k)]
+                                (assoc acc
+                                       (kw-format "matti-dates.deltas.%s" s)
+                                       {:path      (kw-format "matti-verdict.1.%s" s)
+                                        :fn #(when (:enabled %) "")
+                                        :skip-nil? true})))
+                            {}
+                            [:julkipano :anto :valitus :lainvoimainen
+                             :aloitettava :voimassa])
+                    {:neighbors {:path :matti-neighbors
+                                 :fn (fn [{removed :removed}]
+                                       (if removed
+                                         {:removed true}
+                                         {:0 {:neighbor-states
+                                              (neighbors application)}}))}})
+             template)
+            (util/split-kw-path :matti-verdict.1.application-id) (:id application)))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -369,6 +386,20 @@
           :versions
           (util/find-by-id version-id))))
 
+
+(defn open-verdict [{:keys [application organization] :as command}]
+  (let [verdict (command->verdict command)
+        data    (cond-> (:data verdict)
+                  (and (-> verdict :published not)
+                       (-> verdict :data :neighbors :removed not))
+                  (assoc-in [:neighbors :0 :neighbor-states]
+                            (neighbors application)))]
+
+    {:verdict  (assoc (select-keys verdict [:id :modified :published])
+                      :data data)
+     :settings (:settings (verdict-template-for-verdict verdict
+                                                        @organization))}))
+
 (defn delete-verdict [verdict-id command]
   (action/update-application command
                              {$pull {:matti-verdicts {:id verdict-id}}}))
@@ -390,7 +421,9 @@
                                          [$set :matti-verdicts.$.modified]
                                          created))))
 
-(defn- verdict-changes-update [command changes]
+(defn- verdict-changes-update
+  "Write the auxiliary changes into mongo."
+  [command changes]
   (when (seq changes)
     (verdict-update command {$set (reduce (fn [acc [k v]]
                                             (assoc acc

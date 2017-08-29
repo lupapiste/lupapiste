@@ -184,6 +184,11 @@
   (merge MattiEnabled
          {:name sc/Str}))
 
+(defschema MattiPlaceholder
+  "Placholder for external (filled by backend) data."
+  (merge MattiComponent
+         {:type (sc/enum :neighbors)}))
+
 (def schema-type-alternatives
   {:docgen         (sc/conditional
                     :name MattiDocgen
@@ -194,7 +199,8 @@
    :loc-text       sc/Keyword ;; Localisation term shown as text.
    :date-delta     MattiDateDelta
    :multi-select   MattiMultiSelect
-   :reference      MattiReference})
+   :reference      MattiReference
+   :placeholder    MattiPlaceholder})
 
 (defn make-conditional [m]
   (->> (reduce (fn [a [k v]]
@@ -319,7 +325,7 @@
                :grid {:columns 1
                       :rows [[{:schema {:phrase-text {:category :lupaehdot}}}]]}
                :_meta {:can-remove? true}}
-              (text-section :matti-neighbours)
+              (text-section :matti-neighbors)
               {:id    "matti-appeal"
                :grid  {:columns 1
                        :rows    [[{:schema {:phrase-text {:category :muutoksenhaku
@@ -486,6 +492,18 @@
                                  :align  :full
                                  :schema {:phrase-text {:i18nkey  [:phrase.category.lupaehdot]
                                                         :category :lupaehdot}}}]])}}
+     {:id "neighbors"
+      :grid {:columns 12
+             :rows [[{:col 7
+                      :id "neighbor-notes"
+                      :schema {:phrase-text {:i18nkey [:phrase.category.naapurit]
+                                             :category :naapurit}}}
+                     {}
+                     {:col 3
+                      :id "neighbor-states"
+                      :align :right
+                      :schema {:placeholder {:type :neighbors}}}]
+                    ]}}
      {:id   "matti-complexity"
       :grid {:columns 6
              :rows    [[{:col    5

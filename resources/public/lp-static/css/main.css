@@ -18519,6 +18519,16 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   border-color: #df3215;
 }
 
+.neighbor-states .tabby__row.neighbor > .tabby__cell {
+  vertical-align: top;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.neighbor-states .tabby__row.neighbor > .tabby__cell.property-id {
+  white-space: nowrap;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {

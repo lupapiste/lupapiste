@@ -478,8 +478,8 @@ var util = (function($) {
     return m ? m.format( dateFormats.fi ) : dateArg;
   }
 
-  function finnishDateAndTime( timestamp ) {
-    return moment( timestamp ).format( "D.M.YYYY, HH:mm:ss");
+  function finnishDateAndTime( timestamp, fmt ) {
+    return moment( timestamp ).format( fmt ? fmt : "D.M.YYYY, HH:mm:ss");
   }
 
   return {

@@ -320,6 +320,31 @@
       (docgen/docgen-label-wrap options span)
       span)))
 
+(defmulti placeholder (fn [options & _]
+                        (-> options :schema :type)))
+
+;; Neighbors value is a list of property-id, timestamp maps.
+(defmethod placeholder :neighbors
+  [{:keys [state path] :as options}]
+  [:div.tabby.neighbor-states
+   (map (fn [{:keys [property-id done]}]
+          [:div.tabby__row.neighbor
+           [:div.tabby__cell.property-id (js/util.prop.toHumanFormat property-id)]
+           [:div.tabby__cell
+            (if done
+              (common/loc :neighbors.closed
+                          (js/util.finnishDateAndTime done
+                                                      "D.M.YYYY HH:mm"))
+              (common/loc :neighbors.open))]])
+        (path/value path state))])
+
+(defmethod view-component :placeholder
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  (let [elem (placeholder options)]
+    (if (show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options elem)
+      elem)))
+
 (defn- sub-options
   "Options for the subschema"
   [{:keys [state path]} subschema]
