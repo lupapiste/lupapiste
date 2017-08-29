@@ -137,4 +137,11 @@
           (fact "as in give-statement, attachment should be set readonly"
             (:readOnly ely-attachment) => true)
           (fact "locked true comes from asiahallinta reader" ; hmm?
-            (:locked ely-attachment) => true))))))
+            (:locked ely-attachment) => true)
+          (fact "'child' attachment PDF is generated"
+            (let [child (->> (:attachments app)
+                             (filter #(= (:id ely-statement) (-> % :source :id)))
+                             first)]
+              (get-in child [:source :type]) => "statements"
+              (get-in child [:contents]) => statement-subtype
+              (get-in child [:latestVersion :contentType]) => "application/pdf")))))))

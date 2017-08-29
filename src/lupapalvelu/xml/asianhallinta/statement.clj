@@ -4,6 +4,7 @@
             [sade.common-reader :as cr]
             [sade.util :as util]
             [sade.xml :as xml]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.statement :as statement]
@@ -29,6 +30,7 @@
 
 (defn statement-response-handler [parsed-xml unzipped-path ftp-user system-user]
   (let [xml-edn   (xml/xml->edn parsed-xml)
+        ely-user  (assoc system-user :firstName "ELY-keskus")
         lausunto-vastaus (:LausuntoVastaus xml-edn)
         ; external-id (:AsianTunnus lausunto-vastaus)
         ; external-id-statement (get-in lausunto-vastaus [:Lausunto :AsianTunnus])
@@ -62,6 +64,12 @@
             {:type "statement" :id (:id statement)}
             "Lausunnon liite (ELY-keskus)"
             created
-            (assoc system-user :firstName "ELY-keskus")
-            {:read-only true})))
+            ely-user
+            {:read-only true}))
+        (child-to-attachment/create-attachment-from-children
+          ely-user
+          (domain/get-application-no-access-checking (:id application))
+          :statements
+          (:id statement)
+          "fi"))
       (ok))))
