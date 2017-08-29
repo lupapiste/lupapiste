@@ -24,7 +24,7 @@
 "document.party.disabled.areyousure.confirmation" "sv" "Märk upp som avlägsnad"
 "document.party.person-select.designer.areyousure" "en" ""
 "document.party.person-select.designer.areyousure" "fi" "Suunnittelijan tehtävään hankkeella liittyy henkilökohtainen vastuu. Valtuuta suunnittelija lähettämällä hänelle kutsu hankkeelle. Suunnittelijan tietoja ei tällöin tarvitse lisätä erikseen, vaan ne täydentyvät automaattisesti kutsun hyväksymisen myötä."
-"document.party.person-select.designer.areyousure" "sv" ""
+"document.party.person-select.designer.areyousure" "sv" "Planerarens uppgift i ett projekt är förknippad med ett personligt ansvar. Du kan befullmäktiga planeraren genom att bjuda in denne per e-post. Planerarens uppgifter behövs inte tilläggas separat, utan dem kompletteras automatiskt efter planeraren har godkänt inbjudan."
 "document.status.toggle.disable" "en" "Mark as left"
 "document.status.toggle.disable" "fi" "Merkitse poistuneeksi"
 "document.status.toggle.disable" "sv" "Märk upp som avlägsnad"
