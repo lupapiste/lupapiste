@@ -86,6 +86,7 @@
                                               nil    "Z"
                                               (missing element))
                           (missing element))
+      :fundingSelector    true
       (missing element))))
 
 ;;

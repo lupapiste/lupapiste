@@ -71,8 +71,6 @@
 (fact authority?
   (authority? {:role "authority"})  => truthy
   (authority? {:role :authority})   => truthy
-  (authority? {:role "financialAuthority"}) => truthy
-  (authority? {:role :financialAuthority}) => truthy
   (authority? {:role :oirAuthority}) => falsey
   (authority? {:role "applicant"})  => falsey
   (authority? {})                   => falsey
