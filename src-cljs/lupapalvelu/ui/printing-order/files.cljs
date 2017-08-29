@@ -69,3 +69,31 @@
     [:tbody
      (for [file files]
        (rum/with-key (file-row file opts) (util/unique-elem-id "file-row")))]]])
+
+(defn- accordion-name [path]
+  (.attachmentAccordionName js/lupapisteApp.services.accordionService path))
+
+(defn- attachment-in-group? [path attachment]
+  (every? (fn [pathKey] (some #(= pathKey %) (:tags attachment))) path))
+
+(rum/defcs files-accordion-group < rum/reactive
+  (rum/local true ::group-open)
+  [{group-open ::group-open} {:keys [level path children]}]
+  (let [attachments          (rum/react (rum/cursor-in state/component-state [:attachments]))
+        attachments-in-group (filter (partial attachment-in-group? path) attachments)]
+   (when (seq attachments-in-group)
+     [:div.rollup.rollup--open
+      [:button
+       {:class (conj ["rollup-button" "rollup-status" "attachments-accordion" "toggled"]
+                     (if (seq children)
+                       "secondary"
+                       "tertiary"))}
+       [:span (accordion-name (last path))]]
+      [:div.attachments-accordion-content
+       (for [[child-key & _] children]
+         (rum/with-key
+           (files-accordion-group {:path (conj path child-key)})
+           (util/unique-elem-id "accordion-sub-group")))
+       (when (empty? children)
+         [:div.rollup-accordion-content-part
+          (files-table attachments-in-group)])]])))

@@ -7,7 +7,8 @@
             [lupapalvelu.ui.common :refer [loc loc-html] :as common]
             [lupapalvelu.ui.printing-order.files :as files]
             [lupapalvelu.ui.printing-order.components :as poc]
-            [lupapalvelu.ui.printing-order.state :as state]))
+            [lupapalvelu.ui.printing-order.state :as state]
+            [lupapalvelu.ui.printing-order.transitions :as transitions]))
 
 (def log (.-log js/console))
 
@@ -50,34 +51,6 @@
       (init-user-details))
     init-state))
 
-(defn accordion-name [path]
-  (.attachmentAccordionName js/lupapisteApp.services.accordionService path))
-
-(defn attachment-in-group? [path attachment]
-  (every? (fn [pathKey] (some #(= pathKey %) (:tags attachment))) path))
-
-(rum/defcs accordion-group < rum/reactive
-  (rum/local true ::group-open)
-  [{group-open ::group-open} {:keys [level path children]}]
-  (let [attachments          (rum/react (rum/cursor-in state/component-state [:attachments]))
-        attachments-in-group (filter (partial attachment-in-group? path) attachments)]
-    (when (seq attachments-in-group)
-      [:div.rollup.rollup--open
-       [:button
-        {:class (conj ["rollup-button" "rollup-status" "attachments-accordion" "toggled"]
-                      (if (seq children)
-                        "secondary"
-                        "tertiary"))}
-        [:span (accordion-name (last path))]]
-       [:div.attachments-accordion-content
-        (for [[child-key & _] children]
-          (rum/with-key
-            (accordion-group {:path (conj path child-key)})
-            (util/unique-elem-id "accordion-sub-group")))
-        (when (empty? children)
-          [:div.rollup-accordion-content-part
-           (files/files-table attachments-in-group)])]])))
-
 (rum/defc order-composer-footer < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
         total-amount (reduce + (vals order-rows))]
@@ -100,25 +73,9 @@
      [:div.attachments-accordions
       (for [[path-key & children] tag-groups]
         (rum/with-key
-          (accordion-group {:path       [path-key]
-                            :children   children})
-          (util/unique-elem-id "accordion-group")))]
-     [:div.order-section
-      (loc-html :span "printing-order.mylly.provided-by")]
-     [:div.operation-button-row
-      [:button.positive
-       {:on-click #(state/proceed-phase2)
-        :disabled (not (pos-int? total-amount))}
-       [:span (loc "printing-order.phase1.button.next")]
-       [:i.lupicon-chevron-right]]]]))
-
-(rum/defc proceed-to-phase3-button < rum/reactive []
-  (let [valid-order? (rum/react (rum-util/derived-atom [state/component-state] state/valid-order?))]
-    [:button.positive
-     {:on-click #(state/proceed-phase3)
-      :disabled (false? valid-order?)}
-     [:span (loc "printing-order.phase2.button.next")]
-     [:i.lupicon-chevron-right]]))
+          (files/files-accordion-group {:path       [path-key]
+                                        :children   children})
+          (util/unique-elem-id "accordion-group")))]]))
 
 (rum/defc composer-phase2 < rum/reactive []
   (let [payer-option (rum/cursor-in state/component-state [:contacts :payer-same-as-orderer])
@@ -151,15 +108,7 @@
        [:div.col-4
         (loc-html :span "printing-order.conditions.text")]]
       [:div.row
-       (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept" true)]]
-     [:div.order-section
-       (loc-html :span "printing-order.mylly.provided-by")]
-     [:div.operation-button-row
-      [:button.secondary
-       {:on-click #(state/back-to-phase1)}
-       [:i.lupicon-chevron-left]
-       [:span (loc "printing-order.phase2.button.prev")]]
-      (proceed-to-phase3-button)]]))
+       (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept" true)]]]))
 
 (rum/defc order-pricing-table < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
@@ -230,18 +179,7 @@
        [:div.col-4
         [:label.like-btn
          [:i.lupicon-circle-check.positive]
-         [:span (loc "printing-order.conditions.accepted")]]]]]
-     [:div.order-section
-      (loc-html :span "printing-order.mylly.provided-by")]
-     [:div.operation-button-row
-      [:button.secondary
-       {:on-click #(state/back-to-phase2)}
-       [:i.lupicon-chevron-left]
-       [:span (loc "printing-order.phase3.button.prev")]]
-      [:button.positive
-       {:on-click #(state/submit-order)}
-       [:span (loc "printing-order.phase3.button.submit")]
-       [:i.lupicon-chevron-right]]]]))
+         [:span (loc "printing-order.conditions.accepted")]]]]]]))
 
 (rum/defc order-composer < rum/reactive
                            {:init         init
@@ -258,6 +196,9 @@
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))
+     [:div.order-section
+      (loc-html :span "printing-order.mylly.provided-by")]
+     (transitions/transition-buttons phase)
      [:div (comp/debug-atom (rum/cursor-in state/component-state [:contacts]))]
      (order-composer-footer)]))
 
