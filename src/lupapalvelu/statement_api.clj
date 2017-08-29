@@ -211,7 +211,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
    :pre-checks  [statement/statement-owner
                  statement/statement-not-given
-                 statement/statement-in-sent-state-allowed]
+                 statement/statement-in-sent-state-allowed
+                 statement/not-ely-statement]
    :states      #{:open :submitted :complementNeeded :sent}
    :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
