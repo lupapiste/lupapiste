@@ -3,7 +3,7 @@
             [sade.strings :as ss]
             [lupapalvelu.attachment :as attachment]))
 
-(defn insert-attachment! [unzipped-path application attachment type target timestamp user]
+(defn insert-attachment! [unzipped-path application attachment type target contents timestamp user]
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
         file          (fs/file (ss/join "/" [unzipped-path filename]))
         file-size     (.length file)]
@@ -13,6 +13,7 @@
                                     :required false
                                     :locked true
                                     :created timestamp
+                                    :contents contents
                                     :state :ok}
                                    {:filename filename
                                     :size file-size
