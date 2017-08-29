@@ -60,6 +60,7 @@ util.showSavedIndicator = function() {};
 util.partyFullName = function() {};
 util.finnishDateAndTime = function() {};
 util.finnishDate = function() {};
+util.toMoment = function() {};
 
 var sprintf = function() {};
 

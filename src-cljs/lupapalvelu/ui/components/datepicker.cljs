@@ -62,21 +62,21 @@
    (fn [state]
      (let [dom-node        (rum/dom-node state)
            date*           (date-key state)
+           lang            (js/loc.getCurrentLanguage)
            default-options {:format           (loc "date.format")
                             :show-week-number true
                             :first-day        1
                             :position         "bottom left"
                             :field            dom-node
-                            :default-date     @date*
-                            :set-default-date true
                             :i18n             (pikaday-i18n)
                             :on-select        #(reset! date* %)}
            opts            (opts-transform (merge default-options
                                                   pikaday-options))
-           pikaday*        (atom (js/Pikaday. opts))]
-       (add-watch date* :update-instance
-                  (fn [new]
-                    (.setDate @pikaday* new true)))
+           pikaday*        (atom (js/Pikaday. opts))
+           update-fn       #(when-let [m (js/util.toMoment @date* lang)]
+                              (.setMoment @pikaday* m true))]
+       (update-fn)
+       (add-watch date* :update-instance update-fn)
        (assoc state ::pikaday pikaday*)))
    :will-unmount
    (fn [state]

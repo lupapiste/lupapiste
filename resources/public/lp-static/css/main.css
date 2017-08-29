@@ -18508,7 +18508,7 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
 
 .pprint > .code {
   font-family: Consolas, "Lucida Console", monospace;
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .dateinput.dateinput--safe {
