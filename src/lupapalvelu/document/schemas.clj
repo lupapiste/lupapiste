@@ -221,7 +221,6 @@
 
 (def rahoitus {:name "rahoitus" :type :fundingSelector})
 
-
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])

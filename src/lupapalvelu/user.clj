@@ -211,7 +211,7 @@
     (oir-authority? user)))
 
 (defn authority? [{role :role}]
-  (contains? #{:authority :financialAuthority} (keyword role)))
+  (contains? #{:authority} (keyword role)))
 
 (defn verified-person-id? [{pid :personId source :personIdSource :as user}]
   (and (ss/not-blank? pid) (util/=as-kw :identification-service source)))
