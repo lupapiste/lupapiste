@@ -62,5 +62,6 @@
             {:type "statement" :id (:id statement)}
             "Lausunnon liite (ELY-keskus)"
             created
-            (assoc system-user :firstName "ELY-keskus"))))
+            (assoc system-user :firstName "ELY-keskus")
+            {:read-only true})))
       (ok))))

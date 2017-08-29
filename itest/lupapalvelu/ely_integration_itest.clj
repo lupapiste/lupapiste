@@ -133,4 +133,8 @@
           (get-in ely-attachment [:target :id]) => (:id ely-statement)
           (get-in ely-attachment [:target :type]) => "statement"
           (get ely-attachment :contents) => (contains "Lausunnon liite")
-          (get-in ely-attachment [:latestVersion :user :username]) => (:username usr/batchrun-user-data))))))
+          (get-in ely-attachment [:latestVersion :user :username]) => (:username usr/batchrun-user-data)
+          (fact "as in give-statement, attachment should be set readonly"
+            (:readOnly ely-attachment) => true)
+          (fact "locked true comes from asiahallinta reader" ; hmm?
+            (:locked ely-attachment) => true))))))
