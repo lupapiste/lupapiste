@@ -4,9 +4,10 @@
             [sade.common-reader :as cr]
             [sade.util :as util]
             [sade.xml :as xml]
-            [clojure.java.io :as io]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.statement :as statement]))
+            [lupapalvelu.statement :as statement]
+            [lupapalvelu.xml.asianhallinta.attachment :as ah-att]))
 
 (def path-to-required-keys {[:Lausunto :LausuntoTunnus] :id
                             [:HakemusTunnus] :application-id
@@ -29,7 +30,6 @@
 (defn statement-response-handler [parsed-xml unzipped-path ftp-user system-user]
   (let [xml-edn   (xml/xml->edn parsed-xml)
         lausunto-vastaus (:LausuntoVastaus xml-edn)
-        application-id (:HakemusTunnus lausunto-vastaus)
         ; external-id (:AsianTunnus lausunto-vastaus)
         ; external-id-statement (get-in lausunto-vastaus [:Lausunto :AsianTunnus])
         text (get-in lausunto-vastaus [:Lausunto :LausuntoTeksti])
@@ -38,14 +38,29 @@
         statement-data (-> statement-required-data
                            (update :given cr/to-timestamp)
                            (util/assoc-when :text text :giver giver))
-        attachments (map xml/xml->edn (xml/select tes [:LausuntoVastaus :Liitteet :Liite]))]
+        attachments (-> (:Liitteet lausunto-vastaus)
+                        (util/ensure-sequential :Liite)
+                        :Liite)
+        application (domain/get-application-no-access-checking
+                      (:application-id statement-data))
+        created (now)]
     (logging/with-logging-context
-      {:applicationId application-id :userId ftp-user}
+      {:applicationId (:id application) :userId ftp-user}
       (when-let [statement (statement/save-ah-statement-response
-                             application-id
+                             application
                              ftp-user
                              statement-data)]
-        (infof "ah-statement-response successfully updated statement, now saving %d attachments" (count attachments))
-        ;TODO attachments
-        )
+        (infof "ah-statement-response successfully updated statement %s, now saving %d attachments"
+               (:id statement)
+               (count attachments))
+        (doseq [attachment attachments]
+          (ah-att/insert-attachment!
+            unzipped-path
+            application
+            attachment
+            {:type-group "muut" :type-id "muu"}
+            {:type "statement" :id (:id statement)}
+            "Lausunnon liite (ELY-keskus)"
+            created
+            (assoc system-user :firstName "ELY-keskus"))))
       (ok))))

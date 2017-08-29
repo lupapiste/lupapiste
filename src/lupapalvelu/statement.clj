@@ -235,14 +235,12 @@
   "Save statement response data from asianhallinta LausuntoVastaus to application statement.
    Validation of required data has been made on reader side.
    Returns updated statement on success"
-  [app-id ftp-user statement-data]
-  (let [app (domain/get-application-no-access-checking app-id)
-        statement (get-statement app (:id statement-data))
+  [app ftp-user statement-data]
+  (let [statement (get-statement app (:id statement-data))
         add-giver (fn [name]
                     (if (ss/not-blank? (:giver statement-data))
                     (str name " (" (:giver statement-data) ")")
-                      name))
-        command (action/application->command {:id app-id})]
+                      name))]
     (if statement
       (do
         (validate-external-statement-update! statement ftp-user)
@@ -254,11 +252,11 @@
                              :given  (:given statement-data)
                              :text   (:text statement-data)
                              :person (update (:person statement) :name add-giver))]
-          (action/update-application command
+          (action/update-application (action/application->command app)
                                      {:statements {$elemMatch {:id (:id statement)}}}
                                      {$set {:statements.$ updated}})
           updated))
-      (warnf "No statement found for ah statement response, app-id: %s, statement: %s", app-id (:id statement)))))
+      (warnf "No statement found for ah statement response, app-id: %s, statement: %s", (:id app) (:id statement)))))
 
 ;;
 ;; Statement givers

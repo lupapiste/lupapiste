@@ -6,6 +6,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.integrations.ely :as ely]
             [lupapalvelu.integrations.messages :as messages]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
@@ -111,5 +112,19 @@
             (:text ely-statement) => "Hyv\u00e4 homma"
             (util/to-xml-date (:given ely-statement)) => "2017-05-07")
           (fact "Old data is OK"
+            (:saateText ely-statement) => "moro"
             (get-in ely-statement [:external :acknowledged]) => pos?
-            (get-in ely-statement [:external :externalId]) => string?))))))
+            (get-in ely-statement [:external :externalId]) => string?)))
+      (fact "Atttachments are uploaded"
+        (let [app (query-application mikko (:id app))
+              ely-statement (first (:statements app))
+              statement-attachments (filter
+                                      #(= (:id ely-statement) (-> % :target :id))
+                                      (:attachments app))
+              ely-attachment (first statement-attachments)]
+          (get-in ely-statement [:external :partner]) => "ely"
+          (count statement-attachments) => 1
+          (get-in ely-attachment [:target :id]) => (:id ely-statement)
+          (get-in ely-attachment [:target :type]) => "statement"
+          (get ely-attachment :contents) => (contains "Lausunnon liite")
+          (get-in ely-attachment [:latestVersion :user :username]) => (:username usr/batchrun-user-data))))))
