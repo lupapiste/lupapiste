@@ -32,7 +32,7 @@ Sonja creates another assignment for herself
 
 Ronja logs in, sees two assignments in document
   Set Suite Variable  ${doctype}  paasuunnittelija
-  Set Suite Variable  ${docPath}  section[@class='accordion' and @data-doc-type='paasuunnittelija']
+  Set Suite Variable  ${docPath}  section[contains(@class, 'accordion') and @data-doc-type='paasuunnittelija']
   Ronja logs in
   Count of open assignments is  1
   Open application  ${appname}  ${propertyid}

@@ -388,7 +388,7 @@
        (let [email "bad@example.com"]
          (fact "Non-existing user can be added as a statement giver (in authority admin view)"
                (create-statement-giver sipoo email) => (contains {:email email
-                                                                  :name (str " " email)}))
+                                                                  :name  email}))
          (fact "Authority user is created"
                (-> (query admin :users :email email) :users first) =contains=> {:email email
                                                                                 :role "authority"
@@ -453,7 +453,6 @@
 
 
 (facts "Statement data filtering"
-
   (create-statement-giver sipoo veikko-email)
   (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
         application-id (:id (create-and-submit-application pena :propertyId sipoo-property-id :operation "ilmoitus-poikkeuksellisesta-tilanteesta"))
@@ -473,5 +472,22 @@
 
     (fact "Some data of not-given statement data is filtered from Pena"
       (let [app-pena (query-application pena application-id)]
-        (:statements app-pena) => (has every? #(= filtered-statement-keys (-> % keys set)))))
-    ))
+        (:statements app-pena) => (has every? #(= filtered-statement-keys (-> % keys set)))))))
+
+(facts "Statement giver names"
+  (fact "Name for non-existing user"
+    (let [{id :id} (command sipoo :create-statement-giver :name "  Bob  " :email "  bob@bob.example.com  " :text "  Hello  ")]
+      (:data (query sipoo :get-organizations-statement-givers))
+      => (contains {:id id :name "Bob" :email "bob@bob.example.com" :text "Hello"})))
+  (fact "Existing user's name overrides the given name"
+    (let [{id :id} (command sipoo :create-statement-giver :name "Sonja the Second" :email "SONJA.SIBBO@sipoo.fi" :text "World")]
+      (:data (query sipoo :get-organizations-statement-givers))
+      => (contains {:id id :name "Sonja Sibbo" :email "sonja.sibbo@sipoo.fi" :text "World"})))
+  (fact "Non-existing, no name: email is used also as name"
+    (let [{id :id} (command sipoo :create-statement-giver :email "dot@dot.example.net" :text "Dodo")]
+      (:data (query sipoo :get-organizations-statement-givers))
+      => (contains {:id id :name "dot@dot.example.net" :email "dot@dot.example.net" :text "Dodo"})))
+  (fact "Blank name is ignored"
+    (let [{id :id} (command sipoo :create-statement-giver :email "phong@phong.example.net" :text "Pho" :name "    ")]
+      (:data (query sipoo :get-organizations-statement-givers))
+      => (contains {:id id :name "phong@phong.example.net" :email "phong@phong.example.net" :text "Pho"}))))

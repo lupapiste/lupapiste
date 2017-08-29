@@ -45,7 +45,7 @@
 
     self.updateDocstoreInfo = function() {
       var descs = _(self.docstoreDescs()).map(unWrapDesc).fromPairs().value();
-      var documentPrice = util.parseFloat(self.docstorePrice());
+      var documentPrice = Math.floor(util.parseFloat(self.docstorePrice()) * 100);
       ajax.command("update-docstore-info",
                    {"org-id":                self.organization().id(),
                     docStoreInUse:           self.docstoreEnabled(),
@@ -133,7 +133,7 @@
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           self.digitizerToolsEnabled(result.data["digitizer-tools-enabled"]);
           self.docstoreEnabled(_.get(result, "data.docstore-info.docStoreInUse"));
-          self.docstorePrice(_.toString(_.get(result, "data.docstore-info.documentPrice")));
+          self.docstorePrice((_.get(result, "data.docstore-info.documentPrice") / 100).toFixed(2).replace(".", ","));
           self.docstoreDescs(_.map(util.getIn(result,["data", "docstore-info", "organizationDescription"]), wrapDesc));
           self.calendarsEnabled(result.data["calendars-enabled"]);
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));

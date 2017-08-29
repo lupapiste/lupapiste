@@ -321,7 +321,10 @@
                                  (:caseManagement %))
                               (:scope resp))]
             (:enabled ah-config) => true
-            (:version ah-config) => "lol"))))
+            (:version ah-config) => "lol")))
+    (fact "R can't be set"
+      (command kuopio "save-asianhallinta-config" :permitType "R" :municipality velho-muni :enabled true :version "lol")
+      => (partial expected-failure? :error.invalid-permit-type)))
 
   (fact "Fail when organization has unsupported version selected"
     (let [app-id (:id (create-and-submit-application

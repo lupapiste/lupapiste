@@ -37,6 +37,6 @@ Inspection summary should be created automatically
   Open tab  inspectionSummaries
   Wait until  Select From List by label  xpath=//select[@data-test-id="summaries-select"]  Uusi pohja 1 -
   Wait until  Element should be visible by test id  target-0
-  Element should contain  //tr[@data-test-id="target-0"]/td[@class="target-name"]  AA
-  Element should contain  //tr[@data-test-id="target-1"]/td[@class="target-name"]  BB
-  Element should contain  //tr[@data-test-id="target-2"]/td[@class="target-name"]  CC
+  Element should contain  //tr[@data-test-id="target-0"]/td[contains(@class, 'target-name')]  AA
+  Element should contain  //tr[@data-test-id="target-1"]/td[contains(@class, 'target-name')]  BB
+  Element should contain  //tr[@data-test-id="target-2"]/td[contains(@class, 'target-name')]  CC

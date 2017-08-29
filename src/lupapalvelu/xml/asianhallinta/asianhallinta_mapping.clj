@@ -1,12 +1,13 @@
 (ns lupapalvelu.xml.asianhallinta.asianhallinta-mapping
-  (:require [lupapalvelu.document.asianhallinta-canonical :as canonical]
+  (:require [taoensso.timbre :refer [infof]]
+            [lupapalvelu.document.asianhallinta-canonical :as canonical]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.integrations.statement-canonical :refer [statement-as-canonical]]
             [lupapalvelu.xml.asianhallinta.mapping-common :as ah]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.mapping-common :as common]
             [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.i18n :as i18n]
             [sade.core :refer [def-]]
             [sade.util :as util]))
 
@@ -145,17 +146,29 @@
 
 (defn statement-request
   "Construct UusiAsia XML with type Lausuntopyynt\u00f6. Writes XML and attachments to disk"
-  [user application submitted-application statement lang message-config]
+  [{:keys [user created] :as command} application submitted-application statement lang message-config]
   (let [{:keys [version begin-of-link output-dir]} message-config
+        message-id (get-in statement [:external :messageId])
         application  (enrich-application application)
+        integration-message-data {:id          message-id :direction "out"
+                                  :output-dir  (:output-dir message-config) :format "xml"
+                                  :partner     (get-in statement [:external :partner])
+                                  :messageType "ah-statement-request" :created created
+                                  :application (select-keys application [:id :organization :state])
+                                  :target      {:id (:id statement) :type "statement"}
+                                  :initator    (select-keys user [:id :username])
+                                  :action      (:action command)}
         canonical    (create-statement-request-canonical user application statement lang)
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link #(not= "verdict" (-> % :target :type)))
         attachments-with-pdfs  (conj attachments-canonical
                                     (canonical/get-submitted-application-pdf application begin-of-link)
                                     (canonical/get-current-application-pdf application begin-of-link))
         canonical-with-attachments (assoc-in canonical [:UusiAsia :Liitteet :Liite] attachments-with-pdfs)
-        mapping (get-uusi-asia-mapping version)
+        mapping (-> (get-uusi-asia-mapping version)
+                    (assoc-in [:attr :messageId] message-id))
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write (:attachments application) #(not= "verdict" (-> % :target :type)))
-        ]
-    (writer/write-to-disk application attachments xml (str "ah-" version) output-dir submitted-application lang "statement_request")))
+        saved-attachment-ids (writer/write-to-disk application attachments xml (str "ah-" version) output-dir submitted-application lang "statement_request")]
+    (messages/save (assoc integration-message-data :attachmentsCount (count saved-attachment-ids)))
+    (infof "ELY statement-request written, messageId: %s, attachments (excl generated PDFs): %d" message-id (count saved-attachment-ids))
+    saved-attachment-ids))

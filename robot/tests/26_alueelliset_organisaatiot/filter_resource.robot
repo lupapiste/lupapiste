@@ -13,8 +13,8 @@ Save advanced filter
 
 Filter item should contain X number of tags
   [Arguments]  ${filter name}  ${amount}
-  Wait until  Xpath should match X times  //div[@data-test-id="${filter name}-filter-component"]//ul[@class="tags"]//li[@class="tag"]  ${amount}
+  Wait until  Xpath should match X times  //div[@data-test-id="${filter name}-filter-component"]//ul[contains(@class, 'tags')]//li[contains(@class, 'tag')]  ${amount}
 
 Filter should contain tag
   [Arguments]  ${filter name}  ${text}
-  Wait Until  Element Should Contain  xpath=//div[@data-test-id="${filter name}-filter-component"]//ul[@class="tags"]//li[@class="tag"]//span  ${text}
+  Wait Until  Element Should Contain  xpath=//div[@data-test-id="${filter name}-filter-component"]//ul[contains(@class, 'tags')]//li[contains(@class, 'tag')]//span  ${text}

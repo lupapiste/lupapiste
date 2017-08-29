@@ -13035,6 +13035,15 @@ ul.tabs {
   color: red;
 }
 
+.integration-error-dialog div.content.integration-error i {
+  float: left;
+  margin-right: 6px;
+}
+
+.integration-error-dialog div.content.integration-error p.dialog-desc {
+  display: inline-block;
+}
+
 .bubble-dialog {
   padding: 20px 20px 20px 20px;
   margin-bottom: 20px;

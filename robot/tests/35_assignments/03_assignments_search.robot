@@ -37,32 +37,32 @@ Sonja has 'own assignments' filter as default
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
 
 Sonja sees two assignments
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
   # Order is ascending
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Tarkasta varusteet
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[2]/td[@data-test-col-name='description']  Tarkasta kiinteistö
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Tarkasta varusteet
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[2]/td[@data-test-col-name='description']  Tarkasta kiinteistö
 
 Complete assignment button should be visible
-  Element should be visible  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]//button[@data-test-id='complete-assignment']
+  Element should be visible  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]//button[@data-test-id='complete-assignment']
 
 No assignments completed
   Click by test id  search-tab-completed
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  0
 
 All assignments returns two
   Click by test id  search-tab-all
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
 
 Complete first assignment from search results
-  Click element  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]//button[@data-test-id='complete-assignment']
+  Click element  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]//button[@data-test-id='complete-assignment']
   Positive indicator should be visible
   # The 'all' tab
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
   Click by test id  search-tab-created
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Click by test id  search-tab-completed
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Tarkasta varusteet
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Tarkasta varusteet
   Logout
 
 Ronja logs in and sees only her assignments
@@ -71,14 +71,14 @@ Ronja logs in and sees only her assignments
   Active search tab is  created
   Click by test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
   Click by test id  search-tab-completed
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  0
 
 Ronja opens her assignments and ends up in parties tab
   Click by test id  search-tab-created
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Click element  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
+  Click element  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]
   Wait until  Tab should be visible  parties
 
 Ronja goes back to search and selects filter for all authorities in organization
@@ -89,22 +89,22 @@ Ronja goes back to search and selects filter for all authorities in organization
 Sonja's completed assignment is visible for Ronja
   Click by test id  search-tab-completed
   Active search tab is  completed
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Tarkasta varusteet
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Tarkasta varusteet
 
 Two assignments are open with 'all' filter
   Click by test id  search-tab-created
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
 
 Ronja can complete both assignments
   Active search tab is  created
-  Click element  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]//button[@data-test-id='complete-assignment']
+  Click element  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]//button[@data-test-id='complete-assignment']
   Positive indicator should be visible
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Click element  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]//button[@data-test-id='complete-assignment']
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
+  Click element  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]//button[@data-test-id='complete-assignment']
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  0
   Click by test id  search-tab-completed
-  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  3
+  Wait until  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  3
 
 Completed assignments are not visible in application
   Scroll to and click xpath results  //label[@for='searchTypeApplications']
@@ -125,16 +125,16 @@ Sonja creates two assignments with no recipient
 
 Sonja opens assignments search and sees no assignments
   Open assignments search
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  0
 
 Sonja sets recipient filter to Kaikki and sees two assignments
   Click by test id  toggle-advanced-filters
   Select from autocomplete by test id  recipient-filter-component  Kaikki
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
 
 Sonja sets recipient filter to Ei vastaanottajaa and sees two assignments
   Select from autocomplete by test id  recipient-filter-component  Ei vastaanottajaa
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
 
 No frontend errors
   Logout

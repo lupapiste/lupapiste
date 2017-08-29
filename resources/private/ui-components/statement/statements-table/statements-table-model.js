@@ -29,12 +29,31 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
   };
 
+  self.getExternalText = function(statement) {
+    var externalInfo = statement.external;
+    if ( externalInfo && externalInfo.acknowledged && externalInfo.externalId ) {
+      var partnerText = loc("application.statement.external-partner.in." + externalInfo.partner());
+      var acknowledgedDateStr = moment(externalInfo.acknowledged()).format("D.M.YYYY");
+      var fullText = loc("application.statement.external.received",
+                         partnerText,
+                         acknowledgedDateStr,
+                         externalInfo.externalId());
+      return fullText;
+    } else {
+      return "";
+    }
+  };
+
+  self.isExternal = function(statement) {
+    return _.isObject(statement.external);
+  };
+
   var isStatementOwner = function(statement) {
     return util.getIn(statement, ["person", "userId"]) === user.id();
   };
 
   self.isRemovable = function(statement) {
-    return user.isAuthority()  && !self.isGiven(statement);
+    return !self.isExternal(statement) && user.isAuthority()  && !self.isGiven(statement);
   };
 
   self.canAccessStatement = function(statement) {
@@ -79,12 +98,11 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.openDeleteDialog = function(model) {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("statement.delete.header"),
-        loc("statement.delete.message"),
-        {title: loc("yes"), fn: _.partial(deleteStatementFromServer, model.id())},
-        {title: loc("no")}
-    );
+    hub.send("show-dialog", {ltitle: "statement.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "statement.delete.message",
+                                               yesFn: _.partial(deleteStatementFromServer, model.id())}});
   };
 
 };

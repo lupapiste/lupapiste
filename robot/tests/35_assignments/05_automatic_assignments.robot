@@ -76,8 +76,8 @@ Assignments are assigned to Sonja
   Open search tab  all
   Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
 
 Sonja can see that there are more attachments in the same assignment
   Open applications search
@@ -120,9 +120,9 @@ Sonja has two assignments
   Open search tab  all
   Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  2
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  2
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema
 
 Sonja can see two automatic assignments
   Open applications search
@@ -181,7 +181,7 @@ Sonja has no open assignments
   Open assignments search
   Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  0
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  0
   Logout
 
 Ronja has one assignment
@@ -190,5 +190,5 @@ Ronja has one assignment
   Open search tab  all
   Scroll and click test id  toggle-advanced-filters
   Autocomplete selection is  div[@data-test-id="recipient-filter-component"]  Omat tehtäväni
-  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[@class="assignment-row"]  1
-  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[@class="assignment-row"])[1]/td[@data-test-col-name='description']  Aita ja asema
+  Xpath Should Match X Times  //table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')]  1
+  Element text should be  xpath=(//table[@id="assignments-list"]//tbody/tr[contains(@class, 'assignment-row')])[1]/td[@data-test-col-name='description']  Aita ja asema

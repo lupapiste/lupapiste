@@ -17,10 +17,10 @@
 
 (def local-db-name (str "test_pdf_html_template_" (now)))
 
-(mongo/with-db local-db-name
+#_(mongo/with-db local-db-name
   (fixture/apply-fixture "minimal"))
 
-(mongo/with-db local-db-name
+#_(mongo/with-db local-db-name
   (facts "inspection summary pdf generation at muuntaja"
     (let [app  {:primaryOperation     {:id "..op-id..", :name "pientalo-laaj", :description nil}
                 :municipality         "300"

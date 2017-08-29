@@ -231,6 +231,9 @@
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
+(defn get-by-id [collection id & args]
+  (decode-response (http-get (str (server-address) "/dev/by-id/" (name collection) "/" id) (apply hash-map args))))
+
 (defn clear-collection [collection]
   (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
     (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection "\": response: " (pr-str resp)))))

@@ -33,7 +33,7 @@ Goto following week view
   Goto following week in calendar view
 
 Create reservation slots for Friday next week
-  Element should not be visible  xpath=//div[@class='calendar-slot-bubble']//h3
+  Element should not be visible  xpath=//div[contains(@class, 'calendar-slot-bubble')]//h3
   Click by test id  timeline-slot-Friday-1000
   Wait until  Element should be visible by test id  reservation-slot-create-amount
   Fill test id  reservation-slot-create-amount  6

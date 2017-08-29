@@ -54,7 +54,7 @@ Edit target name on an existing inspection summary
   Input text  xpath=//input[@data-test-id="edit-target-field-${index}"]  ${newName}
   Execute javascript  $("[data-test-id='edit-target-field-${index}']").blur();
   Positive indicator should be visible
-  Wait until  Element should contain  //tr[@data-test-id="target-${index}"]/td[@class="target-name"]  ${newName}
+  Wait until  Element should contain  //tr[@data-test-id="target-${index}"]/td[contains(@class, 'target-name')]  ${newName}
 
 Add a new target on an existing inspection summary
   [Arguments]  ${targetCountBefore}  ${newName}
@@ -62,4 +62,4 @@ Add a new target on an existing inspection summary
   Wait test id visible  edit-target-field-${targetCountBefore}
   Input text  xpath=//input[@data-test-id="edit-target-field-${targetCountBefore}"]  ${newName}
   Execute javascript  $("[data-test-id='edit-target-field-${targetCountBefore}']").blur();
-  Wait until  Element should contain  //tr[@data-test-id="target-${targetCountBefore}"]/td[@class="target-name"]  ${newName}
+  Wait until  Element should contain  //tr[@data-test-id="target-${targetCountBefore}"]/td[contains(@class, 'target-name')]  ${newName}

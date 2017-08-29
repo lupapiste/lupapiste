@@ -40,8 +40,8 @@ Mikko can't reinvite Teppo
 Teppo declines invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
-  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  ${appname}, Sipoo,
-  Element Text Should Be  xpath=//div[@class='invitation'][1]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
+  Element Should Contain  xpath=//div[contains(@class, 'invitation')][1]//h3  ${appname}, Sipoo,
+  Element Text Should Be  xpath=//div[contains(@class, 'invitation')][1]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  decline-invite-button
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  xpath=//*[@data-test-id='decline-invite-button']
@@ -58,16 +58,16 @@ Mikko reinvites Teppo
 
 Teppo can view application
   Teppo logs in
-  Wait Until  Element should be visible  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
-  Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
+  Wait Until  Element should be visible  xpath=//div[contains(@class, 'invitation')]//a[@data-test-id='open-application-button']
+  Click element  xpath=//div[contains(@class, 'invitation')]//a[@data-test-id='open-application-button']
   Deny yes no dialog
   Application address should be  ${appname}
   Go to page  applications
 
 Teppo accepts invitation
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
-  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  ${appname}, Sipoo,
-  Element Text Should Be  xpath=//div[@class='invitation']//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
+  Element Should Contain  xpath=//div[contains(@class, 'invitation')][1]//h3  ${appname}, Sipoo,
+  Element Text Should Be  xpath=//div[contains(@class, 'invitation')]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
@@ -192,7 +192,7 @@ Frontend errors check
 *** Keywords ***
 
 Error message is present on invite form
-  Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//div[@class='context-error']
+  Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//div[contains(@class, 'context-error')]
   Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
   Wait until  Mask is invisible
 

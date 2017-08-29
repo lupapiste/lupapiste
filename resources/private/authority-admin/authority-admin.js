@@ -180,19 +180,17 @@
     var self = this;
 
     self.email = ko.observable();
-    self.email2 = ko.observable();
+    self.name = ko.observable();
     self.text = ko.observable();
     self.error = ko.observable();
     self.command = ko.observable();
-    self.disabled = ko.computed(function() {
-      var emailOk = self.email() && util.isValidEmailAddress(self.email()) && self.email() === self.email2();
-      var textOk = self.text();
-      return !(emailOk && textOk);
+    self.formOk = ko.computed(function() {
+      return _.trim(self.email()) && _.trim(self.text());
     });
 
     self.copyFrom = function(data) {
       self.email(data.email);
-      self.email2( data.email);
+      self.name( data.name);
       self.text(data.text);
       return self;
     };
@@ -208,7 +206,7 @@
       ajax.command("create-statement-giver", statementGiver)
         .success(self.onSuccess)
         .error(function(result) {
-          self.error(result.txt);
+          self.error(result.text);
         })
         .call();
       return false;

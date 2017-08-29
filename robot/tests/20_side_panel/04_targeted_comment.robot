@@ -20,7 +20,7 @@ Sonja sends message to Ronja
   Select From List by id  side-panel-assigneed-authority  Sibbo Ronja
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
-  Page Should Contain Element  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[@class='to' and contains(text(), 'Ronja')]
+  Page Should Contain Element  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[contains(@class, 'to') and contains(text(), 'Ronja')]
 
 Selection of to has been reset
   List Selection Should Be  side-panel-assigneed-authority  ${EMPTY}

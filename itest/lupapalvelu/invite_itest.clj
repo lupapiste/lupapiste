@@ -222,3 +222,27 @@
      (invite sonja id "" "" (email-for-key teppo)) => ok?
      (count (:invites (query teppo :invites))) => 1
      (command teppo :approve-invite :id id) => ok?)))
+
+(facts* "Authority invites company and its employee as designer"
+  (doseq [user-key [sonja erkki]]
+    (let [resp (query user-key :invites) => ok?]
+      (count (:invites resp)) => 0))
+
+  (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
+        id    (:id resp) => truthy
+        app    (query-application sonja id)
+        suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
+
+    (fact "invite company"
+      (:body (decode-response (invite-company-and-accept-invitation sonja id "esimerkki"))) => ok?)
+
+    (fact "invite company user as designer"
+      (invite sonja id suunnittelija-doc "suunnittelija" (email-for-key erkki)) => ok?
+      (count (:invites (query erkki :invites))) => 1
+      (command erkki :approve-invite :id id) => ok?)
+
+    (fact "document contains company info"
+      (let [app (query-application sonja id)
+            document (domain/get-document-by-name app "suunnittelija")]
+        (get-in document [:data :yritys :yritysnimi :value]) => "Esimerkki Oy"
+        (get-in document [:data :yritys :liikeJaYhteisoTunnus :value]) => "7208863-8"))))
