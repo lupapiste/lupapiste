@@ -27,6 +27,7 @@
             [sade.env :as env]
             [sade.http :as http]
             [sade.schemas :as ssc]
+            [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as sxml]
@@ -86,12 +87,12 @@
 
 (sc/defschema DocStoreInfo
   {:docStoreInUse           sc/Bool
-   :documentPrice           sc/Num
+   :documentPrice           sssc/Nat
    :organizationDescription i18n/LocalizationStringMap})
 
 (def default-docstore-info
   {:docStoreInUse           false
-   :documentPrice           0.0
+   :documentPrice           0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
 (sc/defschema Organization

@@ -320,8 +320,8 @@
     (wfs/raster-images request "plandocument") => http200?))
 
 (facts "Get address from Turku"
-  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"})
-  (fact "get-addresses-proxy"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "https://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"})
+  (fact "get-addresses-proxy - this may fail if Turku backend doesn't respond, as MML fallback has different coords"
     (let [response (get-addresses-proxy {:params {:query "Linnankatu 80, Turku" :lang "fi"}})
           body (json/decode (:body response) true)]
       (fact (:suggestions body) =contains=> "Linnankatu 80, Turku")
@@ -329,7 +329,7 @@
                                               :number "80",
                                               :name {:fi "Turku" :sv "\u00c5bo"}
                                               :municipality "853"
-                                              :location {:x "237556.799" :y "6709445.314"}
+                                              :location {:x 237551.371, :y 6709441.9}
                                               }))))
 
   (fact "address-by-point-proxy"
