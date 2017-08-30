@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-Lupapisteessä on ilmoitettu uudesta ARA-hankkeesta. Hanke on Asuinkerrostalon tai rivitalon rakentaminen osoitteessa {{address}}, {{municipality}}.
+Lupapisteessä on ilmoitettu uudesta ARA-hankkeesta. Hanke on {{operation}} osoitteessa {{address}}, {{municipality}}.
 
 Nähdäksesi hankkeen tiedot klikkaa alla olevaa linkkiä ja kirjaudu tarvittaessa sisään sähköpostiosoitteella {{user.email}}. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 

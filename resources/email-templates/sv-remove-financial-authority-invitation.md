@@ -1,6 +1,6 @@
 # Hei {{user.firstName}},
 
-Ilmoitus ARA-hankkeesta Lupapisteessä on peruttu. Hanke on Asuinkerrostalon tai rivitalon rakentaminen osoitteessa {{address}}, {{municipality}}.
+Ilmoitus ARA-hankkeesta Lupapisteessä on peruttu. Hanke on {{operation}} osoitteessa {{address}}, {{municipality}}.
 
 Jos haluat lisätietoja asiasta, ole hyvä ja ota yhteyttä hanketta käsittelevän kunnan viranomaiseen. Hankkeen asiointitunnus Lupapisteessä on {{operation}}.
 

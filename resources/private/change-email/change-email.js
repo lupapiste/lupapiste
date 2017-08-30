@@ -63,7 +63,6 @@
     ajax.command("change-financial-authority-email", {tokenId: token})
       .success(function() {
         changingModel.success(true);
-        console.log("success");
       })
       .fail(_.partial(initError, "error.token-not-found"))
       .call();

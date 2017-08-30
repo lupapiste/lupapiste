@@ -96,7 +96,7 @@
 (defn- default-recipients-fn
   "Default recipient roles for notifications are all user roles but 'statementGiver'."
   [{application :application}]
-  (get-email-recipients-for-application application nil [:statementGiver]))
+  (get-email-recipients-for-application application nil [:statementGiver :financialAuthority]))
 
 (defn from-user [command] [(:user command)])
 
@@ -107,7 +107,7 @@
 (defn comment-recipients-fn
   "Recipients roles for comments are same user roles that can view and add comments."
   [{:keys [application]}]
-  (get-email-recipients-for-application application roles/comment-user-authz-roles [:statementGiver]))
+  (get-email-recipients-for-application application roles/comment-user-authz-roles [:statementGiver :financialAuthority]))
 
 
 ;;

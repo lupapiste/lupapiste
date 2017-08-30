@@ -1,6 +1,6 @@
 # Hei,
 
-Lupapisteessä on jätetty vireille hakemus, jossa on ilmoitettu ARA-rahoituksesta. Hanke on Asuinkerrostalon tai rivitalon rakentaminen osoitteessa {{address}}, {{municipality}}.
+Lupapisteessä on jätetty vireille hakemus, jossa on ilmoitettu ARA-rahoituksesta. Hanke on {{operation}} osoitteessa {{address}}, {{municipality}}.
 
 Onko sinulla käyttäjätunnus Lupapisteeseen? Klikkaa alla olevaa linkkiä nähdäksesi hankkeen tiedot. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
