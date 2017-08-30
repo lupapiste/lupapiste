@@ -32,11 +32,11 @@ Sonja creates assignment for Ronja about paasuunnittelija
 
 Sonja sees assignment in attachment
   Set Suite Variable  ${attachmentRow}  tr[@data-test-type='paapiirustus.asemapiirros']
-  Set Suite Variable  ${assignmentRow}  ${attachmentRow}/following-sibling::tr[@class='attachment-assignment-row']
+  Set Suite Variable  ${assignmentRow}  ${attachmentRow}/following-sibling::tr[contains(@class, 'attachment-assignment-row')]
   Wait until  Element should be visible  xpath=//${assignmentRow}//accordion-assignments
   Wait until  Element should be visible  xpath=//${assignmentRow}//button[@data-test-id='mark-assignment-complete']
-  Wait until  Element should contain  xpath=//${assignmentRow}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='creator']  Sonja Sibbo
-  Wait until  Element should contain  xpath=//${assignmentRow}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='receiver']  Ronja Sibbo
+  Wait until  Element should contain  xpath=//${assignmentRow}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[contains(@class, 'creator')]  Sonja Sibbo
+  Wait until  Element should contain  xpath=//${assignmentRow}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[contains(@class, 'receiver')]  Ronja Sibbo
   Element should contain  xpath=//${assignmentRow}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Onhan asemapiirros
 
 Sonja edits description of the assignment

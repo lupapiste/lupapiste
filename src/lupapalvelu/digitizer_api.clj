@@ -12,13 +12,14 @@
             [lupapalvelu.permit :as permit]))
 
 (defn user-is-allowed-to-digitize [{user-orgs :user-organizations user :user {:keys [organizationId]} :data}]
-  (let [archive-enabled? (some :permanent-archive-enabled (if organizationId
-                                                            (filter #(= organizationId (:id %)) user-orgs)
-                                                            user-orgs))
+  (let [archive-enabled? (some #(and (:permanent-archive-enabled %) (:digitizer-tools-enabled %))
+                               (if organizationId
+                                 (filter #(= organizationId (:id %)) user-orgs)
+                                 user-orgs))
         roles (if organizationId
                 ((keyword organizationId) (:orgAuthz user))
                 (apply set/union (vals (:orgAuthz user))))
-        correct-role? (seq (set/intersection #{:authority :digitizer :archivist} roles))]
+        correct-role? (seq (set/intersection #{:digitizer :archivist :authorityAdmin} roles))]
     (when-not (and archive-enabled? correct-role?)
       unauthorized)))
 
@@ -69,7 +70,7 @@
   (ok))
 
 (defquery digitizing-enabled
-  {:user-roles #{:authority}
+  {:user-roles #{:authority :authorityAdmin}
    :feature    :digitizer
    :pre-checks [user-is-allowed-to-digitize]}
   (ok))

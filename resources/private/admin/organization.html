@@ -75,7 +75,11 @@
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
             <label data-bind="ltext: 'organization.archive.enabled'" for="permanentArchiveEnabled"></label>
             <input type="checkbox" data-bind="checked: permanentArchiveEnabled" class="form-input" id="permanentArchiveEnabled">
-            <span data-bind="saveIndicator: indicator"></span>
+          </div>
+
+          <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+            <label data-bind="ltext: 'organization.digitizer.enabled'" for="digitizerToolsEnabled"></label>
+            <input type="checkbox" data-bind="checked: digitizerToolsEnabled" class="form-input" id="digitizerToolsEnabled">
           </div>
 
           <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">

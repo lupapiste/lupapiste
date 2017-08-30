@@ -30,11 +30,11 @@ Sonja creates assignment for Ronja about paasuunnittelija
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää
 
 Sonja sees assignment in document
-  Set Suite Variable  ${docPath}  section[@class='accordion' and @data-doc-type='paasuunnittelija']
+  Set Suite Variable  ${docPath}  section[contains(@class, 'accordion') and @data-doc-type='paasuunnittelija']
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
   Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
-  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='creator']  Sonja Sibbo
-  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='receiver']  Ronja Sibbo
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[contains(@class, 'creator')]  Sonja Sibbo
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[contains(@class, 'receiver')]  Ronja Sibbo
   Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katoppa tää
 
 Sonja edits description of the assignment
@@ -86,7 +86,7 @@ Ronja changes assignment back to Sonja
   Scroll and click test id  bubble-dialog-ok
   Positive indicator should be visible
   Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
-  Wait until  Element text should be  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']/span[@class='receiver']  Sonja Sibbo
+  Wait until  Element text should be  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']/span[contains(@class, 'receiver')]  Sonja Sibbo
 
 Only one assignment has been created
   Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1

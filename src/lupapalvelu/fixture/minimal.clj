@@ -423,7 +423,7 @@
     :enabled true
     :language "fi"
     :role "authority"
-    :orgAuthz {:186-R #{:authority}}
+    :orgAuthz {:186-R #{:authority :archivist}}
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
@@ -441,6 +441,18 @@
     :username "lupasihteeri@jarvenpaa.fi"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
+   ;; digitoija@jarvenpaa.fi / jarvenpaa
+   {:id "50ac77ecd2e6c2ea6e73f853"
+    :email "digitoija@jarvenpaa.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:186-R #{:digitizer}}
+    :firstName "Dingo"
+    :lastName "Digitoija"
+    :username "digitoija@jarvenpaa.fi"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f853"}}
 
    {:id "jarvenpaa-backend"
     :username "jarvenpaa-backend"
@@ -754,6 +766,7 @@
                        :assignments-enabled true
                        :inspection-summaries-enabled true
                        :permanent-archive-enabled true
+                       :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :automatic-ok-for-attachments-enabled true}
 
@@ -828,6 +841,7 @@
                        :calendars-enabled true
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "YM" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :permanent-archive-in-use-since 1451613600000
                        :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
                        :assignments-enabled true
@@ -920,6 +934,7 @@
                                              :ya-kayttolupa-nostotyot]
                        :operations-attachments ya-default-attachments-for-operations
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :tags [{:id "735001000000000000000000" :label "YA kadut"} {:id "735002000000000000000000" :label "YA ojat"}]
                        :automatic-ok-for-attachments-enabled true}
 
@@ -947,6 +962,7 @@
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
 
@@ -980,6 +996,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Tampere YA
@@ -1003,6 +1020,7 @@
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Porvoo R
@@ -1019,6 +1037,7 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
                        :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "172.17.144.220" "109.204.231.126"]
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :krysp {:R {:url local-krysp, :ftpUser "dev_porvoo", :version "2.1.6"}}
                        :handler-roles [{:id "abba11111111111111111638"
                                         :name {:fi "K\u00e4sittelij\u00e4"
@@ -1043,6 +1062,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Oulu YA
@@ -1064,6 +1084,7 @@
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled true
+                       :digitizer-tools-enabled true
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Naantali R
@@ -1078,6 +1099,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Peruspalvelukuntayhtyma Selanne R
@@ -1095,6 +1117,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
 
@@ -1118,6 +1141,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Turku R with a public WFS server
@@ -1139,6 +1163,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Kuopio R, has case management (asianhallinta) enabled
@@ -1183,6 +1208,7 @@
                        :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Helsinki R
@@ -1208,6 +1234,7 @@
                                                                       [:paapiirustus :pohjapiirustus]]}
                        :assignments-enabled true
                        :permanent-archive-enabled true
+                       :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
                        :use-attachment-links-integration true
                        :operations-tos-functions {:masto-tms "10 03 00 01"}
@@ -1237,6 +1264,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "YM" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;;
@@ -1265,6 +1293,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Sipoo R - Inforequests disabled
@@ -1288,6 +1317,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}
 
                       ;; Sipoo R - Both new applications and inforequests disabled
@@ -1311,6 +1341,7 @@
                                         :general true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true}]))
 
 (def companies [{:_id "solita"

@@ -91,9 +91,12 @@
             </thead>
             <tbody data-bind="foreach: statementGivers.data()">
               <tr data-test-type="statement-giver-row">
-                <td data-bind="text: text"></td>
-                <td data-bind="text: name"></td>
-                <td data-bind="text: email"></td>
+                <td data-bind="text: text,
+                               testId: 'statement-giver-' + email() + '-text'"></td>
+                <td data-bind="text: name,
+                               testId: 'statement-giver-' + email() + '-name'"></td>
+                <td data-bind="text: email,
+                               testId: 'statement-giver-' + email() + '-email'"></td>
                 <td>
                   <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('delete-statement-giver')">
                     [<a href="#" data-bind="click: $root.statementGivers.delete, ltext: 'remove'" data-test-id="remove-statement-giver" class="modal"></a>]
@@ -116,13 +119,18 @@
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.createStatementGiver">
+            <label class="form-label" data-bind="ltext: 'users.table.name'" for="statement-giver-name"></label>
+            <input class="form-input text long" type="text" id="statement-giver-name" data-bind="textInput: name" />
             <label class="form-label" data-bind="ltext: 'register.email'" for="statement-giver-email"></label>
             <input class="form-input text long" type="text" id="statement-giver-email" data-bind="textInput: email" />
-            <label class="form-label" data-bind="ltext: 'register.email2'" for="statement-giver-email2"></label>
-            <input class="form-input text long" type="text" id="statement-giver-email2" data-bind="textInput: email2" />
             <label class="form-label" data-bind="ltext: 'userinfo.statement-type'" for="statement-giver-text"></label>
             <input class="form-input text long" type="text" id="statement-giver-text" data-bind="textInput: text" />
-            <button data-test-id="create-statement-giver-save" class="btn btn-primary btn-dialog" id="statement-giver-save" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
+            <button data-test-id="create-statement-giver-save"
+                    class="btn btn-primary btn-dialog"
+                    id="statement-giver-save"
+                    data-bind="click: save,
+                               enable: formOk,
+                               ltext: 'save'"></button>
             <div data-bind="visible: error" >
               <div data-bind="ltext: error" id="statement-giver-error" class="context-error"></div>
             </div>

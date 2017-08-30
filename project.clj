@@ -9,6 +9,7 @@
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
+                 [org.clojure/core.async "0.3.443"]
 
                  ; Web frameworks
                  [ring "1.5.1" :exclusions [commons-fileupload org.clojure/tools.reader]]
@@ -124,7 +125,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.60"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.113"]
+                 [lupapiste/commons "0.7.118"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -154,7 +155,8 @@
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.7"]
                                   [pdfboxing "0.1.13"]
-                                  [com.cemerick/piggieback "0.2.1"]]
+                                  [com.cemerick/piggieback "0.2.1"]
+                                  [binaryage/devtools "0.9.4"]]
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
@@ -179,7 +181,8 @@
                                                          :asset-path "/lp-static/js/out"
                                                          :parallel-build true
                                                          :pretty-print true
-                                                         :optimizations :none}}}}}
+                                                         :optimizations :none
+                                                         :preloads  [devtools.preload]}}}}}
              :uberjar  {:main lupapalvelu.main
                         :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
                                                                         :output-to "resources/public/lp-static/js/rum-app.js"

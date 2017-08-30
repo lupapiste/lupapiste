@@ -4,6 +4,7 @@
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.operations :as ops]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
             [sade.strings :as ss]
@@ -15,13 +16,20 @@
   (util/find-by-id (usr/authority-admins-organization-id user)
                    user-organizations ))
 
+(defn permit-type->category [permit-type]
+  (when-let [kw (-> permit-type
+                    ss/lower-case
+                    keyword)]
+    (cond
+      (#{:r :p :ya} kw)              kw
+      (#{:kt :mm} kw)                :kt
+      (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+
 (defn organization-categories [{scope :scope}]
-  (->> (map (comp keyword ss/lower-case :permitType) scope)
-       (map #(cond
-               (#{:r :p :ya} %) %
-               (#{:kt :mm} %)   :kt
-               :else            :ymp))
-       set))
+  (set (map (comp permit-type->category :permitType) scope)))
+
+(defn operation->category [operation]
+  (permit-type->category (ops/permit-type-of-operation operation)))
 
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
@@ -154,7 +162,7 @@
         settings-key (settings-key category)]
     (mongo/update-by-id :organizations
                         (:id organization)
-                        {$set {settings-key {:draft draft
+                        {$set {settings-key {:draft    draft
                                              :modified timestamp}}})))
 
 ;; Generic is a placeholder term that means either review or plan
@@ -242,3 +250,26 @@
 
 (defn set-plan-details [organization timestamp review-id data]
   (set-generic-details organization timestamp review-id data :plans))
+
+;; Default operation verdict templates
+
+(defn operation-verdict-templates [organization]
+  (let [published (->> organization
+                       :verdict-templates
+                       :templates
+                       (remove :deleted)
+                       (filter (util/fn-> :versions seq))
+                       (map :id)
+                       set)]
+    (->> organization
+         :operation-verdict-templates
+         (filter (fn [[k v]]
+                   (contains? published v)))
+         (into {}))))
+
+(defn set-operation-verdict-template [org-id operation template-id]
+  (let [path (util/kw-path :operation-verdict-templates operation)]
+    (org/update-organization org-id
+                             (if (ss/blank? template-id)
+                               {$unset {path true}}
+                               {$set {path template-id}}))))

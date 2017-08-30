@@ -18,6 +18,8 @@
 ;; Supported languages
 ;;
 
+(def all-languages [:fi :sv :en])
+
 (def supported-langs (if (env/feature? :english)
                        [:fi :sv :en]
                        [:fi :sv]))
@@ -41,8 +43,11 @@
 
 (sc/defschema EnumSupportedLanguages (apply sc/enum (map name languages)))
 
+;; The languages are hard coded (with English optional) to avoid failing smoketests
 (sc/defschema LocalizationStringMap
-  (localization-schema sc/Str))
+  {:fi                   sc/Str
+   :sv                   sc/Str
+   (sc/optional-key :en) sc/Str})
 
 
 ;;
@@ -274,7 +279,7 @@
   ([lang :- EnumSupportedLanguages]
    (missing-localizations-excel lang nil))
   ([lang    :- EnumSupportedLanguages
-    options :- {:exclude [sc/Regex]}]
+    options :- (sc/maybe {:exclude [sc/Regex]})]
    (if (= lang "fi")
      (println "Oops, this does not work with Finnish as the target language.")
      (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
@@ -328,7 +333,9 @@
 
 
                                  (not= (:fi v) (:fi v-new))
-                                 (throw (ex-info "Finnish text used for translation does not match the one found in current source"
+                                 (throw (ex-info (str "Finnish text \"" (:fi v)
+                                                      "\" used for translation does not match the one found in current source \""
+                                                      (:fi v-new) "\"")
                                                  {:source {k v}
                                                   :new    {k-new v-new}}))
 

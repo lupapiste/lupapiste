@@ -2,8 +2,10 @@
   (:require [midje.sweet :refer :all]
             [clojure.data.xml :as xml]
             [clojure.java.io :as io]
+            [schema.core :as sc]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.integrations.ely :as ely]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
@@ -40,7 +42,9 @@
         (fact "Tyyppi is correct"
           (sxml/get-text xml [:UusiAsia :Tyyppi]) => "Lausuntopyynt\u00f6")
         (fact "TyypinTarkenne is correct"
-          (sxml/get-text xml [:UusiAsia :TyypinTarkenne]) => statement-subtype)))
+          (sxml/get-text xml [:UusiAsia :TyypinTarkenne]) => statement-subtype)
+        (fact "messageId is written"
+          (sxml/select1-attribute-value xml [:UusiAsia] :messageId) => string?)))
 
     (fact "ELY statement is saved to application"
       (let [statements (:statements (query-application mikko (:id app)))
@@ -51,4 +55,39 @@
         (fact "external config ok"
           (get ely-statement :external) => (just {:partner "ely"
                                                   :messageId string?
-                                                  :subtype statement-subtype}))))))
+                                                  :subtype statement-subtype}))
+
+        (fact "valid integration-message saved to db"
+          (let [resp (:body (get-by-id :integration-messages (get-in ely-statement [:external :messageId])))]
+            resp => ok?
+            (sc/check messages/IntegrationMessage (:data resp)) => nil))))
+
+    (fact "Statement allowed actions"
+      (let [ely-statement (-> (query-application mikko (:id app))
+                              :statements
+                              first)
+            ely-id (:id ely-statement)]
+        (fact "delete-statement not possible"
+          sonja =not=> (allowed? :delete-statement :id (:id app) :statementId ely-id))))
+
+    (fact "message is acknowledged by partner"
+      (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))
+            external-data (:external ely-statement)]
+        (fact "Random FTP user can't update statement"
+          (-> (decoded-get (str (server-address) "/dev/ah/message-response")
+                                   {:query-params {:id (:id app)
+                                                   :ftp-user "foo"
+                                                   :messageId (:messageId external-data)}})
+              :body) => (partial expected-failure? :error.unauthorized))
+
+        ; Mock XML unzipping and messageId parsing from AsianTunnusVastaus
+        (-> (decoded-get (str (server-address) "/dev/ah/message-response")
+                                 {:query-params {:id (:id app)
+                                                 :ftp-user (env/value :ely :sftp-user)
+                                                 :messageId (:messageId external-data)}})
+            :body) => ok?
+
+        (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+          (fact "Statement is acknowledged by ELY"
+            (get-in ely-statement [:external :acknowledged]) => pos?
+            (get-in ely-statement [:external :externalId]) => string?))))))

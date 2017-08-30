@@ -68,7 +68,7 @@
               <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'login.with-rights'"></th>
-              <th data-bind="ltext: 'organization.archive.enabled'"></th>
+              <th data-bind="ltext: 'organization.archive.header'"></th>
               <!-- ko if: features.enabled('ajanvaraus') -->
               <th data-bind="ltext: 'organization.calendars.enabled'"></th>
               <!-- /ko -->
@@ -93,7 +93,8 @@
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
                 </td>
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
-                  <span data-bind="text: $data['permanent-archive-enabled'] ? 'arkisto' : '-'"></span>
+                  <span data-bind="text: $data['permanent-archive-enabled'] ? 'arkisto' : '-'"></span><br>
+                  <span data-bind="text: $data['digitizer-tools-enabled'] ? 'digitointi' : '-'"></span>
                 </td>
                 <!-- ko if: features.enabled('ajanvaraus') -->
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">

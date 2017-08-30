@@ -129,14 +129,14 @@ Kill dev-box
 
 Resurrect dev-box
   Execute Javascript  $(".dev-debug").show();
-  Wait until  Element should be visible  //div[@class="dev-debug"]
+  Wait until  Element should be visible  //div[contains(@class, 'dev-debug')]
 
 Hide nav-bar
   Execute Javascript  $("nav.nav-wrapper").hide();
 
 Show nav-bar
   Execute Javascript  $("nav.nav-wrapper").show();
-  Wait until  Element should be visible  //nav[@class="nav-wrapper"]
+  Wait until  Element should be visible  //nav[contains(@class, 'nav-wrapper')]
 
 
 Language To
@@ -559,7 +559,7 @@ Autocomplete selection by test id is empty
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open
-  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[@class="autocomplete-dropdown"]
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="operations-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
   Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
 
@@ -571,7 +571,7 @@ Autocomplete option list should contain
 Autocomplete option list should contain by test id
   [Arguments]  ${data-test-id}  @{options}
   Click Element  xpath=//div[@data-test-id="${data-test-id}"]//span[contains(@class, "autocomplete-selection")]
-  Wait until  Element should be visible  xpath=//div[@data-test-id="${data-test-id}"]//div[@class="autocomplete-dropdown"]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="${data-test-id}"]//div[contains(@class, 'autocomplete-dropdown')]
   :FOR  ${element}  IN  @{options}
   \  Wait Until  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
 
@@ -776,7 +776,7 @@ Do prepare new request
   Click element  ${path}
 
   Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[contains(@class, 'tree-content')]//*[@data-test-id="create-application"]
   Set animations on
 
 Add empty attachment template
@@ -979,7 +979,7 @@ Select operations path YA sijoituslupa-tyolupa
 
 Click tree item by text
   [Arguments]  ${itemName}
-  Wait and click  //section[@id="create-part-2"]//div[@class="tree-content"]//*[text()=${itemName}]
+  Wait and click  //section[@id="create-part-2"]//div[contains(@class, 'tree-content')]//*[text()=${itemName}]
 
 
 # Cancel application or inforequest
@@ -1217,12 +1217,12 @@ Comment count is
 Is authorized party
   # Party can be either email or username
   [Arguments]  ${party}
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[contains(@class, 'parties-list')]//table/tbody//td[contains(., '${party}')]
 
 Is not authorized party
   # Party can be either email or username
   [Arguments]  ${party}
-  Wait Until  Element Should Not Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
+  Wait Until  Element Should Not Be Visible  xpath=//section[@id='application']//div[contains(@class, 'parties-list')]//table/tbody//td[contains(., '${party}')]
 
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
@@ -1235,11 +1235,11 @@ Fill application person invite bubble
 
 Invite ${email} to application
   Open tab  parties
-  ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
+  ${invites_count}=  Get Matching Xpath Count  //div[contains(@class, 'parties-list')]/table//tr[contains(@class, 'party')]
   Fill application person invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
   Scroll and click test id  person-invite-bubble-dialog-ok
   Wait until  Element should not be visible  jquery=[data-test-id=person-invite-bubble-dialog-ok]
-  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
+  Wait Until  Element Should Be Visible  xpath=//div[contains(@class, 'parties-list')]//tr[contains(@class, 'party')][${invites_count} + 1]
   ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
   # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
   ${username}=  Fetch From Left  ${email}  @
@@ -1247,7 +1247,7 @@ Invite ${email} to application
 
 Invite count is
   [Arguments]  ${amount}
-  Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
+  Wait Until  Xpath Should Match X Times  //*[contains(@class, 'user-invite')]  ${amount}
 
 #
 # Authority admin
@@ -1276,7 +1276,7 @@ Task state count is
 
 Foreman count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //table[@class="tasks-foreman"]/tbody/tr  ${amount}
+  Wait until  Xpath Should Match X Times  //table[contains(@class, 'tasks-foreman')]/tbody/tr  ${amount}
 
 #
 # Quick, jettison the db...
@@ -1401,7 +1401,7 @@ Do fetch verdict
   Click enabled by test id  fetch-verdict
   Wait for jQuery
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
-  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  ${fetchConfirmationText}
+  Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[contains(@class, 'dialog-user-content')]/p  ${fetchConfirmationText}
   Confirm  dynamic-ok-confirm-dialog
 
 Fetch verdict

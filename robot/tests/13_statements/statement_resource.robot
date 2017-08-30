@@ -10,7 +10,7 @@ Open statement
   Wait Until  Positive indicator should not be visible
   Scroll to top
   Wait and click  xpath=(//div[@id='application-statement-tab']//a[@data-test-email="open-statement-${email}"])[${index}]
-  Wait until  element should be visible  xpath=//div[@class='statement-top']//div[@class='tabs-container']
+  Wait until  element should be visible  xpath=//div[contains(@class, 'statement-top')]//div[contains(@class, 'tabs-container')]
 
 Invite read-only statement giver
   [Arguments]  ${email}  ${date}
@@ -61,7 +61,7 @@ Invite 'manual' statement giver
 
 Statement count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[@class="statement-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[contains(@class, 'statement-row')]  ${amount}
 
 Statement is disabled
   Wait until  Element should be disabled  statement-type-select
@@ -80,15 +80,22 @@ Statement giver count is
   Wait until  Xpath Should Match X Times  //tr[@data-test-type="statement-giver-row"]  ${amount}
 
 Create statement giver
-  [Arguments]  ${email}  ${text}
+  [Arguments]  ${email}  ${text}  ${name}=${EMPTY}
   ${count} =  Get Matching Xpath Count  //tr[@data-test-type="statement-giver-row"]
   Click enabled by test id  create-statement-giver
   Wait until  Element should be visible  //label[@for='statement-giver-email']
+  Input text  statement-giver-name  ${name}
   Input text  statement-giver-email  ${email}
-  Input text  statement-giver-email2  ${email}
   Input text  statement-giver-text  ${text}
   Click enabled by test id  create-statement-giver-save
   Wait Until  Element Should Not Be Visible  statement-giver-save
   Wait Until  Page Should Contain  ${email}
   ${countAfter} =  Evaluate  ${count} + 1
   Statement giver count is  ${countAfter}
+
+Statement giver is
+  [Arguments]  ${email}  ${text}  ${name}
+  Scroll to bottom
+  Test id text is  'statement-giver-${email}-email'  ${email}
+  Test id text is  'statement-giver-${email}-text'  ${text}
+  Test id text is  'statement-giver-${email}-name'  ${name}

@@ -400,7 +400,7 @@
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         schema-name (get-in schema [:info :name])]
     {:id          (mongo/create-id)
-     :schema-info (:info schema)
+     :schema-info (:info schema) ; TODO: no need for storing doc schema into mongo (LPK-3107)
      :created     created
      :data        (util/deep-merge
                    (tools/create-document-data schema tools/default-values)
@@ -421,6 +421,7 @@
 
         make (partial make-document application (:name op) created manual-schema-datas)
 
+        ;; TODO: :removable is deprecated (LPK-3107), no need for storing doc schema into mongo
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
 
@@ -481,7 +482,7 @@
 
 (defn application-auth [user operation-name]
   (let [owner (merge (usr/user-in-role user :owner :type :owner)
-                     {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})]
+                     {:unsubscribed (contains? #{:aiemmalla-luvalla-hakeminen :archiving-project} (keyword operation-name))})]
     (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
       [owner company]
       [owner])))
@@ -706,7 +707,10 @@
   (let [state (keyword state)
         graph (sm/state-graph application)
         verdict-state (sm/verdict-given-state application)
-        target (if (= state :appealed) :appealed verdict-state)]
+        target (cond
+                 (= state :appealed) :appealed
+                 (= state :archived) :open
+                 :else verdict-state)]
     (set (cons state (remove #{:canceled} (target graph))))))
 
 (defn valid-new-state

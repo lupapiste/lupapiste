@@ -11,10 +11,10 @@ Authenticate via Osuuspankki via Vetuma
   Wait Until  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//img[@alt='Pankkitunnistus']
-  Wait Until  Element Should Be Visible  xpath=//a[@class='osuuspankki']
-  Click element  xpath=//a[@class='osuuspankki']
-  Wait Until  Element Should Be Visible  xpath=//input[@class='login']
-  Input text     xpath=//input[@class='login']  123456
+  Wait Until  Element Should Be Visible  xpath=//a[contains(@class, 'osuuspankki')]
+  Click element  xpath=//a[contains(@class, 'osuuspankki')]
+  Wait Until  Element Should Be Visible  xpath=//input[contains(@class, 'login')]
+  Input text     xpath=//input[contains(@class, 'login')]  123456
   Input text     xpath=//input[@type='PASSWORD']  7890
   Click button   xpath=//input[@name='ktunn']
   Wait Until  Element Should Be Visible  xpath=//input[@name='avainluku']
@@ -32,8 +32,8 @@ Authenticate via Nordea via Vetuma
   Wait Until  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//img[@alt='Pankkitunnistus']
-  Wait Until  Element Should Be Visible  xpath=//a[@class='nordea']
-  Click element  xpath=//a[@class='nordea']
+  Wait Until  Element Should Be Visible  xpath=//a[contains(@class, 'nordea')]
+  Click element  xpath=//a[contains(@class, 'nordea')]
   Wait Until  Element Should Be Visible  xpath=//input[@name='Ok']
   Click element  xpath=//input[@name='Ok']
   Wait Until  Element Should Be Visible  xpath=//input[@type='submit']

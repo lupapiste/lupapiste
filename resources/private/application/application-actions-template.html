@@ -72,7 +72,8 @@
                     data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !stateChanged() && !processing() && $root.authorization.ok('cancel-application-authority')"
                     data-test-id="application-cancel-authority-btn">
                 <i class="lupicon-circle-remove"></i>
-                <span data-bind="ltext: 'application.cancelApplication'"></span>
+                <span data-bind="ltext: 'application.cancelArchivingProject', if: isArchivingProject"></span>
+                <span data-bind="ltext: 'application.cancelApplication', ifnot: isArchivingProject"></span>
             </button>
             <button class="function"
                     data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !stateChanged() && !processing(), attr: {'title': loc('tooltip.undoCancellation')}"

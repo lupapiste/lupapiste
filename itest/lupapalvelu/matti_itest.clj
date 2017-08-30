@@ -156,6 +156,16 @@
                         =>  [{:id id :name "Uusi nimi"}
                              {:id copy-id :name "Uusi nimi (kopio)"}]))))))))))))
 
+(fact "Delete nonexisting template"
+  (command sipoo :toggle-delete-verdict-template
+           :template-id "bad-id" :delete true)
+  => (err :error.verdict-template-not-found))
+
+(fact "Copy nonexisting template"
+  (command sipoo :copy-verdict-template
+           :template-id "bad-id")
+  => (err :error.verdict-template-not-found))
+
 (facts "Data path and value validation"
   (let [{id :id} (command sipoo :new-verdict-template :category "r")]
     (command sipoo :save-verdict-template-draft-value
@@ -362,3 +372,62 @@
                    :plan-id "notfound"
                    :fi "Hei")
           => (err :error.settings-item-not-found))))))
+
+(facts "Operation default verdict template"
+  (fact "No defaults yet"
+    (:templates (query sipoo :default-operation-verdict-templates))
+    => {})
+  (let [{template-id :id} (command sipoo :new-verdict-template :category "r")]
+        (fact "Verdict template not published"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "pientalo" :template-id template-id)
+          => (err :error.verdict-template-not-published))
+        (fact "Publish the verdict template"
+          (command sipoo :publish-verdict-template :template-id template-id)
+          => ok?)
+        (fact "Delete verdict template"
+          (command sipoo :toggle-delete-verdict-template
+                   :template-id template-id :delete true)
+          => ok?)
+        (fact "Verdict template not editable"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "pientalo" :template-id template-id)
+          => (err :error.verdict-template-deleted))
+        (fact "Delete verdict template"
+          (command sipoo :toggle-delete-verdict-template
+                   :template-id template-id :delete false)
+          => ok?)
+        (fact "Bad operation"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "bad-operation" :template-id template-id)
+          => (err :error.unknown-operation))
+        (fact "Bad operation category"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "rasitetoimitus" :template-id template-id)
+          => (err :error.invalid-category))
+        (fact "Set template for operation"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "pientalo" :template-id template-id)
+          => ok?)
+        (fact "Defaults are no longer empty"
+          (:templates (query sipoo :default-operation-verdict-templates))
+          => {:pientalo template-id})
+        (fact "Set template for another operation"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "muu-laajentaminen" :template-id template-id)
+          => ok?)
+        (fact "Defaults has two items"
+          (:templates (query sipoo :default-operation-verdict-templates))
+          => {:pientalo template-id :muu-laajentaminen template-id})
+        (fact "Empty template-id clears default"
+          (command sipoo :set-default-operation-verdict-template
+                   :operation "muu-laajentaminen" :template-id "")
+          => ok?
+          (:templates (query sipoo :default-operation-verdict-templates))
+          => {:pientalo template-id})
+        (fact "Deleted template can no longer be default"
+          (command sipoo :toggle-delete-verdict-template
+                   :template-id template-id :delete true)
+          => ok?
+          (:templates (query sipoo :default-operation-verdict-templates))
+          => {})))

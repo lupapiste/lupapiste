@@ -801,6 +801,22 @@ h1 .icon {
   cursor: default;
 }
 
+.lupicon-grip-diagonal:before {
+  content: "\e92c";
+}
+
+.lupicon-grip-horizontal:before {
+  content: "\e92d";
+}
+
+.lupicon-grip-vertical:before {
+  content: "\e92e";
+}
+
+.lupicon-minus:before {
+  content: "\e92f";
+}
+
 .lupicon-gear:before {
   content: "\e928";
 }
@@ -13017,6 +13033,15 @@ ul.tabs {
   margin-left: 5px;
   font-style: italic;
   color: red;
+}
+
+.integration-error-dialog div.content.integration-error i {
+  float: left;
+  margin-right: 6px;
+}
+
+.integration-error-dialog div.content.integration-error p.dialog-desc {
+  display: inline-block;
 }
 
 .bubble-dialog {

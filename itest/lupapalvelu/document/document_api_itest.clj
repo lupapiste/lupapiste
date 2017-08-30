@@ -216,7 +216,7 @@
     (fact "application has attachments with secondary operation" (count (attachment/get-attachments-by-operation application (:id (first sec-operations)))) => pos?)
 
     (facts "not removable document cannot be removed"
-      (get-in aloitusoikeus [:schema-info :removable]) => false
+      (get-in aloitusoikeus [:schema-info :removable-by]) => "none"
 
       (fact "by applicant"
         (command pena  :remove-doc :id application-id :docId (:id aloitusoikeus)) => (partial expected-failure? "error.not-allowed-to-remove-document"))
@@ -225,13 +225,12 @@
         (command sonja :remove-doc :id application-id :docId (:id aloitusoikeus)) => (partial expected-failure? "error.not-allowed-to-remove-document")))
 
     (fact "only authority can remove removable-only-by-authority document"
-      (get-in paasuunnittelija [:schema-info :removable]) => true
-      (get-in paasuunnittelija [:schema-info :removable-only-by-authority]) => true
-      (command pena :remove-doc :id application-id :docId (:id paasuunnittelija)) => (partial expected-failure? "error.action-allowed-only-for-authority")
+      (get-in paasuunnittelija [:schema-info :removable-by]) => "authority"
+      (command pena :remove-doc :id application-id :docId (:id paasuunnittelija)) => (partial expected-failure? "error.not-allowed-to-remove-document")
       (command sonja :remove-doc :id application-id :docId (:id paasuunnittelija)) => ok?)
 
     (fact "last hakija doc cannot be removed due :deny-removing-last-document flag"
-      (get-in hakija [:schema-info :deny-removing-last-document]) => true
+      (get-in hakija [:schema-info :last-removable-by]) => "none"
       (command pena :remove-doc :id application-id :docId (:id hakija)) => fail?)
 
     (fact "hakija doc is removed if there is more than one hakija-doc"

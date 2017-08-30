@@ -121,7 +121,7 @@ Accordions in the Application Summary tab are closed
   Click by test id  accordion-application-summary-statements-header
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='closed']  6
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[contains(@class, 'accordion')]//div[@data-accordion-state='open']  1
-  Element should be visible  //div[@id='application-applicationSummary-tab']//section[@id='accordion-application-summary-statements']//div[@class='accordion_content']
+  Element should be visible  //div[@id='application-applicationSummary-tab']//section[@id='accordion-application-summary-statements']//div[contains(@class, 'accordion_content')]
 
 Stamping page opens, verdict details can be seen
   Open tab  attachments
@@ -134,7 +134,7 @@ Stamping page opens, verdict details can be seen
 
 Mikko sees that the application has verdicts
   Mikko logs in
-  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[contains(@class, 'lupicon-star')]
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Verdict is given  2013-01  0
@@ -164,7 +164,7 @@ Mikko signs the verdict
 
 Verdict count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //div[@id="application-verdict-tab"]//h2[@class="application_section_header"]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id="application-verdict-tab"]//h2[contains(@class, 'application_section_header')]  ${amount}
 
 Comment verdict
   [Arguments]  ${message}

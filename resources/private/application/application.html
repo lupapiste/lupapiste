@@ -1034,7 +1034,7 @@
                                         <span data-bind="ltext: 'task.missing.title'"></span>
                                     </div>
                                 </div>
-                                <table class="tasks">
+                                <table class="tasks" data-test-id="lupamaaraykset">
                                     <thead>
                                         <tr>
                                             <th data-bind="ltext: 'application.taskState'"></th>
@@ -1174,7 +1174,6 @@
                   <div class="dialog-content">
                     <p data-bind="ltext: 'document.party.person-select.designer.areyousure'" class="dialog-desc"></p>
                     <p>&nbsp;</p>
-                    <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
                     <form data-bind="with: $root.invite">
                       <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
                       <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />

@@ -3327,6 +3327,29 @@
                         :organizationDescription (i18n/supported-langs-map
                                                   (constantly ""))}}}
                 :multi true))
+
+(defmigration add-digitizer-tools-settings-to-orgs
+  {:apply-when (pos? (mongo/count :organizations {:digitizer-tools-enabled {$exists false}}))}
+  (mongo/update :organizations
+                {:digitizer-tools-enabled {$exists false}}
+                {$set {:digitizer-tools-enabled false}}
+                :multi true))
+
+(def docstore-price-query
+  {$or [{:docstore-info.documentPrice {$type "double"}}
+        {:docstore-info.documentPrice {$gt 0 $lt 100}}]})
+
+(defmigration change-docstore-prices-to-cents
+  {:apply-when (pos? (mongo/count :organizations docstore-price-query))}
+  (let [orgs (mongo/find-maps :organizations
+                              docstore-price-query)]
+    (doseq [{:keys [_id docstore-info]} orgs]
+      (let [current-price (:documentPrice docstore-info)
+            new-price (long (* current-price 100))]
+        (mongo/update-by-id :organizations
+                            _id
+                            {$set {:docstore-info.documentPrice new-price}})))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

@@ -159,7 +159,7 @@
 (defpermit ARK "Arkistointiprojekti"
   {:subtypes                         []
    :state-graph                      states/ark-state-graph
-   :allow-state-change               []
+   :allow-state-change               :all
    :sftp-directory                   ""
    :allowed-task-schemas             #{}
    :multiple-parties-allowed         false

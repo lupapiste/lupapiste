@@ -159,6 +159,9 @@
 
               ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
               (fact "fetching prev-permit again after canceling the previously fetched one"
+                (local-command raktark-jarvenpaa :change-application-state
+                               :id (:id application)
+                               :state "appealed") => ok?
                 (local-command raktark-jarvenpaa :cancel-application-authority
                                :id (:id application)
                                :text "Se on peruutus ny!"
@@ -219,7 +222,18 @@
             (:auth)
             (count)) => 4
        (provided
-         (krysp-reader/get-app-info-from-message anything anything) => example-app-info))))
+         (krysp-reader/get-app-info-from-message anything anything) => example-app-info)))
+
+    (facts "Application from previous permit contains correct data"
+      (fact "reviews are fetched"
+        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa))
+             (query-application local-query raktark-jarvenpaa)
+             (:tasks)
+             (count)) => 14)
+      (fact "state is fetched"
+        (->> (:id (create-app-from-prev-permit raktark-jarvenpaa))
+             (query-application local-query raktark-jarvenpaa)
+             (:state)) => "constructionStarted")))
 
 (facts "Application from kuntalupatunnus via rest API"      ; DOES NOT USE LOCAL QUERIES
   (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")

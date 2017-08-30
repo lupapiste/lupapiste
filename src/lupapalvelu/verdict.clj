@@ -137,7 +137,7 @@
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
   ([{permit-type :permitType :as application} type]
-   (if (#{:P :R} (keyword permit-type))
+   (if (#{:P :R :ARK} (keyword permit-type))
      {:type-group "paatoksenteko" :type-id type}
      {:type-group "muut" :type-id type})))
 
@@ -391,7 +391,8 @@
        flatten))
 
 (defn get-state-updates [user created {current-state :state :as application} app-xml]
-  (let [new-state (->> (krysp-reader/application-state app-xml)
+  (let [new-state (->> (cr/strip-xml-namespaces app-xml)
+                       (krysp-reader/application-state)
                        krysp-reader/krysp-state->application-state)]
     (cond
       (nil? new-state) nil

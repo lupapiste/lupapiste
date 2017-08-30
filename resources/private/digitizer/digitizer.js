@@ -1,8 +1,6 @@
 ;(function() {
   "use strict";
 
-  var tree;
-
   function CreateApplicationModel() {
     var self = this;
 
@@ -16,19 +14,10 @@
     self.search = ko.observable("");
     self.searching = ko.observable(false);
 
-    self.operations = ko.observable(null);
     self.organization = ko.observable(null);
-    self.attachmentsForOp = ko.pureComputed(function() {
-      var m = self.organization();
-      return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null;
-    });
 
     self.processing = ko.observable(false);
     self.pending = ko.observable(false);
-    self.inforequestsDisabled = ko.observable(false);
-    self.newApplicationsDisabled = ko.observable(false);
-    self.operation = ko.observable();
-    self.message = ko.observable("");
 
     // Observables for creating new application from previous permit
     self.creatingAppWithPrevPermit = false;
@@ -36,7 +25,6 @@
     self.selectedPrevPermitOrganization = ko.observable(null);
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
-    self.authorizeApplicants = ko.observable(true);
     self.creatingAppWithPrevPermitOk = ko.pureComputed(function() {
       return !self.processing() && !self.pending() &&
              !_.isBlank(self.kuntalupatunnusFromPrevPermit()) &&
@@ -49,19 +37,12 @@
 
     self.permitNotFound = ko.observable(false);
 
-    ko.computed(function() {
-      var code = self.locationModel.municipalityCode();
-      if (code && !self.creatingAppWithPrevPermit) {
-        self.findOperations(code);
+    var localStorageKey = "digitizer-prev-permit-organization";
+    self.selectedPrevPermitOrganization.subscribe(function(organizationId) {
+      if (organizationId && window.localStorage) {
+        window.localStorage.setItem(localStorageKey, organizationId);
       }
     });
-
-    self.findOperations = function(code) {
-      municipalities.operationsForMunicipality(code, function(operations) {
-        self.operations(operations);
-      });
-      return self;
-    };
 
     self.resetLocation = function() {
       self.locationModel.reset();
@@ -75,7 +56,6 @@
       return self
         .resetLocation()
         .search("")
-        .message("")
         .kuntalupatunnusFromPrevPermit(null)
         .organizationOptions([])
         .selectedPrevPermitOrganization(null)
@@ -220,53 +200,6 @@
       }
     };
 
-    self.create = function(infoRequest) {
-      if (infoRequest) {
-        if (self.inforequestsDisabled()) {
-          hub.send("track-click", {category:"Create", label:"tree", event:"infoRequestDisabled'"});
-          LUPAPISTE.ModalDialog.showDynamicOk(
-              loc("new-applications-or-inforequests-disabled.dialog.title"),
-              loc("new-applications-or-inforequests-disabled.inforequests-disabled"));
-          return;
-        }
-        hub.send("track-click", {category:"Create", label:"tree", event:"newInfoRequest'"});
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
-      } else if (self.newApplicationsDisabled()) {
-        LUPAPISTE.ModalDialog.showDynamicOk(
-            loc("new-applications-or-inforequests-disabled.dialog.title"),
-            loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
-        hub.send("track-click", {category:"Create", label:"tree", event:"newApplicationsDisabled"});
-        return;
-      }
-
-      var op = self.operation();
-      if (!op) {
-        error("No operation!", {selected: tree.getSelected(), stack: tree.getStack()});
-      }
-
-      var params = self.locationModel.toJS();
-      params.infoRequest = infoRequest;
-      params.operation = op;
-      params.messages =  _.isBlank(self.message()) ? [] : [self.message()];
-
-      ajax.command("create-application", params)
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          self.clear();
-          params.id = data.id;
-          pageutil.openApplicationPage(params);
-        })
-        .call();
-      hub.send("track-click", {category:"Create", label:"tree", event:"newApplication"});
-    };
-    self.createApplication = self.create.bind(self, false);
-    self.createInfoRequest = self.create.bind(self, true);
-
-    //
-    // For creating new application based on a previous permit
-    //
-
     self.initCreateAppWithPrevPermit = function() {
       self.clear();
       self.creatingAppWithPrevPermit = true;
@@ -277,7 +210,16 @@
         .success(function(data) {
           self.organizationOptions(data.organizations);
           if (self.organizationOptions().length) {
-            self.selectedPrevPermitOrganization(self.organizationOptions()[0].id);
+            var defaultOrg = self.organizationOptions()[0].id;
+            var storedOrg = window.localStorage && window.localStorage.getItem(localStorageKey);
+            if (storedOrg &&
+              _.chain(self.organizationOptions())
+                .map("id")
+                .includes(window.localStorage.getItem(localStorageKey))
+                .value()) {
+              defaultOrg = storedOrg;
+            }
+            self.selectedPrevPermitOrganization(defaultOrg);
           }
         })
         .call();

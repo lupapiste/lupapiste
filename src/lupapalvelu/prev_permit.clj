@@ -24,7 +24,9 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.application :as app]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.review :as review]
+            [lupapalvelu.user :as user]))
 
 (def building-fields
   (->> schemas/rakennuksen-tiedot (map (comp keyword :name)) (concat [:rakennuksenOmistajat :valtakunnallinenNumero])))
@@ -242,6 +244,10 @@
     ;; Get verdicts for the application
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
+
+    (let [updated-application (mongo/by-id :applications (:id created-application))
+          {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)]
+      (review/save-review-updates user/batchrun-user-data updated-application updates added-tasks-with-updated-buildings attachments-by-task-id))
 
     (invite-applicants command hakijat authorize-applicants)
 

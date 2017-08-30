@@ -41,7 +41,7 @@
             (usr/oir-authority? user)       (is (= :error.unauthorized (keyword (:text res))))
             (or (not (usr/authority? user))
                 (empty? (:orgAuthz user))) (is (fail? res))
-            (contains? #{:canceled :draft :open} (keyword (:state application))) (is (= (:text res) "error.command-illegal-state"))
+            (contains? #{:canceled :draft} (keyword (:state application))) (is (= (:text res) "error.command-illegal-state"))
             (and (usr/authority? user)
                  (usr/user-is-authority-in-organization? user (name (:organization application)))) (is (ok? res))
             :else (is (fail? res))))))))

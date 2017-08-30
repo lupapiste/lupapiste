@@ -378,14 +378,19 @@ LUPAPISTE.ApplicationModel = function() {
     if (!self.stateChanged()) {
       hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
       ajax.command("submit-archiving-project", {id: self.id()})
-        .success( self.reload)
+        .success(function(){
+          if (lupapisteApp.models.currentUser.isArchivist()) {
+            self.reloadToTab("archival");
+          } else {
+            self.reload();
+          }
+        })
         .onError("error.cannot-submit-application", cannotSubmitResponse)
         .onError("error.command-illegal-state", self.lightReload)
         .fuse(self.stateChanged)
         .processing(self.processing)
         .call();
       hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-      hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     }
     return false;
   };
@@ -629,10 +634,10 @@ LUPAPISTE.ApplicationModel = function() {
             ? "cancel-application-authority"
             : "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-      hub.send("show-dialog", {ltitle: "application.cancelApplication",
+      hub.send("show-dialog", {ltitle: self.isArchivingProject() ? "application.cancelArchivingProject" : "application.cancelApplication",
                                size: "medium",
-                               component: "textarea-dialog",
-                               componentParams: {text: loc("areyousure.cancel-application"),
+                               component: self.isArchivingProject() ? "yes-no-dialog" : "textarea-dialog",
+                               componentParams: {text: self.isArchivingProject() ? loc("areyousure.cancelArchivingProject") : loc("areyousure.cancel-application"),
                                                  yesFn: cancelApplicationAjax(command),
                                                  lyesTitle: "yes",
                                                  lnoTitle: "no",

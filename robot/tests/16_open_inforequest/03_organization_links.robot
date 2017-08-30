@@ -56,7 +56,7 @@ Open inforequest tree
   Click element  xpath=//div[@id="create-map"]//button[@data-test-id="create-continue"]
   Set animations off
   Sleep  2s
-  Wait until  Element should be visible  xpath=//section[@id='create-part-2']//div[@class='tree-page']
+  Wait until  Element should be visible  xpath=//section[@id='create-part-2']//div[contains(@class, 'tree-page')]
 
 
 Finish creation

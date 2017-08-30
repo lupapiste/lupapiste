@@ -34,7 +34,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
-            [lupapalvelu.wfs :as wfs]))
+            [lupapalvelu.wfs :as wfs]
+            [sade.shared-schemas :as sssc]))
 ;;
 ;; local api
 ;;
@@ -141,7 +142,7 @@
 (defquery user-organizations-for-archiving-project
   {:user-roles #{:authority}}
   [{user :user}]
-  (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:authority :digitizer})}})))
+  (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:archivist :digitizer})}})))
 
 (defcommand update-organization
   {:description "Update organization details."
@@ -448,14 +449,19 @@
   (org/update-organization organizationId {$set {:calendars-enabled enabled}})
   (ok))
 
-(defcommand set-organization-permanent-archive-enabled
-  {:parameters [enabled organizationId]
+(defcommand set-organization-boolean-attribute
+  {:parameters [enabled organizationId attribute]
    :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:organizationId])
+   :input-validators  [(partial non-blank-parameters [:organizationId :attribute])
                        (partial boolean-parameters [:enabled])]}
-  [{user :user}]
-  (org/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
-  (ok))
+  [_]
+  (when-let [org (->> (org/get-organization organizationId)
+                      org/parse-organization)]
+    (if (->> (assoc org (keyword attribute) enabled)
+             (sc/check org/Organization))
+      (fail :error.illegal-key)
+      (do (org/update-organization organizationId {$set {attribute enabled}})
+          (ok)))))
 
 (defcommand set-organization-permanent-archive-start-date
   {:parameters [date]
@@ -858,13 +864,13 @@
        (org/remove-assignment-trigger triggerId)))
 
 (defcommand update-docstore-info
-  {:description "Updates organization's document store information"
-   :parameters [org-id docStoreInUse documentPrice organizationDescription]
-   :user-roles #{:admin}
+  {:description      "Updates organization's document store information"
+   :parameters       [org-id docStoreInUse documentPrice organizationDescription]
+   :user-roles       #{:admin}
    :input-validators [(partial boolean-parameters [:docStoreInUse])
-                      (partial number-parameters  [:documentPrice])
+                      (partial number-parameters [:documentPrice])
                       (fn [{{price :documentPrice} :data}]
-                        (when (neg? price)
+                        (when (sc/check sssc/Nat price)
                           (fail :error.illegal-number)))
                       (partial localization-parameters [:organizationDescription])]}
   [{user :user created :created}]

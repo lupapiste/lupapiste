@@ -39,7 +39,7 @@ Mikko invites Teppo and Pena
 
 Teppo logs in, doesn't see Mikko's CV
   Teppo logs in
-  Wait until  Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
+  Wait until  Click element  xpath=//div[contains(@class, 'invitation')]//a[@data-test-id='open-application-button']
   Confirm yes no dialog
   Open tab  attachments
   Wait Until  Element should not be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='osapuolet.cv']
@@ -49,7 +49,7 @@ Teppo uploads new version to asemapiirros
   Open attachment details  paapiirustus.asemapiirros
   Add attachment version  ${PNG_TESTFILE_PATH}
   Wait Until  Click button  id=show-attachment-versions
-  Wait Until  Xpath Should Match X Times  //section[@id='attachment']//div[@class='attachment-file-versions-content']//table/tbody/tr  2
+  Wait Until  Xpath Should Match X Times  //section[@id='attachment']//div[contains(@class, 'attachment-file-versions-content')]//table/tbody/tr  2
 
 Teppo sets asemapiirros to only-authority visibility
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
@@ -59,7 +59,7 @@ Teppo sets asemapiirros to only-authority visibility
 
 Pena logs in, doesn't see Mikko's CV, nor asemapiirros
   Pena logs in
-  Wait until  Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
+  Wait until  Click element  xpath=//div[contains(@class, 'invitation')]//a[@data-test-id='open-application-button']
   Confirm yes no dialog
   Open tab  attachments
   Wait Until  Element should be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='paapiirustus.pohjapiirustus']

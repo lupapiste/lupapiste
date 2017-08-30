@@ -69,10 +69,10 @@ Olli-ya can see all filters
   Wait until  Element should be visible  xpath=//div[@data-test-id="event-filter-item"]
   Wait until  Element should be visible  xpath=//div[@data-test-id="event-filter-component"]
   Click Element  xpath=//div[@data-test-id="event-filter-component"]//span[contains(@class, "autocomplete-selection")]
-  Wait until  Element should be visible  xpath=//div[@data-test-id="event-filter-component"]//div[@class="autocomplete-dropdown"]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="event-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
   Autocomplete option list should contain  event-filter-component  Takuun päättyminen  Lupa-ajan alkaminen  Lupa-ajan päättyminen  Lupa-aika alkanut, ei valmis  Lupa-aika päättynyt, ei valmis  Ilmoitettu valmistuneeksi, mutta tila ei valmistunut
   Click Element  xpath=//div[@data-test-id="event-filter-component"]//span[contains(@class, "autocomplete-selection")]
-  Wait until  Element should not be visible  xpath=//div[@data-test-id="event-filter-component"]//div[@class="autocomplete-dropdown"]
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="event-filter-component"]//div[contains(@class, 'autocomplete-dropdown')]
 
 Olli-ya selects warranty filter and see only warranty applications
   Select from autocomplete by test id  event-filter-component  Takuun päättyminen

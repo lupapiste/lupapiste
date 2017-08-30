@@ -77,9 +77,9 @@
                  :output-dir (str (env/value :outgoing-directory) "/" (env/value :ely :sftp-user) ah-from-dir)})
 
 (defn save-statement-request
-  [user application submitted-application organization statement lang]
-  (ah-mapping/statement-request (assoc user :organization organization)
-                                application
+  [command submitted-application organization statement lang]
+  (ah-mapping/statement-request (update command :user assoc :organization organization)
+                                (:application command)
                                 submitted-application
                                 statement
                                 lang

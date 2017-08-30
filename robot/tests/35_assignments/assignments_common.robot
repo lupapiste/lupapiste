@@ -18,16 +18,16 @@ Fill assignment editor
 Open assignment editor
   Wait test id visible  create-assignment-editor-button
   Click by test id  create-assignment-editor-button
-  Wait until  Element should be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
+  Wait until  Element should be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[contains(@class, 'bubble-dialog')]/div
 
 Save assignment
   Scroll and click test id  bubble-dialog-ok
   Positive indicator should be visible
-  Wait until  Element should not be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
+  Wait until  Element should not be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[contains(@class, 'bubble-dialog')]/div
 
 Create assignment
   [Arguments]  ${user}  ${targetGroup}  ${doctype}  ${description}=Foosignment  ${assignmentIdx}=1
-  ${docId}=  Get Element Attribute  xpath=//section[@class='accordion' and @data-doc-type='${doctype}']@data-doc-id
+  ${docId}=  Get Element Attribute  xpath=//section[contains(@class, 'accordion') and @data-doc-type='${doctype}']@data-doc-id
   Open assignment editor
   Fill assignment editor  bubble-dialog[@data-test-id='create-assignment-bubble']  ${targetGroup}  ${docId}  ${user}  ${description}
   Save assignment

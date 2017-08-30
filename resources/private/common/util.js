@@ -247,11 +247,7 @@ var util = (function($) {
   }
 
   function showSavedIndicator(response) {
-    if (response.ok) {
-      hub.send("indicator", {style: "positive"});
-    } else {
-      hub.send("indicator", {style: "negative", message: response.text});
-    }
+    hub.send("indicator", {style: response.ok ? "positive" : "negative", message: response.text});
   }
 
   function showSavedIndicatorIcon(response) {
@@ -408,7 +404,13 @@ var util = (function($) {
     var url = identLogoutUrl();
     var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
     if (url) {
-      window.location = _.escape(url) + "?return=" + suffix;
+      ajax.deleteReq("/api/vetuma/user")
+        .success(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        })
+        .error(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        }).call();
     }
   }
 
@@ -416,7 +418,13 @@ var util = (function($) {
     var url = identLogoutUrl();
     var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
     if (url) {
-      window.location = _.escape(url) + "?return=" + suffix;
+      ajax.deleteReq("/api/vetuma/user")
+        .success(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        })
+        .error(function() {
+          window.location = _.escape(url) + "?return=" + suffix;
+        }).call();
     }
   }
 

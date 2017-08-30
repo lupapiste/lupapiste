@@ -139,7 +139,7 @@
    {:keys [state path schema] :as options} & [wrap-label?]]
   (letfn [(set-category [category]
             (when (util/not=as-kw category @category*)
-              (reset! category* (name category))
+              (reset! category* (name (or category "")))
               (reset! selected* "")))
           (update-text [text]
             (reset! (path/state path state) text)

@@ -87,7 +87,7 @@ Olli types in draft
 Olli peeks reply request tab
   Scroll to top
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
-  Wait until element contains  xpath=//div[@class='statement-info']//p  Kun lausunto on annettu
+  Wait until element contains  xpath=//div[contains(@class, 'statement-info')]//p  Kun lausunto on annettu
   Element should not be visible  statement-submit
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-statement']
   [Teardown]  Return from statement

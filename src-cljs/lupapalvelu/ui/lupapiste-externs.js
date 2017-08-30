@@ -2,6 +2,10 @@
  * Symbols used from outside cljs code need to be defined as externs when 'advanced' Closure compilation level is used.
  * This prevents listed symbols to be munged by the Google Closure compiler.
  * https://github.com/clojure/clojurescript/wiki/Compiler-Options#externs
+ *
+ * You can try out the advanced compilation locally (remember to stop figwheel first)
+ *
+ * lein with-profiles uberjar cljsbuild once
  */
 var ajax = {};
 
@@ -55,6 +59,7 @@ var util = {};
 util.showSavedIndicator = function() {};
 util.partyFullName = function() {};
 util.finnishDateAndTime = function() {};
+util.finnishDate = function() {};
 
 var sprintf = function() {};
 

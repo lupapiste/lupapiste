@@ -32,28 +32,28 @@ Teppo logs in and creates some applications
 Teppo navigates to application page
   Go to page  applications
   Active search tab is  all
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  9
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  9
 
 Teppo selects application tab
   Click by test id  search-tab-application
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  5
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${submitted}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${sent}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${complementNeeded}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${draft}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${open}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  5
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${submitted}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${sent}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${complementNeeded}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${draft}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${open}"]
 
 Teppo selects construction tab
   Click by test id  search-tab-construction
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  2
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${verdictGiven}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${constructionStarted}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  2
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${verdictGiven}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${constructionStarted}"]
 
 Teppo selects inforequest tab
   Click by test id  search-tab-inforequest
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  2
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${info}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${answered}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  2
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${info}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${answered}"]
 
 Teppo selects cancelled tab
   Click by test id  search-tab-canceled
@@ -69,20 +69,20 @@ Sonja logs in and navigates to application page
 
 Sonja selects all applications tab
   Wait until  Click by test id  search-tab-all
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  8
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  8
 
 Sonja selects application tab
   Click by test id  search-tab-application
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${submitted}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${sent}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${complementNeeded}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  3
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${submitted}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${sent}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${complementNeeded}"]
 
 Sonja selects construction tab
   Click by test id  search-tab-construction
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  2
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${verdictGiven}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${constructionStarted}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  2
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${verdictGiven}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${constructionStarted}"]
 
 Sonja select foremen view
   Click element  jquery=label[for=searchTypeForeman]
@@ -92,10 +92,10 @@ Sonja select foremen view
 
 Sonja selects inforequest tab
   Click by test id  search-tab-inforequest
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${open}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[@class="application-row"]/td[@data-test-row-state="${answered}"]
-  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[@class="application-row"]/td[@data-test-row-state="${info}"]
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  3
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${open}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${answered}"]
+  Wait until  Element should be visible  //table[@id="applications-list"]/tbody/tr[contains(@class, 'application-row')]/td[@data-test-row-state="${info}"]
 
 Sonja selects cancelled tab
   Click by test id  search-tab-canceled

@@ -103,7 +103,7 @@
           "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           "readyForArchival"   (archival-query user)
-          "archivingProjects"  {:permitType permit/ARK :state {$ne :archived}}
+          "archivingProjects"  {:permitType permit/ARK :state {$nin [:archived :canceled]}}
           {$and [{:state {$ne "canceled"}
                   :permitType {$ne permit/ARK}}
                  {$or [{:state {$ne "draft"}}
@@ -217,7 +217,6 @@
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
-        _ (println query)
         query-total (mongo/count :applications query)
         skip        (or (util/->long (:skip params)) 0)
         limit       (or (util/->long (:limit params)) 10)

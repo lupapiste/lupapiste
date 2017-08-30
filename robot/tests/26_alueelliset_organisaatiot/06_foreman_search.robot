@@ -29,13 +29,13 @@ Sonja logs in and sees some only foreman applications on foreman search tab
   Switch to applications
   Active search tab is  application
   Scroll and click test id  search-tab-all
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  1
   Switch to foremen
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  3
 
 Sonja can see foreman application on verdict tab
   Click by test id  search-tab-verdict
-  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[contains(@class, 'application-row')]  1
 
 Sonja sees different saved filters on foreman search tab
   Click by test id  toggle-advanced-filters

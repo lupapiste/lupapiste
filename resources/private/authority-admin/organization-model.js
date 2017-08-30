@@ -239,6 +239,27 @@ LUPAPISTE.OrganizationModel = function () {
     self.operationsInspectionSummaryTemplates(_.get(event, "operations-templates"));
   });
 
+
+  // Matti verdict templates
+  self.verdictTemplates = ko.observableArray( [] );
+  self.defaultOperationVerdictTemplates = ko.observable( {} );
+
+  function refreshVerdictTemplates() {
+    ajax.query( "verdict-templates")
+    .success( function( res ) {
+      self.verdictTemplates( _.get( res, "verdict-templates", [] )  );
+    })
+    .call();
+    ajax.query( "default-operation-verdict-templates")
+    .success( function( res ) {
+      self.defaultOperationVerdictTemplates( _.get( res, "templates", {} )  );
+    })
+    .call();
+  }
+
+  // Sent from matti/service.cljs
+  hub.subscribe( "matti::verdict-templates-changed", refreshVerdictTemplates );
+
   self.init = function(data) {
     self.initialized = false;
     var organization = data.organization;
@@ -361,10 +382,11 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
+    if( features.enabled( "matti")) {
+      refreshVerdictTemplates();
+    }
     self.initialized = true;
   };
-
-
 
   self.isSectionOperation = function ( $data )  {
     return self.sectionOperations.indexOf( $data.id ) >= 0;

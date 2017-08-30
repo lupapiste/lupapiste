@@ -3,10 +3,12 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer [unauthorized? ok?]]
             [lupapalvelu.document.document-api :as dapi]
-            [lupapalvelu.document.document :refer [create-doc-validator]]))
+            [lupapalvelu.document.document :refer [create-doc-validator]]
+            [lupapalvelu.document.schemas :as schemas]))
 
 (testable-privates lupapalvelu.document.document
                    deny-remove-of-last-document
+                   deny-remove-of-non-removable-doc
                    document-assignment-info
                    describe-parties-assignment-targets
                    describe-non-party-document-assignment-targets)
@@ -28,20 +30,83 @@
                                                    {:schema-info {:type "celebration"}}]}}) => nil)
 
 (facts "deny-remove-of-last-document"
-  (deny-remove-of-last-document nil nil) => falsey
-  (deny-remove-of-last-document {} nil) => falsey
-  (deny-remove-of-last-document nil []) => falsey
+  (fact "default with nil args"
+    (deny-remove-of-last-document nil nil nil) => falsey)
+  (fact "default with empty schema"
+    (deny-remove-of-last-document {} nil nil) => falsey)
 
-  (fact "poikkeamis rakennushanke"
-    (let [rakennushanke {:schema-info {:name "rakennushanke"}}]
-      (deny-remove-of-last-document rakennushanke {:documents []}) => true
-      (deny-remove-of-last-document rakennushanke {:documents [rakennushanke]}) => true
-      (deny-remove-of-last-document rakennushanke {:documents [rakennushanke rakennushanke]}) => falsey))
+  (fact "last removable by none"
+    (let [rakennushanke {:schema-info {:name "rakennushanke", :removable-by :all, :last-removable-by :none}}]
+      (fact "no docs"
+        (deny-remove-of-last-document rakennushanke {:documents []} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role {:documents []} ..user..) => :authority))
+      (fact "one doc - applicant"
+        (deny-remove-of-last-document rakennushanke {:documents [rakennushanke]} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role {:documents [rakennushanke]} ..user..) => :applicant))
+      (fact "one doc - authority"
+        (deny-remove-of-last-document rakennushanke {:documents [rakennushanke]} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role {:documents [rakennushanke]} ..user..) => :authority))
+      (fact "two docs - applicant"
+        (deny-remove-of-last-document rakennushanke {:documents [rakennushanke rakennushanke]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role {:documents [rakennushanke rakennushanke]} ..user..) => :applicant))
+      (fact "two docs - authority"
+        (deny-remove-of-last-document rakennushanke {:documents [rakennushanke rakennushanke]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role {:documents [rakennushanke rakennushanke]} ..user..) => :authority))))
 
-  (fact "suunnittelija"
-    (let [suunnittelija {:schema-info {:name "suunnittelija"}}]
-     (deny-remove-of-last-document suunnittelija {:documents [suunnittelija]}) => falsey
-     (deny-remove-of-last-document suunnittelija {:documents [suunnittelija suunnittelija]}) => falsey)))
+  (fact "last removable by authority"
+    (let [maksaja {:schema-info {:name "maksaja", :removable-by :all, :last-removable-by :authority}}]
+      (fact "one doc - applicant"
+        (deny-remove-of-last-document maksaja {:documents [maksaja]} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :applicant))
+      (fact "one doc - authority"
+        (deny-remove-of-last-document maksaja {:documents [maksaja]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority))
+      (fact "two docs - applicant"
+        (deny-remove-of-last-document maksaja {:documents [maksaja maksaja]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :applicant))
+      (fact "two docs - authority"
+        (deny-remove-of-last-document maksaja {:documents [maksaja maksaja]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority))))
+
+  (fact "removing last is not restricted"
+    (let [suunnittelija {:schema-info {:name "suunnittelija", :removable-by :all}}]
+      (fact "one doc"
+        (deny-remove-of-last-document suunnittelija {:documents [suunnittelija]} ..user..) => falsey)
+      (fact "two docs"
+        (deny-remove-of-last-document suunnittelija {:documents [suunnittelija suunnittelija]} ..user..) => falsey))))
+
+(facts "deny-remove-of-non-removable-doc"
+  (fact "default with nil args"
+    (deny-remove-of-non-removable-doc nil nil nil) => true)
+  (fact "default with empty schema"
+    (deny-remove-of-non-removable-doc {} nil nil) => true)
+
+  (fact "removable by none"
+    (let [doc {:schema-info {:name "rakennushanke", :removable-by :none}}]
+      (fact "applicant"
+        (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :applicant))
+      (fact "authority"
+        (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority))))
+
+  (fact "removable by all"
+    (let [doc {:schema-info {:name "rakennushanke", :removable-by :all}}]
+      (fact "applicant"
+        (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :applicant))
+      (fact "authority"
+        (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority))))
+
+  (fact "removable by authority"
+    (let [doc {:schema-info {:name "rakennushanke", :removable-by :authority}}]
+      (fact "applicant"
+        (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => true
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :applicant))
+      (fact "authority"
+        (deny-remove-of-non-removable-doc doc {:documents [doc]} ..user..) => falsey
+        (provided (lupapalvelu.authorization/application-role anything ..user..) => :authority)))))
 
 (facts "document user-authz-roles validation"
   (let [command {:application

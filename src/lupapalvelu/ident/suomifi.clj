@@ -66,8 +66,11 @@
   (if (str/contains? status2 "AuthnFailed")
     (warn "SAML endpoint rejected authentication")
     (error "SAML endpoint encountered an error:" status status2 message))
-  (if-let [trid (re-find #"\d+$" relay-state)]
-    (let [url (or (some-> (ident-session/get-user trid) (get-in [:paths :cancel])) "/")]
-      (response/redirect url))))
-
-
+  (try
+    (if-let [trid (re-find #".*/([0-9A-Za-z]+)$" relay-state)]
+      (let [url (or (some-> (ident-session/get-by-trid (last trid)) (get-in [:paths :cancel])) "/")]
+        (response/redirect url))
+      (response/redirect "/"))
+    (catch Exception e
+      (error "SAML error endpoint encountered an error:" e)
+      (response/redirect "/"))))

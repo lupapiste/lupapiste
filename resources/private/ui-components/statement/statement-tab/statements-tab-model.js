@@ -15,6 +15,44 @@ LUPAPISTE.StatementsTabModel = function(params) {
   self.saateText = ko.observable();
   self.maaraaika = ko.observable();
 
+  // ELY statement specifics
+  self.showElyStatementSection = ko.observable();
+  self.elySubtypes = ko.observableArray(); // from query, subtypes differ for each permit type
+  self.elyData = {subtype: ko.observable(),
+                  saateText: ko.observable(),
+                  lang: ko.observable(loc.getCurrentLanguage()),
+                  dueDate: ko.observable()};
+  self.elyDataOk = ko.pureComputed(function() {
+    return self.elyData.subtype();
+  });
+
+  self.requestElyStatement = function() {
+    ajax.command("ely-statement-request", _.merge(ko.mapping.toJS(self.elyData),
+                                                  {id: self.application.id(),
+                                                   dueDate: self.elyData.dueDate() ? new Date(self.elyData.dueDate()).getTime() : null}))
+      .pending(self.submitting)
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        repository.load(self.application.id(), self.submitting, null, true);
+        self.showElyStatementSection(false);
+        self.elyData.subtype(null);
+        self.elyData.saateText(null);
+        self.elyData.dueDate(null);
+      })
+      .onError("error.integration.create-message", function(e) {
+        hub.send("show-dialog", {ltitle: "integration.asianhallinta.title",
+                                 size: "large",
+                                 component: "integration-error-dialog",
+                                 componentParams: {ltext: "error.ely-statement.xml-error",
+                                                   details: e.details}});
+      })
+      .call();
+  };
+
+  self.someDialogOpen = ko.pureComputed(function() {
+    return self.showInviteSection() || self.showElyStatementSection();
+  });
+
   self.disabled = self.disposedPureComputed(function() {
     return _.isEmpty(self.selectedPersons()) || self.submitting();
   });
@@ -101,6 +139,13 @@ LUPAPISTE.StatementsTabModel = function(params) {
         self.data(fetchedStatementGivers);
       })
       .call();
+    }
+    if (self.authorization.ok("ely-statement-request")) {
+      ajax.query("ely-statement-types", {id: self.application.id()})
+        .success(function(result) {
+          self.elySubtypes(result.statementTypes);
+        })
+        .call();
     }
   })();
 

@@ -4,9 +4,12 @@
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.core.async :as async]
             [slingshot.slingshot :refer [try+]]
+            [clj-time.coerce :as c]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application :as app]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
@@ -14,25 +17,23 @@
             [lupapalvelu.neighbors-api :as neighbors]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.prev-permit :as prev-permit]
             [lupapalvelu.review :as review]
             [lupapalvelu.states :as states]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.xml.krysp.reader]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [lupapalvelu.attachment :as attachment]
             [sade.util :refer [fn->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [clj-time.coerce :as c]
             [sade.http :as http]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.prev-permit :as prev-permit])
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -349,12 +350,16 @@
     (remove nil?)
     distinct))
 
-(defn fetch-asianhallinta-verdicts []
+(defn fetch-asianhallinta-messages []
   (let [ah-organizations (mongo/select :organizations
                                        {"scope.caseManagement.ftpUser" {$exists true}}
                                        {"scope.caseManagement.ftpUser" 1})
-        ftp-users (get-asianhallinta-ftp-users ah-organizations)
+        ftp-users (if (string? (env/value :ely :sftp-user))
+                    (conj (get-asianhallinta-ftp-users ah-organizations) (env/value :ely :sftp-user))
+                    (get-asianhallinta-ftp-users ah-organizations))
         eraajo-user (user/batchrun-user (map :id ah-organizations))]
+    (logging/log-event :info {:run-by "Asianhallinta reader"
+                              :event (format "Reader process start - %d ftp users to be checked" (count ftp-users))})
     (doseq [ftp-user ftp-users
             :let [path (str
                          (env/value :outgoing-directory) "/"
@@ -365,25 +370,29 @@
       (fs/mkdirs (str path "error"))
       (let [zip-path (.getPath zip)
             result (try
-                     (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
+                     (ah-reader/process-message zip-path ftp-user eraajo-user)
                      (catch Throwable e
-                       (logging/log-event :error {:run-by "Automatic ah-verdicts checking"
-                                                  :event "Unable to process ah-verdict zip file"
+                       (logging/log-event :error {:run-by "Asianhallinta reader"
+                                                  :event "Unable to process ah zip file"
                                                   :exception-message (.getMessage e)})
                        ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
-        (logging/log-event :info {:run-by "Automatic ah-verdicts checking"
-                                  :event (if (ok? result)  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
+        (logging/log-event (if (ok? result) :info :error)
+                           (util/assoc-when {:run-by "Asianhallinta reader"
+                                             :event (if (ok? result)  "Succesfully processed message" "Failed to process message")
+                                             :zip-path zip-path}
+                                            :text (:text result)))
         (when-not (fs/rename zip target)
-          (errorf "Failed to rename %s to %s" zip-path target))))))
+          (errorf "Failed to rename %s to %s" zip-path target))))
+    (logging/log-event :info {:run-by "Asianhallinta reader" :event "Reader process finished"})))
 
-(defn check-for-asianhallinta-verdicts [& args]
+(defn check-for-asianhallinta-messages [& args]
   (when-not (system-not-in-lockdown?)
-    (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
+    (logging/log-event :info {:run-by "Asianhallinta reader" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-asianhallinta-verdicts))
+  (fetch-asianhallinta-messages))
 
 (defn orgs-for-review-fetch [& organization-ids]
   (mongo/select :organizations (merge {:krysp.R.url {$exists true},
@@ -408,60 +417,78 @@
       (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
         (let [{:keys [review-count updated-tasks validation-errors] :as result} (review/read-reviews-from-xml user created application app-xml overwrite-background-reviews?)]
           (cond
-            (and (ok? result) (pos? review-count))
-            (logging/log-event :info {:run-by "Automatic review checking"
-                                      :event "Reviews found"
-                                      :updated-tasks updated-tasks})
-
-            (fail? result)
-            (logging/log-event :error {:run-by "Automatic review checking"
-                                       :event "Failed to read reviews"
-                                       :validation-errors validation-errors}))
-
+            (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "Reviews found"
+                                                                             :updated-tasks updated-tasks})
+            (ok? result)                           (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "No reviews"})
+            (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
+                                                                              :event "Failed to read reviews"
+                                                                              :validation-errors validation-errors}))
           result)))
     (catch Throwable t
       (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
 (defn- fetch-reviews-for-organization-permit-type-consecutively [organization permit-type applications]
+  (logging/log-event :info {:run-by "Automatic review checking"
+                            :event "Fetch consecutively"
+                            :organization-id (:id organization)
+                            :application-count (count applications)
+                            :applications (map :id applications)})
   (->> (map (fn [app]
               (try
-                (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s"
-                        (:id organization) permit-type (:id app))
                 (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
                 (catch Throwable t
-                  (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s"
-                          (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                  (logging/log-event :error {:run-by "Automatic review checking"
+                                             :application-id (:id app)
+                                             :organization-id (:id organization)
+                                             :exception (.getName (class t))
+                                             :message (.getMessage t)
+                                             :event (format "Unable to get reviews for %s from %s backend: %s - %s"  permit-type (:id organization))})
                   nil)))
             applications)
        (apply concat)
        (remove nil?)))
 
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
-  (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
-    (try+
-      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]"
-              (:id organization) permit-type (ss/join ", " (map :id applications)))
-      (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+  (try+
 
-      (catch SAXParseException e
-        (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
-        ;; Fallback into fetching xmls consecutively
-        (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+   (logging/log-event :info {:run-by "Automatic review checking"
+                             :event "Start fetching xmls"
+                             :organization-id (:id organization)
+                             :application-count (count applications)
+                             :applications (map :id applications)})
 
-      (catch [:sade.core/type :sade.core/fail
-              :status         404] _
-        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: Got HTTP status 404" permit-type (:id organization))
-        ;; Fallback into fetching xmls consecutively
-        (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+   (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+
+   (catch SAXParseException e
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization-id (:id organization)
+                                :event (format "Could not understand response when getting reviews in chunks from %s backend" (:id organization))})
+     ;; Fallback into fetching xmls consecutively
+     (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
+
+   (catch [:sade.core/type :sade.core/fail
+           :status         404] _
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization-id (:id organization)
+                                :event (format "Unable to get reviews in chunks from %s backend: Got HTTP status 404" (:id organization))})
+     ;; Fallback into fetching xmls consecutively
+     (fetch-reviews-for-organization-permit-type-consecutively organization permit-type applications))
 
 
-      (catch [:sade.core/type :sade.core/fail] t
-        (errorf "error.integration - Unable to get reviews for %s backend: %s"
-                (:id organization) (select-keys t [:status :text])))
+   (catch [:sade.core/type :sade.core/fail] t
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization-id (:id organization)
+                                :event (format "Unable to get reviews from %s backend: %s" (:id organization) (select-keys t [:status :text]))}))
 
-      (catch Object o
-        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
-                permit-type (:id organization) (.getName (class o)) (get &throw-context :message ""))))))
+   (catch Object o
+     (logging/log-event :error {:run-by "Automatic review checking"
+                                :organization-id (:id organization)
+                                :exception (.getName (class o))
+                                :message (get &throw-context :message "")
+                                :event (format "Unable to get reviews in chunks from %s backend: %s - %s"
+                                               (:id organization) (.getName (class o)) (get &throw-context :message ""))}))))
 
 (defn- organization-applications-for-review-fetching
   [organization-id permit-type]
@@ -483,6 +510,32 @@
                           :verdicts true
                           :history true}))))
 
+(defn- save-reviews [user applications-with-results]
+  (when (not-empty applications-with-results)
+    (logging/log-event :info {:run-by "Automatic review checking"
+                              :event "Save organization reviews"
+                              :organization-id (:organization (first (first applications-with-results)))
+                              :application-count (count applications-with-results)})
+    (run! (fn [[app result]] (save-reviews-for-application user app result)) applications-with-results)))
+
+(defn mark-reviews-faulty-for-application [application {:keys [new-faulty-tasks]}]
+  (when (not (empty? new-faulty-tasks))
+    (let [timestamp (now)]
+      (doseq [task-id new-faulty-tasks]
+        (tasks/mark-review-faulty application task-id timestamp)))))
+
+(defn mark-reviews-faulty [applications-with-results]
+  (when (not-empty applications-with-results)
+    (logging/log-event :info {:run-by "Automatic review checking"
+                              :event "Mark overwritten reviews faulty"
+                              :organization-id (:organization (first (first applications-with-results)))
+                              :faulty-task-count (->> applications-with-results
+                                                      (map (comp count :new-faulty-tasks second))
+                                                      (reduce +))})
+    (run! (fn [[app result]]
+            (mark-reviews-faulty-for-application app result))
+          applications-with-results)))
+
 (defn- fetch-review-updates-for-organization
   [eraajo-user created applications permit-types {org-krysp :krysp :as organization} & [overwrite-background-reviews?]]
   (let [grouped-apps (if (seq applications)
@@ -490,31 +543,31 @@
                          (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
                               (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
-         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)])))))
-
-(defn mark-reviews-faulty [application {:keys [new-faulty-tasks]}]
-  (when (not (empty? new-faulty-tasks))
-    (let [timestamp (now)]
-     (doseq [task-id new-faulty-tasks]
-       (tasks/mark-review-faulty application task-id timestamp)))))
+         (mapv (fn [[app app-xml]]
+                 [app (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)])))))
 
 (defn poll-verdicts-for-reviews
   [& {:keys [application-ids organization-ids overwrite-background-reviews?]}]
-  (let [applications  (when (seq application-ids)
-                        (mongo/select :applications {:_id {$in application-ids}}))
+  (let [applications (when (seq application-ids)
+                       (mongo/select :applications {:_id {$in application-ids}}))
         organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
-        eraajo-user   (user/batchrun-user (map :id organizations))
-        fetch-results (->> (pmap #(fetch-review-updates-for-organization
-                                   eraajo-user
-                                   (now)
-                                   applications
-                                   [:R]
-                                   %
-                                   overwrite-background-reviews?)
-                                 organizations)
-                           (apply concat))]
-    (run! (partial apply mark-reviews-faulty) fetch-results)
-    (run! (partial apply save-reviews-for-application eraajo-user) fetch-results)))
+        eraajo-user (user/batchrun-user (map :id organizations))
+        fetch-results-fn #(fetch-review-updates-for-organization eraajo-user
+                                                                 (now)
+                                                                 applications
+                                                                 [:R]
+                                                                 %
+                                                                 overwrite-background-reviews?)
+        channel (async/chan)]
+    (run! (util/fn->> fetch-results-fn
+                      (async/>! channel)
+                      (async/go))
+          organizations)
+    (run! (fn [_]
+            (let [results (async/<!! channel)]
+             (mark-reviews-faulty results)
+             (save-reviews eraajo-user results)))
+          organizations)))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)

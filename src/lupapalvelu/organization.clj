@@ -27,11 +27,13 @@
             [sade.env :as env]
             [sade.http :as http]
             [sade.schemas :as ssc]
+            [sade.shared-schemas :as sssc]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as sxml]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]))
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [schema.coerce :as coerce]))
 
 (def scope-skeleton
   {:permitType nil
@@ -52,8 +54,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
-   :name i18n/LocalizationStringMap
+  {:url  (zipmap i18n/all-languages (repeat ssc/OptionalHttpUrl))
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -70,7 +72,7 @@
 
 (sc/defschema HandlerRole
   {:id                              ssc/ObjectIdStr
-   :name                            (i18n/localization-schema ssc/NonBlankStr)
+   :name                            (zipmap i18n/all-languages (repeat ssc/NonBlankStr))
    (sc/optional-key :general)       sc/Bool
    (sc/optional-key :disabled)      sc/Bool})
 
@@ -85,17 +87,17 @@
 
 (sc/defschema DocStoreInfo
   {:docStoreInUse           sc/Bool
-   :documentPrice           sc/Num
+   :documentPrice           sssc/Nat
    :organizationDescription i18n/LocalizationStringMap})
 
 (def default-docstore-info
   {:docStoreInUse           false
-   :documentPrice           0.0
+   :documentPrice           0
    :organizationDescription (i18n/supported-langs-map (constantly ""))})
 
 (sc/defschema Organization
   {:id OrgId
-   :name i18n/LocalizationStringMap
+   :name (zipmap i18n/all-languages (repeat sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
@@ -130,6 +132,7 @@
    (sc/optional-key :operations-attachments) sc/Any
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool
+   (sc/optional-key :digitizer-tools-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
@@ -153,13 +156,16 @@
                                           (sc/optional-key :operations-templates) sc/Any}
    (sc/optional-key :assignment-triggers) [AssignmentTrigger]
    (sc/optional-key :stamps) [stmp/StampTemplate]
-   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
    (sc/optional-key :docstore-info) DocStoreInfo
-   (sc/optional-key :phrases) [Phrase]})
+   (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
+   (sc/optional-key :phrases) [Phrase]
+   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}})
 
 
 (sc/defschema SimpleOrg
   (select-keys Organization [:id :name :scope]))
+
+(def parse-organization (coerce/coercer! Organization coerce/json-coercion-matcher))
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist :digitizer])
 (def authority-roles

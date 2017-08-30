@@ -97,7 +97,7 @@
                (= (-> current :source :type) "background")
                updated-match
                (not (= (-> updated-match :data :katselmus)
-                       (-> current :data :katselmus))))
+                       (-> current       :data :katselmus))))
           ;; if existing background reviews can be overwritten by more
           ;; recent ones, the existing one needs to be marked faulty
           (recur (remove #{updated-match} from-update)

@@ -11,7 +11,7 @@ Authority admin goes to the authority admin page
   Wait until page contains  Organisaation viranomaiset
 
 Authority admin creates two users
-  Set Suite Variable  ${userRowXpath}  //div[@class='admin-users-table']//table/tbody/tr
+  Set Suite Variable  ${userRowXpath}  //div[contains(@class, 'admin-users-table')]//table/tbody/tr
   Wait Until  Element Should Be Visible  ${userRowXpath}
   ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
   Create user  heikki.virtanen@example.com  Heikki  Virtanen  Lukuoikeus
@@ -21,8 +21,8 @@ Authority admin creates two users
 
 Authority admin removes Heikki
   ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
-  Element should be visible  xpath=//div[@class='admin-users-table']//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
-  Click element  xpath=//div[@class='admin-users-table']//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Element should be visible  xpath=//div[contains(@class, 'admin-users-table')]//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
+  Click element  xpath=//div[contains(@class, 'admin-users-table')]//tr[@data-user-email='heikki.virtanen@example.com']//a[@data-op='removeFromOrg']
   Confirm  dynamic-yes-no-confirm-dialog
   ${userCountAfter} =  Evaluate  ${userCount} - 1
   User count is  ${userCountAfter}
@@ -76,5 +76,5 @@ Create user
   Click enabled by test id  authadmin-add-authority-ok
   Wait Until  Element Should Not Be Visible  add-user-to-organization-dialog
   Wait Until  Page Should Contain  ${email}
-  Element Should Contain  //div[@class="users-table"]//table/tbody/tr[@data-user-email="${email}"]/td[3]  ${role}
+  Element Should Contain  //div[contains(@class, 'users-table')]//table/tbody/tr[@data-user-email="${email}"]/td[3]  ${role}
 
