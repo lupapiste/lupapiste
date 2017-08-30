@@ -227,6 +227,15 @@
       (checker coll)
       (= coll checker))))
 
+(defn safe-update-in [a-map path fn & params]
+  "Like update-in, but does nothing in case the given path does not exist"
+  (if (empty? path)
+    (apply fn a-map params)
+    (let [[fst & rst] path]
+      (if (contains? a-map fst)
+        (apply update a-map fst safe-update-in rst fn params)
+        a-map))))
+
 (defn ->keyword [x]
   ((if (number? x)
      (comp keyword str)
