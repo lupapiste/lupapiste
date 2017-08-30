@@ -15,6 +15,9 @@
 (defn change-email-for-company-user-link [lang token]
   (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email/" token))
 
+(defn change-email-for-financial-authority-link [lang token]
+  (str (env/value :host) "/app/" (name lang) "/welcome#!/change-email-fa/" token))
+
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
    :model-fn (fn [{data :data} conf recipient]
@@ -34,6 +37,17 @@
                    (select-keys data [:old-email :new-email])
                    {:expires (util/to-local-datetime expires)
                     :link    #(change-email-for-company-user-link % id)})))})
+
+(notifications/defemail :change-email-for-financial-authority
+                        {:recipients-fn notifications/from-user
+                         :subject-key "change-email"
+                         :template "change-email-for-company-user.md"
+                         :model-fn (fn [{data :data} conf recipient]
+                                     (let [{:keys [id expires]} (:token data)]
+                                       (merge
+                                         (select-keys data [:old-email :new-email])
+                                         {:expires (util/to-local-datetime expires)
+                                          :link    #(change-email-for-financial-authority-link % id)})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
@@ -78,3 +92,11 @@
    :user-roles #{:anonymous}}
   [_]
   (change-email/change-email tokenId stamp))
+
+(defcommand change-financial-authority-email
+  {:parameters [tokenId]
+   :input-validators [(partial action/non-blank-parameters [:tokenId])]
+   :notified   true
+   :user-roles #{:anonymous}}
+  [_]
+  (change-email/change-email tokenId nil))
