@@ -53,7 +53,8 @@
             [clj-time.core :as time]
             [clj-time.local :as local]
             [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
+            [clojure.set :as set])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -481,16 +482,6 @@
       (fail? response) (resp/status 404 (resp/json response))
       :else (resp/status 404 (resp/json (fail :error.unknown))))))
 
-(defpage [:get "/oauth/authorize"]
-  {:keys [client_id scope lang]}
-  (if-not (logged-in? (request/ring-request))
-    (let [{:keys [uri query-string] :as request} (request/ring-request)]
-      (ssess/merge-to-session
-        request
-        (resp/redirect (str (env/value :host) "/app/" (or lang "fi") "/welcome#!/login"))
-        {:redirect-after-login (str uri "?" query-string)}))
-    (hiccup.core/html (oauth/authorization-page-hiccup client_id scope lang (usr/current-user (request/ring-request))))))
-
 ;;
 ;; Cross-site request forgery protection
 ;;
@@ -528,21 +519,22 @@
 (defn tokenless-request? [request]
    (re-matches #"^/proxy/.*" (:uri request)))
 
+(def anti-csrf-cookie-name "anti-csrf-token")
+
 (defn anti-csrf [handler]
   (fn [request]
     (if (env/feature? :disable-anti-csrf)
       (handler request)
-      (let [cookie-name "anti-csrf-token"
-            cookie-attrs (dissoc (env/value :cookie) :http-only)]
+      (let [cookie-attrs (dissoc (env/value :cookie) :http-only)]
         (cond
            (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
                 (not (logged-in-with-apikey? request)))
-             (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+             (anti-forgery/crosscheck-token handler request anti-csrf-cookie-name csrf-attack-hander)
           (tokenless-request? request)
              ;; cookies via /proxy may end up overwriting current valid ones otherwise
              (handler request)
           :else
-             (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
+             (anti-forgery/set-token-in-cookie request (handler request) anti-csrf-cookie-name cookie-attrs))))))
 
 (defn cookie-monster
    "Remove cookies from requests in which only IE would send and update original cookie information
@@ -598,6 +590,75 @@
           app id ts mac))
 
 
+;;
+;; OAuth
+;;
+
+(defpage [:get "/oauth/authorize"]
+  {:keys [client_id scope lang]}
+  (let [{:keys [uri query-string] :as req} (request/ring-request)
+        client (when client_id (usr/get-user-by-oauth-id client_id))
+        user (usr/current-user req)]
+    (cond
+      (not (logged-in? req))
+      (ssess/merge-to-session
+        req
+        (resp/redirect (str (env/value :host) "/app/" (or lang "fi") "/welcome#!/login"))
+        {:redirect-after-login (str uri "?" query-string)})
+
+      (not (and client scope lang))
+      {:status 400
+       :body "Missing or invalid parameters"}
+
+      (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes]))))
+      {:status 403
+       :body (str "Invalid scope: " scope)}
+
+      (oauth/payment-required-but-not-available? scope user)
+      {:status 307
+       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=cannot_pay")}}
+
+      :else
+      (hiccup.core/html
+        (oauth/authorization-page-hiccup client
+                                         scope
+                                         lang
+                                         user
+                                         (get-in req [:cookies anti-csrf-cookie-name :value]))))))
+
+(defpage [:post "/oauth/authorize"]
+  {:keys [client_id scope lang accept cancel]}
+  (let [client (usr/get-user-by-oauth-id client_id)
+        user (usr/current-user (request/ring-request))]
+    (cond
+      (not (logged-in? (request/ring-request)))
+      (redirect-after-logout lang)
+
+      cancel
+      {:status 307
+       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=authorization_cancelled")}}
+
+      (not (and client scope lang accept))
+      {:status 400
+       :body "Missing or invalid parameters"}
+
+      (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes]))))
+      {:status 403
+       :body (str "Invalid scope: " scope)}
+
+      (oauth/payment-required-but-not-available? scope user)
+      {:status 307
+       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=cannot_pay")}}
+
+      :else
+      (anti-forgery/crosscheck-token
+        (fn [request]
+          (let [token (oauth/grant-access-token client scope user)]
+            {:status 307
+             :headers {"Location" (str (get-in client [:oauth :callback :success-url]) "?token=" token)}}))
+        (request/ring-request)
+        anti-csrf-cookie-name
+        csrf-attack-hander))))
 
 ;;
 ;; dev utils:

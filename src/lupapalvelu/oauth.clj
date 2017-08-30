@@ -1,5 +1,9 @@
 (ns lupapalvelu.oauth
-  (:require [sade.env :as env]))
+  (:require [sade.env :as env]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.company :as company]
+            [sade.strings :as str]
+            [lupapalvelu.token :as token]))
 
 (def header
   [:nav.nav-wrapper
@@ -63,13 +67,52 @@
      [:div.container
       content]]]])
 
+(defn authorization-page-hiccup [client scope lang user anti-csrf]
+  (let [company-id (get-in user [:company :id])
+        company (when company-id (company/find-company-by-id company-id))
+        user-name (str (:firstName user) " " (:lastName user))
+        scopes (str/split scope #",")]
+    (content-to-template
+      [:div
+       [:h2 (i18n/localize lang "oauth.accept.header")]
+       [:div.user
+        [:i.lupicon-circle-attention.primary {:style "vertical-align: middle"}]
+        [:span {:style "vertical-align: middle; margin-left: 5px;"}
+         (if company
+           (i18n/localize-and-fill lang "oauth.user.company" (:name company) user-name (:email user))
+           (i18n/localize-and-fill lang "oauth.user.individual" user-name (:email user)))]]
+       [:div.scopes
+        [:div (i18n/localize-and-fill lang "oauth.scope.title" (get-in client [:oauth :display-name (keyword lang)]))]
+        [:div
+         [:ul
+          (for [s scopes]
+            [:li (i18n/localize-and-fill lang (str "oauth.scope." s) (:name company))])]]]
+       [:div.buttons
+        [:form {:method "post" :action "/oauth/authorize"}
+         [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
+         [:input {:type "hidden" :name "scope" :value scope}]
+         [:input {:type "hidden" :name "lang" :value lang}]
+         [:input {:type "hidden" :name "__anti-forgery-token" :value anti-csrf}]
+         [:button.accept {:name "accept" :value "true"}
+          [:i.lupicon-check]
+          [:span (i18n/localize lang "oauth.button.accept")]]]
+        [:form {:method "post" :action "/oauth/authorize"}
+         [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
+         [:input {:type "hidden" :name "lang" :value lang}]
+         [:button.cancel {:name "cancel" :value "true"}
+          [:i.lupicon-remove]
+          [:span (i18n/localize lang "oauth.button.cancel")]]]]])))
 
+(defn payment-required-but-not-available? [scope user]
+  (and (some #(= % "pay") (str/split scope #","))
+       (nil?
+         (when-let [id (get-in user [:company :id])]
+           (company/find-company-by-id id)))))
 
-(defn authorization-page-hiccup [client-id scope lang user]
-  (println user)
-  (content-to-template
-    [:div
-     [:h2 "Hyväksy tietojen luovutus"]
-     [:div
-      [:i.lupicon-circle-attention.primary {:style "vertical-align: middle"}]
-      [:span {:style "vertical-align: middle; margin-left: 5px;"} "Olet kirjautunut sisään Lupapisteeseen yrityksen Kallen suunnittelutoimisto käyttäjänä Kaino Solita (kaino@solita.fi)"]]]))
+(defn grant-access-token [client scope user]
+  (token/make-token :oauth
+                    user
+                    {:client-id (get-in client [:oauth :client-id])
+                     :scopes (str/split scope #",")}
+                    :ttl
+                    (* 10 60 1000)))
