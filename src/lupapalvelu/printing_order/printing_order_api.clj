@@ -41,7 +41,7 @@
                            :max   12
                            :fixed 180}
                           {:min   13
-                           :additionalInformation "ABCDEFGHIJKLMNOP"}]}))
+                           :additionalInformation "Hinta sopimuksen mukaan."}]}))
 
 (defcommand submit-printing-order
             {:description ""

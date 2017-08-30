@@ -80,13 +80,13 @@
 (rum/defc contact-form [path]
   [:div
    [:div.row
-    (grid-text-input (conj path :firstName) :col-1 "etunimi" true)
-    (grid-text-input (conj path :lastName) :col-1 "sukunimi" true)
-    (grid-text-input (conj path :companyName) :col-2 "printing-order.company-name")]
+    (grid-text-input (conj path :firstName) :col-1 :etunimi true)
+    (grid-text-input (conj path :lastName) :col-1 :sukunimi true)
+    (grid-text-input (conj path :companyName) :col-2 :printing-order.company-name)]
    [:div.row
-    (grid-text-input (conj path :address) :col-2 "printing-order.address" true)
-    (grid-text-input (conj path :postalCode) :col-1 "printing-order.postal-code" true)
-    (grid-text-input (conj path :city) :col-1 "printing-order.city" true)]
+    (grid-text-input (conj path :address) :col-2 :printing-order.address true)
+    (grid-text-input (conj path :postalCode) :col-1 :printing-order.postal-code true)
+    (grid-text-input (conj path :city) :col-1 :printing-order.city true)]
    [:div.row
-    (grid-text-input (conj path :email) :col-2 "printing-order.email" true)
-    (grid-text-input (conj path :phoneNumber) :col-1 "printing-order.phone")]])
+    (grid-text-input (conj path :email) :col-2 :printing-order.email true)
+    (grid-text-input (conj path :phoneNumber) :col-1 :printing-order.phone)]])

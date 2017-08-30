@@ -6,19 +6,19 @@
 
 (def phase-transitions
   [{:forward-fn    state/proceed-phase2
-    :forward-ltext "printing-order.phase1.button.next"
+    :forward-ltext :printing-order.phase1.button.next
     :forward-cond  (rum-util/derived-atom [state/component-state]
                                           (fn [{order :order}]
                                             (pos-int? (reduce + (vals order)))))}
    {:back-fn       state/back-to-phase1
-    :back-ltext    "printing-order.phase2.button.prev"
+    :back-ltext    :printing-order.phase2.button.prev
     :forward-fn    state/proceed-phase3
-    :forward-ltext "printing-order.phase2.button.next"
+    :forward-ltext :printing-order.phase2.button.next
     :forward-cond  (rum-util/derived-atom [state/component-state] state/valid-order?)}
    {:back-fn       state/back-to-phase2
-    :back-ltext    "printing-order.phase3.button.prev"
+    :back-ltext    :printing-order.phase3.button.prev
     :forward-fn    state/submit-order
-    :forward-ltext "printing-order.phase3.button.submit"}])
+    :forward-ltext :printing-order.phase3.button.submit}])
 
 (rum/defc transition-buttons < rum/reactive [phase]
   (let [{:keys [back-fn back-ltext forward-fn forward-ltext

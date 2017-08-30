@@ -38,6 +38,7 @@
 "printing-order.postal-code" "fi" "Postinumero"
 "printing-order.show-pricing" "fi" "Näytä hinnasto"
 "printing-order.summary.documents" "fi" "Valitut dokumentit"
+"printing-order.summary.includes-vat" "fi" "Sis. alv (24%)"
 "printing-order.summary.total-amount" "fi" "Tilattavia tulosteita yhteensä: {0} kpl"
 "printing-order.summary.total-price" "fi" "Hinta yhteensä sisältäen toimituskulut"
 "printing-order.start.ordering" "fi" "Tilaa tulosteita"

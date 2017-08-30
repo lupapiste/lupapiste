@@ -60,13 +60,19 @@
     [:div.printing-order-footer
      [:div
       [:button.tertiary.rollup-button
-       [:h2 (loc "printing-order.footer.total-amount" (str total-amount))]]
+       [:h2 (loc :printing-order.footer.total-amount (str total-amount))]]
       [:button.tertiary.rollup-button
-       [:h2 (str (loc "printing-order.footer.price") " " 0 "€")]]
-      [:button.tertiary.rollup-buttonx
-       [:h2 (loc "printing-order.show-pricing")]]
-      [:button.tertiary.rollup-button
-       (loc-html :h2 "printing-order.mylly.provided-by")]]]))
+       (when (pos-int? total-amount)
+         (let [pricing (pricing/price-for-order-amount total-amount)]
+           (cond
+             (:total pricing) [:h2 (str (loc :printing-order.footer.price) " "
+                                        (:total (pricing/price-for-order-amount total-amount)) "€")]
+             (:additionalInformation pricing)
+                              [:h2 (:additionalInformation pricing)])))]
+      [:button.tertiary.rollup-button.right
+       (loc-html :h2 :printing-order.mylly.provided-by)]
+      [:button.tertiary.rollup-button.right
+       [:h2 (loc :printing-order.show-pricing)]]]]))
 
 (rum/defc composer-phase1 < rum/reactive []
   (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
@@ -83,32 +89,32 @@
         conditions-accepted-option (rum/cursor-in state/component-state [:conditions-accepted])]
     [:div.order-grid-4
      [:div.order-section
-      (poc/section-header "printing-order.orderer-details")
+      (poc/section-header :printing-order.orderer-details)
       (poc/contact-form [:contacts :orderer])]
      [:div.order-section
-      (poc/section-header "printing-order.payer-details")
+      (poc/section-header :printing-order.payer-details)
       [:div.row
-       (poc/grid-radio-button payer-option true  :col-1 "printing-order.payer.same-as-orderer")
-       (poc/grid-radio-button payer-option false :col-1 "printing-order.payer.other-than-orderer")]
+       (poc/grid-radio-button payer-option true  :col-1 :printing-order.payer.same-as-orderer)
+       (poc/grid-radio-button payer-option false :col-1 :printing-order.payer.other-than-orderer)]
       (when (false? (rum/react payer-option))
         (poc/contact-form [:contacts :payer]))]
      [:div.order-section
-      (poc/section-header "printing-order.delivery-details")
+      (poc/section-header :printing-order.delivery-details)
       [:div.row
-       (poc/grid-radio-button delivery-option true  :col-1 "printing-order.delivery.same-as-orderer")
-       (poc/grid-radio-button delivery-option false :col-1 "printing-order.delivery.other-than-orderer")]
+       (poc/grid-radio-button delivery-option true  :col-1 :printing-order.delivery.same-as-orderer)
+       (poc/grid-radio-button delivery-option false :col-1 :printing-order.delivery.other-than-orderer)]
       (when (false? (rum/react delivery-option))
         (poc/contact-form [:contacts :delivery]))
       [:div.row
-       (poc/grid-text-input [:billingReference] :col-2 "printing-order.billing-reference")
-       (poc/grid-textarea-input [:deliveryInstructions] :col-2 "printing-order.delivery-instructions")]]
+       (poc/grid-text-input [:billingReference] :col-2 :printing-order.billing-reference)
+       (poc/grid-textarea-input [:deliveryInstructions] :col-2 :printing-order.delivery-instructions)]]
      [:div.order-section
-      (poc/section-header "printing-order.conditions.heading")
+      (poc/section-header :printing-order.conditions.heading)
       [:div.row
        [:div.col-4
-        (loc-html :span "printing-order.conditions.text")]]
+        (loc-html :span :printing-order.conditions.text)]]
       [:div.row
-       (poc/grid-checkbox conditions-accepted-option :col-2 "printing-order.conditions.accept" true)]]]))
+       (poc/grid-checkbox conditions-accepted-option :col-2 :printing-order.conditions.accept true)]]]))
 
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))
@@ -118,49 +124,49 @@
                                             (pos? (get order id)))))]
     [:div.order-grid-3
      [:div.order-section
-      (poc/section-header "printing-order.summary.documents")
+      (poc/section-header :printing-order.summary.documents)
       (files/files-table attachments-selected :read-only)]
      (pricing/order-summary-pricing)
      [:div.order-section " "]
      [:div.order-summary-contacts-block
       [:div.row
        [:div.col-1
-        [:span.order-grid-header (loc "printing-order.orderer-details")]
+        [:span.order-grid-header (loc :printing-order.orderer-details)]
         [:span.order-summary-line
          (for [line (state/orderer-summary-lines)]
            [:span.order-summary-line
             {:key (util/unique-elem-id)}
             line])]]
        [:div.col-1
-        [:span.order-grid-header (loc "printing-order.payer-details")]
+        [:span.order-grid-header (loc :printing-order.payer-details)]
         (for [line (state/payer-summary-lines)]
           [:span.order-summary-line
            {:key (util/unique-elem-id)}
            line])]
        [:div.col-1
-        [:span.order-grid-header (loc "printing-order.delivery-details")]
+        [:span.order-grid-header (loc :printing-order.delivery-details)]
         (for [line (state/delivery-address-summary-lines)]
           [:span.order-summary-line
            {:key (util/unique-elem-id)}
            line])]]
       [:div.row
        [:div.col-1
-        [:span.order-grid-header (loc "printing-order.billing-reference")]
+        [:span.order-grid-header (loc :printing-order.billing-reference)]
         [:span.order-summary-line (-> @state/component-state :billingReference)]]
        [:div.col-1
-        [:span.order-grid-header (loc "printing-order.delivery-instructions")]
+        [:span.order-grid-header (loc :printing-order.delivery-instructions)]
         [:span.order-summary-line (-> @state/component-state :deliveryInstructions)]]]]
      [:div.order-section " "]
      [:div.order-section
-      (poc/section-header "printing-order.conditions.heading")
+      (poc/section-header :printing-order.conditions.heading)
       [:div.row
        [:div.col-4
-        (loc-html :span "printing-order.conditions.text")]]
+        (loc-html :span :printing-order.conditions.text)]]
       [:div.row
        [:div.col-4
         [:label.like-btn
          [:i.lupicon-circle-check.positive]
-         [:span (loc "printing-order.conditions.accepted")]]]]]]))
+         [:span (loc :printing-order.conditions.accepted)]]]]]]))
 
 (rum/defc order-composer < rum/reactive
                            {:init         init
@@ -178,7 +184,7 @@
      (when (= phase 3)
        (composer-phase3))
      [:div.order-section
-      (loc-html :span "printing-order.mylly.provided-by")]
+      (loc-html :span :printing-order.mylly.provided-by)]
      (transitions/transition-buttons phase)
      [:div (comp/debug-atom (rum/cursor-in state/component-state [:contacts]))]
      (order-composer-footer)]))

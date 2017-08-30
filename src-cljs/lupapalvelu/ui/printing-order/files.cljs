@@ -60,12 +60,12 @@
     [:thead
      [:tr
       [:th.attachments-table--wide
-       (loc "printing-order.files-table.type-and-content")]
-      [:th (loc "printing-order.files-table.filename")]
-      [:th (loc "printing-order.files-table.modified")]
+       (loc :printing-order.files-table.type-and-content)]
+      [:th (loc :printing-order.files-table.filename)]
+      [:th (loc :printing-order.files-table.modified)]
       [:th
        {:style {:width "15%"}}
-       (loc "printing-order.files-table.copy-amount")]]]
+       (loc :printing-order.files-table.copy-amount)]]]
     [:tbody
      (for [file files]
        (rum/with-key (file-row file opts) (util/unique-elem-id "file-row")))]]])
