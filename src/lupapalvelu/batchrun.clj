@@ -491,24 +491,14 @@
                                                (:id organization) (.getName (class o)) (get &throw-context :message ""))}))))
 
 (defn- organization-applications-for-review-fetching
-  [organization-id permit-type]
+  [organization-id permit-type projection]
   (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
     (mongo/select :applications {:state {$in eligible-application-states}
                                  :permitType permit-type
                                  :organization organization-id
                                  :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
                   (merge app/timestamp-key
-                         {:attachments true
-                          :state true
-                          :municipality true
-                          :address true
-                          :permitType true
-                          :permitSubtype true
-                          :organization true
-                          :primaryOperation true
-                          :tasks true
-                          :verdicts true
-                          :history true}))))
+                         projection))))
 
 (defn- save-reviews [user applications-with-results]
   (when (not-empty applications-with-results)
@@ -538,10 +528,24 @@
 
 (defn- fetch-review-updates-for-organization
   [eraajo-user created applications permit-types {org-krysp :krysp :as organization} & [overwrite-background-reviews?]]
-  (let [grouped-apps (if (seq applications)
+  (let [projection (merge {:state            true
+                           :municipality     true
+                           :address          true
+                           :permitType       true
+                           :permitSubtype    true
+                           :organization     true
+                           :primaryOperation true
+                           :tasks            true
+                           :verdicts         true
+                           :history          true}
+                          (when overwrite-background-reviews?
+                            {:attachments true}))
+        grouped-apps (if (seq applications)
                          (group-by :permitType applications)
                          (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
-                              (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
+                              (map #(vector % (organization-applications-for-review-fetching (:id organization)
+                                                                                             %
+                                                                                             projection)))))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
          (mapv (fn [[app app-xml]]
                  [app (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)])))))
