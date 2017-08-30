@@ -73,11 +73,11 @@
         user-name (str (:firstName user) " " (:lastName user))
         scopes (str/split scope #",")]
     (content-to-template
-      [:div
+      [:div.oauth
        [:h2 (i18n/localize lang "oauth.accept.header")]
        [:div.user
-        [:i.lupicon-circle-attention.primary {:style "vertical-align: middle"}]
-        [:span {:style "vertical-align: middle; margin-left: 5px;"}
+        [:i.lupicon-circle-attention.primary]
+        [:span
          (if company
            (i18n/localize-and-fill lang "oauth.user.company" (:name company) user-name (:email user))
            (i18n/localize-and-fill lang "oauth.user.individual" user-name (:email user)))]]
@@ -88,18 +88,18 @@
           (for [s scopes]
             [:li (i18n/localize-and-fill lang (str "oauth.scope." s) (:name company))])]]]
        [:div.buttons
-        [:form {:method "post" :action "/oauth/authorize"}
+        [:form.accept {:method "post" :action "/oauth/authorize"}
          [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
          [:input {:type "hidden" :name "scope" :value scope}]
          [:input {:type "hidden" :name "lang" :value lang}]
          [:input {:type "hidden" :name "__anti-forgery-token" :value anti-csrf}]
-         [:button.accept {:name "accept" :value "true"}
+         [:button.accept.positive {:name "accept" :value "true"}
           [:i.lupicon-check]
           [:span (i18n/localize lang "oauth.button.accept")]]]
         [:form {:method "post" :action "/oauth/authorize"}
          [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
          [:input {:type "hidden" :name "lang" :value lang}]
-         [:button.cancel {:name "cancel" :value "true"}
+         [:button.cancel.reject {:name "cancel" :value "true"}
           [:i.lupicon-remove]
           [:span (i18n/localize lang "oauth.button.cancel")]]]]])))
 
