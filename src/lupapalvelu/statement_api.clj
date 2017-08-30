@@ -166,7 +166,7 @@
   (let [org @organization
         submitted-application (mongo/by-id :submitted-applications id)
         metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-        ely-statement-giver (ely/ely-statement-giver subtype)
+        ely-statement-giver (ely/ely-statement-giver (i18n/localize lang subtype))
         message-id (mongo/create-id)
         ely-data  {:partner "ely"
                    :subtype subtype
