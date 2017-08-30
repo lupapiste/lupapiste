@@ -115,7 +115,12 @@
            (sc/optional-key :companyFilters)      [SearchFilter]
            (sc/optional-key :language)            i18n/EnumSupportedLanguages
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
-           (sc/optional-key :firstLogin)          sc/Bool})
+           (sc/optional-key :firstLogin)          sc/Bool
+           (sc/optional-key :oauth)               {:client-id sc/Str
+                                                   :scopes (sc/enum "read" "pay")
+                                                   :display-name i18n/LocalizationStringMap
+                                                   :callback {:success-url sc/Str
+                                                              :failure-url sc/Str}}})
 
 (defschema RegisterUser
                   {:email                            ssc/Email
@@ -489,6 +494,10 @@
 (defn get-user-by-email [email]
   {:pre [email]}
   (get-user {:email email}))
+
+(defn get-user-by-oauth-id [client-id]
+  {:pre [client-id]}
+  (get-user {:oauth.client-id client-id}))
 
 (defn email-in-use? [email]
   (as-> email $

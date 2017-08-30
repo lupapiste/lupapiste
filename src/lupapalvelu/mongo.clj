@@ -425,6 +425,7 @@
   (ensure-index :users {:email 1} {:unique true})
   (ensure-index :users {:organizations 1} {:sparse true})
   (ensure-index :users {:private.apikey 1} {:unique true :sparse true})
+  (ensure-index :users {:oauth.client-id 1} {:unique true :sparse true})
   (ensure-index :users {:company.id 1} {:sparse true})
   (ensure-index :applications {:municipality 1})
   (ensure-index :applications {:submitted 1})
