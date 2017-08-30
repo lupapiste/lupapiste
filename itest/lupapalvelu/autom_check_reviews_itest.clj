@@ -372,6 +372,9 @@
             (fact "application state is updated from verdictGive to constructionStarted"
                   (:state application) => "constructionStarted")
 
+            ;; Since :overwrite-background-reviews? is nil, reviews
+            ;; are not updated even though the review data in the XML
+            ;; differs from the current review data in the application
             (fact "application reviews are not updated"
               (->> application :tasks (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
                                                            "29.09.2014"))
@@ -384,14 +387,32 @@
                 faulty-attachments => empty?)))
           => truthy
 
-          ;; Review query is made only for applications in eligible state -> xml found for verdict given application
           (provided (krysp-reader/rakval-application-xml anything anything [application-id] :application-id anything)
              => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                     (ss/replace #"LP-186-2014-90009" application-id)
                     (ss/replace #"aloituskokouksessa" "aloituskoKKouksessa") ;; <- NOTE!
                     (sxml/parse-string "utf-8"))))
 
-        (fact "second batchrun, overwrite"
+        (fact "second batchrun, overwrite with the same data"
+          (let [poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
+                application (query-application local-query sonja application-id) => truthy]
+
+            ;; :overwrite-background-reviews? is true, but the review
+            ;; data in the XML does not differ from the current review
+            ;; data in the application
+            (fact "there are no faulty attachments"
+                  (let [faulty-attachments (->> application :attachments
+                                                (filter #(= (-> % :metadata :tila)
+                                                            "ei-arkistoida-virheellinen")))]
+                    faulty-attachments => empty?)))
+          => truthy
+
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id] :application-id anything)
+            => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                   (ss/replace #"LP-186-2014-90009" application-id)
+                   (sxml/parse-string "utf-8"))))
+
+        (fact "third batchrun, overwrite with differing data"
 
           (let [application-before-rewrite (query-application local-query sonja application-id) => truthy
                 old-task (->> application-before-rewrite :tasks
