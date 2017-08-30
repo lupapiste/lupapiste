@@ -489,7 +489,7 @@
         request
         (resp/redirect (str (env/value :host) "/app/" (or lang "fi") "/welcome#!/login"))
         {:redirect-after-login (str uri "?" query-string)}))
-    (hiccup.core/html (oauth/authorization-page-hiccup client_id scope lang))))
+    (hiccup.core/html (oauth/authorization-page-hiccup client_id scope lang (usr/current-user (request/ring-request))))))
 
 ;;
 ;; Cross-site request forgery protection

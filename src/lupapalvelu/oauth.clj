@@ -44,7 +44,7 @@
     [:meta {:name "viewport", :content "width=device-width, initial-scale=1.0"}]
     [:meta {:name "description", :content "Lupapiste"}]
     [:meta {:name "author", :content "Evolta Oy -- https://evolta.fi/"}]
-    [:link {:href "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,200,200italic,300italic,300,400italic,600,600italic,700,700italic", :rel "stylesheet", :type "text/css"}] "<!-- Cloak content until css is loaded -->"
+    [:link {:href "https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,200,200italic,300italic,300,400italic,600,600italic,700,700italic", :rel "stylesheet", :type "text/css"}]
     [:link {:id "lupicons-css", :href "/lp-static/css/lupicons.css", :rel "stylesheet"}]
     [:link {:id "main-css", :href (str "/lp-static/css/main.css?b=" env/build-number), :rel "stylesheet"}]
     [:link {:rel "icon", :href "/lp-static/img/favicon-v2.png", :type "image/png"}]
@@ -65,7 +65,8 @@
 
 
 
-(defn authorization-page-hiccup [client-id scope lang]
+(defn authorization-page-hiccup [client-id scope lang user]
+  (println user)
   (content-to-template
     [:div
      [:h2 "Hyväksy tietojen luovutus"]

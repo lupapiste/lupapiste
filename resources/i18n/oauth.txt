@@ -1,0 +1,6 @@
+"oauth.accept.header" "fi" "Hyväksy tietojen luovutus"
+"oauth.accept.header" "sv" ""
+"oauth.user.company" "fi" "Olet kirjautunut sisään Lupapisteeseen yrityksen <em>{0}</em> käyttäjänä <em>{1}</em> ({2})."
+"oauth.user.company" "sv" ""
+"oauth.user.individual" "fi" "Olet kirjautunut sisään Lupapisteeseen käyttäjänä <em>{0}</em> ({1})."
+"oauth.user.individual" "sv" ""
