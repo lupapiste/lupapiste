@@ -564,9 +564,8 @@
   ([source target-dir]
     (unzip source target-dir "UTF-8"))
   ([source target-dir encoding]
-    (let [fallback-encoding "IBM437"]
+    (let [fallback-encoding "IBM00858"]
       (try
-
        (with-open [zip (java.util.zip.ZipFile. (fs/file source) (java.nio.charset.Charset/forName encoding))]
         (let [entries (enumeration-seq (.entries zip))
               target-file #(->> (.getName %)
@@ -580,7 +579,7 @@
        (catch IllegalArgumentException e
          (if-not (= encoding fallback-encoding)
            (do
-             (debugf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP437 encoding" source encoding)
+             (debugf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP858 encoding" source encoding)
              (unzip source target-dir fallback-encoding))
            (fail! :error.unzipping-error)))))
     target-dir))
