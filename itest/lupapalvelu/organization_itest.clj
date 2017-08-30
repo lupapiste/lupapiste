@@ -1112,19 +1112,23 @@
 
   (fact "calling does not change other organization data"
     (let [org (:data (query admin :organization-by-id :organizationId "753-R"))]
-      (update-docstore-info "753-R" true 1.0 (i18n/supported-langs-map (constantly "Description"))) => ok?
+      (update-docstore-info "753-R" true 100 (i18n/supported-langs-map (constantly "Description"))) => ok?
       (dissoc org :docstore-info)
       => (-> (query admin :organization-by-id :organizationId "753-R")
              :data
              (dissoc :docstore-info))))
 
   (fact "calling updates organization's docstore info"
-    (update-docstore-info "753-R" true 1.0 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
+    (update-docstore-info "753-R" true 100 {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}) => ok?
     (get-docstore-info "753-R")
     => {:docStoreInUse true
-        :documentPrice 1.0
+        :documentPrice 100
         :organizationDescription {:fi "Kuvaus" :sv "Beskrivning" :en "Description"}})
 
   (fact "can't set negative document price"
-    (update-docstore-info "753-R" true -1.0 "Description")
+    (update-docstore-info "753-R" true -100 "Description")
+    => (partial expected-failure? :error.illegal-number))
+
+  (fact "can't set decimal document price"
+    (update-docstore-info "753-R" true 1.0 "Description")
     => (partial expected-failure? :error.illegal-number)))

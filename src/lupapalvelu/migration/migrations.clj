@@ -3339,7 +3339,7 @@
   {$or [{:docstore-info.documentPrice {$type "double"}}
         {:docstore-info.documentPrice {$gt 0 $lt 100}}]})
 
-(defmigration change-docstore-prices-to-integers
+(defmigration change-docstore-prices-to-cents
   {:apply-when (pos? (mongo/count :organizations docstore-price-query))}
   (let [orgs (mongo/find-maps :organizations
                               docstore-price-query)]
