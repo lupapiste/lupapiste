@@ -44,9 +44,8 @@
      :error.integration.asianhallinta.wrong-state)))
 
 
-(defn process-ah-verdict [parsed-xml unzipped-path ftp-user system-user]
+(defn process-ah-verdict [parsed-xml unzipped-path ftp-user system-user timestamp]
   (let [xml-edn   (xml/xml->edn parsed-xml)
-        timestamp (core/now)
         application-id (get-in xml-edn [:AsianPaatos :HakemusTunnus])
         attachments (-> (get-in xml-edn [:AsianPaatos :Liitteet])
                         (util/ensure-sequential :Liite)

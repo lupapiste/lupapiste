@@ -28,7 +28,7 @@
     {}
     (keys path-to-required-keys)))
 
-(defn statement-response-handler [parsed-xml unzipped-path ftp-user system-user]
+(defn statement-response-handler [parsed-xml unzipped-path ftp-user system-user created]
   (let [xml-edn   (xml/xml->edn parsed-xml)
         ely-user  (assoc system-user :firstName "ELY-keskus")
         lausunto-vastaus (:LausuntoVastaus xml-edn)
@@ -44,14 +44,14 @@
                         (util/ensure-sequential :Liite)
                         :Liite)
         application (domain/get-application-no-access-checking
-                      (:application-id statement-data))
-        created (now)]
+                      (:application-id statement-data))]
     (logging/with-logging-context
       {:applicationId (:id application) :userId ftp-user}
       (when-let [statement (statement/save-ah-statement-response
                              application
                              ftp-user
-                             statement-data)]
+                             statement-data
+                             created)]
         (infof "ah-statement-response successfully updated statement %s, now saving %d attachments"
                (:id statement)
                (count attachments))

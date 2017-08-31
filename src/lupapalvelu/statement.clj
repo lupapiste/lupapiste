@@ -209,7 +209,8 @@
   "LPK-3126 handler for :statement target IntegrationMessages"
   [responded-message :- msgs/IntegrationMessage
    xml-edn
-   ftp-user]
+   ftp-user
+   created]
   (let [application-id (get-in xml-edn [:AsianTunnusVastaus :HakemusTunnus])
         partners-id (get-in xml-edn [:AsianTunnusVastaus :AsianTunnus])
         received-ts (-> xml-edn (get-in [:AsianTunnusVastaus :VastaanotettuPvm]) (cr/to-timestamp))
@@ -228,14 +229,14 @@
                              (assoc (:external statement) :externalId partners-id :acknowledged received-ts))]
           (action/update-application command
                                      {:statements {$elemMatch {:id statement-id}}}
-                                     {$set {:statements.$ updated}})))
+                                     {$set {:statements.$ updated :modified created}})))
       (warnf "No statement found for ah response-message (%s), statementId in original message was: %s", (:id responded-message) statement-id))))
 
 (defn save-ah-statement-response
   "Save statement response data from asianhallinta LausuntoVastaus to application statement.
    Validation of required data has been made on reader side.
    Returns updated statement on success"
-  [app ftp-user statement-data]
+  [app ftp-user statement-data created]
   (let [statement (get-statement app (:id statement-data))
         add-giver (fn [name]
                     (if (ss/not-blank? (:giver statement-data))
@@ -254,7 +255,7 @@
                              :person (update (:person statement) :name add-giver))]
           (action/update-application (action/application->command app)
                                      {:statements {$elemMatch {:id (:id statement)}}}
-                                     {$set {:statements.$ updated}})
+                                     {$set {:statements.$ updated :modified created}})
           updated))
       (warnf "No statement found for ah statement response, app-id: %s, statement: %s", (:id app) (:id statement)))))
 
