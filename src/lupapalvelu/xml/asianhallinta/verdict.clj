@@ -1,19 +1,16 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
   (:require [sade.core :refer [ok fail fail! error-and-fail!] :as core]
             [sade.common-reader :as cr]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]
             [taoensso.timbre :refer [error]]
-            [me.raynes.fs :as fs]
             [monger.operators :refer :all]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.xml.asianhallinta.attachment :as ah-att]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :as action]
-            [lupapalvelu.application :as application]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.state-machine :as sm]))
 
@@ -31,27 +28,6 @@
                                 :paatoskoodi     (or (:PaatosKoodi AsianPaatos) (:PaatoksenTunnus AsianPaatos)) ; PaatosKoodi is not required
                                 :id              (mongo/create-id)}]}]})
 
-(defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id timestamp]
-  (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
-        file          (fs/file (ss/join "/" [unzipped-path filename]))
-        file-size     (.length file)
-        orgs          (org/resolve-organizations
-                        (:municipality application)
-                        (:permitType application))
-        batchrun-user (user/batchrun-user (map :id orgs))
-        target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
-        attachment-id (mongo/create-id)]
-    (attachment/upload-and-attach! {:application application :user batchrun-user}
-                                   {:attachment-id attachment-id
-                                    :attachment-type {:type-group "muut" :type-id "paatos"}
-                                    :target target
-                                    :required false
-                                    :locked true
-                                    :created timestamp
-                                    :state :ok}
-                                   {:filename filename
-                                    :size file-size
-                                    :content file})))
 
 (defn- check-ftp-user-has-right-to-modify-app! [ftp-user {application-id :id municipality :municipality permit-type :permitType}]
   (when-not (-> (org/resolve-organization-scope municipality permit-type)
@@ -68,9 +44,8 @@
      :error.integration.asianhallinta.wrong-state)))
 
 
-(defn process-ah-verdict [parsed-xml unzipped-path ftp-user system-user]
+(defn process-ah-verdict [parsed-xml unzipped-path ftp-user system-user timestamp]
   (let [xml-edn   (xml/xml->edn parsed-xml)
-        timestamp (core/now)
         application-id (get-in xml-edn [:AsianPaatos :HakemusTunnus])
         attachments (-> (get-in xml-edn [:AsianPaatos :Liitteet])
                         (util/ensure-sequential :Liite)
@@ -97,13 +72,15 @@
 
         (action/update-application command update-clause)
         (doseq [attachment attachments]
-          (insert-attachment!
+          (ah-att/insert-attachment!
+            unzipped-path
             application
             attachment
-            unzipped-path
-            (:id new-verdict)
-            poytakirja-id
-            timestamp))
+            {:type-group "muut" :type-id "paatos"}
+            {:type "verdict" :id (:id new-verdict) :poytakirjaId poytakirja-id}
+            timestamp
+            (:Kuvaus attachment)
+            system-user))
         (notifications/notify! :application-state-change command)
         (ok)))))
 

@@ -1,10 +1,6 @@
 (ns lupapalvelu.pdf.html-template
-  (:require [clojure.java.io :as io]
-            [sade.core :refer [now ok ok?]]
-            [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]
-            [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.i18n :as i18n]
+  (:require [sade.core :refer [now ok ok?]]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.pdf.html-template-common :as common]
@@ -24,5 +20,7 @@
         header  (common/apply-page common/basic-header)
         footer  (common/apply-page common/basic-application-footer application)
         file-name (str (:id application) "_inspection-summary_" summary-id \_ (now) ".pdf")]
-    (->> (muuntaja/convert-html-to-pdf (:id application) "inspection-summary" content header footer)
-         (store-file file-id file-name))))
+    (logging/with-logging-context
+      {:applicationId (:id application)}
+      (->> (muuntaja/convert-html-to-pdf (:id application) "inspection-summary" content header footer)
+           (store-file file-id file-name)))))
