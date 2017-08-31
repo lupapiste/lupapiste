@@ -8,7 +8,7 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
   var statementId = params.statementId;
   var commands = params.commands;
   var submitAllowed = params.submitAllowed;
-  
+
   self.authModel = params.authModel;
   self.tab = params.selectedTab;
 
@@ -31,11 +31,12 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
 
   self.submit = function() {
     if( commands[self.tab()].confirm ) {
-      LUPAPISTE.ModalDialog.showDynamicYesNo( loc( self.tab() + ".confirm.title"),
-                                              loc( self.tab() + ".confirm.body"),
-                                              {title: loc( "yes"),
-                                                fn: send },
-                                               {title: loc( "cancel")});
+      hub.send("show-dialog",
+               {component: "yes-no-dialog",
+                ltitle: self.tab() + ".confirm.title",
+                size: "medium",
+                componentParams: {ltext: self.tab() + ".confirm.body",
+                                  yesFn: send}});
     } else {
       send();
     }
