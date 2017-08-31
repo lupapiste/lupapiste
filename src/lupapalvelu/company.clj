@@ -230,6 +230,9 @@
       (get-in user [:company :id])
       (ok :result :already-in-company)
 
+      (usr/financial-authority? user)
+      (ok :result :financial-authority)
+
       :else
       (fun user))))
 

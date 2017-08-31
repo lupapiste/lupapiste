@@ -79,7 +79,7 @@
         not-company?             (-> user :company :role ss/blank?)]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
-      (or (and (not hetu) not-company?) (not usr/financial-authority?)) (fail! :error.missing-person-id)
+      (and (not hetu) not-company? (not (usr/financial-authority? user))) (fail! :error.missing-person-id)
       (and (usr/verified-person-id? user) (not= hetu vetuma-hetu)) (fail! :error.personid-mismatch)
       (usr/email-in-use? new-email)            (fail! :error.duplicate-email))
 
