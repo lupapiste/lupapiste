@@ -78,8 +78,8 @@
             attachment
             {:type-group "muut" :type-id "paatos"}
             {:type "verdict" :id (:id new-verdict) :poytakirjaId poytakirja-id}
-            timestamp
             (:Kuvaus attachment)
+            timestamp
             system-user))
         (notifications/notify! :application-state-change command)
         (ok)))))
