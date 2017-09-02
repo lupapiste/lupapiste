@@ -24,7 +24,8 @@
         {:class "required"})
       (loc ltext)]
      [:input.grid-style-input--wide
-      {:type "text"
+      {:data-test-id (str "input-" (clojure.string/join "-" (map name path)))
+       :type "text"
        :value     @text*
        :on-change identity ;; A function is needed
        :on-blur   commit-fn}]]))
@@ -62,11 +63,12 @@
      (loc ltext)]]])
 
 (rum/defc grid-checkbox < rum/reactive
-  [state col-class ltext required?]
+  [state path col-class ltext required?]
   [:div
    {:class (name col-class)}
    [:div
-    {:class ["checkbox-wrapper"]}
+    {:class "checkbox-wrapper"
+     :data-test-id (str "checkbox-" (clojure.string/join "-" (map name path)))}
     [:input {:type    "checkbox"
              :checked (true? (rum/react state))
              :value   true}]
@@ -79,6 +81,7 @@
 
 (rum/defc contact-form [path]
   [:div
+   {:data-test-id (str "form-" (clojure.string/join "-" (map name path)))}
    [:div.row
     (grid-text-input (conj path :firstName) :col-1 :etunimi true)
     (grid-text-input (conj path :lastName) :col-1 :sukunimi true)

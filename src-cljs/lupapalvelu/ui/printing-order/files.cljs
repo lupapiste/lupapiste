@@ -36,14 +36,16 @@
   [{:keys [id contents modified latestVersion type] :as att} opts]
   (let [order-cursor (rum/cursor-in state/component-state [:order id])
         in-printing-order? (pos? (rum/react order-cursor))
-        type-id-text (loc (str "attachmentType." (-> type :type-group) "." (-> type :type-id)))
+        type-group-and-id (str (-> type :type-group) "." (-> type :type-id))
+        type-id-text (loc (str "attachmentType." type-group-and-id))
         type-and-contents (cond
                             (= type-id-text contents) type-id-text
                             (not (empty? contents))   (str type-id-text " (" contents ")")
                             :default                  type-id-text)]
     [:tr
      {:class [(when-not in-printing-order?
-                "not-in-printing-order")]}
+                "not-in-printing-order")]
+      :data-test-type type-group-and-id}
      [:td type-and-contents]
      [:td (attc/view-with-download-small-inline latestVersion)]
      [:td
@@ -56,6 +58,7 @@
 (rum/defc files-table < rum/reactive
   [files & opts]
   [:div.attachments-table-container
+   {:data-test-id "files-table"}
    [:table.attachments-table.table-even-odd
     [:thead
      [:tr

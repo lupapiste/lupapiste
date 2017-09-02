@@ -114,7 +114,7 @@
        [:div.col-4
         (loc-html :span :printing-order.conditions.text)]]
       [:div.row
-       (poc/grid-checkbox conditions-accepted-option :col-2 :printing-order.conditions.accept true)]]]))
+       (poc/grid-checkbox conditions-accepted-option [:conditions-accepted] :col-2 :printing-order.conditions.accept true)]]]))
 
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))
@@ -174,7 +174,8 @@
   [ko-app]
   (let [phase (rum/react (rum/cursor-in state/component-state [:phase]))]
     [:div
-     [:h1 (loc (str "printing-order.phase" phase ".title"))]
+     [:h1 {:data-test-id "order-composer-title"}
+      (loc (str "printing-order.phase" phase ".title"))]
      [:span (loc (str "printing-order.phase" phase ".intro-text"))]
      [:div.bottom-marginM]
      (when (= phase 1)

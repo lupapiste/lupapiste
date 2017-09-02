@@ -26,11 +26,13 @@
     [:div.operation-button-row
      (when back-fn
        [:button.secondary
-        {:on-click back-fn}
+        {:data-test-id "back-button"
+         :on-click back-fn}
         [:i.lupicon-chevron-left]
         [:span (loc back-ltext)]])
      (when forward-fn
-       (let [args (merge {:on-click forward-fn}
+       (let [args (merge {:data-test-id "forward-button"
+                          :on-click forward-fn}
                          (when forward-cond
                            {:disabled (false? (rum/react forward-cond))}))]
        [:button.positive
