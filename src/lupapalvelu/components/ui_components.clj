@@ -403,7 +403,7 @@
 
    :change-email {:depends [:common-html]
                   :js ["change-email.js"]
-                  :html ["init-email-change.html" "change-email.html"]}
+                  :html ["init-email-change.html" "change-email.html" "change-email-fa.html"]}
 
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
@@ -538,6 +538,11 @@
                     "application-bulletins/bulletins-search/bulletins-search-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
+
+   :financial-authority-app {:depends []
+                             :js ["financial-authority-app.js"]}
+   :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
+                             :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
    })
 
 ; Make sure all dependencies are resolvable:

@@ -195,7 +195,8 @@
     (provided (usr/get-user-by-id! ..user-id..) => {:id       ..user-id..
                                                     :username ..username..
                                                     :email    ..old-email..
-                                                    :personId nil}))
+                                                    :personId nil
+                                                    :role "applicant"}))
 
   (fact "invalid token"
     (try+

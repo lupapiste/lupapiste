@@ -109,6 +109,7 @@
 (def oir? (partial in-role? :oirAuthority))
 (def authority-admin? (partial in-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
+(def financial-authority? (partial in-role? :financialAuthority))
 (defn- anyone [_] true)
 (defn- nobody [_] false)
 
@@ -199,7 +200,8 @@
                    :welcome anyone
                    :oskari anyone
                    :neighbor anyone
-                   :bulletins anyone})
+                   :bulletins anyone
+                   :financial-authority financial-authority?})
 
 (defn cache-headers [resource-type]
   (if (env/feature? :no-cache)

@@ -38,7 +38,7 @@
     (assoc application :auth (remove nil? (concat company-auths personal-auths)))))
 
 (defquery invites
-  {:user-roles #{:applicant :authority :oirAuthority}}
+  {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}}
   [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
   (->> (mongo/select :applications
                      {$or [{:auth.invite.user.id user-id}
@@ -50,7 +50,7 @@
        (mapcat invites-with-application)
        (ok :invites)))
 
-(def settable-roles #{:writer :foreman})
+(def settable-roles #{:writer :foreman :financialAuthority})
 (def changeable-roles #{:writer :foreman})
 
 (defn- valid-role [role]
@@ -67,8 +67,9 @@
       (fail :invite.already-has-auth)
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
-            email-template (if (= notification "invite-to-prev-permit")
-                             :invite-to-prev-permit
+            email-template (case notification
+                             "invite-to-prev-permit" :invite-to-prev-permit
+                             "invite-financial-authority" :invite-financial-authority
                              :invite)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
@@ -129,7 +130,7 @@
     flatten
     (zipmap <> (repeat ""))))
 
-(defn- do-remove-auth [{application :application :as command} username]
+(defn do-remove-auth [{application :application :as command} username]
   (let [username (ss/canonize-email username)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))

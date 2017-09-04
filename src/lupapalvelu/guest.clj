@@ -29,7 +29,7 @@
                                 not-empty
                                 boolean)]
     (assoc (select-keys candidate [:firstName :lastName])
-           :hasAccess already-has-access)))
+           :hasAccess already-has-access :financialAuthority (usr/financial-authority? candidate))))
 
 (defn organization-guest-authorities
   "Guest authorities for the given organisation. Fetches organization from db."

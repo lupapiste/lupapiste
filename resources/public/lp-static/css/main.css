@@ -184,7 +184,7 @@ body {
   height: 100%;
 }
 
-body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins {
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins, body.financial-authority {
   min-height: 100vh;
   padding-bottom: 320px;
   position: relative;

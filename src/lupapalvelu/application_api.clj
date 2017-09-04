@@ -313,6 +313,16 @@
                (assoc (notifications/create-app-model command conf recipient)
                  :applicants (reduce #(str %1 ", " %2) (:_applicantIndex app))))})
 
+(notifications/defemail :organization-housing-office
+  {:pred-fn       (fn [command] (let [application (:application command)
+                                      document-data (:data (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa"))]
+                                  (and (some? (:rahoitus document-data))
+                                       (true? (get-in document-data [:rahoitus :value])))))
+   :recipients-fn (fn [{application :application org :organization}]
+                    (let [organization (or (and org @org) (org/get-organization (:organization application)))
+                          emails (get-in organization [:notifications :funding-notification-emails])]
+                      (map (fn [e] {:email e, :role "authority"}) emails)))})
+
 (defn submit-validation-errors [{:keys [application] :as command}]
   (remove nil? (conj []
                      (foreman/validate-application application)
@@ -344,7 +354,8 @@
    :notified         true
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
-                      (notify :organization-on-submit)]
+                      (notify :organization-on-submit)
+                      (notify :organization-housing-office)]
    :pre-checks       [(action/some-pre-check
                        domain/validate-owner-or-write-access
                        usr/validate-authority-in-organization)

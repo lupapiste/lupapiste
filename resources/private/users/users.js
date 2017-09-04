@@ -23,7 +23,7 @@ var users = (function($) {
     self.component = component;
     self.table$ = $("table", component);
 
-    self.availableRoles = _([null, "admin", "authority", "authorityAdmin", "applicant", "dummy"])
+    self.availableRoles = _([null, "admin", "authority", "authorityAdmin", "applicant", "dummy", "financialAuthority"])
       .map(function(id) { return {id: id, name: loc(id ? id : "users.filters.role.all")}; })
       .value();
 

@@ -109,6 +109,10 @@ LUPAPISTE.CurrentUser = function() {
       _.includes(orgAuths, "archivist");
   });
 
+  self.isFinancialAuthority = ko.pureComputed(function() {
+    return self.role() === "financialAuthority";
+  });
+
   // Role in the context of the current application.
   self.applicationRole = _.cond( [[self.isAuthority, _.constant( "authority")],
                                   [self.isApplicant, _.constant( "applicant")],
