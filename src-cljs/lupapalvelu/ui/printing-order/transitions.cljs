@@ -29,12 +29,16 @@
      (when back-fn
        [:button.secondary
         {:data-test-id "back-button"
-         :on-click back-fn}
+         :on-click #(do
+                     (back-fn)
+                     (js/scrollTo 0 0))}
         [:i.lupicon-chevron-left]
         [:span (loc back-ltext)]])
      (when forward-fn
        (let [args (merge {:data-test-id "forward-button"
-                          :on-click forward-fn}
+                          :on-click #(do
+                                       (forward-fn)
+                                       (js/scrollTo 0 0))}
                          (when forward-cond
                            {:disabled (false? (rum/react forward-cond))}))]
        [:button.positive
