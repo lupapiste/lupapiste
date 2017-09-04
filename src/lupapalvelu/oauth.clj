@@ -69,7 +69,7 @@
      [:div.container
       content]]]])
 
-(defn authorization-page-hiccup [client scope lang user anti-csrf]
+(defn authorization-page-hiccup [client scope lang user response-type anti-csrf]
   (let [company-id (get-in user [:company :id])
         company (when company-id (company/find-company-by-id company-id))
         user-name (str (:firstName user) " " (:lastName user))
@@ -94,6 +94,7 @@
          [:input {:type "hidden" :name "client_id" :value (get-in client [:oauth :client-id])}]
          [:input {:type "hidden" :name "scope" :value scope}]
          [:input {:type "hidden" :name "lang" :value lang}]
+         [:input {:type "hidden" :name "response_type" :value response-type}]
          [:input {:type "hidden" :name "__anti-forgery-token" :value anti-csrf}]
          [:button.accept.positive {:name "accept" :value "true"}
           [:i.lupicon-check]
@@ -111,19 +112,46 @@
          (when-let [id (get-in user [:company :id])]
            (company/find-company-by-id id)))))
 
-(defn grant-access-token [client scope user]
-  (token/make-token :oauth
+(defn grant-access-token [client scope user & [expires-in]]
+  (token/make-token :oauth-access
                     user
                     {:client-id (get-in client [:oauth :client-id])
-                     :scopes (str/split scope #",")}
+                     :scopes (if (string? scope)
+                               (str/split scope #",")
+                               scope)}
                     :ttl
-                    (* 10 60 1000)
+                    (or expires-in (* 10 60 1000))
                     :auto-consume
                     false))
+
+(defn grant-authorization-code [client scope user]
+  (token/make-token :oauth-code
+                    user
+                    {:client-id (get-in client [:oauth :client-id])
+                     :scopes (if (string? scope)
+                               (str/split scope #",")
+                               scope)}
+                    :ttl
+                    (* 60 1000)
+                    :auto-consume
+                    true))
+
+(defn access-token-response [client-id client-secret code]
+  (when-let [client (usr/get-user {:oauth.client-id client-id
+                                   :oauth.client-secret client-secret})]
+    (let [{:keys [token-type user-id data]} (token/get-token code)]
+      (when (and (= token-type :oauth-code)
+                 (= (:client-id data) client-id))
+        (let [expires-in (* 10 60 1000)
+              token (grant-access-token client (:scopes data) {:id user-id} expires-in)]
+          {:access_token token
+           :token_type "bearer"
+           :expires_in expires-in
+           :scope (str/join "," (:scopes data))})))))
 
 (defn user-for-access-token [request]
   (when-let [token-id (http/parse-bearer request)]
     (when-let [{:keys [token-type user-id data]} (token/get-token token-id)]
-      (when (= token-type :oauth)
+      (when (= token-type :oauth-access)
         (when-let [user (usr/get-user-by-id user-id)]
           (assoc user :scopes (map keyword (:scopes data))))))))

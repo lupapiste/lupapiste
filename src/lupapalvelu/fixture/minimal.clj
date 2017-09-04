@@ -689,6 +689,7 @@
     :role "docstore-api"
     :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth
     :oauth {:client-id "docstore"
+            :client-secret "docstore"
             :scopes ["read" "pay"]
             :display-name {:fi "Lupapiste kauppa"
                            :sv "Lupapiste butik"
