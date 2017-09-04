@@ -572,5 +572,5 @@
   (split-kw-path :a..b) => [:a (keyword "" ):b])
 
 (facts "safe-update-in"
-       (safe-update-in {:a [{:b 2}]} [:a 0 :b] + 2) => {:a [{:b 4}]}
-       (safe-update-in {:a [{:b 2}]} [:a :b] + 2) => {:a [{:b 2}]})
+  (safe-update-in {:a [{:b 2}]} [:a 0 :b] + 2) => {:a [{:b 4}]}
+  (safe-update-in {:a [{:b 2}]} [:a :b] + 2) => {:a [{:b 2}]})
