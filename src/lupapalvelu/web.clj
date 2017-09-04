@@ -509,7 +509,7 @@
               "', user agent '" user-agent
               "', requested with '" req-with "'.")))
 
-(defn- csrf-attack-hander [request]
+(defn csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (usr/current-user request) "???")}
@@ -588,77 +588,6 @@
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac))
-
-
-;;
-;; OAuth
-;;
-
-(defpage [:get "/oauth/authorize"]
-  {:keys [client_id scope lang]}
-  (let [{:keys [uri query-string] :as req} (request/ring-request)
-        client (when client_id (usr/get-user-by-oauth-id client_id))
-        user (usr/current-user req)]
-    (cond
-      (not (logged-in? req))
-      (ssess/merge-to-session
-        req
-        (resp/redirect (str (env/value :host) "/app/" (or lang "fi") "/welcome#!/login"))
-        {:redirect-after-login (str uri "?" query-string)})
-
-      (not (and client scope lang))
-      {:status 400
-       :body "Missing or invalid parameters"}
-
-      (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes]))))
-      {:status 403
-       :body (str "Invalid scope: " scope)}
-
-      (oauth/payment-required-but-not-available? scope user)
-      {:status 307
-       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=cannot_pay")}}
-
-      :else
-      (hiccup.core/html
-        (oauth/authorization-page-hiccup client
-                                         scope
-                                         lang
-                                         user
-                                         (get-in req [:cookies anti-csrf-cookie-name :value]))))))
-
-(defpage [:post "/oauth/authorize"]
-  {:keys [client_id scope lang accept cancel]}
-  (let [client (usr/get-user-by-oauth-id client_id)
-        user (usr/current-user (request/ring-request))]
-    (cond
-      (not (logged-in? (request/ring-request)))
-      (redirect-after-logout lang)
-
-      cancel
-      {:status 307
-       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=authorization_cancelled")}}
-
-      (not (and client scope lang accept))
-      {:status 400
-       :body "Missing or invalid parameters"}
-
-      (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes]))))
-      {:status 403
-       :body (str "Invalid scope: " scope)}
-
-      (oauth/payment-required-but-not-available? scope user)
-      {:status 307
-       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=cannot_pay")}}
-
-      :else
-      (anti-forgery/crosscheck-token
-        (fn [request]
-          (let [token (oauth/grant-access-token client scope user)]
-            {:status 307
-             :headers {"Location" (str (get-in client [:oauth :callback :success-url]) "?token=" token)}}))
-        (request/ring-request)
-        anti-csrf-cookie-name
-        csrf-attack-hander))))
 
 ;;
 ;; dev utils:

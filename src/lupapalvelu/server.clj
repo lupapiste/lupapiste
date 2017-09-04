@@ -57,6 +57,7 @@
             [lupapalvelu.municipality-api]
             [lupapalvelu.neighbors-api]
             [lupapalvelu.notice-api]
+            [lupapalvelu.oauth-api]
             [lupapalvelu.onnistuu-api]
             [lupapalvelu.operations]
             [lupapalvelu.open-inforequest-api]
