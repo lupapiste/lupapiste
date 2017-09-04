@@ -199,7 +199,6 @@
      [:div.order-section
       (loc-html :span :printing-order.mylly.provided-by)]
      (transitions/transition-buttons phase)
-     [:div (comp/debug-atom (rum/cursor-in state/component-state [:contacts]))]
      (order-composer-footer)]))
 
 (defonce args (atom {}))
