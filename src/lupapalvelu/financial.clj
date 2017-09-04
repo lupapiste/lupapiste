@@ -35,8 +35,8 @@
     (auth/send-invite! command)
     (action/update-application command
                         {:auth {$elemMatch {:invite.user.id (:id financial-authority)}}}
-                        {$set {:modified (now)
-                               :auth.$   (util/assoc-when-pred financial-authority util/not-empty-or-nil? :inviter caller)}})))
+                               {$set {:modified (now)
+                                      :auth.$   (util/assoc-when-pred (usr/summary financial-authority) util/not-empty-or-nil? :inviter (usr/summary caller))}})))
 
 (defn remove-financial-handler-invitation [command]
   (let [financial-authority (get-financial-user)
