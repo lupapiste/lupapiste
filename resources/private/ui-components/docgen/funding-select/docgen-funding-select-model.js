@@ -36,6 +36,15 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
       .call();
   };
 
+  var sendNotificationToHousingOffice = function () {
+    ajax.command("notify-organizations-housing-office",
+      {id: params.applicationId})
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function() {})
+      .call();
+  };
+
   var removeInvitation = function() {
     ajax.command("remove-financial-handler-invitation",
       {id: params.applicationId})
@@ -50,6 +59,7 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
   var saveFunding = function() {
     doSave(true);
     invite();
+    _.delay(sendNotificationToHousingOffice, 1000);
   };
 
   var removeFunding = function() {

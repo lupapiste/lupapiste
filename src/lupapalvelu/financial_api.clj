@@ -2,7 +2,8 @@
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.financial :as financial]
             [lupapalvelu.application :as application]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [sade.core :refer [ok]]))
 
 (defcommand create-financial-handler
   {:parameters [:email]
@@ -36,8 +37,9 @@
   {:parameters [:id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant :authority}
-   :states states/post-submitted-states
-   :pre-checks [application/validate-authority-in-drafts]
+   :pre-checks [(fn [command]
+                  (when-not (contains? lupapalvelu.states/post-submitted-states (keyword (-> command :application :state)))
+                    (ok)))]
    :notified true}
   [command]
   (financial/notify-housing-office command))
