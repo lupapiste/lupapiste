@@ -17,12 +17,22 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
 
   self.authModel = params.authModel;
 
-  self.columnHeaders = _.map(self.schema.body, function(schema) {
-    return {
-      name: params.i18npath.concat(schema.name),
-      required: !!schema.required
-    };
-  });
+  self.showMuutostapa = self.docModel.schemaName !== "uusiRakennus";
+
+  self.columnHeaders = _(self.schema.body)
+                       .filter( function( schema ) {
+                         return self.showMuutostapa
+                              ? true
+                              : schema.name !== "muutostapa";
+                       })
+                       .map( function(schema) {
+                         return {
+                           name: params.i18npath.concat(schema.name),
+                           required: !!schema.required
+                         };
+                       })
+                       .value();
+
   self.columnHeaders.push({
     name: self.groupsRemovable(self.schema) ? "remove" : "",
     required: false

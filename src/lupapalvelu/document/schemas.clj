@@ -633,7 +633,9 @@
                   :henkilo-body henkilo-maksaja)
                  {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.muutostapa"
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname
+                 :size :s :label false :i18nkey "huoneistot.muutostapa"
+                 :default "lis\u00e4ys"
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})

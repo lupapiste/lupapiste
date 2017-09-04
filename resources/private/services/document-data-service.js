@@ -222,7 +222,8 @@ LUPAPISTE.DocumentDataService = function(params) {
   function createInputDataModel(schema, rawModel, path) {
     return {path: path,
             schema: schema,
-            model: ko.observable(rawModel && rawModel.value)};
+            model: ko.observable((rawModel && rawModel.value)
+                               || _.get(schema, "default"))};
   }
 
   //
