@@ -15,7 +15,8 @@
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.oauth :refer [user-for-access-token]]))
+            [lupapalvelu.oauth :refer [user-for-access-token]]
+            [sade.env :as env]))
 
 (defonce endpoints (atom []))
 
@@ -122,12 +123,12 @@
                              :parameters  {:query (or parameters {})}
                              :responses   {200 {:schema (:returns meta)}}
                              :security    security}}}))]
-    (rs/swagger-json {:securityDefinitions {:OAuth2 {:type "oauth2"
-                                                     :flow "implicit"
-                                                     :authorizationUrl "https://www.lupapiste.fi/oauth/authorize"
-                                                     :scopes {:read "Grants read access"
-                                                              :pay "Allows payment with company account"}}}
-                      :paths (into {} (map mapper @endpoints))})))
+    (rs/swagger-json {:securityDefinitions {:OAuth2 {:type             "oauth2"
+                                                     :flow             "implicit"
+                                                     :authorizationUrl (str (env/value :host) "/oauth/authorize")
+                                                     :scopes           {:read "Grants read access"
+                                                                        :pay  "Allows payment with company account"}}}
+                      :paths               (into {} (map mapper @endpoints))})))
 
 (defpage "/rest/swagger.json" []
   (if-let [user (or (basic-authentication (request/ring-request))
