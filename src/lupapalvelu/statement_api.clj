@@ -45,6 +45,10 @@
   {:parameters [email text]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
+   :pre-checks [(fn [{data :data}] (if (some? (:email data))
+                                     (let [user (usr/get-user-by-email (:email data))]
+                                       (if (usr/financial-authority? user)
+                                         (fail! :error.is-financial-authority)))))]
    :notified   true
    :user-roles #{:authorityAdmin}}
   [{data :data user :user}]

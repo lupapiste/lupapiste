@@ -74,6 +74,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
           // This way, admin authority can still modify users with missing names.
           dd.oldUser( namesFilled() );
           dd.errorMessage( res.user.hasAccess ? "guest-authority.has-access" : "");
+          dd.errorMessage (res.user.financialAuthority ? "error.is-financial-authority" : "");
         })
         .error ( function() {
           dd.error( false );

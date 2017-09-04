@@ -208,7 +208,7 @@
       ajax.command("create-statement-giver", statementGiver)
         .success(self.onSuccess)
         .error(function(result) {
-          self.error(result.txt);
+          self.error(result.text);
         })
         .call();
       return false;
