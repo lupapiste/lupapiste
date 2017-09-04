@@ -3316,7 +3316,6 @@
                  $unset {:private ""}}
                 :multi true))
 
-
 (defmigration add-docstore-info
   {:apply-when (pos? (mongo/count :organizations {:docstore-info {$exists false}}))}
   (mongo/update :organizations
@@ -3334,6 +3333,30 @@
                 {:digitizer-tools-enabled {$exists false}}
                 {$set {:digitizer-tools-enabled false}}
                 :multi true))
+
+(def docstore-price-query
+  {$or [{:docstore-info.documentPrice {$type "double"}}
+        {:docstore-info.documentPrice {$gt 0 $lt 100}}]})
+
+(defmigration change-docstore-prices-to-cents
+  {:apply-when (pos? (mongo/count :organizations docstore-price-query))}
+  (let [orgs (mongo/find-maps :organizations
+                              docstore-price-query)]
+    (doseq [{:keys [_id docstore-info]} orgs]
+      (let [current-price (:documentPrice docstore-info)
+            new-price (long (* current-price 100))]
+        (mongo/update-by-id :organizations
+                            _id
+                            {$set {:docstore-info.documentPrice new-price}})))))
+
+(defn copy-auth-id-from-invite [{{{id :id} :user} :invite invite-type :type :as auth}]
+  (cond-> auth
+    (and id (util/=as-kw invite-type :company)) (assoc :id id :company-role :admin)))
+
+(defmigration allow-reader-access-for-invited-company-users
+  {:apply-when (pos? (mongo/count :applications {:auth.id ""}))}
+  (update-applications-array :auth copy-auth-id-from-invite {:auth.id ""}))
+
 
 ;;
 ;; ****** NOTE! ******

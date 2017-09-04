@@ -31,7 +31,8 @@
             [sade.dummy-email-server]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [sade.http :as http])
+            [sade.http :as http]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import [org.xml.sax SAXParseException]))
 
 
@@ -348,12 +349,16 @@
     (remove nil?)
     distinct))
 
-(defn fetch-asianhallinta-verdicts []
+(defn fetch-asianhallinta-messages []
   (let [ah-organizations (mongo/select :organizations
                                        {"scope.caseManagement.ftpUser" {$exists true}}
                                        {"scope.caseManagement.ftpUser" 1})
-        ftp-users (get-asianhallinta-ftp-users ah-organizations)
+        ftp-users (if (string? (env/value :ely :sftp-user))
+                    (conj (get-asianhallinta-ftp-users ah-organizations) (env/value :ely :sftp-user))
+                    (get-asianhallinta-ftp-users ah-organizations))
         eraajo-user (user/batchrun-user (map :id ah-organizations))]
+    (logging/log-event :info {:run-by "Asianhallinta reader"
+                              :event (format "Reader process start - %d ftp users to be checked" (count ftp-users))})
     (doseq [ftp-user ftp-users
             :let [path (str
                          (env/value :outgoing-directory) "/"
@@ -364,25 +369,29 @@
       (fs/mkdirs (str path "error"))
       (let [zip-path (.getPath zip)
             result (try
-                     (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
+                     (ah-reader/process-message zip-path ftp-user eraajo-user)
                      (catch Throwable e
-                       (logging/log-event :error {:run-by "Automatic ah-verdicts checking"
-                                                  :event "Unable to process ah-verdict zip file"
+                       (logging/log-event :error {:run-by "Asianhallinta reader"
+                                                  :event "Unable to process ah zip file"
                                                   :exception-message (.getMessage e)})
                        ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
-        (logging/log-event :info {:run-by "Automatic ah-verdicts checking"
-                                  :event (if (ok? result)  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
+        (logging/log-event (if (ok? result) :info :error)
+                           (util/assoc-when {:run-by "Asianhallinta reader"
+                                             :event (if (ok? result)  "Succesfully processed message" "Failed to process message")
+                                             :zip-path zip-path}
+                                            :text (:text result)))
         (when-not (fs/rename zip target)
-          (errorf "Failed to rename %s to %s" zip-path target))))))
+          (errorf "Failed to rename %s to %s" zip-path target))))
+    (logging/log-event :info {:run-by "Asianhallinta reader" :event "Reader process finished"})))
 
-(defn check-for-asianhallinta-verdicts [& args]
+(defn check-for-asianhallinta-messages [& args]
   (when-not (system-not-in-lockdown?)
-    (logging/log-event :info {:run-by "Automatic review checking" :event "Not run - system in lockdown"})
+    (logging/log-event :info {:run-by "Asianhallinta reader" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-asianhallinta-verdicts))
+  (fetch-asianhallinta-messages))
 
 (defn orgs-for-review-fetch [& organization-ids]
   (mongo/select :organizations (merge {:krysp.R.url {$exists true},
@@ -570,7 +579,7 @@
     (do
       (println "No application id given.")
       1)))
-  
+
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"

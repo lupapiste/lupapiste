@@ -40,7 +40,11 @@ LUPAPISTE.StatementsTabModel = function(params) {
         self.elyData.dueDate(null);
       })
       .onError("error.integration.create-message", function(e) {
-        LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);
+        hub.send("show-dialog", {ltitle: "integration.asianhallinta.title",
+                                 size: "large",
+                                 component: "integration-error-dialog",
+                                 componentParams: {ltext: "error.ely-statement.xml-error",
+                                                   details: e.details}});
       })
       .call();
   };

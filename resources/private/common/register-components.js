@@ -45,6 +45,7 @@ jQuery(document).ready(function() {
     {name: "invoice-operator-selector"},
     {name: "ok-dialog"},
     {name: "ok-button-group"},
+    {name: "integration-error-dialog"},
     {name: "company-edit"},
     {name: "organization-name-editor"},
     {name: "tags-editor"},

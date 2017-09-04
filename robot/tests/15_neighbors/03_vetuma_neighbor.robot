@@ -67,7 +67,7 @@ Neighbor is back and leaves a comment
   [Tags]  integration
   Wait and click  xpath=//input[@data-test-id='neighbor-response-comments']
   Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-message']
-  Input text  xpath=//*[@data-test-id='neighbor-response-message']  No fucking way
+  Input text  xpath=//*[@data-test-id='neighbor-response-message']  I do not want it
   Click enabled by test id  neighbor-response-send
   Wait until  Element should be visible  xpath=//*[@data-test-id='neighbor-response-done']
   Element text should be  xpath=//*[@data-test-id='neighbor-response-done']  KIITOS VASTAUKSESTASI!
@@ -86,7 +86,7 @@ Mikko opens dialog to see neighbors response
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  Teemu
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  Testaaja
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
+  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  I do not want it
 
 Mikko can not see neighbor sotu
   [Tags]  integration
@@ -107,7 +107,7 @@ Sonja sees that the neighbour has given a comment
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  Teemu
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  Testaaja
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
+  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  I do not want it
 
 Sonja can see neighbor sotu
   [Tags]  integration

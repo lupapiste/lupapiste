@@ -148,7 +148,7 @@ Sonja logs in and adds Vainamoinen as statement giver
 
 Sonja removes Vainamoinen
   Scroll and click test id  delete-statement-1
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Statement count is  1
   Logout
 

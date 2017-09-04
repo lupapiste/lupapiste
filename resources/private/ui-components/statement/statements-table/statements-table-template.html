@@ -28,7 +28,10 @@
               </thead>
               <tbody data-bind="foreach: $data.statements">
                   <tr class="statement-row"
-                      data-bind="click: _.partial($component.openStatement, 'statement'), attr: {'data-test-email':$data.person.email()}">
+                      data-bind="click: _.partial($component.openStatement, 'statement'),
+                                 attr: {'data-test-email':$data.person.email(),
+                                        'data-message-id':$data.external && $data.external.messageId(),
+                                        'data-statement-id':$data.id(), }">
                       <td>
                         <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data),
                                                                 attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
@@ -42,7 +45,13 @@
                               <span data-bind="text: $data.person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
                           </span>
                       </td>
-                      <td data-bind="text: $data.person.name"></td>
+                      <td>
+                         <span data-bind="text: $data.person.name" data-test-id="statement-giver-name"></span>
+                         <!-- ko if: $component.isExternal($data) -->
+                         <br>
+                         <span data-bind="text: $component.getExternalText($data)" data-test-id="external-received"></span>
+                         <!-- /ko -->
+                      </td>
                       <td data-bind="dateString: $data.requested"></td>
                       <td data-bind="dateString: $data.dueDate,
                                      css: {'statement-over-due': $component.isStatementOverDue($data)}"></td>

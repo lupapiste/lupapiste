@@ -33,8 +33,9 @@
     (fail! :error.invalid-month-or-year))
   (let [month-number (read-string month)
         year-number (read-string year)
-        data (reps/applications-per-month-per-permit-type
-               month-number year-number)
+        data (concat
+               (reps/applications-per-month-per-permit-type month-number year-number)
+               (reps/archiving-projects-per-month-query month-number year-number))
         designer-and-foreman (reps/designer-and-foreman-applications-per-month
                                month-number year-number)]
     (ok :applications (map (fn [{permitType :permitType :as m}]

@@ -12,3 +12,13 @@
   font-style:    italic;
   color:         $error-text;
 }
+
+.integration-error-dialog div.content.integration-error {
+  i {
+    float: left;
+    margin-right: $marginS;
+  }
+  p.dialog-desc {
+    display: inline-block;
+  }
+}

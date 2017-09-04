@@ -150,8 +150,8 @@
   (let [{:keys [version begin-of-link output-dir]} message-config
         message-id (get-in statement [:external :messageId])
         application  (enrich-application application)
-        integration-message-data {:id          message-id
-                                  :output-dir  (:output-dir message-config) :format      "xml"
+        integration-message-data {:id          message-id :direction "out"
+                                  :output-dir  (:output-dir message-config) :format "xml"
                                   :partner     (get-in statement [:external :partner])
                                   :messageType "ah-statement-request" :created created
                                   :application (select-keys application [:id :organization :state])

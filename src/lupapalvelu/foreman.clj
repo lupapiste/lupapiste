@@ -220,15 +220,15 @@
 ;; imported previous permit applications do not have a hankkeen-kuvaus -document
 ;; and have the description in the first aiemman-luvan-toimenpide -document
 (defn get-application-description [application]
-  (let 
-    [description 
-      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") 
-        first 
+  (let
+    [description
+      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus")
+        first
         (get-in [:data :kuvaus :value]))]
     (if (and description (not (= description "")))
       description
       (or
-        (-> (domain/get-document-by-name (:documents application) "aiemman-luvan-toimenpide") 
+        (-> (domain/get-document-by-name (:documents application) "aiemman-luvan-toimenpide")
          (get-in [:data :kuvaus :value]))
         ""))))
 
@@ -289,12 +289,12 @@
 
 (defn create-company-auth [company-id]
   (when-let [company (company/find-company-by-id company-id)]
-    (assoc
-      (company/company->auth company)
-      :id "" ; prevents access to application before accepting invite
-      :role "reader"
-      :invite {:user {:id company-id}})))
-
+    ;; company-auth can be nil if company is locked
+    (when-let [company-auth (company/company->auth company)]
+      (assoc company-auth
+             :id "" ; prevents access to application before accepting invite
+             :role "reader"
+             :invite {:user {:id company-id}}))))
 
 (defn- invite->auth [inv app-id inviter timestamp]
   (if (:company-id inv)
@@ -307,6 +307,7 @@
        (applicant-invites (:documents foreman-app))
        (remove #(= (:email %) (:email user)))
        (mapv #(invite->auth % (:id foreman-app) user created))
+       (remove nil?)
        (update foreman-app :auth concat)))
 
 (defn add-foreman-invite-auth [foreman-app foreman-user user created]

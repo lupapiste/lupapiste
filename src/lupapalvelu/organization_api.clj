@@ -34,7 +34,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.waste-ads :as waste-ads]
-            [lupapalvelu.wfs :as wfs]))
+            [lupapalvelu.wfs :as wfs]
+            [sade.shared-schemas :as sssc]))
 ;;
 ;; local api
 ;;
@@ -874,13 +875,13 @@
        (org/remove-assignment-trigger triggerId)))
 
 (defcommand update-docstore-info
-  {:description "Updates organization's document store information"
-   :parameters [org-id docStoreInUse documentPrice organizationDescription]
-   :user-roles #{:admin}
+  {:description      "Updates organization's document store information"
+   :parameters       [org-id docStoreInUse documentPrice organizationDescription]
+   :user-roles       #{:admin}
    :input-validators [(partial boolean-parameters [:docStoreInUse])
-                      (partial number-parameters  [:documentPrice])
+                      (partial number-parameters [:documentPrice])
                       (fn [{{price :documentPrice} :data}]
-                        (when (neg? price)
+                        (when (sc/check sssc/Nat price)
                           (fail :error.illegal-number)))
                       (partial localization-parameters [:organizationDescription])]}
   [{user :user created :created}]

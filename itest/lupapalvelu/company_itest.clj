@@ -110,21 +110,27 @@
 
     (fact "Company is only invited to the application"
       (let [auth (:auth (query-application mikko application-id))
-            auth-ids (flatten (map (juxt :id) auth))]
+            company-auth (util/find-by-id "solita" auth)]
         (count auth) => 2
-        (some #(= "solita" %) auth-ids) => nil?))
+        (:type company-auth) => "company"
+        (:role company-auth) => "reader"
+        (:company-role company-auth) => "admin"
+        (:invite company-auth) => map?))
 
     (fact "Invitation is accepted"
-      (let [resp (accept-company-invitation)]
-        (:status resp) => 200))
+      (command kaino :approve-invite :id application-id :invite-type :company) => ok?)
 
     (fact "Company still cannot be invited twice"
       (command mikko :company-invite :id application-id :company-id "solita") => (partial expected-failure? "company.already-invited"))
 
     (fact "Company is fully authorized to the application after accept"
       (let [auth (:auth (query-application mikko application-id))
-            auth-ids (flatten (map (juxt :id) auth))]
-        (some #(= "solita" %) auth-ids) => true))
+            company-auth (util/find-by-id "solita" auth)]
+        (count auth) => 2
+        (:type company-auth) => "company"
+        (:role company-auth) => "writer"
+        (:company-role company-auth) => nil
+        (:invite company-auth) => nil))
 
     (fact "Company users are available for person selectors in party documents"
       (map :id (:users (query mikko :company-users-for-person-selector :id application-id)))
@@ -549,8 +555,7 @@
       (command kaino :company-invite :id (:id app) :company-id "esimerkki") => ok?)
 
     (fact "Invitation is accepted"
-      (let [resp (accept-company-invitation)]
-        (:status resp) => 200))
+      (command erkki :approve-invite :id (:id app) :invite-type :company) => ok?)
 
     (fact "solita company notes are not visible for another company user"
       (let [app (query-application erkki (:id app))]

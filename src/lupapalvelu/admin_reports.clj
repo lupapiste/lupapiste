@@ -353,11 +353,11 @@
       local/to-local-date-time
       tc/to-long))
 
-(defn applications-per-month-query [month year group-clause filter-query]
+(defn applications-per-month-query [month year group-clause filter-query timestamp-key]
   (let [start-ts (month-start-as-timestamp month year)
         end-ts   (month-start-as-timestamp (inc month) year)
-        match-query {$and [{:submitted {$gt start-ts}}
-                           {:submitted {$lt end-ts}}]}
+        match-query {$and [{timestamp-key {$gt start-ts}}
+                           {timestamp-key {$lt end-ts}}]}
         aggregate  (remove nil?
                      [{"$match" match-query}
                       (when filter-query
@@ -365,9 +365,15 @@
                       {"$group" group-clause}])]
     (collection/aggregate (mongo/get-db) "applications" aggregate)))
 
+(defn archiving-projects-per-month-query [month year]
+  (->> (applications-per-month-query month year {:_id "$permitType"
+                                                 :count {$sum 1}} {:permitType "ARK"} :opened)
+       (map #(set/rename-keys % {:_id :permitType}))
+       (sort-by (comp - :count))))
+
 (defn applications-per-month-per-permit-type [month year]
   (->> (applications-per-month-query month year {:_id "$permitType"
-                                                 :count {$sum 1}} nil)
+                                                 :count {$sum 1}} nil :submitted)
        (map #(set/rename-keys % {:_id :permitType}))
        (sort-by (comp - :count))))
 
@@ -376,4 +382,4 @@
                                 {:_id "$primaryOperation.name"
                                  :count {$sum 1}}
     {:primaryOperation.name {$in [:tyonjohtajan-nimeaminen-v2
-                                  :suunnittelijan-nimeaminen]}}))
+                                  :suunnittelijan-nimeaminen]}} :submitted))

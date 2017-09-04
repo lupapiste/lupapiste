@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="integration-error-dialog-template">
+  <div class="content integration-error">
+    <i class="lupicon-circle-attention negative"></i>
+    <p data-bind="html: text" class="dialog-desc"></p>
+    <div data-bind="if: technicalDetails">
+      <p data-bind="ltext: 'error.technical-error-message'"></p>
+      <textarea readonly="readonly" style="width: 90%;" data-bind="value: technicalDetails"></textarea>
+    </div>
+  </div>
+  <div class="button-group ok">
+    <div data-bind="component: {name:'ok-button-group',
+                                params: {okFn: ok, okTitle: okTitle}}"></div>
+  </div>
+</script>
