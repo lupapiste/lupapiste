@@ -50,3 +50,13 @@
    :delivery        Delivery
    :internalOrderId sc/Str
    :files           [PrintingOrderFile]})
+
+(sc/defschema PricingItem
+              {:min sc/Int
+               (sc/optional-key :max) sc/Int
+               (sc/optional-key :fixed) sc/Int
+               (sc/optional-key :additionalInformation) sc/Str})
+
+(sc/defschema PricingConfiguration
+              {:delivery sc/Num
+               :volume   [PricingItem]})

@@ -1,0 +1,9 @@
+{:delivery 6.95
+ :volume  [{:min    1
+            :max    6
+            :fixed 90}
+           {:min    7
+            :max   12
+            :fixed 180}
+           {:min   13
+            :additionalInformation "Hinta sopimuksen mukaan."}]}

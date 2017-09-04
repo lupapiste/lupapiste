@@ -1,22 +1,41 @@
 (ns lupapalvelu.printing-order.printing-order-api
-  (:require [lupapalvelu.action :refer [defquery defcommand]]
+  (:require [taoensso.timbre :as timbre :refer [error]]
+            [lupapalvelu.action :refer [defquery defcommand]]
             [sade.core :refer :all]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
-            [sade.util :as util]))
+            [lupapalvelu.printing-order.schemas :refer :all]
+            [sade.util :as util]
+            [clojure.java.io :as io]
+            [schema.core :as sc]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
    :katselmukset_ja_tarkastukset :tietomallit])
+
+(defn read-pricing []
+  (try
+    (sc/validate PricingConfiguration
+                 (util/read-edn-resource "printing-order/pricing.edn"))
+    (catch Exception e
+      (error "Reading pricing configuration failed" e)
+      nil)))
+
+(def pricing (read-pricing))
+
+(defn pricing-available? [_]
+  (when-not pricing
+    (fail :error.feature-not-enabled)))
 
 (defquery attachments-for-printing-order
   {:feature          :printing-order
    :parameters       [id]
    :states           states/post-verdict-states
    :user-roles       #{:applicant}
-   :user-authz-roles roles/all-authz-writer-roles}
+   :user-authz-roles roles/all-authz-writer-roles
+   :pre-checks       [pricing-available?]}
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
                         (map att/enrich-attachment)
@@ -31,20 +50,17 @@
   {:feature          :printing-order
    :states           states/post-verdict-states
    :user-roles       #{:applicant}
-   :user-authz-roles roles/all-authz-writer-roles}
+   :user-authz-roles roles/all-authz-writer-roles
+   :pre-checks       [pricing-available?]}
   [_]
-  (ok :pricing {:delivery 6.95
-                :volume  [{:min    1
-                           :max    6
-                           :fixed 90}
-                          {:min    7
-                           :max   12
-                           :fixed 180}
-                          {:min   13
-                           :additionalInformation "Hinta sopimuksen mukaan."}]}))
+  (ok :pricing pricing))
 
 (defcommand submit-printing-order
-            {:description ""
-             :parameters [id]
-             :states states/post-verdict-states
-             :user-roles #{:applicant}} [] ())
+  {:feature     :printing-order
+   :description ""
+   :parameters [id]
+   :states     states/post-verdict-states
+   :user-roles #{:applicant}
+   :pre-checks  [pricing-available?]}
+  [_]
+  (ok))
