@@ -93,11 +93,15 @@
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
   (let [template (verdict-template organization template-id)
-        draft    (assoc-in (:draft template) (map keyword path) value)]
-    (or (schemas/validate-path-value shared/default-verdict-template path value
-                                     {:schema-overrides {:section shared/MattiVerdictSection}
-                                      :references {:settings (:draft (settings organization
-                                                                               (:category template)))}})
+        draft    (assoc-in (:draft template) [path] value)
+        dict-key (first path)]
+    (or (schemas/validate-dictionary-value (-> shared/default-verdict-template
+                                               :dictionary
+                                               dict-key)
+                                           value
+                                           (rest path)
+                                           {:settings (:draft (settings organization
+                                                                        (:category template)))})
         (template-update organization
                          template-id
                          {$set {:verdict-templates.templates.$.draft draft}}

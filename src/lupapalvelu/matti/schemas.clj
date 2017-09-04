@@ -307,3 +307,32 @@
                                  :value value
                                  :references references
                                  :schema-overrides schema-overrides))))
+
+(defn- resolve-dict-value
+  [data]
+  (let [docgen       (:docgen data)
+        reflist      (:reference-list data)
+        date-delta   (:date-delta data)
+        multi-select (:multi-select data)
+        phrase-text  (:phrase-text data)
+        wrap         (fn [type schema data]
+                       {:type   type
+                        :schema schema
+                        :data   data})]
+    (cond
+      (:grid data) (wrap :section shared/MattiSection data)
+      docgen       (wrap :docgen (doc-schemas/get-schema
+                                  {:name (get docgen :name docgen)}) docgen)
+      date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
+      reflist      (wrap :reference-list shared/MattiReferenceList reflist)
+      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
+      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text))))
+
+(defn validate-dictionary-value
+  [dict-value value path & [references]]
+  (if dict-value
+    (validate-resolution (assoc (resolve-dict-value dict-value)
+                                :value value
+                                :path path
+                                :references references))
+    :error.invalid-dictionary-key))
