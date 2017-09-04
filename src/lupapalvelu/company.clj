@@ -11,6 +11,7 @@
             [sade.core :refer :all]
             [sade.validators :as v]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.logging :as logging]
@@ -466,13 +467,15 @@
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
         auth      (assoc (company->auth company)
-                    :id      "" ; prevents access to application before accepting invite
+                    :id      company-id
                     :role    "reader"
+                    :company-role :admin
                     :inviter (usr/summary caller)
-                    :invite  {:user {:id company-id}})
+                    :invite  {:user {:id company-id}
+                              :created (now)
+                              :role "writer"})
         admins    (find-company-admins company-id)
         application-id (:id application)
-        token-id  (company-invitation-token caller company-id application-id)
         update-count (update-application
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
@@ -482,29 +485,31 @@
       (notif/notify! :accept-company-invitation {:admins     admins
                                                  :inviter    caller
                                                  :company    company
-                                                 :token-id   token-id
-                                                 :application application})
-      token-id)))
+                                                 :application application}))))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
                                             :recipients-fn :admins
                                             :model-fn      (fn [model _ recipient]
                                                              (merge (notif/create-app-model model nil recipient)
-                                                                    model
-                                                                    {:link #(str (env/value :host) "/app/"
-                                                                                 (name %)
-                                                                                 "/welcome#!/accept-company-invitation/"
-                                                                                 (:token-id model))}))})
+                                                                    model))})
+
+(defmethod auth/approve-invite-auth :company [{invite :invite :as auth} {{company-id :id} :company :as user} accepted-ts]
+  (when invite
+    (some-> (find-company! {:id company-id})
+            company->auth
+            (util/assoc-when-pred util/not-empty-or-nil?
+              :inviter (:inviter auth)
+              :inviteAccepted accepted-ts))))
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
   (when-let [application (domain/get-application-no-access-checking application-id)]
-    (let [company           (find-company! {:id company-id})
-          {:keys [inviter]} (some #(when (= (:y company) (:y %)) %) (:auth application))]
+    (let [auth (-> (auth/get-auth application company-id)
+                   (auth/approve-invite-auth {:company {:id company-id}} (now)))]
       (update-application
        (application->command application)
        {:auth {$elemMatch {:invite.user.id company-id}}}
-       {$set  {:auth.$ (-> company company->auth (util/assoc-when-pred util/not-empty-or-nil? :inviter inviter :inviteAccepted (now)))}}))
+       {$set  {:auth.$ auth}}))
     (ok)))
 
 (defn cannot-submit

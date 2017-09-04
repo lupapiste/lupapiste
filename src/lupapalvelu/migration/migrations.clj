@@ -3316,7 +3316,6 @@
                  $unset {:private ""}}
                 :multi true))
 
-
 (defmigration add-docstore-info
   {:apply-when (pos? (mongo/count :organizations {:docstore-info {$exists false}}))}
   (mongo/update :organizations
@@ -3349,6 +3348,15 @@
         (mongo/update-by-id :organizations
                             _id
                             {$set {:docstore-info.documentPrice new-price}})))))
+
+(defn copy-auth-id-from-invite [{{{id :id} :user} :invite invite-type :type :as auth}]
+  (cond-> auth
+    (and id (util/=as-kw invite-type :company)) (assoc :id id :company-role :admin)))
+
+(defmigration allow-reader-access-for-invited-company-users
+  {:apply-when (pos? (mongo/count :applications {:auth.id ""}))}
+  (update-applications-array :auth copy-auth-id-from-invite {:auth.id ""}))
+
 
 ;;
 ;; ****** NOTE! ******
