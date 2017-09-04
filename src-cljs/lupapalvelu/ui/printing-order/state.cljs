@@ -88,4 +88,8 @@
   (swap! component-state assoc :phase 2))
 
 (defn submit-order []
-  (js/console.log @component-state))
+  (js/console.log @component-state)
+  (swap! component-state assoc :phase 4))
+
+(defn back-to-application []
+  (.openPage js/pageutil (str "application/" (:id @component-state)) "attachments"))

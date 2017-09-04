@@ -116,13 +116,12 @@
       [:div.row
        (poc/grid-checkbox conditions-accepted-option [:conditions-accepted] :col-2 :printing-order.conditions.accept true)]]]))
 
-(rum/defc composer-phase3 < rum/reactive []
-  (let [order (rum/react (rum/cursor-in state/component-state [:order]))
-        attachments-selected (->> @state/component-state
+(rum/defc order-summary [order]
+  (let [attachments-selected (->> @state/component-state
                                   :attachments
                                   (filter (fn [{id :id}]
                                             (pos? (get order id)))))]
-    [:div.order-grid-3
+    [:div
      [:div.order-section
       (poc/section-header :printing-order.summary.documents)
       (files/files-table attachments-selected :read-only)]
@@ -155,7 +154,12 @@
         [:span.order-summary-line (-> @state/component-state :billingReference)]]
        [:div.col-1
         [:span.order-grid-header (loc :printing-order.delivery-instructions)]
-        [:span.order-summary-line (-> @state/component-state :deliveryInstructions)]]]]
+        [:span.order-summary-line (-> @state/component-state :deliveryInstructions)]]]]]))
+
+(rum/defc composer-phase3 < rum/reactive []
+  (let [order (rum/react (rum/cursor-in state/component-state [:order]))]
+    [:div.order-grid-3
+     (order-summary order)
      [:div.order-section " "]
      [:div.order-section
       (poc/section-header :printing-order.conditions.heading)
@@ -167,6 +171,12 @@
         [:label.like-btn
          [:i.lupicon-circle-check.positive]
          [:span (loc :printing-order.conditions.accepted)]]]]]]))
+
+(rum/defc composer-phase4 < rum/reactive []
+  (let [order (rum/react (rum/cursor-in state/component-state [:order]))]
+    [:div.order-grid-3
+     (order-summary order)
+     [:div.order-section " "]]))
 
 (rum/defc order-composer < rum/reactive
                            {:init         init
@@ -184,6 +194,8 @@
        (composer-phase2))
      (when (= phase 3)
        (composer-phase3))
+     (when (= phase 4)
+       (composer-phase4))
      [:div.order-section
       (loc-html :span :printing-order.mylly.provided-by)]
      (transitions/transition-buttons phase)

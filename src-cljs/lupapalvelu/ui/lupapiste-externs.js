@@ -88,6 +88,9 @@ loc.supported = [];
 loc.terms = {};
 loc.defaultLanguage = "fi";
 
+var pageutil = {};
+pageutil.openPage = function() {};
+
 var lupapisteApp = {};
 lupapisteApp.services = {};
 lupapisteApp.services.fileUploadService = {};

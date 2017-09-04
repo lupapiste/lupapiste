@@ -18,7 +18,9 @@
    {:back-fn       state/back-to-phase2
     :back-ltext    :printing-order.phase3.button.prev
     :forward-fn    state/submit-order
-    :forward-ltext :printing-order.phase3.button.submit}])
+    :forward-ltext :printing-order.phase3.button.submit}
+   {:forward-fn    state/back-to-application
+    :forward-ltext :printing-order.phase4.button.back-to-application}])
 
 (rum/defc transition-buttons < rum/reactive [phase]
   (let [{:keys [back-fn back-ltext forward-fn forward-ltext
