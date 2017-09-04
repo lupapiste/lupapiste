@@ -107,7 +107,7 @@
   {:arglists '([auth-elem user accepted-ts])}
   (fn [{auth-type :type :as auth} & _] (keyword auth-type)))
 
-(defmethod approve-invite-auth nil [{invite :invite :as auth} user accepted-ts]
+(defmethod approve-invite-auth :default [{invite :invite :as auth} user accepted-ts]
   (when invite
     (let [role (or (:role invite) (:role auth))]
       (util/assoc-when-pred (usr/user-in-role user role) util/not-empty-or-nil?
