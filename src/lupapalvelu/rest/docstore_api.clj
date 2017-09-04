@@ -72,3 +72,4 @@
    :optional-parameters [:status OrganizationStatusFilter]
    :returns     OrganizationsResponse}
   {:ok true :data (get-docstore-infos (get status-query status {}))})
+

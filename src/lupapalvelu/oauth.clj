@@ -3,7 +3,9 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as company]
             [sade.strings :as str]
-            [lupapalvelu.token :as token]))
+            [lupapalvelu.token :as token]
+            [sade.http :as http]
+            [lupapalvelu.user :as usr]))
 
 (def header
   [:nav.nav-wrapper
@@ -115,4 +117,13 @@
                     {:client-id (get-in client [:oauth :client-id])
                      :scopes (str/split scope #",")}
                     :ttl
-                    (* 10 60 1000)))
+                    (* 10 60 1000)
+                    :auto-consume
+                    false))
+
+(defn user-for-access-token [request]
+  (when-let [token-id (http/parse-bearer request)]
+    (when-let [{:keys [token-type user-id data]} (token/get-token token-id)]
+      (when (= token-type :oauth)
+        (when-let [user (usr/get-user-by-id user-id)]
+          (assoc user :scopes (map keyword (:scopes data))))))))

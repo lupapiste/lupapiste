@@ -144,6 +144,10 @@
    :userId (:id User)
    :roleId ssc/ObjectIdStr})
 
+(defschema UserForRestEndpoint
+  (merge (select-keys User [:role :email :firstName :lastName])
+         {(sc/optional-key :company) {:id sc/Str :name sc/Str}}))
+
 ;;
 ;; ==============================================================================
 ;; Utils:
