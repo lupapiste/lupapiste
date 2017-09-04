@@ -81,11 +81,15 @@
 (defn has-some-auth-role? [{auth :auth} user-id roles]
   (has-auth? {:auth (get-auths-by-roles {:auth auth} roles)} user-id))
 
-(defn auth-via-company [{auth :auth} user-id]
-  (if-let [company (get (usr/get-user-by-id user-id) :company)]
-    (let [company-auth (util/find-by-id (:id company) auth)]
-      (when (some #{(:role company-auth)} #{"writer" "owner"})
-        company-auth))))
+(defn get-company-auths [{auth :auth} {{company-id :id company-role :role} :company :as user}]
+  (filter #(and (= company-id (:id %))
+                (contains? #{(keyword company-role) nil} (keyword (:company-role %))))
+          auth))
+
+(defn auth-via-company [application user-id]
+  (->> (usr/get-user-by-id user-id)
+       (get-company-auths application)
+       (util/find-first (comp #{"writer" "owner"} :role))))
 
 (defn has-auth-via-company? [application user-id]
   (or (auth-via-company application user-id) false))
@@ -123,9 +127,8 @@
   (let [roles-in-app  (map (comp keyword :role) (get-auths application (:id user)))]
     (some roles roles-in-app)))
 
-(defn company-authz? [roles application {{company-id :id company-role :role} :company :as user}]
-  (->> (get-auths application company-id)
-       (filter (util/fn->> :company-role keyword (contains? #{(keyword company-role) nil})))
+(defn company-authz? [roles application user]
+  (->> (get-company-auths application user)
        (map (comp keyword :role))
        (some roles)))
 

@@ -30,16 +30,12 @@
     (domain/invites application)
     (map #(assoc % :application (select-keys application [:id :address :primaryOperation :municipality])))))
 
-(defn- select-invite-auth
-  "Select invite auth for user. Company authorization overrides personal authorization."
-  [{user-id :id {company-id :id} :company :as user} {auth :auth :as application}]
-  (let [company-auth  (util/find-by-id company-id auth)
-        personal-auth (util/find-by-id user-id auth)]
-    (assoc application :auth
-           (cond
-             (:invite company-auth) [company-auth]
-             company-auth           []
-             :else                  [personal-auth]))))
+(defn- select-user-auths
+  "Select auths for user by user-id and company-id."
+  [{user-id :id :as user} {auth :auth :as application}]
+  (let [company-auths  (auth/get-company-auths application user)
+        personal-auths (auth/get-auths application user-id)]
+    (assoc application :auth (remove nil? (concat company-auths personal-auths)))))
 
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority}}
@@ -50,7 +46,7 @@
                            {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]
                       :state {$ne :canceled}}
                      [:auth :primaryOperation :address :municipality])
-       (map (partial select-invite-auth user))
+       (map (partial select-user-auths user))
        (mapcat invites-with-application)
        (ok :invites)))
 
