@@ -79,15 +79,15 @@ LUPAPISTE.DocgenFundingSelectModel = function(params) {
         LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc("hankkeen-kuvaus.rahoitus.add.areysure"),
           loc("hankkeen-kuvaus.rahoitus.add.help"),
-          {title: loc("yes"), fn: function() {saveFunding()}},
-          {title: loc("no"), fn: function() {reset(false)}}
+          {title: loc("yes"), fn: function() {saveFunding();}},
+          {title: loc("no"), fn: function() {reset(false);}}
         );
       } else {
         LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc("hankkeen-kuvaus.rahoitus.remove.areysure"),
           loc("hankkeen-kuvaus.rahoitus.remove.help"),
-          {title: loc("yes"), fn: function() {removeFunding()}},
-          {title: loc("no"), fn: function() {reset(true)}}
+          {title: loc("yes"), fn: function() {removeFunding();}},
+          {title: loc("no"), fn: function() {reset(true);}}
         );
       }
     } else {
