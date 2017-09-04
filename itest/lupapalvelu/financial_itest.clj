@@ -28,7 +28,7 @@
     (fact "Financial authority has rights to application"
       (let [fetched-application (query-application sonja application-id)
             financial-auth (second (:auth fetched-application))]
-        (:email financial-auth) => "financial@ara.fi"
+        (:username financial-auth) => "financial"
         (:role financial-auth) => "financialAuthority"))
 
     (fact "Financial authority can now see the application"
