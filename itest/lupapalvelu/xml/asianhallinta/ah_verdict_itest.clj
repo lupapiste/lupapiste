@@ -11,7 +11,8 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.verdict-api] ; for notification definition
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.verdict-api]                       ; for notification definition
             [me.raynes.fs :as fs]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now] :as core]
@@ -25,12 +26,7 @@
 
 (def db-name (str "test_xml_asianhallinta_verdict-itest_" (now)))
 
-(def system-user {:id "-"
-                  :enabled true
-                  :lastName "Er\u00e4ajo"
-                  :firstName "Lupapiste"
-                  :role "authority"
-                  :orgAuthz []})
+(def system-user (usr/batchrun-user []))
 
 (mongo/connect!)
 (mongo/with-db db-name

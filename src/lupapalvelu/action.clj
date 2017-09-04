@@ -423,7 +423,8 @@
     (auth/has-organization-authz-roles? required-authz (:organization application) user)))
 
 (defn- company-authz? [command-meta-data application user]
-  (auth/has-auth? application (get-in user [:company :id])))
+  (-> (get command-meta-data :user-authz-roles #{})
+      (auth/company-authz? application user)))
 
 (defn user-is-allowed-to-access?
   [{user :user :as command} application]

@@ -124,14 +124,13 @@ Mikko decides to go to the desert, put on his ipod, and listen some some British
   Logout
 
 Solita accepts invite
-  Open last email
-  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
-  Click Element  xpath=(//a[contains(., 'accept-company-invitation')])
-  Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
-  [Teardown]  Go to login page
-
-Kaino Solita logs in and opens the application
   User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo,
+  Click by test id  accept-invite-button
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
+
+Kaino Solita opens the application
   Open application  ${appname}  ${propertyId}
   [Teardown]  logout
 

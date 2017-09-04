@@ -166,7 +166,7 @@
   (let [org @organization
         submitted-application (mongo/by-id :submitted-applications id)
         metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-        ely-statement-giver (ely/ely-statement-giver subtype)
+        ely-statement-giver (ely/ely-statement-giver (i18n/localize lang subtype))
         message-id (mongo/create-id)
         ely-data  {:partner "ely"
                    :subtype subtype
@@ -211,7 +211,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
    :pre-checks  [statement/statement-owner
                  statement/statement-not-given
-                 statement/statement-in-sent-state-allowed]
+                 statement/statement-in-sent-state-allowed
+                 statement/not-ely-statement]
    :states      #{:open :submitted :complementNeeded :sent}
    :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}

@@ -916,6 +916,25 @@
         (io/delete-file temp)
         (resp/status 200 (resp/json result)))))
 
+  (defpage [:get "/dev/ah/statement-response"] {:keys [id statement-id ftp-user]} ; LPK-3126
+    (let [attachment (files/temp-file "ah-statement-test" ".txt")
+          xml (-> (io/resource "asianhallinta/sample/ah-example-statement-response.xml")
+                  (enlive/xml-resource)
+                  (enlive/transform [:ah:LausuntoVastaus :ah:HakemusTunnus] (enlive/content id))
+                  (enlive/transform [:ah:LausuntoVastaus :ah:Lausunto :ah:LausuntoTunnus] (enlive/content statement-id))
+                  (enlive/transform [:ah:LausuntoVastaus :ah:Liitteet :ah:Liite :ah:LinkkiLiitteeseen] (enlive/content (.getName attachment))))
+          xml-s (apply str (enlive/emit* xml))
+          temp (files/temp-file "asianhallinta" ".xml")]
+      (spit temp xml-s)
+      (spit attachment "Testi Onnistui!")
+      (let [result (files/with-zip-file
+                     [(.getPath temp) (.getPath attachment)]
+                     (ah-reader/process-message zip-file
+                                                (or ftp-user (env/value :ely :sftp-user))
+                                                (usr/batchrun-user ["123"])))]
+        (io/delete-file temp)
+        (resp/status 200 (resp/json result)))))
+
   (defpage [:get "/dev/filecho/:filename"] {filename :filename}
     (->> filename
          (format "This is file %s\n")

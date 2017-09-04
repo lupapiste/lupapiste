@@ -37,7 +37,7 @@
       => (partial expected-failure? "error.application-not-found"))
 
     (let [{app-id :id :as app}  (create-and-submit-application pena)
-          _                     (invite-company-and-accept-invitation pena app-id "solita")
+          _                     (invite-company-and-accept-invitation pena app-id "solita" kaino)
           _                     (command pena :invite-with-role :id app-id :email (email-for-key mikko)
                                               :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
           _                     (command mikko :approve-invite :id app-id) => ok?
@@ -74,7 +74,7 @@
       (let [{app-id :id} (create-and-submit-application pena)]
         (copy-application pena app-id) => (partial expected-failure? "error.unauthorized")
         (copy-application kaino app-id) => (partial expected-failure? "error.application-not-found")
-        (invite-company-and-accept-invitation pena app-id "solita")
+        (invite-company-and-accept-invitation pena app-id "solita" kaino)
         (copy-application kaino app-id) => ok?))
 
     (fact "fails if organization does not support given operation"
@@ -84,7 +84,7 @@
         (restore-sipoo-selected-operations)))
 
     (let [{app-id :id} (create-and-submit-application pena)
-          _ (invite-company-and-accept-invitation pena app-id "solita")
+          _ (invite-company-and-accept-invitation pena app-id "solita" kaino)
           app (query-application sonja app-id)
           x 444445.0 y 6666665.0
           property-id "75312312341234"

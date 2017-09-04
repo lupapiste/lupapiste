@@ -1,12 +1,12 @@
-# Hi {{user.firstName}},
+# Dear {{user.firstName}},
 
-{{inviter.firstName}} {{inviter.lastName}} wants to authorize your company {{company.name}} to join the project {{operation}} at {{address}}, {{municipality}} at Lupapiste.
+{{inviter.firstName}} {{inviter.lastName}} wishes to authorise your company {{company.name}} to Lupapiste’s project {{operation}} at address {{address}}, {{municipality}}.
 
-Click the link below to join your Company account as a party to the application. You will simultaneously accept the online authorization request which is equivalent to a traditional mandate.
+To be able to fill in the application, click on the link below and accept the company authorisation. Acceptance connects your company to project’s parties, after which the company’s personnel can easily be added to the application in wished roles (e.g. designer) through choosing a name from the drop-down list. Then the personal data fills in automatically to the application.
 
 {{link}}
 
-If the link doesn't work, copy the address and paste it in your browser's address bar.     
+If the link does not work, copy the address and paste it in your browser.
 
-Online project greetings from
-{{lupapiste.team}}       
+Online project greetings from,
+{{lupapiste.team}}

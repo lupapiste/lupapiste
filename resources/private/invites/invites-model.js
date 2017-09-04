@@ -6,7 +6,7 @@ LUPAPISTE.InvitesModel = function() {
     var address = inv.application.address;
     var municipality = inv.application.municipality;
     var operation = util.getIn(inv, ["application", "primaryOperation", "name"]);
-    return loc("auth") + ": " +
+    return (inv.type === "company" ? loc("company-auth") : loc("auth")) + ": " +
            (address ? address + ", " : "") +
            (municipality ? loc(["municipality", municipality]) + ", " : "") +
            (operation ? loc(["operations", operation]) : "");
@@ -16,7 +16,8 @@ LUPAPISTE.InvitesModel = function() {
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       var invs = _(data.invites).map(function(inv) {
-        return _.assign(inv, { headerText: getHeaderText(inv) });
+        return _.assign(inv, { headerText: getHeaderText(inv),
+                               created: inv.created });
       }).value();
 
       self.invites(invs);
@@ -25,7 +26,7 @@ LUPAPISTE.InvitesModel = function() {
   self.approveInvite = function(model) {
     hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
     ajax
-      .command("approve-invite", {id: model.application.id})
+      .command("approve-invite", {id: model.application.id, "invite-type": model.type})
       .success(self.updateInvites)
       .call();
     return false;
