@@ -20,7 +20,7 @@
 ;;
 
 (defn basic-application-query-for [{user-id :id {company-id :id company-role :role} :company :as user}]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority}})]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority})]
     (case (keyword (:role user))
       :applicant    (if (nil? company-id)
                       {:auth.id user-id}
