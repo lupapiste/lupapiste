@@ -443,7 +443,7 @@
                                              $lt (or end
                                                      (now))}
                                  :paatokset.poytakirjat {$size 0}}}}
-         (when organization
+         (when (not-empty organizations)
            {:organization {$in organizations}})))
 
 (defn applications-with-missing-verdict-attachments
@@ -452,4 +452,81 @@
    - end:           consider verdicts with timestamp < end
    - organizations: when defined, only consider given organizations"
   [options]
-  (mongo/selecet :applications (missing-verdict-attachments-query options)))
+  (mongo/select :applications (missing-verdict-attachments-query options)))
+
+;; Having application and verdict xml, update application verdicts:
+;; 1. get verdicts from xml
+(defn- get-verdicts-from-xml [application organization xml]
+  (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
+
+;; 2. only consider verdicts that
+;; - are already present in the application
+;; - do not have poytakirja attachments
+(defn- matching-verdict
+  "Return a verdict with a matching kuntalupatunnus from verdicts"
+  [verdict verdicts]
+  (util/find-first #(= (:kuntalupatunnus %)
+                       (:kuntalupatunnus verdict))
+                   verdicts))
+
+(defn- verdict-in-application-without-attachment?
+  "Is the verdict from xml present in the application without an attachment?"
+  [application verdict-from-xml]
+  (boolean
+   (when-let [existing-verdict (matching-verdict verdict-from-xml
+                                                 (:verdicts application))]
+     (some empty? (->> existing-verdict
+                       :paatokset
+                       (map :poytakirjat))))))
+
+;; 3. update the verdicts on application that have a new poytakirja attachment
+;; 3.1 add poytakirja attachment with get-poytakirja!
+;; 3.2 update verdict entry
+(defn- add-verdict-attachments!
+  "When available, add a new verdict attachments (note, side effect)
+  and return an updated verdict with information on the added
+  attachments in relevant :poytakirjat arrays."
+  [application user timestamp verdicts-from-xml app-verdict]
+
+  (if-let [update-verdict (matching-verdict app-verdict
+                                            verdicts-from-xml)]
+
+    ;; TODO How do we match the "verdicts within verdicts"?  For now
+    ;; this question is theoretical since no verdict contains
+    ;; a :paatokset array with more than one element.
+    (if (or (> (count (:paatokset app-verdict)) 1)
+            (> (count (:paatokset update-verdict)) 1))
+      app-verdict
+      (let [paatos-from-app-verdict         (-> app-verdict :paatokset 0)
+            poytakirjat-from-update-verdict (-> update-verdict :paatokset 0 :poytakirjat)]
+        (assoc app-verdict
+               :paatokset
+               [(assoc paatos-from-app-verdict
+                       :poytakirjat
+                       (map (partial get-poytakirja! application
+                                     user timestamp (:id app-verdict))
+                            poytakirjat-from-update-verdict)
+                       :timestamp timestamp)])))
+    app-verdict))
+
+;; 4. store the updates to mongo
+(defn- store-verdict-updates! [command updated-verdicts]
+  (action/update-application command
+                             {$set {:verdicts updated-verdicts}})
+  updated-verdicts)
+
+
+(defn update-verdict-attachments-from-xml!
+  "Update the verdict's poytakirja attachments from the xml, return
+  updated verdicts"
+  [{:keys [application organization user created] :as command} app-xml]
+  (let [organization    (if organization
+                          @organization
+                          (org/get-organization (:organization application)))
+        update-verdicts (->> (get-verdicts-from-xml application
+                                                    organization app-xml)
+                             (filter (partial verdict-in-application-without-attachment?
+                                              application)))]
+    (->> (:verdicts application)
+         (map (partial add-verdict-attachments! application user created update-verdicts))
+         (store-verdict-updates! command))))
