@@ -56,19 +56,17 @@
 
 (rum/defc order-composer-footer < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        total-amount (reduce + (vals order-rows))]
+        number-of-printouts (reduce + (vals order-rows))]
     [:div.printing-order-footer
      [:div
       [:button.tertiary.rollup-button
-       [:h2 (loc :printing-order.footer.total-amount (str total-amount))]]
+       [:h2 (loc :printing-order.footer.total-amount (str number-of-printouts))]]
       [:button.tertiary.rollup-button
-       (when (pos-int? total-amount)
-         (let [pricing (pricing/price-for-order-amount total-amount)]
+       (when (pos-int? number-of-printouts)
+         (let [{:keys [total additionalInformation]} (pricing/price-for-order-amount number-of-printouts)]
            (cond
-             (:total pricing) [:h2 (str (loc :printing-order.footer.price) " "
-                                        (:total (pricing/price-for-order-amount total-amount)) "€")]
-             (:additionalInformation pricing)
-                              [:h2 (:additionalInformation pricing)])))]
+             total [:h2 (str (loc :printing-order.footer.price) " " total "€")]
+             additionalInformation [:h2 additionalInformation])))]
       [:button.tertiary.rollup-button.right
        (loc-html :h2 :printing-order.mylly.provided-by)]
       [:button.tertiary.rollup-button.right
