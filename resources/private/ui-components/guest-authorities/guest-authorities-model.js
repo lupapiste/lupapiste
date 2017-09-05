@@ -32,6 +32,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
     dd.error     = ko.observable();
     dd.oldUser   = ko.observable();
     dd.errorMessage = ko.observable();
+    dd.financialAuthority = ko.observable();
     dd.reset = function() {
       dd.email( "" );
       dd.firstName( "" );
@@ -42,6 +43,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
       dd.error( null );
       dd.oldUser( false );
       dd.errorMessage("");
+      dd.financialAuthority(false);
     };
     function namesFilled() {
       return _.every( ["firstName", "lastName"],
@@ -59,7 +61,8 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
     });
     dd.namesEditable = ko.pureComputed( function() {
       return !(dd.waitingEmail()
-             || dd.oldUser());
+             || dd.oldUser()
+             || dd.financialAuthority());
     });
     dd.getUser = ko.computed( function() {
       if( util.isValidEmailAddress( dd.email())) {
@@ -74,7 +77,10 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
           // This way, admin authority can still modify users with missing names.
           dd.oldUser( namesFilled() );
           dd.errorMessage( res.user.hasAccess ? "guest-authority.has-access" : "");
-          dd.errorMessage (res.user.financialAuthority ? "error.is-financial-authority" : "");
+          if ( dd.errorMessage() === "" ) {
+            dd.errorMessage (res.user.financialAuthority ? "error.is-financial-authority" : "");
+          };
+          dd.financialAuthority(res.user.financialAuthority);
         })
         .error ( function() {
           dd.error( false );
@@ -105,7 +111,6 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
   }
 
   self.dialogData = new DialogData();
-
 
   // Table operations
 
