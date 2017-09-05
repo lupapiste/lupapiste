@@ -79,7 +79,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
           dd.errorMessage( res.user.hasAccess ? "guest-authority.has-access" : "");
           if ( dd.errorMessage() === "" ) {
             dd.errorMessage (res.user.financialAuthority ? "error.is-financial-authority" : "");
-          };
+          }
           dd.financialAuthority(res.user.financialAuthority);
         })
         .error ( function() {
