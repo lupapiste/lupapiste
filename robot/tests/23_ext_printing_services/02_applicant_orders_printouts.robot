@@ -65,9 +65,14 @@ Personal details are prefilled in the order form
 Accept terms and conditions
   Click by test id  checkbox-conditions-accepted
   Test id enabled  forward-button
+  Scroll to bottom
+  Click by test id  forward-button
+  Wait Until  Element should be visible by test id  files-table
 
 Mikko proceeds to order summary
+  Element should contain  jquery=tr[data-test-type='paapiirustus.asemapiirros']:first td:last  1
+
+Mikko submits the order
   Click by test id  forward-button
-  Element should be visible by test id  files-table
-  Value should be  jquery=tr[data-test-type='paapiirustus.asemapiirros']:first td:last  1
+  Wait until page contains  Tilauksen lähettäminen onnistui
   Logout
