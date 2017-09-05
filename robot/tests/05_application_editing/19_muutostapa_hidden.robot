@@ -1,5 +1,6 @@
 *** Settings ***
 
+Description  Muutostapa column is hidden for new buildings.
 Suite Setup  Apply minimal fixture now
 Resource     ../../common_resource.robot
 

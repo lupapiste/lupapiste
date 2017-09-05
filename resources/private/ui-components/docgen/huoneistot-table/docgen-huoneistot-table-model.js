@@ -21,6 +21,14 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
                        .filter( function( schema ) {
                          return !schema.hidden;
                        })
+                       .sortBy( function ( schema ) {
+                         return _.indexOf( ["muutostapa", "huoneistoTyyppi", "porras",
+                                            "huoneistonumero", "jakokirjain", "huoneluku",
+                                            "keittionTyyppi", "huoneistoala", "WCKytkin",
+                                            "ammeTaiSuihkuKytkin", "saunaKytkin",
+                                            "parvekeTaiTerassiKytkin", "lamminvesiKytkin"],
+                                           schema.name );
+                       })
                        .map( function(schema) {
                          return {
                            name: params.i18npath.concat(schema.name),
