@@ -51,12 +51,15 @@
    :internalOrderId sc/Str
    :files           [PrintingOrderFile]})
 
+(sc/defschema LocalizedLabel
+  {sc/Any sc/Str})
+
 (sc/defschema PricingItem
               {:min sc/Int
                (sc/optional-key :max) sc/Int
-               (sc/optional-key :fixed) sc/Int
-               (sc/optional-key :additionalInformation) sc/Str})
+               (sc/optional-key :fixed) sc/Num
+               (sc/optional-key :pricelist-label) LocalizedLabel
+               (sc/optional-key :additionalInformation) LocalizedLabel})
 
 (sc/defschema PricingConfiguration
-              {:delivery sc/Num
-               :volume   [PricingItem]})
+              {:by-volume   [PricingItem]})

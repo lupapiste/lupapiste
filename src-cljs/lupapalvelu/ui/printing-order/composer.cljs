@@ -54,23 +54,35 @@
       (init-user-details))
     init-state))
 
+(rum/defc pricelist-panel < rum/reactive [open?]
+  (when (rum/react open?)
+    (let [pricing-config (-> @state/component-state :pricing)]
+      [:div.pricelist-panel
+       [:div.order-grid-2
+        (for [row (:by-volume pricing-config)]
+          [:div.row {:key (util/unique-elem-id "pricelist-")} (get-in row [:pricelist-label (keyword (.getCurrentLanguage js/loc))])])
+        [:div.row {:key "pricelist-last-row"} (loc :printing-order.show-pricing.includes-vat)]]
+       [:div.arrow]])))
+
 (rum/defc order-composer-footer < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
-        number-of-printouts (reduce + (vals order-rows))]
+        number-of-printouts (reduce + (vals order-rows))
+        pricelist-panel-open? (atom false)]
     [:div.printing-order-footer
      [:div
-      [:button.tertiary.rollup-button
-       [:h2 (loc :printing-order.footer.total-amount (str number-of-printouts))]]
-      [:button.tertiary.rollup-button
+      [:button.tertiary-ghost.rollup-button
+       [:h3 (loc :printing-order.footer.total-amount (str number-of-printouts))]]
+      [:button.tertiary-ghost.rollup-button
        (when (pos-int? number-of-printouts)
-         (let [{:keys [total additionalInformation]} (pricing/price-for-order-amount number-of-printouts)]
-           (cond
-             total [:h2 (str (loc :printing-order.footer.price) " " total "€")]
-             additionalInformation [:h2 additionalInformation])))]
-      [:button.tertiary.rollup-button.right
-       (loc-html :h2 :printing-order.mylly.provided-by)]
-      [:button.tertiary.rollup-button.right
-       [:h2 (loc :printing-order.show-pricing)]]]]))
+         [:h3 (pricing/footer-price-for-order-amount number-of-printouts)])]
+      [:button.tertiary-ghost.rollup-button.right
+       (loc-html :h3 :printing-order.mylly.provided-by)]
+      [:div.right
+       [:button.tertiary-ghost.rollup-button.open-pricelist-btn
+        [:h3
+         {:on-click #(swap! pricelist-panel-open? not)}
+         (loc :printing-order.show-pricing)]
+        (pricelist-panel pricelist-panel-open?)]]]]))
 
 (rum/defc composer-phase1 < rum/reactive []
   (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]

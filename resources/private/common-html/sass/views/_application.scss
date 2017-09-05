@@ -1032,30 +1032,3 @@ div.review-tasks {
 div.foreman-history-container {
   padding-bottom: $marginS;
 }
-
-div.printing-order-footer {
-  position: fixed;
-  left: 0px;
-  bottom: 0px;
-  width: 100%;
-  z-index: 2002;
-  background-color: $light-gray-link;
-  padding: $baseline auto $baseline auto;
-
-  div {
-    width: 100%;
-    max-width: $application-max-width;
-    min-width: $application-min-width;
-    margin: 0 auto;
-
-    button {
-      width: auto;
-      display: inline;
-      padding-right: $baseline * 2;
-    }
-
-    h2 {
-      font-weight: normal;
-    }
-  }
-}

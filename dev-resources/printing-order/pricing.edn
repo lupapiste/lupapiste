@@ -1,9 +1,11 @@
-{:delivery 6.95
- :volume  [{:min    1
-            :max    6
-            :fixed 90}
-           {:min    7
-            :max   12
-            :fixed 180}
-           {:min   13
-            :additionalInformation "Hinta sopimuksen mukaan."}]}
+{:by-volume [{:min    1
+              :max    6
+              :fixed 96.95
+              :pricelist-label {:fi "1-6 kuvaa: 96.95 €"}}
+             {:min    7
+              :max   12
+              :fixed 186.95
+              :pricelist-label {:fi "7-12 kuvaa: 186.95 €"}}
+             {:min   13
+              :pricelist-label {:fi "Yli 13 kuvaa: Sopimuksen mukaan."}
+              :additionalInformation {:fi "Sopimuksen mukaan"}}]}
