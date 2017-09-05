@@ -635,32 +635,36 @@
 
 (def muutostapa {:name "muutostapa" :type :select :sortBy :displayname
                  :size :s :label false :i18nkey "huoneistot.muutostapa"
-                 :default "lis\u00e4ys"
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.huoneistoTyyppi"
-                   :body [{:name "asuinhuoneisto"}
-                          {:name "toimitila"}
-                          ei-tiedossa]}
-                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :transform :upper-case}
-                   {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size :s :required true :label false :i18nkey "huoneistot.huoneistonumero"}
-                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :transform :lower-case}
-                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size :t :label false :i18nkey "huoneistot.huoneluku"}
-                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size :s :label false :i18nkey "huoneistot.keittionTyyppi"
-                    :body [{:name "keittio"}
-                           {:name "keittokomero"}
-                           {:name "keittotila"}
-                           {:name "tupakeittio"}
-                           ei-tiedossa]}
-                   {:name "huoneistoala" :type :string :subtype :decimal :size :s :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
-                   {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin"}
-                   {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin"}
-                   {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin"}
-                   {:name "parvekeTaiTerassiKytkin" :type :checkbox :label false :i18nkey "huoneistot.parvekeTaiTerassiKytkin"}
-                   {:name "lamminvesiKytkin" :type :checkbox :label false :i18nkey "huoneistot.lamminvesiKytkin"}
-                   muutostapa])
+(def muutostapa-hidden (assoc muutostapa
+                              :default "lis\u00e4ys"
+                              :hidden true))
+
+
+
+(def huoneisto-row [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.huoneistoTyyppi"
+                     :body [{:name "asuinhuoneisto"}
+                            {:name "toimitila"}
+                            ei-tiedossa]}
+                    {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :transform :upper-case}
+                    {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size :s :required true :label false :i18nkey "huoneistot.huoneistonumero"}
+                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :transform :lower-case}
+                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size :t :label false :i18nkey "huoneistot.huoneluku"}
+                    {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size :s :label false :i18nkey "huoneistot.keittionTyyppi"
+                     :body [{:name "keittio"}
+                            {:name "keittokomero"}
+                            {:name "keittotila"}
+                            {:name "tupakeittio"}
+                            ei-tiedossa]}
+                    {:name "huoneistoala" :type :string :subtype :decimal :size :s :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
+                    {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin"}
+                    {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin"}
+                    {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin"}
+                    {:name "parvekeTaiTerassiKytkin" :type :checkbox :label false :i18nkey "huoneistot.parvekeTaiTerassiKytkin"}
+                    {:name "lamminvesiKytkin" :type :checkbox :label false :i18nkey "huoneistot.lamminvesiKytkin"}])
 
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
@@ -671,7 +675,9 @@
                       :repeating true
                       :approvable true
                       :copybutton true
-                      :body huoneistoRow})
+                      :body (conj huoneisto-row muutostapa)})
+
+(def huoneistotTable-new-building (assoc huoneistotTable :body (conj huoneisto-row muutostapa-hidden)))
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
 
@@ -824,6 +830,8 @@
                                                                          mitat-muutos])
 
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistotTable))
+
+(def rakennuksen-tiedot-uusi-rakennus (conj rakennuksen-tiedot-ilman-huoneistoa huoneistotTable-new-building))
 
 (def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
@@ -1337,7 +1345,7 @@
            :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat
-                (approvable-top-level-groups rakennuksen-tiedot)
+                (approvable-top-level-groups rakennuksen-tiedot-uusi-rakennus)
                 rakennustunnus)}
 
    {:info {:name "uusi-rakennus-ei-huoneistoa"

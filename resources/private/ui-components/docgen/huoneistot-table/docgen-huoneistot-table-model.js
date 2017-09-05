@@ -17,13 +17,9 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
 
   self.authModel = params.authModel;
 
-  self.showMuutostapa = self.docModel.schemaName !== "uusiRakennus";
-
   self.columnHeaders = _(self.schema.body)
                        .filter( function( schema ) {
-                         return self.showMuutostapa
-                              ? true
-                              : schema.name !== "muutostapa";
+                         return !schema.hidden;
                        })
                        .map( function(schema) {
                          return {
