@@ -429,3 +429,22 @@
                          :model-fn       (fn [command conf recipient]
                                            (assoc (notifications/create-app-model command conf recipient)
                                              :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
+
+
+;; Fetch missing "päätöspöytäkirja" attachments
+
+(defn- missing-verdict-attachments-query [{:keys [start end organizations]}]
+  (merge {:verdicts {$elemMatch {:timestamp {$gt start
+                                             $lt (or end
+                                                     (now))}
+                                 :paatokset.poytakirjat {$size 0}}}}
+         (when organization
+           {:organization {$in organizations}})))
+
+(defn applications-with-missing-verdict-attachments
+  "Options:
+   - start:         consider verdicts with timestamp > start
+   - end:           consider verdicts with timestamp < end
+   - organizations: when defined, only consider given organizations"
+  [options]
+  (mongo/selecet :applications (missing-verdict-attachments-query options)))
