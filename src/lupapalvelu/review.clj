@@ -87,7 +87,7 @@
        vals
        (map #(apply merge %))))
 
-(defn reviews-preprocessed 
+(defn reviews-preprocessed
   "Review preprocessing: 1) Duplicate entry prevention (group-by review type, name, date and external id)
                          2) Collect all related building and attachment elements together
                          3) Merge into final results in which there are no duplicates by name or type but still
@@ -171,5 +171,5 @@
       (let [attachments (get attachments-by-task-id id)]
         (if-not (empty? attachments)
           (doseq [att attachments]
-            (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
+            (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att))
           (tasks/generate-task-pdfa updated-application added-task user "fi"))))))

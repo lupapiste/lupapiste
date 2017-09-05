@@ -38,10 +38,15 @@
                               (String. StandardCharsets/UTF_8))
       raw-filename)))
 
-(defn get-poytakirja
-  "At least outlier verdicts (KT) poytakirja can have multiple
-  attachments. On the other hand, traditional (e.g., R) verdict
-  poytakirja can only have one attachment."
+(defn get-poytakirja!
+  "Fetches the verdict attachments listed in the verdict xml. If the
+  fetch is successful, uploads and attaches them to the
+  application. Returns pk (with urlHash assoced if upload and attach
+  was successful).
+
+  At least outlier verdicts (KT) poytakirja can have
+  multiple attachments. On the other hand, traditional (e.g., R)
+  verdict poytakirja can only have one attachment."
   [application user timestamp {target-type :type verdict-id :id :as target} pk]
   (if-let [attachments (or (:liite pk) (:Liite pk))]
     (let [;; Attachments without link are ignored

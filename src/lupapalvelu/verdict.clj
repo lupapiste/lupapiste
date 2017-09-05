@@ -160,12 +160,17 @@
                               (String. StandardCharsets/UTF_8))
       raw-filename)))
 
-(defn- get-poytakirja
-  "At least outlier verdicts (KT) poytakirja can have multiple
+(defn- get-poytakirja!
+  "Fetches the verdict attachments listed in the verdict xml. If the
+  fetch is successful, uploads and attaches them to the
+  application. Returns pk (with urlHash assoced if upload and attach
+  was successful).
+
+  At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
   poytakirja can only have one attachment."
   [application user timestamp verdict-id pk]
-  (verdict-review-util/get-poytakirja application user timestamp {:type "verdict" :id verdict-id} pk))
+  (verdict-review-util/get-poytakirja! application user timestamp {:type "verdict" :id verdict-id} pk))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}
@@ -173,7 +178,7 @@
     (let [verdict-id (mongo/create-id)]
       (-> (assoc verdict :id verdict-id, :timestamp timestamp)
           (update :paatokset
-                  (fn->> (map #(update % :poytakirjat (partial map (partial get-poytakirja application user timestamp verdict-id))))
+                  (fn->> (map #(update % :poytakirjat (partial map (partial get-poytakirja! application user timestamp verdict-id))))
                          (map #(assoc % :id (mongo/create-id)))
                          (filter seq)))))))
 
