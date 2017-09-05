@@ -138,8 +138,8 @@
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
-   :locked                               sc/Bool            ;;
-   (sc/optional-key :readOnly)           sc/Bool            ;;
+   :locked                               sc/Bool            ;; Locked prevents new version
+   (sc/optional-key :readOnly)           sc/Bool            ;; Readonly attachment (or its versions) cannot be deleted
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created if not forced to any other
    (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
    :target                               (sc/maybe Target)  ;;

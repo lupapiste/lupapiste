@@ -28,9 +28,9 @@ LUPAPISTE.ReviewTasksModel = function( params ) {
               .map(function( task ) {
                 return {
                   notesVisible: ko.observable( false ),
-                  hasAttachments: Boolean( _.find( app.attachments(),
+                  hasAttachments: Boolean( _.find( lupapisteApp.services.attachmentsService.attachments(),
                                                    function( aObs ) {
-                                                     return _.get( ko.mapping.toJS( aObs ),
+                                                     return _.get( aObs(),
                                                                    "target.id") === task.id;
                                                    })),
                   name: task.taskname,

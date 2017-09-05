@@ -251,7 +251,9 @@
     (ok :integrationAvailable sent-to-krysp?)))
 
 (defcommand mark-review-faulty
-  {:description "Marks review done, generates PDF/A and sends data to backend"
+  {:description "Marks review faulty, but does not remove
+  it. Similarly the review attachments are made deletable. However,
+  the attachments remain locked, so new versions cannot be created."
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :pre-checks  [validate-task-is-review
@@ -267,7 +269,8 @@
                                           {:metadata.sailytysaika.arkistointi :ei
                                            :metadata.sailytysaika.perustelu (i18n/loc "review.faulty-document")
                                            :metadata.myyntipalvelu false
-                                           :metadata.tila :ei-arkistoida-virheellinen}
+                                           :metadata.tila :ei-arkistoida-virheellinen
+                                           :readOnly false}
                                           created
                                           :set-app-modified? false
                                           :set-attachment-modified? false))
