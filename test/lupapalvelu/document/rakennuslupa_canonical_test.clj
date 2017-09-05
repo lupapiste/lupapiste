@@ -318,7 +318,7 @@
                     :keittionTyyppi {:value "keittio"}
                     :parvekeTaiTerassiKytkin {:value true}
                     :WCKytkin {:value true}}
-                :1 {:muutostapa {:value "lis\u00e4ys"}
+                :1 {:muutostapa {:value "muutos"}
                     :porras {:value "A"}
                     :huoneistonumero {:value "2"}
                     :jakokirjain {:value "a"}
@@ -860,10 +860,10 @@
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-huoneisto-data)
 
 (facts "Huoneisto is correct"
-  (let [huoneistot (-> uusi-rakennus
-                     (get-in [:data :huoneistot])
-                     tools/unwrapped
-                     get-huoneisto-data)
+  (let [huoneistot (get-huoneisto-data (-> uusi-rakennus
+                                           (get-in [:data :huoneistot])
+                                           tools/unwrapped)
+                                       "uusiRakennus")
         h2 (last huoneistot), h1 (first huoneistot)]
     (fact "h1 huoneistot count" (count huoneistot) => 2)
     (fact "h1 muutostapa" (:muutostapa h1) => "lis\u00e4ys")
@@ -881,6 +881,7 @@
     (fact "h1 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
     (fact "h1 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")
 
+    ;; For uusiRakennus muutostapa is always lis\u00e4ys
     (fact "h2 muutostapa" (:muutostapa h2) => "lis\u00e4ys")
     (fact "h2 huoneluku" (:huoneluku h2) => "12")
     (fact "h2 keittionTyyppi" (:keittionTyyppi h2) => "keittokomero")
@@ -896,31 +897,43 @@
     (fact "h2 huoneistotunnus: huoneistonumero" (-> h1 :huoneistotunnus :huoneistonumero) => "001")
     (fact "h2 huoneistotunnus: jakokirjain" (-> h1 :huoneistotunnus :jakokirjain) => "a")))
 
+(facts "Muutostapa for old buildings"
+  (let [huoneistot (get-huoneisto-data (-> uusi-rakennus
+                                           (get-in [:data :huoneistot])
+                                           tools/unwrapped)
+                                       "rakennuksen-muuttaminen")
+        h2         (last huoneistot)]
+    (fact "h2 muutostapa" (:muutostapa h2) => "muutos")))
+
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
-  (let [doc (tools/unwrapped {:data {:lammitys {:lammitystapa {:value nil}
+  (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
+                              :data {:lammitys {:lammitystapa {:value nil}
                                                :lammonlahde  {:value "turve"}
                                                :muu-lammonlahde {:value nil}}}})
         rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is inluded"
-  (let [doc (tools/unwrapped {:data {:luokitus {:energiatehokkuusluku {:value "124"}
+  (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
+                              :data {:luokitus {:energiatehokkuusluku {:value "124"}
                                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
         rakennus (get-rakennus application-rakennuslupa doc)]
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => "kWh/m2"))
 
 (fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
-  (let [doc (tools/unwrapped {:data {:luokitus {:energiatehokkuusluku {:value ""}
-                                               :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
+  (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
+                              :data {:luokitus {:energiatehokkuusluku {:value ""}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
         rakennus (get-rakennus application-rakennuslupa doc)]
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => nil))
 
 (facts "When muu-lammonlahde is specified, it is used"
-  (let [doc (tools/unwrapped {:data {:lammitys {:lammitystapa {:value nil}
-                                               :lammonlahde  {:value "other"}
-                                               :muu-lammonlahde {:value "fuusioenergialla"}}}})
+  (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
+                              :data {:lammitys {:lammitystapa {:value nil}
+                                                :lammonlahde  {:value "other"}
+                                                :muu-lammonlahde {:value "fuusioenergialla"}}}})
         rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
