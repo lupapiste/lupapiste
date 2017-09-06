@@ -32,7 +32,7 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
                        .map( function(schema) {
                          return {
                            name: params.i18npath.concat(schema.name),
-                           required: !!schema.required
+                           required: Boolean(schema.required)
                          };
                        })
                        .value();

@@ -915,7 +915,7 @@
         rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
-(fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is inluded"
+(fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is included"
   (let [doc (tools/unwrapped {:schema-info {:name "uusiRakennus"}
                               :data {:luokitus {:energiatehokkuusluku {:value "124"}
                                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
