@@ -184,7 +184,7 @@
     (fail :error.user.trying-to-update-verified-person-id)))
 
 (defcommand update-user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin :financialAuthority}
    :input-validators [validate-updatable-user]
    :pre-checks [validate-person-id-update-is-allowed!]}
   [{caller :user {person-id :personId :as user-data} :data :as command}]
@@ -394,7 +394,7 @@
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
    :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
-   :user-roles #{:applicant :authority :authorityAdmin :admin}}
+   :user-roles #{:applicant :authority :authorityAdmin :admin :financialAuthority}}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))

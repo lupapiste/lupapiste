@@ -544,3 +544,6 @@
 "register.company.vismasign.title" "en" "What Is Visma Sign?"
 "register.company.vismasign.title" "fi" "Mikä on Visma Sign?"
 "register.company.vismasign.title" "sv" "Vad är Visma Sign?"
+"register.company.add-user.is-financial-authority" "en" ""
+"register.company.add-user.is-financial-authority" "fi" "Pahoittelut, käyttäjää {0} ei voi lisätä yritystiliin."
+"register.company.add-user.is-financial-authority" "sv" ""

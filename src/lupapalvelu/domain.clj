@@ -20,7 +20,7 @@
 ;;
 
 (defn basic-application-query-for [{user-id :id {company-id :id company-role :role} :company :as user}]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority})]
     (case (keyword (:role user))
       :applicant    (if (nil? company-id)
                       {:auth.id user-id}
@@ -32,6 +32,7 @@
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
       :trusted-salesforce {}
+      :financialAuthority {:auth.id (:id user)}
       (do
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results
@@ -54,6 +55,7 @@
       :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["canceled"]}}
       :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
+      :financialAuthority {:state {$nin ["canceled"]}}
       {})))
 
 (defn- only-authority-sees [user checker items]

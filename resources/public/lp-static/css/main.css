@@ -184,7 +184,7 @@ body {
   height: 100%;
 }
 
-body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins {
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins, body.financial-authority {
   min-height: 100vh;
   padding-bottom: 320px;
   position: relative;
@@ -14702,6 +14702,15 @@ div.search i {
   font-size: 15px;
   position: absolute;
   white-space: pre-line;
+}
+
+.applications-search-results__indicator .bubble-hover .bubble-hover-text.bubble-hover-text--notice {
+  width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  bottom: -50%;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 .applications-search-results__indicator .bubble-hover:hover .bubble-hover-text {

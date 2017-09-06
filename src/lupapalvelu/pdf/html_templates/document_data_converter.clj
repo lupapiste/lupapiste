@@ -145,6 +145,10 @@
 (defmethod element-value :checkbox [doc-data path i18n-path schema]
   (when (get-in doc-data (conj path :value)) (i18n/loc "yes")))
 
+(defmethod convert-element :fundingSelector [doc-data path i18n-path schema]
+  (let [value (if (true? (get-in doc-data (conj path :value))) (i18n/loc "yes") (i18n/loc "no"))]
+    (leaf-element value i18n-path schema {})))
+
 (defn- get-i18n-path-for-selection [doc-data path i18n-path schema]
   (let [selected (->> (conj path :value) (map #(if (keyword? %) % (keyword (str %)))) (get-in doc-data))]
     (when selected

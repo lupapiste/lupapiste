@@ -123,7 +123,7 @@ Pena gives reply
   Input text  statement-reply-text  OK
   Click element  statement-submit
   Confirm yes no dialog
-  Element text should be  xpath=//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-0']  Vastine annettu
+  Wait until  Element text should be  xpath=//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-0']  Vastine annettu
   Logout
 
 Frontend errors

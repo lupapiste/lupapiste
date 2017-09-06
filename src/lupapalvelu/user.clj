@@ -60,7 +60,8 @@
    "rest-api"
    "trusted-etl"
    "trusted-salesforce"
-   "docstore-api"])
+   "docstore-api"
+   "financialAuthority"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -258,6 +259,9 @@
 
 (defn company-admin? [user]
   (= (-> user :company :role) "admin"))
+
+(defn financial-authority? [{role :role}]
+  (= :financialAuthority (keyword role)))
 
 
 (defn organization-ids
@@ -568,7 +572,7 @@
     (when (and org-authz (not (every? coll? (vals org-authz))))
       (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
 
-    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
+    (when-not (#{:authority :authorityAdmin :applicant :dummy :financialAuthority} user-role)
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)

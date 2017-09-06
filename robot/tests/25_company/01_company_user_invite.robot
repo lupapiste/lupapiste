@@ -77,6 +77,15 @@ Can not add the same user again
   Click enabled by test id  company-add-user-already-in-close
   Wait until  Element should not be visible  dialog-company-new-user
 
+Can not add the financial authority as company user
+  Click enabled by test id  company-add-user
+  Wait until  Element should be visible  dialog-company-new-user
+  Input text by test id  company-new-user-email  financial@ara.fi
+  Click enabled by test id  company-search-email
+  Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="text: loc('register.company.add-user.is-financial-authority', email())"]
+  Click enabled by test id  company-user-is-financial-authority-close-dialog
+  Wait until  Element should not be visible  dialog-company-new-user
+
 Delete Duff3
   Element should be visible by test id  company-user-delete-0
   Click element  xpath=//section[@id='company']//a[@data-test-id="company-user-delete-0"]

@@ -35,6 +35,7 @@
     self.showUserAlreadyInvited = ko.observable();
     self.showUserInvited    = ko.observable();
     self.showUserDetails    = ko.observable();
+    self.showUserIsFinancialAuthority = ko.observable();
     self.oldUser          = ko.observable();
     self.isDummy          = ko.pureComputed(function() { return self.userRole() === "dummy"; });
 
@@ -65,6 +66,8 @@
           this.showSearchEmail(false).showUserInCompany(true);
         } else if (result === "already-invited") {
           this.showSearchEmail(false).showUserAlreadyInvited(true);
+        } else if (result === "financial-authority") {
+          this.showSearchEmail(false).showUserIsFinancialAuthority(true);
         } else {
           this.showSearchEmail(false).showUserDetails(true);
           if( result === "found") {
@@ -100,7 +103,8 @@
       .showUserInCompany(undefined)
       .showUserAlreadyInvited(undefined)
       .showUserInvited(undefined)
-      .showUserDetails(undefined);
+      .showUserDetails(undefined)
+      .showUserIsFinancialAuthority(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
   };
 
