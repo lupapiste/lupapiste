@@ -33,7 +33,7 @@
                      data-bind="click: _.partialRight($parent.openApplication, 'notice'), clickBubble: false,
                                 css: $data.urgency">
                   <i class="bubble-hover" data-bind="css: $data.urgencyClass">
-                    <span class="bubble-hover-text" data-bind="text: _.trim($data.authorityNotice) ? _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])"></span>
+                    <span class="bubble-hover-text bubble-hover-text--notice" data-bind="text: _.trim($data.authorityNotice) ? _.trim($data.authorityNotice) : loc(['notice', 'urgency', $data.urgency])"></span>
                   </i>
                 </div>
               </td>

@@ -14704,6 +14704,15 @@ div.search i {
   white-space: pre-line;
 }
 
+.applications-search-results__indicator .bubble-hover .bubble-hover-text.bubble-hover-text--notice {
+  width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  bottom: -50%;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
 .applications-search-results__indicator .bubble-hover:hover .bubble-hover-text {
   visibility: visible;
 }
