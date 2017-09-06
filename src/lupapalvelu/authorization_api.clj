@@ -105,7 +105,7 @@
   [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
   (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
                             (util/=as-kw company-role :admin)        company-id)
-        auth          (auth/get-auth application auth-id)
+        auth          (->> (auth/get-auths application auth-id) (util/find-first :invite))
         approved-auth (auth/approve-invite-auth auth user created)]
     (when approved-auth
       (update-application command
