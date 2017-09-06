@@ -16,7 +16,7 @@
            [sade.util :as util])
   (:import [java.nio.charset StandardCharsets]))
 
-(testable-privates lupapalvelu.verdict get-verdicts-with-attachments content-disposition-filename)
+(testable-privates lupapalvelu.verdict get-verdicts-with-attachments content-disposition-filename verdict-in-application-without-attachment?)
 
 (facts "Verdicts parsing"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
@@ -188,3 +188,18 @@
                                                                                      StandardCharsets/ISO_8859_1)
                                                       "server"              "Microsoft-IIS/7.5"}})
              => "P\u00e4\u00e4t\u00f6sote.txt"))
+
+(facts "updating verdict paatosote attachments"
+
+  (fact "verdict-in-application-without-attachment?"
+    (let [app {:verdicts [{:kuntalupatunnus "KL-1"
+                           :paatokset [{:poytakirjat ["not-empty"]}]}
+                          {:kuntalupatunnus "KL-2"
+                           :paatokset [{:poytakirjat []}
+                                       {:poytakirjat ["something"]}]}]}]
+      ;; KL-1 has an element in :poytakirjat array
+      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-1"}) => false
+      ;; KL-3 is not present in the :verdicts array
+      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-3"}) => false
+      ;; KL-2 is present and :poytakirjat is empty
+      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-2"}) => true)))

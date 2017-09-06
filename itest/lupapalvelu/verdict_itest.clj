@@ -431,3 +431,33 @@
          (fact "Disable section requirement for Sipoo"
                (command sipoo :section-toggle-enabled :flag false) => ok?
                (command sonja :check-for-verdict :id kt-id) => ok?)))
+
+(facts "Updating application's verdict attachments"
+       ;; Ajetaan päivityseräajo
+       ;; Haetaan hakemus
+       ;; Hakemukselle pitäisi olla ilmestynyt pöytäkirjaliite
+       ;; Päätöksen alle pitäisi olla syntynyt ainakin urlHash
+       ;; sidotaan funktiot siten, että päätökseksi haetaan resources/dev/krysp/verdict-no-attachment.xml
+       ;;
+       ;; Create new application
+       (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
+             app-id (:id application)]
+
+         (:verdicts application) => empty?
+
+         ;; Fetch a verdict without verdict attachment
+         (override-krysp-xml sipoo "753-R" :R [{:selector [:yht:liite] :value ""}])
+         (command sonja :check-for-verdict :id app-id) => ok?
+         (remove-krysp-xml-overrides sipoo "753-R" :R)
+
+         (let [application (query-application sonja app-id)
+               verdict     (first (:verdicts application))
+               paatos      (first (:paatokset verdict))
+               poytakirja  (first (:poytakirjat paatos))]
+
+           ;; Check that poytakirja exists, but urlHash is empty,
+           ;; signifying that attachment was not created
+           poytakirja            => truthy
+           (:urlHash poytakirja) => nil?
+
+           )))
