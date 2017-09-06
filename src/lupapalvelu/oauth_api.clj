@@ -15,6 +15,17 @@
   {:status 400
    :body   "Missing or invalid parameters"})
 
+(defn bad-scope [scope]
+  {:status 403
+   :body   (str "Invalid scope: " scope)})
+
+(defn invalid-scopes? [scope client]
+  (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes])))))
+
+(defn error-redirect [client reason]
+  {:status  307
+   :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=" reason)}})
+
 (defpage [:get "/oauth/authorize"]
   {:keys [client_id scope lang response_type]}
   (let [{:keys [uri query-string] :as req} (request/ring-request)
@@ -30,13 +41,11 @@
       (not (and client scope lang response_type))
       bad-request
 
-      (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes]))))
-      {:status 403
-       :body   (str "Invalid scope: " scope)}
+      (invalid-scopes? scope client)
+      (bad-scope scope)
 
       (oauth/payment-required-but-not-available? scope user)
-      {:status  307
-       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=cannot_pay")}}
+      (error-redirect client "cannot_pay")
 
       :else
       (hiccup.core/html
@@ -56,23 +65,20 @@
       (web/redirect-after-logout lang)
 
       cancel
-      {:status  307
-       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=authorization_cancelled")}}
+      (error-redirect client "authorization_cancelled")
 
       (not (and client scope lang accept))
       bad-request
 
-      (not (set/subset? (set (ss/split scope #",")) (set (get-in client [:oauth :scopes]))))
-      {:status 403
-       :body   (str "Invalid scope: " scope)}
+      (invalid-scopes? scope client)
+      (bad-scope scope)
 
       (oauth/payment-required-but-not-available? scope user)
-      {:status  307
-       :headers {"Location" (str (get-in client [:oauth :callback :failure-url]) "?error=cannot_pay")}}
+      (error-redirect client "cannot_pay")
 
       :else
       (anti-forgery/crosscheck-token
-        (fn [request]
+        (fn [_]
           (let [token (if (= response_type "token")
                         (str "#token=" (oauth/grant-access-token client scope user))
                         (str "?code=" (oauth/grant-authorization-code client scope user)))]
