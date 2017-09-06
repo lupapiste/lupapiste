@@ -49,12 +49,10 @@
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
-            [lupapalvelu.oauth :as oauth]
             [clj-time.core :as time]
             [clj-time.local :as local]
             [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
-            [clojure.set :as set])
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
