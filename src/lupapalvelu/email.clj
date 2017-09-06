@@ -170,12 +170,13 @@
 
 (defn- render-body-with-lang [template-name context lang]
   (let [master (fetch-template "master.md")
+        header (fetch-template-by-lang "header.md" lang)
         footer (fetch-template-by-lang "footer.md" lang)
         body   (fetch-template-by-lang template-name lang)]
     (clostache/render master
                       (preprocess-context body
                                           (assoc context :lang lang))
-                      {:body body :footer footer})))
+                      {:body body :footer footer :header header})))
 
 (defn try-render-with-lang
   "Try render with language. If resource is not found and IllegalArgumentException is thrown, return empty string."
