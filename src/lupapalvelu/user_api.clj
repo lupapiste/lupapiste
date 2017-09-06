@@ -173,7 +173,7 @@
     (fail :error.user.trying-to-update-verified-person-id)))
 
 (defcommand update-user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin :financialAuthority}
    :input-validators [validate-updatable-user]
    :pre-checks [validate-person-id-update-is-allowed!]}
   [{caller :user {person-id :personId :as user-data} :data :as command}]
