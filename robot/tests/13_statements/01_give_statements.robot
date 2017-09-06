@@ -142,7 +142,6 @@ Sonja removes attachment from statement draft
 Sonja can give statement to own request
   Open statement  sonja.sibbo@sipoo.fi
   Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  ERITYISLAUSUNTO
-  Element text should be  statement-text  typed in statement text but not gonna submit the statement.
   Input text  statement-text  salibandy on the rocks.
   Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
