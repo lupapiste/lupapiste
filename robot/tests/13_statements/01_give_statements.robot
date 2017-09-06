@@ -142,10 +142,11 @@ Sonja removes attachment from statement draft
 Sonja can give statement to own request
   Open statement  sonja.sibbo@sipoo.fi
   Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  ERITYISLAUSUNTO
+  Element text should be  statement-text  typed in statement text but not gonna submit the statement.
   Input text  statement-text  salibandy on the rocks.
   Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
 
 Comment is added
@@ -219,7 +220,7 @@ Veikko from Tampere can give statement (and attach something to it as well)
   Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Statement status is  Ehdollinen  veikko.viranomainen@tampere.fi
   Logout
 
