@@ -770,7 +770,8 @@
   {:parameters ["id"]
    :user-roles #{:applicant :authority}
    :states     #{:verdictGiven :constructionStarted :appealed :inUse :onHold}
-   :pre-checks [(permit/validate-permit-type-is permit/R)]}
+   :pre-checks [(permit/validate-permit-type-is permit/R)
+                (app/reject-primary-operations #{:raktyo-aloit-loppuunsaat})]}
   [{:keys [created user application] :as command}]
   (let [muutoslupa-app-id (app/make-application-id (:municipality application))
         primary-op (:primaryOperation application)
