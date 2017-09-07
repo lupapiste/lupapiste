@@ -34,7 +34,6 @@
    :parameters       [id]
    :states           states/post-verdict-states
    :user-roles       #{:applicant}
-   :user-authz-roles roles/all-authz-writer-roles
    :pre-checks       [pricing-available?]}
   [{application :application :as command}]
   (ok :attachments (->> (att/sorted-attachments command)
@@ -50,7 +49,6 @@
   {:feature          :printing-order
    :states           states/post-verdict-states
    :user-roles       #{:applicant}
-   :user-authz-roles roles/all-authz-writer-roles
    :pre-checks       [pricing-available?]}
   [_]
   (ok :pricing pricing))
