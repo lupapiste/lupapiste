@@ -1,4 +1,5 @@
-var printingOrder = (function() {
+;(function() {
+  "use strict";
 
   hub.onPageLoad("printing-order", function() {
     pageutil.showAjaxWait();
@@ -19,7 +20,7 @@ var printingOrder = (function() {
 
 
   $(function() {
-    $('#printing-order').applyBindings({
+    $("#printing-order").applyBindings({
       applicationModel: lupapisteApp.models.application,
       backToApplication: function() {
         var id = pageutil.subPage();

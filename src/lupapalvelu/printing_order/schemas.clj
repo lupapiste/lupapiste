@@ -38,13 +38,10 @@
   {:fileId  ssc/ObjectIdStr
    :name    sc/Str
    :size    sc/Int
-   :content sc/Any #_???})
+   :content sc/Any})
 
 (sc/defschema PrintingOrder
   {:projectName     (str-max-length 150)
-                           ;Granon tuotannossa tilausnimi, moniosainen tilaus
-                           ; osoitetaan laittamalla nimen perään
-                           ; -1, -2, -3 ...
    :orderer         Orderer
    :payer           Payer
    :delivery        Delivery
@@ -55,11 +52,11 @@
   {sc/Any sc/Str})
 
 (sc/defschema PricingItem
-              {:min sc/Int
-               (sc/optional-key :max) sc/Int
-               (sc/optional-key :fixed) sc/Num
-               (sc/optional-key :pricelist-label) LocalizedLabel
-               (sc/optional-key :additionalInformation) LocalizedLabel})
+  {:min sc/Int
+   (sc/optional-key :max) sc/Int
+   (sc/optional-key :fixed) sc/Num
+   (sc/optional-key :pricelist-label) LocalizedLabel
+   (sc/optional-key :additionalInformation) LocalizedLabel})
 
 (sc/defschema PricingConfiguration
-              {:by-volume   [PricingItem]})
+  {:by-volume   [PricingItem]})

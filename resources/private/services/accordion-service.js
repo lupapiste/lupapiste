@@ -185,7 +185,7 @@ LUPAPISTE.AccordionService = function() {
     } else {
       return "";
     }
-  }
+  };
 
   self.attachmentAccordionName = function(key) {
     var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i;

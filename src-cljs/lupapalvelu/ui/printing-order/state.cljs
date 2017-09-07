@@ -88,7 +88,7 @@
   (swap! component-state assoc :phase 2))
 
 (defn submit-order []
-  (js/console.log @component-state)
+  ; TODO backend command here
   (swap! component-state assoc :phase 4))
 
 (defn back-to-application []
