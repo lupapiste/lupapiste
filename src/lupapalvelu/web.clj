@@ -509,7 +509,7 @@
               "', user agent '" user-agent
               "', requested with '" req-with "'.")))
 
-(defn- csrf-attack-hander [request]
+(defn csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (usr/current-user request) "???")}
@@ -519,21 +519,22 @@
 (defn tokenless-request? [request]
    (re-matches #"^/proxy/.*" (:uri request)))
 
+(def anti-csrf-cookie-name "anti-csrf-token")
+
 (defn anti-csrf [handler]
   (fn [request]
     (if (env/feature? :disable-anti-csrf)
       (handler request)
-      (let [cookie-name "anti-csrf-token"
-            cookie-attrs (dissoc (env/value :cookie) :http-only)]
+      (let [cookie-attrs (dissoc (env/value :cookie) :http-only)]
         (cond
            (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
                 (not (logged-in-with-apikey? request)))
-             (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+             (anti-forgery/crosscheck-token handler request anti-csrf-cookie-name csrf-attack-hander)
           (tokenless-request? request)
              ;; cookies via /proxy may end up overwriting current valid ones otherwise
              (handler request)
           :else
-             (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
+             (anti-forgery/set-token-in-cookie request (handler request) anti-csrf-cookie-name cookie-attrs))))))
 
 (defn cookie-monster
    "Remove cookies from requests in which only IE would send and update original cookie information

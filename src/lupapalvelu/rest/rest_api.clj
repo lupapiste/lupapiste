@@ -14,7 +14,9 @@
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.rest.schemas :refer :all]
             [lupapalvelu.rest.applications-data :as applications-data]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.oauth :refer [user-for-access-token]]
+            [sade.env :as env]))
 
 (defonce endpoints (atom []))
 
@@ -45,7 +47,8 @@
                                (param-schema-map))
                 :optional (->> (get meta-data :optional-parameters)
                                (param-schema-map))}
-        letkeys (apply concat (->> params vals (map keys)))]
+        letkeys (apply concat (->> params vals (map keys)))
+        required-scope (keyword (:oauth-scope meta-data))]
     `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
            retval-schema# (get ~meta-data :returns)]
        (when ~register-endpoint?
@@ -53,9 +56,13 @@
                                 :path   p#
                                 :meta   ~meta-data}))
        (defpage ~path {:keys ~letkeys :as request#}
-         (if-let [~'user (or (basic-authentication (request/ring-request))
-                             (autologin/autologin  (request/ring-request)))]
-           (if (~role-check-fn ~'user)
+         (if-let [~'user (if ~required-scope
+                           (user-for-access-token (request/ring-request))
+                           (or (basic-authentication (request/ring-request))
+                               (autologin/autologin  (request/ring-request))))]
+           (if (or (and (not ~required-scope)
+                        (~role-check-fn ~'user))
+                   ((set (:scopes ~'user)) ~required-scope))
              ; Input schema validation
              (if (valid-inputs? request# ~params)
                (let [response-data# (do ~@content)]
@@ -73,6 +80,11 @@
            basic-401)))))
 
 (defmacro defendpoint [path & content]
+  "Defines a plain JSON endpoint which can be accessed with basic authentication or autologin.
+
+   If the metadata map given as second argument contains the key :oauth-scope, then the user will be looked up
+   (only) by comparing the token given in Authorization header (Bearer token) to issued OAuth access tokens.
+   The scopes requested at authorization time must include the one defined in endpoint metadata."
   `(defendpoint-for usr/rest-user? ~path true ~@content))
 
 (defendpoint "/rest/submitted-applications"
@@ -101,12 +113,22 @@
 
 (defn paths []
   (letfn [(mapper [{:keys [path method meta]}]
-            (let [parameters (apply assoc {} (:parameters meta))]
+            (let [parameters (when (seq (:parameters meta))
+                               (apply assoc {} (:parameters meta)))
+                  security (if-let [scope (:oauth-scope meta)]
+                             {:OAuth2 [scope]}
+                             {})]
               {path {method {:summary     (:summary meta)
                              :description (:description meta)
-                             :parameters  {:query parameters}
-                             :responses   {200 {:schema (:returns meta)}}}}}))]
-    (rs/swagger-json {:paths (into {} (map mapper @endpoints))})))
+                             :parameters  {:query (or parameters {})}
+                             :responses   {200 {:schema (:returns meta)}}
+                             :security    security}}}))]
+    (rs/swagger-json {:securityDefinitions {:OAuth2 {:type             "oauth2"
+                                                     :flow             "implicit"
+                                                     :authorizationUrl (str (env/value :host) "/oauth/authorize")
+                                                     :scopes           {:read "Grants read access"
+                                                                        :pay  "Allows payment with company account"}}}
+                      :paths               (into {} (map mapper @endpoints))})))
 
 (defpage "/rest/swagger.json" []
   (if-let [user (or (basic-authentication (request/ring-request))

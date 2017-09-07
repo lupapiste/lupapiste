@@ -681,14 +681,22 @@
    ;; Docstore
    {:id "docstore"
     :username "docstore"
-    :email ""
+    :email "docstore@lupapiste.fi"
     :firstName "Docstore"
     :lastName "API-user"
     :enabled true
     :language "fi"
     :role "docstore-api"
     :private {:password "$2a$10$LqhU/xPaLEsiPYkIJlT3UuBkzZ0wJyLr.0NBcOAlaP4/DW7AHbeGy"} ; basicauth
-    }
+    :oauth {:client-id "docstore"
+            :client-secret "docstore"
+            :scopes ["read" "pay"]
+            :display-name {:fi "Lupapiste kauppa"
+                           :sv "Lupapiste butik"
+                           :en "Lupapiste store"}
+            :callback {:success-url "http://localhost:8000/success"
+                       :failure-url "http://localhost:8000/failure"}}}
+
    ;; Solita admin:  financial / admin
    {:id "financial"
     :email "financial@ara.fi"

@@ -11,6 +11,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.rest.rest-api :refer [defendpoint]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
@@ -31,7 +32,8 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
+            [lupapalvelu.company :as company]))
 
 ;;
 ;; ==============================================================================
@@ -93,7 +95,16 @@
   [{caller :user {params :params} :data}]
   (ok :data (usr/users-for-datatables caller params)))
 
-
+(defendpoint "/rest/user"
+  {:summary     "Returns details of the user associated to the provided access token"
+   :description ""
+   :parameters  []
+   :oauth-scope :read
+   :returns     usr/UserForRestEndpoint}
+  (let [company-id (get-in user [:company :id])
+        company (when company-id (company/find-company-by-id company-id))]
+    (cond-> (select-keys user [:role :email :firstName :lastName])
+            company (assoc :company {:id company-id :name (:name company)}))))
 
 ;;
 ;; ==============================================================================
