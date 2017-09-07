@@ -28,7 +28,7 @@ Application summary tab is hidden
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784
 # Note: The test browser must be active or the case will fail.
-Mikko adds three owners to the Uusirakennus document
+Mikko adds three owners
   Open accordions  info
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  1
 

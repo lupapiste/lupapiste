@@ -401,7 +401,9 @@
   [& {:keys [default henkilo-body yritys-body] :or {default "henkilo" henkilo-body henkilo yritys-body yritys}}]
   (body
     {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default default}
-    {:name "henkilo" :type :group :body henkilo-body}
+    {:name "henkilo" :type :group :body (update-in-body henkilo-body
+                                                        ["userId"]
+                                                        :excludeCompanies (constantly true))}
     {:name "yritys" :type :group :body yritys-body}))
 
 (def party (henkilo-yritys-select-group))
