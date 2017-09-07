@@ -1,6 +1,6 @@
 # OAuth 2 in Lupapiste
 
-Lupapiste provides OAuth 2 authorization endpoints. These can be used to gain authorization from an user to access
+Lupapiste provides OAuth 2 authorization endpoints. These can be used to gain authorization from a user to access
 their user data and, when applicable, bill the corporate account they are associated with.
 
 Lupapiste supports _authorization code_ and _implicit_ grant types.
@@ -8,7 +8,7 @@ Lupapiste supports _authorization code_ and _implicit_ grant types.
 ## Registering an application
 
 The OAuth authorization endpoints must be accessed with valid client credentials. These may be created by adding
-an object resembling the following under the key `oauth` in an user document: 
+an object resembling the following under the key `oauth` in a user document:
 
 ```json
 { 
@@ -21,8 +21,8 @@ an object resembling the following under the key `oauth` in an user document:
 }
 ```
 
-Client id and client secret will be used to identify the client application and display name is what get's displayed in
-the authorization UI. Success-url is the URL that will be called with the authorization code / token, and failure-url
+Client id and client secret will be used to identify the client application and the display name will be shown on the
+authorization UI. Success-url is the URL that will be called with the authorization code / token, and failure-url
 will be called in an error situation.
 
 Currently supported scopes are `read` for retrieving user data and `pay` for asking permission to bill the corporate
@@ -61,8 +61,8 @@ Refresh tokens are currently not supported.
 
 ## Implicit grant type
 
-This flow may be used by front-end client applications (e.g. Javascript or mobile apps) that cannot keep the client-secret
-secure.
+This flow may be used by front-end client applications (e.g. Javascript or mobile apps) that cannot keep the
+client-secret secure.
 
 1. Redirect the user to:
    `https://www.lupapiste.fi/oauth/authorize?lang=fi&scope=read,pay&client_id=<client_id>&response_type=token`. The
@@ -79,9 +79,9 @@ secure.
 The user may decide to cancel the authorization. In this case the failure url of the application will be called with
 `?error=authorization_cancelled`, e.g. `http://somesite.fi/auth/failure?error=authorization_cancelled`.
 
-If the client application asks for a `pay` scope and the user does not have the ability to pay (e.g. she's not associated
-with a corporate account), the user agent will be immediately redirected to the failure url callback with the parameter
-`?error=cannot_pay`, e.g. `http://somesite.fi/auth/failure?error=cannot_pay`.
+If the client application asks for a `pay` scope and the user does not have the ability to pay (e.g. she's not
+associated with a corporate account), the user agent will be immediately redirected to the failure url callback with
+the parameter `?error=cannot_pay`, e.g. `http://somesite.fi/auth/failure?error=cannot_pay`.
 
 ## Service APIs available with the access token
 
