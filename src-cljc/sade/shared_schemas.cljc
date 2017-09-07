@@ -1,5 +1,6 @@
 (ns sade.shared-schemas
-  (:require [schema.core :refer [defschema] :as sc]))
+  (:require [schema.core :refer [defschema] :as sc]
+            [sade.validators :as v]))
 
 (defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
 
@@ -12,12 +13,6 @@
 (def ObjectIdStr
   (sc/pred (partial matches? object-id-pattern) "ObjectId hex string"))
 
-(defn valid-email? [email]
-  (try
-    (boolean (re-matches #".+@.+\..+" email))
-    (catch java.lang.Exception _
-      false)))
-
 (defn in-lower-case? [^String s]
   (if s
     (= s (.toLowerCase s))
@@ -28,4 +23,4 @@
 
 (defschema Email
            "A simple schema for email"
-  (sc/constrained sc/Str (every-pred valid-email? in-lower-case? (max-length-constraint 254)) "Email"))
+  (sc/constrained sc/Str (every-pred v/valid-email? in-lower-case? (max-length-constraint 254)) "Email"))
