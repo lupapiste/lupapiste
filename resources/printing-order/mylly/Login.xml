@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:ord="http://kopijyva.fi/OrderingSystem.AuthenticationService">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <ord:Login>
+            <ord:userName>{{username}}</ord:userName>
+            <ord:password>{{password}}</ord:password>
+        </ord:Login>
+    </soapenv:Body>
+</soapenv:Envelope>

@@ -322,8 +322,13 @@
                           "reservation-slot-reserve-bubble-template.html"
                           "book-appointment-filter-template.html"]}
 
+
+   :printing-order {:depends [:common-html]
+                    :js ["printing-order.js"]
+                    :html ["printing-order-template.html"]}
+
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
-                            :signing :invites :verdict-attachment-prints :calendar-view]
+                            :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"

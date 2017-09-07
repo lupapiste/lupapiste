@@ -62,6 +62,13 @@
       <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
     </button>
     <button class="ghost"
+            data-bind="click: $data.startPrintingOrder,
+                       visible: $data.printingOrderEnabled()"
+            data-test-id="open-printing-order-form">
+      <i class="lupicon-envelope"></i>
+      <span data-bind="ltext: 'printing-order.start.ordering'"></span>
+    </button>
+    <button class="ghost"
             data-bind="click: downloadAll,
                        visible: hasFiles()"
             data-test-id="download-all">
