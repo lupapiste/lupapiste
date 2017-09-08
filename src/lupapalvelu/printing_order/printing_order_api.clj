@@ -6,7 +6,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
-            [lupapalvelu.printing-order.schemas :refer :all]
+            [lupapalvelu.printing-order.domain :refer :all]
             [sade.util :as util]
             [clojure.java.io :as io]
             [schema.core :as sc]))
@@ -19,9 +19,13 @@
   (try
     (sc/validate PricingConfiguration
                  (util/read-edn-resource "printing-order/pricing.edn"))
-    (catch Exception e
-      (error "Reading pricing configuration failed" e)
-      nil)))
+    (catch Exception _
+      (try
+        (sc/validate PricingConfiguration
+                     (util/read-edn-file "./printing-order/pricing.edn"))
+        (catch Exception e
+          (error "Reading pricing configuration failed" e)
+          nil)))))
 
 (def pricing (read-pricing))
 

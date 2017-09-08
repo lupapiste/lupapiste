@@ -1,4 +1,4 @@
-(ns lupapalvelu.printing-order.schemas
+(ns lupapalvelu.printing-order.domain
   (:require [schema.core :as sc]
             [sade.schemas :as ssc]))
 

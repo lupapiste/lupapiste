@@ -11,7 +11,7 @@
             [taoensso.timbre :as timbre]
             [sade.env :as env]
             [schema.core :as sc]
-            [lupapalvelu.printing-order.schemas :refer :all]
+            [lupapalvelu.printing-order.domain :refer :all]
             [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo])
   (:import (java.io ByteArrayOutputStream)))
