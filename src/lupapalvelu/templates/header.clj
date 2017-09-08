@@ -6,9 +6,7 @@
    [:div.nav-top
     [:div.nav-box
      [:div.brand
-      [:a.logo {:href "/"}
-       [:img {:src "/img/lupapiste-logo.png"
-              :alt "Lupapiste"}]]]
+      [:a.logo {:href "/"}]]
      [:div.header-menu
       [:div.header-box
        [:a {:href (str "/app/" lang "/logout") :title (i18n/localize lang "logout")}
