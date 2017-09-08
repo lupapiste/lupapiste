@@ -44,6 +44,33 @@
 (defn- non-empty-review-task? [task]
   (and (tasks/task-is-review? task) (not (empty-review-task? task))))
 
+(defn- task-with-matching-background-id [mongo-task tasks]
+  (let [mongo-task-bg-id (background-id mongo-task)]
+    (when-not (ss/empty? mongo-task-bg-id)
+      (util/find-first #(= mongo-task-bg-id
+                           (background-id %))
+                       update-tasks))))
+
+(defn- task-with-same-name-and-type [mongo-task tasks]
+  (->> tasks
+       (filter #(reviews-have-same-name-and-type? mongo-task %))
+       (first)))
+
+(defn- matching-data?
+  "Do the two tasks have matching review data for the given keys?"
+  [data-keys a b]
+  (->> [a b]
+       (map (comp #(select-keys % data-keys)
+                  :katselmus
+                  :data))
+       (apply =)))
+
+(defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
+  (->> tasks
+       (filter #(and (reviews-have-same-name-and-type? mongo-task %)
+                     (matching-data? data-keys mongo-task %)))
+       (first)))
+
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
   [mongo-task update-tasks]
@@ -52,11 +79,18 @@
                            (util/find-first #(= mongo-task-bg-id
                                                 (background-id %))
                                             update-tasks))]
-    (or updated-id-match
-        (->> update-tasks
-             (filter #(or (reviews-have-same-name-and-type? mongo-task %)
-                          (reviews-have-same-type-other-than-muu-katselmus? mongo-task %)))
-             (first)))))
+    (or ;; 1. task with matching id, or
+        (task-with-matching-background-id mongo-task update-tasks)
+
+        ;; 2. task with same name and type WHEN mongo task is empty, or
+        (and (empty-review-task? mongo-task)
+             (task-with-same-name-and-type mongo-task update-tasks))
+
+        ;; 3. task with same name, type and other data related to
+        ;;    holding the review
+        (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
+                                           mongo-task
+                                           update-tasks))))
 
 (defn- merge-review-tasks
   "Returns a vector with two values:
@@ -64,8 +98,12 @@
    1: Completely new and updated existing review tasks,
    2: Reviews to be marked faulty"
   [tasks-from-update tasks-from-mongo & [overwrite-background-reviews?]]
+
+  ;; As a postcondition, check that for every new faulty task there is
+  ;; an matching updated task
   {:post [(let [[_ new-and-updated new-faulty] %]
             (every? #(matching-task % new-and-updated) new-faulty))]}
+
   (let [faulty-tasks     (filter #(util/=as-kw (:state %) :faulty_review_task)
                                  tasks-from-mongo)
         tasks-from-mongo (remove #(util/=as-kw (:state %) :faulty_review_task)
