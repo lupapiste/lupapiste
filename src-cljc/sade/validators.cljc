@@ -1,9 +1,7 @@
 (ns sade.validators
   (:require #?@(:clj [[clj-time.format :as timeformat]
-                      [sade.dns :as dns]
-                      [sade.env :as env]
-                      [sade.strings :as ss]])
-            #?(:cljs [cljs-time.format :as timeformat])))
+                      [sade.strings :as ss]]
+                :cljs [[cljs-time.format :as timeformat]])))
 
 (defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
 
@@ -17,13 +15,6 @@
     (catch #?(:clj Exception
               :cljs js/Object) _
       false)))
-
-#?(:clj ; This function is not available for cljs at all - won't do DNS queries from the frontend
-(defn email-and-domain-valid? [email]
-  (or (ss/blank? email)
-    (and
-      (valid-email? email)
-      (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))))
 
 ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
 (def http-url? (partial matches? #"^(https?)://[^\s/$.?#].[^\s]*$"))
