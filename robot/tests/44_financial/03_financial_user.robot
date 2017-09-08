@@ -128,7 +128,6 @@ Financial authority can go to my page and change email
   Click enabled by test id  change-email
   Open last email
   Click link  xpath=//a
-  Wait Until  Page should contain  Voit nyt kirjautua sisään uudella sähköpostiosoitteellasi.
   Go to login page
   User logs in  financial@ara.com  admin1234  Rahoituskäsittelijä
 

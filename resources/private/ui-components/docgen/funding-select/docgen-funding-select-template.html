@@ -7,10 +7,9 @@
     <p>
       <input type="checkbox"
              data-bind="checked: selectValue,
-                        attr: { id: 'fundingChecbox' },
                         css: inputClasses"
              id="select-funding-checkbox"/>
-      <label data-bind="attr: { 'for': 'fundingChecbox' }, visible: label, ltext: label, css: labelClasses"></label>
+      <label data-bind="attr: { 'for': 'select-funding-checkbox' }, visible: label, ltext: label, css: labelClasses"></label>
       <span data-bind="saveIndicator: indicator, label: true"></span>
     </p>
   </span>
