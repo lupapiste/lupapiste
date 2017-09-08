@@ -17,7 +17,7 @@
 (defquery applications-search
   {:description "Service point for application search component"
    :parameters []
-   :user-roles #{:applicant :authority}}
+   :user-roles #{:applicant :authority :financialAuthority}}
   [{user :user data :data}]
   (ok :data (search/applications-for-user
               user
@@ -30,7 +30,7 @@
 (defquery applications-search-default
   {:description "The initial applications search. Returns data and used search."
    :parameters  []
-   :user-roles  #{:applicant :authority}}
+   :user-roles  #{:applicant :authority :financialAuthority}}
   [{user :user}]
   (let [{:keys [defaultFilter applicationFilters]} (usr/get-user-by-id (:id user))
         {:keys [sort filter]} (or (some-> defaultFilter

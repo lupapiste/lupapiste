@@ -69,6 +69,10 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return application().isNotOwner( role );
   };
 
+  self.isNotFinancialAuthority = function ( model ) {
+    return model.role() !== "financialAuthority";
+  };
+
   var roleChangeMap = {"foreman":"writer", "writer":"foreman"};
 
   self.changeAuth = function(model) {
@@ -131,11 +135,11 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   };
 
   self.showRemove = function( role ) {
-    return hasAuth( "remove-auth") && self.isNotOwner( role );
+    return hasAuth( "remove-auth") && self.isNotOwner( role ) && self.isNotFinancialAuthority ( role );
   };
 
   self.showSubscriptionStatus = function( role ) {
-    return application().canSubscribe( role );
+    return application().canSubscribe( role ) && self.isNotFinancialAuthority( role );
   };
 
   self.subscriptionOn = function( role ) {

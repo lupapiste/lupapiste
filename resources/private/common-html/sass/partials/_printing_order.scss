@@ -1,0 +1,212 @@
+$matti-grid-margin: 10px;
+
+@mixin order-column ($size, $columns) {
+  position: relative;
+  float: left;
+  @include column-width($size * (100% / $columns));
+  min-height: 1px; // Enforce rendering of empty column.
+  padding-left: $matti-grid-margin * 3;
+
+  div.radio-wrapper {
+    width: 100%;
+  }
+
+  label.required:after {
+    content: " *";
+    color: $label-required-star-color;
+  }
+
+  .col--vertical, .col--horizontal {
+    box-sizing: border-box;
+  }
+  .col--vertical {
+    label {
+      text-align: left;
+      display: block;
+    }
+  }
+}
+
+@mixin order-grid ($columns) {
+  .order-grid-#{$columns} {
+    width: 100%;
+    color: $gray51;
+    .row {
+      @include clearfix;
+      padding: $matti-grid-margin 0;
+      @for $i from 1 through $columns {
+        .col-#{$i} {
+          @include order-column($i, $columns);
+          &:first-child {
+            padding-left: 0;
+          }
+        }
+      }
+      .col--full > * {
+        width: 100%;
+      }
+      .col--full > .col--vertical > * {
+        width: 100%;
+      }
+      .col--right > * {
+        float: right;
+      }
+      .col--left > * {
+        float: left;
+      }
+      .col--center {
+        text-align: center;
+        > * {
+          display: inline-block;
+        }
+      }
+      &.row--tight {
+        padding-top: $marginS;
+        padding-bottom: $marginS;
+        margin: 0 0 0 0;
+      }
+    }
+  }
+}
+
+@for $i from 1 through 12 {
+  @include order-grid( $i );
+}
+
+span.order-grid-header {
+  font-size: 17px;
+  font-weight: bold;
+  width: 100%;
+  display: inline-block;
+}
+
+div.order-summary-contacts-block {
+  box-sizing: border-box;
+  border: 1px solid $gray187;
+  padding: 0px $baseline / 2;
+}
+
+span.order-summary-line {
+  width: 100%;
+  display: inline-block;
+}
+
+div.order-section {
+  padding-bottom: $matti-grid-margin * 2;
+
+  div.attachments-table-container {
+    padding:0;
+  }
+}
+
+.order-summary-pricing-block {
+  background-color: $gray246;
+  border-top: 1px solid $gray221;
+
+  table {
+    margin-bottom: 0px;
+
+    tr {
+      background: none;
+      border: none;
+    }
+
+    td.first {
+      width: 50%;
+    }
+
+    td.second {
+      width: 35%;
+      text-align: right;
+    }
+
+    td.third {
+      width: 15%;
+    }
+  }
+}
+
+div.printing-order-footer {
+  position: fixed;
+  left: 0px;
+  bottom: 0px;
+  width: 100%;
+  z-index: 2002;
+  background-color: $light-gray-link;
+  padding: $baseline auto $baseline auto;
+
+  > div {
+    width: 100%;
+    max-width: $application-max-width;
+    min-width: $application-min-width;
+    margin: 0 auto;
+
+    button {
+      width: auto;
+      display: inline;
+      padding-right: $baseline;
+    }
+
+    h2 {
+      font-weight: normal;
+    }
+  }
+
+  .open-pricelist-btn {
+    min-width: 200px;
+  }
+
+  div.pricelist-panel {
+    position: absolute;
+    bottom: $btn-height;
+    min-width: 250px;
+
+    > div:first-child {
+      bottom: 27px;
+      position: absolute;
+      background-color: white;
+      color: black;
+      border: solid 2px $lp-orange;
+      z-index: 99;
+    }
+
+    div.row {
+      padding: 0px 10px;
+    }
+
+    .arrow {
+      position: absolute;
+      z-index: 101;
+      left: 80px;
+    }
+
+    .arrow:after, .arrow:before {
+      bottom: 100%;
+      left: 50%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+      z-index: 100;
+      overflow-y: visible;
+    }
+
+    .arrow:before {
+      display: block;
+      border-color: transparentize( $lp-orange, 1);
+      border-top-color: $lp-orange;
+      border-width:  14px;
+      margin-left:  -14px;
+    }
+
+    .arrow:after {
+      border-color: transparentize( white, 1);
+      border-top-color: white;
+      border-width:  16px;
+      margin-left:  -16px;
+    }
+
+  }
+}

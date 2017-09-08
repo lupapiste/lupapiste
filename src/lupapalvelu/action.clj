@@ -19,7 +19,8 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [sade.dns :as dns]))
 
 ;;
 ;; construct command, query and raw
@@ -89,7 +90,7 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (v/email-and-domain-valid? (ss/canonize-email email))
+      (when-not (dns/email-and-domain-valid? (ss/canonize-email email))
         (fail :error.email)))))
 
 (defn validate-url [url]
@@ -291,13 +292,20 @@
 ;; Command router
 ;;
 
+; FIXME This is bit ugly hack to get needed rights for financial authority without adding
+; it into all queries. Should be removed when user-roles handling is updated.
+(defn- allowed-financial-authority [allowed-roles user-role parameters]
+  (and (= user-role :financialAuthority)
+       (allowed-roles :applicant)
+       (contains? (set (map keyword parameters)) :id)))
+
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-user-role [command {user-roles :user-roles :as meta-data}]
+(defn- has-required-user-role [command {user-roles :user-roles parameters :parameters :as meta-data}]
   (let [allowed-roles (or user-roles #{})
         user-role (-> command :user :role keyword)]
-    (or (allowed-roles :anonymous) (allowed-roles user-role))))
+    (or (allowed-roles :anonymous) (allowed-roles user-role) (allowed-financial-authority allowed-roles user-role parameters))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -423,7 +431,8 @@
     (auth/has-organization-authz-roles? required-authz (:organization application) user)))
 
 (defn- company-authz? [command-meta-data application user]
-  (auth/has-auth? application (get-in user [:company :id])))
+  (-> (get command-meta-data :user-authz-roles #{})
+      (auth/company-authz? application user)))
 
 (defn user-is-allowed-to-access?
   [{user :user :as command} application]

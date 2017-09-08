@@ -20,8 +20,11 @@ LUPAPISTE.DocgenPersonSelectModel = function( params ) {
   var collection = collectionFn();
 
   self.personOptions = self.disposedComputed( function() {
-    var itemsObservable = _.get(partiesModel, "personSelectorItems");
-    return itemsObservable ? itemsObservable() : [];
+    var items = _.clone (util.getIn(partiesModel, ["personSelectorItems"], []));
+    if( params.schema.excludeCompanies ) {
+      _.remove( items, "company" );
+    }
+    return items;
   });
 
   self.optionsText = function( person ) {

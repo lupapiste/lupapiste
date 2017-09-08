@@ -77,6 +77,15 @@ Can not add the same user again
   Click enabled by test id  company-add-user-already-in-close
   Wait until  Element should not be visible  dialog-company-new-user
 
+Can not add the financial authority as company user
+  Click enabled by test id  company-add-user
+  Wait until  Element should be visible  dialog-company-new-user
+  Input text by test id  company-new-user-email  financial@ara.fi
+  Click enabled by test id  company-search-email
+  Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="text: loc('register.company.add-user.is-financial-authority', email())"]
+  Click enabled by test id  company-user-is-financial-authority-close-dialog
+  Wait until  Element should not be visible  dialog-company-new-user
+
 Delete Duff3
   Element should be visible by test id  company-user-delete-0
   Click element  xpath=//section[@id='company']//a[@data-test-id="company-user-delete-0"]
@@ -233,14 +242,16 @@ Mikko logs in, creates application and invites Solita
   Logout
 
 Solita accepts invite
-  Open last email
-  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
-  Click Element  xpath=(//a[contains(., 'accept-company-invitation')])
-  Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
-  Go to login page
+  User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo,
+  Click by test id  accept-invite-button
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
-Kaino logs in and could submit application
-  Kaino logs in
+Kaino Solita opens the application
+  Open application  ${appname}  ${propertyId}
+
+Kaino could submit application
   Open application  ${appname}  ${propertyId}
   Open tab  requiredFieldSummary
   Wait until  Test id enabled  application-submit-btn

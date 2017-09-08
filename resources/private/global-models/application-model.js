@@ -222,8 +222,11 @@ LUPAPISTE.ApplicationModel = function() {
       self.invites(_.filter(data.invites, function(invite) {
         return invite.application.id === self.id();
       }));
-      if (self.hasInvites()) {
-        self.showAcceptInvitationDialog();
+      if (self.hasPersonalInvites()) {
+        self.showAcceptPersonalInvitationDialog();
+      }
+      if (self.hasCompanyInvites()) {
+        self.showAcceptCompanyInvitationDialog();
       }
     });
   };
@@ -232,12 +235,22 @@ LUPAPISTE.ApplicationModel = function() {
   self.id.subscribe(self.updateInvites);
 
   self.hasInvites = ko.computed(function() {
-    return self.invites().length !== 0;
+    return !_.isEmpty(self.invites());
   });
 
-  self.approveInvite = function() {
+  self.hasPersonalInvites = ko.computed(function() {
+    var id = util.getIn(lupapisteApp.models.currentUser, ["id"]);
+    return !_.isEmpty(_.filter(self.invites(), ["user.id", id]));
+  });
+
+  self.hasCompanyInvites = ko.computed(function() {
+    var id = util.getIn(lupapisteApp.models.currentUser, ["company", "id"]);
+    return !_.isEmpty(_.filter(self.invites(), ["user.id", id]));
+  });
+
+  self.approveInvite = function(type) {
     ajax
-      .command("approve-invite", {id: self.id()})
+      .command("approve-invite", {id: self.id(), "invite-type": type})
       .success(function() {
         self.reload();
         self.updateInvites();
@@ -872,8 +885,8 @@ LUPAPISTE.ApplicationModel = function() {
     }
   };
 
-  self.showAcceptInvitationDialog = function() {
-    if (self.hasInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
+  self.showAcceptPersonalInvitationDialog = function() {
+    if (self.hasPersonalInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
       hub.send("show-dialog", {ltitle: "application.inviteSend",
                                size: "medium",
                                component: "yes-no-dialog",
@@ -881,6 +894,18 @@ LUPAPISTE.ApplicationModel = function() {
                                                  lyesTitle: "applications.approveInvite",
                                                  lnoTitle: "application.showApplication",
                                                  yesFn: self.approveInvite}});
+    }
+  };
+
+  self.showAcceptCompanyInvitationDialog = function() {
+    if (self.hasCompanyInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
+      hub.send("show-dialog", {ltitle: "application.inviteSend",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.inviteCompanyDialogText",
+                                                 lyesTitle: "applications.approveInvite",
+                                                 lnoTitle: "application.showApplication",
+                                                 yesFn: _.partial(self.approveInvite, "company")}});
     }
   };
 

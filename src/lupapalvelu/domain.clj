@@ -19,17 +19,20 @@
 ;; application mongo querys
 ;;
 
-(defn basic-application-query-for [user]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter})]
+(defn basic-application-query-for [{user-id :id {company-id :id company-role :role} :company :as user}]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :approver :commenter :financialAuthority})]
     (case (keyword (:role user))
-      :applicant    (if-let [company-id (get-in user [:company :id])]
-                      {$or [{:auth.id (:id user)} {:auth.id company-id}]}
-                      {:auth.id (:id user)})
+      :applicant    (if (nil? company-id)
+                      {:auth.id user-id}
+                      {$or [{:auth.id user-id}
+                            {:auth {$elemMatch {:id company-id :company-role company-role}}}
+                            {:auth {$elemMatch {:id company-id :company-role {$exists false}}}}]})
       :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
       :rest-api     {:organization {$in organizations}}
       :oirAuthority {:organization {$in organizations}}
       :trusted-etl {}
       :trusted-salesforce {}
+      :financialAuthority {:auth.id (:id user)}
       (do
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results
@@ -52,6 +55,7 @@
       :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["canceled"]}}
       :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
+      :financialAuthority {:state {$nin ["canceled"]}}
       {})))
 
 (defn- only-authority-sees [user checker items]
@@ -274,10 +278,9 @@
   (first (get-applicant-documents documents)))
 
 (defn invites [{auth :auth}]
-  (map :invite (filter :invite auth)))
-
-(defn invite [application email]
-  (first (filter #(= (ss/lower-case email) (:email %)) (invites application))))
+  (->> (filter :invite auth)
+       (map (fn [{invite :invite inviter :inviter auth-type :type}]
+              (merge {:inviter inviter :type auth-type} invite)))))
 
 (defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))

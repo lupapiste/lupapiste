@@ -13,7 +13,7 @@
             [sade.shared-util :as shared]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [schema.core :as sc]
-            [taoensso.timbre :as timbre :refer [debugf]])
+            [taoensso.timbre :as timbre :refer [debugf warnf]])
   (:import [java.util.jar JarFile]
            [org.joda.time LocalDateTime]
            [java.io ByteArrayOutputStream]))
@@ -164,7 +164,7 @@
   "Returns the mapping for which the value satisfies the predicate.
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
   [pred m]
-  (into {} (filter (fn [[_ v]] (pred v)) m)))
+  (shared/filter-map-by-val pred m))
 
 ; From clojure.contrib/seq
 
@@ -564,9 +564,8 @@
   ([source target-dir]
     (unzip source target-dir "UTF-8"))
   ([source target-dir encoding]
-    (let [fallback-encoding "IBM437"]
+    (let [fallback-encoding "IBM00858"]
       (try
-
        (with-open [zip (java.util.zip.ZipFile. (fs/file source) (java.nio.charset.Charset/forName encoding))]
         (let [entries (enumeration-seq (.entries zip))
               target-file #(->> (.getName %)
@@ -580,7 +579,7 @@
        (catch IllegalArgumentException e
          (if-not (= encoding fallback-encoding)
            (do
-             (debugf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP437 encoding" source encoding)
+             (warnf "Malformed zipfile contents in (%s) with encoding: %s. Fallbacking to CP858 encoding" source encoding)
              (unzip source target-dir fallback-encoding))
            (fail! :error.unzipping-error)))))
     target-dir))
@@ -626,6 +625,9 @@
 
 (defn read-edn-resource [file-path]
   (->> file-path io/resource slurp edn/read-string))
+
+(defn read-edn-file [file-path]
+  (-> (io/file file-path) slurp edn/read-string))
 
 (defn distinct-by
   "Given a function comparable-fn and collection coll, builds a new

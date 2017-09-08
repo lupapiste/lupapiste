@@ -18,12 +18,14 @@
 
   (against-background [(fetch-template "master.md")           => "{{>header}}\n\n{{>body}}\n\n{{>footer}}"
                        (fetch-template "en-footer.md")        => "## {{footer}}"
+                       (fetch-template "en-header.md")        => "## {{header}}"
                        (fetch-template "en-test.md")          => "This is *test* message for {{applicationRole.hakija}} {{receiver}} [link text](http://link.url \"alt text\")"
                        (fetch-html-template "html-wrap.html") => (enlive/html-resource (io/input-stream (.getBytes "<html><body></body></html>")))]
     (facts "header and footer"
-      (let [[plain html] (apply-template "test.md" {:footer "FOOTER" :receiver "foobar" :lang "en"})]
-        plain => "\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
-        html => "<html><body><p>This is <em>test</em> message for applicant foobar <a href=\"http://link.url\" title=\"alt text\">link text</a></p><h2>FOOTER</h2></body></html>"))))
+      (let [[plain html] (apply-template "test.md" {:footer "FOOTER" :header "HEADER"
+                                                    :receiver "foobar" :lang "en"})]
+        plain => "\nHEADER\n\nThis is test message for applicant foobar link text: http://link.url \n\nFOOTER\n"
+        html => "<html><body><h2>HEADER</h2><p>This is <em>test</em> message for applicant foobar <a href=\"http://link.url\" title=\"alt text\">link text</a></p><h2>FOOTER</h2></body></html>"))))
 
 (facts "User language markdown templates: test body"
   (fetch-template "testbody.md") => (contains "suomi")

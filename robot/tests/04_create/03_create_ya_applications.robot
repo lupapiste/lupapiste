@@ -32,7 +32,7 @@ Mikko creates a kayttolupa
   [Tags]  firefox
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  FOO_${secs}
-  Create application  ${appname}  753  753-423-2-163  YA-kayttolupa
+  Create application  ${appname}  753  753-423-2-151  YA-kayttolupa
   Wait until  Permit subtype is  Käyttölupa
 
 Mikko creates a mainostus-viitoitus type of kayttolupa

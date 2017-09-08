@@ -405,7 +405,7 @@
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment-preview! attachment-id (partial att/get-attachment-file-as! user)))
@@ -414,7 +414,7 @@
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id false (partial att/get-attachment-file-as! user)))
@@ -433,7 +433,7 @@
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (att/output-attachment attachment-id true (partial att/get-attachment-file-as! user)))
@@ -443,7 +443,7 @@
    :categories       #{:attachments}
    :optional-parameters [:download]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority :financialAuthority}
    :user-authz-roles roles/all-authz-roles}
   [{{:keys [attachment-id download]} :data user :user}]
   (att/output-attachment (att/get-attachment-latest-version-file user attachment-id) (= download "true")))

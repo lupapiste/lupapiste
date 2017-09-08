@@ -27,7 +27,7 @@ Mikko invites Teppo
 
 Mikko can't reinvite Teppo
   Open accordions  parties
-  Click by test id  application-invite-paasuunnittelija
+  Scroll and click test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Sleep  1
   Input Text  invite-email  teppo@example.com
@@ -110,7 +110,7 @@ Mikko can see invite paasuunnittelija button again
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko can't invite himself
-  Wait until  Click by test id  application-invite-paasuunnittelija
+  Scroll and click test id  application-invite-paasuunnittelija
   Input Text  invite-email  mikko@example.com
   Input Text  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit
@@ -124,14 +124,13 @@ Mikko decides to go to the desert, put on his ipod, and listen some some British
   Logout
 
 Solita accepts invite
-  Open last email
-  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
-  Click Element  xpath=(//a[contains(., 'accept-company-invitation')])
-  Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
-  [Teardown]  Go to login page
-
-Kaino Solita logs in and opens the application
   User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  Yritysvaltuutus: ${appname}, Sipoo,
+  Click by test id  accept-invite-button
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
+
+Kaino Solita opens the application
   Open application  ${appname}  ${propertyId}
   [Teardown]  logout
 
@@ -147,7 +146,7 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
   Open tab  parties
   Open accordions  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
-  Click by test id  application-invite-paasuunnittelija
+  Scroll and click test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Input Text  invite-email  oskari@example.com
   Input Text  invite-text  Tuu mukaan tunkkaan lupaa
@@ -158,6 +157,21 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
 
 # TODO: should create new user "oskari@example.com" and make sure he has access
 
+# There are now three parties: Mikko, Teppo, Solita and Oskari (not accepted yet).
+Solita is not included in the hakija person select
+  Scroll and click  [data-doc-type='hakija-r'] [data-docgen-path='_selected'][value=henkilo]
+  # Empty, Mikko and Teppo
+  Person selector count is  hakija-r  henkilo.userId  3
+  Person selector includes  hakija-r  henkilo.userId  Mikko
+  Person selector includes  hakija-r  henkilo.userId  Teppo
+  Person selector includes  hakija-r  henkilo.userId  Kaino  0
+
+Solita is included in the paasuunnittelija person select
+  # Empty, Mikko, Teppo and Kaino
+  Person selector count is  paasuunnittelija  userId  4
+  Person selector includes  paasuunnittelija  userId  Mikko
+  Person selector includes  paasuunnittelija  userId  Teppo
+  Person selector includes  paasuunnittelija  userId  Solita Kaino, Solita Oy
 
 # Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
 # Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
@@ -168,7 +182,7 @@ Mikko invites previously unknown user Unto as tyonjohtaja
   Open tab  parties
   Open accordions  parties
   Wait until  Element should be visible  xpath=//div[@id="application-parties-tab"]//*[@data-test-id='application-invite-tyonjohtaja']
-  Click by test id  application-invite-tyonjohtaja
+  Scroll and click test id  application-invite-tyonjohtaja
   Wait until  Element should be visible  invite-email
   Input Text  invite-email  unto@example.com
   Input Text  invite-text  Tuu mulle tyonjohtajaksi
@@ -201,7 +215,7 @@ Mask is invisible
 
 Invite Teppo
   Invite count is  0
-  Click by test id  application-invite-paasuunnittelija
+  Scroll and click test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
@@ -213,3 +227,12 @@ Invite Teppo
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
+
+Person selector includes
+  [Arguments]  ${doc-type}  ${user-id}  ${text}  ${count}=1
+  jQuery should match X times  [data-doc-type='${doc-type}'] select[data-test-id='${user-id}'] option:contains(${text})  ${count}
+
+Person selector count is
+  [Arguments]  ${doc-type}  ${user-id}  ${count}
+  jQuery should match X times  [data-doc-type='${doc-type}'] select[data-test-id='${user-id}'] option  ${count}
+  Person selector includes  ${doc-type}  ${user-id}  Valitse

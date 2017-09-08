@@ -322,8 +322,13 @@
                           "reservation-slot-reserve-bubble-template.html"
                           "book-appointment-filter-template.html"]}
 
+
+   :printing-order {:depends [:common-html]
+                    :js ["printing-order.js"]
+                    :html ["printing-order-template.html"]}
+
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
-                            :signing :invites :verdict-attachment-prints :calendar-view]
+                            :signing :invites :verdict-attachment-prints :calendar-view :printing-order]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "archival-summary.js" "case-file.js"
@@ -403,7 +408,7 @@
 
    :change-email {:depends [:common-html]
                   :js ["change-email.js"]
-                  :html ["init-email-change.html" "change-email.html"]}
+                  :html ["init-email-change.html" "change-email.html" "change-email-fa.html"]}
 
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
@@ -538,6 +543,11 @@
                     "application-bulletins/bulletins-search/bulletins-search-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
+
+   :financial-authority-app {:depends []
+                             :js ["financial-authority-app.js"]}
+   :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
+                             :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
    })
 
 ; Make sure all dependencies are resolvable:

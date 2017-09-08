@@ -76,3 +76,6 @@
 "guest-authority.remove-title" "en" "Remove a project-specific read-only access"
 "guest-authority.remove-title" "fi" "Poista hankekohtainen lukuoikeus"
 "guest-authority.remove-title" "sv" "Stryk projektspecifik läsrätt"
+"error.is-financial-authority" "en" ""
+"error.is-financial-authority" "fi" "Käyttäjä on rahoituskäsittelijä."
+"error.is-financial-authority" "sv" ""

@@ -31,6 +31,9 @@
    :suomifi-vakinainenkotimainenlahiosoitepostinumero         :zip
    :suomifi-vakinainenkotimainenlahiosoitepostitoimipaikkas   :city})
 
+(defn select-headers [m]
+  (select-keys m (keys header-translations)))
+
 (def proxy-user-and-pass
   {"saml-user" (-> (env/get-config) :shibboleth :proxy-key)})
 
@@ -39,7 +42,9 @@
         request (request/ring-request)
         headers (->> request
                      :headers
-                     (util/map-keys (comp keyword str/lower-case)))
+                     (util/map-keys (comp keyword str/lower-case))
+                     select-headers
+                     (util/map-values #(String. (.getBytes % "ISO-8859-1"))))
         proxy-key-matches (security/check-credentials-from-basic-auth request proxy-user-and-pass)
         ident (-> (select-keys headers (keys header-translations))
                   (clojure.set/rename-keys header-translations)

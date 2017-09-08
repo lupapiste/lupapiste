@@ -69,7 +69,7 @@ Veikko from Tampere can give statement
   Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Ehdollinen
   [Teardown]  logout
 
@@ -97,13 +97,13 @@ Olli gives two statements
   Input text  statement-text  freedom!
   Wait until  Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Statement status is  Puollettu  olli.uleaborg@ouka.fi  2
   Open statement  olli.uleaborg@ouka.fi  3
   Input text  statement-text  freedom again!
   Wait until  Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Statement status is  Puollettu  olli.uleaborg@ouka.fi  3
 
 Olli requests reply for statement
@@ -154,7 +154,7 @@ Mikko writes reply for Olli's statement
   Checkbox wrapper selected  statement-nothing-to-add
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-1']  Vastine annettu
 
 Mikko writes reply for another Olli's statement
@@ -169,7 +169,7 @@ Mikko writes reply for another Olli's statement
   Wait until  Input text  statement-reply-text  this is my reply
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-2']  Vastine annettu
   [Teardown]  logout
 

@@ -159,13 +159,15 @@
 
     self.updateAttachments = function() {
       self.attachments(null);
-      ajax
-        .query("user-attachments", {})
-        .pending(self.loadingAttachments)
-        .success(function(data) {
-          self.attachments(_.map(data.attachments, function(info, id) { info.id = id; return info; }));
-        })
-        .call();
+      if (!lupapisteApp.models.currentUser.isFinancialAuthority()) {
+        ajax
+          .query("user-attachments", {})
+          .pending(self.loadingAttachments)
+          .success(function(data) {
+            self.attachments(_.map(data.attachments, function(info, id) { info.id = id; return info; }));
+          })
+          .call();
+      }
       return self;
     };
 

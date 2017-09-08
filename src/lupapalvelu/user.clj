@@ -60,7 +60,8 @@
    "rest-api"
    "trusted-etl"
    "trusted-salesforce"
-   "docstore-api"])
+   "docstore-api"
+   "financialAuthority"])
 
 (defschema Role (apply sc/enum all-roles))
 (defschema OrgId (sc/pred keyword? "Organization ID"))
@@ -115,7 +116,12 @@
            (sc/optional-key :companyFilters)      [SearchFilter]
            (sc/optional-key :language)            i18n/EnumSupportedLanguages
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
-           (sc/optional-key :firstLogin)          sc/Bool})
+           (sc/optional-key :firstLogin)          sc/Bool
+           (sc/optional-key :oauth)               {:client-id sc/Str
+                                                   :scopes (sc/enum "read" "pay")
+                                                   :display-name i18n/LocalizationStringMap
+                                                   :callback {:success-url sc/Str
+                                                              :failure-url sc/Str}}})
 
 (defschema RegisterUser
                   {:email                            ssc/Email
@@ -138,6 +144,10 @@
   {:id     ssc/ObjectIdStr
    :userId (:id User)
    :roleId ssc/ObjectIdStr})
+
+(defschema UserForRestEndpoint
+  (merge (select-keys User [:role :email :firstName :lastName])
+         {(sc/optional-key :company) {:id sc/Str :name sc/Str}}))
 
 ;;
 ;; ==============================================================================
@@ -249,6 +259,9 @@
 
 (defn company-admin? [user]
   (= (-> user :company :role) "admin"))
+
+(defn financial-authority? [{role :role}]
+  (= :financialAuthority (keyword role)))
 
 
 (defn organization-ids
@@ -490,6 +503,10 @@
   {:pre [email]}
   (get-user {:email email}))
 
+(defn get-user-by-oauth-id [client-id]
+  {:pre [client-id]}
+  (get-user {:oauth.client-id client-id}))
+
 (defn email-in-use? [email]
   (as-> email $
     (get-user-by-email $)
@@ -555,7 +572,7 @@
     (when (and org-authz (not (every? coll? (vals org-authz))))
       (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
 
-    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
+    (when-not (#{:authority :authorityAdmin :applicant :dummy :financialAuthority} user-role)
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)

@@ -1,23 +1,20 @@
 (ns sade.validators
-  (:require [clj-time.format :as timeformat]
-            [sade.dns :as dns]
-            [sade.env :as env]
-            [sade.strings :as ss]))
+  (:require #?@(:clj [[clj-time.format :as timeformat]
+                      [sade.strings :as ss]]
+                :cljs [[cljs-time.format :as timeformat]])))
 
 (defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
 
+#?(:clj (defn parse-long [s] (Long/parseLong s)))
+#?(:cljs (def parse-long int))
+
 (defn valid-email? [email]
   (try
-    (javax.mail.internet.InternetAddress. email)
+    #?(:clj (javax.mail.internet.InternetAddress. email))
     (boolean (re-matches #".+@.+\..+" email))
-    (catch Exception _
+    (catch #?(:clj Exception
+              :cljs js/Object) _
       false)))
-
-(defn email-and-domain-valid? [email]
-  (or (ss/blank? email)
-    (and
-      (valid-email? email)
-      (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email)))))
 
 ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
 (def http-url? (partial matches? #"^(https?)://[^\s/$.?#].[^\s]*$"))
@@ -25,9 +22,9 @@
 (defn finnish-y? [y]
   (if y
     (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
-      (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
+      (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(parse-long (str %)) number))) 11)
             cn (if (zero? cn) 0 (- 11 cn))]
-        (= (Long/parseLong check) cn)))
+        (= (parse-long check) cn)))
     false))
 
 (defn finnish-ovt?
@@ -42,8 +39,6 @@
       (finnish-y? (str y \- c)))
     false))
 
-(def bic? (partial matches? #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$"))
-
 (def rakennusnumero? (partial matches? #"^\d{3}$"))
 
 (def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
@@ -52,11 +47,11 @@
 
 (def finnish-hetu-regex (re-pattern (str "^" finnish-hetu-str "$")))
 
-(defn vrk-checksum [^Long l]
+(defn vrk-checksum [l]
   (nth vrk-checksum-chars (mod l 31)))
 
 (defn hetu-checksum [^String hetu]
-  (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
+  (vrk-checksum (parse-long (str (subs hetu 0 6) (subs hetu 7 10)))))
 
 (defn- validate-hetu-date [hetu]
   (let [dateparts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
@@ -66,7 +61,8 @@
     (try
       (timeformat/parse (timeformat/formatters :basic-date) basic-date)
       true
-      (catch Exception e
+      (catch #?(:clj Exception
+                :cljs :default) _
         false))))
 
 (defn- validate-hetu-checksum [hetu]
@@ -78,7 +74,7 @@
     false))
 
 (defn- rakennustunnus-checksum [^String prt]
-  (vrk-checksum (Long/parseLong (subs prt 0 9))))
+  (vrk-checksum (parse-long  (subs prt 0 9))))
 
 (defn- rakennustunnus-checksum-matches? [^String prt]
   (= (subs prt 9 10) (rakennustunnus-checksum prt)))

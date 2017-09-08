@@ -1,11 +1,23 @@
 (ns lupapalvelu.ui.common
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [cljs-time.format :as tf]
+            [cljs-time.coerce :as tc]
+            [cljs-time.core :as t]))
 
 (defn get-current-language []
   (.getCurrentLanguage js/loc))
 
 (defn loc [& args]
   (apply js/loc (map name args)))
+
+(defn loc-html [tag & args]
+  [tag
+   {:dangerouslySetInnerHTML {:__html (apply loc args)}}])
+
+(def fi-date-formatter (tf/formatter "d.M.yyyy"))
+
+(defn format-timestamp [tstamp]
+  (tf/unparse fi-date-formatter (doto (t/time-now) (.setTime (tc/to-long tstamp)))))
 
 (defn query [query-name success-fn & kvs]
   (-> (js/ajax.query (clj->js query-name) (-> (apply hash-map kvs) clj->js))
