@@ -19,7 +19,8 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [sade.dns :as dns]))
 
 ;;
 ;; construct command, query and raw
@@ -89,7 +90,7 @@
   ([command] (email-validator :email command))
   ([email-param-name command]
     (let [email (get-in command [:data email-param-name])]
-      (when-not (v/email-and-domain-valid? (ss/canonize-email email))
+      (when-not (dns/email-and-domain-valid? (ss/canonize-email email))
         (fail :error.email)))))
 
 (defn validate-url [url]

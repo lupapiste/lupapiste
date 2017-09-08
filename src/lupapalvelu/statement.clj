@@ -19,7 +19,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
+            [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+            [sade.dns :as dns]))
 
 ;;
 ;; Common
@@ -189,7 +190,7 @@
                                       selectedPersons)
                                 (fail :error.missing-parameters))
         has-invalid-email (when (some
-                                  #(not (v/email-and-domain-valid? (ss/canonize-email (:email %))))
+                                  #(not (dns/email-and-domain-valid? (ss/canonize-email (:email %))))
                                   selectedPersons)
                             (fail :error.email))]
     (or non-blank-string-keys has-invalid-email)))
