@@ -4223,7 +4223,7 @@
 "hankkeen-kuvaus.rahoitus._group_label" "fi" "ARA-rahoitus"
 "hankkeen-kuvaus.rahoitus._group_label" "sv" ""
 "hankkeen-kuvaus.rahoitus" "en" ""
-"hankkeen-kuvaus.rahoitus" "fi" "ARA: mikäli kyseessä on ARA-hanke, on tämä kohta rastitettava."
+"hankkeen-kuvaus.rahoitus" "fi" "Hankkeelle haetaan ARA-rahoitusta"
 "hankkeen-kuvaus.rahoitus" "sv" ""
 "hankkeen-kuvaus.rahoitus.add.help" "en" ""
 "hankkeen-kuvaus.rahoitus.add.help" "fi" "ARA-rahoituksen hakemisesta ilmoittaminen lisää ARA:n edustajan lukuoikeuksilla hankkeen osapuoleksi. ARA pääsee tällöin näkemään hankkeen tiedot ja suunnitelmat. \n  \n Haluatko jatkaa?"

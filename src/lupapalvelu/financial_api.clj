@@ -9,7 +9,8 @@
   {:parameters [:email]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :user-roles #{:admin :authorityAdmin}}
+   :user-roles #{:admin :authorityAdmin}
+   :feature :financial}
   [{user-data :data user :user}]
     (financial/create-financial-handler user-data user))
 
@@ -20,7 +21,8 @@
                       action/email-validator]
    :user-roles #{:applicant :authority}
    :pre-checks  [application/validate-authority-in-drafts]
-   :notified   true}
+   :notified   true
+   :feature :financial}
   [command]
   (financial/invite-financial-handler command))
 
@@ -29,7 +31,8 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant :authority}
    :pre-checks  [application/validate-authority-in-drafts]
-   :notified true}
+   :notified true
+   :feature :financial}
   [command]
   (financial/remove-financial-handler-invitation command))
 
@@ -40,6 +43,7 @@
    :pre-checks [(fn [command]
                   (when-not (contains? lupapalvelu.states/post-submitted-states (keyword (-> command :application :state)))
                     (ok)))]
-   :notified true}
+   :notified true
+   :feature :financial}
   [command]
   (financial/notify-housing-office command))

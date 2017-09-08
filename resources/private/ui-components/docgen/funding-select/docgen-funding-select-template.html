@@ -1,14 +1,18 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="docgen-funding-select-template">
+<section data-bind="if: lupapisteApp.models.globalAuthModel.ok('invite-financial-handler')">
   <span class="form-group">
     <div class="property-group-header">
       <label class="form-label form-label-property-group" data-bind="ltext: 'hankkeen-kuvaus.rahoitus._group_label'"></label>
     </div>
     <p>
-      <input type="checkbox" data-bind="checked: selectValue,
-                                        css: inputClasses"
-                             id="select-funding-checkbox"/>
-      <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
+      <input type="checkbox"
+             data-bind="checked: selectValue,
+                        attr: { id: 'fundingChecbox' },
+                        css: inputClasses"
+             id="select-funding-checkbox"/>
+      <label data-bind="attr: { 'for': 'fundingChecbox' }, visible: label, ltext: label, css: labelClasses"></label>
       <span data-bind="saveIndicator: indicator, label: true"></span>
     </p>
   </span>
+</section>
 </script>
