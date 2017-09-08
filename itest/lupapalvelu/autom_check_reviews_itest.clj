@@ -137,7 +137,7 @@
             (fact "last review state"
               (:state last-review) => "sent")
             (fact "reviews for verdict given application"
-              (count-reviews sonja application-id-verdict-given-1) => 6)
+              (count-reviews sonja application-id-verdict-given-1) => 7)
             (fact "application state is updated"
               (:state app) => "constructionStarted")) => truthy
 
@@ -150,7 +150,7 @@
           (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil))
 
         (fact "existing tasks are preserved"
-          (count-reviews sonja application-id-verdict-given-1) => 6
+          (count-reviews sonja application-id-verdict-given-1) => 7
           (let [tasks (map tools/unwrapped  (query-tasks sonja application-id-verdict-given-1))
                 reviews (filter task-is-review? tasks)
                 review-types (map #(-> % :data :katselmuksenLaji) reviews)
@@ -158,7 +158,7 @@
                                 (= (get-in review [:data :katselmus :tila]) "lopullinen"))]
             (fact "no validation errors"
               (not-any? :validationErrors reviews))
-            (count (filter  (partial = "aloituskokous") review-types)) => 2
+            (count (filter  (partial = "aloituskokous") review-types)) => 3
             (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
 
 (fact "Automatic checking for reviews - 404 in fetching multiple applications causes fallback into fetching consecutively"
