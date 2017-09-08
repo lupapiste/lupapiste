@@ -93,7 +93,7 @@
             <tr>
               <td data-bind="ltext: 'auth-admin.email-notifications.funding'"></td>
               <td class="value">
-                <input type="text" data-bind="value: organization.fundingNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-funding-enabled-notification-email')" />
+                <input data-test-id="fundingEmails" type="text" data-bind="value: organization.fundingNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-funding-enabled-notification-email')" />
               </td>
             </tr>
           </tbody>

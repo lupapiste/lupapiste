@@ -467,6 +467,9 @@ Jussi logs in
   [Arguments]  ${showAll}=True
   Authority logs in  jussi  jussi  Jussi Viranomainen  ${showAll}
 
+Financial logs in
+  User logs in  financial  admin  Rahoituskäsittelijä
+
 
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:

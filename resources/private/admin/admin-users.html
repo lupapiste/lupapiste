@@ -19,7 +19,8 @@
                              ltext: 'add.rest-api-user'"></button>
           <button class="btn-primary"
                   data-bind="click: financialHandlerUser.addFinancialHandlerUser,
-                             ltext: 'admin.add-financial-handler'"></button>
+                             ltext: 'admin.add-financial-handler'"
+                  data-test-id="add-financial-user"></button>
 
           <div id="add-authority-admin-user-to-organization-dialog" class="window autosized">
             <div class="dialog-header">
@@ -145,7 +146,8 @@
                 </div>
 
                 <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
-                        class="positive btn-dialog"></button>
+                        class="positive btn-dialog"
+                        data-test-id="add-financial-user-continue"></button>
               </form>
               </div>
               <div data-bind="visible: phase() === 2">
@@ -159,7 +161,7 @@
                   <a href="#" data-bind="text: createdUserlinkSv, attr: {href: createdUserlinkSv}"></a>
                   </p>
                 </div>
-                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close" data-test-id="add-financial-user-ok"></button>
               </div>
             </div>
           </div>
