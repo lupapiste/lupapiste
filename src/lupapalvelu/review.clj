@@ -49,7 +49,7 @@
     (when-not (ss/empty? mongo-task-bg-id)
       (util/find-first #(= mongo-task-bg-id
                            (background-id %))
-                       update-tasks))))
+                       tasks))))
 
 (defn- task-with-same-name-and-type [mongo-task tasks]
   (->> tasks
