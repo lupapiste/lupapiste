@@ -439,10 +439,10 @@
 ;; Fetch missing "päätöspöytäkirja" attachments
 
 (defn- missing-verdict-attachments-query [{:keys [start end organizations]}]
-  (merge {:verdicts {$elemMatch {:timestamp {$gt start
-                                             $lt (or end
-                                                     (now))}
-                                 :paatokset.poytakirjat {$size 0}}}}
+  (merge {:verdicts {$elemMatch {$and [{:timestamp {$gt start
+                                                    $lt end} }
+                                       {$or [{:paatokset.poytakirjat {$size 0}}
+                                             {:paatokset.poytakirjat.urlHash {$exists false}}]}]}}}
          (when (not-empty organizations)
            {:organization {$in organizations}})))
 
@@ -477,7 +477,8 @@
                                                  (:verdicts application))]
      (some empty? (->> existing-verdict
                        :paatokset
-                       (map :poytakirjat))))))
+                       (map :poytakirjat)
+                       (mapcat (partial map :urlHash)))))))
 
 ;; 3. update the verdicts on application that have a new poytakirja attachment
 ;; 3.1 add poytakirja attachment with get-poytakirja!
@@ -487,22 +488,24 @@
   and return an updated verdict with information on the added
   attachments in relevant :poytakirjat arrays."
   [application user timestamp verdicts-from-xml app-verdict]
-
+  (println "application verdict, kuntalupatunnus" (:kuntalupatunnus app-verdict))
+  (println (map :kuntalupatunnus verdicts-from-xml))
   (if-let [update-verdict (matching-verdict app-verdict
                                             verdicts-from-xml)]
-
     ;; TODO How do we match the "verdicts within verdicts"?  For now
     ;; this question is theoretical since no verdict contains
     ;; a :paatokset array with more than one element.
     (if (or (> (count (:paatokset app-verdict)) 1)
             (> (count (:paatokset update-verdict)) 1))
       app-verdict
-      (let [paatos-from-app-verdict         (-> app-verdict :paatokset 0)
-            poytakirjat-from-update-verdict (-> update-verdict :paatokset 0 :poytakirjat)]
+      (let [paatos-from-app-verdict         (-> app-verdict :paatokset (get 0))
+            poytakirjat-from-update-verdict (-> update-verdict :paatokset (get 0) :poytakirjat)]
+        (clojure.pprint/pprint update-verdict)
         (assoc app-verdict
                :paatokset
                [(assoc paatos-from-app-verdict
                        :poytakirjat
+                       ;; TODO päivitä vain tarvittavat pöytäkirjat, miten mätsätään?
                        (map (partial get-poytakirja! application
                                      user timestamp (:id app-verdict))
                             poytakirjat-from-update-verdict)
@@ -529,4 +532,6 @@
                                               application)))]
     (->> (:verdicts application)
          (map (partial add-verdict-attachments! application user created update-verdicts))
-         (store-verdict-updates! command))))
+         (store-verdict-updates! command)
+         (filter (comp #(= (:timestamp %) created) first :paatokset))
+         (ok :id (:id application) :updated-verdicts))))

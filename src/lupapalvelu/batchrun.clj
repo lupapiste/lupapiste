@@ -7,6 +7,7 @@
             [clojure.core.async :as async]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
+            [clj-time.core :as t]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
@@ -617,3 +618,65 @@
                       (if (:archivabilityError result)
                         (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
                         (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
+
+;; Update verdict attachments
+
+(defn fetch-verdict-attachments [start end organizations]
+  {:pre [(number? start) (number? end) (< start end) (vector? organizations)]}
+  (let [apps (verdict/applications-with-missing-verdict-attachments
+              {:start         start
+               :end           end
+               :organizations organizations})
+        eraajo-user (user/batchrun-user (map :organization apps))]
+    (->> (doall
+          (map
+           (fn [{:keys [id permitType organization] :as app}]
+             (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+               (try
+                 (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdict-attachments)
+                       app-xml (krysp-fetch/get-application-xml-by-application-id app)
+                       result  (verdict/update-verdict-attachments-from-xml! command app-xml)]
+                   (when (-> result :updated-verdicts count pos?)
+                     ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+                     (logging/log-event :info {:run-by "Automatic verdict attachments checking"
+                                               :event "Found new verdict attachments"}))
+                   (when (or (nil? result) (fail? result))
+                     (logging/log-event :error {:run-by "Automatic verdict attachment checking"
+                                                :event "Failed to check verdict attachments"
+                                                :failure (if (nil? result) :error.no-app-xml result)
+                                                :organization {:id organization :permit-type permitType}
+                                                }))
+
+                   ;; Return result for testing purposes
+                   result)
+                 (catch Throwable t
+                   (println {:run-by "Automatic verdict attachments checking"
+                             :event "Unable to get verdict from backend"
+                             :exception-message (.getMessage t)
+                             :application-id id
+                             :organization {:id organization :permit-type permitType}})
+                   (clojure.stacktrace/print-stack-trace t)
+                   (logging/log-event :error {:run-by "Automatic verdict attachments checking"
+                                              :event "Unable to get verdict from backend"
+                                              :exception-message (.getMessage t)
+                                              :application-id id
+                                              :organization {:id organization :permit-type permitType}})))))
+           apps))
+         (hash-map :updated-applications)
+         (merge {:start start
+                 :end end
+                 :organizations organizations
+                 :applications (map :id apps)}))))
+
+(defn check-for-verdict-attachments [& [start end & organizations]]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic verdict attachment checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
+  (mongo/connect!)
+  (fetch-verdict-attachments (or (when start
+                                   (util/to-millis-from-local-date-string start))
+                                 (-> 3 t/months t/ago c/to-long))
+                             (or (when end
+                                   (util/to-millis-from-local-date-string end))
+                                 (now))
+                             (or organizations [])))
