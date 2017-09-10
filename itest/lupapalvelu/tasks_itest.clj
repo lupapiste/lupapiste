@@ -198,6 +198,12 @@
     (fact "final review template exists from verdict"
       loppukatselmus => truthy)
     (http-post (str (server-address) "/dev/review-from-background/" application-id "/" (:id loppukatselmus)) {}) => http200?
+    (let [attachment (->> (query-application sonja application-id)
+                             :attachments
+                             (util/find-first #(= (:id loppukatselmus) (get-in % [:target :id]))))]
+      (fact "review attachment cannot be deleted"
+        (command sonja :delete-attachment :id application-id :attachmentId (:id attachment))
+        => fail?))
     (fact "review can be marked faulty"
       (command sonja :mark-review-faulty :id application-id :taskId (:id loppukatselmus)) => ok?)
     (let [updated-application (query-application pena application-id)
@@ -209,4 +215,5 @@
           (-> targeted-attachment :metadata :tila) => "ei-arkistoida-virheellinen"
           (-> targeted-attachment :metadata :sailytysaika :arkistointi) => "ei"))
       (fact "faulty review can not be sent to background"
-        (command sonja :resend-review-to-backing-system :id application-id :taskId (:id loppukatselmus) :lang "fi") => (partial expected-failure? :error.command-illegal-state)))))
+        (command sonja :resend-review-to-backing-system :id application-id :taskId (:id loppukatselmus) :lang "fi")
+        => (partial expected-failure? :error.command-illegal-state)))))

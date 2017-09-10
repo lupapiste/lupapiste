@@ -251,30 +251,27 @@
     (ok :integrationAvailable sent-to-krysp?)))
 
 (defcommand mark-review-faulty
-  {:description "Marks review faulty, but does not remove
-  it. Similarly the review attachments are made deletable. However,
-  the attachments remain locked, so new versions cannot be created."
-   :parameters  [id taskId]
+  {:description      "Sets review's state to faulty_review_task, cleares
+  its attachments but stores the file ids and filenames. The latter is
+  done just in case for future reference.."
+   :parameters       [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :pre-checks  [validate-task-is-review
-                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
-                 (task-state-assertion #{:sent})]
-   :user-roles  #{:authority}
-   :states      valid-states}
+   :pre-checks       [validate-task-is-review
+                      (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
+                      (task-state-assertion #{:sent})]
+   :user-roles       #{:authority}
+   :states           valid-states}
   [{application :application created :created :as command}]
-  (let [review-attachments (attachment/get-attachments-by-target-type-and-id application {:type "task" :id taskId})]
-    (doseq [att review-attachments]
-      (attachment/update-attachment-data! command
-                                          (:id att)
-                                          {:metadata.sailytysaika.arkistointi :ei
-                                           :metadata.sailytysaika.perustelu (i18n/loc "review.faulty-document")
-                                           :metadata.myyntipalvelu false
-                                           :metadata.tila :ei-arkistoida-virheellinen
-                                           :readOnly false}
-                                          created
-                                          :set-app-modified? false
-                                          :set-attachment-modified? false))
-    (set-state command taskId :faulty_review_task)))
+  (let [review-attachments (attachment/get-attachments-by-target-type-and-id application
+                                                                             {:type "task"
+                                                                              :id   taskId})]
+    (update-application command {$pull {:attachments {:id {$in (map :id review-attachments)}}}})
+    (set-state command taskId :faulty_review_task
+               {$set {:tasks.$.faulty
+                      {:timestamp created
+                       :files     (map (util/fn-> :latestVersion
+                                                  (select-keys [:fileId :filename]))
+                                       review-attachments)}}})))
 
 (defcommand resend-review-to-backing-system
   {:description "Resend review data to backend"
@@ -301,3 +298,16 @@
    :states valid-states
    :pre-checks [validate-task-is-end-review
                 (permit/validate-permit-type-is permit/R)]})
+
+(defquery is-faulty-review
+  {:description      "Pseudo query that succeeds only if the current task
+  has been marked faulty."
+   :parameters       [id taskId]
+   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :user-roles       #{:authority}
+   :states           valid-states
+   :pre-checks       [(fn [{{task-id :taskId} :data {tasks :tasks} :application}]
+                        (when-not (some-> (util/find-by-id task-id tasks)
+                                          :state
+                                          (util/=as-kw :faulty_review_task))
+                          :error.not-faulty))]})

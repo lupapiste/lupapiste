@@ -109,14 +109,25 @@
       :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 20000 :css []
-              :whitelist {:roles [:authority] :otherwise :disabled} }
-             {:name "maaraAika" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}
-             {:name "toteaja" :type :string :whitelist {:roles [:authority] :otherwise :disabled}}
-             {:name "toteamisHetki" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
-      :whitelist {:roles [:authority] :otherwise :disabled}}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
-      :whitelist {:roles [:authority] :otherwise :disabled}}]}
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}
+             {:name "maaraAika" :type :date
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}
+             {:name "toteaja" :type :string
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}
+             {:name "toteamisHetki" :type :date
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}]}
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width
+      :css [] :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:disabled [:is-faulty-review]}}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout
+      :full-width :css [] :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:disabled [:is-faulty-review]}}]}
    {:name "muuTunnus" :type :text
     :readonly true :hidden true}])
 

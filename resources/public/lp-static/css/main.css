@@ -23151,8 +23151,12 @@ div.review-tasks {
   margin-top: 20px;
 }
 
-div.review-tasks .faulty {
+div.review-tasks .faulty td {
   text-decoration: line-through;
+}
+
+div.review-tasks .faulty td.reviews-table--action {
+  text-decoration: none;
 }
 
 .assignment-creator {
