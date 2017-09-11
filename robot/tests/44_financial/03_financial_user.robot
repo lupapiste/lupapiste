@@ -126,6 +126,7 @@ Financial authority can go to my page and change email
   Go to  ${SERVER}/app/fi/financial-authority#!/mypage
   Input Text  newEmail  financial@ara.com
   Click enabled by test id  change-email
+  Wait Until  Page Should Contain  Uuteen sähköpostiosoitteeseen on lähetetty viesti osoitteen vaihdosta
   Open last email
   Click link  xpath=//a
   Go to login page
