@@ -137,4 +137,15 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
         .value();
     });
   });
+
+  self.showMuutostapa = self.disposedComputed( function() {
+    return !_.get( _.first( self.rows()), "muutostapa.schema.hidden");
+  });
+
+  self.tableHelp = self.disposedComputed( function() {
+    var help = loc( "huoneistotTable.help" );
+    return self.showMuutostapa()
+         ? loc( "huoneistotTable.help.muutostapa" ) + help
+         : help;
+  });
 };
