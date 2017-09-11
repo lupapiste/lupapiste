@@ -127,24 +127,22 @@ div.order-section {
 }
 
 div.printing-order-footer {
-  position: fixed;
-  left: 0px;
-  bottom: 0px;
   width: 100%;
-  z-index: 2002;
   background-color: $light-gray-link;
   padding: $baseline auto $baseline auto;
 
+  > div button:first-child {
+    padding-left: 0px;
+    padding-right: $baseline * 2;
+  }
+
   > div {
-    width: 100%;
-    max-width: $application-max-width;
-    min-width: $application-min-width;
-    margin: 0 auto;
+    margin: $baseline/2;
 
     button {
       width: auto;
-      display: inline;
-      padding-right: $baseline;
+      display: inline-block;
+      padding-right: $baseline/2;
     }
 
     h2 {
@@ -154,15 +152,20 @@ div.printing-order-footer {
 
   .open-pricelist-btn {
     min-width: 200px;
+    h3 {
+      color: $orange;
+    }
   }
 
   div.pricelist-panel {
     position: absolute;
+    right: 0px;
     bottom: $btn-height;
     min-width: 250px;
 
     > div:first-child {
-      bottom: 27px;
+      bottom: 81px;
+      right: 6px;
       position: absolute;
       background-color: white;
       color: black;
@@ -178,6 +181,7 @@ div.printing-order-footer {
       position: absolute;
       z-index: 101;
       left: 80px;
+      bottom: 54px;
     }
 
     .arrow:after, .arrow:before {
