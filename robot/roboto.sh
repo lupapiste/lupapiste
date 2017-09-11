@@ -44,11 +44,26 @@ recursive_kill() { # sig pid indent
    kill $1 $2
 }
 
+high_load() {
+   # 1 min fully loaded cores
+   local LOADED=$(cat /proc/loadavg | sed -e 's/\..*//')
+   # available cores
+   local CORES=$(grep bogomips /proc/cpuinfo | wc -l)
+   test "$LOADED" -gt $(expr "$CORES" "+" "$MAXCOREUNDERFLOW")
+}
+
+low_memory() {
+   local AVAILKB=$(grep MemAvailable /proc/meminfo | sed -e 's/[^0-9]//g')
+   local AVAILMB=$(expr "$AVAILKB" "/" "1024")
+   test "$AVAILMB" -lt $LOWMEMMB
+}
+
 load_warning() {
    # 1 min fully loaded cores
    local LOADED=$(cat /proc/loadavg | sed -e 's/\..*//')
    # available cores
    local CORES=$(grep bogomips /proc/cpuinfo | wc -l)
+
    test "$LOADED" -gt $(expr "$CORES" "+" "$MAXCOREUNDERFLOW") \
       && echo -e "${YELLOW}Warning: heavy load. $LOADED/$CORES cores at work.$DEFAULT"
 }
@@ -63,6 +78,14 @@ mem_warning() {
 load_warnings() {
    mem_warning
    load_warning
+}
+
+too_high_load() {
+   if high_load || low_memory; then
+     return 0
+   else
+     return 1
+   fi
 }
 
 fail() {
@@ -507,9 +530,9 @@ esac
 for test in $TARGETS
 do
    RUNNING=$(n_tests)
-   while [ $RUNNING -ge $MAXTHREADS ]
+   while [[ $RUNNING -ge $MAXTHREADS ]] || too_high_load
    do
-      show_stats "$RUNNING/$MAXTHREADS threads running"
+      show_stats "$RUNNING/$MAXTHREADS threads running, can't currently start more"
       for foo in $(seq $UPDATE)
       do
          test $(n_tests) "=" "$RUNNING" || break
