@@ -32,13 +32,6 @@
         (fail :error.command-illegal-state))
       (fail :error.task-not-found))))
 
-(defn- set-state [{created :created :as command} task-id state & [updates]]
-  (update-application command
-    {:tasks {$elemMatch {:id task-id}}}
-    (util/deep-merge
-      {$set {:tasks.$.state state :modified created}}
-      updates)))
-
 (defn- validate-task-is-not-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when (tasks/task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
@@ -118,7 +111,7 @@
                 validate-task-is-not-review]}
   [{:keys [application user lang] :as command}]
   (tasks/generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
-  (set-state command taskId :ok))
+  (tasks/set-state command taskId :ok))
 
 (defcommand reject-task
   {:description "Authority can reject task, requires user action."
@@ -129,7 +122,7 @@
    :pre-checks  [(task-state-assertion (tasks/all-states-but :sent))
                  validate-task-is-not-review]}
   [{:keys [application] :as command}]
-  (set-state command taskId :requires_user_action))
+  (tasks/set-state command taskId :requires_user_action))
 
 (defn- validate-review-kind [{{task-id :taskId} :data} {tasks :tasks}]
   (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
@@ -218,7 +211,7 @@
                           all-attachments
                           (if task-pdf-version (conj review-attachments (:fileId task-pdf-version)) review-attachments)))]
 
-    (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
+    (tasks/set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
 
     (case tila
       ; Create new, similar task
@@ -261,17 +254,8 @@
                       (task-state-assertion #{:sent})]
    :user-roles       #{:authority}
    :states           valid-states}
-  [{application :application created :created :as command}]
-  (let [review-attachments (attachment/get-attachments-by-target-type-and-id application
-                                                                             {:type "task"
-                                                                              :id   taskId})]
-    (update-application command {$pull {:attachments {:id {$in (map :id review-attachments)}}}})
-    (set-state command taskId :faulty_review_task
-               {$set {:tasks.$.faulty
-                      {:timestamp created
-                       :files     (map (util/fn-> :latestVersion
-                                                  (select-keys [:fileId :filename]))
-                                       review-attachments)}}})))
+  [command]
+  (tasks/task->faulty command taskId))
 
 (defcommand resend-review-to-backing-system
   {:description "Resend review data to backend"
@@ -310,4 +294,4 @@
                         (when-not (some-> (util/find-by-id task-id tasks)
                                           :state
                                           (util/=as-kw :faulty_review_task))
-                          :error.not-faulty))]})
+                          (fail :error.not-faulty)))]})

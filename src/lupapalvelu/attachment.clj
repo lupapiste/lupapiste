@@ -433,7 +433,7 @@
                        #{:ok :requires_user_action})
            :cannot-delete))))
 
-(defn- delete-attachment-file-and-preview! [file-id]
+(defn delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
   (mongo/delete-file-by-id (str file-id "-preview")))
 
