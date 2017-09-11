@@ -180,7 +180,7 @@
   (let [historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                                 (< pvm (now))))
         grouped-reviews (group-by
-                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm])
+                          #(select-keys % [:katselmuksenLaji :tarkastuksenTaiKatselmuksenNimi :pitoPvm :muuTunnustieto])
                           (filter historical-timestamp-present? (review-reader/xml->reviews app-xml)))]
     (for [k (keys grouped-reviews)
           :let [values (get grouped-reviews k)
