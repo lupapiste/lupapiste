@@ -11902,20 +11902,6 @@ div.suti-admin-container .serversettings--wide {
   color: #df3215;
 }
 
-.view-with-download {
-  /* No arrow for bubble-hover */
-  /*.bubble-hover .bubble-hover-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: $negative transparent transparent transparent;
-  }*/
-}
-
 .view-with-download .download {
   white-space: nowrap;
 }
@@ -14833,17 +14819,6 @@ div.search i {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
-  /* No arrow for bubble-hover */
-  /*.bubble-hover .bubble-hover-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: $negative transparent transparent transparent;
-  }*/
 }
 
 .applications-search-results__indicator div {
@@ -14889,15 +14864,6 @@ div.search i {
   font-size: 15px;
   position: absolute;
   white-space: pre-line;
-}
-
-.applications-search-results__indicator .bubble-hover .bubble-hover-text.bubble-hover-text--notice {
-  width: 400px;
-  max-height: 400px;
-  overflow-y: scroll;
-  text-overflow: ellipsis;
-  bottom: -50%;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 .applications-search-results__indicator .bubble-hover:hover .bubble-hover-text {
@@ -15019,6 +14985,15 @@ div.search i {
 
 .search-results-waiting span {
   padding-left: 2em;
+}
+
+.applications-search-results__indicator .bubble-hover .bubble-hover-text.bubble-hover-text--notice {
+  width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  bottom: -50%;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 #indicator .indicator-bar {
