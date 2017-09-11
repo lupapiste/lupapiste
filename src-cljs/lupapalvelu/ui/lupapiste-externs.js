@@ -136,4 +136,5 @@ lupapisteApp.models.currentUser.street = function() {};
 lupapisteApp.models.currentUser.zip = function() {};
 lupapisteApp.models.currentUser.city = function() {};
 lupapisteApp.models.currentUser.email = function() {};
-
+lupapisteApp.models.currentUser.company = {};
+lupapisteApp.models.currentUser.company.id = function() {};
