@@ -61,10 +61,17 @@
                      inviter :user
                      application :application
                      :as command}]
-  (let [email (ss/canonize-email email)]
-    (if (or (util/find-by-key :email email (domain/invites application))
-            (auth/has-auth? application (:id (user/get-user-by-email email))))
+  (let [email (ss/canonize-email email)
+        existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
+        existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))]
+    (cond
+      (#{:reader :guest} existing-role)
+      (fail :invite.already-has-reader-auth :existing-role existing-role)
+
+      existing-auth
       (fail :invite.already-has-auth)
+
+      :else
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
             email-template (case notification
