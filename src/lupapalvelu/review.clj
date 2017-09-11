@@ -74,23 +74,18 @@
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
   [mongo-task update-tasks]
-  (let [mongo-task-bg-id (background-id mongo-task)
-        updated-id-match (when-not (ss/empty? mongo-task-bg-id)
-                           (util/find-first #(= mongo-task-bg-id
-                                                (background-id %))
-                                            update-tasks))]
-    (or ;; 1. task with matching id, or
-        (task-with-matching-background-id mongo-task update-tasks)
+  (or ;; 1. task with matching id, or
+   (task-with-matching-background-id mongo-task update-tasks)
 
-        ;; 2. task with same name and type WHEN mongo task is empty, or
-        (and (empty-review-task? mongo-task)
-             (task-with-same-name-and-type mongo-task update-tasks))
+   ;; 2. task with same name and type WHEN mongo task is empty, or
+   (and (empty-review-task? mongo-task)
+        (task-with-same-name-and-type mongo-task update-tasks))
 
-        ;; 3. task with same name, type and other data related to
-        ;;    holding the review
-        (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
-                                           mongo-task
-                                           update-tasks))))
+   ;; 3. task with same name, type and other data related to
+   ;;    holding the review
+   (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
+                                      mongo-task
+                                      update-tasks)))
 
 (defn- merge-review-tasks
   "Returns a vector with two values:
