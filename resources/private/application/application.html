@@ -1185,7 +1185,12 @@
                       <div data-bind="visible: error" >
                         <div data-bind="text: error" class="context-error"></div>
                       </div>
-                      <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: disabled">
+                      <p data-bind="ltext: 'document.party.person-select.remove-existing-role-before-invite', visible: hasReaderRole"></p>
+                      <button class="btn btn-primary btn-dialog negative" data-test-id="application-invite-submit" data-bind="click: removeExistingAuth, visible: hasReaderRole">
+                        <span data-bind="ltext: 'document.party.person-select.remove-auth'"></span>
+                        <em data-bind="visible: pending" class="button-loader"></em>
+                      </button>
+                      <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: disabled, visible: !hasReaderRole()">
                         <span data-bind="ltext: 'application.inviteSend'"></span>
                         <em data-bind="visible: pending" class="button-loader"></em>
                       </button>

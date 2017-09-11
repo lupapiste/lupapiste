@@ -53,9 +53,16 @@
                      :as command}]
   {:pre [(valid-role role)]}
   (let [email (ss/canonize-email email)
-        existing-user (user/get-user-by-email email)]
-    (if (or (domain/invite application email) (auth/has-auth? application (:id existing-user)))
+        existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
+        existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))]
+    (cond
+      (#{:reader :guest} existing-role)
+      (fail :invite.already-has-reader-auth :existing-role existing-role)
+
+      existing-auth
       (fail :invite.already-has-auth)
+
+      :else
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
             email-template (if (= notification "invite-to-prev-permit")
