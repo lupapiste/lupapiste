@@ -61,6 +61,7 @@
   [data-keys a b]
   (->> [a b]
        (map (comp #(select-keys % data-keys)
+                  tools/unwrapped
                   :katselmus
                   :data))
        (apply =)))
