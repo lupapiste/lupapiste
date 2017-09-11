@@ -246,8 +246,9 @@
 (defcommand mark-review-faulty
   {:description      "Sets review's state to faulty_review_task, cleares
   its attachments but stores the file ids and filenames. The latter is
-  done just in case for future reference.."
-   :parameters       [id taskId]
+  done just in case for future reference. Notes parameter updates the
+  katselmus/huomautukset/kuvaus field in the schema."
+   :parameters       [id taskId notes]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :pre-checks       [validate-task-is-review
                       (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
@@ -255,7 +256,7 @@
    :user-roles       #{:authority}
    :states           valid-states}
   [command]
-  (tasks/task->faulty command taskId))
+  (tasks/task->faulty command taskId notes))
 
 (defcommand resend-review-to-backing-system
   {:description "Resend review data to backend"

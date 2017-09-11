@@ -1,0 +1,17 @@
+<script type="text/x-jquery-tmpl" class="ko-template" id="mark-review-faulty-dialog-template">
+  <div class="content">
+    <p data-bind="ltext: 'areyousure.mark-review-faulty'"
+       class="dialog-desc"></p>
+    <label data-bind="ltext: 'task-katselmus.katselmus.huomautukset.kuvaus'"
+           for="faulty-review-notes"></label>
+    <textarea class="form-input textarea grid-style-input high"
+              data-bind="value: notes"
+              data-test-id="faulty-review-notes"
+              id="faulty-review-notes"></textarea>
+  </div>
+  <div data-bind="component: {name:'yes-no-button-group',
+                              params: {yesFn:    yes,
+                                       noFn:     no,
+                                       lyesTitle: 'yes',
+                                       lnoTitle:  'no'}}"></div>
+</script>

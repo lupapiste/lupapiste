@@ -433,8 +433,8 @@
 
 (defn task->faulty
   "Clear task attachments. Store original file ids. Set task state
-  to :faulty_review_task."
-  [{:keys [application created] :as command} task-id]
+  to :faulty_review_task. Update note (katselmus/huomautukset/kuvaus)"
+  [{:keys [application created] :as command} task-id notes]
   (let [review-attachments (att/get-attachments-by-target-type-and-id application
                                                                       {:type "task"
                                                                        :id   task-id})]
@@ -447,4 +447,7 @@
                       {:timestamp created
                        :files     (map (util/fn-> :latestVersion
                                                   (select-keys [:originalFileId :filename]))
-                                       review-attachments)}}})))
+                                       review-attachments)}
+                      :tasks.$.data.katselmus.huomautukset.kuvaus
+                      {:value    notes
+                       :modified created}}})))
