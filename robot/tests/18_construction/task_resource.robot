@@ -62,6 +62,10 @@ Review row has attachments
   [Arguments]  ${index}
   Element should be visible  jquery=tr[data-test-index=${index}] i.lupicon-paperclip
 
+Review row does not have attachments
+  [Arguments]  ${index}
+  Element should not be visible  jquery=tr[data-test-index=${index}] i.lupicon-paperclip
+
 Review row note
   [Arguments]  ${index}  ${note}
   Scroll and click test id  show-review-note-${index}
