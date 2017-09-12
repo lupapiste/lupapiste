@@ -987,3 +987,10 @@
                    (when-not (some-> organization deref :permanent-archive-enabled)
                      (fail :error.archive-not-enabled)))]}
   [_])
+
+(defquery ya-application
+  {:parameters [id]
+   :states states/all-states
+   :user-roles #{:applicant :authority}
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]}
+  [_])
