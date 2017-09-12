@@ -118,6 +118,7 @@
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
            (sc/optional-key :firstLogin)          sc/Bool
            (sc/optional-key :oauth)               {:client-id sc/Str
+                                                   :client-secret sc/Str
                                                    :scopes [(sc/enum "read" "pay")]
                                                    :display-name i18n/LocalizationStringMap
                                                    :callback {:success-url sc/Str
