@@ -333,9 +333,9 @@
 
 
                                  (not= (:fi v) (:fi v-new))
-                                 (throw (ex-info (str "Finnish text \"" (:fi v)
+                                 (throw (ex-info (str "Finnish text \"" (:fi v-new)
                                                       "\" used for translation does not match the one found in current source \""
-                                                      (:fi v-new) "\"")
+                                                      (:fi v) "\"")
                                                  {:source {k v}
                                                   :new    {k-new v-new}}))
 
