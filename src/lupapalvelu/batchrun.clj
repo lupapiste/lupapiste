@@ -595,6 +595,9 @@
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Review checking with overwrite" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
+  (when (empty? args)
+    (logging/log-event :info {:run-by "Review checking with overwrite" :event "Not run - no organizations specified"})
+    (fail! :no-organizations))
   (logging/log-event :info {:run-by "Review checking with overwrite" :event "Started" :organizations args})
   (mongo/connect!)
   (poll-verdicts-for-reviews :organization-ids args
