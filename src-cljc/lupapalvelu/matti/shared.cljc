@@ -190,9 +190,9 @@
          {:type (sc/enum :neighbors)}))
 
 (defschema KeyMap
-  "Map with the restricted set of keys. No UI counterpart."
-  {:keys      [sc/Keyword]
-   sc/Keyword sc/Any})
+  "Map with the restricted set of keys. In other words, no new keys
+  after the instantiation can be added. No UI counterpart."
+  {sc/Keyword sc/Any})
 
 (def schema-type-alternatives
   {:docgen         (sc/conditional
@@ -217,6 +217,10 @@
 (defschema Dictionary
   "Id to schema mapping."
   {:dictionary {sc/Keyword (make-conditional schema-type-alternatives)}})
+
+(defschema MattiMeta
+  "Dynamic management. No UI counterpart. Not part of the saved data."
+  {(sc/optional-key :_meta) {sc/Keyword sc/Any}})
 
 (defschema MattiItem
   (merge MattiBase
@@ -268,6 +272,7 @@
 
 (defschema MattiVerdict
   (merge Dictionary
+         MattiMeta
          {(sc/optional-key :id)       sc/Str
           (sc/optional-key :modified) sc/Int
           (sc/optional-key :name)     sc/Str ;; Non-localized raw string
@@ -282,14 +287,12 @@
 (defn  multi-section [id]
   {:id    (name id)
    :grid  {:columns 1
-           :rows    [[{:dict id }]]}
-   :_meta {:can-remove? true}})
+           :rows    [[{:dict id }]]}})
 
 (defn text-section [id]
   {:id (str "matti-" (name id))
    :grid {:columns 1
-          :rows    [[{:dict id}]]}
-   :_meta {:can-remove? true}})
+          :rows    [[{:dict id}]]}})
 
 (def default-verdict-template
   {:name       ""
@@ -332,10 +335,10 @@
                 :vss-luokka      {:docgen "matti-verdict-check"}
                 :paloluokka      {:docgen "matti-verdict-check"}
                 ;; Removable sections
-                :removable-sections {:keymap {:keys [:foremen :reviews :plans
-                                                     :matti-condtions :neighbors
-                                                     :matti-appeal]}}}
-
+                :removable-sections {:keymap (zipmap [:foremen :reviews :plans
+                                                      :matti-conditions :neighbors
+                                                      :matti-appeal]
+                                                     (repeat false))}}
    :sections [{:id    "matti-verdict"
                :grid  {:columns 12
                        :rows    [{:css [:row--date-delta-title]
@@ -353,31 +356,26 @@
                                    :col   3
                                    :dict  :verdict-code}]
                                  [{:col  12
-                                   :dict :paatosteksti}]]}
-               :_meta {:can-remove? false}}
+                                   :dict :paatosteksti}]]}}
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
-
               {:id         "matti-conditions"
                :i18nkey    [:phrase.category.lupaehdot]
                :loc-prefix :phrase.category.lupaehdot
                :grid       {:columns 1
-                            :rows    [[{:dict :conditions }]]}
-               :_meta      {:can-remove? true}}
+                            :rows    [[{:dict :conditions}]]}}
               (text-section :neighbors)
               {:id    "matti-appeal"
                :grid  {:columns 1
-                       :rows    [[{:dict :appeal }]]}
-               :_meta {:can-remove? true}}
+                       :rows    [[{:dict :appeal }]]}}
               (text-section :collateral)
               {:id    "matti-complexity"
                :grid  {:columns 1
                        :rows    [[{:loc-prefix :matti-complexity
                                    :dict       :complexity }]
                                  [{:id   "text"
-                                   :dict :complexity-text}]]}
-               :_meta {:can-remove? true}}
+                                   :dict :complexity-text}]]}}
               (text-section :matti-rights)
               (text-section :matti-purpose)
               (text-section :matti-statements)
@@ -388,8 +386,7 @@
                                                 :items (mapv (fn [check]
                                                                {:dict check
                                                                 :css  [:matti-condition-box]})
-                                                             [:autopaikat :vss-luokka :paloluokka])}}]]}
-               :_meta {:can-remove? true}}]})
+                                                             [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
 (sc/validate MattiVerdict default-verdict-template)
 
