@@ -1368,6 +1368,9 @@
    {:info {:name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
+   {:info {:name "rakennustietojen-korjaus" :approvable true :accordion-fields buildingid-accordion-paths}
+    :body (approvable-top-level-groups olemassaoleva-rakennus)}
+
    {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
