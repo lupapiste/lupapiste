@@ -519,9 +519,11 @@
     (logging/log-event :info {:run-by "Automatic review checking"
                               :event "Mark overwritten reviews faulty"
                               :organization-id (:organization (first (first applications-with-results)))
-                              :faulty-task-count (->> applications-with-results
-                                                      (map (comp count :new-faulty-tasks second))
-                                                      (reduce +))})
+                              :faulty-tasks (->> applications-with-results
+                                                 (map (juxt (comp :id first)
+                                                            (comp :new-faulty-tasks
+                                                                  second)))
+                                                 (into {}))})
     (run! (fn [[app result]]
             (mark-reviews-faulty-for-application app result))
           applications-with-results)))
@@ -569,8 +571,9 @@
           organizations)
     (run! (fn [_]
             (let [results (async/<!! channel)]
-             (mark-reviews-faulty results)
-             (save-reviews eraajo-user results)))
+              ;; Note that the order in which these are called matters!
+              (save-reviews eraajo-user results)
+              (mark-reviews-faulty results)))
           organizations)))
 
 (defn check-for-reviews [& args]

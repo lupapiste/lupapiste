@@ -222,7 +222,9 @@
          new-faulty-tasks] (merge-review-tasks (map #(dissoc % :attachments) review-tasks)
                                                (:tasks application)
                                                overwrite-background-reviews?)
-        updated-tasks (concat unchanged-tasks added-and-updated-tasks)
+        updated-tasks (concat unchanged-tasks
+                              new-faulty-tasks
+                              added-and-updated-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context added-and-updated-tasks) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
