@@ -58,6 +58,26 @@ Time flies and ELY acknowledges statement request
   # (hardcoded value 1006789 from ah-example-response.xml)
   Element should contain  xpath=//tr[@data-message-id='${messageId}']//td//span[@data-test-id='external-received']  1006789
 
+Great, now ELY sends us the statement response
+  ${statement}=  Get Element Attribute  xpath=(//table[@data-test-id='application-statements']/tbody/tr)[1]@data-statement-id
+  Go to  ${SERVER}/dev/ah/statement-response?id=${appId}&statement-id=${statement}
+  Wait until  Page should contain  "ok":true
+  Go back
+  Wait until  Element should be visible  xpath=//section[@id='application']//tr[@data-statement-id='${statement}']
+  # Correct data from ah-example-statement-response.xml is seen in statement table
+  Element text should be  xpath=//section[@id='application']//tr[@data-statement-id='${statement}']//span[@data-test-class='statement-status']  Puollettu
+  Element should contain  xpath=//section[@id='application']//tr[@data-statement-id='${statement}']//span[@data-test-id='statement-giver-name']  Eija Esimerkki
+  # Statement has attachments
+  Element should be visible  xpath=//section[@id='application']//tr[@data-statement-id='${statement}']//i[contains(@class, 'lupicon-paperclip')]
+
+Open statement, has data
+  Open statement  ely-uspa@lupapiste.fi
+  Wait until  Element should be visible  statement-cover-note
+  Element should be disabled  statement-type-select
+  Element should be disabled  statement-text
+  Textarea value should be  statement-text  Hyvä homma
+  Xpath should match X times  //table[@data-test-id='statement-attachments-table']/tbody//tr  1
+  Element should not be visible  xpath=//table[@data-test-id='statement-attachments-table']/tbody//tr//td[contains(@class, 'remove-col')]//i
 
 Frontend errors
   There are no frontend errors

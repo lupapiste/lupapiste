@@ -17,12 +17,26 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
 
   self.authModel = params.authModel;
 
-  self.columnHeaders = _.map(self.schema.body, function(schema) {
-    return {
-      name: params.i18npath.concat(schema.name),
-      required: !!schema.required
-    };
-  });
+  self.columnHeaders = _(self.schema.body)
+                       .filter( function( schema ) {
+                         return !schema.hidden;
+                       })
+                       .sortBy( function ( schema ) {
+                         return _.indexOf( ["muutostapa", "huoneistoTyyppi", "porras",
+                                            "huoneistonumero", "jakokirjain", "huoneluku",
+                                            "keittionTyyppi", "huoneistoala", "WCKytkin",
+                                            "ammeTaiSuihkuKytkin", "saunaKytkin",
+                                            "parvekeTaiTerassiKytkin", "lamminvesiKytkin"],
+                                           schema.name );
+                       })
+                       .map( function(schema) {
+                         return {
+                           name: params.i18npath.concat(schema.name),
+                           required: Boolean(schema.required)
+                         };
+                       })
+                       .value();
+
   self.columnHeaders.push({
     name: self.groupsRemovable(self.schema) ? "remove" : "",
     required: false
@@ -122,5 +136,16 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
                   schema: group.schema })
         .value();
     });
+  });
+
+  self.showMuutostapa = self.disposedComputed( function() {
+    return !_.get( _.first( self.rows()), "muutostapa.schema.hidden");
+  });
+
+  self.tableHelp = self.disposedComputed( function() {
+    var help = loc( "huoneistotTable.help" );
+    return self.showMuutostapa()
+         ? loc( "huoneistotTable.help.muutostapa" ) + help
+         : help;
   });
 };

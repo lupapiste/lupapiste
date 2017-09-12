@@ -27,6 +27,7 @@
                        "tyonjohtaja"
                        "approval-model-with-approvals"
                        "approval-model-without-approvals"
+                       "rahoitus"
                        ;; Matti
                        "matti-string"
                        "matti-verdict-text"

@@ -21,13 +21,13 @@
                foo    "foo@bar.com"]
            (fact "Resolve Veikko"
                  (guest/resolve-guest-authority-candidate admin veikko)
-                 => {:firstName "Veikko" :lastName "Viranomainen" :hasAccess false})
+                 => {:firstName "Veikko" :lastName "Viranomainen" :hasAccess false :financialAuthority false})
            (fact "Resolve Luukas"
                  (guest/resolve-guest-authority-candidate admin "luukas.lukija@sipoo.fi")
-                 => {:firstName "Luukas" :lastName "Lukija" :hasAccess true})
+                 => {:firstName "Luukas" :lastName "Lukija" :hasAccess true :financialAuthority false})
            (fact "Resolve unknown"
                  (guest/resolve-guest-authority-candidate admin "unknown@example.com")
-                 => {:hasAccess false})
+                 => {:hasAccess false :financialAuthority false})
            (fact "No guest authorities"
                  (guest/organization-guest-authorities "753-R") => nil)
            (fact "Veikko as a new guest authority"

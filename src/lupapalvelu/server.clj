@@ -57,6 +57,7 @@
             [lupapalvelu.municipality-api]
             [lupapalvelu.neighbors-api]
             [lupapalvelu.notice-api]
+            [lupapalvelu.oauth-api]
             [lupapalvelu.onnistuu-api]
             [lupapalvelu.operations]
             [lupapalvelu.open-inforequest-api]
@@ -65,6 +66,7 @@
             [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.perf-mon-api]
             [lupapalvelu.prev-permit-api]
+            [lupapalvelu.printing-order.printing-order-api]
             [lupapalvelu.property-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.reports.reports-api]
@@ -88,7 +90,8 @@
             [lupapalvelu.campaign-api]
             [lupapalvelu.digitizer-api]
             [lupapalvelu.matti.matti-api]
-            [lupapalvelu.matti.phrases-api])
+            [lupapalvelu.matti.phrases-api]
+            [lupapalvelu.financial-api])
 
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]

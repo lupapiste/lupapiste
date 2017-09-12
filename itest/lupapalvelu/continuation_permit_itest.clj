@@ -50,3 +50,23 @@
       (:state jatkoaika-application) => "finished"
       (give-verdict apikey jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state")
       (command apikey :create-continuation-period-permit :id jatkoaika-application-id) => (partial expected-failure? "error.command-illegal-state"))))
+
+(facts "raktyo-aloit-loppuunsaat (R continuation application)"
+  (let [{app-id :id} (create-and-submit-application pena
+                                              :propertyId sipoo-property-id
+                                              :operation :pientalo)
+        continue-id (create-app-id pena
+                                   :propertyId sipoo-property-id
+                                   :operation :raktyo-aloit-loppuunsaat)]
+    (fact "Link continuation to the original"
+      (command pena :add-link-permit :linkPermitId app-id :id continue-id) => ok?)
+    (fact "Verdict for the original"
+      (command sonja :check-for-verdict :id app-id) => ok?)
+    (fact "Submit the continuation"
+      (command pena :submit-application :id continue-id) => ok?)
+    (fact "Verdict for the continuation application"
+      (command sonja :check-for-verdict :id continue-id) => ok?)
+    (fact "Change permits are not supported for continuations"
+      (command pena :create-change-permit :id continue-id) => (partial expected-failure? "error.unsupported-primary-operation"))
+    (fact "Change permit for the original can be created"
+      (command pena :create-change-permit :id app-id) => ok?)))

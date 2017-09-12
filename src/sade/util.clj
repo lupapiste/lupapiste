@@ -164,7 +164,7 @@
   "Returns the mapping for which the value satisfies the predicate.
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
   [pred m]
-  (into {} (filter (fn [[_ v]] (pred v)) m)))
+  (shared/filter-map-by-val pred m))
 
 ; From clojure.contrib/seq
 
@@ -625,6 +625,9 @@
 
 (defn read-edn-resource [file-path]
   (->> file-path io/resource slurp edn/read-string))
+
+(defn read-edn-file [file-path]
+  (-> (io/file file-path) slurp edn/read-string))
 
 (defn distinct-by
   "Given a function comparable-fn and collection coll, builds a new

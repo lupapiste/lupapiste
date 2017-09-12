@@ -128,7 +128,8 @@
    (sc/optional-key :map-layers) sc/Any
    (sc/optional-key :notifications) {(sc/optional-key :inforequest-notification-emails) [ssc/Email]
                                      (sc/optional-key :neighbor-order-emails)      [ssc/Email]
-                                     (sc/optional-key :submit-notification-emails) [ssc/Email]}
+                                     (sc/optional-key :submit-notification-emails) [ssc/Email]
+                                     (sc/optional-key :funding-notification-emails) [ssc/Email]}
    (sc/optional-key :operations-attachments) sc/Any
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool

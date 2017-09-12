@@ -90,6 +90,12 @@
                 <input type="text" data-bind="value: organization.infoRequestNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-inforequest-notification-email')" />
               </td>
             </tr>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.email-notifications.funding'"></td>
+              <td class="value">
+                <input data-test-id="fundingEmails" type="text" data-bind="value: organization.fundingNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-funding-enabled-notification-email')" />
+              </td>
+            </tr>
           </tbody>
         </table>
       </section>

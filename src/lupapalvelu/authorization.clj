@@ -29,7 +29,9 @@
    (sc/optional-key :text)           sc/Str})
 
 (defschema CompanyInvite
-  {:user {:id usr/Id}})
+  {:user                             {:id usr/Id}
+   (sc/optional-key :role)           (apply sc/enum all-authz-roles)
+   (sc/optional-key :created)        ssc/Timestamp})
 
 (defschema Auth
   {:id                               usr/Id
@@ -38,6 +40,7 @@
    :lastName                         sc/Str
    :role                             (apply sc/enum all-authz-roles)
    (sc/optional-key :type)           (sc/enum :company :owner)
+   (sc/optional-key :company-role)   (sc/enum :admin :user)
    (sc/optional-key :name)           sc/Str
    (sc/optional-key :y)              ssc/FinnishY
    (sc/optional-key :unsubscribed)   sc/Bool
@@ -78,11 +81,15 @@
 (defn has-some-auth-role? [{auth :auth} user-id roles]
   (has-auth? {:auth (get-auths-by-roles {:auth auth} roles)} user-id))
 
-(defn auth-via-company [{auth :auth} user-id]
-  (if-let [company (get (usr/get-user-by-id user-id) :company)]
-    (let [company-auth (util/find-by-id (:id company) auth)]
-      (when (some #{(:role company-auth)} #{"writer" "owner"})
-        company-auth))))
+(defn get-company-auths [{auth :auth} {{company-id :id company-role :role} :company :as user}]
+  (filter #(and (= company-id (:id %))
+                (contains? #{(keyword company-role) nil} (keyword (:company-role %))))
+          auth))
+
+(defn auth-via-company [application user-id]
+  (->> (usr/get-user-by-id user-id)
+       (get-company-auths application)
+       (util/find-first (comp #{"writer" "owner"} :role))))
 
 (defn has-auth-via-company? [application user-id]
   (or (auth-via-company application user-id) false))
@@ -100,6 +107,17 @@
                  (not (ss/blank? document-id))   (assoc :documentId document-id))]
     (assoc (usr/user-in-role invited :reader) :invite invite)))
 
+(defmulti approve-invite-auth
+  {:arglists '([auth-elem user accepted-ts])}
+  (fn [{auth-type :type :as auth} & _] (keyword auth-type)))
+
+(defmethod approve-invite-auth :default [{invite :invite :as auth} user accepted-ts]
+  (when invite
+    (let [role (or (:role invite) (:role auth))]
+      (util/assoc-when-pred (usr/user-in-role user role) util/not-empty-or-nil?
+                            :inviter (:inviter invite)
+                            :inviteAccepted accepted-ts))))
+
 ;;
 ;; Authz checkers
 ;;
@@ -108,6 +126,11 @@
   {:pre [(set? roles)]}
   (let [roles-in-app  (map (comp keyword :role) (get-auths application (:id user)))]
     (some roles roles-in-app)))
+
+(defn company-authz? [roles application user]
+  (->> (get-company-auths application user)
+       (map (comp keyword :role))
+       (some roles)))
 
 (defn org-authz
   "Returns user's org authz in given organization, nil if not found"

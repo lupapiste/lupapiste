@@ -159,3 +159,6 @@
 
 (defmethod coerce-type :group [elem-schema]
   (data-group elem-schema))
+
+(defmethod coerce-type :fundingSelector [elem-schema]
+  (data-leaf elem-schema ssc/ObjectIdStr))

@@ -11,7 +11,8 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.email :as email]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.i18n :refer [with-lang loc localize]]))
+            [lupapalvelu.i18n :refer [with-lang loc localize]]
+            [sade.dns :as dns]))
 
 
 ;; Email contents generation
@@ -111,7 +112,7 @@
   (let [email (organization/with-organization organization-id :kopiolaitos-email)]
     (when-not (ss/blank? email)
       (let [emails (util/separate-emails email)]
-        (when (some (complement v/email-and-domain-valid?) emails)
+        (when (some (complement dns/email-and-domain-valid?) emails)
           (fail! :kopiolaitos-invalid-email))
         emails))))
 

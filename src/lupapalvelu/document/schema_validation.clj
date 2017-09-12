@@ -216,17 +216,24 @@
 (def special-types [:hetu
                     :foremanHistory
                     :fillMyInfoButton
-                    :personSelector
                     :companySelector
                     :buildingSelector
                     :newBuildingSelector
-                    :maaraalaTunnus])
+                    :maaraalaTunnus
+                    :fundingSelector])
 
 (defschema Special
   (merge GenInput
          {:type            (apply sc/enum special-types)
           (opt :other-key) sc/Str
           (opt :max-len)   sc/Int}))
+
+(defschema PersonSelector
+  (merge Special
+         {:type                    (sc/eq :personSelector)
+          ;; If true, the company users are NOT included in the
+          ;; selector.
+          (opt :excludeCompanies) sc/Bool}))
 
 (defschema Input
   (sc/conditional (type-pred :text)       Text
@@ -238,6 +245,7 @@
                   (type-pred :time)       TimeString
                   (type-pred :msDate)     MsDate
                   (type-pred :linkPermitSelector) LinkPermitSelector
+                  (type-pred :personSelector) PersonSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 

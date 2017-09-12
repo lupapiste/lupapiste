@@ -234,7 +234,7 @@
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
 
     (fact "invite company"
-      (:body (decode-response (invite-company-and-accept-invitation sonja id "esimerkki"))) => ok?)
+      (invite-company-and-accept-invitation sonja id "esimerkki" erkki) => ok?)
 
     (fact "invite company user as designer"
       (invite sonja id suunnittelija-doc "suunnittelija" (email-for-key erkki)) => ok?

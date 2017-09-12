@@ -68,6 +68,14 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
     return self.authModel.ok("order-verdict-attachment-prints");
   };
 
+  self.startPrintingOrder = function() {
+    pageutil.openPage("printing-order", appModel.id());
+  };
+
+  self.printingOrderEnabled = function() {
+    return self.authModel.ok("attachments-for-printing-order");
+  };
+
   self.downloadAll = _.partial( self.sendEvent,
                                 service.serviceName,
                                 "downloadAllAttachments" );
@@ -78,4 +86,5 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
                                           ["latestVersion", "fileId"] ),
                           1));
   };
+
 };

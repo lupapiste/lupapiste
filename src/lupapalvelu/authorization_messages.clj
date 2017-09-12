@@ -39,3 +39,9 @@
 
 (notifications/defemail :invite-foreman {:recipients-fn :recipients
                                          :model-fn create-invite-foreman-email-model})
+
+(notifications/defemail :invite-financial-authority {:recipients-fn :recipients
+                                                     :model-fn create-invite-email-model})
+
+(notifications/defemail :remove-financial-authority-invitation {:recipients-fn :recipients
+                                                                :model-fn create-invite-email-model})

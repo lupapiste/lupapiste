@@ -5,7 +5,7 @@
     <!-- ko ifnot: $data.state === 'faulty_review_task' -->
     <drop-zone></drop-zone>
     <!-- /ko -->
-    <h1><span data-bind="attr: {'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span><span data-bind="text: displayName"></span></h1>
+    <h1><span data-bind="attr: {'data-test-state': $data.state}"></span><span data-bind="text: displayName"></span></h1>
     <div class="clear-fix inner-margins">
       <a class="btn secondary"
          data-bind="click: returnToApplication"
@@ -40,7 +40,7 @@
 
     <!-- ko ifnot: $data.state === 'faulty_review_task' -->
     <div id="taskAttachments"
-         data-bind="component: {name: 'targeted-attachments', params: $parent.attachmentsModel}">      
+         data-bind="component: {name: 'targeted-attachments', params: $parent.attachmentsModel}">
     </div>
     <!-- /ko -->
 

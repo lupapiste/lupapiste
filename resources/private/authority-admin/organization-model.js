@@ -187,6 +187,17 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  self.fundingNotificationEmails = ko.observable("");
+  ko.computed(function() {
+    var emails = self.fundingNotificationEmails();
+    if (self.initialized) {
+      ajax.command("set-organization-funding-enabled-notification-email", {emails: emails})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
   ko.computed(function() {
     var startDate = self.permanentArchiveInUseSince();
     if (self.initialized && startDate) {
