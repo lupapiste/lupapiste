@@ -222,9 +222,12 @@
                                          :attachments
                                          (filter #(= loppukatselmus-id (-> % :target :id)) ))
             review-attachment-files (map :latestVersion review-attachments)]
-        (doseq [{:keys [fileId originalFileId]} review-attachment-files]
-          (fact "Attachment has been converted"
-            (= fileId originalFileId) => false))
+        (doseq [{:keys [fileId originalFileId filename]} review-attachment-files]
+          (if (util/=as-kw filename :Katselmus.pdf)
+            (fact "Katselmus.pdf is already valid PDF/A"
+              (= fileId originalFileId) => true)
+            (fact "Attachment has been converted"
+              (= fileId originalFileId) => false)))
         (doseq [{att-id :id} review-attachments]
           (fact "review attachment cannot be deleted"
             (command sonja :delete-attachment :id application-id :attachmentId att-id)
@@ -244,8 +247,9 @@
           (doseq [{:keys [fileId
                           originalFileId
                           filename]} review-attachment-files]
-            (fact "Converted file is no longer available"
-              (decode-body (http-get (str url fileId) {})) => nil)
+            (when (util/not=as-kw filename :Katselmus.pdf)
+              (fact "Converted file is no longer available"
+                (decode-body (http-get (str url fileId) {})) => nil))
             (let [body (decode-body (http-get (str url originalFileId) {}))]
               (fact "Original file is still accessible"
                 body => (contains {:fileId      originalFileId
