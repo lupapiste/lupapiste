@@ -750,7 +750,7 @@
    :rakennustietojen-korjaus    {:schema "rakennustietojen-korjaus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required []
+                                 :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []
                                  :add-operation-allowed true
                                  :copying-allowed false
