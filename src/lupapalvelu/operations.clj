@@ -46,7 +46,7 @@
         ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
         ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
         ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
-        ["Kiinteistö- ja rakennustietojen korjaus" :rakennustietojen-korjaus]]]
+        ["rakennustietojen-korjaus" :rakennustietojen-korjaus]]]
       ["Rakennelman rakentaminen"
        [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
         ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
