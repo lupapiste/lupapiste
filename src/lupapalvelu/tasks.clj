@@ -431,10 +431,9 @@
         (errorf "update-task-buildings: too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states)))
       updated-task)))
 
-(defn task->faulty
-  "Clear task attachments. Store original file ids. Set task state
-  to :faulty_review_task. Update note (katselmus/huomautukset/kuvaus)"
-  [{:keys [application created] :as command} task-id notes]
+(defn- faultify
+  "Helper function for task->faulty."
+  [{:keys [application created] :as command} task-id & [updates]]
   (let [review-attachments (att/get-attachments-by-target-type-and-id application
                                                                       {:type "task"
                                                                        :id   task-id})]
@@ -443,11 +442,20 @@
       (when-not (= fileId originalFileId)
         (att/delete-attachment-file-and-preview! fileId)))
     (set-state command task-id :faulty_review_task
-               {$set {:tasks.$.faulty
-                      {:timestamp created
-                       :files     (map (util/fn-> :latestVersion
-                                                  (select-keys [:originalFileId :filename]))
-                                       review-attachments)}
-                      :tasks.$.data.katselmus.huomautukset.kuvaus
-                      {:value    notes
-                       :modified created}}})))
+               {$set (merge {:tasks.$.faulty
+                             {:timestamp created
+                              :files     (map (util/fn-> :latestVersion
+                                                         (select-keys [:originalFileId :filename]))
+                                              review-attachments)}}
+                            updates)})))
+
+(defn task->faulty
+  "Clear task attachments. Store original file ids. Set task state
+  to :faulty_review_task. Update notes if
+  given (katselmus/huomautukset/kuvaus)"
+  ([command task-id]
+   (faultify command task-id))
+  ([{:keys [created] :as command} task-id notes]
+   (faultify command task-id {:tasks.$.data.katselmus.huomautukset.kuvaus
+                              {:value    notes
+                               :modified created}})))

@@ -1,41 +1,42 @@
 (ns lupapalvelu.migration.migrations
-  (:require [monger.operators :refer :all]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [clojure.set :refer [rename-keys] :as set]
+  (:require [clj-time.coerce :as cljtc]
             [clj-time.core :as cljt]
-            [clj-time.coerce :as cljtc]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
-            [sade.core :refer [def- now]]
-            [sade.env :as env]
-            [sade.strings :as ss]
-            [sade.property :as p]
-            [sade.validators :as v]
+            [clojure.set :refer [rename-keys] :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.migration.core :refer [defmigration]]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.drawing :as draw]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
+            [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
-            [lupapalvelu.tasks :refer [task-doc-validation]]
-            [sade.excel-reader :as er]
-            [sade.coordinate :as coord]
-            [lupapalvelu.drawing :as draw]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
-            [sade.strings :as str])
+            [lupapalvelu.tasks :refer [task-doc-validation] :as tasks]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
+            [monger.operators :refer :all]
+            [sade.coordinate :as coord]
+            [sade.core :refer [def- now]]
+            [sade.env :as env]
+            [sade.excel-reader :as er]
+            [sade.property :as p]
+            [sade.strings :as ss]
+            [sade.strings :as str]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
+            [sade.validators :as v]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3398,6 +3399,18 @@
 (defmigration allow-reader-access-for-invited-company-users
   {:apply-when (pos? (mongo/count :applications {:auth.id ""}))}
   (update-applications-array :auth copy-auth-id-from-invite {:auth.id ""}))
+
+(defmigration lpk-3198-faulty-review-attachments
+  {:apply-when (pos? (mongo/count :applications {:tasks {$elemMatch {:state "faulty_review_task"
+                                                                     :faulty {$exists false}}}}))}
+  (doseq [{:keys [modified tasks] :as application} (mongo/select :applications {:tasks {$elemMatch {:state "faulty_review_task"
+                                                                                                    :faulty {$exists false}}}})]
+    (doseq [{task-id :id} (filter #(and (util/=as-kw (:state %) :faulty_review_task)
+                                        (nil? (:faulty %)))
+                                  tasks)]
+      (tasks/task->faulty (assoc (action/application->command application)
+                                 :created modified)
+                          task-id))))
 
 
 ;;
