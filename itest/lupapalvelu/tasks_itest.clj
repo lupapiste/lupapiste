@@ -1,12 +1,12 @@
 (ns lupapalvelu.tasks-itest
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.document.model :as model]
+  (:require [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.util :refer [fn->>]]
-            [sade.util :as util]))
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [midje.sweet :refer :all]
+            [sade.strings :as ss]
+            [sade.util :refer [fn->>] :as util]))
 
 (apply-remote-minimal)
 
@@ -188,25 +188,119 @@
               (get-in (second tasks) [:data :katselmus :tila :value]) => "lopullinen")))))))
 
 (facts "mark review faulty"
-  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
-       application-id (:id application)
-       _ (command sonja :check-for-verdict :id application-id)
-       application (query-application pena application-id)
-       tasks (:tasks application)
-       katselmukset (filter (partial task-by-type "katselmus") tasks)
-       loppukatselmus (util/find-by-key :taskname "loppukatselmus" katselmukset)]
+  (fact "Activate PDF/A conversion"
+    (command admin :set-organization-boolean-attribute
+             :attribute "permanent-archive-enabled"
+             :enabled true
+             :organizationId "753-R") => ok?)
+  (let [application       (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id    (:id application)
+        _                 (command sonja :check-for-verdict :id application-id)
+        application       (query-application pena application-id)
+        tasks             (:tasks application)
+        katselmukset      (filter (partial task-by-type "katselmus") tasks)
+        loppukatselmus    (util/find-by-key :taskname "loppukatselmus" katselmukset)
+        loppukatselmus-id (:id loppukatselmus)
+        url               (str (server-address) "/dev/fileinfo/")]
     (fact "final review template exists from verdict"
       loppukatselmus => truthy)
-    (http-post (str (server-address) "/dev/review-from-background/" application-id "/" (:id loppukatselmus)) {}) => http200?
-    (fact "review can be marked faulty"
-      (command sonja :mark-review-faulty :id application-id :taskId (:id loppukatselmus)) => ok?)
-    (let [updated-application (query-application pena application-id)
-          updated-loppukatselmus (util/find-by-id (:id loppukatselmus) (:tasks updated-application))
-          targeted-attachment (util/find-by-key :target {:id (:id loppukatselmus) :type "task"} (:attachments updated-application))]
-      (fact "review state is faulty"
-        (:state updated-loppukatselmus) => "faulty_review_task"
-        (fact "review attachment is not to be archived"
-          (-> targeted-attachment :metadata :tila) => "ei-arkistoida-virheellinen"
-          (-> targeted-attachment :metadata :sailytysaika :arkistointi) => "ei"))
-      (fact "faulty review can not be sent to background"
-        (command sonja :resend-review-to-backing-system :id application-id :taskId (:id loppukatselmus) :lang "fi") => (partial expected-failure? :error.command-illegal-state)))))
+
+    (fact "Fill required review data"
+      (command sonja :update-task :id application-id :doc loppukatselmus-id
+               :updates [["katselmus.tila" "lopullinen"]
+                         ["katselmus.pitoPvm" "11.09.2017"]
+                         ["katselmus.pitaja" "Auburn Authority"]]))
+    (let [att-file-id (upload-file-and-bind sonja application-id {:contents "Asiantuntijatarkastuksen lausunto"
+                                                                  :group    {}
+                                                                  :target   {:type "task" :id loppukatselmus-id}
+                                                                  :type     {:type-group "katselmukset_ja_tarkastukset"
+                                                                             :type-id    "tarkastusasiakirja"}})]
+      (fact "Mark review as done"
+        (command sonja :review-done :id application-id :lang "fi" :taskId loppukatselmus-id)
+        => ok?)
+      (let [review-attachments      (->> (query-application sonja application-id)
+                                         :attachments
+                                         (filter #(= loppukatselmus-id (-> % :target :id)) ))
+            review-attachment-files (map :latestVersion review-attachments)]
+        (doseq [{:keys [fileId originalFileId]} review-attachment-files]
+          (fact "Attachment has been converted"
+            (= fileId originalFileId) => false))
+        (doseq [{att-id :id} review-attachments]
+          (fact "review attachment cannot be deleted"
+            (command sonja :delete-attachment :id application-id :attachmentId att-id)
+            => fail?))
+        (fact "Mark loppukatselmus faulty"
+          (command sonja :mark-review-faulty :id application-id
+                   :taskId loppukatselmus-id :notes "Bad review! Sad!")
+          => ok?)
+        (let [updated-application        (query-application pena application-id)
+              updated-loppukatselmus     (util/find-by-id (:id loppukatselmus)
+                                                          (:tasks updated-application))
+              updated-review-attachments (util/find-by-key :target {:id   loppukatselmus-id
+                                                                    :type "task"}
+                                                           (:attachments updated-application))]
+          (fact "Attachments have been cleared"
+            updated-review-attachments => nil)
+          (doseq [{:keys [fileId
+                          originalFileId
+                          filename]} review-attachment-files]
+            (fact "Converted file is no longer available"
+              (decode-body (http-get (str url fileId) {})) => nil)
+            (let [body (decode-body (http-get (str url originalFileId) {}))]
+              (fact "Original file is still accessible"
+                body => (contains {:fileId      originalFileId
+                                   :application application-id}))
+              (fact "Filename basename is the same (conversion may have changed the extension)"
+                (first (ss/split filename #"\."))
+                => (first (ss/split (:filename body) #"\.")))))
+          (fact "review state is faulty"
+            (:state updated-loppukatselmus) => "faulty_review_task")
+          (fact "Timestamp matches"
+            (:modified updated-application)
+            => (-> updated-loppukatselmus :faulty :timestamp))
+          (fact "Original file ids are stored"
+            (set (map #(select-keys % [:originalFileId :filename])
+                      review-attachment-files))
+            => (-> updated-loppukatselmus :faulty :files set))
+          (fact "Task notes have been updated"
+            (-> updated-loppukatselmus :data :katselmus :huomautukset :kuvaus)
+            => (contains {:modified (:modified updated-application)
+                          :value    "Bad review! Sad!"}))
+          (fact "faulty review can not be sent to background"
+            (command sonja :resend-review-to-backing-system :id application-id
+                     :taskId loppukatselmus-id :lang "fi")
+            => (partial expected-failure? :error.command-illegal-state)))))
+    (fact "Dectivate PDF/A conversion"
+    (command admin :set-organization-boolean-attribute
+             :attribute "permanent-archive-enabled"
+             :enabled false
+             :organizationId "753-R") => ok?)
+    (fact "Review from background"
+      (let [aloituskokous    (util/find-by-key :taskname "Aloituskokous" katselmukset)
+            aloituskokous-id (:id aloituskokous)]
+        (fact "Fetch finished Aloituskokous"
+          (http-post (str (server-address) "/dev/review-from-background/" application-id "/" aloituskokous-id) {})
+          => http200?)
+        (let [ak-attachments (->> (query-application sonja application-id)
+                                  :attachments
+                                  (filter #(= aloituskokous-id (get-in % [:target :id]))))]
+          (fact "Only one attachment for Aloituskokous"
+            (count ak-attachments) => 1)
+          (fact "No conversion"
+            (let [{:keys [fileId originalFileId]} (-> ak-attachments first :latestVersion)]
+              fileId => originalFileId))
+          (fact "Mark Aloituskokous as faulty"
+            (command sonja :mark-review-faulty :id application-id
+                     :taskId aloituskokous-id :notes "No notes")
+            => ok?)
+          (let [app (query-application sonja application-id)
+                ak  (util/find-by-id aloituskokous-id (:tasks app))]
+            (fact "Attachment is gone"
+              (util/find-first (fn->> :target :id (= aloituskokous-id))
+                               (:attachments app))
+              => nil)
+            (fact "Aloituskokous is faulty"
+              (:state ak) => "faulty_review_task")
+            (fact "Attachment file is stored and available"
+              (decode-body (http-get (str url (-> ak :faulty :files first :originalFileId)) {}))
+              => (contains {:application application-id}))))))))

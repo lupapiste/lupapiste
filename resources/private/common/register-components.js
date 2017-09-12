@@ -200,7 +200,8 @@ jQuery(document).ready(function() {
     {name: "set-password"},
     {name: "login"},
     {name: "campaign-editor"},
-    {name: "date-editor"}
+    {name: "date-editor"},
+    {name: "mark-review-faulty-dialog"}
 ];
 
   ko.registerLupapisteComponents(components);

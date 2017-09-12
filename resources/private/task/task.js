@@ -123,8 +123,10 @@ var taskPageController = (function() {
       .call();
   }
 
-  function markFaultyAjax() {
-    ajax.command("mark-review-faulty", { id: applicationModel.id(), taskId: currentTaskId })
+  function markFaultyAjax( notes ) {
+    ajax.command("mark-review-faulty", { id: applicationModel.id(),
+                                         taskId: currentTaskId,
+                                       notes:  notes})
       .pending(pending)
       .processing(processing)
       .success(function() {
@@ -169,13 +171,15 @@ var taskPageController = (function() {
   }
 
   function markFaulty() {
-    hub.send("show-dialog", {ltitle: "areyousure",
-                             size: "medium",
-                             component: "yes-no-dialog",
-                             componentParams: {ltext: "areyousure.mark-review-faulty",
-                                               yesFn: markFaultyAjax,
-                                               lyesTitle: "yes",
-                                               lnoTitle: "no"}});
+    hub.send("show-dialog",
+             {ltitle: "areyousure",
+              size: "medium",
+              component: "mark-review-faulty-dialog",
+              componentParams: {
+                notes: service.getInDocument( currentTaskId,
+                                              ["katselmus", "huomautukset", "kuvaus"])
+                       .model(),
+                yesFn: markFaultyAjax}});
   }
 
   /**

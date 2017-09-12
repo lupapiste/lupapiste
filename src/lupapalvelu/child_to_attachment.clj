@@ -59,7 +59,7 @@
                                                     :tasks (review-attachment-contents child lang taskname)
                                                     type-name)
                               :locked             true
-                              :read-only          (contains? #{:neighbors :statements :verdicts} type)
+                              :read-only          (contains? #{:neighbors :statements :verdicts :tasks} type)
                               :user               user
                               :created            (now)
                               :required           false
