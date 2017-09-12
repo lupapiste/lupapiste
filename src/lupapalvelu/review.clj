@@ -56,15 +56,16 @@
        (filter #(reviews-have-same-name-and-type? mongo-task %))
        (first)))
 
+(defn- katselmus-data [t]
+  (-> t :data :katselmus tools/unwrapped))
+
 (defn- matching-data?
   "Do the two tasks have matching review data for the given keys?"
   [data-keys a b]
-  (->> [a b]
-       (map (comp #(select-keys % data-keys)
-                  tools/unwrapped
-                  :katselmus
-                  :data))
-       (apply =)))
+  (= (select-keys (katselmus-data a)
+                  data-keys)
+     (select-keys (katselmus-data b)
+                  data-keys)))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
   (->> tasks
@@ -130,8 +131,8 @@
                (tasks/task-is-review? current)
                (= (-> current :source :type) "background")
                updated-match
-               (not (= (-> updated-match :data :katselmus)
-                       (-> current       :data :katselmus))))
+               (not (= (katselmus-data updated-match)
+                       (katselmus-data current))))
           ;; if existing background reviews can be overwritten by more
           ;; recent ones, the existing one needs to be marked faulty
           (recur (remove #{updated-match} from-update)
