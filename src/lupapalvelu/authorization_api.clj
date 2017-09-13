@@ -40,15 +40,17 @@
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}}
   [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
-  (->> (mongo/select :applications
-                     {$or [{:auth.invite.user.id user-id}
-                           {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
-                           {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]
-                      :state {$ne :canceled}}
-                     [:auth :primaryOperation :address :municipality])
-       (map (partial select-user-auths user))
-       (mapcat invites-with-application)
-       (ok :invites)))
+  (let [query (if (nil? company-id)
+                {:auth.invite.user.id user-id}
+                {$or [{:auth.invite.user.id user-id}
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]})]
+    (->> (mongo/select :applications
+                       (merge query {:state {$ne :canceled}})
+                       [:auth :primaryOperation :address :municipality])
+         (map (partial select-user-auths user))
+         (mapcat invites-with-application)
+         (ok :invites))))
 
 (def settable-roles #{:writer :foreman :financialAuthority})
 (def changeable-roles #{:writer :foreman})
