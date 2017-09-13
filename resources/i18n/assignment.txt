@@ -15,7 +15,7 @@
 "application.assignment.create" "sv" "Skapa ny uppgift"
 "application.assignment.creator" "en" "Från"
 "application.assignment.creator" "fi" "Keneltä"
-"application.assignment.creator" "sv" "From"
+"application.assignment.creator" "sv" "Från"
 "application.assignment.description.placeholder" "en" "Assignment description"
 "application.assignment.description.placeholder" "fi" "Tehtävän kuvaus"
 "application.assignment.description.placeholder" "sv" "Uppgiftsbeskrivning"

@@ -356,24 +356,23 @@
                                              :rakennusnro (:rakennusnro building)
                                              :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
                                              ))
-                         :katselmuksenRakennustieto (map #(let [building (:rakennus %)
-                                                                building-canonical (merge
-                                                                                     (select-keys building [:jarjestysnumero :kiinttun])
-                                                                                     (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
-                                                                                     (when-not (s/blank? (:valtakunnallinenNumero building)) {:valtakunnallinenNumero (:valtakunnallinenNumero building)})
-                                                                                     {:katselmusOsittainen (get-in % [:tila :tila])
-                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
-                                                                building-canonical (if (s/blank? (:kiinttun building-canonical))
-                                                                                     (assoc building-canonical :kiinttun (:propertyId application))
-                                                                                     building-canonical)
-                                                                building-canonical (util/assoc-when-pred
-                                                                                    building-canonical util/not-empty-or-nil?
-                                                                                    :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                                      [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                                                                                                       {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
-                                                                                    :rakennuksenSelite (:description building)) ; v2.2.0
-                                                                ]
-                                                            {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
+                         :katselmuksenRakennustieto (map (fn [{building :rakennus state :tila}]
+                                                           {:KatselmuksenRakennus
+                                                            (-> {:jarjestysnumero                     (:jarjestysnumero building)
+                                                                 :kiinttun                            (:propertyId application) ; overwritten by (:kiinttun building) if exists
+                                                                 :katselmusOsittainen                 (:tila state)
+                                                                 :kayttoonottoKytkin                  (:kayttoonottava state)}
+                                                                (util/assoc-when-pred ss/not-blank?
+                                                                  :kiinttun                           (:kiinttun building)
+                                                                  :rakennusnro                        (:rakennusnro building)
+                                                                  :valtakunnallinenNumero             (:valtakunnallinenNumero building)
+                                                                  :kunnanSisainenPysyvaRakennusnumero (:kunnanSisainenPysyvaRakennusnumero building))
+                                                                (util/assoc-when-pred util/not-empty-or-nil?
+                                                                  :muuTunnustieto (when-let [op-id (:operationId building)]
+                                                                                    [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                                                     {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
+                                                                  :rakennuksenSelite (:description building)))})
+                                                         buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
                                                                                 (fn [m k v] (if-not (ss/blank? v)
                                                                                               (assoc m k (util/to-xml-date-from-string v))

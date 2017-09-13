@@ -808,7 +808,7 @@
         (fact "Bind-attachments command OK" resp => ok?)
         (fact "Job id is returned" (:id job) => truthy))
       (do
-        (fact "Bind-attachment shoud fail" resp => fail?)
+        (fact "Bind-attachment should fail" resp => fail?)
         (when (or (string? fails) (keyword? fails))
           (fact "Bind-attachments expected failure" resp => (partial expected-failure? fails)))))
     (when (and (:ok resp) (not= "done" (:status job)))
