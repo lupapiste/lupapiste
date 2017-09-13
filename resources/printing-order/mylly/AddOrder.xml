@@ -20,8 +20,8 @@
                             <City>{{city}}</City>
                             <Country />
                             <FirstName>{{firstName}}</FirstName>
-                            <Surname>{{surname}}</Surname>
-                            <PhoneNumber>{{phone}}</PhoneNumber>
+                            <Surname>{{lastName}}</Surname>
+                            <PhoneNumber>{{phoneNumber}}</PhoneNumber>
                             <Email>{{email}}</Email>
                             <AdditionalInformation>{{additionalInformation}}</AdditionalInformation>
                         </Orderer>
@@ -34,8 +34,8 @@
                             <City>{{city}}</City>
                             <Country />
                             <FirstName>{{firstName}}</FirstName>
-                            <Surname>{{surname}}</Surname>
-                            <PhoneNumber>{{phone}}</PhoneNumber>
+                            <Surname>{{lastName}}</Surname>
+                            <PhoneNumber>{{phoneNumber}}</PhoneNumber>
                             <Email>{{email}}</Email>
                             <AdditionalInformation>{{additionalInformation}}</AdditionalInformation>
                         </Payer>
@@ -49,8 +49,8 @@
                                 <City>{{city}}</City>
                                 <Country />
                                 <FirstName>{{firstName}}</FirstName>
-                                <Surname>{{surname}}</Surname>
-                                <PhoneNumber>{{phone}}</PhoneNumber>
+                                <Surname>{{lastName}}</Surname>
+                                <PhoneNumber>{{phoneNumber}}</PhoneNumber>
                                 <Email>{{email}}</Email>
                                 <AdditionalInformation>{{additionalInformation}}</AdditionalInformation>
                                 <DeliveryMethod>Post</DeliveryMethod>

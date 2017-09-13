@@ -1,7 +1,8 @@
 (ns lupapalvelu.printing-order.domain
   (:require [schema.core :as sc]
-            [sade.schemas :as ssc]))
-
+            [sade.schemas :as ssc]
+            [sade.util :as util]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn str-max-length [l]
   (sc/constrained sc/Str
@@ -10,13 +11,13 @@
 
 (sc/defschema ContactDetails
               {:companyName                     (str-max-length  150)
-               (sc/optional-key :streetAddress) (str-max-length   50)
-               (sc/optional-key :postalCode)    sc/Str
-               (sc/optional-key :city)          (str-max-length   50)
-               (sc/optional-key :firstName)     (str-max-length  150)
-               (sc/optional-key :surname)       (str-max-length  150)
-               (sc/optional-key :phone)         (str-max-length   25)
-               (sc/optional-key :email)         (str-max-length 1024)})
+               :streetAddress                   (str-max-length   50)
+               :postalCode                      sc/Str
+               :city                            (str-max-length   50)
+               :firstName                       (str-max-length  150)
+               :lastName                        (str-max-length  150)
+               (sc/optional-key :phoneNumber)   (str-max-length   25)
+               :email                           ssc/Email})
 
 (def Orderer
   ContactDetails)
@@ -60,3 +61,30 @@
 
 (sc/defschema PricingConfiguration
   {:by-volume   [PricingItem]})
+
+(defn prepare-contact-to-order
+  [contacts path]
+  (let [contact (cond
+                  (and (= path :payer)
+                       (:payer-same-as-orderer contacts))    (:orderer contacts)
+                  (and (= path :delivery)
+                       (:delivery-same-as-orderer contacts)) (:orderer contacts)
+                  :default                                   (get contacts path))
+        {:keys [companyName firstName lastName]} contact]
+    (util/assoc-when contact
+      :companyName (when (empty? companyName)
+                     (str firstName " " lastName))
+      :additionalInformation (condp = path
+                               :payer (:billingReference contacts)
+                               :delivery (:deliveryInstructions contacts)
+                               ""))))
+
+; TODO pilko yli 1 GB tilaukset
+(defn prepare-order
+  [app-id files-and-amounts contacts]
+  {:projectName     (str "Lupapisteen hankkeen " app-id " liitteet")
+   :orderer         (prepare-contact-to-order contacts :orderer)
+   :payer           (prepare-contact-to-order contacts :payer)
+   :delivery        (prepare-contact-to-order contacts :delivery)
+   :internalOrderId (mongo/create-id)
+   :files (prepare-files files-and-amounts)})

@@ -21,7 +21,7 @@
           (merge
             {:firstName (.firstName js/lupapisteApp.models.currentUser)
              :lastName  (.lastName js/lupapisteApp.models.currentUser)
-             :address   (.street js/lupapisteApp.models.currentUser)
+             :streetAddress   (.street js/lupapisteApp.models.currentUser)
              :postalCode (.zip js/lupapisteApp.models.currentUser)
              :city       (.city js/lupapisteApp.models.currentUser)
              :email      (.email js/lupapisteApp.models.currentUser)}
@@ -114,8 +114,8 @@
       (when (false? (rum/react delivery-option))
         (poc/contact-form [:contacts :delivery]))
       [:div.row
-       (poc/grid-text-input [:billingReference] :col-2 :printing-order.billing-reference)
-       (poc/grid-textarea-input [:deliveryInstructions] :col-2 :printing-order.delivery-instructions)]]
+       (poc/grid-text-input [:contacts :billingReference] :col-2 :printing-order.billing-reference)
+       (poc/grid-textarea-input [:contacts :deliveryInstructions] :col-2 :printing-order.delivery-instructions)]]
      [:div.order-section
       (poc/section-header :printing-order.conditions.heading)
       [:div.row
@@ -159,10 +159,10 @@
       [:div.row
        [:div.col-1
         [:span.order-grid-header (loc :printing-order.billing-reference)]
-        [:span.order-summary-line (-> @state/component-state :billingReference)]]
+        [:span.order-summary-line (-> @state/component-state :contacts :billingReference)]]
        [:div.col-1
         [:span.order-grid-header (loc :printing-order.delivery-instructions)]
-        [:span.order-summary-line (-> @state/component-state :deliveryInstructions)]]]]]))
+        [:span.order-summary-line (-> @state/component-state :contacts :deliveryInstructions)]]]]]))
 
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))]

@@ -60,11 +60,13 @@
   (ok :pricing pricing))
 
 (defcommand submit-printing-order
-  {:feature     :printing-order
-   :description ""
-   :parameters [id]
-   :states     states/post-verdict-states
-   :user-roles #{:applicant}
+  {:feature      :printing-order
+   :description  ""
+   :parameters  [id order contacts]
+   :states      states/post-verdict-states
+   :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
   [_]
-  (ok))
+  (let [printing-order (prepare-order id order contacts)
+        _ (clojure.pprint/pprint printing-order)]
+    (ok)))

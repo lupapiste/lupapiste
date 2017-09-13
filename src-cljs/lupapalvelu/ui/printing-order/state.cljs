@@ -1,11 +1,12 @@
 (ns lupapalvelu.ui.printing-order.state
   (:require [schema.core :as sc]
-            [sade.shared-schemas :as ssc]))
+            [sade.shared-schemas :as ssc]
+            [lupapalvelu.ui.common :as common]))
 
 (sc/defschema FrontendContact {:firstName                     (sc/constrained sc/Str (comp not empty?))
                                :lastName                      (sc/constrained sc/Str (comp not empty?))
                                (sc/optional-key :companyName) sc/Str
-                               :address                       (sc/constrained sc/Str (comp not empty?))
+                               :streetAddress                 (sc/constrained sc/Str (comp not empty?))
                                :postalCode                    (sc/constrained sc/Str (comp not empty?))
                                :city                          (sc/constrained sc/Str (comp not empty?))
                                :email                         ssc/Email
@@ -18,9 +19,9 @@
                                           :delivery-same-as-orderer true
                                           :orderer {}
                                           :payer {}
-                                          :delivery {}}
-                            :billingReference ""
-                            :deliveryInstructions ""
+                                          :delivery {}
+                                          :billingReference ""
+                                          :deliveryInstructions ""}
                             :conditions-accepted false
                             :phase       1
                             :id          nil})
@@ -43,10 +44,10 @@
          (true? conditions-accepted))))
 
 (defn contact-summary-lines [contact]
-  (let [{:keys [firstName lastName companyName address postalCode city email phoneNumber]} contact]
+  (let [{:keys [firstName lastName companyName streetAddress postalCode city email phoneNumber]} contact]
     (remove nil? [companyName
                   (str firstName " " lastName)
-                  address
+                  streetAddress
                   (str postalCode " " city)
                   email
                   phoneNumber])))
@@ -88,8 +89,12 @@
   (swap! component-state assoc :phase 2))
 
 (defn submit-order []
-  ; TODO backend command here
-  (swap! component-state assoc :phase 4))
+  (common/command "submit-printing-order"
+                  #(swap! component-state assoc :phase 4)
+                  :id (:id @component-state)
+                  :order (:order @component-state)
+                  :contacts (:contacts @component-state)
+                  ))
 
 (defn back-to-application []
   (.openPage js/pageutil (str "application/" (:id @component-state)) "attachments"))
