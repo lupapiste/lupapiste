@@ -218,7 +218,11 @@
       :error.invalid-value)
     :error.invalid-value-path))
 
-(defmethod validate-resolution :section
+(defn path-error [path & [size]]
+  (when (not= (count path) (or size 0))
+    :error.invalid-value-path))
+
+#_(defmethod validate-resolution :section
   [{:keys [path schema value] :as options}]
   (cond
     (coll? value) :error.invalid-value
@@ -278,9 +282,10 @@
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
   ;; Items should not be part of the original path.
-  (or (schema-error (assoc options
-                           :path (conj path :items)))
-      (check-items value (:items data))))
+  (or (path-error path)
+      (schema-error (assoc options
+                           :path [:items]))
+      (check-items value (->> data :items (map #(get % :value %))))))
 
 (defn- get-path [{path :path}]
   (if (keyword? path)
@@ -296,7 +301,8 @@
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]
-  (schema-error (assoc options :path (conj path :text))))
+  (or (path-error path)
+      (schema-error (assoc options :path [:text]))))
 
 (defn validate-path-value
   "Error message if not valid, nil otherwise."
@@ -320,7 +326,6 @@
                         :schema schema
                         :data   data})]
     (cond
-      (:grid data) (wrap :section shared/MattiSection data)
       docgen       (wrap :docgen (doc-schemas/get-schema
                                   {:name (get docgen :name docgen)}) docgen)
       date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)

@@ -163,7 +163,7 @@
          ;; separately from the label.
          {(sc/optional-key :item-loc-prefix) sc/Keyword
           :items           [(sc/conditional
-                             :text  {:value sc/Str
+                             :text  {:value keyword-or-string
                                      :text  sc/Str}
                              :else keyword-or-string)]}))
 
@@ -436,9 +436,9 @@
 
 #_(sc/validate MattiSettings r-settings)
 
-;; It is adivsabled to reuse ids from template when possible. This
+;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.
-#_(def verdict-schemas
+(def verdict-schemas
   {:r
    {:sections
     [{:id   "matti-dates"
