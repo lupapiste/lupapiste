@@ -22,7 +22,7 @@
 "document.party.disabled.areyousure.confirmation" "en" "Mark as left"
 "document.party.disabled.areyousure.confirmation" "fi" "Merkitse poistuneeksi"
 "document.party.disabled.areyousure.confirmation" "sv" "Markera som avlägsnad"
-"document.party.person-select.designer.areyousure" "en" ""
+"document.party.person-select.designer.areyousure" "en" "The designer has personal liabilities related to the project assignments. Authorise the designer by sending them an invitation to the project. In this case, the designer’s information does not need to be added separately; it is filled in automatically when the invitation is accepted."
 "document.party.person-select.designer.areyousure" "fi" "Suunnittelijan tehtävään hankkeella liittyy henkilökohtainen vastuu. Valtuuta suunnittelija lähettämällä hänelle kutsu hankkeelle. Suunnittelijan tietoja ei tällöin tarvitse lisätä erikseen, vaan ne täydentyvät automaattisesti kutsun hyväksymisen myötä."
 "document.party.person-select.designer.areyousure" "sv" "Planerarens uppgift i ett projekt är förknippad med ett personligt ansvar. Du kan befullmäktiga planeraren genom att bjuda in denne per e-post. Planerarens uppgifter behövs inte tilläggas separat, utan dem kompletteras automatiskt efter planeraren har godkänt inbjudan."
 "document.party.person-select.remove-auth" "en" "Remove authorisation"
