@@ -7,62 +7,69 @@
             [schema.core :refer [defschema] :as sc]))
 
 (def test-template
-  {:dictionary {:check {:docgen "matti-verdict-check"}
-                :delta {:date-delta {:unit :years}}
-                :phrase {:phrase-text {:category :paatosteksti}}
-                :multi {:multi-select {:items [:foo :bar {:text "Hello"
-                                                          :value :world}]}}
-                :string {:docgen "matti-string"}
-                :delta2 {:date-delta {:unit :days}}
-                :ref {:reference-list {:type :select
-                                       :path [:path :to :somewhere]}}
-                :text {:docgen "matti-verdict-text"}
-                :giver {:docgen "matti-verdict-giver"}
-                :radio {:docgen "automatic-vs-manual"}
-                :date {:docgen "matti-date"}
-                :complexity {:docgen {:name "matti-complexity"}}}
-   :name     "test"
-   :sections [{:id   "one"
-               :grid {:columns 4
-                      :rows    [[{:col    2
-                                  :dict :check}]
-                                {:id  "row"
-                                 :row [{:col    2
-                                        :dict :delta}
-                                       {:dict :phrase}]}]}}
-              {:id   "two"
-               :grid {:columns 2
-                      :rows    [[{}
-                                 {:dict :multi}]
-                                {:id  "list-row"
-                                 :row [{:list
-                                        {:items [{:dict :string}
-                                                 {:dict :delta2}
-                                                 {:dict :ref}]}}]}]}}
-              {:id   "three"
-               :grid {:columns 4
-                      :rows    [{:id  "docgen"
-                                 :row [{:dict :text}
-                                       {:dict :giver}
-                                       {:dict :radio}
-                                       {:dict :date}
-                                       {:dict :complexity}]}]}}]})
+  {:dictionary {:check      {:docgen "matti-verdict-check"}
+                :delta      {:date-delta {:unit :years}}
+                :phrase     {:phrase-text {:category :paatosteksti}}
+                :multi      {:multi-select {:items [:foo :bar {:text  "Hello"
+                                                               :value :world}]}}
+                :string     {:docgen "matti-string"}
+                :delta2     {:date-delta {:unit :days}}
+                :ref-select {:reference-list {:type :select
+                                              :path [:path :to :somewhere]}}
+                :ref-multi  {:reference-list {:type :multi-select
+                                              :path [:path :to :somewhere]}}
+                :ref-key     {:reference-list {:type     :select
+                                               :path     [:my :path]
+                                               :item-key :value}}
+                :text       {:docgen "matti-verdict-text"}
+                :giver      {:docgen "matti-verdict-giver"}
+                :radio      {:docgen "automatic-vs-manual"}
+                :date       {:docgen "matti-date"}
+                :complexity {:docgen {:name "matti-complexity"}}
+                :keymap     {:keymap {:one   "hello"
+                                      :two   :world
+                                      :three 88}}}
+   :name       "test"
+   :sections   [{:id   "one"
+                 :grid {:columns 4
+                        :rows    [[{:col  2
+                                    :dict :check}]
+                                  {:id  "row"
+                                   :row [{:col  2
+                                          :dict :delta}
+                                         {:dict :phrase}]}]}}
+                {:id   "two"
+                 :grid {:columns 2
+                        :rows    [[{}
+                                   {:dict :multi}]
+                                  {:id  "list-row"
+                                   :row [{:list
+                                          {:items [{:dict :string}
+                                                   {:dict :delta2}
+                                                   {:dict :ref}]}}]}]}}
+                {:id   "three"
+                 :grid {:columns 4
+                        :rows    [{:id  "docgen"
+                                   :row [{:dict :text}
+                                         {:dict :giver}
+                                         {:dict :radio}
+                                         {:dict :date}
+                                         {:dict :complexity}]}]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/MattiVerdict test-template)
   => test-template)
 
-(defn validate-path-value [[x & xs] value]
-  (schemas/validate-dictionary-value (->> test-template
-                                          :dictionary
-                                          ((keyword x)))
-                                     value
-                                     xs))
+(defn validate-path-value [path value & [references]]
+  (schemas/validate-path-value test-template
+                               path
+                               value
+                               references))
 
 (facts "Dictionary validation"
   (fact "Bad path"
     (validate-path-value [:foo :bar] 88)
-    => :error.invalid-dictionary-key)
+    => :error.invalid-value-path)
   (facts "Docgen: checkbox"
     (validate-path-value [:check] true) => nil
     (validate-path-value [:check] false) => nil
@@ -101,8 +108,35 @@
     (validate-path-value [:string] "") => nil
     (validate-path-value [:string] 88) => :error.invalid-value)
   (facts "Reference list"
-    ;; TODO!
-    )
+    (let [refs {:path {:to {:somewhere [:one :two :three]}}}]
+      (validate-path-value [:ref-select] [:one] refs) => nil
+      (validate-path-value [:ref-select] :one refs) => nil
+      (validate-path-value [:ref-select] ["one"] refs) => nil
+      (validate-path-value [:ref-select] [:bad] refs) => :error.invalid-value
+      (validate-path-value [:ref-select] :bad refs) => :error.invalid-value
+      (validate-path-value [:ref-select :bad] [] refs)
+      => :error.invalid-value-path
+      (validate-path-value [:ref-select] [:two :three] refs)
+      => :error.invalid-value
+      (validate-path-value [:ref-select] [] refs) => nil
+      (validate-path-value [:ref-select] nil refs) => nil
+      (validate-path-value [:ref-multi] [:two :three] refs) => nil
+      (validate-path-value [:ref-multi] [:two "three"] refs) => nil
+      (validate-path-value [:ref-multi] [:two :three :bad] refs)
+      => :error.invalid-value
+      (validate-path-value [:ref-multi] [] refs) => nil
+      (validate-path-value [:ref-multi] nil refs) => nil))
+    (facts "Reference list with item-key"
+      (let [refs {:my {:path [{:name "One" :value :one}
+                              {:name "Two" :value :two}
+                              {:name "Three" :value :three}
+                              {:name "Four" :value :four}]}}]
+      (validate-path-value [:ref-key] [:one] refs) => nil
+      (validate-path-value [:ref-key] [:bad] refs) => :error.invalid-value
+      (validate-path-value [:ref-key] [:two :three] refs)
+      => :error.invalid-value
+      (validate-path-value [:ref-key] [] refs) => nil
+      (validate-path-value [:ref-key] nil refs) => nil))
   (facts "Docgen: select"
     (validate-path-value [:giver :bad] "viranhaltija")
     => :error.invalid-value-path
@@ -136,7 +170,14 @@
     (validate-path-value [:complexity] "") => nil
     (validate-path-value [:complexity] "bad") => :error.invalid-value
     (validate-path-value [:complexity :bad] :extra-large)
-    => :error.invalid-value-path))
+    => :error.invalid-value-path)
+  (facts "KeyMap"
+    (validate-path-value [:keymap] :hii) => :error.invalid-value-path
+    (validate-path-value [:keymap :one] :hii) => nil
+    (validate-path-value [:keymap :one :extra] :hii)
+    => :error.invalid-value-path
+    (validate-path-value [:keymap :bad] 33 ) => :error.invalid-value-path
+    (validate-path-value [:keymap :two] 33 ) => nil))
 
 (defn work-day
   ([id from]

@@ -260,12 +260,13 @@
                       (partial action/vector-parameters [:path])]
    :pre-checks       [valid-category]}
   [{:keys [created] :as command}]
-  (matti/save-settings-value (matti/command->organization command)
-                             category
-                             created
-                             path
-                             value)
-  (ok :modified created))
+  (if-let [error (matti/save-settings-value (matti/command->organization command)
+                                            category
+                                            created
+                                            path
+                                            value)]
+    (fail error)
+    (ok :modified created)))
 
 ;; ----------------------------------
 ;; Verdict template reviews API

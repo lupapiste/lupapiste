@@ -22,17 +22,31 @@
   (fact "No settings"
     (query sipoo :verdict-template-settings
            :category "r")=> (just {:ok true}))
+  (fact "Save to bad path"
+    (command sipoo :save-verdict-template-settings-value
+                   :category "r"
+                   :path [:one :two]
+                   :value ["a" "b" "c"])
+    => (err :error.invalid-value-path))
+  (fact "Save bad value"
+    (command sipoo :save-verdict-template-settings-value
+             :category "r"
+             :path [:foremen]
+             :value [:bad-tj])
+    => (err :error.invalid-value))
   (fact "Save settings draft"
     (let [{modified :modified}
           (command sipoo :save-verdict-template-settings-value
                    :category "r"
-                   :path [:one :two]
-                   :value ["a" "b" "c"])]
+                   :path [:verdict-code]
+                   :value [:ehdollinen :ei-puollettu
+                           :evatty :hyvaksytty])]
       modified => pos?
       (fact "Query settings"
         (query sipoo :verdict-template-settings
                :category "r")
-        => (contains {:settings {:draft    {:one {:two ["a" "b" "c"]}}
+        => (contains {:settings {:draft    {:verdict-code ["ehdollinen" "ei-puollettu"
+                                                           "evatty" "hyvaksytty"]}
                                  :modified modified}})))))
 
 (fact "Sipoo categories"
@@ -71,14 +85,14 @@
           (let [{even-later :modified}
                 (command sipoo :save-verdict-template-draft-value
                          :template-id id
-                         :path [:matti-foremen :pdf]
-                         :value true)]
+                         :path [:giver]
+                         :value :viranhaltija)]
             (- even-later later) => pos?
             (fact "Fetch draft again"
               (query sipoo :verdict-template :template-id id)
               => (contains {:id       id
                             :name     "Uusi nimi"
-                            :draft    {:matti-foremen {:pdf true}}
+                            :draft    {:giver "viranhaltija"}
                             :modified even-later}))
             (fact "Publish template"
               (let [{published :published}
@@ -128,17 +142,17 @@
                     copy-published => nil
                     copy-category => "r"
                     copy-name => "Uusi nimi (kopio)"
-                    copy-draft => {:matti-foremen {:pdf true}}
+                    copy-draft => {:giver "viranhaltija"}
                     (fact "Editing copy draft does not affect original"
                       (command sipoo :save-verdict-template-draft-value
                                :template-id copy-id
-                               :path [:matti-verdict :2 :giver]
-                               :value "lautakunta") => ok?
+                               :path [:paatosteksti]
+                               :value  "This is the verdict.") => ok?
                       (fact "Copy has new data"
                         (query sipoo :verdict-template
                                :template-id copy-id)
-                        => (contains {:draft {:matti-foremen {:pdf true}
-                                              :matti-verdict {:2 {:giver "lautakunta"}}}
+                        => (contains {:draft {:giver "viranhaltija"
+                                              :paatosteksti "This is the verdict."}
                                       :name "Uusi nimi (kopio)"}))
                       (fact "Restore the deleted template"
                         (command sipoo :toggle-delete-verdict-template
@@ -147,7 +161,7 @@
                       (fact "The original (restored) template does not have new data"
                         (query sipoo :verdict-template
                                :template-id id)
-                        => (contains {:draft {:matti-foremen {:pdf true}}
+                        => (contains {:draft {:giver "viranhaltija"}
                                       :name "Uusi nimi"}))
                       (fact "Template list has both templates"
                         (->> (query sipoo :verdict-templates)
@@ -170,7 +184,7 @@
   (let [{id :id} (command sipoo :new-verdict-template :category "r")]
     (command sipoo :save-verdict-template-draft-value
              :template-id id
-             :path [:matti-foremen :pdf]
+             :path [:julkipano :enabled]
              :value "bad")=> (err :error.invalid-value)
     (command sipoo :save-verdict-template-draft-value
              :template-id id
@@ -178,8 +192,16 @@
              :value false)=> (err :error.invalid-value-path)
     (command sipoo :save-verdict-template-draft-value
              :template-id id
-             :path ["matti-verdict" "1" "valitus" "delta"]
-             :value -8) => (err :error.invalid-value)))
+             :path [:valitus :delta]
+             :value -8) => (err :error.invalid-value)
+    (command sipoo :save-verdict-template-draft-value
+             :template-id id
+             :path [:verdict-code]
+             :value :bad) => (err :error.invalid-value)
+    (command sipoo :save-verdict-template-draft-value
+             :template-id id
+             :path [:verdict-code]
+             :value :hyvaksytty) => ok?))
 
 (facts "Reviews"
   (fact "Initially empty"

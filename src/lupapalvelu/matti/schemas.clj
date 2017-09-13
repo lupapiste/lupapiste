@@ -134,7 +134,7 @@
 
 ;; Schema utils
 
-(defn- resolve-path-schema
+#_(defn- resolve-path-schema
   "Resolution result is map with two fixed keys (:path, :data) and one
   depending on the schema type (:schema, :docgen, :reference-list)."
   [data xs]
@@ -159,11 +159,11 @@
 
 (defn- parse-int [x]
   (let [n (-> x str name)]
-   (cond
-     (integer? x)                 x
-     (re-matches #"^[+-]?\d+$" n) (util/->int n))))
+    (cond
+      (integer? x)                 x
+      (re-matches #"^[+-]?\d+$" n) (util/->int n))))
 
-(defn- resolve-index [xs x]
+#_(defn- resolve-index [xs x]
   (if-let [index (parse-int x)]
     index
     (first (keep-indexed (fn [i data]
@@ -171,23 +171,23 @@
                              i))
                          xs))))
 
-(defn- pick-item [xs x]
+#_(defn- pick-item [xs x]
   (when-let [i (resolve-index xs x)]
     (when (contains? (vec xs) i)
       (nth xs i))))
 
-(declare schema-data-helper)
+#_(declare schema-data-helper)
 
-(defn item-data [items [x & xs]]
+#_(defn item-data [items [x & xs]]
   (when-let [item (pick-item items x)]
     (schema-data-helper item xs)))
 
-(defn cell-data [grid [x & xs]]
+#_(defn cell-data [grid [x & xs]]
   (when-let [row (pick-item (:rows grid) x)]
     (when-let [col (pick-item (get row :row row) (first xs))]
       (schema-data-helper col (drop 1 xs)))))
 
-(defn schema-data-helper
+#_(defn schema-data-helper
   [data [x & xs :as path]]
   (cond
     (some-> data :schema :list) (item-data (get-in data [:schema :list :items]) path)
@@ -197,7 +197,7 @@
     (nil? xs)                   (resolve-path-schema data path)
     (:grid data)                (cell-data (:grid data) path)))
 
-(defn schema-data
+#_(defn schema-data
   "Data is the reference schema instance (e.g.,
   shared/default-verdict-template). The second argument is path into
   data. Returns map with remaining path and resolved schema (see
@@ -276,8 +276,7 @@
                                      (check-items [value] names))
       (= data-type :radioGroup)    (check-items [value] names)
       (= data-type :date)          (check-date value)
-      :else                        :error.invalid-value))
-  )
+      :else                        :error.invalid-value)))
 
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
@@ -294,17 +293,29 @@
 
 (defmethod validate-resolution :reference-list
   [{:keys [path schema data value references] :as options}]
-  (cond
-    (not-empty path) :error.invalid-value-path
-    :else            (when (seq value) ;; Empty selection is allowed.
-                       (check-items value (get-in references (get-path data))))))
+  (let [value (->> [value] flatten (remove nil?))]
+    (or
+     (path-error path)
+     (when (and (= (:type data) :select)
+                (> (count value) 1))
+       :error.invalid-value)
+     (when (seq value) ;; Empty selection is allowed.
+       (check-items value
+                    (map #(get % (:item-key data) %)
+                         (get-in references (get-path data))))))))
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]
   (or (path-error path)
       (schema-error (assoc options :path [:text]))))
 
-(defn validate-path-value
+(defmethod validate-resolution :keymap
+  [{:keys [path schema value data] :as options}]
+  (or (path-error path 1)
+      (when-not (util/includes-as-kw? (keys data) (first path))
+        :error.invalid-value-path)))
+
+#_(defn validate-path-value
   "Error message if not valid, nil otherwise."
   [schema-instance data-path value & [{:keys [references schema-overrides]}]]
   (let [resolution (schema-data schema-instance data-path)]
@@ -321,6 +332,7 @@
         date-delta   (:date-delta data)
         multi-select (:multi-select data)
         phrase-text  (:phrase-text data)
+        keymap       (:keymap data)
         wrap         (fn [type schema data]
                        {:type   type
                         :schema schema
@@ -331,13 +343,31 @@
       date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
       reflist      (wrap :reference-list shared/MattiReferenceList reflist)
       multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
-      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text))))
+      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text)
+      keymap       (wrap :keymap shared/KeyMap keymap))))
 
-(defn validate-dictionary-value
-  [dict-value value path & [references]]
+(defn- validate-dictionary-value
+  "Validates that path-value combination is valid for the given
+  dictionary value. Returns error if not valid, nil otherwise."
+  [dict-value value & [path references]]
   (if dict-value
     (validate-resolution (assoc (resolve-dict-value dict-value)
                                 :value value
                                 :path path
                                 :references references))
-    :error.invalid-dictionary-key))
+    :error.invalid-value-path))
+
+(defn- canonize-path [path]
+  (cond
+    (keyword? path) (util/split-kw-path path)
+    (sequential? path) (map keyword path)
+    :else path))
+
+(defn validate-path-value
+  "Convenience wrapper for validate-dictionary-value."
+  [{dic :dictionary} path value & [references]]
+  (let [[x & xs] (canonize-path path)]
+    (validate-dictionary-value (get dic x)
+                               value
+                               xs
+                               references)))

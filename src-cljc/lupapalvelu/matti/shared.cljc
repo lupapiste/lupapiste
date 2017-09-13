@@ -115,11 +115,13 @@
 
 (defschema MattiReferenceList
   "Component that builds schema from an external source. Each item is
-  the id property of the target value or the the value itself."
+  the id property of the target value or the value itself."
   (merge MattiComponent
          ;; Path is interpreted by the implementation. In Matti the
          ;; path typically refers to the settings.
          {:path                              path-type
+          ;; In addition to UI, type also affects validation: :select
+          ;; only accepts single values.
           :type                              (sc/enum :select :multi-select)
           ;; By default, an item value is the same as
           ;; source. If :item-key is given, then the corresponding
@@ -128,7 +130,6 @@
           ;; Term-path overrides item-loc-prefix. However,
           ;; item-loc-prefix supports item-key.
           (sc/optional-key :item-loc-prefix) sc/Keyword
-          (sc/optional-key :id)              sc/Str
           ;; Separator string between items when viewed. Default ", "
           (sc/optional-key :separator)       sc/Str
           ;; Term definition resolves the localization for the value.
@@ -162,10 +163,10 @@
          ;; Sometimes it is useful to finetune item localisations
          ;; separately from the label.
          {(sc/optional-key :item-loc-prefix) sc/Keyword
-          :items           [(sc/conditional
-                             :text  {:value keyword-or-string
-                                     :text  sc/Str}
-                             :else keyword-or-string)]}))
+          :items                             [(sc/conditional
+                                               :text  {:value keyword-or-string
+                                                       :text  sc/Str}
+                                               :else keyword-or-string)]}))
 
 (defschema MattiDateDelta
   (merge MattiComponent
@@ -335,10 +336,10 @@
                 :vss-luokka      {:docgen "matti-verdict-check"}
                 :paloluokka      {:docgen "matti-verdict-check"}
                 ;; Removable sections
-                :removable-sections {:keymap (zipmap [:foremen :reviews :plans
-                                                      :matti-conditions :neighbors
-                                                      :matti-appeal]
-                                                     (repeat false))}}
+                :removed-sections {:keymap (zipmap [:foremen :reviews :plans
+                                                    :matti-conditions :neighbors
+                                                    :matti-appeal]
+                                                   (repeat false))}}
    :sections [{:id    "matti-verdict"
                :grid  {:columns 12
                        :rows    [{:css [:row--date-delta-title]
@@ -391,50 +392,47 @@
 (sc/validate MattiVerdict default-verdict-template)
 
 (defschema MattiSettings
-  {:title    sc/Str
-   :sections [MattiSection]})
+  (merge Dictionary
+         {:title    sc/Str
+          :sections [MattiSection]}))
 
 (def r-settings
-  {:title    "matti-r"
-   :sections [{:id   "verdict"
-               :grid {:columns 1
-                      :rows    [[{:id     "verdict-code"
-                                  :schema {:multi-select {:label?     false
-                                                          :loc-prefix :matti-r
-                                                          :items (keys verdict-code-map)}}}]]}
-               :_meta {:editing? true}}
-              {:id   "foremen"
-               :grid {:columns 1
-                      :rows    [[{:id     "foremen"
-                                  :schema {:multi-select {:label?     false
-                                                          :loc-prefix :matti-r
-                                                          :items foreman-codes}}}]]}
-               :_meta {:editing? true}}
-              {:id   "plans"
-               :grid {:columns 1
-                      :rows    [[{:id     "plans"
-                                  :schema {:reference-list {:label?   false
-                                                            :path     [:plans]
-                                                            :item-key :id
-                                                            :type     :multi-select
-                                                            :term     {:path       :plans
-                                                                       :extra-path :name}}}}]]}
-               :_meta {:editing? true}}
-              {:id   "reviews"
-               :grid {:columns 1
-                      :rows    [[{:id     "reviews"
-                                  :schema {:reference-list {:label?   false
-                                                            :path     [:reviews]
-                                                            :item-key :id
-                                                            :type     :multi-select
-                                                            :term     {:path       :reviews
-                                                                       :extra-path :name}}}}]]}
-               :_meta {:editing? true}}]})
+  {:title      "matti-r"
+   :dictionary {:verdict-code {:multi-select {:label?     false
+                                              :loc-prefix :matti-r
+                                              :items      (keys verdict-code-map)}}
+                :foremen      {:multi-select {:label?     false
+                                              :loc-prefix :matti-r
+                                              :items      foreman-codes}}
+                :plans        {:reference-list {:label?   false
+                                                :path     [:plans]
+                                                :item-key :id
+                                                :type     :multi-select
+                                                :term     {:path       :plans
+                                                           :extra-path :name}}}
+                :reviews      {:reference-list {:label?   false
+                                                :path     [:reviews]
+                                                :item-key :id
+                                                :type     :multi-select
+                                                :term     {:path       :reviews
+                                                           :extra-path :name}}}}
+   :sections   [{:id    "verdict"
+                 :grid  {:columns 1
+                         :rows    [[{:dict :verdict-code}]]}}
+                {:id    "foremen"
+                 :grid  {:columns 1
+                         :rows    [[{:dict :foremen}]]}}
+                {:id    "plans"
+                 :grid  {:columns 1
+                         :rows    [[{:dict :plans}]]}}
+                {:id    "reviews"
+                 :grid  {:columns 1
+                         :rows    [[{:dict :reviews}]]}}]})
 
 (def settings-schemas
   {:r r-settings})
 
-#_(sc/validate MattiSettings r-settings)
+(sc/validate MattiSettings r-settings)
 
 ;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.

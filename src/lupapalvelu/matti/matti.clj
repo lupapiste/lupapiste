@@ -93,15 +93,12 @@
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
   (let [template (verdict-template organization template-id)
-        draft    (assoc-in (:draft template) [path] value)
-        dict-key (first path)]
-    (or (schemas/validate-dictionary-value (-> shared/default-verdict-template
-                                               :dictionary
-                                               dict-key)
-                                           value
-                                           (rest path)
-                                           {:settings (:draft (settings organization
-                                                                        (:category template)))})
+        draft    (assoc-in (:draft template) path value)]
+    (or (schemas/validate-path-value shared/default-verdict-template
+                                     path
+                                     value
+                                     {:settings (:draft (settings organization
+                                                                  (:category template)))})
         (template-update organization
                          template-id
                          {$set {:verdict-templates.templates.$.draft draft}}
@@ -159,10 +156,14 @@
                                (map keyword path)
                                value)
         settings-key (settings-key category)]
-    (mongo/update-by-id :organizations
-                        (:id organization)
-                        {$set {settings-key {:draft    draft
-                                             :modified timestamp}}})))
+    (or (schemas/validate-path-value (get shared/settings-schemas
+                                          (keyword category))
+                                     path
+                                     value)
+     (mongo/update-by-id :organizations
+                         (:id organization)
+                         {$set {settings-key {:draft    draft
+                                              :modified timestamp}}}))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in
@@ -438,7 +439,7 @@
                                           changes)})))
 
 (defn update-automatic-verdict-dates [{:keys [category template verdict-data]}]
-  (let [verdict-schema  (category shared/verdict-schemas)
+  #_(let [verdict-schema  (category shared/verdict-schemas)
         template-schema shared/default-verdict-template
         datestring      (get-in verdict-data (shared/cell-path verdict-schema
                                                                "verdict-date"))
@@ -489,7 +490,7 @@
                      application                     :application
                      created                         :created
                      :as                             command}]
-  (let [verdict  (command->verdict command)
+  #_(let [verdict  (command->verdict command)
         category (-> application
                      :permitType
                      shared/permit-type->category)
