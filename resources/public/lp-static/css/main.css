@@ -11902,20 +11902,6 @@ div.suti-admin-container .serversettings--wide {
   color: #df3215;
 }
 
-.view-with-download {
-  /* No arrow for bubble-hover */
-  /*.bubble-hover .bubble-hover-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: $negative transparent transparent transparent;
-  }*/
-}
-
 .view-with-download .download {
   white-space: nowrap;
 }
@@ -14833,17 +14819,6 @@ div.search i {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
-  /* No arrow for bubble-hover */
-  /*.bubble-hover .bubble-hover-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: $negative transparent transparent transparent;
-  }*/
 }
 
 .applications-search-results__indicator div {
@@ -14889,15 +14864,6 @@ div.search i {
   font-size: 15px;
   position: absolute;
   white-space: pre-line;
-}
-
-.applications-search-results__indicator .bubble-hover .bubble-hover-text.bubble-hover-text--notice {
-  width: 400px;
-  max-height: 400px;
-  overflow-y: scroll;
-  text-overflow: ellipsis;
-  bottom: -50%;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 .applications-search-results__indicator .bubble-hover:hover .bubble-hover-text {
@@ -15019,6 +14985,15 @@ div.search i {
 
 .search-results-waiting span {
   padding-left: 2em;
+}
+
+.applications-search-results__indicator .bubble-hover .bubble-hover-text.bubble-hover-text--notice {
+  width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  bottom: -50%;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 #indicator .indicator-bar {
@@ -21607,26 +21582,24 @@ div.order-section div.attachments-table-container {
 }
 
 div.printing-order-footer {
-  position: fixed;
-  left: 0px;
-  bottom: 0px;
   width: 100%;
-  z-index: 2002;
   background-color: #777777;
   padding: 24px auto 24px auto;
 }
 
+div.printing-order-footer > div button:first-child {
+  padding-left: 0px;
+  padding-right: 48px;
+}
+
 div.printing-order-footer > div {
-  width: 100%;
-  max-width: 1280px;
-  min-width: 640px;
-  margin: 0 auto;
+  margin: 12px;
 }
 
 div.printing-order-footer > div button {
   width: auto;
-  display: inline;
-  padding-right: 24px;
+  display: inline-block;
+  padding-right: 12px;
 }
 
 div.printing-order-footer > div h2 {
@@ -21637,14 +21610,20 @@ div.printing-order-footer .open-pricelist-btn {
   min-width: 200px;
 }
 
+div.printing-order-footer .open-pricelist-btn h3 {
+  color: #f7ac2e;
+}
+
 div.printing-order-footer div.pricelist-panel {
   position: absolute;
+  right: 0px;
   bottom: 40px;
   min-width: 250px;
 }
 
 div.printing-order-footer div.pricelist-panel > div:first-child {
-  bottom: 27px;
+  bottom: 81px;
+  right: 6px;
   position: absolute;
   background-color: white;
   color: black;
@@ -21660,6 +21639,7 @@ div.printing-order-footer div.pricelist-panel .arrow {
   position: absolute;
   z-index: 101;
   left: 80px;
+  bottom: 54px;
 }
 
 div.printing-order-footer div.pricelist-panel .arrow:after, div.printing-order-footer div.pricelist-panel .arrow:before {
@@ -23171,8 +23151,12 @@ div.review-tasks {
   margin-top: 20px;
 }
 
-div.review-tasks .faulty {
+div.review-tasks .faulty td {
   text-decoration: line-through;
+}
+
+div.review-tasks .faulty td.reviews-table--action {
+  text-decoration: none;
 }
 
 .assignment-creator {

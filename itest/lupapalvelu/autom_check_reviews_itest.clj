@@ -421,20 +421,26 @@
                 poll-result (batchrun/poll-verdicts-for-reviews :overwrite-background-reviews? true)
                 application (query-application local-query sonja application-id) => truthy
                 overwritten-task (->> application :tasks
-                                      (util/find-first #(= (-> % :data :katselmus :pitoPvm :value)
-                                                           "29.09.2014")))]
+                                      (util/find-first #(= (:id %)
+                                                           (:id old-task))))
+                overwriting-task (->> application :tasks
+                                      (util/find-first #(and (not= (:state %)
+                                                                   "faulty_review_task")
+                                                             (= (-> % :data :katselmus :pitoPvm :value)
+                                                                "29.09.2014"))))]
 
             (fact "one of the application reviews is updated"
-              (->> overwritten-task :data :katselmus :huomautukset :kuvaus :value)
+              (->> overwriting-task :data :katselmus :huomautukset :kuvaus :value)
               => (contains "aloituskoKKouksessa"))  ;; <- NOTE!
 
-            (fact "the overwritten review attachment is marked faulty"
+            (fact "the overwritten review is marked faulty"
+                  (:state overwritten-task) => "faulty_review_task")
+
+            (fact "the associated attachments are removed"
               (let [faulty-attachments (->> application :attachments
-                                            (filter #(= (-> % :metadata :tila)
-                                                        "ei-arkistoida-virheellinen")))]
-                (count faulty-attachments) => 1
-                (:target (first faulty-attachments))
-                => {:type "task", :id (:id old-task)})))
+                                            (filter #(= (-> % :target :id)
+                                                        (:id overwritten-task))))]
+                (count faulty-attachments) => 0)))
           => truthy
 
           (provided (krysp-reader/rakval-application-xml anything anything [application-id] :application-id anything)

@@ -40,15 +40,17 @@
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}}
   [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
-  (->> (mongo/select :applications
-                     {$or [{:auth.invite.user.id user-id}
-                           {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
-                           {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]
-                      :state {$ne :canceled}}
-                     [:auth :primaryOperation :address :municipality])
-       (map (partial select-user-auths user))
-       (mapcat invites-with-application)
-       (ok :invites)))
+  (let [query (if (nil? company-id)
+                {:auth.invite.user.id user-id}
+                {$or [{:auth.invite.user.id user-id}
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]})]
+    (->> (mongo/select :applications
+                       (merge query {:state {$ne :canceled}})
+                       [:auth :primaryOperation :address :municipality])
+         (map (partial select-user-auths user))
+         (mapcat invites-with-application)
+         (ok :invites))))
 
 (def settable-roles #{:writer :foreman :financialAuthority})
 (def changeable-roles #{:writer :foreman})
@@ -61,10 +63,17 @@
                      inviter :user
                      application :application
                      :as command}]
-  (let [email (ss/canonize-email email)]
-    (if (or (util/find-by-key :email email (domain/invites application))
-            (auth/has-auth? application (:id (user/get-user-by-email email))))
+  (let [email (ss/canonize-email email)
+        existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
+        existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))]
+    (cond
+      (#{:reader :guest} existing-role)
+      (fail :invite.already-has-reader-auth :existing-role existing-role)
+
+      existing-auth
       (fail :invite.already-has-auth)
+
+      :else
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
             email-template (case notification

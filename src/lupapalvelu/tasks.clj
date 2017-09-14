@@ -1,14 +1,9 @@
 (ns lupapalvelu.tasks
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+  (:require [clojure.set :refer [rename-keys]]
             [clojure.string :as s]
-            [clojure.set :refer [rename-keys]]
-            [monger.operators :refer :all]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.core :refer [def-]]
-            [lupapalvelu.action :refer [application->command update-application]]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.action :as action :refer [application->command update-application]]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -16,7 +11,12 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as user]
+            [monger.operators :refer :all]
+            [sade.core :refer [def-]]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]))
 
 (def task-schemas-version 1)
 
@@ -112,14 +112,25 @@
       :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 20000 :css []
-              :whitelist {:roles [:authority] :otherwise :disabled} }
-             {:name "maaraAika" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}
-             {:name "toteaja" :type :string :whitelist {:roles [:authority] :otherwise :disabled}}
-             {:name "toteamisHetki" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
-      :whitelist {:roles [:authority] :otherwise :disabled}}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
-      :whitelist {:roles [:authority] :otherwise :disabled}}]}
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}
+             {:name "maaraAika" :type :date
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}
+             {:name "toteaja" :type :string
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}
+             {:name "toteamisHetki" :type :date
+              :whitelist {:roles [:authority] :otherwise :disabled}
+              :auth {:disabled [:is-faulty-review]}}]}
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width
+      :css [] :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:disabled [:is-faulty-review]}}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout
+      :full-width :css [] :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:disabled [:is-faulty-review]}}]}
    {:name "muuTunnus" :type :text
     :readonly true :hidden true}])
 
@@ -228,6 +239,15 @@
      :duedate nil
      :created created
      :closed nil}))
+
+(defn set-state
+  "Updates are called in the context of the task $elemMatch."
+  [{created :created :as command} task-id state & [updates]]
+  (action/update-application command
+    {:tasks {$elemMatch {:id task-id}}}
+    (util/deep-merge
+      {$set {:tasks.$.state state :modified created}}
+      updates)))
 
 
 (defn merge-rakennustieto [rakennustieto-from-xml rakennus-from-buildings]
@@ -412,25 +432,31 @@
         (errorf "update-task-buildings: too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states)))
       updated-task)))
 
-(defn set-task-state [{created :created :as command} task-id state & [updates]]
-  (update-application command
-                      {:tasks {$elemMatch {:id task-id}}}
-                      (util/deep-merge
-                       {$set {:tasks.$.state state :modified created}}
-                       updates)))
+(defn- faultify
+  "Helper function for task->faulty."
+  [{:keys [application created] :as command} task-id & [updates]]
+  (let [review-attachments (att/get-attachments-by-target-type-and-id application
+                                                                      {:type "task"
+                                                                       :id   task-id})]
+    (action/update-application command {$pull {:attachments {:id {$in (map :id review-attachments)}}}})
+    (doseq [{{:keys [fileId originalFileId]} :latestVersion} review-attachments]
+      (when-not (= fileId originalFileId)
+        (att/delete-attachment-file-and-preview! fileId)))
+    (set-state command task-id :faulty_review_task
+               {$set (merge {:tasks.$.faulty
+                             {:timestamp created
+                              :files     (map (util/fn-> :latestVersion
+                                                         (select-keys [:originalFileId :filename]))
+                                              review-attachments)}}
+                            updates)})))
 
-(defn mark-review-faulty [application task-id timestamp]
-  (let [command (assoc (application->command application)
-                       :created timestamp)
-        review-attachments (attachment/get-attachments-by-target-type-and-id application {:type "task" :id task-id})]
-    (doseq [att review-attachments]
-      (attachment/update-attachment-data! command
-                                          (:id att)
-                                          {:metadata.sailytysaika.arkistointi :ei
-                                           :metadata.sailytysaika.perustelu (i18n/localize :fi "review.faulty-document")
-                                           :metadata.myyntipalvelu false
-                                           :metadata.tila :ei-arkistoida-virheellinen}
-                                          timestamp
-                                          :set-app-modified? false
-                                          :set-attachment-modified? false))
-    (set-task-state command task-id :faulty_review_task)))
+(defn task->faulty
+  "Clear task attachments. Store original file ids. Set task state
+  to :faulty_review_task. Update notes if
+  given (katselmus/huomautukset/kuvaus)"
+  ([command task-id]
+   (faultify command task-id))
+  ([{:keys [created] :as command} task-id notes]
+   (faultify command task-id {:tasks.$.data.katselmus.huomautukset.kuvaus
+                              {:value    notes
+                               :modified created}})))

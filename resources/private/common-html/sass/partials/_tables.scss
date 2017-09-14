@@ -473,17 +473,6 @@ div.suti-admin-container .serversettings--wide {
     position: absolute;
     white-space: pre-line;
   }
-  /* No arrow for bubble-hover */
-  /*.bubble-hover .bubble-hover-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: $negative transparent transparent transparent;
-  }*/
   .bubble-hover:hover .bubble-hover-text {
     visibility: visible;
   }

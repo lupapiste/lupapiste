@@ -25,6 +25,7 @@
                               operations/operations))))
 
 (def ^:private mikko-user (find-user-from-minimal-by-apikey mikko))
+(def ^:private teppo-user (find-user-from-minimal-by-apikey teppo))
 (def ^:private pena-user (find-user-from-minimal-by-apikey pena))
 (def ^:private sonja-user (find-user-from-minimal-by-apikey sonja))
 (def ^:private solita-company (company-from-minimal-by-id "solita"))
@@ -39,8 +40,10 @@
     (let [{app-id :id :as app}  (create-and-submit-application pena)
           _                     (invite-company-and-accept-invitation pena app-id "solita" kaino)
           _                     (command pena :invite-with-role :id app-id :email (email-for-key mikko)
-                                              :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
+                                         :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
           _                     (command mikko :approve-invite :id app-id) => ok?
+          _                     (command pena :invite-with-role :id app-id :email (email-for-key teppo)
+                                         :role "writer" :text "huanying" :documentName "" :documentId "" :path "") => ok?
           hakija-doc-id         (:id (domain/get-applicant-document (:documents app)))
           resp                  (command pena :update-doc :id app-id :doc hakija-doc-id  :collection "documents"
                                          :updates [["henkilo.henkilotiedot.etunimi" (:firstName mikko-user)]
@@ -53,19 +56,21 @@
         (query kaino :copy-application-invite-candidates :source-application-id app-id) => ok?
         (query sonja :copy-application-invite-candidates :source-application-id app-id) => ok?)
 
-      (fact "For Sonja, invite candidates are Pena, Mikko and Solita"
+      (fact "For Sonja, invited candidates are Pena, Mikko, Teppo and Solita"
         (:candidates (query sonja :copy-application-invite-candidates :source-application-id app-id))
         => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
                   (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")
+                  (assoc (select-keys teppo-user [:firstName :lastName :id]) :email "teppo@example.com" :role "writer" :roleSource "auth")
                   (assoc {:firstName (:name solita-company)
                           :lastName ""
                           :id (:_id solita-company)} :email nil :role "writer" :roleSource "auth")]
                  :in-any-order))
 
-      (fact "For Kaino, invite candidates are Pena and Mikko, but not Solita (automatically invited)"
+      (fact "For Kaino, invited candidates are Pena, Mikko and Teppo, but not Solita (automatically invited)"
         (:candidates (query kaino :copy-application-invite-candidates :source-application-id app-id))
         => (just [(assoc (select-keys pena-user [:firstName :lastName :id])  :email nil :role "owner" :roleSource "auth")
-                  (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")]
+                  (assoc (select-keys mikko-user [:firstName :lastName :id]) :email nil :role "hakija" :roleSource "document")
+                  (assoc (select-keys teppo-user [:firstName :lastName :id]) :email "teppo@example.com" :role "writer" :roleSource "auth")]
                  :in-any-order))))
 
   (facts "copying application"
@@ -85,6 +90,8 @@
 
     (let [{app-id :id} (create-and-submit-application pena)
           _ (invite-company-and-accept-invitation pena app-id "solita" kaino)
+          _ (command pena :invite-with-role :id app-id :email (email-for-key teppo)
+                     :role "writer" :text "huanying" :documentName "" :documentId "" :path "")
           app (query-application sonja app-id)
           x 444445.0 y 6666665.0
           property-id "75312312341234"
@@ -92,7 +99,7 @@
           {copy-app-id :id} (copy-application sonja app-id
                                               :x x :y y
                                               :address "Testitie 1"
-                                              :auth-invites [pena-id (:_id solita-company)]
+                                              :auth-invites [pena-id (:_id solita-company) teppo-id]
                                               :propertyId property-id) => ok?
                                               copy-app (query-application sonja copy-app-id)]
 
@@ -111,19 +118,28 @@
         (:propertyId copy-app) => property-id
         (:municipality copy-app) => (prop/municipality-id-by-property-id property-id))
 
-      (fact "Sonja is new owner, Pena (previous owner) is invited as writer"
-        (count (:auth copy-app)) => 3
+      (fact "Sonja is new owner, Pena (previous owner) is invited as writer, Teppo's pending invitation has been transferred successfully"
+        (count (:auth copy-app)) => 4
         (-> copy-app :auth (first) ((juxt :id :role))) => [(:id sonja-user) "owner"]
         (-> copy-app :auth (second) ((juxt :id (comp :role :invite)))) => [pena-id "writer"]
         (-> copy-app :auth (get 2) ((juxt :name :type))) => [(:name solita-company) "company"]
+        (let [teppo-auth (-> copy-app :auth last)]
+          teppo-auth => (contains {:role "reader" :username "teppo@example.com"})
+          (:invite teppo-auth) => (contains {:role "writer" :email "teppo@example.com"}))
         (let [emails (sent-emails)]
-          (count emails) => 2
-
-          (-> emails first :body :html) => (contains "Sinut halutaan valtuuttaa kirjoitusoikeudella")
-          (-> emails first :to) => (contains "Pena Panaani")
-
-          (-> emails second :body :html) => (contains "Sonja Sibbo haluaa valtuuttaa yrityksenne")
-          (-> emails second :to) => (contains (:email solita-company-admin))))
+          (count emails) => 3
+          (doall (mapv (fn [{:keys [to body]}]
+                         (let [[t b] (cond
+                                       (re-find #"Pena" to) ["Pena Panaani"
+                                                             "Sinut halutaan valtuuttaa kirjoitusoikeudella"]
+                                       (re-find #"kaino" to) [(:email solita-company-admin)
+                                                              "Sonja Sibbo haluaa valtuuttaa yrityksenne"]
+                                       (re-find #"Teppo" to) ["Teppo Nieminen"
+                                                              "Sinut halutaan valtuuttaa kirjoitusoikeudella"])]
+                           (fact {:midje/description (str "Email for " t)}
+                             to => (contains t)
+                             (:html body) => (contains b))))
+                       emails))))
 
       (fact "the source application is stored in the source-applications collection"
         (let [source-app (:source-application (query sonja :source-application :copy-application-id (:id copy-app)))]

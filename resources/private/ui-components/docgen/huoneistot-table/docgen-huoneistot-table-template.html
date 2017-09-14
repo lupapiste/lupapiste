@@ -8,7 +8,7 @@
 
           <div>
             <h3 class="form-label" data-bind="ltext: groupLabel"></h3>
-            <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'huoneistotTable.help' } }"></span>
+            <span data-bind="component: { name: 'help-toggle', params: {html: tableHelp } }"></span>
           </div>
 
 
@@ -28,7 +28,7 @@
             <tbody data-bind="foreach: rows">
               <tr data-bind="attr: { 'id': 'huoneistot-row-' + index , 'data-test-id': $component.schemaName + '-row-' + index}">
                 <!--Huoneiston muutos-->
-                <!-- ko ifnot: muutostapa.schema.hidden -->
+                <!-- ko if: $parent.showMuutostapa -->
                 <td>
                   <span class="form-entry form-input">
                     <div class="inline">

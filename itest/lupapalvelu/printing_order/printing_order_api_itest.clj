@@ -4,9 +4,6 @@
 
 (apply-remote-minimal)
 
-(defn- tagGroups-response->map [tagGroups]
-  (apply merge (map (fn [[k & vs]] {(keyword k) vs}) tagGroups)))
-
 (facts "attachments for printing order"
   (let [{application-id :id :as response}
           (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
@@ -31,6 +28,4 @@
       (let [{:keys [attachments tagGroups] :as resp} (query pena :attachments-for-printing-order :id application-id)]
         resp => ok?
         (count attachments) => 1
-        (tagGroups-response->map tagGroups) => (contains
-                                                 {(keyword (str "op-id-" (:id primaryOperation)))
-                                                  [["paapiirustus"] ["other"]]})))))
+        tagGroups => (contains [["paapiirustus"] ["other"]] :gaps-ok :in-any-order)))))

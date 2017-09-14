@@ -512,7 +512,9 @@
   (when (not (empty? new-faulty-tasks))
     (let [timestamp (now)]
       (doseq [task-id new-faulty-tasks]
-        (tasks/mark-review-faulty application task-id timestamp)))))
+        (tasks/task->faulty (assoc (application->command application)
+                                   :created timestamp)
+                            task-id)))))
 
 (defn mark-reviews-faulty [applications-with-results]
   (when (not-empty applications-with-results)

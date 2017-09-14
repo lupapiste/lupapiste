@@ -8,6 +8,7 @@ LUPAPISTE.InviteModel = function() {
   self.text = ko.observable(loc("invite.default-text"));
   self.documentName = ko.observable();
   self.documentId = ko.observable();
+  self.hasReaderRole = ko.observable();
   self.error = ko.observable();
   self.processing = ko.observable();
   self.pending = ko.observable();
@@ -26,7 +27,19 @@ LUPAPISTE.InviteModel = function() {
     self.documentId(undefined);
     self.path(undefined);
     self.text(loc("invite.default-text"));
+    self.hasReaderRole(false);
     self.error(undefined);
+  };
+
+  self.removeExistingAuth = function(model) {
+    ajax.command("remove-auth", { id: model.applicationId, username: model.email()})
+      .success(function() {
+        self.error(undefined);
+        self.hasReaderRole(false);
+      })
+      .processing(model.processing)
+      .call();
+    return false;
   };
 
   self.submit = function(model) {
@@ -51,6 +64,7 @@ LUPAPISTE.InviteModel = function() {
         LUPAPISTE.ModalDialog.close();
       })
       .error(function(d) {
+        self.hasReaderRole(_.includes(["reader","guest"], d["existing-role"]));
         self.error(loc(d.text));
       })
       .call();

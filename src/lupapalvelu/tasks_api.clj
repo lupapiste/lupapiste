@@ -111,7 +111,7 @@
                 validate-task-is-not-review]}
   [{:keys [application user lang] :as command}]
   (tasks/generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
-  (tasks/set-task-state command taskId :ok))
+  (tasks/set-state command taskId :ok))
 
 (defcommand reject-task
   {:description "Authority can reject task, requires user action."
@@ -122,7 +122,8 @@
    :pre-checks  [(task-state-assertion (tasks/all-states-but :sent))
                  validate-task-is-not-review]}
   [{:keys [application] :as command}]
-  (tasks/set-task-state command taskId :requires_user_action))
+  (tasks/set-state command taskId :requires_user_action))
+
 
 (defn- validate-review-kind [{{task-id :taskId} :data} {tasks :tasks}]
   (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
@@ -211,7 +212,7 @@
                           all-attachments
                           (if task-pdf-version (conj review-attachments (:fileId task-pdf-version)) review-attachments)))]
 
-    (tasks/set-task-state command taskId :sent (when (seq set-statement) {$set set-statement}))
+    (tasks/set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
 
     (case tila
       ; Create new, similar task
@@ -244,16 +245,19 @@
     (ok :integrationAvailable sent-to-krysp?)))
 
 (defcommand mark-review-faulty
-  {:description "Marks review done, generates PDF/A and sends data to backend"
-   :parameters  [id taskId]
+  {:description      "Sets review's state to faulty_review_task, cleares
+  its attachments but stores the file ids and filenames. The latter is
+  done just in case for future reference. Notes parameter updates the
+  katselmus/huomautukset/kuvaus field in the schema."
+   :parameters       [id taskId notes]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :pre-checks  [validate-task-is-review
-                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
-                 (task-state-assertion #{:sent})]
-   :user-roles  #{:authority}
-   :states      valid-states}
-  [{application :application created :created :as command}]
-  (tasks/mark-review-faulty application taskId created))
+   :pre-checks       [validate-task-is-review
+                      (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
+                      (task-state-assertion #{:sent})]
+   :user-roles       #{:authority}
+   :states           valid-states}
+  [command]
+  (tasks/task->faulty command taskId notes))
 
 (defcommand resend-review-to-backing-system
   {:description "Resend review data to backend"
@@ -280,3 +284,16 @@
    :states valid-states
    :pre-checks [validate-task-is-end-review
                 (permit/validate-permit-type-is permit/R)]})
+
+(defquery is-faulty-review
+  {:description      "Pseudo query that succeeds only if the current task
+  has been marked faulty."
+   :parameters       [id taskId]
+   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :user-roles       #{:authority}
+   :states           valid-states
+   :pre-checks       [(fn [{{task-id :taskId} :data {tasks :tasks} :application}]
+                        (when-not (some-> (util/find-by-id task-id tasks)
+                                          :state
+                                          (util/=as-kw :faulty_review_task))
+                          (fail :error.not-faulty)))]})

@@ -87,10 +87,7 @@
    (when (seq attachments-in-group)
      [:div.rollup.rollup--open
       [:button
-       {:class (conj ["rollup-button" "rollup-status" "attachments-accordion" "toggled"]
-                     (if (seq children)
-                       "secondary"
-                       "tertiary"))}
+       {:class ["rollup-button" "rollup-status" "attachments-accordion" "toggled" "secondary"]}
        [:span (accordion-name (last path))]]
       [:div.attachments-accordion-content
        (for [[child-key & _] children]

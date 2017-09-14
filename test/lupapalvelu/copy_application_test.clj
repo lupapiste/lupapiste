@@ -3,6 +3,7 @@
             [clojure.walk :as walk]
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.copy-application :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -28,14 +29,31 @@
   (walk-dissoc-keys application :id :created :modified :ts))
 
 (def users
-  {"source-user" {:id        "source-user"
-                  :firstName "Source"
-                  :lastName  "User"
-                  :role      :applicant}
+  {"source-user"  {:id        "source-user"
+                   :username  "source-user"
+                   :firstName "Source"
+                   :lastName  "User"
+                   :role      :applicant}
    "copying-user" {:id        "copying-user"
+                   :username  "copying-user"
                    :firstName "New"
                    :lastName  "User"
-                   :role      :applicant}})
+                   :role      :applicant}
+   "iida"         {:id        "iida"
+                   :firstName "Iida"
+                   :lastName  "Invitee"
+                   :username  "iida@example.com"
+                   :email     "iida@example.com"}})
+
+(defn add-invite [{:keys [auth id]}]
+  {:auth (conj auth (auth/create-invite-auth (get users "source-user")
+                                             {:id "iida"
+                                              :firstName "Iida"
+                                              :lastName "Invitee"
+                                              :email "iida@example.com"}
+                                             id
+                                             "writer"
+                                             1504879553883))})
 
 (defn pointing-to-operations-of [application]
   (let [operations (conj (:secondaryOperations application) (:primaryOperation application))]
@@ -53,6 +71,12 @@
 
    (let [source-user (get users "source-user")
          user        (get users "copying-user")
+         invitee     (get users "iida")
+         invitation (auth/create-invite-auth (get users "source-user")
+                                             invitee
+                                             "LP-123"
+                                             :writer
+                                             1504879553883)
          source-created 12345
          created 23456
          municipality "753"
@@ -73,7 +97,8 @@
                                                                           {:type (ssg/generate attachment/Type)}]
                                                                          nil false true true))
                         (update :documents conj {:id "extra-document"
-                                                 :schema-info {:name "lisatiedot"}}))]
+                                                 :schema-info {:name "lisatiedot"}})
+                        (update :auth conj invitation))]
      (facts new-application-copy
        (facts "No options specified"
          (let [new-app (new-application-copy source-app user organization created {})
@@ -114,15 +139,25 @@
                     (dissoc-ids-and-timestamps (select-keys raw-new-app [:attachments])))  => true?)
 
            (fact "user is the owner of the new application, previous owner invited as writer"
-                 (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)]
-                 (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)
-                                     (assoc source-user
-                                            :role :reader
-                                            :invite {:created created
-                                                     :email nil
-                                                     :inviter user
-                                                     :role :writer
-                                                     :user source-user})])))
+             (:auth source-app) => [(assoc source-user :role :owner :type :owner :unsubscribed false)
+                                    invitation]
+             (:auth new-app) => [(assoc user :role :owner :type :owner :unsubscribed false)
+                                 (assoc source-user
+                                        :role :reader
+                                        :invite {:created created
+                                                 :email nil
+                                                 :inviter user
+                                                 :role :writer
+                                                 :user source-user})
+                                 (let [invitee (dissoc invitee :email)]
+                                   (assoc invitee
+                                          :role :reader
+                                          :invite {:created created
+                                                   :inviter user
+                                                   :email "iida@example.com"
+                                                   :role :writer
+                                                   :user invitee}))]
+             )))
 
             (fact "If documents are not copied or overridden, those of normal new application are created"
                   (let [new-app (new-application-copy source-app user organization created

@@ -68,6 +68,9 @@ Error indicator disappears when valid value is input
   Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
   Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
+Muutostapa help text is available
+  jQuery should match X times  docgen-huoneistot-table .help-text:contains(Esimerkki)  1
+
 Huoneistot info is correct
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  1
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-test-id='huoneistot.0.huoneistonumero']  ${EMPTY}
@@ -75,7 +78,7 @@ Huoneistot info is correct
   Huoneisto row items disabled except muutostapa  0
 
   Open accordions  info
-  Click by test id  huoneistot-append-button
+  Scroll and click test id  huoneistot-append-button
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id='huoneistot.1.muutostapa']
   Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id='huoneistot.1.muutostapa']
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  - Valitse -

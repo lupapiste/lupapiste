@@ -75,8 +75,6 @@
       [:button.tertiary-ghost.rollup-button
        (when (pos-int? number-of-printouts)
          [:h3 (pricing/footer-price-for-order-amount number-of-printouts)])]
-      [:button.tertiary-ghost.rollup-button.right
-       (loc-html :h3 :printing-order.mylly.provided-by)]
       [:div.right
        [:button.tertiary-ghost.rollup-button.open-pricelist-btn
         [:h3
@@ -206,10 +204,11 @@
        (composer-phase3))
      (when (= phase 4)
        (composer-phase4))
+     (when (#{1 2} phase)
+       (order-composer-footer))
      [:div.order-section
       (loc-html :span :printing-order.mylly.provided-by)]
-     (transitions/transition-buttons phase)
-     (order-composer-footer)]))
+     (transitions/transition-buttons phase)]))
 
 (defonce args (atom {}))
 

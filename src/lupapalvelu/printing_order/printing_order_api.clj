@@ -9,7 +9,9 @@
             [lupapalvelu.printing-order.domain :refer :all]
             [sade.util :as util]
             [clojure.java.io :as io]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.tags :as att-tags]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -47,7 +49,7 @@
                                   (not (:forPrinting %))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
                         (filter #(= (-> % :latestVersion :contentType) "application/pdf")))
-      :tagGroups (att-tag-groups/attachment-tag-groups application)))
+      :tagGroups (map vector (concat att-tags/application-group-types att-type/type-groups))))
 
 (defquery printing-order-pricing
   {:feature          :printing-order
