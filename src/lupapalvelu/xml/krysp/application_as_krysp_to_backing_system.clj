@@ -11,6 +11,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.parties-canonical]
+            [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
@@ -23,7 +25,6 @@
             [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
             [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]
-            [lupapalvelu.document.parties-canonical]
             [lupapiste-commons.attachment-types :as attachment-types]))
 
 (defn- get-begin-of-link [permit-type use-http-links?]
@@ -72,12 +73,17 @@
     (and (= :suunnittelija subtype)
          (or (not (doc/approved? document))
            (pos? (model/modifications-since-approvals document))))))
+(defn- designer-doc? [document]
+  (= :suunnittelija (doc-tools/doc-subtype document)))
 
 (defn- remove-non-approved-designers [application]
   (update application :documents #(remove non-approved-designer? %)))
 
+(defn- created-before-verdict? [application document]
+  (not (doc/created-after-verdict? document application)))
+
 (defn- remove-pre-verdict-designers [application]
-  (update application :documents (fn [docs] (filter #(doc/created-after-verdict? % application) docs))))
+  (update application :documents #(remove (every-pred designer-doc? (partial created-before-verdict? application)) %)))
 
 (defn- remove-disabled-documents [application]
   (update application :documents (fn [docs] (remove :disabled docs))))
