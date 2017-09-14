@@ -1,9 +1,14 @@
 (ns lupapalvelu.document.parties-canonical-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.document.data-schema :as dds]
+            [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.document.parties-canonical :refer :all]
             [sade.schema-generators :as ssg]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
+
+(testable-privates lupapalvelu.document.parties-canonical party-doc-to-canonical)
 
 (def paasuunnittelija-schema      (dds/doc-data-schema "paasuunnittelija" true))
 (def hankkeen-kuvaus-data-schema  (dds/doc-data-schema "hankkeen-kuvaus"))
@@ -199,8 +204,8 @@
                   :statements []})
 
 
-(facts "parties canonical"
-  (let [canonical          (parties-to-canonical application "fi")
+(facts "suunnittelija canonical"
+  (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 2)))
         asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
         krysp-element-keys (keys asia)
         valid-names        (->> (:documents application)
@@ -211,12 +216,43 @@
     canonical => map?
     (fact "no toimenpide or rakennuspaikka information"
       krysp-element-keys => (just [:osapuolettieto
-                                   :kasittelynTilatieto :luvanTunnisteTiedot
-                                   :kayttotapaus :asianTiedot
-                                   :lisatiedot :hankkeenVaativuus] :in-any-order))
+                                   :kasittelynTilatieto
+                                   :luvanTunnisteTiedot
+                                   :viitelupatieto
+                                   :kayttotapaus
+                                   :asianTiedot
+                                   :lisatiedot] :in-any-order))
     (fact "kayttotapaus"
       (get asia :kayttotapaus) => "Uuden suunnittelijan nime\u00e4minen")
 
-    (fact "only suunnittelijatiedot"
+    (fact "only one suunnittelijatiedot per krysp message"
       (keys (get-in asia [:osapuolettieto :Osapuolet])) => (just :suunnittelijatieto)
-      (count (get-in asia [:osapuolettieto :Osapuolet :suunnittelijatieto])) => (count valid-names))))
+      (count (get-in asia [:osapuolettieto :Osapuolet :suunnittelijatieto])) => 1)))
+
+(facts "hakija canonical"
+  (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 1)))
+        asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
+        krysp-element-keys (keys asia)
+        valid-names        (->> (:documents application)
+                                (filter (fn [{info :schema-info}]
+                                          (= (:subtype info) :suunnittelija)))
+                                (remove (fn [{data :data}]  ; Canonical skips designers without sukunimi
+                                          (ss/blank? (get-in data [:henkilotiedot :sukunimi :value])))))]
+    canonical => map?
+    (fact "no toimenpide or rakennuspaikka information"
+      krysp-element-keys => (just [:osapuolettieto
+                                   :kasittelynTilatieto
+                                   :luvanTunnisteTiedot
+                                   :viitelupatieto
+                                   :kayttotapaus
+                                   :asianTiedot
+                                   :lisatiedot] :in-any-order))
+    (fact "kayttotapaus"
+      (get asia :kayttotapaus) => "Uuden suunnittelijan nime\u00e4minen")
+
+    (fact "only one suunnittelijatiedot per krysp message"
+      (keys (get-in asia [:osapuolettieto :Osapuolet])) => (just :osapuolitieto)
+      (count (get-in asia [:osapuolettieto :Osapuolet :osapuolitieto])) => 1)))
+
+(facts "non party canonical - no method in multimethod"
+  (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 0))) => (throws java.lang.IllegalArgumentException))
