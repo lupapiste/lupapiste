@@ -10,9 +10,9 @@
 
 (defmulti party-canonical-info
   {:arglists '([party-doc])}
-  (some-fn doc-tools/doc-subtype doc-tools/doc-name))
+  doc-tools/doc-subtype)
 
-(defmethod party-canonical-info :default
+(defmethod party-canonical-info :hakija
   [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
   {:osapuolitieto {:Osapuoli (canonical-common/get-osapuoli-data doc-data party-type doc-subtype)}})
 
@@ -28,7 +28,7 @@
      {:kasittelynTilatieto (canonical-common/get-state application)
       :luvanTunnisteTiedot (canonical-common/lupatunnus (:id party-doc) (:submitted application) nil)
       :viitelupatieto (canonical-common/lupatunnus application)
-      :osapuolettieto {:Osapuolet [(party-canonical-info party-doc)]}
+      :osapuolettieto {:Osapuolet (party-canonical-info party-doc)}
       :kayttotapaus "Uuden suunnittelijan nime\u00e4minen"
       :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus ""}}
       :lisatiedot (rl-canonical/get-lisatiedot lang)}}}})
