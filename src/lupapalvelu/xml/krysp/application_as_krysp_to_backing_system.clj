@@ -68,16 +68,15 @@
          (assoc application :attachments))
     application))
 
-(defn- non-approved-designer? [document]
-  (let [subtype  (keyword (get-in document [:schema-info :subtype]))]
-    (and (= :suunnittelija subtype)
-         (or (not (doc/approved? document))
-           (pos? (model/modifications-since-approvals document))))))
 (defn- designer-doc? [document]
   (= :suunnittelija (doc-tools/doc-subtype document)))
 
+(defn- non-approved? [document]
+  (or (not (doc/approved? document))
+      (pos? (model/modifications-since-approvals document))))
+
 (defn- remove-non-approved-designers [application]
-  (update application :documents #(remove non-approved-designer? %)))
+  (update application :documents #(remove (every-pred designer-doc? non-approved?) %)))
 
 (defn- created-before-verdict? [application document]
   (not (doc/created-after-verdict? document application)))
