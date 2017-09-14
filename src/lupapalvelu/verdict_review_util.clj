@@ -1,14 +1,15 @@
 (ns lupapalvelu.verdict-review-util
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [lupapalvelu.attachment :as attachment]
             [pandect.core :as pandect]
             [clojure.java.io :as io]
-            [sade.files :as files]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]
             [lupapalvelu.mime :as mime]
+            [sade.common-reader :refer [to-timestamp]]
+            [sade.files :as files]
             [sade.http :as http]
-            [sade.strings :as ss])
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [lupapalvelu.attachment :as attachment])
   (:import (java.net URL)
            (java.nio.charset StandardCharsets)))
 
@@ -87,7 +88,10 @@
                                                                     :target target
                                                                     :required false
                                                                     :locked true
-                                                                    :created (or attachment-time timestamp)
+                                                                    :created (or (if (string? attachment-time)
+                                                                                   (to-timestamp attachment-time)
+                                                                                   attachment-time)
+                                                                                 timestamp)
                                                                     :state :ok}
                                                                    {:filename filename
                                                                     :size content-length

@@ -124,6 +124,7 @@
   [{:keys [application] :as command}]
   (tasks/set-state command taskId :requires_user_action))
 
+
 (defn- validate-review-kind [{{task-id :taskId} :data} {tasks :tasks}]
   (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
     (fail! :error.missing-parameters)))
