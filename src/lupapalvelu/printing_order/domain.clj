@@ -1,8 +1,10 @@
 (ns lupapalvelu.printing-order.domain
   (:require [schema.core :as sc]
+            [sade.core :refer [fail!]]
             [sade.schemas :as ssc]
             [sade.util :as util]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.attachment :as att]))
 
 (defn str-max-length [l]
   (sc/constrained sc/Str
@@ -79,12 +81,29 @@
                                :delivery (:deliveryInstructions contacts)
                                ""))))
 
-; TODO pilko yli 1 GB tilaukset
+(defn pdf-attachment? [attachment]
+  (= (-> attachment :latestVersion :contentType) "application/pdf"))
+
+(defn prepare-attachments
+  [application order-map]
+  (for [[k amount] order-map]
+    (let [attachment-id (name k)
+          attachment-info (att/get-attachment-info application attachment-id)]
+      (when-not attachment-info
+        (fail! :error.attachment-not-found))
+      (when-not (pdf-attachment? attachment-info)
+        (fail! :error.not-pdf))
+      {:id attachment-id
+       :fileId (-> attachment-info :latestVersion :fileId)
+       :name (-> attachment-info :latestVersion :filename)
+       :size (-> attachment-info :latestVersion :size)
+       :amount amount})))
+
 (defn prepare-order
-  [app-id files-and-amounts contacts]
-  {:projectName     (str "Lupapisteen hankkeen " app-id " liitteet")
+  [{id :id :as application} order-map contacts]
+  {:projectName     (str "Lupapisteen hankkeen " id " liitteet")
    :orderer         (prepare-contact-to-order contacts :orderer)
    :payer           (prepare-contact-to-order contacts :payer)
    :delivery        (prepare-contact-to-order contacts :delivery)
    :internalOrderId (mongo/create-id)
-   :files (prepare-files files-and-amounts)})
+   :files           (prepare-attachments application order-map)})

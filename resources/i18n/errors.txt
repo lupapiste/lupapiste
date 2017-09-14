@@ -634,6 +634,7 @@
 "error.previous-permit-no-propertyid" "en" "No property code was found in the data of the retrieved permit"
 "error.previous-permit-no-propertyid" "fi" "Noudettavan luvan tiedoista ei löytynyt kiinteistötunnusta"
 "error.previous-permit-no-propertyid" "sv" "Fastighetsbeteckning saknas i tidigare lov"
+"error.printing-order.too-large" "fi" "Kerrallaan tilattavien tulosteiden tiedostokoko saa olla korkeintaan yhteensä 1 Gt. Ole hyvä, ja tee tulostetilaus pienemmissä erissä."
 "error.property-in-other-muinicipality" "en" "The property is not within the selected municipality"
 "error.property-in-other-muinicipality" "fi" "Kiinteistö ei ole valitun kunnan alueella"
 "error.property-in-other-muinicipality" "sv" "Fastigheten finns inte inom den valda kommunens område"

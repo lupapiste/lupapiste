@@ -35,6 +35,7 @@
   (when-not pricing
     (fail :error.feature-not-enabled)))
 
+
 (defquery attachments-for-printing-order
   {:feature          :printing-order
    :parameters       [id]
@@ -48,7 +49,7 @@
                                   (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
                                   (not (:forPrinting %))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
-                        (filter #(= (-> % :latestVersion :contentType) "application/pdf")))
+                        (filter pdf-attachment?))
       :tagGroups (map vector (concat att-tags/application-group-types att-type/type-groups))))
 
 (defquery printing-order-pricing
@@ -59,14 +60,18 @@
   [_]
   (ok :pricing pricing))
 
+(def max-total-file-size ; 1 Gb
+  (* 1024 1024 1024))
+
 (defcommand submit-printing-order
   {:feature      :printing-order
-   :description  ""
-   :parameters  [id order contacts]
+   :parameters  [:id order contacts]
    :states      states/post-verdict-states
    :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
-  [_]
-  (let [printing-order (prepare-order id order contacts)
-        _ (clojure.pprint/pprint printing-order)]
-    (ok)))
+  [{application :application}]
+  (let [printing-order (prepare-order application order contacts)
+        total-size (reduce + (map :size (:files printing-order)))]
+    (when (> total-size max-total-file-size)
+      (fail! :error.printing-order.too-large))
+    (ok :prepared-order printing-order :size total-size)))
