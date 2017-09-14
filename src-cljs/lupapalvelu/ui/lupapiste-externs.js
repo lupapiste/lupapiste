@@ -128,6 +128,8 @@ lupapisteApp.services.handlerService = {};
 lupapisteApp.services.cardService = {};
 
 lupapisteApp.models = {};
+lupapisteApp.models.application = {};
+lupapisteApp.models.application.userHasRole = function() {};
 lupapisteApp.models.currentUser = {};
 lupapisteApp.models.currentUser.firstName = function() {};
 lupapisteApp.models.currentUser.lastName = function() {};
