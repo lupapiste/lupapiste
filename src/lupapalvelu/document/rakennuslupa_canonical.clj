@@ -233,7 +233,7 @@
     (not-empty (sort-by :created toimenpiteet))))
 
 
-(defn- get-lisatiedot [lang]
+(defn get-lisatiedot [lang]
   {:Lisatiedot {:asioimiskieli (case lang
                                  "sv" "ruotsi"
                                  "suomi")}})

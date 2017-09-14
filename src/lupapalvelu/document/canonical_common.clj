@@ -262,14 +262,16 @@
           :kasittelija (get-handler application)}})
       state-timestamps)))
 
-(defn lupatunnus [{:keys [id submitted] :as application}]
-  {:pre [id]}
-  {:LupaTunnus
-   (util/assoc-when-pred
-     {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
-     util/not-empty-or-nil?
-     :saapumisPvm (util/to-xml-date submitted)
-     :kuntalupatunnus (->> application :verdicts (some :kuntalupatunnus)))})
+(defn lupatunnus
+  ([{:keys [id submitted] :as application}]
+   (lupatunnus id submitted (->> application :verdicts (some :kuntalupatunnus))))
+  ([id submitted backend-id]
+   {:pre [id]}
+   {:LupaTunnus
+    (util/assoc-when-pred {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
+      util/not-empty-or-nil?
+      :saapumisPvm     (util/to-xml-date submitted)
+      :kuntalupatunnus backend-id)}))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"

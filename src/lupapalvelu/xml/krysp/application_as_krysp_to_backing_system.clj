@@ -108,7 +108,7 @@
         (fail! :error.unknown))))
 
 (defn save-parties-as-krysp
-  "Send application's parties to municipality backend. Returns sent party document ids."
+  "Send application's parties (currently only designers) to municipality backend. Returns sent party document ids."
   [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
@@ -118,7 +118,7 @@
                           remove-non-approved-designers
                           remove-pre-verdict-designers
                           remove-disabled-documents)
-        write-result (permit/parties-krysp-mapper filtered-app lang krysp-version output-dir)]
+        write-result (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version output-dir)]
     (if write-result
       (map :id (domain/get-documents-by-subtype (:documents filtered-app) :suunnittelija))
       (fail! :error.unknown))))

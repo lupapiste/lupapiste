@@ -262,8 +262,8 @@
   nil)
 
 (defmulti parties-krysp-mapper
-  "Maps application into KRYSP XML and saves the XML to disk."
-  {:arglists '([application lang krysp-version output-dir])}
+  "Maps designer documents into KRYSP XML and saves the XML to disk."
+  {:arglists '([application doc-subtype lang krysp-version output-dir])}
   (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
