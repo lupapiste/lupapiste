@@ -106,7 +106,7 @@
   (let [company-id (get-in user [:company :id])
         company (when company-id (company/find-company-by-id company-id))]
     (cond-> (select-keys user [:role :email :firstName :lastName])
-            (and (not= env/mode :prod) dummy-role)  (assoc :role dummy-role)
+            (and (env/feature? :dummy-rest-user-role) dummy-role)  (assoc :role dummy-role)
             company (assoc :company {:id company-id :name (:name company)}))))
 
 ;;
