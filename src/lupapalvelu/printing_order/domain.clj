@@ -64,46 +64,5 @@
 (sc/defschema PricingConfiguration
   {:by-volume   [PricingItem]})
 
-(defn prepare-contact-to-order
-  [contacts path]
-  (let [contact (cond
-                  (and (= path :payer)
-                       (:payer-same-as-orderer contacts))    (:orderer contacts)
-                  (and (= path :delivery)
-                       (:delivery-same-as-orderer contacts)) (:orderer contacts)
-                  :default                                   (get contacts path))
-        {:keys [companyName firstName lastName]} contact]
-    (util/assoc-when contact
-      :companyName (when (empty? companyName)
-                     (str firstName " " lastName))
-      :additionalInformation (condp = path
-                               :payer (:billingReference contacts)
-                               :delivery (:deliveryInstructions contacts)
-                               ""))))
-
 (defn pdf-attachment? [attachment]
   (= (-> attachment :latestVersion :contentType) "application/pdf"))
-
-(defn prepare-attachments
-  [application order-map]
-  (for [[k amount] order-map]
-    (let [attachment-id (name k)
-          attachment-info (att/get-attachment-info application attachment-id)]
-      (when-not attachment-info
-        (fail! :error.attachment-not-found))
-      (when-not (pdf-attachment? attachment-info)
-        (fail! :error.not-pdf))
-      {:id attachment-id
-       :fileId (-> attachment-info :latestVersion :fileId)
-       :name (-> attachment-info :latestVersion :filename)
-       :size (-> attachment-info :latestVersion :size)
-       :amount amount})))
-
-(defn prepare-order
-  [{id :id :as application} order-map contacts]
-  {:projectName     (str "Lupapisteen hankkeen " id " liitteet")
-   :orderer         (prepare-contact-to-order contacts :orderer)
-   :payer           (prepare-contact-to-order contacts :payer)
-   :delivery        (prepare-contact-to-order contacts :delivery)
-   :internalOrderId (mongo/create-id)
-   :files           (prepare-attachments application order-map)})

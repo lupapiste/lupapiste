@@ -11,9 +11,7 @@
             [taoensso.timbre :as timbre]
             [sade.env :as env]
             [schema.core :as sc]
-            [lupapalvelu.printing-order.domain :refer :all]
-            [clojure.java.io :as io]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.printing-order.domain :as domain])
   (:import (java.io ByteArrayOutputStream)))
 
 (defn parse-soap [response]
@@ -70,10 +68,8 @@
                              {:action action, :time total-time})))
       (-> result :Body vals first))))
 
-(defn encoded-file
-  [file-name]
-  (with-open [orig (io/input-stream file-name)
-              output (ByteArrayOutputStream.)]
+(defn encode-file-from-stream [orig]
+  (with-open [output (ByteArrayOutputStream.)]
     (base64/encoding-transfer orig output)
     (.toString output)))
 
@@ -102,13 +98,13 @@
     (loop [sum   0
            coll  sizes]
       (cond
-        (empty? coll)                     false
-        (> (+ sum (first sizes)) 1048576) true
-        :else                             (recur (+ sum (first sizes)) (rest coll))))))
+        (empty? coll)                              false
+        (> (+ sum (first sizes)) (* 1024 1048576)) true
+        :else                                      (recur (+ sum (first sizes)) (rest coll))))))
 
-(sc/defn login-and-send-order! [order :- PrintingOrder]
+(sc/defn login-and-send-order! [order :- domain/PrintingOrder]
   (if (order-too-large? order)
-    {:ok false :reason :order-too-big}
+    nil
     (try+
       (let [token  (fetch-login-token!)
             result (send-order! order-service-url token order)]

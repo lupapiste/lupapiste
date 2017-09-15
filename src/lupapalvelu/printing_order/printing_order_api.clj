@@ -5,8 +5,8 @@
             [lupapalvelu.roles :as roles]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.states :as states]
-            [lupapalvelu.attachment.tag-groups :as att-tag-groups]
             [lupapalvelu.printing-order.domain :refer :all]
+            [lupapalvelu.printing-order.processor :as processor]
             [sade.util :as util]
             [clojure.java.io :as io]
             [schema.core :as sc]
@@ -69,9 +69,9 @@
    :states      states/post-verdict-states
    :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
-  [{application :application}]
-  (let [printing-order (prepare-order application order contacts)
-        total-size (reduce + (map :size (:files printing-order)))]
+  [{application :application user :user}]
+  (let [prepared-order (processor/prepare-order application order contacts)
+        total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)
       (fail! :error.printing-order.too-large))
-    (ok :prepared-order printing-order :size total-size)))
+    (ok :prepared-order (processor/enrich-with-file-content user prepared-order) :size total-size)))

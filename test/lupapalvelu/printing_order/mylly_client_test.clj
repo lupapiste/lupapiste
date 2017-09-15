@@ -1,7 +1,10 @@
 (ns lupapalvelu.printing-order.mylly-client-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.printing-order.mylly-client :as mylly]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [clojure.data.codec.base64 :as base64]
+            [clojure.java.io :as io])
+  (:import (java.io ByteArrayOutputStream)))
 
 (def login-result-xml
 "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">
@@ -27,6 +30,13 @@
   </s:Body>
   </s:Envelope>")
 
+
+(defn encoded-file [file-name]
+  (with-open [orig (io/input-stream file-name)
+              output (ByteArrayOutputStream.)]
+    (base64/encoding-transfer orig output)
+    (.toString output)))
+
 (def mock-order
   {:projectName     "Lupapisteen hankkeen LP-999-2017-88888 liitteet"
    :orderer         {:companyName "Testiyritys"
@@ -41,7 +51,7 @@
    :files           [{:fileId  "5950e6d4fc2a8807af72a777"
                       :name    "test-pdf.pdf"
                       :size    13963
-                      :content (mylly/encoded-file
+                      :content (encoded-file
                                  "dev-resources/test-pdf.pdf")}]})
 
 (facts "mylly authentication service calls"
