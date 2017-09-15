@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.parties-canonical
-  (:require [sade.core :refer :all]
+  (:require [clojure.walk :as walk]
+            [sade.core :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.rakennuslupa-canonical :as rl-canonical]
@@ -66,5 +67,6 @@
 (defmethod permit/parties-krysp-mapper :R [application doc-subtype lang krysp-version output-dir]
   (let [application (doc-tools/unwrapped application)]
     (->> (domain/get-documents-by-subtype (:documents application) doc-subtype)
+         (walk/postwalk canonical-common/empty-strings-to-nil)
          (run! (partial write-party-krysp application lang krysp-version output-dir)))
     true))
