@@ -53,7 +53,7 @@
      {:kasittelynTilatieto (canonical-common/get-state application)
       :luvanTunnisteTiedot (canonical-common/lupatunnus (:id party-doc) (:submitted application) nil)
       :viitelupatieto (canonical-common/lupatunnus application)
-      :osapuolettieto {:Osapuolet (party-canonical-info party-doc)}
+      :osapuolettieto {:Osapuolet [(party-canonical-info party-doc)]}
       :kayttotapaus (party-usage-info party-doc)
       :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus (party-krysp-description party-doc)}}
       :lisatiedot (rl-canonical/get-lisatiedot lang)}}}})
