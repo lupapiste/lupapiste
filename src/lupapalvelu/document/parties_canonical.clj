@@ -43,7 +43,7 @@
 
 (defmethod party-krysp-description :suunnittelija
   [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
-  (format "Suunnittelijan (rooli: %s) nimeäminen hankkeelle." (canonical-common/get-kuntaRooliKoodi doc-data party-type doc-subtype)))
+  (format "Suunnittelijan (rooli: %s) nime\u00e4minen hankkeelle." (canonical-common/get-kuntaRooliKoodi doc-data party-type doc-subtype)))
 
 (defn- party-doc-to-canonical [application lang party-doc]
   {:Rakennusvalvonta
