@@ -35,18 +35,20 @@
       {:fileId (-> attachment-info :latestVersion :fileId)
        :name (-> attachment-info :latestVersion :filename)
        :size (-> attachment-info :latestVersion :size)
-       :amount amount})))
+       :copyAmount amount})))
 
 (defn prepare-order
   [{id :id :as application} order-map contacts]
-  {:projectName     (str "Lupapisteen hankkeen " id " liitteet")
-   :orderer         (prepare-contact-to-order contacts :orderer)
-   :payer           (prepare-contact-to-order contacts :payer)
-   :delivery        (prepare-contact-to-order contacts :delivery)
-   :internalOrderId (mongo/create-id)
-   :files           (prepare-attachments application order-map)})
+  (let [files (prepare-attachments application order-map)]
+    {:projectName     (str "Lupapisteen hankkeen " id " liitteet")
+     :orderer         (prepare-contact-to-order contacts :orderer)
+     :payer           (prepare-contact-to-order contacts :payer)
+     :delivery        (merge (prepare-contact-to-order contacts :delivery)
+                             {:printedMaterials (map #(select-keys % [:fileId :copyAmount]) files)})
+     :internalOrderId (mongo/create-id)
+     :files           files}))
 
-(defn enrich-with-file-content [user prepared-order]
-  (update prepared-order :files #(map (fn [{fileId :fileId :as file}]
-                                        (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
-                                          (assoc file :content (mylly/encode-file-from-stream content-is)))) %)))
+(defn enrich-with-file-content [user {files :files :as prepared-order}]
+  (assoc prepared-order :files (map (fn [{fileId :fileId :as file}]
+                                      (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
+                                        (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))

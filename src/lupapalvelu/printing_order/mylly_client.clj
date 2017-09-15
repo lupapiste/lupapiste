@@ -104,7 +104,10 @@
 
 (sc/defn login-and-send-order! [order :- domain/PrintingOrder]
   (if (order-too-large? order)
-    nil
+    (do
+      (timbre/error "order-too-large")
+      {:ok false
+       :reason :error.order-too-large})
     (try+
       (let [token  (fetch-login-token!)
             result (send-order! order-service-url token order)]

@@ -11,7 +11,8 @@
             [clojure.java.io :as io]
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.attachment.tags :as att-tags]))
+            [lupapalvelu.attachment.tags :as att-tags]
+            [lupapalvelu.printing-order.mylly-client :as mylly]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -74,4 +75,5 @@
         total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)
       (fail! :error.printing-order.too-large))
-    (ok :prepared-order (processor/enrich-with-file-content user prepared-order) :size total-size)))
+    (let [result (mylly/login-and-send-order! (processor/enrich-with-file-content user prepared-order))]
+      (ok :order-number (:orderNumber result) :size total-size))))
