@@ -1,10 +1,10 @@
 (ns lupapalvelu.ui.matti.path
   (:require [clojure.string :as s]
+            [goog.events :as googe]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [rum.core :as rum]
-            [sade.shared-util :as util]
-            [goog.events :as googe]))
+            [sade.shared-util :as util]))
 
 (defn state [path state]
   (rum/cursor-in state (map keyword path)))
@@ -121,20 +121,30 @@
   (or (get _meta (keyword key))
       (latest path state :_meta key)))
 
+(defn kw-path
+  "Like sade.util/kw-path on the Clojure side."
+  [& path]
+  (->> path
+       flatten
+       (map #(if (keyword? %)
+               (name %)
+               %))
+       (s/join ".")
+       keyword))
+
 (defn- access-meta [{:keys [id-path _meta]} key & [deref-fn]]
   (loop [m ((or deref-fn deref) _meta)
          path id-path]
     (if (empty? path)
       (get m key)
-      (let [v (get-in m (concat path [key]) )]
+      (let [v (get m (kw-path path key))]
         (if (nil? v)
           (recur m (butlast path))
           v)))))
 
-
 (defn meta?
-  "_meta is a hieararchical map. meta? returns value for the key that is
-  closest to the id-path of the options."
+  "_meta is a flat map with kw-mapped keys. meta? returns value for the
+  key that is closest to the id-path of the options."
   [options key]
   (access-meta options key))
 
@@ -146,7 +156,9 @@
 (defn flip-meta
   "Flips (toggles boolean) on the id-path _meta."
   [{:keys [_meta id-path]} key]
-  (swap! (state id-path _meta) not))
+  (let [kw (kw-path id-path key)]
+    (swap! _meta (fn [m]
+                   (assoc m kw (not (kw m)))))))
 
 (defn css
   "List of CSS classes based on current :css value and status

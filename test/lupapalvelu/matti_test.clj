@@ -28,7 +28,8 @@
                 :complexity {:docgen {:name "matti-complexity"}}
                 :keymap     {:keymap {:one   "hello"
                                       :two   :world
-                                      :three 88}}}
+                                      :three 88}}
+                :placeholder {:placeholder {:type :neighbors}}}
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -48,7 +49,7 @@
                                                    {:dict :delta2}
                                                    {:dict :ref}]}}]}]}}
                 {:id   "three"
-                 :grid {:columns 4
+                 :grid {:columns 5
                         :rows    [{:id  "docgen"
                                    :row [{:dict :text}
                                          {:dict :giver}
@@ -177,11 +178,15 @@
     (validate-path-value [:keymap :one :extra] :hii)
     => :error.invalid-value-path
     (validate-path-value [:keymap :bad] 33 ) => :error.invalid-value-path
-    (validate-path-value [:keymap :two] 33 ) => nil))
+    (validate-path-value [:keymap :two] 33 ) => nil)
+  (facts "Placeholder: always fails"
+    (validate-path-value [:placeholder] :hii) => :error.invalid-value-path
+    (validate-path-value [:placeholder :type] :neighbors)
+    => :error.invalid-value-path))
 
 (defn work-day
   ([id from]
-   work-day id from from)
+   (work-day id from from))
   ([id from to]
    (fact {:midje/description (format "%s next work day: %s -> %s" id from to)}
      (date/forward-to-work-day (date/parse-finnish-date from))

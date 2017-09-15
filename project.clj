@@ -183,8 +183,7 @@
                                                                    :parallel-build true
                                                                    :pretty-print   true
                                                                    :optimizations  :none
-                                                                   :preloads       [devtools.preload]
-                                                                   }}}}}
+                                                                   :preloads       [devtools.preload]}}}}}
              :uberjar  {:main       lupapalvelu.main
                         :cljsbuild  {:builds {:rum {:compiler ^:replace {:output-dir     "resources/public/lp-static/js/out"
                                                                          :output-to      "resources/public/lp-static/js/rum-app.js"

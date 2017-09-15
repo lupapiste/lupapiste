@@ -18476,11 +18476,6 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   padding-left: 10px;
 }
 
-<<<<<<< HEAD
-.order-grid-1 {
-  width: 100%;
-  color: #333333;
-=======
 .pprint {
   margin-top: 6px;
   padding: 4px;
@@ -18529,13 +18524,9 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   white-space: nowrap;
 }
 
-/* VIEWS
-------------------------------------------------------------------------------*/
-@media (max-width: 47.5em) {
-  body.welcome {
-    width: 41.25em;
-  }
->>>>>>> LPK-3110 Matti list component related fixes.
+.order-grid-1 {
+  width: 100%;
+  color: #333333;
 }
 
 .order-grid-1 .row {

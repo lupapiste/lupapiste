@@ -69,7 +69,7 @@
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.matti-multi-select
    (when (show-label? schema wrap-label?)
-     [:h4.matti-label (path/loc path schema)])
+     [:h4.matti-label (path/new-loc options)])
    (let [state (path/state path state)
          items (->> (:items schema)
                     (map (fn [item]
@@ -79,11 +79,11 @@
                                {:value item
                                 :text  (if-let [item-loc (:item-loc-prefix schema)]
                                          (path/loc [item-loc item])
-                                         (path/loc path schema item))}))))
+                                         (path/new-loc options item))}))))
                     (sort-by :text))]
 
      (for [{:keys [value text]} items
-           :let                 [item-id (path/id (path/extend path value))
+           :let                 [item-id (path/unique-id "multi")
                                  checked (util/includes-as-kw? (set (rum/react state)) value)]]
        [:div.matti-checkbox-wrapper
         {:key item-id}
@@ -106,13 +106,13 @@
 
 (defn- resolve-reference-list
   "List of :value, :text maps"
-  [{:keys [path schema]}]
+  [{:keys [path schema references] :as options}]
   (let [{:keys [item-key item-loc-prefix term]}        schema
         {:keys [extra-path match-key] term-path :path} term
         extra-path                                     (path/pathify extra-path)
         term-parth                                     (path/pathify term-path)
         match-key                                      (or match-key item-key)]
-    (->> (path/value (path/pathify (:path schema)) state/references)
+    (->> (path/value (path/pathify (:path schema)) references )
          (remove :deleted) ; Safe for non-maps
          (map (fn [x]
                 (let [v (if item-key (item-key x) x)]
@@ -247,7 +247,6 @@
         options      (path/schema-options options schema-value)]
     (if (path/react-meta? options :editing?)
       ((case cell-type
-         :list           matti-list
          :date-delta     matti-date-delta
          :reference-list (if (= :select (:type schema-value))
                            select-reference-list
@@ -256,7 +255,7 @@
          :phrase-text    matti-phrase-text
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
-      (view-component options wrap-label?))))
+      (view-component cell-type options wrap-label?))))
 
 (defmethod instantiate :loc-text
   [{:keys [schema]} & _]
@@ -268,11 +267,11 @@
 ;; View layout components
 ;; -------------------------------
 
-(defmulti view-component (fn [options & _]
-                           (schema-type options)))
+(defmulti view-component (fn [cell-type & _]
+                           cell-type))
 
 (defmethod view-component :reference-list
-  [{:keys [state path schema ] :as options} & [wrap-label?]]
+  [_ {:keys [state path schema ] :as options} & [wrap-label?]]
   (let [values (set (flatten [(path/value path state)]))
         span [:span (->> (resolve-reference-list options)
                          (filter #(contains? values (:value %)))
@@ -283,14 +282,14 @@
       span)))
 
 (defmethod view-component :phrase-text
-  [{:keys [state path schema] :as options} & [wrap-label?]]
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.phrase-text (path/value path state)]]
     (if (show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
 (defmethod view-component :list
-  [{:keys [state path schema] :as options} & [wrap-label?]]
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [component [:div (map-indexed (fn [i item]
                                         (instantiate (assoc options
                                                             :path (path/extend path
@@ -337,13 +336,6 @@
     (if (show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))
-
-(defn- sub-options
-  "Options for the subschema"
-  [{:keys [state path]} subschema]
-  (assoc subschema
-         :state state
-         :path (path/extend path (:id subschema))))
 
 (defn matti-list [{:keys [schema] :as options} & [wrap-label?]]
   [:div.matti-list

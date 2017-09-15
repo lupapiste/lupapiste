@@ -75,9 +75,7 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       (layout/last-saved options)]]]
-   (for [sec (:sections schema)]
-     (sections/section (path/schema-options options
-                                            sec)))])
+   (sections/sections options :verdict-template)])
 
 (defn new-template [options]
   (reset-template options))
@@ -170,16 +168,28 @@
              (rum/react state/phrases))
     [:div
      (case (rum/react state/current-view)
-       ::template (with-back-button
-                    (verdict-template
-                     (merge
-                      {:schema (dissoc shared/default-verdict-template
-                                       :dictionary)
-                       :dictionary (:dictionary shared/default-verdict-template)
-                       :settings state/settings}
-                      (state/select-keys state/current-template [:state :info :_meta]))))
-       ::list     [:div (verdict-template-list) (phrases/phrases-table)]
-       ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @state/current-category)))))]))
+       ::template
+       (with-back-button
+         (verdict-template
+          (merge
+           {:schema     (dissoc shared/default-verdict-template
+                                :dictionary)
+            :dictionary (:dictionary shared/default-verdict-template)
+            :references (atom {:settings (path/value [:state] state/settings)})}
+           (state/select-keys state/current-template [:state :info :_meta]))))
+
+       ::list
+       [:div (verdict-template-list) (phrases/phrases-table)]
+
+       ::settings
+       (when-let [full-schema ((keyword @state/current-category) shared/settings-schemas)]
+         (with-back-button
+           (settings/verdict-template-settings
+            (merge
+             {:schema     (dissoc full-schema :dictionary)
+              :dictionary (:dictionary full-schema)
+              :references state/references}
+             (state/select-keys state/settings [:state :info :_meta]))))))]))
 
 (defonce args (atom {}))
 

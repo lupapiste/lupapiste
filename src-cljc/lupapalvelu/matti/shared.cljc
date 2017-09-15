@@ -373,10 +373,9 @@
                        :rows    [[{:dict :appeal }]]}}
               (text-section :collateral)
               {:id    "complexity"
-               :loc-prefix :matti-complexity
+               :loc-prefix :matti.complexity
                :grid  {:columns 1
-                       :rows    [[{:loc-prefix :matti-complexity
-                                   :dict       :complexity }]
+                       :rows    [[{:dict       :complexity }]
                                  [{:id   "text"
                                    :dict :complexity-text}]]}}
               (text-section :rights)
@@ -403,10 +402,8 @@
 (def r-settings
   {:title      "matti-r"
    :dictionary {:verdict-code {:multi-select {:label?     false
-                                              :loc-prefix :matti-r
                                               :items      (keys verdict-code-map)}}
                 :foremen      {:multi-select {:label?     false
-                                              :loc-prefix :matti-r
                                               :items      foreman-codes}}
                 :plans        {:reference-list {:label?   false
                                                 :path     [:plans]
@@ -421,15 +418,21 @@
                                                 :term     {:path       :reviews
                                                            :extra-path :name}}}}
    :sections   [{:id    "verdict"
+                 :loc-prefix :matti-settings.verdict
                  :grid  {:columns 1
+                         :loc-prefix :matti-r.verdict-code
                          :rows    [[{:dict :verdict-code}]]}}
                 {:id    "foremen"
+                 :loc-prefix :matti-settings.foremen
                  :grid  {:columns 1
+                         :loc-prefix :matti-r.foremen
                          :rows    [[{:dict :foremen}]]}}
                 {:id    "plans"
+                 :loc-prefix :matti-settings.plans
                  :grid  {:columns 1
                          :rows    [[{:dict :plans}]]}}
                 {:id    "reviews"
+                 :loc-prefix :matti-settings.reviews
                  :grid  {:columns 1
                          :rows    [[{:dict :reviews}]]}}]})
 
