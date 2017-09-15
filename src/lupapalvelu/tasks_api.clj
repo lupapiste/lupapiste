@@ -40,12 +40,16 @@
   (when-not (tasks/task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
-(defn- task-is-end-review? [task]
-  (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (get-in task [:data :katselmuksenLaji :value]) "")))
+(defn- review-type-in? [types task]
+  (->> (get-in task [:data :katselmuksenLaji :value])
+       (ss/lower-case)
+       (contains? types)))
 
-(defn- validate-task-is-end-review [{{task-id :taskId} :data {tasks :tasks} :application}]
-  (when-not (task-is-end-review? (util/find-by-id task-id tasks))
-    (fail :error.invalid-task-type)))
+(defn- validate-review-type-in [types]
+  {:pre [(set? types) (every? string? types) (every? ss/in-lower-case? types)]}
+  (fn [{{task-id :taskId} :data {tasks :tasks} :application}]
+    (when-not (review-type-in? types (util/find-by-id task-id tasks))
+      (fail :error.invalid-task-type))))
 
 ;; API
 (def valid-source-types #{"verdict" "task"})
@@ -282,7 +286,16 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states valid-states
-   :pre-checks [validate-task-is-end-review
+   :pre-checks [(validate-review-type-in #{"loppukatselmus" "osittainen loppukatselmus"})
+                (permit/validate-permit-type-is permit/R)]})
+
+(defquery is-other-review
+  {:description "Pseudo query that fails if the task is not Muu katselmus"
+   :parameters [id taskId]
+   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :user-roles #{:authority}
+   :states valid-states
+   :pre-checks [(validate-review-type-in #{"muu katselmus"})
                 (permit/validate-permit-type-is permit/R)]})
 
 (defquery is-faulty-review

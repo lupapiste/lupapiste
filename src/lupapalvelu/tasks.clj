@@ -91,7 +91,7 @@
                     :body [{:name "osittainen"} {:name "lopullinen"}]}
                    {:name "kayttoonottava" :readonly-after-sent true
                     :type :checkbox :inputType :checkbox-wrapper
-                    :auth {:enabled [:is-end-review]}
+                    :auth {:enabled [:is-end-review :is-other-review]}
                     :whitelist {:roles [:authority] :otherwise :disabled}}
                    ]}]}
    {:name "katselmus" :type :group
