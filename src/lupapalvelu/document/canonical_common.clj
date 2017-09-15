@@ -372,9 +372,9 @@
     (util/assoc-when-pred yritys-canonical util/not-empty-or-nil? :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
-(defn- get-kuntaRooliKoodi [party party-type subtype]
-  (if (contains? kuntaRoolikoodit party-type)
-    (kuntaRoolikoodit party-type)
+(defn get-kuntaRooliKoodi [party party-type subtype]
+  (if (contains? kuntaRoolikoodit (keyword party-type))
+    (kuntaRoolikoodit (keyword party-type))
     (let [code (or (get-in party [:kuntaRoolikoodi])
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])

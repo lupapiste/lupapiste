@@ -225,9 +225,8 @@
     (fact "kayttotapaus"
       (get asia :kayttotapaus) => "Uuden suunnittelijan nime\u00e4minen")
 
-    (fact "only one suunnittelijatiedot per krysp message"
-      (keys (get-in asia [:osapuolettieto :Osapuolet])) => (just :suunnittelijatieto)
-      (count (get-in asia [:osapuolettieto :Osapuolet :suunnittelijatieto])) => 1)))
+    (fact "only one osapuoli: suunnittelija as one suunnittelijatieto"
+      (mapcat keys (get-in asia [:osapuolettieto :Osapuolet])) => [:suunnittelijatieto])))
 
 (facts "hakija canonical"
   (let [canonical          (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 1)))
@@ -247,12 +246,12 @@
                                    :kayttotapaus
                                    :asianTiedot
                                    :lisatiedot] :in-any-order))
-    (fact "kayttotapaus"
-      (get asia :kayttotapaus) => "Uuden suunnittelijan nime\u00e4minen")
 
-    (fact "only one suunnittelijatiedot per krysp message"
-      (keys (get-in asia [:osapuolettieto :Osapuolet])) => (just :osapuolitieto)
-      (count (get-in asia [:osapuolettieto :Osapuolet :osapuolitieto])) => 1)))
+    (fact "kayttotapaus"
+      (get asia :kayttotapaus) => "Hakijatietojen muuttaminen")
+
+    (fact "only hakija doc is included"
+      (mapcat keys (get-in asia [:osapuolettieto :Osapuolet])) => [:osapuolitieto])))
 
 (facts "non party canonical - no method in multimethod"
   (party-doc-to-canonical (doc-tools/unwrapped application) "fi" (doc-tools/unwrapped (docs 0))) => (throws java.lang.IllegalArgumentException))

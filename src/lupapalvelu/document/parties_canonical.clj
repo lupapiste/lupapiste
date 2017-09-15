@@ -20,6 +20,30 @@
   [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
   {:suunnittelijatieto {:Suunnittelija (canonical-common/get-suunnittelija-data doc-data party-type doc-subtype)}})
 
+(defmulti party-usage-info
+  {:arglists '([party-doc])}
+  doc-tools/doc-subtype)
+
+(defmethod party-usage-info :hakija
+  [party-doc]
+  "Hakijatietojen muuttaminen")
+
+(defmethod party-usage-info :suunnittelija
+  [party-doc]
+  "Uuden suunnittelijan nime\u00e4minen")
+
+(defmulti party-krysp-description
+  {:arglists '([party-doc])}
+  doc-tools/doc-subtype)
+
+(defmethod party-krysp-description :hakija
+  [party-doc]
+  "Hankkeen hakijatietojen muuttaminen.")
+
+(defmethod party-krysp-description :suunnittelija
+  [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
+  (format "Suunnittelijan (rooli: %s) nimeäminen hankkeelle." (canonical-common/get-kuntaRooliKoodi doc-data party-type doc-subtype)))
+
 (defn- party-doc-to-canonical [application lang party-doc]
   {:Rakennusvalvonta
    {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
@@ -29,8 +53,8 @@
       :luvanTunnisteTiedot (canonical-common/lupatunnus (:id party-doc) (:submitted application) nil)
       :viitelupatieto (canonical-common/lupatunnus application)
       :osapuolettieto {:Osapuolet (party-canonical-info party-doc)}
-      :kayttotapaus "Uuden suunnittelijan nime\u00e4minen"
-      :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus ""}}
+      :kayttotapaus (party-usage-info party-doc)
+      :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus (party-krysp-description party-doc)}}
       :lisatiedot (rl-canonical/get-lisatiedot lang)}}}})
 
 (defn- write-party-krysp [application lang krysp-version output-dir {doc-id :id :as party-doc}]
