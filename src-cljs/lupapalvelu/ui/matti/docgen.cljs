@@ -7,8 +7,9 @@
             [rum.core :as rum]
             [sade.shared_util :as util]))
 
-(defn docgen-loc [{:keys [path schema]} & extra]
-  (path/loc path schema extra))
+(defn docgen-loc [options & extra]
+  (console.log (:loc-path options)   (path/new-loc options extra))
+  (path/new-loc options extra))
 
 (defn docgen-type [{schema :schema}]
   (-> schema :body first :type keyword))
@@ -72,16 +73,16 @@
 
 (rum/defc docgen-checkbox < rum/reactive
   [{:keys [schema state path] :as options}]
-  (let [state    (path/state path state)
-        input-id (str (path/id path) "input")]
+  (let [state*    (path/state path state)
+        input-id  (path/unique-id "checkbox-input")]
     [:div.matti-checkbox-wrapper (docgen-attr options)
      [:input {:type    "checkbox"
-              :checked (rum/react state)
+              :checked (rum/react state*)
               :id      input-id}]
      [:label.matti-checkbox-label
       {:for      input-id
        :on-click (fn [_]
-                   (swap! state not)
+                   (swap! state* not)
                    (path/meta-updated options))}
       (when-not (false? (:label schema))
         (docgen-loc options))]]))

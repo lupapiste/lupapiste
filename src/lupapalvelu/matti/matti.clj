@@ -92,8 +92,7 @@
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [template (verdict-template organization template-id)
-        draft    (assoc-in (:draft template) path value)]
+  (let [template (verdict-template organization template-id)]
     (or (schemas/validate-path-value shared/default-verdict-template
                                      path
                                      value
@@ -101,7 +100,8 @@
                                                                   (:category template)))})
         (template-update organization
                          template-id
-                         {$set {:verdict-templates.templates.$.draft draft}}
+                         {$set {(util/kw-path (cons :verdict-templates.templates.$.draft
+                                                    path)) value}}
                          timestamp))))
 
 (defn publish-verdict-template [organization template-id timestamp]

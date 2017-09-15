@@ -13,8 +13,8 @@
             [sade.shared-util :as util]))
 
 
-(defn schema-type [schema-type]
-  (-> schema-type :schema keys first keyword))
+(defn schema-type [options]
+  (-> options :schema keys first keyword))
 
 (declare matti-list)
 
@@ -52,7 +52,7 @@
   (let [enabled-path (path/extend path :enabled)]
     [:div.matti-date-delta
      (when (show-label? schema wrap-label?)
-       [:div.delta-label (path/loc path)])
+       [:div.delta-label (path/new-loc options)])
      [:div.delta-editor
       (docgen/docgen-checkbox (assoc options
                                      :path enabled-path
@@ -147,9 +147,9 @@
                       wrap-label?))
 
 (rum/defc last-saved < rum/reactive
-  [{state :state}]
+  [{info* :info}]
   [:span.saved-info
-   (when-let [ts (path/react [:modified] state)]
+   (when-let [ts (path/react [:modified] info*)]
      (common/loc :matti.last-saved (js/util.finnishDateAndTime ts)))])
 
 (rum/defcs matti-phrase-text < rum/reactive
@@ -169,10 +169,10 @@
             (path/meta-updated options))]
     (when-not @category*
       (set-category (:category schema)))
-    (let [ref-id (str (path/id path) "-ref")]
+    (let [ref-id (path/unique-id "-ref")]
       [:div.matti-grid-12
        (when (show-label? schema wrap-label?)
-         [:h4.matti-label (path/loc path schema)])
+         [:h4.matti-label (path/new-loc options)])
        [:div.row
         [:div.col-3.col--full
          [:div.col--vertical
@@ -223,36 +223,28 @@
 
 (declare view-component)
 
-(defmulti instantiate (fn [_ cell & _]
-                      (schema-type cell)))
+(defmulti instantiate (fn [options & _]
+                        (schema-type options)))
 
 (defmethod instantiate :docgen
-  [{:keys [state path]} {:keys [schema id]} & [wrap-label?]]
-  (let [docgen   (:docgen schema)
+  [{:keys [schema] :as options} & [wrap-label?]]
+  (let [docgen      (:docgen schema)
         schema-name (get docgen :name docgen)
-        options  (shared/child-schema {:state  state
-                                       :path   (path/extend path id)
-                                       :schema (cond-> (service/schema schema-name)
-                                                 ;; Additional, non-legacy properties
-                                                 (map? docgen) (merge (dissoc docgen :name)))}
-                                      :schema
-                                      schema)
-        editing? (path/react-meta? options :editing?)]
+        options     (path/schema-options options
+                                         (cond-> (service/schema schema-name)
+                                           ;; Additional, non-legacy properties
+                                           (map? docgen) (merge (dissoc docgen :name))))
+        editing?    (path/react-meta? options :editing?)]
     (cond->> options
       editing?       docgen/docgen-component
       (not editing?) docgen/docgen-view
       wrap-label?    (docgen/docgen-label-wrap options))))
 
 (defmethod instantiate :default
-  [{:keys [state path] :as options} {:keys [schema id] :as cell} & [wrap-label?]]
-  (let [cell-type    (schema-type cell)
-        schema-value (-> schema vals first)
-        options      (shared/child-schema (assoc options
-                                                 :state  state
-                                                 :path   (path/extend path id (:id schema-value))
-                                                 :schema schema-value)
-                                          :schema
-                                          schema)]
+  [{:keys [schema] :as options} & [wrap-label?]]
+  (let [cell-type    (schema-type options)
+        schema-value (cell-type schema)
+        options      (path/schema-options options schema-value)]
     (if (path/react-meta? options :editing?)
       ((case cell-type
          :list           matti-list
@@ -264,22 +256,23 @@
          :phrase-text    matti-phrase-text
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
-      (view-component cell-type options wrap-label?))))
+      (view-component options wrap-label?))))
 
 (defmethod instantiate :loc-text
-  [_ {:keys [schema]} & _]
+  [{:keys [schema]} & _]
   [:span
    (common/loc (name (:loc-text schema)))])
+
 
 ;; -------------------------------
 ;; View layout components
 ;; -------------------------------
 
-(defmulti view-component (fn [cell-type & _]
-                           cell-type))
+(defmulti view-component (fn [options & _]
+                           (schema-type options)))
 
 (defmethod view-component :reference-list
-  [_ {:keys [state path schema ] :as options} & [wrap-label?]]
+  [{:keys [state path schema ] :as options} & [wrap-label?]]
   (let [values (set (flatten [(path/value path state)]))
         span [:span (->> (resolve-reference-list options)
                          (filter #(contains? values (:value %)))
@@ -290,14 +283,14 @@
       span)))
 
 (defmethod view-component :phrase-text
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  [{:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.phrase-text (path/value path state)]]
     (if (show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
 (defmethod view-component :list
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  [{:keys [state path schema] :as options} & [wrap-label?]]
   (let [component [:div (map-indexed (fn [i item]
                                         (instantiate (assoc options
                                                             :path (path/extend path
@@ -352,67 +345,50 @@
          :state state
          :path (path/extend path (:id subschema))))
 
-(defn matti-list [{:keys [schema state path] :as options} & [wrap-label?]]
+(defn matti-list [{:keys [schema] :as options} & [wrap-label?]]
   [:div.matti-list
-   {:class (path/css (sub-options options schema))}
+   {:class (path/css options)}
    (when (and wrap-label? (:title schema))
      [:h4.matti-label (common/loc (:title schema))])
-   (map-indexed (fn [i item]
-                  (let [item-options (assoc options
-                                            :path (path/extend path
-                                                    (when-not (:id item)
-                                                      (str i))))
-                        item-schema (shared/child-schema item
-                                                         :schema
-                                                         schema)]
-                    (when (path/visible? (assoc item-options :schema item-schema))
-                      (when-let [component (instantiate item-options
-                                                        item-schema
-                                                        false)]
-                        [:div.item {:key   (str "item-" i)
-                                   :class (path/css (sub-options options item)
-                                                    (when (:align item)
-                                                      (str "item--" (-> item :align name))))}
-                         component]))))
+   (map-indexed (fn [i item-schema]
+                  (let [item-options (path/schema-options options item-schema)]
+                    (when (path/visible? item-options)
+                      [:div.item {:key   (str "item-" i)
+                                  :class (path/css item-options
+                                                   (when-let [item-align (:align item-schema)]
+                                                     (str "item--" (name item-align))))}
+                       (when (:dict item-schema)
+                         (instantiate (path/dict-options item-options)
+                                      false))])))
                 (:items schema))])
 
-(defn matti-grid [{:keys [grid state path] :as options}]
+(defn matti-grid [{:keys [schema] :as options}]
   [:div
-   {:class (path/css (sub-options options grid)
-                     (str "matti-grid-" (:columns grid)))}
-   (map-indexed (fn [row-index row]
-                  (let [row-index (get row :id row-index)
-                        row-schema (shared/child-schema (if (map? row)
-                                                          row
-                                                          {:row row})
-                                                        grid)]
-                    ;; Row visibility
-                    (when (path/visible? {:state  state
-                                          :schema row
-                                          :path   (path/extend path (str row-index))})
-                      [:div.row {:class (some->> row :css (map name) s/join )}
-                       (map-indexed (fn [col-index {:keys [col align schema id] :as cell}]
-                                      (let [col-path (path/extend path
-                                                       (str row-index)
-                                                       (when-not id
-                                                         (str col-index)))]
-                                        ;; Cell visibility
-                                        (when (path/visible? {:state state
-                                                              :schema cell
-                                                              :path col-path})
-                                          [:div {:class (path/css (sub-options options cell)
-                                                                  (str "col-" (or col 1))
-                                                                  (when align (str "col--" (name align))))}
-                                           (when schema
-                                             ;; Cell is added to the
-                                             ;; schema tree
-                                             ;; for :loc-prefix to
-                                             ;; work: cell-schema -> cell -> grid
-                                             (instantiate (assoc options
-                                                                 :path col-path)
-                                                          (shared/child-schema cell
-                                                                               :schema
-                                                                               (shared/child-schema cell row-schema))
-                                                          true))])))
-                                    (get row :row row))])))
-                (:rows grid))])
+   {:class (path/css options
+                     (str "matti-grid-" (:columns schema)))}
+   (map (fn [row-schema]
+          (let [row-options (path/schema-options options row-schema)]
+            ;; Row visibility
+            (when (path/visible? row-options)
+              [:div.row {:class (some->> row-schema :css (map name) s/join )}
+               (map (fn [{:keys [col align] :as cell-schema}]
+                      (let [cell-options (path/schema-options row-options
+                                                              cell-schema)]
+                        ;; Cell visibility
+                        (when (path/visible? cell-options)
+                          [:div {:class (path/css cell-options
+                                                  (str "col-" (or col 1))
+                                                  (when align
+                                                    (str "col--" (name align))))}
+                           (cond
+                             (:dict cell-schema)
+                             (instantiate (path/dict-options cell-options)
+                                          true)
+
+                             (:list cell-schema)
+                             (matti-list (path/schema-options cell-options
+                                                              (:list cell-schema))
+                                         true))])))
+
+                    (get row-schema :row row-schema))])))
+        (-> schema :rows))])

@@ -35,8 +35,8 @@
                    (map (fn [n] {:value n :text (category-text n)}))
                    (sort-by :text))
         select (fn [value]
-                 (reset! selected* value)
-                 (callback value))]
+                 (when (common/reset-if-needed! selected* value)
+                   (callback value)))]
     (when-not (util/includes-as-kw? (map :value items) @selected*)
       (select (-> items first :value)))
     [:select.dropdown

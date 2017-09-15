@@ -12,48 +12,45 @@
             [rum.core :as rum]))
 
 
-(defn updater [{:keys [state path]}]
-  (service/save-draft-value (path/value [:id] state)
+(defn updater [{:keys [state info path]}]
+  (service/save-draft-value (path/value [:id] info)
                             path
                             (path/value path state)
-                            (common/response->state state :modified)))
+                            (common/response->state info :modified)))
 
 
 (rum/defc verdict-template-name < rum/reactive
-  [{state :state}]
+  [{info* :info}]
   (letfn [(handler-fn [value]
-            (reset! (path/state [:name] state) value)
-            (service/set-template-name @(path/state [:id] state)
+            (reset! (path/state [:name] info*) value)
+            (service/set-template-name @(path/state [:id] info*)
                                        value
-                                       (common/response->state state :modified)))]
-    (components/pen-input {:value      (rum/react (path/state [:name] state))
+                                       (common/response->state info* :modified)))]
+    (components/pen-input {:value      (rum/react (path/state [:name] info*))
                            :handler-fn handler-fn})))
 
 
 (rum/defc verdict-template-publish < rum/reactive
-  [{state :state}]
+  [{info* :info}]
   [:div [:span.row-text.row-text--margin
-         (if-let [published (path/react [:published] state)]
+         (if-let [published (path/react [:published] info*)]
            (common/loc :matti.last-published
                        (js/util.finnishDateAndTime published))
            (common/loc :matti.template-not-published))]
    [:button.ghost
-    {:on-click #(service/publish-template (path/value [:id] state)
-                                          (common/response->state state :published))}
+    {:on-click #(service/publish-template (path/value [:id] info*)
+                                          (common/response->state info* :published))}
         (common/loc :matti.publish)]])
 
 
-(defn reset-template [{:keys [id name modified published draft] :as template}]
+(defn reset-template [{draft :draft :as template}]
   (reset! state/current-template
           (when template
-            (assoc draft
-                   :name name
-                   :id id
-                   :modified modified
-                   :published published
-                   :_meta {:updated   updater
-                           :can-edit? true?
-                           :editing? true})))
+            {:state draft
+             :info (dissoc template :draft)
+             :_meta {:updated   updater
+                     :can-edit? true
+                     :editing?  true}}))
   (reset! state/current-view (if template ::template ::list)))
 
 (defn with-back-button [component]
@@ -65,7 +62,7 @@
    component])
 
 (defn verdict-template
-  [{:keys [sections state settings] :as options}]
+  [{:keys [schema state] :as options}]
   [:div.verdict-template
    [:div.matti-grid-2
     [:div.row.row--tight
@@ -78,11 +75,9 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       (layout/last-saved options)]]]
-   (for [sec sections]
-     (sections/section (assoc sec
-                              :path (path/extend (:id sec))
-                              :state state
-                              :settings settings)))])
+   (for [sec (:sections schema)]
+     (sections/section (path/schema-options options
+                                            sec)))])
 
 (defn new-template [options]
   (reset-template options))
@@ -175,8 +170,14 @@
              (rum/react state/phrases))
     [:div
      (case (rum/react state/current-view)
-       ::template (with-back-button (verdict-template (assoc shared/default-verdict-template
-                                                             :state state/current-template)))
+       ::template (with-back-button
+                    (verdict-template
+                     (merge
+                      {:schema (dissoc shared/default-verdict-template
+                                       :dictionary)
+                       :dictionary (:dictionary shared/default-verdict-template)
+                       :settings state/settings}
+                      (state/select-keys state/current-template [:state :info :_meta]))))
        ::list     [:div (verdict-template-list) (phrases/phrases-table)]
        ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @state/current-category)))))]))
 

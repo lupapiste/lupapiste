@@ -46,12 +46,6 @@
    :valituksesta-luovuttu-1     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy puollettuna)"
    :valituksesta-luovuttu-2     "valituksesta on luovuttu (oikaisuvaatimus tai lupa pysyy ev\u00e4ttyn\u00e4)"})
 
-(def meta-flags (zipmap (map sc/optional-key
-                             [:can-edit?
-                              :editing?
-                              :can-remove?])
-                        (repeat sc/Bool)))
-
 (def review-type-map
   {:muu-katselmus             "muu katselmus"
    :muu-tarkastus             "muu tarkastus"
@@ -81,6 +75,10 @@
                 ;; the schema.
                 :else    [sc/Keyword]))
 
+(def keyword-or-string (sc/conditional
+                        keyword? sc/Keyword
+                        :else    sc/Str))
+
 (defschema MattiEnabled
   "Component is enabled/disabled if the path value is truthy. Empty
   strings/collections are interpreted as falsey. Default: enabled.
@@ -99,15 +97,14 @@
 (defschema MattiBase
   (merge MattiVisible
          MattiEnabled
-         {(sc/optional-key :_meta)      meta-flags
-          (sc/optional-key :css)        [sc/Keyword]
-          ;; If an schema ancestor has :loc-prefix then localization term is
-          ;; loc-prefix + last, where last is the last path part.
-          (sc/optional-key :loc-prefix) sc/Keyword
+         {(sc/optional-key :css)        [sc/Keyword]
+          ;; If an schema ancestor has :loc-prefix then localization
+          ;; term is loc-prefix + id-path, where id-path from
+          ;; loc-prefix schema element util current.
+          (sc/optional-key :loc-prefix) keyword-or-string
           ;; Absolute localisation terms. Overrides loc-prefix, does not
-          ;; affect children. When the vector has more than one items, the
-          ;; earlier localisations are arguments to the latter.
-          (sc/optional-key :i18nkey)    [sc/Keyword]}))
+          ;; affect children.
+          (sc/optional-key :i18nkey)    keyword-or-string}))
 
 (defschema MattiComponent
   (merge MattiBase
@@ -153,10 +150,6 @@
          {;; Default category.
           :category (apply sc/enum phrase-categories)
           (sc/optional-key :text) sc/Str}))
-
-(def keyword-or-string (sc/conditional
-                        keyword? sc/Keyword
-                        :else    sc/Str))
 
 (defschema MattiMultiSelect
   (merge MattiComponent
@@ -225,9 +218,8 @@
 
 (defschema MattiItem
   (merge MattiBase
-         {;; Id is used as a path part within the state. Thus, it is
-          ;; mandatory if an explicit resolution is needed.
-          (sc/optional-key :id)     sc/Str
+         {;; Id is used as a path part for _meta queries.
+          (sc/optional-key :id)   keyword-or-string
           ;; Value is a dictionary key
           (sc/optional-key :dict) sc/Keyword}))
 
@@ -286,18 +278,24 @@
                           extra)})
 
 (defn  multi-section [id]
-  {:id    (name id)
-   :grid  {:columns 1
-           :rows    [[{:dict id }]]}})
+  {:loc-prefix (str "matti-" (name id))
+   :id         (name id)
+   :grid       {:columns 1
+                :rows    [[{:dict id }]]}})
 
 (defn text-section [id]
-  {:id (str "matti-" (name id))
-   :grid {:columns 1
-          :rows    [[{:dict id}]]}})
+  {:loc-prefix (str "matti-" (name id))
+   :id         (name id)
+   :grid       {:columns 1
+                :rows    [[{:dict id}]]}})
+
+(defn date-delta-row [kws]
+  (map (fn [kw]
+         {:col 2 :dict kw :id (name kw)})
+       kws))
 
 (def default-verdict-template
-  {:name       ""
-   :dictionary {;; Verdict section
+  {:dictionary {;; Verdict section
                 :verdict-dates   {:loc-text :matti-verdict-dates}
                 :julkipano       {:date-delta {:unit :days}}
                 :anto            {:date-delta {:unit :days}}
@@ -320,8 +318,9 @@
                                                                            :match-key  :id}})
                 :conditions      {:phrase-text {:category :lupaehdot}}
                 :neighbors       {:loc-text :matti-neighbors.text}
+
                 :appeal          {:phrase-text {:category :muutoksenhaku
-                                                :i18nkey  [:phrase.category.muutoksenhaku]}}
+                                                :i18nkey  :phrase.category.muutoksenhaku}}
                 :collateral      {:loc-text :matti-collateral.text}
                 ;; Complexity section
                 :complexity      {:docgen "matti-complexity"}
@@ -337,22 +336,24 @@
                 :paloluokka      {:docgen "matti-verdict-check"}
                 ;; Removable sections
                 :removed-sections {:keymap (zipmap [:foremen :reviews :plans
-                                                    :matti-conditions :neighbors
-                                                    :matti-appeal]
+                                                    :conditions :neighbors
+                                                    :appeal :statements :collateral
+                                                    :complexity :rights :purpose
+                                                    :buildings]
                                                    (repeat false))}}
-   :sections [{:id    "matti-verdict"
+   :sections [{:id    "verdict"
+               :loc-prefix :matti-verdict
                :grid  {:columns 12
                        :rows    [{:css [:row--date-delta-title]
                                   :row [{:col  12
                                          :css  [:matti-label]
                                          :dict :verdict-dates}]}
-                                 [{:col 2 :dict :julkipano}
-                                  {:col 2 :dict :anto}
-                                  {:col 2 :dict :valitus}
-                                  {:col 2 :dict :lainvoimainen}
-                                  {:col 2 :dict :aloitettava}
-                                  {:col 2 :dict :voimassa}]
-                                 [{:col 3 :dict :giver}
+                                 (date-delta-row [:julkipano :anto
+                                                  :valitus :lainvoimainen
+                                                  :aloitettava :voimassa])
+                                 [{:col 3
+                                   :id :giver
+                                   :dict :giver}
                                   {:align :full
                                    :col   3
                                    :dict  :verdict-code}]
@@ -361,31 +362,34 @@
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
-              {:id         "matti-conditions"
-               :i18nkey    [:phrase.category.lupaehdot]
+              {:id         "conditions"
                :loc-prefix :phrase.category.lupaehdot
                :grid       {:columns 1
                             :rows    [[{:dict :conditions}]]}}
               (text-section :neighbors)
-              {:id    "matti-appeal"
+              {:id    "appeal"
+               :loc-prefix :matti-appeal
                :grid  {:columns 1
                        :rows    [[{:dict :appeal }]]}}
               (text-section :collateral)
-              {:id    "matti-complexity"
+              {:id    "complexity"
+               :loc-prefix :matti-complexity
                :grid  {:columns 1
                        :rows    [[{:loc-prefix :matti-complexity
                                    :dict       :complexity }]
                                  [{:id   "text"
                                    :dict :complexity-text}]]}}
-              (text-section :matti-rights)
-              (text-section :matti-purpose)
-              (text-section :matti-statements)
-              {:id    "matti-buildings"
+              (text-section :rights)
+              (text-section :purpose)
+              (text-section :statements)
+              {:id    "buildings"
+               :loc-prefix :matti-buildings
                :grid  {:columns 1
                        :rows    [[{:loc-prefix :matti-buildings.info
                                    :list       {:title "matti-buildings.info"
                                                 :items (mapv (fn [check]
                                                                {:dict check
+                                                                :id check
                                                                 :css  [:matti-condition-box]})
                                                              [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
@@ -522,13 +526,13 @@
                               [[{:col    6
                                  :id     "other"
                                  :align  :full
-                                 :schema {:phrase-text {:i18nkey  [:phrase.category.lupaehdot]
+                                 :schema {:phrase-text {:i18nkey  :phrase.category.lupaehdot
                                                         :category :lupaehdot}}}]])}}
      {:id "neighbors"
       :grid {:columns 12
              :rows [[{:col 7
                       :id "neighbor-notes"
-                      :schema {:phrase-text {:i18nkey [:phrase.category.naapurit]
+                      :schema {:phrase-text {:i18nkey :phrase.category.naapurit
                                              :category :naapurit}}}
                      {}
                      {:col 3

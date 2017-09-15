@@ -27,7 +27,6 @@
 
 (def verdict-giver {:name "matti-verdict-giver"
                     :type :select
-                    :locPrefix "matti-verdict"
                     :body [{:name "viranhaltija"}
                            {:name "lautakunta"}]})
 

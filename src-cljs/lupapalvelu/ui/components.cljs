@@ -134,6 +134,10 @@
   rum/reactive
   [local-state _ & [options]]
   (let [text* (::text local-state)]
+    ;; Textarea loses focus without blur when the typing starts if the
+    ;; contents are nil.
+    (when (nil? @text*)
+      (reset! text* ""))
     [:textarea.grid-style-input
      (text-options text* options)]))
 

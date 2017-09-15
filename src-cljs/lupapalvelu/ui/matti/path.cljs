@@ -3,7 +3,8 @@
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [rum.core :as rum]
-            [sade.shared-util :as util]))
+            [sade.shared-util :as util]
+            [goog.events :as googe]))
 
 (defn state [path state]
   (rum/cursor-in state (map keyword path)))
@@ -13,6 +14,34 @@
        flatten
        (remove nil?)
        (map keyword)))
+
+(defn loc-extend
+  [loc-path {:keys [id loc-prefix body]}]
+  (let [locPrefix (some-> body first :locPrefix)]
+    (cond
+      loc-prefix [loc-prefix]
+      locPrefix  [locPrefix]
+      id (extend loc-path id)
+      :else loc-path)))
+
+(defn id-extend [id-path {id :id}]
+  (extend id-path id))
+
+(defn schema-options
+  "Options for a child schema. Options are parent options."
+  [options schema]
+  (let [{:keys [id-path loc-path]} options]
+    (assoc options
+           :schema schema
+           :loc-path (loc-extend loc-path schema)
+           :id-path (id-extend id-path schema))))
+
+(defn dict-options
+  "Options corresponding to the the dictionary schema referenced in the
+  given options. Creates path ([dict]) onto top-level."
+  [{{dict :dict} :schema dictionary :dictionary :as options}]
+  (assoc (schema-options options (dict dictionary))
+         :path [dict]))
 
 (defn value [path state* & extra]
   @(state (extend path extra) state*))
@@ -51,7 +80,23 @@
            flatten
            loc)))))
 
-(defn latest-helper
+(defn new-loc
+  [{:keys [i18nkey loc-path schema] :as arg} & extra]
+  #_(console.log "i18nkey:" i18nkey "loc-path:" loc-path "Extra:" extra)
+  (some->> (concat [(if (sequential? arg)
+                      arg
+                      (or i18nkey
+                          (some-> schema :body first :i18nkey)
+                          (:dict schema)
+                          loc-path))]
+                   extra)
+           flatten
+           (filter identity)
+           (map name)
+           (s/join ".")
+           common/loc))
+
+#_(defn latest-helper
   "The latest non-nil value for the given key in the state* along the
   path. Path is shortened until the value is found. Nil if value not
   found. Key can be also be key sequence. Value-fn is either value or
@@ -62,31 +107,46 @@
       v
       (latest-helper value-fn (drop-last path) state* key))))
 
-(defn latest
+#_(defn latest
   "The latest non-nil value for the given key in the state* along the
   path. Path is shortened until the value is found. Nil if value not
   found. Key can be also be key sequence."
   [path state* & key]
   (latest-helper value path state* key))
 
-(defn meta?
+#_(defn meta?
   "Truthy if _meta value for the given key is found either within
   _meta options or as latest _meta from the state."
   [{:keys [state path _meta]} key]
   (or (get _meta (keyword key))
       (latest path state :_meta key)))
 
+(defn- access-meta [{:keys [id-path _meta]} key & [deref-fn]]
+  (loop [m ((or deref-fn deref) _meta)
+         path id-path]
+    (if (empty? path)
+      (get m key)
+      (let [v (get-in m (concat path [key]) )]
+        (if (nil? v)
+          (recur m (butlast path))
+          v)))))
+
+
+(defn meta?
+  "_meta is a hieararchical map. meta? returns value for the key that is
+  closest to the id-path of the options."
+  [options key]
+  (access-meta options key))
+
 (defn react-meta?
-  "Truthy if _meta value for the given key is found either within
-  _meta options or as latest _meta from the state."
-  [{:keys [state path _meta]} key]
-  (or (get _meta (keyword key))
-      (latest-helper react path state :_meta key)))
+  "Like meta? but uses rum/react to access the _meta atom."
+  [options key]
+  (access-meta options key rum/react))
 
 (defn flip-meta
-  "Flips (toggles boolean) on the path _meta."
-  [{state* :state path :path} key]
-  (swap! (state (extend path :_meta key) state*) not))
+  "Flips (toggles boolean) on the id-path _meta."
+  [{:keys [_meta id-path]} key]
+  (swap! (state id-path _meta) not))
 
 (defn css
   "List of CSS classes based on current :css value and status
@@ -101,14 +161,19 @@
 
 (defn meta-updated
   "Calls _meta :updated if defined."
-  [{:keys [state path] :as options}]
-  (when-let [fun (latest path state :_meta :updated)]
+  [options]
+  (when-let [fun (access-meta options :updated)]
     (fun options)))
 
 (defn key-fn
   "Rum key-fn, where key is the path id."
-  [{path :path}]
-  (id path))
+  [{id-path :id-path}]
+  (id id-path))
+
+(defn unique-id
+  "Callthrough for goog.events.getUniqueId."
+  [prefix]
+  (googe/getUniqueId prefix))
 
 (defn pathify
   "Splits kw-path if necessary."

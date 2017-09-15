@@ -20,3 +20,9 @@
 (def application-id   (state-cursor :application-id))
 (def current-verdict  (state-cursor :current-verdict))
 (def verdict-list     (state-cursor :verdict-list))
+
+(defn select-keys [state ks]
+  (reduce (fn [acc k]
+            (assoc acc k (rum/cursor-in state [k])))
+          {}
+          ks))

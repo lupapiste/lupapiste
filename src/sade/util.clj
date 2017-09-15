@@ -599,9 +599,11 @@
 (defalias intersection-as-kw shared/intersection-as-kw)
 
 (defn kw-path
-  "a b c -> :a.b.c"
+  "a b c -> :a.b.c
+   [a b c] -> :a.b.c"
   [& kw]
   (->> kw
+       flatten
        (map ss/->plain-string)
        (ss/join ".")
        keyword))

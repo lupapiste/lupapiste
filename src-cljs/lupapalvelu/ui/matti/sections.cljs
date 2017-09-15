@@ -8,39 +8,40 @@
             [rum.core :as rum]))
 
 
-(rum/defc section-checkbox < rum/reactive
-  [{:keys [state path]} kw & [{:keys [disabled negate?]}]]
-  (let [path       (path/extend path kw)
+(rum/defc remove-section-checkbox < rum/reactive
+  [{:keys [state schema]}]
+  (let [path       [:removed-sections (:id schema)]
         state*     (path/state path state)
         handler-fn (fn [flag]
                      (reset! state* flag)
                      (path/meta-updated {:path  path
                                          :state state}))]
-    (components/checkbox {:label      (str "matti.template-" (name kw))
+    (components/checkbox {:label      "matti.template-removed"
                           :value      (rum/react state*)
                           :handler-fn handler-fn
-                          :disabled   disabled
-                          :negate?    negate?})))
+                          :disabled   false ;; TODO: _meta
+                          :negate?    true})))
 
 (defn template-section-header
-  [{:keys [state path i18nkey] :as options}]
+  [{:keys [state dictionary schema] :as options}]
   [:div.section-header.matti-grid-2
    [:div.row.row--tight
     [:div.col-1
-     [:span.row-text.section-title (path/loc (or i18nkey path))]]
+     [:span.row-text.section-title (path/new-loc options)]]
     [:div.col-1.col--right
-     (if (path/meta? options :can-remove?)
+     (if (contains? (-> dictionary :removed-sections :keymap)
+                    (keyword (:id schema)))
        [:span
-        (section-checkbox options :removed {:negate? true})]
+        (remove-section-checkbox options)]
        [:span.row-text (common/loc :matti.always-in-verdict)])]]])
 
 (rum/defc section < rum/reactive
   {:key-fn path/key-fn}
-  [{:keys [state path id css] :as options} & [header-fn]]
+  [{:keys [schema state] :as options} & [header-fn]]
   [:div.matti-section
    {:class (path/css options)}
    ((or header-fn template-section-header) options)
-   (when-not (path/react path state :removed)
-     [:div.section-body (layout/matti-grid (shared/child-schema options
-                                                                :grid
-                                                                options))])])
+   (when-not (path/react [:removed-sections (:id schema)] state)
+     [:div.section-body
+      (layout/matti-grid (path/schema-options options
+                                              (:grid schema)))])])
