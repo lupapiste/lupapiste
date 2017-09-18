@@ -9,7 +9,8 @@
             [lupapalvelu.ui.printing-order.files :as files]
             [lupapalvelu.ui.printing-order.pricing :as pricing]
             [lupapalvelu.ui.printing-order.state :as state]
-            [lupapalvelu.ui.printing-order.transitions :as transitions]))
+            [lupapalvelu.ui.printing-order.transitions :as transitions]
+            [lupapalvelu.ui.hub :as hub]))
 
 (def log (.-log js/console))
 
@@ -54,10 +55,12 @@
       (init-user-details))
     init-state))
 
-(rum/defc pricelist-panel < rum/reactive [open?]
+(rum/defc pricelist-panel < rum/reactive [open? mouse-on-panel?]
   (when (rum/react open?)
     (let [pricing-config (-> @state/component-state :pricing)]
       [:div.pricelist-panel
+       {:on-mouse-enter #(reset! mouse-on-panel? true)
+        :on-mouse-leave #(reset! mouse-on-panel? false)}
        [:div.order-grid-2
         (for [row (:by-volume pricing-config)]
           [:div.row {:key (util/unique-elem-id "pricelist-")} (get-in row [:pricelist-label (keyword (.getCurrentLanguage js/loc))])])
@@ -67,7 +70,11 @@
 (rum/defc order-composer-footer < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
         number-of-printouts (reduce + (vals order-rows))
-        pricelist-panel-open? (atom false)]
+        pricelist-panel-open? (atom false)
+        mouse-on-panel? (atom false)]
+    (hub/subscribe "printingOrderPage::clickEvent" #(do
+                                                     (when-not @mouse-on-panel?
+                                                       (reset! pricelist-panel-open? false))))
     [:div.printing-order-footer
      [:div
       [:button.tertiary-ghost.rollup-button
@@ -80,7 +87,7 @@
         [:h3
          {:on-click #(swap! pricelist-panel-open? not)}
          (loc :printing-order.show-pricing)]
-        (pricelist-panel pricelist-panel-open?)]]]]))
+        (pricelist-panel pricelist-panel-open? mouse-on-panel?)]]]]))
 
 (rum/defc composer-phase1 < rum/reactive []
   (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
