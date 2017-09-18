@@ -59,7 +59,7 @@
 "error.attachment.id" "fi" "Virheellinen liitteen tunnus"
 "error.attachment.id" "sv" "Felaktig kod för bilagan"
 "error.attachment.no-auth" "en" "No right to change the attachment"
-"error.attachment.no-auth" "fi" "Ei oikeutta muuttaa liittettä"
+"error.attachment.no-auth" "fi" "Ei oikeutta muuttaa liitettä"
 "error.attachment.no-auth" "sv" "Rätt att ändra i bilagan saknas"
 "error.attachment.no-content" "en" "The attachment could not be found"
 "error.attachment.no-content" "fi" "Liitetiedostoa ei löydy"
