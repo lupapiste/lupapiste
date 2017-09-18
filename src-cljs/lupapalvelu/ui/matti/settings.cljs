@@ -20,11 +20,11 @@
 (defn fetch-settings [category]
   (service/settings category
                     (fn [{settings :settings}]
-                      (reset! state/settings
-                              {:state (:draft settings)
-                               :info {:modified (:modified settings)
-                                      :category category}
-                               :_meta {:updated settings-updater
+                      (reset! state/settings (:draft settings))
+                      (reset! state/settings-info
+                              {:info  {:modified (:modified settings)
+                                       :category category}
+                               :_meta {:updated  settings-updater
                                        :editing? true}})))
   (service/generics :review
                     category

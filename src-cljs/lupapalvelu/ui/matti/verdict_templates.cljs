@@ -175,7 +175,7 @@
            {:schema     (dissoc shared/default-verdict-template
                                 :dictionary)
             :dictionary (:dictionary shared/default-verdict-template)
-            :references (atom {:settings (path/value [:state] state/settings)})}
+            :references state/references}
            (state/select-keys state/current-template [:state :info :_meta]))))
 
        ::list
@@ -188,8 +188,9 @@
             (merge
              {:schema     (dissoc full-schema :dictionary)
               :dictionary (:dictionary full-schema)
-              :references state/references}
-             (state/select-keys state/settings [:state :info :_meta]))))))]))
+              :references state/references
+              :state state/settings}
+             (state/select-keys state/settings-info [:info :_meta]))))))]))
 
 (defonce args (atom {}))
 

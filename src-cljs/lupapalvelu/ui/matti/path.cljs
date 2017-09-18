@@ -87,6 +87,8 @@
                       arg
                       (or i18nkey
                           (some-> schema :body first :i18nkey)
+                          (:i18nkey schema)
+                          (:loc-prefix schema)
                           (:dict schema)
                           loc-path))]
                    extra)
@@ -121,23 +123,12 @@
   (or (get _meta (keyword key))
       (latest path state :_meta key)))
 
-(defn kw-path
-  "Like sade.util/kw-path on the Clojure side."
-  [& path]
-  (->> path
-       flatten
-       (map #(if (keyword? %)
-               (name %)
-               %))
-       (s/join ".")
-       keyword))
-
 (defn- access-meta [{:keys [id-path _meta]} key & [deref-fn]]
   (loop [m ((or deref-fn deref) _meta)
          path id-path]
     (if (empty? path)
       (get m key)
-      (let [v (get m (kw-path path key))]
+      (let [v (get m (util/kw-path path key))]
         (if (nil? v)
           (recur m (butlast path))
           v)))))
@@ -156,7 +147,7 @@
 (defn flip-meta
   "Flips (toggles boolean) on the id-path _meta."
   [{:keys [_meta id-path]} key]
-  (let [kw (kw-path id-path key)]
+  (let [kw (util/kw-path id-path key)]
     (swap! _meta (fn [m]
                    (assoc m kw (not (kw m)))))))
 

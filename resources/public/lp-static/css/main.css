@@ -18514,6 +18514,10 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   border-color: #df3215;
 }
 
+.neighbor-states {
+  margin: 0;
+}
+
 .neighbor-states .tabby__row.neighbor > .tabby__cell {
   vertical-align: top;
   padding-top: 0;
@@ -26925,14 +26929,13 @@ div.summary-button-bar {
   margin-bottom: 12px;
 }
 
-/* feature class for marking unfinished content */
-.feature {
+.feature:not(.feature--no-border) {
   border: orange dotted medium !important;
   border-radius: 10px;
   min-height: 44px;
 }
 
-.feature .legend {
+.feature:not(.feature--no-border) .legend {
   display: inline-block;
   position: relative;
   top: -20px;
@@ -26941,11 +26944,6 @@ div.summary-button-bar {
   color: black;
   padding: 3px;
   border-radius: 5px;
-}
-
-.feature.feature--no-border {
-  border: none;
-  padding: 0 0 0 0;
 }
 
 /*

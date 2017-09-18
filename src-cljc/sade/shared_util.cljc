@@ -55,3 +55,15 @@
   ":a.b.c -> [:a :b :c]"
   [kw]
   (map keyword (s/split (name (or kw "")) #"\.")))
+
+(defn kw-path
+  "Like sade.util/kw-path on the Clojure side. Note: this is not
+  defaliased in sade.util."
+  [& path]
+  (->> path
+       flatten
+       (map #(if (keyword? %)
+               (name %)
+               %))
+       (s/join ".")
+       keyword))

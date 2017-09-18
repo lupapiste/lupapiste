@@ -312,17 +312,17 @@
        neighbors))
 
 (defn data-draft
-  "Kmap keys are draft targets (kw-paths). Values are either kw-paths
-  or maps with :path, :fn and :skip-nil? properties. Paths denote data
-  sources. :fn is the source handler function (default identity),
-  if :skip-nil? is true the nil value entries are skipped (default
-  false)."
+  "Kmap keys are draft targets (kw-paths). Values are either kw-paths or
+  maps with :fn and :skip-nil? properties. :fn is the source
+  (full) data handler function. If :skip-nil? is true the nil value
+  entries are skipped (default false)."
   [kmap template]
   (let [data (-> template :versions last :data)]
     (reduce (fn [acc [k v]]
-              (let [v-path (get v :path v)
-                    v-fn   (get v :fn identity)
-                    value  (v-fn (get-in data (util/split-kw-path v-path)))]
+              (let [v-fn   (get v :fn identity)
+                    value  (if-let [v-fn (get v :fn)]
+                             (v-fn data)
+                             (get-in data (util/split-kw-path v)))]
                 (if (and (nil? value) (:skip-nil? v))
                   acc
                   (assoc-in acc
@@ -335,42 +335,36 @@
                                (-> template :category keyword)))
 
 (defn- kw-format [& xs]
-  (keyword (apply format xs)))
+  (keyword (apply format (map ss/->plain-string xs))))
 
 (defmethod initial-draft-data :r
   [template application]
-  (assoc-in (data-draft
-             (merge {:matti-verdict.0.giver.giver  :matti-verdict.2.giver
-                     :matti-verdict.0.verdict-code :matti-verdict.2.verdict-code
-                     :matti-verdict.1.paatosteksti :matti-verdict.3.paatosteksti}
-                    (reduce-kv (fn [acc i v]
-                                 (assoc acc
-                                        (kw-format "requirements.%s.0" i)
-                                        (kw-format "matti-%s.0.0" (name v))
-                                        (kw-format "requirements.%s.included" i)
-                                        {:path (kw-format "matti-%s.removed" (name v))
-                                         :fn   not}))
-                               {}
-                               [:foremen :plans :reviews])
-                    {:requirements.3.other :matti-conditions.0.0}
-                    (reduce (fn [acc k]
-                              (let [s (name k)]
+  (let [neighbors? (-> template :versions last :data
+                       :removed-sections :neighbors not)]
+    (assoc (data-draft
+               (merge {:giver        :giver
+                       :verdict-code :verdict-code
+                       :verdict-text :paatosteksti}
+                      (reduce (fn [acc kw]
                                 (assoc acc
-                                       (kw-format "matti-dates.deltas.%s" s)
-                                       {:path      (kw-format "matti-verdict.1.%s" s)
-                                        :fn #(when (:enabled %) "")
-                                        :skip-nil? true})))
-                            {}
-                            [:julkipano :anto :valitus :lainvoimainen
-                             :aloitettava :voimassa])
-                    {:neighbors {:path :matti-neighbors
-                                 :fn (fn [{removed :removed}]
-                                       (if removed
-                                         {:removed true}
-                                         {:0 {:neighbor-states
-                                              (neighbors application)}}))}})
-             template)
-            (util/split-kw-path :matti-verdict.1.application-id) (:id application)))
+                                       kw kw
+                                       (kw-format "%s-included" kw)
+                                       {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
+                              {}
+                              [:foremen :plans :reviews])
+                      {:other-requirements :conditions}
+                     (reduce (fn [acc kw]
+                               (assoc acc
+                                      kw  {:fn   #(when (some-> % kw :enabled) "")
+                                           :skip-nil? true}))
+                             {}
+                             [:julkipano :anto :valitus :lainvoimainen
+                              :aloitettava :voimassa])
+                     (when neighbors?
+                       {:neighbor-text   :neighbors}))
+               template)
+              :application-id (:id application)
+              :neighbor-states (when neighbors? (neighbors application)))))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -448,26 +442,18 @@
                                           changes)})))
 
 (defn update-automatic-verdict-dates [{:keys [category template verdict-data]}]
-  #_(let [verdict-schema  (category shared/verdict-schemas)
+  (let [verdict-schema  (category shared/verdict-schemas)
         template-schema shared/default-verdict-template
-        datestring      (get-in verdict-data (shared/cell-path verdict-schema
-                                                               "verdict-date"))
-        automatic?      (get-in verdict-data (shared/cell-path verdict-schema
-                                                               "automatic-verdict-dates"))]
+        datestring      (:verdict-date verdict-data)
+        automatic?      (:automatic-verdict-dates verdict-data)]
     (when (and automatic? (ss/not-blank? datestring))
       (reduce (fn [acc kw]
-                (let [cell-id           (name kw)
-                      path              (shared/cell-path template-schema
-                                                          cell-id)
-                      unit              (-> (schemas/schema-data template-schema
-                                                                 path)
-                                            :date-delta :data :unit)
+                (let [unit (-> template-schema :dictionary kw :date-delta :unit)
                       {:keys [delta
-                              enabled]} (get-in (:data template) path)]
+                              enabled]} (-> template :data kw)]
                   (if enabled
                     (assoc acc
-                           (apply util/kw-path (shared/cell-path verdict-schema
-                                                           cell-id))
+                           kw
                            (date/parse-and-forward datestring
                                                    (util/->long delta)
                                                    unit))
@@ -499,7 +485,7 @@
                      application                     :application
                      created                         :created
                      :as                             command}]
-  #_(let [verdict  (command->verdict command)
+  (let [verdict  (command->verdict command)
         category (-> application
                      :permitType
                      shared/permit-type->category)
@@ -509,8 +495,7 @@
     (if-let [error (schemas/validate-path-value
                     schema
                     path value
-                    {:schema-overrides {:section shared/MattiVerdictSection}
-                     :references       (:settings template)})]
+                    (:settings template))]
       {:errors [[path error]]}
       (let [path    (map keyword path)
             updated (assoc-in (:data verdict) path value)]

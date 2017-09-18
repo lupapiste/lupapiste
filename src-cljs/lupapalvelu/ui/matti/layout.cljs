@@ -110,7 +110,7 @@
   (let [{:keys [item-key item-loc-prefix term]}        schema
         {:keys [extra-path match-key] term-path :path} term
         extra-path                                     (path/pathify extra-path)
-        term-parth                                     (path/pathify term-path)
+        term-path                                      (path/pathify term-path)
         match-key                                      (or match-key item-key)]
     (->> (path/value (path/pathify (:path schema)) references )
          (remove :deleted) ; Safe for non-maps
@@ -121,21 +121,21 @@
                             (and match-key term-path) (-> (util/find-by-key match-key
                                                                             v
                                                                             (path/value term-path
-                                                                                        state/references))
+                                                                                        references))
                                                           (get-in (cond->> [(keyword (common/get-current-language))]
                                                                     extra-path (concat extra-path))))
                             item-loc-prefix           (path/loc [item-loc-prefix v])
-                            :else                     (path/loc path schema v))})))
+                            :else                     (path/new-loc options v))})))
          distinct)))
 
 (rum/defc select-reference-list < rum/reactive
-  [{:keys [schema ] :as options} & [wrap-label?]]
+  [{:keys [schema references] :as options} & [wrap-label?]]
   (let [options   (assoc options
                          :schema (assoc schema
                                         :body [{:sortBy :displayName
                                                 :body (map #(hash-map :name %)
                                                            (distinct (path/react (path/pathify (:path schema))
-                                                                                 state/references)))}]))
+                                                                                 references)))}]))
         component (docgen/docgen-select options)]
     (if (show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options component)
@@ -143,6 +143,7 @@
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
+  (console.log (resolve-reference-list options))
   (matti-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
                       wrap-label?))
 
@@ -288,7 +289,7 @@
       (docgen/docgen-label-wrap options span)
       span)))
 
-(defmethod view-component :list
+#_(defmethod view-component :list
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [component [:div (map-indexed (fn [i item]
                                         (instantiate (assoc options

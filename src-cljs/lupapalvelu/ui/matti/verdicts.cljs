@@ -35,17 +35,18 @@
 
 (defn updater [{:keys [state path] :as options}]
   (service/edit-verdict @state/application-id
-                        (path/value [:id] state/current-verdict)
+                        (path/value [:info :id] state/current-verdict)
                         path
                         (path/value path state)
                         (update-changes-and-errors options)))
 
 (defn reset-verdict [{:keys [verdict settings]}]
-  (reset! state/current-verdict (when verdict
-                                  (assoc-in verdict
-                                            [:data :_meta]
-                                            {:updated updater})))
-  (reset! state/references settings)
+  (reset! state/current-verdict
+          (when verdict
+            {:state (:data verdict)
+             :info (dissoc verdict :data)
+             :_meta {:updated updater}}))
+  (reset! state/settings settings)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
 (defn update-application-id []
@@ -79,19 +80,24 @@
                      :close
                      :edit))]]]]])
 
+
+
+(defmethod sections/section-header :verdict
+  [options _]
+  (verdict-section-header options))
+
+
 (defn verdict
-  [{:keys [sections state settings] :as options}]
+  [{:keys [schema state] :as options}]
   [:div.matti-verdict
    [:div.matti-grid-2
     [:div.row.row--tight
      [:div.col-2.col--right
-      (layout/last-saved {:state state/current-verdict})]]]
-   (for [sec sections]
-     (when-not (path/value [(:id sec) :removed] state)
-       (sections/section (assoc sec
-                                :path (path/extend (:id sec))
-                                :state state)
-                         verdict-section-header)))])
+      (layout/last-saved options)]]]
+   (for [sec (:sections schema)
+         :let [section-id (-> sec :id keyword)]]
+     (when-not (some-> @state :removed-sections section-id  )
+       (sections/section (path/schema-options options sec) :verdict)))])
 
 
 (rum/defcs new-verdict < rum/reactive
@@ -150,11 +156,15 @@
     [:div
      (case (rum/react state/current-view)
        ::list (verdict-list @state/verdict-list @state/application-id)
-       ::verdict (with-back-button (verdict (assoc (get shared/verdict-schemas
-                                                        (shared/permit-type->category (lupapisteApp.models.application.permitType)))
-                                                   :state (rum/cursor-in state/current-verdict [:data])))))
-     (components/debug-atom state/current-verdict "state/current-verdict")
-     (components/debug-atom state/references "state/references")]))
+       ::verdict (let [{dictionary :dictionary :as schema} (get shared/verdict-schemas
+                                                                (shared/permit-type->category (lupapisteApp.models.application.permitType)))]
+                   (with-back-button (verdict (assoc (state/select-keys state/current-verdict
+                                                                       [:state :info :_meta])
+                                                     :schema (dissoc schema :dictionary)
+                                                     :dictionary dictionary
+                                                     :references state/references)))))
+     #_(components/debug-atom state/current-verdict "state/current-verdict")
+     #_(components/debug-atom state/references "state/references")]))
 
 (defn mount-component []
   (when (common/feature? :matti)

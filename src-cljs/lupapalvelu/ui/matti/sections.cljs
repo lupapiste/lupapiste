@@ -32,7 +32,7 @@
 
 (rum/defc default-section < rum/reactive
   {:key-fn #(path/unique-id "section")}
-  [{:keys [schema state] :as options} section-type]
+  [{:keys [schema] :as options} section-type]
   [:div.matti-section
    {:class (path/css options)}
    (section-header options section-type)
@@ -49,7 +49,7 @@
 ;; -------------------------
 
 (defn template-section-header
-  [{:keys [state dictionary schema] :as options}]
+  [{:keys [dictionary schema] :as options}]
   [:div.section-header.matti-grid-2
    [:div.row.row--tight
     [:div.col-1
@@ -62,10 +62,9 @@
        [:span.row-text (common/loc :matti.always-in-verdict)])]]])
 
 (rum/defc template-section-body < rum/reactive
-  [{:keys [schema state] :as options} section-type]
+  [{:keys [schema state] :as options} _]
   (when-not (path/react [:removed-sections (:id schema)] state)
     (default-section-body options)))
-
 
 
 (defn- section-type-fn [_ section-type] section-type)

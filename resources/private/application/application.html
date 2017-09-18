@@ -287,9 +287,10 @@
 
                             <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
                                            css: {'active': $parent.selectedTabName() === 'matti-verdict'}">
-                              <a data-bind="click: changeTab,
-                                            feature: 'matti'" href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
-                                 class="link-btn">
+                              <a  data-bind="click: changeTab,
+                                            feature: 'matti'"
+                                 href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
+                                 class="link-btn feature--no-border">
                                 <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
                                 <span data-bind="if: unseenVerdicts">
                                   <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
@@ -546,7 +547,8 @@
 
                     <!-- Matti verdict tab -->
                     <!-- ko if: selectedTabName() === 'matti-verdict' -->
-                    <div id="application-matti-verdict-tab" class="tab-content" data-bind="feature: 'matti'">
+                    <div id="application-matti-verdict-tab"
+                         class="tab-content feature--no-border" data-bind="feature: 'matti'">
                       <cljs-matti_verdicts></cljs-matti_verdicts>
                     </div>
                     <!-- /ko -->

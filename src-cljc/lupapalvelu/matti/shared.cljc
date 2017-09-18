@@ -296,44 +296,44 @@
 
 (def default-verdict-template
   {:dictionary {;; Verdict section
-                :verdict-dates   {:loc-text :matti-verdict-dates}
-                :julkipano       {:date-delta {:unit :days}}
-                :anto            {:date-delta {:unit :days}}
-                :valitus         {:date-delta {:unit :days}}
-                :lainvoimainen   {:date-delta {:unit :days}}
-                :aloitettava     {:date-delta {:unit :years}}
-                :voimassa        {:date-delta {:unit :years}}
-                :giver           {:docgen "matti-verdict-giver"}
-                :verdict-code    {:reference-list {:path       :settings.verdict-code
-                                                   :type       :select
-                                                   :loc-prefix :matti-r}}
-                :paatosteksti    {:phrase-text {:category :paatosteksti}}
+                :verdict-dates {:loc-text :matti-verdict-dates}
+                :julkipano     {:date-delta {:unit :days}}
+                :anto          {:date-delta {:unit :days}}
+                :valitus       {:date-delta {:unit :days}}
+                :lainvoimainen {:date-delta {:unit :days}}
+                :aloitettava   {:date-delta {:unit :years}}
+                :voimassa      {:date-delta {:unit :years}}
+                :giver         {:docgen "matti-verdict-giver"}
+                :verdict-code  {:reference-list {:path       :settings.verdict-code
+                                                 :type       :select
+                                                 :loc-prefix :matti-r.verdict-code}}
+                :paatosteksti  {:phrase-text {:category :paatosteksti}}
                 ;; The following keys are whole sections
-                :foremen         (reference-list :settings.foremen {:item-loc-prefix :matti-r.foremen})
-                :plans           (reference-list :settings.plans {:term {:path       [:plans]
+                :foremen       (reference-list :settings.foremen {:item-loc-prefix :matti-r.foremen})
+                :plans         (reference-list :settings.plans {:term {:path       [:plans]
+                                                                       :extra-path [:name]
+                                                                       :match-key  :id}})
+                :reviews       (reference-list :settings.reviews {:term {:path       [:reviews]
                                                                          :extra-path [:name]
                                                                          :match-key  :id}})
-                :reviews         (reference-list :settings.reviews {:term {:path       [:reviews]
-                                                                           :extra-path [:name]
-                                                                           :match-key  :id}})
-                :conditions      {:phrase-text {:category :lupaehdot}}
-                :neighbors       {:loc-text :matti-neighbors.text}
+                :conditions    {:phrase-text {:category :lupaehdot}}
+                :neighbors     {:loc-text :matti-neighbors.text}
 
-                :appeal          {:phrase-text {:category :muutoksenhaku
-                                                :i18nkey  :phrase.category.muutoksenhaku}}
-                :collateral      {:loc-text :matti-collateral.text}
+                :appeal           {:phrase-text {:category :muutoksenhaku
+                                                 :i18nkey  :phrase.category.muutoksenhaku}}
+                :collateral       {:loc-text :matti-collateral.text}
                 ;; Complexity section
-                :complexity      {:docgen "matti-complexity"}
-                :complexity-text {:phrase-text {:label?   false
-                                                :category :vaativuus}}
+                :complexity       {:docgen "matti-complexity"}
+                :complexity-text  {:phrase-text {:label?   false
+                                                 :category :vaativuus}}
                 ;; Text sections
-                :rights          {:loc-text :matti-rights.text}
-                :purpose         {:loc-text :matti-purpose.text}
-                :statements      {:loc-text :matti-statements.text}
+                :rights           {:loc-text :matti-rights.text}
+                :purpose          {:loc-text :matti-purpose.text}
+                :statements       {:loc-text :matti-statements.text}
                 ;; Buildings section
-                :autopaikat      {:docgen "matti-verdict-check"}
-                :vss-luokka      {:docgen "matti-verdict-check"}
-                :paloluokka      {:docgen "matti-verdict-check"}
+                :autopaikat       {:docgen "matti-verdict-check"}
+                :vss-luokka       {:docgen "matti-verdict-check"}
+                :paloluokka       {:docgen "matti-verdict-check"}
                 ;; Removable sections
                 :removed-sections {:keymap (zipmap [:foremen :reviews :plans
                                                     :conditions :neighbors
@@ -341,24 +341,24 @@
                                                     :complexity :rights :purpose
                                                     :buildings]
                                                    (repeat false))}}
-   :sections [{:id    "verdict"
+   :sections [{:id         "verdict"
                :loc-prefix :matti-verdict
-               :grid  {:columns 12
-                       :rows    [{:css [:row--date-delta-title]
-                                  :row [{:col  12
-                                         :css  [:matti-label]
-                                         :dict :verdict-dates}]}
-                                 (date-delta-row [:julkipano :anto
-                                                  :valitus :lainvoimainen
-                                                  :aloitettava :voimassa])
-                                 [{:col 3
-                                   :id :giver
-                                   :dict :giver}
-                                  {:align :full
-                                   :col   3
-                                   :dict  :verdict-code}]
-                                 [{:col  12
-                                   :dict :paatosteksti}]]}}
+               :grid       {:columns 12
+                            :rows    [{:css [:row--date-delta-title]
+                                       :row [{:col  12
+                                              :css  [:matti-label]
+                                              :dict :verdict-dates}]}
+                                      (date-delta-row [:julkipano :anto
+                                                       :valitus :lainvoimainen
+                                                       :aloitettava :voimassa])
+                                      [{:col  3
+                                        :id   :giver
+                                        :dict :giver}
+                                       {:align :full
+                                        :col   3
+                                        :dict  :verdict-code}]
+                                      [{:col  12
+                                        :dict :paatosteksti}]]}}
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
@@ -367,30 +367,30 @@
                :grid       {:columns 1
                             :rows    [[{:dict :conditions}]]}}
               (text-section :neighbors)
-              {:id    "appeal"
+              {:id         "appeal"
                :loc-prefix :matti-appeal
-               :grid  {:columns 1
-                       :rows    [[{:dict :appeal }]]}}
+               :grid       {:columns 1
+                            :rows    [[{:dict :appeal }]]}}
               (text-section :collateral)
-              {:id    "complexity"
+              {:id         "complexity"
                :loc-prefix :matti.complexity
-               :grid  {:columns 1
-                       :rows    [[{:dict       :complexity }]
-                                 [{:id   "text"
-                                   :dict :complexity-text}]]}}
+               :grid       {:columns 1
+                            :rows    [[{:dict :complexity }]
+                                      [{:id   "text"
+                                        :dict :complexity-text}]]}}
               (text-section :rights)
               (text-section :purpose)
               (text-section :statements)
-              {:id    "buildings"
+              {:id         "buildings"
                :loc-prefix :matti-buildings
-               :grid  {:columns 1
-                       :rows    [[{:loc-prefix :matti-buildings.info
-                                   :list       {:title "matti-buildings.info"
-                                                :items (mapv (fn [check]
-                                                               {:dict check
-                                                                :id check
-                                                                :css  [:matti-condition-box]})
-                                                             [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
+               :grid       {:columns 1
+                            :rows    [[{:loc-prefix :matti-buildings.info
+                                        :list       {:title "matti-buildings.info"
+                                                     :items (mapv (fn [check]
+                                                                    {:dict check
+                                                                     :id   check
+                                                                     :css  [:matti-condition-box]})
+                                                                  [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
 (sc/validate MattiVerdict default-verdict-template)
 
@@ -445,114 +445,147 @@
 ;; makes localization work automatically.
 (def verdict-schemas
   {:r
-   {:sections
+   {:dictionary
+    (merge
+     {:verdict-date            {:docgen "matti-date"}
+      :automatic-verdict-dates {:docgen {:name "matti-verdict-check"}}}
+     (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
+          (map (fn [kw]
+                 [kw{:docgen {:name      "matti-date"
+                              :disabled? :automatic-verdict-dates}}]))
+          (into {}))
+     {:contact-ref      {:reference {:path :contact}}
+      :giver            {:docgen "matti-verdict-giver"}
+      :contact          {:docgen "matti-verdict-contact"}
+      :verdict-code     {:reference-list {:path       :settings.verdict-code
+                                          :type       :select
+                                          :loc-prefix :matti-r.verdict-code}}
+      :verdict-text     {:phrase-text {:category :paatosteksti}}
+      :verdict-text-ref {:reference {:path :verdict-text}}
+      :application-id   {:docgen "matti-verdict-id"}}
+     (reduce (fn [acc [loc-prefix kw term? separator?]]
+               (let [included (keyword (str (name kw) "-included"))
+                     path     (util/kw-path :settings kw)]
+                 (assoc acc
+                        kw
+                        {:reference-list
+                         (merge {:enabled?   included
+                                 :loc-prefix loc-prefix
+                                 :path       path
+                                 :type       :multi-select}
+                                (when term?
+                                  {:item-key :id
+                                   :term     {:path       path
+                                              :extra-path :name
+                                              :match-key  :id}})
+                                (when separator?
+                                  {:separator " \u2013 "}))}
+                        ;; Included checkbox
+                        included
+                        {:docgen "required-in-verdict"})))
+             {}
+             [[:matti-r.foremen :foremen false false]
+              [:matti-plans :plans true false]
+              [:matti-reviews :reviews true true]])
+     {:other-requirements {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                         :category :lupaehdot}}
+      :neighbor-text      {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                         :category :naapurit}}
+      :neighbor-states    {:placeholder {:type :neighbors}}
+      :complexity         {:docgen "matti-complexity"}
+      :complexity-text    {:phrase-text {:label?   false
+                                         :category :vaativuus}}
+      :removed-sections   {:keymap (zipmap [:neighbors
+                                            :appeal :statements :collateral
+                                            :complexity :rights :purpose
+                                            :buildings]
+                                           (repeat false))}})
+    :sections
     [{:id   "matti-dates"
       :grid {:columns 7
-             :rows    [[{:id     "verdict-date"
-                         :schema {:docgen "matti-date"}}
-                        {:id     "automatic-verdict-dates"
-                         :col    2
-                         :show?  :_meta.editing?
-                         :schema {:docgen {:name "matti-verdict-check"}}}]
+             :rows    [[{:id   "verdict-date"
+                         :dict :verdict-date}
+                        {:id    "automatic-verdict-dates"
+                         :col   2
+                         :show? :_meta.editing?
+                         :dict  :automatic-verdict-dates}]
                        {:id         "deltas"
                         :css        [:matti-date]
                         :loc-prefix :matti-verdict
                         :row        (map (fn [kw]
                                            (let [id (name kw)]
-                                             {:show?  (keyword (str "matti-dates.deltas."
-                                                                    id))
-                                              :id     id
-                                              :schema {:docgen {:name      "matti-date"
-                                                                :disabled? :matti-dates.0.automatic-verdict-dates}}}))
+                                             {:show?     kw
+                                              :disabled? :automati-verdict-dates
+                                              :id        id
+                                              :dict      kw}))
                                          [:julkipano :anto :valitus
                                           :lainvoimainen :aloitettava :voimassa])}]}}
      {:id   "matti-verdict"
       :grid {:columns 6
              :rows    [[{:loc-prefix :matti-verdict.giver
                          :hide?      :_meta.editing?
-                         :schema     {:reference {:path :matti-verdict.0.giver.contact}}}
-                        {:id     "giver"
-                         :col    2
-                         :show?  :_meta.editing?
-                         :schema {:list {:title "matti-verdict.giver"
-                                         :items [{:id     "giver"
-                                                  :schema {:docgen "matti-verdict-giver"}}
-                                                 {:id     "contact"
-                                                  :show?  :_meta.editing?
-                                                  :schema {:docgen "matti-verdict-contact"}}]}}}
-                        {:id     "section"
-                         :schema {:docgen "matti-verdict-text"}}
-                        {:hide? :_meta.editing?}
-                        {:col    2
-                         :id     "verdict-code"
-                         :align  :full
-                         :schema {:reference-list {:path       :verdict
-                                                   :type       :select
-                                                   :loc-prefix :matti-r}} }]
-                       [{:col    5
-                         :id     "paatosteksti"
-                         :show?  :_meta.editing?
-                         :schema {:phrase-text {:category :paatosteksti}}}
-                        {:col    3
-                         :hide?  :_meta.editing?
-                         :schema {:reference {:path :matti-verdict.1.paatosteksti}}}
-                        {:col    2
-                         :id     "application-id"
-                         :hide?  :_meta.editing?
-                         :schema {:docgen "matti-verdict-id"}}]]}}
+                         :dict       :contact-ref}
+                        {:col   3
+                         :show? :_meta.editing?
+                         :list  {:title "matti-verdict.giver"
+                                 :items [{:id   :giver
+                                          :dict :giver}
+                                         {:id    :contact
+                                          :show? :_meta.editing?
+                                          :dict  :contact}]}}
+                        {:col   2
+                         :hide? :_meta.editing?}
+                        {:col   2
+                         :align :full
+                         :dict  :verdict-code}]
+                       [{:col   5
+                         :id    "paatosteksti"
+                         :show? :_meta.editing?
+                         :dict  :verdict-text}
+                        {:col   3
+                         :hide? :_meta.editing?
+                         :dict  :verdict-text-ref}
+                        {:col   2
+                         :id    "application-id"
+                         :hide? :_meta.editing?
+                         :dict  :application-id}]]}}
      {:id   "requirements"
       :grid {:columns 7
-             :rows    (concat (map-indexed (fn [i [loc-prefix path term? separator?]]
-                                             (let [check-path (keyword (str "requirements." i ".included"))]
-                                               {:show? [:_meta.editing? check-path]
-                                                :row   [{:col    4
-                                                         :schema {:reference-list
-                                                                  (merge {:enabled?   check-path
-                                                                          :loc-prefix loc-prefix
-                                                                          :path       path
-                                                                          :type       :multi-select}
-                                                                         (when term?
-                                                                           {:item-key :id
-                                                                            :term     {:path       path
-                                                                                       :extra-path :name
-                                                                                       :match-key  :id}})
-                                                                         (when separator?
-                                                                           {:separator " \u2013 "}))}}
-                                                        {:col    2
-                                                         :align  :right
-                                                         :show?  :_meta.editing?
-                                                         :id     "included"
-                                                         :schema {:docgen "required-in-verdict"}}]}))
-                                           [[:matti-r.foremen :foremen false false]
-                                            [:matti-plans :plans true false]
-                                            [:matti-reviews :reviews true true]])
-                              [[{:col    6
-                                 :id     "other"
-                                 :align  :full
-                                 :schema {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                                        :category :lupaehdot}}}]])}}
-     {:id "neighbors"
+             :rows    (concat (map (fn [dict]
+                                     (let [check-path (keyword (str (name dict) "-included"))]
+                                       {:show? [:_meta.editing? check-path]
+                                        :row   [{:col  4
+                                                 :dict dict}
+                                                {:col   2
+                                                 :align :right
+                                                 :show? :_meta.editing?
+                                                 :id    "included"
+                                                 :dict  check-path}]}))
+                                   [:foremen :plans :reviews])
+                              [[{:col   6
+                                 :id    "other"
+                                 :align :full
+                                 :dict  :other-requirements}]])}}
+     {:id   "neighbors"
       :grid {:columns 12
-             :rows [[{:col 7
-                      :id "neighbor-notes"
-                      :schema {:phrase-text {:i18nkey :phrase.category.naapurit
-                                             :category :naapurit}}}
-                     {}
-                     {:col 3
-                      :id "neighbor-states"
-                      :align :right
-                      :schema {:placeholder {:type :neighbors}}}]
-                    ]}}
-     {:id   "matti-complexity"
-      :grid {:columns 6
-             :rows    [[{:col    5
-                         :schema {:docgen "matti-complexity"}}]
-                       [{:col    5
-                         :id     "text"
-                         :schema {:phrase-text {:label?   false
-                                                :category :vaativuus}}}]]}}]}})
+             :rows    [[{:col  8
+                         :id   "neighbor-notes"
+                         :dict :neighbor-text}
+                        {:col   3
+                         :id    "neighbor-states"
+                         :align :right
+                         :dict  :neighbor-states}]
+                       ]}}
+     {:id   "complexity"
+      :loc-prefix :matti.complexity
+      :grid {:columns 12
+             :rows    [[{:col  6
+                         :dict :complexity}]
+                       [{:col  8
+                         :id   "text"
+                         :dict :complexity-text}]]}}]}})
 
-#_(sc/validate MattiVerdict (:r verdict-schemas))
+(sc/validate MattiVerdict (:r verdict-schemas))
 
 ;; Schema utils
 
