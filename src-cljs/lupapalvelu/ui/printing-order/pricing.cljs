@@ -26,10 +26,9 @@
 
 (defn footer-price-for-order-amount [amount]
   (let [{:keys [total additionalInformation]} (price-for-order-amount amount)]
-    (str (loc :printing-order.footer.price) " "
-      (cond
-        total                 (str total " € " (loc :printing-order.footer.includes-vat))
-        additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc)))))))
+    (cond
+      total                 (str (loc :printing-order.footer.price) " " total " € " (loc :printing-order.footer.includes-vat))
+      additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc))))))
 
 (rum/defc order-summary-pricing < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
