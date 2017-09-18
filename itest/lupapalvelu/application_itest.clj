@@ -900,3 +900,11 @@
          (fact "Archive enabled"
                (query pena :application-organization-archive-enabled :id app-id )
                => ok?)))
+
+(facts "Multiple operations support can be selected"
+  (let [app-id-1 (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)
+        app-id-2 (create-app-id velho :operation :pientalo :propertyId kuopio-property-id)]
+    (fact "Multiple operations is allowed in Sipoo"
+      pena => (allowed? :add-operation :id app-id-1 :operation "vapaa-ajan-asuinrakennus"))
+    (fact "Multiple operations is not allowed in Kuopio"
+      velho =not=> (allowed? :add-operation :id app-id-2 :operation "vapaa-ajan-asuinrakennus"))))

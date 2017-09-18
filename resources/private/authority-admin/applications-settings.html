@@ -34,6 +34,15 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.multiple-operations-support.title'"></h2>
+        <toggle params="value: organization.multipleOperationsSupported,
+                        ltext: 'auth-admin.multiple-operations-support.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-multiple-operations-support'),
+                        testId: 'multiple-operations-support-enabled'"></toggle>
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'organization-name-editor'"></div>
