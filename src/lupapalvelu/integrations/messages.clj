@@ -9,16 +9,17 @@
 
 (def create-id mongo/create-id)
 
-(def partners #{"ely"})
+(def partners #{"ely" "mylly"})
 
 (sc/defschema IntegrationMessage
   {:id                            ssc/ObjectIdStr
    :direction                     (sc/enum "in" "out")
    :messageType                   sc/Str
    :partner                       (apply sc/enum partners)
-   :output-dir                    sc/Str
    :format                        (sc/enum "xml" "json")
    :created                       ssc/Timestamp
+   (sc/optional-key :external-reference) sc/Str
+   (sc/optional-key :output-dir)  sc/Str
    (sc/optional-key :application) {:id           ssc/ApplicationId
                                    :organization sc/Str
                                    :state        (apply sc/enum (map name states/all-states))}
@@ -27,6 +28,7 @@
    (sc/optional-key :initator)    {:id       sc/Str
                                    :username sc/Str}
    (sc/optional-key :action)            sc/Str
+   (sc/optional-key :attachment-ids)    [ssc/ObjectIdStr]
    (sc/optional-key :attachmentsCount)  sc/Int
    (sc/optional-key :acknowledged)      ssc/Timestamp})
 

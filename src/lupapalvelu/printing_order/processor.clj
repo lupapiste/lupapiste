@@ -4,7 +4,8 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [fail!]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.integrations.messages :as messages]))
 
 (defn prepare-contact-to-order
   [contacts path]
@@ -52,3 +53,14 @@
   (assoc prepared-order :files (map (fn [{fileId :fileId :as file}]
                                       (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
+
+(defn save-integration-message [user created-ts application {:keys [internalOrderId delivery] :as prepared-order} order-number]
+  (messages/save {:id internalOrderId
+                  :direction "out"
+                  :messageType "printing-order"
+                  :partner "mylly"
+                  :format "xml"
+                  :created created-ts
+                  :external-reference order-number
+                  :initator (select-keys user [:id :username])
+                  :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))
