@@ -261,6 +261,11 @@
                                    enable: $data.setVisibilityAllowed()"></select>
               </div>
 
+              <div data-bind="if: isArchived" class="archive-valid">
+                <i class="lupicon-archives positive" data-bind="attr: {title: loc('arkistoitu')}"></i>
+                <span data-bind="ltext: 'arkistoitu'"></span>
+              </div>
+
               <div data-bind="if: $data.permanentArchiveEnabled() && $data.hasVersion()">
                 <div class="archive-valid"
                      data-bind="with: $data.attachment().latestVersion">
