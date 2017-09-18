@@ -38,3 +38,9 @@
   [& colls]
   (let [kw-set (apply set/intersection (map #(set (map keyword %)) colls))]
     (filter #(includes-as-kw? kw-set %) (first colls))))
+
+(defn filter-map-by-val
+  "Returns the mapping for which the value satisfies the predicate.
+  (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
+  [pred m]
+  (into {} (filter (fn [[_ v]] (pred v)) m)))

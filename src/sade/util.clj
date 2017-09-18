@@ -18,6 +18,11 @@
            [org.joda.time LocalDateTime]
            [java.io ByteArrayOutputStream]))
 
+(defmacro defalias [alias from]
+  `(do (def ~alias ~from)
+       (alter-meta! #'~alias merge (select-keys (meta #'~from) [:arglists]))
+       ~alias))
+
 ;;
 ;; Nil-safe number utilities
 ;;
@@ -148,7 +153,7 @@
         (apply some-key m (rest ks))
         (m k)))))
 
-(def find-by-key shared/find-by-key)
+(defalias find-by-key shared/find-by-key)
 
 (defn find-by-id
   "Return item from sequence col of maps where :id matches id."
@@ -164,7 +169,7 @@
   "Returns the mapping for which the value satisfies the predicate.
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
   [pred m]
-  (into {} (filter (fn [[_ v]] (pred v)) m)))
+  (shared/filter-map-by-val pred m))
 
 ; From clojure.contrib/seq
 
@@ -514,7 +519,7 @@
 (defn separate-emails [^String email-str]
   (->> (ss/split email-str #"[,;]") (map ss/trim) set))
 
-(def find-first shared/find-first)
+(defalias find-first shared/find-first)
 
 (defn get-files-by-regex
   "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
@@ -591,10 +596,10 @@
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
 
-(def =as-kw             shared/=as-kw)
-(def not=as-kw          shared/not=as-kw)
-(def includes-as-kw?    shared/includes-as-kw?)
-(def intersection-as-kw shared/intersection-as-kw)
+(defalias =as-kw             shared/=as-kw)
+(defalias not=as-kw          shared/not=as-kw)
+(defalias includes-as-kw?    shared/includes-as-kw?)
+(defalias intersection-as-kw shared/intersection-as-kw)
 
 (defn kw-path
   "a b c -> :a.b.c"
@@ -625,6 +630,9 @@
 
 (defn read-edn-resource [file-path]
   (->> file-path io/resource slurp edn/read-string))
+
+(defn read-edn-file [file-path]
+  (-> (io/file file-path) slurp edn/read-string))
 
 (defn distinct-by
   "Given a function comparable-fn and collection coll, builds a new

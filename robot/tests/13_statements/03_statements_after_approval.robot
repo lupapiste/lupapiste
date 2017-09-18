@@ -92,7 +92,7 @@ Ronja can delete and add attachment
 
 Ronja submits statement
   Wait and click  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
   Open statement  ronja.sibbo@sipoo.fi
   Statement is disabled
@@ -130,7 +130,7 @@ Mikko logs in and replies to the statement
   Positive indicator icon should be visible
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-0']  Vastine annettu
   [Teardown]  Logout
 

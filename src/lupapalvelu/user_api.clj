@@ -11,6 +11,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.password-reset :as pw-reset]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.rest.rest-api :refer [defendpoint]]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.security :as security]
             [lupapalvelu.states :as states]
@@ -31,7 +32,9 @@
             [schema.core :as sc]
             [slingshot.slingshot :refer [throw+ try+]]
             [swiss.arrows :refer :all]
-            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]))
+            [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
+            [lupapalvelu.company :as company]
+            [schema.core :as s]))
 
 ;;
 ;; ==============================================================================
@@ -93,7 +96,18 @@
   [{caller :user {params :params} :data}]
   (ok :data (usr/users-for-datatables caller params)))
 
-
+(defendpoint "/rest/user"
+  {:summary             "Returns details of the user associated to the provided access token"
+   :description         ""
+   :parameters          []
+   :optional-parameters [:dummy-role s/Str]
+   :oauth-scope         :read
+   :returns             usr/UserForRestEndpoint}
+  (let [company-id (get-in user [:company :id])
+        company (when company-id (company/find-company-by-id company-id))]
+    (cond-> (select-keys user [:role :email :firstName :lastName])
+            (and (env/feature? :dummy-rest-user-role) dummy-role)  (assoc :role dummy-role)
+            company (assoc :company {:id company-id :name (:name company)}))))
 
 ;;
 ;; ==============================================================================
@@ -173,7 +187,7 @@
     (fail :error.user.trying-to-update-verified-person-id)))
 
 (defcommand update-user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin :financialAuthority}
    :input-validators [validate-updatable-user]
    :pre-checks [validate-person-id-update-is-allowed!]}
   [{caller :user {person-id :personId :as user-data} :data :as command}]
@@ -383,7 +397,7 @@
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
    :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
-   :user-roles #{:applicant :authority :authorityAdmin :admin}}
+   :user-roles #{:applicant :authority :authorityAdmin :admin :financialAuthority}}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))

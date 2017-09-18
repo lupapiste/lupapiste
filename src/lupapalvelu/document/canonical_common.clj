@@ -262,14 +262,16 @@
           :kasittelija (get-handler application)}})
       state-timestamps)))
 
-(defn lupatunnus [{:keys [id submitted] :as application}]
-  {:pre [id]}
-  {:LupaTunnus
-   (util/assoc-when-pred
-     {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
-     util/not-empty-or-nil?
-     :saapumisPvm (util/to-xml-date submitted)
-     :kuntalupatunnus (->> application :verdicts (some :kuntalupatunnus)))})
+(defn lupatunnus
+  ([{:keys [id submitted] :as application}]
+   (lupatunnus id submitted (->> application :verdicts (some :kuntalupatunnus))))
+  ([id submitted backend-id]
+   {:pre [id]}
+   {:LupaTunnus
+    (util/assoc-when-pred {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
+      util/not-empty-or-nil?
+      :saapumisPvm     (util/to-xml-date submitted)
+      :kuntalupatunnus backend-id)}))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -370,9 +372,9 @@
     (util/assoc-when-pred yritys-canonical util/not-empty-or-nil? :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
-(defn- get-kuntaRooliKoodi [party party-type subtype]
-  (if (contains? kuntaRoolikoodit party-type)
-    (kuntaRoolikoodit party-type)
+(defn get-kuntaRooliKoodi [party party-type subtype]
+  (if (contains? kuntaRoolikoodit (keyword party-type))
+    (kuntaRoolikoodit (keyword party-type))
     (let [code (or (get-in party [:kuntaRoolikoodi])
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])

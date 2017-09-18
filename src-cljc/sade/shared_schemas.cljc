@@ -1,5 +1,6 @@
 (ns sade.shared-schemas
-  (:require [schema.core :refer [defschema] :as sc]))
+  (:require [schema.core :refer [defschema] :as sc]
+            [sade.validators :as v]))
 
 (defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
 
@@ -11,3 +12,15 @@
 
 (def ObjectIdStr
   (sc/pred (partial matches? object-id-pattern) "ObjectId hex string"))
+
+(defn in-lower-case? [^String s]
+  (if s
+    (= s (.toLowerCase s))
+    false))
+
+(defn max-length-constraint [max-len]
+  (fn [v] (<= (count v) max-len)))
+
+(defschema Email
+           "A simple schema for email"
+  (sc/constrained sc/Str (every-pred v/valid-email? in-lower-case? (max-length-constraint 254)) "Email"))

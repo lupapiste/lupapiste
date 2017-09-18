@@ -234,7 +234,7 @@
 "kayttotarkoitus.999 muualla luokittelemattomat rakennukset" "sv" "999 byggnader som inte klassificerats annorstädes"
 "kayttotarkoitus._group_label" "en" "The main use"
 "kayttotarkoitus._group_label" "fi" "Pääasiallinen käyttötarkoitus"
-"kayttotarkoitus._group_label" "sv" "Huvudsaklig användningsändamål"
+"kayttotarkoitus._group_label" "sv" "Huvudsakligt användningsändamål"
 "kayttotarkoitus.ei tiedossa" "en" "not known"
 "kayttotarkoitus.ei tiedossa" "fi" "ei tiedossa"
 "kayttotarkoitus.ei tiedossa" "sv" "inte känt"

@@ -49,6 +49,10 @@
    :optional-parameters [name]
    :input-validators    [(partial action/non-blank-parameters [:email :text])
                          action/email-validator]
+   :pre-checks          [(fn [{data :data}] (if (some? (:email data))
+                                 (let [user (usr/get-user-by-email (:email data))]
+                                   (if (usr/financial-authority? user)
+                                     (fail! :error.is-financial-authority)))))]
    :notified            true
    :user-roles          #{:authorityAdmin}}
   [{data :data user :user}]
@@ -166,7 +170,7 @@
   (let [org @organization
         submitted-application (mongo/by-id :submitted-applications id)
         metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-        ely-statement-giver (ely/ely-statement-giver subtype)
+        ely-statement-giver (ely/ely-statement-giver (i18n/localize lang subtype))
         message-id (mongo/create-id)
         ely-data  {:partner "ely"
                    :subtype subtype
@@ -211,7 +215,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
    :pre-checks  [statement/statement-owner
                  statement/statement-not-given
-                 statement/statement-in-sent-state-allowed]
+                 statement/statement-in-sent-state-allowed
+                 statement/not-ely-statement]
    :states      #{:open :submitted :complementNeeded :sent}
    :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}

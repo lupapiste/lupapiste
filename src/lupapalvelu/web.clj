@@ -109,6 +109,7 @@
 (def oir? (partial in-role? :oirAuthority))
 (def authority-admin? (partial in-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
+(def financial-authority? (partial in-role? :financialAuthority))
 (defn- anyone [_] true)
 (defn- nobody [_] false)
 
@@ -199,7 +200,8 @@
                    :welcome anyone
                    :oskari anyone
                    :neighbor anyone
-                   :bulletins anyone})
+                   :bulletins anyone
+                   :financial-authority financial-authority?})
 
 (defn cache-headers [resource-type]
   (if (env/feature? :no-cache)
@@ -507,7 +509,7 @@
               "', user agent '" user-agent
               "', requested with '" req-with "'.")))
 
-(defn- csrf-attack-hander [request]
+(defn csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (usr/current-user request) "???")}
@@ -517,21 +519,22 @@
 (defn tokenless-request? [request]
    (re-matches #"^/proxy/.*" (:uri request)))
 
+(def anti-csrf-cookie-name "anti-csrf-token")
+
 (defn anti-csrf [handler]
   (fn [request]
     (if (env/feature? :disable-anti-csrf)
       (handler request)
-      (let [cookie-name "anti-csrf-token"
-            cookie-attrs (dissoc (env/value :cookie) :http-only)]
+      (let [cookie-attrs (dissoc (env/value :cookie) :http-only)]
         (cond
            (and (re-matches #"^/api/(command|query|datatables|upload).*" (:uri request))
                 (not (logged-in-with-apikey? request)))
-             (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+             (anti-forgery/crosscheck-token handler request anti-csrf-cookie-name csrf-attack-hander)
           (tokenless-request? request)
              ;; cookies via /proxy may end up overwriting current valid ones otherwise
              (handler request)
           :else
-             (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
+             (anti-forgery/set-token-in-cookie request (handler request) anti-csrf-cookie-name cookie-attrs))))))
 
 (defn cookie-monster
    "Remove cookies from requests in which only IE would send and update original cookie information
@@ -836,6 +839,25 @@
       (spit temp xml-s)
       (let [result (files/with-zip-file
                      [(.getPath temp)]
+                     (ah-reader/process-message zip-file
+                                                (or ftp-user (env/value :ely :sftp-user))
+                                                (usr/batchrun-user ["123"])))]
+        (io/delete-file temp)
+        (resp/status 200 (resp/json result)))))
+
+  (defpage [:get "/dev/ah/statement-response"] {:keys [id statement-id ftp-user]} ; LPK-3126
+    (let [attachment (files/temp-file "ah-statement-test" ".txt")
+          xml (-> (io/resource "asianhallinta/sample/ah-example-statement-response.xml")
+                  (enlive/xml-resource)
+                  (enlive/transform [:ah:LausuntoVastaus :ah:HakemusTunnus] (enlive/content id))
+                  (enlive/transform [:ah:LausuntoVastaus :ah:Lausunto :ah:LausuntoTunnus] (enlive/content statement-id))
+                  (enlive/transform [:ah:LausuntoVastaus :ah:Liitteet :ah:Liite :ah:LinkkiLiitteeseen] (enlive/content (.getName attachment))))
+          xml-s (apply str (enlive/emit* xml))
+          temp (files/temp-file "asianhallinta" ".xml")]
+      (spit temp xml-s)
+      (spit attachment "Testi Onnistui!")
+      (let [result (files/with-zip-file
+                     [(.getPath temp) (.getPath attachment)]
                      (ah-reader/process-message zip-file
                                                 (or ftp-user (env/value :ely :sftp-user))
                                                 (usr/batchrun-user ["123"])))]

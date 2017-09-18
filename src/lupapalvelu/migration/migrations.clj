@@ -1,40 +1,42 @@
 (ns lupapalvelu.migration.migrations
-  (:require [monger.operators :refer :all]
-            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [clojure.set :refer [rename-keys] :as set]
+  (:require [clj-time.coerce :as cljtc]
             [clj-time.core :as cljt]
-            [clj-time.coerce :as cljtc]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
-            [sade.core :refer [def- now]]
-            [sade.env :as env]
-            [sade.strings :as ss]
-            [sade.property :as p]
-            [sade.validators :as v]
+            [clojure.set :refer [rename-keys] :as set]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.migration.core :refer [defmigration]]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.drawing :as draw]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
+            [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.tasks :refer [task-doc-validation] :as tasks]
             [lupapalvelu.user :as user]
-            [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
-            [lupapalvelu.tasks :refer [task-doc-validation]]
-            [sade.excel-reader :as er]
-            [sade.coordinate :as coord]
-            [lupapalvelu.drawing :as draw]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.states :as states])
+            [monger.operators :refer :all]
+            [sade.coordinate :as coord]
+            [sade.core :refer [def- now]]
+            [sade.env :as env]
+            [sade.excel-reader :as er]
+            [sade.property :as p]
+            [sade.strings :as ss]
+            [sade.strings :as str]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
+            [sade.validators :as v]
+            [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -3316,7 +3318,6 @@
                  $unset {:private ""}}
                 :multi true))
 
-
 (defmigration add-docstore-info
   {:apply-when (pos? (mongo/count :organizations {:docstore-info {$exists false}}))}
   (mongo/update :organizations
@@ -3349,6 +3350,68 @@
         (mongo/update-by-id :organizations
                             _id
                             {$set {:docstore-info.documentPrice new-price}})))))
+
+(def mangled-utf-to-correct-utf
+  {"\u00c3\u00a4" "\u00e4",
+   "\u00c3\u00b6" "\u00f6",
+   "\u00c3\u00a5" "\u00e5",
+   "\u00c3\u0084" "\u00c4",
+   "\u00c3\u0096" "\u00d6",
+   "\u00c3\u0085" "\u00c5"})
+
+(defn ungarble-utf8-string [text]
+  (reduce
+    (fn [new-text [search replacement]]
+      (str/replace new-text search replacement))
+    text
+    mangled-utf-to-correct-utf))
+
+(def mangled-utf-regex
+  (str ".*" (str/join "|" (keys mangled-utf-to-correct-utf)) ".*"))
+
+(def suspect-user-keys
+  [:firstName :lastName :street :city])
+
+(def invalid-ut8-users-query
+  {$or (map #(-> {% {$regex mangled-utf-regex}}) suspect-user-keys)})
+
+(defmigration fix-invalid-utf8-in-users
+  {:apply-when (pos? (mongo/count :users invalid-ut8-users-query))}
+  (doseq [user (mongo/find-maps :users invalid-ut8-users-query)]
+    (let [update-map (reduce
+                       (fn [updates kw]
+                         (let [orig-str (kw user)
+                               new-str (ungarble-utf8-string orig-str)]
+                           (if-not (= orig-str new-str)
+                             (assoc updates kw new-str)
+                             updates)))
+                       {}
+                       suspect-user-keys)]
+      (when-not (empty? update-map)
+        (mongo/update-by-id :users
+                            (:_id user)
+                            {$set update-map})))))
+
+(defn copy-auth-id-from-invite [{{{id :id} :user} :invite invite-type :type :as auth}]
+  (cond-> auth
+          (and id (util/=as-kw invite-type :company)) (assoc :id id :company-role :admin)))
+
+(defmigration allow-reader-access-for-invited-company-users
+  {:apply-when (pos? (mongo/count :applications {:auth.id ""}))}
+  (update-applications-array :auth copy-auth-id-from-invite {:auth.id ""}))
+
+(defmigration lpk-3198-faulty-review-attachments
+  {:apply-when (pos? (mongo/count :applications {:tasks {$elemMatch {:state "faulty_review_task"
+                                                                     :faulty {$exists false}}}}))}
+  (doseq [{:keys [modified tasks] :as application} (mongo/select :applications {:tasks {$elemMatch {:state "faulty_review_task"
+                                                                                                    :faulty {$exists false}}}})]
+    (doseq [{task-id :id} (filter #(and (util/=as-kw (:state %) :faulty_review_task)
+                                        (nil? (:faulty %)))
+                                  tasks)]
+      (tasks/task->faulty (assoc (action/application->command application)
+                                 :created modified)
+                          task-id))))
+
 
 ;;
 ;; ****** NOTE! ******

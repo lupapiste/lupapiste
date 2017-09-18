@@ -106,7 +106,7 @@
 (defn merge-into-coll-after-tag
   "Merges coll-to-merge in the collection just after the element tagged with tag"
   [coll tag coll-to-merge]
-  (mapcat (fn [{t :tag :as d}] (if (= t tag) (cons d coll-to-merge) [d])) coll))
+  (vec (mapcat (fn [{t :tag :as d}] (if (= t tag) (cons d coll-to-merge) [d])) coll)))
 
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}

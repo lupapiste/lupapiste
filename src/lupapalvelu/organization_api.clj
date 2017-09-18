@@ -517,6 +517,17 @@
     (org/update-organization organization-id {$set {:notifications.inforequest-notification-emails addresses}})
     (ok)))
 
+(defcommand set-organization-funding-enabled-notification-email
+  {:parameters [emails]
+   :description "When ARA funding is enabled to application, send notification to these email addresses"
+   :user-roles #{:authorityAdmin}
+   :input-validators email-list-validators}
+  [{user :user}]
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+        organization-id (usr/authority-admins-organization-id user)]
+    (org/update-organization organization-id {$set {:notifications.funding-notification-emails addresses}})
+    (ok)))
+
 (defcommand set-organization-default-reservation-location
   {:parameters [location]
    :description "When reservation is made, use this location as default value"

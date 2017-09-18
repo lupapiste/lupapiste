@@ -122,6 +122,7 @@
 @import "partials/_rollup";
 @import "partials/_stamp_editor";
 @import "partials/_matti";
+@import "partials/_printing_order";
 
 /* VIEWS
 ------------------------------------------------------------------------------*/
@@ -145,6 +146,7 @@
 @import "views/_calendars";
 @import "views/_attachments";
 @import "views/_inspection_summary";
+@import "views/_oauth";
 
 // Bulletins depepend on application
 @import "partials/_bulletins";

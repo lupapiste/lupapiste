@@ -11,7 +11,8 @@
             [lupapalvelu.user-utils :as uu]
             [monger.operators :refer :all]
             [sade.core :refer [fail ok]]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (defn resolve-guest-authority-candidate
   "Namesake query implementation."
@@ -28,7 +29,7 @@
                                 not-empty
                                 boolean)]
     (assoc (select-keys candidate [:firstName :lastName])
-           :hasAccess already-has-access)))
+           :hasAccess already-has-access :financialAuthority (usr/financial-authority? candidate))))
 
 (defn organization-guest-authorities
   "Guest authorities for the given organisation. Fetches organization from db."
@@ -105,10 +106,9 @@
     timestamp                    :created
     application                  :application
     :as                          command}]
-  (let [email (ss/canonize-email email)
-        existing-user (usr/get-user-by-email email)]
-    (if (or (domain/invite application email)
-            (auth/has-auth? application (:id existing-user)))
+  (let [email (ss/canonize-email email)]
+    (if (or (util/find-by-key :email email (domain/invites application))
+            (auth/has-auth? application (:id (usr/get-user-by-email email))))
       (fail :error.already-has-access)
       (let [guest (usr/get-or-create-user-by-email email user)
             auth  (usr/user-in-role guest (keyword role))

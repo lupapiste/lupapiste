@@ -880,6 +880,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent( "docgen-person-select", subSchema, model, path );
   }
 
+  function buildFundingSelect( subSchema, model, path) {
+    return buildGroupComponent( "docgen-funding-select", subSchema, model, path);
+  }
+
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
@@ -1165,6 +1169,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     personSelector: buildDocgenPersonSelect,
     companySelector: buildCompanySelector,
     table: buildTableRow,
+    fundingSelector: buildFundingSelect,
     unknown: buildUnknown
   };
 

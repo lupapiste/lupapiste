@@ -17,7 +17,7 @@ Init...
 
 Mikko opens an application
   Mikko logs in
-  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  ${propertyId}  kayttotark-muutos
 
 Application info tab is visible
   Element should be visible  jquery=a[data-test-id=application-open-info-tab]
@@ -28,24 +28,24 @@ Application summary tab is hidden
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784
 # Note: The test browser must be active or the case will fail.
-Mikko adds three owners to the Uusirakennus document
+Mikko adds three owners
   Open accordions  info
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  1
 
-  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"]  pikku
+  Input text with jQuery  \#application-info-tab section[data-doc-type="rakennuksen-muuttaminen"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi"]  pikku
 
   Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
 
-  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi"]  ISO1
-  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi"]  ISO2
-  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi"]  ISO3
+  Input text with jQuery  \#application-info-tab section[data-doc-type="rakennuksen-muuttaminen"] input[data-docgen-path="rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi"]  ISO1
+  Input text with jQuery  \#application-info-tab section[data-doc-type="rakennuksen-muuttaminen"] input[data-docgen-path="rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi"]  ISO2
+  Input text with jQuery  \#application-info-tab section[data-doc-type="rakennuksen-muuttaminen"] input[data-docgen-path="rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi"]  ISO3
   Wait for jQuery
 
 Owners are visible after page refresh
@@ -53,40 +53,44 @@ Owners are visible after page refresh
   Application address should be  ${appname}
   Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
-  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
-  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
-  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
-  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
 
 Error indicator appears with invalid data
-  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  Test
-  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
-  Wait until  Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
+  Input text with jQuery  \#application-info-tab section[data-doc-type="rakennuksen-muuttaminen"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  Test
+  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
+  Wait until  Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
 Error indicator disappears when valid value is input
-  Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  12345
-  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
-  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
+  Input text with jQuery  \#application-info-tab section[data-doc-type="rakennuksen-muuttaminen"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  12345
+  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
+  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
-Huoneistot info for Uusirakennus is correct
+Muutostapa help text is available
+  jQuery should match X times  docgen-huoneistot-table .help-text:contains(Esimerkki)  1
+
+Huoneistot info is correct
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  1
-  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-test-id='huoneistot.0.huoneistonumero']  000
-  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.0.muutostapa"]  lis\u00e4ys
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-test-id='huoneistot.0.huoneistonumero']  ${EMPTY}
+  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.0.muutostapa"]  - Valitse -
+  Huoneisto row items disabled except muutostapa  0
 
   Open accordions  info
-  Click by test id  huoneistot-append-button
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
-  Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
+  Scroll and click test id  huoneistot-append-button
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id='huoneistot.1.muutostapa']
+  Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id='huoneistot.1.muutostapa']
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  - Valitse -
-  # TODO check this: Huoneisto row items disabled except muutostapa
+  Huoneisto row items disabled except muutostapa  1
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.huoneistoTyyppi"]  1
   Sleep  0.5s
   Reload page and kill dev-box
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
-  List selection should be  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.huoneistoTyyppi']  Asuinhuoneisto
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id='huoneistot.1.muutostapa']
+  List selection should be  xpath=//div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id='huoneistot.1.huoneistoTyyppi']  Asuinhuoneisto
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[contains(@class, 'huoneistot-table')]//tbody//tr  2
 
 Mikko removes apartment
@@ -227,16 +231,6 @@ No errors logged in editing
 *** Keywords ***
 
 Huoneisto row items disabled except muutostapa
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.huoneistoTyyppi"]
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.keittionTyyppi"]
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.porras']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.huoneistonumero']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.jakokirjain']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.huoneluku']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.huoneistoala']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.WCKytkin']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.ammeTaiSuihkuKytkin']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.saunaKytkin']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.parvekeTaiTerassiKytkin']
-  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.lamminvesiKytkin']
-  Element Should Be Enabled   //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
+  [Arguments]  ${index}
+  jQuery should match X times  tr[data-test-id='huoneistot-row-${index}'] :disabled  12
+  Element Should Be Enabled   //div[@id='application-info-tab']//section[@data-doc-type='rakennuksen-muuttaminen']//select[@data-test-id="huoneistot.${index}.muutostapa"]

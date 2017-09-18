@@ -46,6 +46,13 @@
     (fact (has-required-user-role {:user {:role "bar"}} {:user-roles #{:foo :bar}}) => truthy)
     (fact (has-required-user-role {:user {:role "boz"}} {:user-roles #{:foo :bar}}) => falsey))
 
+  (fact "Financial authority have applicant user role when command takes id as parameter"
+    (fact (has-required-user-role {:user {:role "financialAuthority"}} {:user-roles #{:applicant} :parameters [:id]}) => truthy)
+    (fact (has-required-user-role {:user {:role "financialAuthority"}} {:user-roles #{:applicant} :parameters ["id"]}) => truthy)
+    (fact (has-required-user-role {:user {:role "financialAuthority"}} {:user-roles #{:applicant} :parameters [:some-other]}) => falsey)
+    (fact (has-required-user-role {:user {:role "notFinancialAuthority"}} {:user-roles #{:applicant} :parameters [:id]}) => falsey)
+    (fact (has-required-user-role {:user {:role "financialAuthority"}} {:user-roles #{:authority} :parameters [:id]}) => falsey))
+
 
 
   (facts "Test missing-fields"

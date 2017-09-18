@@ -30,17 +30,29 @@
     (domain/invites application)
     (map #(assoc % :application (select-keys application [:id :address :primaryOperation :municipality])))))
 
-(defquery invites
-  {:user-roles #{:applicant :authority :oirAuthority}}
-  [{{:keys [id]} :user}]
-  (let [common     {:auth {$elemMatch {:invite.user.id id}}}
-        query      {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications query [:auth :primaryOperation :address :municipality])
-        invites    (mapcat invites-with-application data)
-        my-invites (filter #(= id (get-in % [:user :id])) invites)]
-    (ok :invites my-invites)))
+(defn- select-user-auths
+  "Select auths for user by user-id and company-id."
+  [{user-id :id :as user} {auth :auth :as application}]
+  (let [company-auths  (auth/get-company-auths application user)
+        personal-auths (auth/get-auths application user-id)]
+    (assoc application :auth (remove nil? (concat company-auths personal-auths)))))
 
-(def settable-roles #{:writer :foreman})
+(defquery invites
+  {:user-roles #{:applicant :authority :oirAuthority :financialAuthority}}
+  [{{user-id :id {company-id :id company-role :role} :company :as user} :user}]
+  (let [query (if (nil? company-id)
+                {:auth.invite.user.id user-id}
+                {$or [{:auth.invite.user.id user-id}
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role company-role}}}
+                      {:auth {$elemMatch {:invite.user.id company-id :company-role {$exists false}}}}]})]
+    (->> (mongo/select :applications
+                       (merge query {:state {$ne :canceled}})
+                       [:auth :primaryOperation :address :municipality])
+         (map (partial select-user-auths user))
+         (mapcat invites-with-application)
+         (ok :invites))))
+
+(def settable-roles #{:writer :foreman :financialAuthority})
 (def changeable-roles #{:writer :foreman})
 
 (defn- valid-role [role]
@@ -51,15 +63,22 @@
                      inviter :user
                      application :application
                      :as command}]
-  {:pre [(valid-role role)]}
   (let [email (ss/canonize-email email)
-        existing-user (user/get-user-by-email email)]
-    (if (or (domain/invite application email) (auth/has-auth? application (:id existing-user)))
+        existing-auth (auth/get-auth application (:id (user/get-user-by-email email)))
+        existing-role (keyword (get-in existing-auth [:invite :role] (:role existing-auth)))]
+    (cond
+      (#{:reader :guest} existing-role)
+      (fail :invite.already-has-reader-auth :existing-role existing-role)
+
+      existing-auth
       (fail :invite.already-has-auth)
+
+      :else
       (let [invited (user/get-or-create-user-by-email email inviter)
             auth    (auth/create-invite-auth inviter invited (:id application) role timestamp text documentName documentId path)
-            email-template (if (= notification "invite-to-prev-permit")
-                             :invite-to-prev-permit
+            email-template (case notification
+                             "invite-to-prev-permit" :invite-to-prev-permit
+                             "invite-financial-authority" :invite-financial-authority
                              :invite)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
@@ -88,24 +107,25 @@
 
 (defcommand approve-invite
   {:parameters [id]
+   :optional-parameters [invite-type]
    :user-roles #{:applicant}
    :user-authz-roles roles/default-authz-reader-roles
    :states     states/all-application-states}
-  [{:keys [created user application] :as command}]
-  (when-let [my-invite (domain/invite application (:email user))]
-    (let [my-auth (auth/get-auth application (:id user))
-          role (or (:role my-invite) (:role my-auth))
-          inviter (:inviter my-invite)
-          document-id (:documentId my-invite)]
+  [{created :created  {user-id :id {company-id :id company-role :role} :company :as user} :user application :application :as command}]
+  (let [auth-id       (cond (not (util/=as-kw invite-type :company)) user-id
+                            (util/=as-kw company-role :admin)        company-id)
+        auth          (->> (auth/get-auths application auth-id) (util/find-first :invite))
+        approved-auth (auth/approve-invite-auth auth user created)]
+    (when approved-auth
       (update-application command
-        {:auth {$elemMatch {:invite.user.id (:id user)}}}
+        {:auth {$elemMatch {:invite.user.id auth-id}}}
         {$set {:modified created
-               :auth.$   (util/assoc-when-pred (user/user-in-role user role) util/not-empty-or-nil? :inviter inviter :inviteAccepted created)}})
-      (when-not (empty? document-id)
+               :auth.$   approved-auth}})
+      (when-let [document-id (not-empty (get-in auth [:invite :documentId]))]
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
           ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-          (doc-persistence/do-set-user-to-document application document-id (:id user) (:path my-invite) created false)))
+          (doc-persistence/do-set-user-to-document application document-id (:id user) (get-in auth [:invite :path]) created false)))
       (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
@@ -119,7 +139,7 @@
     flatten
     (zipmap <> (repeat ""))))
 
-(defn- do-remove-auth [{application :application :as command} username]
+(defn do-remove-auth [{application :application :as command} username]
   (let [username (ss/canonize-email username)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))

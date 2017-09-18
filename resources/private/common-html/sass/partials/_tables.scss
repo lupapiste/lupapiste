@@ -94,6 +94,9 @@ tr {
     background: inherit;
     border: none;
   }
+  &.not-in-printing-order {
+    color: $gray153;
+  }
 }
 
 th, td {
@@ -380,6 +383,9 @@ div.attachments-table-container {
     td {
       vertical-align: top;
     }
+    .attachments-table--wide {
+      width: 50%;
+    }
     .attachments-table--widest {
       width: 80%;
     }
@@ -390,6 +396,19 @@ div.attachments-table-container {
       overflow-wrap: break-word;
       margin-right: -1px;
     }
+    input[type=text] {
+      padding-left: $baseline / 4;
+      padding-right: $baseline / 4;
+      width: $baseline;
+    }
+
+    .amount-controls > [class^="lupicon-"]:before, [class*=" lupicon-"]:before {
+      position: relative;
+      top: $baseline / 6;
+      margin: $baseline / 4;
+      color: $orange-dark;
+    }
+
   }
 }
 
@@ -454,17 +473,6 @@ div.suti-admin-container .serversettings--wide {
     position: absolute;
     white-space: pre-line;
   }
-  /* No arrow for bubble-hover */
-  /*.bubble-hover .bubble-hover-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    border-width: 10px;
-    border-style: solid;
-    border-color: $negative transparent transparent transparent;
-  }*/
   .bubble-hover:hover .bubble-hover-text {
     visibility: visible;
   }

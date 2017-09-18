@@ -128,7 +128,7 @@
               <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
             </button>
         <!-- /ko  -->
-        <!-- ko if: hasInvites -->
+        <!-- ko if: hasPersonalInvites -->
             <button class="positive"
                     data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
                     data-test-id="accept-invite-button">
@@ -138,6 +138,18 @@
                     data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
                     data-test-id="decline-invite-button">
                 <span data-bind="ltext: 'applications.declineInvite'"></span>
+            </button>
+       <!-- /ko -->
+       <!-- ko if: hasCompanyInvites -->
+            <button class="positive"
+                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
+                    data-test-id="accept-invite-button">
+                <span data-bind="ltext: 'applications.approveCompanyInvite'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
+                    data-test-id="decline-invite-button">
+                <span data-bind="ltext: 'applications.declineCompanyInvite'"></span>
             </button>
        <!-- /ko -->
        <!-- ko if: canBeCopied -->

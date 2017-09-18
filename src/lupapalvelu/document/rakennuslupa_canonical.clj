@@ -11,24 +11,40 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]))
 
-(defn- get-huoneisto-data [huoneistot]
-  (let [huoneistot (vals (into (sorted-map) huoneistot))
+(defn- muutostapa
+  "If muutostapa is hidden and has a default value via schema the
+  latter is always used in the canonical model. For example, for the
+  new buildings the only allowed muutostapa is Lis\u00e4ys."
+  [huoneisto schema]
+  (let [{:keys [hidden default]} (->> schema
+                                      :body
+                                      (util/find-by-key :name "muutostapa"))]
+    (if (and hidden (ss/not-blank? default))
+      default
+      (:muutostapa huoneisto))))
+
+(defn- get-huoneisto-data [huoneistot schema-name]
+  (let [schema     (->> {:name schema-name}
+                        schemas/get-schema
+                        :body
+                        (util/find-by-key :name "huoneistot"))
+        huoneistot (vals (into (sorted-map) huoneistot))
         huoneistot (filter :muutostapa huoneistot)]
     (for [huoneisto huoneistot
-         :let [huoneistonumero (-> huoneisto :huoneistonumero)
-               huoneistoPorras (-> huoneisto :porras)
-               jakokirjain (-> huoneisto :jakokirjain)]
-         :when (seq huoneisto)]
-     (merge {:muutostapa (-> huoneisto :muutostapa)
-             :huoneluku (-> huoneisto :huoneluku)
-             :keittionTyyppi (-> huoneisto :keittionTyyppi)
-             :huoneistoala (ss/replace (-> huoneisto :huoneistoala) "," ".")
-             :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
-                         :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
-                         :saunaKytkin (true? (-> huoneisto :saunaKytkin))
-                         :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
-                         :lamminvesiKytkin (true? (-> huoneisto :lamminvesiKytkin))}
-             :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
+          :let      [huoneistonumero (-> huoneisto :huoneistonumero)
+                     huoneistoPorras (-> huoneisto :porras)
+                     jakokirjain (-> huoneisto :jakokirjain)]
+          :when     (seq huoneisto)]
+      (merge {:muutostapa       (muutostapa huoneisto schema)
+              :huoneluku        (-> huoneisto :huoneluku)
+              :keittionTyyppi   (-> huoneisto :keittionTyyppi)
+              :huoneistoala     (ss/replace (-> huoneisto :huoneistoala) "," ".")
+              :varusteet        {:WCKytkin                (true? (-> huoneisto :WCKytkin))
+                                 :ammeTaiSuihkuKytkin     (true? (-> huoneisto :ammeTaiSuihkuKytkin))
+                                 :saunaKytkin             (true? (-> huoneisto :saunaKytkin))
+                                 :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
+                                 :lamminvesiKytkin        (true? (-> huoneisto :lamminvesiKytkin))}
+              :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
             (when (ss/numeric? huoneistonumero)
               {:huoneistotunnus
                (merge {:huoneistonumero (format "%03d" (util/->int (ss/remove-leading-zeros huoneistonumero)))}
@@ -59,7 +75,6 @@
 
 (defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
-        kuvaus (:toimenpiteenKuvaus toimenpide)
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
                                                   :rakennusaine (:kantavaRakennusaine rakenne))
         lammonlahde-map (muu-select-map
@@ -70,7 +85,7 @@
         julkisivu-map (muu-select-map :muuMateriaali (:muuMateriaali rakenne)
                                       :julkisivumateriaali (:julkisivu rakenne))
         lammitystapa (:lammitystapa lammitys)
-        huoneistot {:huoneisto (get-huoneisto-data huoneistot)}
+        huoneistot {:huoneisto (get-huoneisto-data huoneistot (:name info))}
         vaestonsuoja-value (ss/trim (get-in toimenpide [:varusteet :vaestonsuoja]))
         vaestonsuoja (when (ss/numeric? vaestonsuoja-value) (util/->int vaestonsuoja-value))
         rakennuksen-tiedot-basic-info {:kayttotarkoitus (:kayttotarkoitus kaytto)
@@ -144,6 +159,13 @@
                 :rakennustieto (get-rakennus-data application rakennuksen-muuttaminen-doc)}
    :created (:created rakennuksen-muuttaminen-doc)})
 
+(defn- get-rakennustietojen-korjaus-toimenpide [rakennustietojen-korjaus-doc application]
+  {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennustietojen-korjaus-doc)
+                                    {:perusparannusKytkin false}
+                                    {:muutostyonLaji      schemas/muumuutostyo})
+                :rakennustieto (get-rakennus-data application rakennustietojen-korjaus-doc)}
+   :created (:created rakennustietojen-korjaus-doc)})
+
 (defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
   {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
                                  {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
@@ -207,6 +229,7 @@
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents-by-type))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents-by-type))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents-by-type))
+                                               (map #(get-rakennustietojen-korjaus-toimenpide % application) (:rakennustietojen-korjaus documents-by-type))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents-by-type))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen-ei-huoneistoja documents-by-type))
                                                (map #(get-purku-toimenpide % application) (:purkaminen documents-by-type))
@@ -217,7 +240,7 @@
     (not-empty (sort-by :created toimenpiteet))))
 
 
-(defn- get-lisatiedot [lang]
+(defn get-lisatiedot [lang]
   {:Lisatiedot {:asioimiskieli (case lang
                                  "sv" "ruotsi"
                                  "suomi")}})
@@ -340,24 +363,23 @@
                                              :rakennusnro (:rakennusnro building)
                                              :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
                                              ))
-                         :katselmuksenRakennustieto (map #(let [building (:rakennus %)
-                                                                building-canonical (merge
-                                                                                     (select-keys building [:jarjestysnumero :kiinttun])
-                                                                                     (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
-                                                                                     (when-not (s/blank? (:valtakunnallinenNumero building)) {:valtakunnallinenNumero (:valtakunnallinenNumero building)})
-                                                                                     {:katselmusOsittainen (get-in % [:tila :tila])
-                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
-                                                                building-canonical (if (s/blank? (:kiinttun building-canonical))
-                                                                                     (assoc building-canonical :kiinttun (:propertyId application))
-                                                                                     building-canonical)
-                                                                building-canonical (util/assoc-when-pred
-                                                                                    building-canonical util/not-empty-or-nil?
-                                                                                    :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                                      [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                                                                                                       {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
-                                                                                    :rakennuksenSelite (:description building)) ; v2.2.0
-                                                                ]
-                                                            {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
+                         :katselmuksenRakennustieto (map (fn [{building :rakennus state :tila}]
+                                                           {:KatselmuksenRakennus
+                                                            (-> {:jarjestysnumero                     (:jarjestysnumero building)
+                                                                 :kiinttun                            (:propertyId application) ; overwritten by (:kiinttun building) if exists
+                                                                 :katselmusOsittainen                 (:tila state)
+                                                                 :kayttoonottoKytkin                  (:kayttoonottava state)}
+                                                                (util/assoc-when-pred ss/not-blank?
+                                                                  :kiinttun                           (:kiinttun building)
+                                                                  :rakennusnro                        (:rakennusnro building)
+                                                                  :valtakunnallinenNumero             (:valtakunnallinenNumero building)
+                                                                  :kunnanSisainenPysyvaRakennusnumero (:kunnanSisainenPysyvaRakennusnumero building))
+                                                                (util/assoc-when-pred util/not-empty-or-nil?
+                                                                  :muuTunnustieto (when-let [op-id (:operationId building)]
+                                                                                    [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                                                     {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
+                                                                  :rakennuksenSelite (:description building)))})
+                                                         buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
                                                                                 (fn [m k v] (if-not (ss/blank? v)
                                                                                               (assoc m k (util/to-xml-date-from-string v))

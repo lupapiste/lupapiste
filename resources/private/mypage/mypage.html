@@ -14,10 +14,11 @@
       <div class="hr"></div>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="ltext:'mypage.desc'" class="page-info"></div>
-
+      <!-- ko if: !lupapisteApp.models.currentUser.isFinancialAuthority() -->
       <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
 
-<form>
+        <form>
+
           <div class="form-grid no-padding">
             <div class="row">
               <div class="col-1"
@@ -232,6 +233,7 @@
           </div>
 
         </form>
+        <!-- /ko -->
 
     </div>
 
@@ -328,7 +330,7 @@
     </div>
 
     <div id="mypage-register-company" class="accordion-container">
-      <!-- ko if: !authority() && !companyShow() -->
+      <!-- ko if: !authority() && !companyShow() &&  !lupapisteApp.models.currentUser.isFinancialAuthority() -->
       <div data-test-id="mypage-register-company-accordion"
            data-bind="component: {name: 'accordion', params: {ltitle: 'register.company.header',
                                                               accordionContentTemplate: 'mypage-register-company-template',

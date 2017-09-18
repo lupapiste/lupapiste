@@ -640,11 +640,9 @@
           (check path) => ss/blank?)))
 
     (fact "Add company Esimerkki to application"
-      (:status (invite-company-and-accept-invitation pena app-id "esimerkki"))
-      => 200)
+      (invite-company-and-accept-invitation pena app-id "esimerkki" erkki) => ok?)
     (fact "Add company Solita to application"
-      (:status (invite-company-and-accept-invitation pena app-id "solita"))
-      => 200)
+      (invite-company-and-accept-invitation pena app-id "solita" kaino) => ok?)
 
     (fact "No company auth, no company user"
       (company-to-document pena app-id "esimerkki"

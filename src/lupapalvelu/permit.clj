@@ -262,12 +262,12 @@
   nil)
 
 (defmulti parties-krysp-mapper
-  "Maps application into KRYSP XML and saves the XML to disk."
-  {:arglists '([application lang krysp-version output-dir])}
+  "Maps designer documents into KRYSP XML and saves the XML to disk."
+  {:arglists '([application doc-subtype lang krysp-version output-dir])}
   (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
-(defmethod application-krysp-mapper :default
+(defmethod parties-krysp-mapper :default
   [{permit-type :permitType} & _]
   (error "KRYSP 'parties mapper' method not defined for permit type: " permit-type)
   nil)

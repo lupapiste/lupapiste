@@ -88,6 +88,9 @@ loc.supported = [];
 loc.terms = {};
 loc.defaultLanguage = "fi";
 
+var pageutil = {};
+pageutil.openPage = function() {};
+
 var lupapisteApp = {};
 lupapisteApp.services = {};
 lupapisteApp.services.fileUploadService = {};
@@ -107,6 +110,7 @@ lupapisteApp.services.publishBulletinService = {};
 lupapisteApp.services.documentDataService = {};
 lupapisteApp.services.sidePanelService = {};
 lupapisteApp.services.accordionService = {};
+lupapisteApp.services.accordionService.attachmentAccordionName = function() {};
 lupapisteApp.services.verdictAppealService = {};
 lupapisteApp.services.scrollService = {};
 lupapisteApp.services.ramService = {};
@@ -124,5 +128,15 @@ lupapisteApp.services.handlerService = {};
 lupapisteApp.services.cardService = {};
 
 lupapisteApp.models = {};
+lupapisteApp.models.application = {};
+lupapisteApp.models.application.userHasRole = function() {};
 lupapisteApp.models.currentUser = {};
+lupapisteApp.models.currentUser.firstName = function() {};
+lupapisteApp.models.currentUser.lastName = function() {};
 lupapisteApp.models.currentUser.displayName = function() {};
+lupapisteApp.models.currentUser.street = function() {};
+lupapisteApp.models.currentUser.zip = function() {};
+lupapisteApp.models.currentUser.city = function() {};
+lupapisteApp.models.currentUser.email = function() {};
+lupapisteApp.models.currentUser.company = {};
+lupapisteApp.models.currentUser.company.id = function() {};

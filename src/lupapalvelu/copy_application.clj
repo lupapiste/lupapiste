@@ -296,7 +296,7 @@
 (defn create-user-auth [old-user-auth role inviter application-id timestamp & [text document-name document-id path]]
   (when-let [user (usr/get-user-by-id (:id old-user-auth))]
     (auth/create-invite-auth inviter user application-id
-                             role
+                             (get-in old-user-auth [:invite :role] role)
                              timestamp
                              text document-name document-id path)))
 

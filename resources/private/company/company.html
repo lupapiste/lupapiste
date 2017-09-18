@@ -315,6 +315,17 @@
           </div>
         </div>
 
+        <div data-bind="visible: showUserIsFinancialAuthority">
+          <span data-bind="text: loc('register.company.add-user.is-financial-authority', email())"></span>
+          <div class="dialog-content__footer">
+            <button class="positive close"
+                    data-test-id="company-user-is-financial-authority-close-dialog">
+              <i class="lupicon-check"></i>
+              <span  data-bind="ltext: 'ok'"></span>
+            </button>
+          </div>
+        </div>
+
         <form data-bind="visible: showUserDetails" id="companyUserDetails">
 
           <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>

@@ -11,6 +11,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.parties-canonical]
+            [lupapalvelu.document.tools :as doc-tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
@@ -23,7 +25,6 @@
             [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
             [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]
-            [lupapalvelu.document.parties-canonical]
             [lupapiste-commons.attachment-types :as attachment-types]))
 
 (defn- get-begin-of-link [permit-type use-http-links?]
@@ -67,17 +68,21 @@
          (assoc application :attachments))
     application))
 
-(defn- non-approved-designer? [document]
-  (let [subtype  (keyword (get-in document [:schema-info :subtype]))]
-    (and (= :suunnittelija subtype)
-         (or (not (doc/approved? document))
-           (pos? (model/modifications-since-approvals document))))))
+(defn- designer-doc? [document]
+  (= :suunnittelija (doc-tools/doc-subtype document)))
+
+(defn- non-approved? [document]
+  (or (not (doc/approved? document))
+      (pos? (model/modifications-since-approvals document))))
 
 (defn- remove-non-approved-designers [application]
-  (update application :documents #(remove non-approved-designer? %)))
+  (update application :documents #(remove (every-pred designer-doc? non-approved?) %)))
+
+(defn- created-before-verdict? [application document]
+  (not (doc/created-after-verdict? document application)))
 
 (defn- remove-pre-verdict-designers [application]
-  (update application :documents (fn [docs] (filter #(doc/created-after-verdict? % application) docs))))
+  (update application :documents #(remove (every-pred designer-doc? (partial created-before-verdict? application)) %)))
 
 (defn- remove-disabled-documents [application]
   (update application :documents (fn [docs] (remove :disabled docs))))
@@ -102,7 +107,7 @@
         (fail! :error.unknown))))
 
 (defn save-parties-as-krysp
-  "Send application's parties to municipality backend. Returns sent party document ids."
+  "Send application's parties (currently only designers) to municipality backend. Returns sent party document ids."
   [application lang organization]
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
@@ -112,7 +117,7 @@
                           remove-non-approved-designers
                           remove-pre-verdict-designers
                           remove-disabled-documents)
-        write-result (permit/parties-krysp-mapper filtered-app lang krysp-version output-dir)]
+        write-result (permit/parties-krysp-mapper filtered-app :suunnittelija lang krysp-version output-dir)]
     (if write-result
       (map :id (domain/get-documents-by-subtype (:documents filtered-app) :suunnittelija))
       (fail! :error.unknown))))

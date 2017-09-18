@@ -23,6 +23,7 @@ jQuery(document).ready(function() {
     {name: "docgen-review-buildings", synchronous: true},
     {name: "docgen-building-select", synchronous: true},
     {name: "docgen-person-select", synchronous: true},
+    {name: "docgen-funding-select", synchronous: true},
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "attachment-details"},
@@ -199,7 +200,8 @@ jQuery(document).ready(function() {
     {name: "set-password"},
     {name: "login"},
     {name: "campaign-editor"},
-    {name: "date-editor"}
+    {name: "date-editor"},
+    {name: "mark-review-faulty-dialog"}
 ];
 
   ko.registerLupapisteComponents(components);

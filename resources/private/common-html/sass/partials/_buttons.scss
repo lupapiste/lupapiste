@@ -254,6 +254,10 @@ i.btn-small {
   @include styled-input( $bg: $light-gray-link, $hover-bg: $light-gray-hover, $active-bg: $light-gray-active );
 }
 
+@include button-div-a-i-span (tertiary-ghost) {
+  @include styled-input( $bg: $light-gray-link, $hover-bg: $light-gray-link, $active-bg: $light-gray-link );
+}
+
 @include button-div-a-i-span (positive) {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }

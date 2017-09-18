@@ -1,0 +1,95 @@
+(ns lupapalvelu.ui.printing-order.state
+  (:require [schema.core :as sc]
+            [sade.shared-schemas :as ssc]))
+
+(sc/defschema FrontendContact {:firstName                     (sc/constrained sc/Str (comp not empty?))
+                               :lastName                      (sc/constrained sc/Str (comp not empty?))
+                               (sc/optional-key :companyName) sc/Str
+                               :address                       (sc/constrained sc/Str (comp not empty?))
+                               :postalCode                    (sc/constrained sc/Str (comp not empty?))
+                               :city                          (sc/constrained sc/Str (comp not empty?))
+                               :email                         ssc/Email
+                               (sc/optional-key :phoneNumber) sc/Str})
+
+(def empty-component-state {:attachments []
+                            :tagGroups   []
+                            :order       {}
+                            :contacts    {:payer-same-as-orderer true
+                                          :delivery-same-as-orderer true
+                                          :orderer {}
+                                          :payer {}
+                                          :delivery {}}
+                            :billingReference ""
+                            :deliveryInstructions ""
+                            :conditions-accepted false
+                            :phase       1
+                            :id          nil})
+
+(defonce component-state (atom empty-component-state))
+
+(defn valid-contact? [contact]
+  (let [checker (sc/checker FrontendContact)]
+    (->> contact
+         checker
+         nil?)))
+
+(defn valid-order? []
+  (let [{:keys [orderer payer delivery
+                payer-same-as-orderer delivery-same-as-orderer]} (:contacts @component-state)
+        conditions-accepted (:conditions-accepted @component-state)]
+    (and (valid-contact? orderer)
+         (or payer-same-as-orderer (valid-contact? payer))
+         (or delivery-same-as-orderer (valid-contact? delivery))
+         (true? conditions-accepted))))
+
+(defn contact-summary-lines [contact]
+  (let [{:keys [firstName lastName companyName address postalCode city email phoneNumber]} contact]
+    (remove nil? [companyName
+                  (str firstName " " lastName)
+                  address
+                  (str postalCode " " city)
+                  email
+                  phoneNumber])))
+
+(defn- payer []
+  (let [{:keys [payer-same-as-orderer orderer payer]} (-> @component-state :contacts)]
+    (if payer-same-as-orderer
+      orderer
+      payer)))
+
+(defn- delivery-address []
+  (let [{:keys [delivery-same-as-orderer orderer delivery]} (-> @component-state :contacts)]
+    (if delivery-same-as-orderer
+      orderer
+      delivery)))
+
+(defn orderer-summary-lines []
+  (contact-summary-lines (-> @component-state :contacts :orderer)))
+
+(defn payer-summary-lines []
+  (contact-summary-lines (payer)))
+
+(defn delivery-address-summary-lines []
+  (contact-summary-lines (delivery-address)))
+
+(defn will-unmount [& _]
+  (reset! component-state empty-component-state))
+
+(defn proceed-phase2 []
+  (swap! component-state assoc :phase 2))
+
+(defn proceed-phase3 []
+  (swap! component-state assoc :phase 3))
+
+(defn back-to-phase1 []
+  (swap! component-state assoc :phase 1))
+
+(defn back-to-phase2 []
+  (swap! component-state assoc :phase 2))
+
+(defn submit-order []
+  ; TODO backend command here
+  (swap! component-state assoc :phase 4))
+
+(defn back-to-application []
+  (.openPage js/pageutil (str "application/" (:id @component-state)) "attachments"))

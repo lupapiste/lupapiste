@@ -83,6 +83,12 @@
   (applicant? {})                   => falsey
   (applicant? nil)                  => falsey)
 
+(fact financial-authority?
+  (financial-authority? {:role "financialAuthority"}) => truthy
+  (financial-authority? {:role :financialAuthority}) => truthy
+  (financial-authority? {:role "authority"}) => falsey
+  (financial-authority? {:role :authority}) => falsey)
+
 (fact same-user?
   (same-user? {:id "foo"} {:id "foo"}) => truthy
   (same-user? {:id "foo"} {:id "bar"}) => falsey)

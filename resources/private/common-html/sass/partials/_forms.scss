@@ -1571,6 +1571,10 @@ textarea.grid-style-input.really-high {
   height: $grid-textarea-height * 2;
 }
 
+textarea.grid-style-input.wide {
+  width: 100%;
+}
+
 .no-wrap-whitespace {
   white-space: nowrap;
 }

@@ -6,15 +6,17 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.integrations.ely :as ely]
             [lupapalvelu.integrations.messages :as messages]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
             [sade.env :as env]
-            [sade.xml :as sxml]))
+            [sade.xml :as sxml]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
-(facts "ELY statement-request"
+(facts "ELY statement process"                              ; LPK-2941
   (let [app (create-and-submit-application mikko :propertyId sipoo-property-id :operation "poikkeamis")
         statement-subtype "Lausuntopyynt\u00f6 poikkeamishakemuksesta"]
     (generate-documents app mikko)                          ; generate documents so generated XML is valid
@@ -90,4 +92,56 @@
         (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
           (fact "Statement is acknowledged by ELY"
             (get-in ely-statement [:external :acknowledged]) => pos?
-            (get-in ely-statement [:external :externalId]) => string?))))))
+            (get-in ely-statement [:external :externalId]) => string?))))
+
+    (fact "ELY sends statement response"
+      (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+        (fact "Random FTP user can't update statement"
+          (-> (decoded-get (str (server-address) "/dev/ah/statement-response")
+                           {:query-params {:id (:id app)
+                                           :ftp-user "foo"
+                                           :statement-id (:id ely-statement)}})
+              :body) => (partial expected-failure? :error.unauthorized))
+        (fact "Statement response is processed correctly"
+          (-> (decoded-get (str (server-address) "/dev/ah/statement-response")
+                           {:query-params {:id (:id app)
+                                           :ftp-user (env/value :ely :sftp-user)
+                                           :statement-id (:id ely-statement)}})
+              :body) => ok?)
+
+        (let [ely-statement (-> (query-application mikko (:id app)) (:statements) (first))]
+          (fact "State is given"
+            (:state ely-statement) => "given")
+          (fact "Values from XML are saved to statement"
+            (get-in ely-statement [:person :name]) => (contains "Eija Esimerkki")
+            (:status ely-statement) => "puollettu"
+            (:text ely-statement) => "Hyv\u00e4 homma"
+            (util/to-xml-date (:given ely-statement)) => "2017-05-07")
+          (fact "Old data is OK"
+            (:saateText ely-statement) => "moro"
+            (get-in ely-statement [:external :acknowledged]) => pos?
+            (get-in ely-statement [:external :externalId]) => string?)))
+      (fact "Atttachments are uploaded"
+        (let [app (query-application mikko (:id app))
+              ely-statement (first (:statements app))
+              statement-attachments (filter
+                                      #(= (:id ely-statement) (-> % :target :id))
+                                      (:attachments app))
+              ely-attachment (first statement-attachments)]
+          (get-in ely-statement [:external :partner]) => "ely"
+          (count statement-attachments) => 1
+          (get-in ely-attachment [:target :id]) => (:id ely-statement)
+          (get-in ely-attachment [:target :type]) => "statement"
+          (get ely-attachment :contents) => (contains "Lausunnon liite")
+          (get-in ely-attachment [:latestVersion :user :username]) => (:username usr/batchrun-user-data)
+          (fact "as in give-statement, attachment should be set readonly"
+            (:readOnly ely-attachment) => true)
+          (fact "locked true comes from asiahallinta reader" ; hmm?
+            (:locked ely-attachment) => true)
+          (fact "'child' attachment PDF is generated"
+            (let [child (->> (:attachments app)
+                             (filter #(= (:id ely-statement) (-> % :source :id)))
+                             first)]
+              (get-in child [:source :type]) => "statements"
+              (get-in child [:contents]) => statement-subtype
+              (get-in child [:latestVersion :contentType]) => "application/pdf")))))))
