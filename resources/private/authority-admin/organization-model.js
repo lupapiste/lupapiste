@@ -62,7 +62,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.operationsInspectionSummaryTemplates = ko.observable({});
   self.handlerRoles = ko.observableArray();
   self.assignmentTriggers = ko.observableArray();
-  self.multipleOpertationsSupported = ko.observable(false);
+  self.multipleOperationsSupported = ko.observable(false);
 
   self.sectionOperations = ko.observableArray();
 
@@ -124,9 +124,9 @@ LUPAPISTE.OrganizationModel = function () {
   });
 
   ko.computed(function() {
-    var multipleOpertationsSupported = self.multipleOpertationsSupported();
+    var multipleOperationsSupported = self.multipleOperationsSupported();
     if (self.initialized) {
-      ajax.command("set-organization-multiple-operations-support", {enabled: multipleOpertationsSupported})
+      ajax.command("set-organization-multiple-operations-support", {enabled: multipleOperationsSupported})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -303,7 +303,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
 
-    self.multipleOpertationsSupported(organization["multiple-operations-supported"] || false);
+    self.multipleOperationsSupported(organization["multiple-operations-supported"] || false);
 
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 

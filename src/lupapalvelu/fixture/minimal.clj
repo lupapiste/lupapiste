@@ -1244,7 +1244,7 @@
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
                        :automatic-ok-for-attachments-enabled true
-                       :multiple-operations-supported true}
+                       :multiple-operations-supported false}
 
                       ;; Helsinki R
                       {:id "091-R"

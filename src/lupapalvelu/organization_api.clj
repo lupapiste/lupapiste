@@ -426,7 +426,6 @@
 (defcommand set-organization-multiple-operations-support
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}
-   :pre-checks [(org/permit-type-validator :R)]
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:multiple-operations-supported enabled}})
