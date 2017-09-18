@@ -16,7 +16,7 @@
            [sade.util :as util])
   (:import [java.nio.charset StandardCharsets]))
 
-(testable-privates lupapalvelu.verdict get-verdicts-with-attachments content-disposition-filename verdict-in-application-without-attachment?)
+(testable-privates lupapalvelu.verdict get-verdicts-with-attachments content-disposition-filename verdict-in-application-without-attachment? matching-poytakirja)
 
 (facts "Verdicts parsing"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
@@ -193,13 +193,26 @@
 
   (fact "verdict-in-application-without-attachment?"
     (let [app {:verdicts [{:kuntalupatunnus "KL-1"
-                           :paatokset [{:poytakirjat ["not-empty"]}]}
-                          {:kuntalupatunnus "KL-2"
-                           :paatokset [{:poytakirjat []}
-                                       {:poytakirjat ["something"]}]}]}]
-      ;; KL-1 has an element in :poytakirjat array
+                           :paatokset [{:poytakirjat [{:urlHash "I-have-an-attachment"}
+                                                      {:urlHash "So-do-I"}]}]}
+                          {:kuntalupatunnus "KL-3"
+                           :paatokset [{:poytakirjat []}]}
+                          {:kuntalupatunnus "KL-4"
+                           :paatokset [{:poytakirjat [{:urlHash nil}]}]}]}]
+      ;; KL-1: all elements in :poytakirjat array have :urlHash
       (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-1"}) => false
-      ;; KL-3 is not present in the :verdicts array
-      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-3"}) => false
-      ;; KL-2 is present and :poytakirjat is empty
-      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-2"}) => true)))
+      ;; KL-2 is not present in the :verdicts array
+      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-2"}) => false
+      ;; KL-3 is present and :poytakirjat is empty
+      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-3"}) => true
+      ;; KL-3 is present and :urlHash is nil
+      (verdict-in-application-without-attachment? app {:kuntalupatunnus "KL-4"}) => true))
+  (fact matching-poytakirja
+        (matching-poytakirja {:a 1 :b 2 :d 3}
+                             [:a :b :c]
+                             [{:a 1 :b 3 :c 3}
+                              {:a 1 :b 2 :d 4}]) => {:a 1 :b 2 :d 4}
+        (matching-poytakirja {:a 1 :b 2}
+                             [:a :b :c]
+                             [{:a 1 :b 3}
+                              {:a 1}]) => nil))

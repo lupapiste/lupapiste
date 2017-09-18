@@ -475,10 +475,60 @@
   (boolean
    (when-let [existing-verdict (matching-verdict verdict-from-xml
                                                  (:verdicts application))]
-     (some empty? (->> existing-verdict
-                       :paatokset
-                       (map :poytakirjat)
-                       (mapcat (partial map :urlHash)))))))
+     (let [url-hashes (->> existing-verdict
+                           :paatokset
+                           (map :poytakirjat)
+                           (mapcat (partial map :urlHash)))]
+       (or (empty? url-hashes)
+           (some empty? url-hashes))))))
+
+
+
+(defn- matching-poytakirja
+  "Returns the first element from update-pks that has equal values for
+  keys that 1) are in match keys and 2) are present in app-pk"
+  [app-pk match-keys update-pks]
+  (let [app-pk-match (select-keys app-pk match-keys)
+        ;; Only compare the keys that are actually present in the poytakirja
+        app-pk-match-keys (keys app-pk-match)]
+    (util/find-first #(= app-pk-match
+                         (select-keys % app-pk-match-keys))
+                     update-pks)))
+
+
+(defn- poytakirja-matches
+  "Return a sequence of pairs of matching poytakirja's such that the
+  first one is from the existing application and the second one, if
+  any, is from the update"
+  [app-paatos update-paatos match-keys]
+  (map (juxt identity
+             #(matching-poytakirja %
+                                   match-keys
+                                   (:poytakirjat update-paatos)))
+       (:poytakirjat app-paatos)))
+
+(defn- poytakirja-update [[app-pk update-pk]]
+  (cond (nil? update-pk)        {:action :keep :pk app-pk}
+        (or (:liite update-pk)
+            (:Liite update-pk)) {:action :update :pk app-pk :with-pk update-pk}
+        :else                   {:action :keep :pk app-pk}))
+
+(defn- update-poytakirja-entries!
+  [app-paatos update-paatos application user timestamp app-verdict-id]
+  (let [update-actions (->> (poytakirja-matches app-paatos update-paatos
+                                                [:paatoskoodi :paatospvm :paatoksentekija :pykala :status])
+                            (map poytakirja-update))]
+    (assoc app-paatos
+           :poytakirjat
+           (doall
+            (for [{:keys [action pk] :as action} update-actions]
+              (cond (= action :keep)   pk
+                    (= action :update) (get-poytakirja! application
+                                                        user
+                                                        timestamp
+                                                        app-verdict-id
+                                                        (:with-pk action))
+                    :else              pk))))))
 
 ;; 3. update the verdicts on application that have a new poytakirja attachment
 ;; 3.1 add poytakirja attachment with get-poytakirja!
@@ -492,24 +542,21 @@
   (println (map :kuntalupatunnus verdicts-from-xml))
   (if-let [update-verdict (matching-verdict app-verdict
                                             verdicts-from-xml)]
-    ;; TODO How do we match the "verdicts within verdicts"?  For now
-    ;; this question is theoretical since no verdict contains
-    ;; a :paatokset array with more than one element.
-    (if (or (> (count (:paatokset app-verdict)) 1)
-            (> (count (:paatokset update-verdict)) 1))
-      app-verdict
-      (let [paatos-from-app-verdict         (-> app-verdict :paatokset (get 0))
-            poytakirjat-from-update-verdict (-> update-verdict :paatokset (get 0) :poytakirjat)]
-        (clojure.pprint/pprint update-verdict)
-        (assoc app-verdict
-               :paatokset
-               [(assoc paatos-from-app-verdict
-                       :poytakirjat
-                       ;; TODO päivitä vain tarvittavat pöytäkirjat, miten mätsätään?
-                       (map (partial get-poytakirja! application
-                                     user timestamp (:id app-verdict))
-                            poytakirjat-from-update-verdict)
-                       :timestamp timestamp)])))
+    ;; There is no straightforward way to match :paatokset elements,
+    ;; but this should not be a problem, since all the verdicts in
+    ;; production contain only one element in :paatokset.
+    (if (= (count (:paatokset app-verdict))
+           (count (:paatokset update-verdict)))
+      (assoc app-verdict
+             :paatokset
+             (map #(update-poytakirja-entries! %1
+                                               %2
+                                               application
+                                               user timestamp
+                                               (:id app-verdict))
+                  (:paatokset app-verdict)
+                  (:paatokset update-verdict)))
+      (do (warn "Cannot match :paatokset elements")))
     app-verdict))
 
 ;; 4. store the updates to mongo
