@@ -151,6 +151,8 @@
        (ss/join ".")
        keyword))
 
+(declare generic-list)
+
 (defn save-settings-value [organization category timestamp path value]
   (let [draft        (assoc-in (:draft (settings organization category))
                                (map keyword path)
@@ -159,11 +161,18 @@
     (or (schemas/validate-path-value (get shared/settings-schemas
                                           (keyword category))
                                      path
-                                     value)
+                                     value
+                                     (when-let [ref-gen (some->> path
+                                                                 (util/intersection-as-kw [:plans :reviews])
+                                                                 first)]
+                                       (hash-map ref-gen
+                                                 (map :id (generic-list organization
+                                                                        category
+                                                                        ref-gen)))))
      (mongo/update-by-id :organizations
                          (:id organization)
-                         {$set {settings-key {:draft    draft
-                                              :modified timestamp}}}))))
+                         {$set {(util/kw-path settings-key :draft path) value
+                                (util/kw-path settings-key :modified)   timestamp}}))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in

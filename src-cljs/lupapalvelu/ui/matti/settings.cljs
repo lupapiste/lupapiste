@@ -163,7 +163,7 @@
       [:div.col-2.col--right
        [:button.ghost
         {:on-click #(path/flip-meta options :editor?)}
-        (common/loc (if (path/meta? options :editor?)
+        (common/loc (if (path/react-meta? options :editor?)
                       :close
                       :edit))]])]])
 
