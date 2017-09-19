@@ -14,9 +14,8 @@
 (sc/defschema operation
   {:id ssc/ObjectIdStr
    :name sc/Str
-   :displayName {:fi sc/Str
-                 :sv sc/Str}
-   :description sc/Str
+   :displayName (zipmap i18n/supported-langs (repeat sc/Str))
+   (sc/optional-key :description) sc/Str
    (sc/optional-key :building) {:new sc/Bool
                                 (sc/optional-key :buildingId) sc/Str}})
 
@@ -34,13 +33,18 @@
    :permitType    (apply sc/enum (map name (keys (permit/permit-types))))
    :applicant     sc/Str
    :infoRequest   sc/Bool
-   :link {:fi sc/Str
-          :sv sc/Str}})
+   :link          (zipmap i18n/supported-langs (repeat ssc/OptionalHttpUrl))})
 
-(sc/defn get-op-data :- operation [op]
+(defn to-lang-map [localize-function]
+  (reduce (fn [result lang]
+            (assoc result (keyword lang) (localize-function lang)))
+          {}
+          i18n/supported-langs))
+
+(sc/defn ^:always-validate get-op-data :- operation [op]
   (-> (select-keys op [:id :name :description])
-      (assoc :displayName {:fi (i18n/localize :fi "operations" (:name op))
-                           :sv (i18n/localize :sv "operations" (:name op))})))
+      (assoc :displayName (to-lang-map #(i18n/localize % "operations" (:name op))))))
+
 (defn get-building-data [document]
   (let [unwrapped (tools/unwrapped document)]
     (if (get-in unwrapped [:data :buildingId])              ; has 'existing' building
@@ -65,14 +69,12 @@
 
 (def location-array-to-map (fn [[x y]] {:x x :y y}))
 
-(sc/defn app-to-json :- base-data [application]
+(sc/defn ^:always-validate app-to-json :- base-data [application]
   (-> (select-keys application (keys base-data))
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
       (assoc :operations (build-operations application))
-      (assoc :link {:fi (make-app-link (:id application) :fi)
-                    :sv (make-app-link (:id application) :sv)})
-      (set/rename-keys {:location-wgs84 :locationWGS84})))
+      (assoc :link (to-lang-map #(make-app-link (:id application) %)))))
 
 (defn state-map [state]
   {:name state
@@ -81,6 +83,7 @@
 
 (defn state-change-data [application new-state]
   (-> (app-to-json application)
+      (set/rename-keys {:location-wgs84 :locationWGS84})
       (assoc :state (name new-state))
       (assoc :fromState (state-map (:state application)))
       (assoc :toState (state-map new-state))))
