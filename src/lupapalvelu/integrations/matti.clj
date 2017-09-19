@@ -6,7 +6,9 @@
             [clojure.set :as set]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.schemas :as schemas]))
 
 
 (sc/defschema operation
@@ -39,9 +41,24 @@
   (-> (select-keys op [:id :name :description])
       (assoc :displayName {:fi (i18n/localize :fi "operations" (:name op))
                            :sv (i18n/localize :sv "operations" (:name op))})))
+(defn get-building-data [document]
+  (let [unwrapped (tools/unwrapped document)]
+    (if (get-in unwrapped [:data :buildingId])              ; has 'existing' building
+      {:new false :buildingId (get-in unwrapped [:data (keyword schemas/national-building-id)])}
+      {:new true})))
 
-(defn build-operations [{:keys [primaryOperation secondaryOperations]}]
-  (cons (get-op-data primaryOperation) (map get-op-data secondaryOperations)))
+(defn enrich-operation-with-building [{:keys [documents]} operation]
+  (if-let [op-doc (->> documents
+                       (util/find-first
+                         #(= (:id operation)
+                             (get-in % [:schema-info :op :id]))))]
+    (util/assoc-when operation :building (get-building-data op-doc))
+    operation))
+
+(defn build-operations [{:keys [primaryOperation secondaryOperations] :as app}]
+  (->> (cons (get-op-data primaryOperation)
+             (map get-op-data secondaryOperations))
+       (map (partial enrich-operation-with-building app))))
 
 (defn make-app-link [id lang]
   (str (env/value :host) "/app/" (name lang) "/authority" "#!/application/" id))
