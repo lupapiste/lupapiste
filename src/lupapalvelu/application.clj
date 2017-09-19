@@ -459,12 +459,13 @@
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
-(defn application-state [user organization-id info-request? archiving-project?]
+(defn application-state [user organization-id info-request? operation-name]
   (cond
     info-request? :info
+    (= "aiemmalla-luvalla-hakeminen" operation-name) :verdictGiven
     (or (usr/user-is-authority-in-organization? user organization-id)
         (usr/rest-user? user)
-        archiving-project?) :open
+        (= "ARK" (op/permit-type-of-operation operation-name))) :open
     :else :draft))
 
 (defn application-history-map [{:keys [created organization state tosFunction]} user]
@@ -540,7 +541,7 @@
                             :organization        (:id organization)
                             :propertyId          property-id
                             :schema-version      (schemas/get-latest-schema-version)
-                            :state               (application-state user (:id organization) info-request? (= "ARK" (op/permit-type-of-operation operation-name)))
+                            :state               (application-state user (:id organization) info-request? operation-name)
                             :title               address
                             :tosFunction         (tos-function organization operation-name)}
                            (when-not (#{:location-service nil} (keyword property-id-source))
