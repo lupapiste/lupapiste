@@ -462,7 +462,7 @@
 (defn application-state [user organization-id info-request? operation-name]
   (cond
     info-request? :info
-    (= "aiemmalla-luvalla-hakeminen" operation-name) :verdictGiven
+    (util/=as-kw "aiemmalla-luvalla-hakeminen" operation-name) :verdictGiven
     (or (usr/user-is-authority-in-organization? user organization-id)
         (usr/rest-user? user)
         (= "ARK" (op/permit-type-of-operation operation-name))) :open
