@@ -2,7 +2,7 @@
   (:require [lupapalvelu.ui.printing-order.state :as state]
             [lupapalvelu.ui.common :refer [loc]]
             [rum.core :as rum]
-            [lupapalvelu.ui.rum-util :as rum-util]))
+            [lupapalvelu.ui.util :as util]))
 
 (defn vat [total-vat-included]
   (-> total-vat-included
@@ -27,7 +27,9 @@
 (defn footer-price-for-order-amount [amount]
   (let [{:keys [total additionalInformation]} (price-for-order-amount amount)]
     (cond
-      total                 (str (loc :printing-order.footer.price) " " total " € " (loc :printing-order.footer.includes-vat))
+      total                 (str (loc :printing-order.footer.price) " "
+                                 (util/format-currency-value total) " "
+                                 (loc :printing-order.footer.includes-vat))
       additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc))))))
 
 (rum/defc order-summary-pricing < rum/reactive []
@@ -44,11 +46,12 @@
          [:span.h3 (loc :printing-order.summary.total-price)]]
         [:td.third
          [:span.h3 (cond
-                     total-price (str total-price " €")
+                     total-price (util/format-currency-value total-price)
                      additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc))))]]]
-       [:tr
-        [:td.first]
-        [:td.second
-         [:span (loc :printing-order.summary.includes-vat)]]
-        [:td.third
-         [:span (str vat " €")]]]]]]))
+       (when vat
+         [:tr
+          [:td.first]
+          [:td.second
+           [:span (loc :printing-order.summary.includes-vat)]]
+          [:td.third
+           [:span (util/format-currency-value vat)]]])]]]))
