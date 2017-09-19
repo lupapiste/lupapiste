@@ -4,12 +4,10 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [monger.operators :refer :all]
-            [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.prev-permit :as prev-permit]
-            [lupapalvelu.user :as user]
-            [noir.response :as resp]))
+            [lupapalvelu.user :as user]))
 
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus authorizeApplicants]

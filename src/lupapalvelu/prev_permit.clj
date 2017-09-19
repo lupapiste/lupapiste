@@ -196,7 +196,7 @@
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+  (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
         doc (assoc-in doc [:schema-info :op] op)
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
@@ -234,8 +234,10 @@
         other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        created-application (update-in created-application [:documents] concat other-building-docs new-parties)
-        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+        created-application (-> created-application
+                                (update-in [:documents] concat other-building-docs new-parties)
+                                (update-in [:secondaryOperations] concat secondary-ops)
+                                (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
@@ -274,7 +276,7 @@
       location-info)))
 
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
-  (let [operation         :aiemmalla-luvalla-hakeminen
+  (let [operation         "aiemmalla-luvalla-hakeminen"
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
@@ -366,7 +368,7 @@
       (mongo/disconnect!))))
 
 (defn- ->op-document [{:keys [schema-version] :as application} building]
-  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+  (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
         doc (assoc-in doc [:schema-info :op] op)
         doc-updates (lupapalvelu.document.model/map2updates [] (select-keys building building-fields))]
