@@ -989,13 +989,11 @@
     (access/has-attachment-auth-role :uploader command)))
 
 (defn allowed-only-for-authority-when-application-sent
-  "Pre-check is OK if the user is application authority or the
-  application has an environmental permit type."
+  "Pre-check is OK if the user is application authority"
   [{:keys [application user]}]
-  (when (util/=as-kw :sent (:state application))
-    (when-not (or (auth/application-authority? application user)
-                  (contains? #{:YI :YL :YM :VVVL :MAL} (-> application :permitType keyword)))
-      (fail :error.unauthorized))))
+  (when (and (util/=as-kw :sent (:state application))
+             (not (auth/application-authority? application user)))
+    (fail :error.unauthorized)))
 
 (defn attachment-editable-by-application-state
   [{{attachmentId :attachmentId} :data user :user {current-state :state organization :organization :as application} :application}]

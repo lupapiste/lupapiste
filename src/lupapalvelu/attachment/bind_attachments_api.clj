@@ -6,6 +6,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
             [lupapalvelu.job :as job]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -60,7 +61,8 @@
                          att/attachment-not-readOnly
                          att/attachment-is-needed
                          att/attachment-editable-by-application-state
-                         att/allowed-only-for-authority-when-application-sent
+                         (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                                (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                          att/foreman-must-be-uploader]
    :input-validators    [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
    :states              bind-states}
@@ -82,7 +84,8 @@
    :user-roles          #{:applicant :authority :oirAuthority}
    :user-authz-roles    (conj roles/all-authz-writer-roles :foreman)
    :pre-checks          [app/validate-authority-in-drafts
-                         att/allowed-only-for-authority-when-application-sent
+                         (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                                (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                          att/foreman-must-be-uploader
                          (filedatas-precheck att/upload-to-target-allowed)
                          validate-attachment-ids

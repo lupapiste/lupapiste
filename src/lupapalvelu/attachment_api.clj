@@ -514,7 +514,8 @@
                 att/attachment-editable-by-application-state
                 att/upload-to-target-allowed
                 att/foreman-must-be-uploader
-                att/allowed-only-for-authority-when-application-sent
+                (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                       (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                 validate-attachment-type
                 app/validate-authority-in-drafts
                 att/validate-group]
