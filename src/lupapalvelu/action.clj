@@ -364,8 +364,9 @@
     (when (seq validators)
       (reduce #(or %1 (%2 command)) nil validators))))
 
-(defn invalid-state-in-application [command {state :state}]
-  (when-let [valid-states (:states (meta-data command))]
+(defn invalid-state-in-application [{{role :role} :user :as command} {state :state}]
+  (when-let [valid-states (util/pcond-> (:states (meta-data command))
+                                        map? (get (keyword role)))]
     (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
@@ -585,7 +586,9 @@
    ; Input validators take one parameter, the command. Application is not yet available.
    (sc/optional-key :input-validators)  [(sc/cond-pre util/Fn sc/Symbol)]
    ; Application state keywords
-   (sc/optional-key :states)      (subset-of states/all-states)
+   (sc/optional-key :states)      (sc/if map?
+                                    {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
+                                    (subset-of states/all-states))
    (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-success)  (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-fail)     (sc/cond-pre util/Fn [util/Fn])
@@ -621,6 +624,9 @@
       (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
       true)
     (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+
+  (assert (or  (nil? (:states meta-data)) (set? (:states meta-data)) (-> meta-data :states keys set (= (:user-roles meta-data))))
+    (str "Keys of :states should match :user-roles for " action-name " when :states is defined as a map."))
 
   (assert (or (seq (:input-validators meta-data))
               (empty? (:parameters meta-data))
