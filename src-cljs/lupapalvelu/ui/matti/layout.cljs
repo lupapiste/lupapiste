@@ -1,4 +1,20 @@
 (ns lupapalvelu.ui.matti.layout
+  "General guidance on the layout component parameters:
+
+  schema (schema): The schema of the current component.
+
+  dictionary (schema): Dictionary for the whole schema (e.g., verdict)
+
+  state (atom): The whole current state atom. Structurally corresponds
+  to the dictionary.
+
+  path (list): Current component's value path within the state. For
+  simple components this is just the dictionary key wrapped in a list.
+
+  id-path (list): List of ids for the component schema path. Each id
+  that is on the schema path.
+
+  loc-path (list): Latest loc-prefix in the schema path and the later ids."
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.matti.shared :as shared]
@@ -11,7 +27,6 @@
             [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]
             [sade.shared-util :as util]))
-
 
 (defn schema-type [options]
   (-> options :schema keys first keyword))
@@ -52,7 +67,7 @@
   (let [enabled-path (path/extend path :enabled)]
     [:div.matti-date-delta
      (when (show-label? schema wrap-label?)
-       [:div.delta-label (path/new-loc options)])
+       [:div.delta-label (path/loc options)])
      [:div.delta-editor
       (docgen/docgen-checkbox (assoc options
                                      :path enabled-path
@@ -69,7 +84,7 @@
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   [:div.matti-multi-select
    (when (show-label? schema wrap-label?)
-     [:h4.matti-label (path/new-loc options)])
+     [:h4.matti-label (path/loc options)])
    (let [state (path/state path state)
          items (->> (:items schema)
                     (map (fn [item]
@@ -79,7 +94,7 @@
                                {:value item
                                 :text  (if-let [item-loc (:item-loc-prefix schema)]
                                          (path/loc [item-loc item])
-                                         (path/new-loc options item))}))))
+                                         (path/loc options item))}))))
                     (sort-by :text))]
 
      (for [{:keys [value text]} items
@@ -125,7 +140,7 @@
                                                           (get-in (cond->> [(keyword (common/get-current-language))]
                                                                     extra-path (concat extra-path))))
                             item-loc-prefix           (path/loc [item-loc-prefix v])
-                            :else                     (path/new-loc options v))})))
+                            :else                     (path/loc options v))})))
          distinct)))
 
 (rum/defc select-reference-list < rum/reactive
@@ -143,7 +158,6 @@
 
 (rum/defc multi-select-reference-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
-  (console.log (resolve-reference-list options))
   (matti-multi-select (assoc-in options [:schema :items] (resolve-reference-list options))
                       wrap-label?))
 
@@ -173,7 +187,7 @@
     (let [ref-id (path/unique-id "-ref")]
       [:div.matti-grid-12
        (when (show-label? schema wrap-label?)
-         [:h4.matti-label (path/new-loc options)])
+         [:h4.matti-label (path/loc options)])
        [:div.row
         [:div.col-3.col--full
          [:div.col--vertical
@@ -235,7 +249,7 @@
                                          (cond-> (service/schema schema-name)
                                            ;; Additional, non-legacy properties
                                            (map? docgen) (merge (dissoc docgen :name))))
-        editing?    (path/react-meta? options :editing?)]
+        editing?    (path/react-meta options :editing?)]
     (cond->> options
       editing?       docgen/docgen-component
       (not editing?) docgen/docgen-view
@@ -246,7 +260,7 @@
   (let [cell-type    (schema-type options)
         schema-value (cell-type schema)
         options      (path/schema-options options schema-value)]
-    (if (path/react-meta? options :editing?)
+    (if (path/react-meta options :editing?)
       ((case cell-type
          :date-delta     matti-date-delta
          :reference-list (if (= :select (:type schema-value))
@@ -289,22 +303,6 @@
       (docgen/docgen-label-wrap options span)
       span)))
 
-#_(defmethod view-component :list
-  [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [component [:div (map-indexed (fn [i item]
-                                        (instantiate (assoc options
-                                                            :path (path/extend path
-                                                                    (when-not (:id item)
-                                                                      (str i))))
-                                                     (shared/child-schema item
-                                                                          :schema
-                                                                          schema)
-                                                     false))
-                                     (:items schema))]]
-    (if (show-label? schema wrap-label?)
-      (docgen/docgen-label-wrap options component)
-      component)))
-
 (defmethod view-component :reference
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.formatted (path/react (-> schema :path util/split-kw-path)
@@ -316,9 +314,13 @@
 (defmulti placeholder (fn [options & _]
                         (-> options :schema :type)))
 
-;; Neighbors value is a list of property-id, timestamp maps.
+;; Neighbors value is a list of property-id, timestamp maps.  Before
+;; publishing the verdict, the neighbors are taken from the
+;; applicationModel. On publishing the neighbor states are frozen into
+;; mongo.
 (defmethod placeholder :neighbors
   [{:keys [state path] :as options}]
+  (console.log (lupapisteApp.models.application.neighbors))
   [:div.tabby.neighbor-states
    (map (fn [{:keys [property-id done]}]
           [:div.tabby__row.neighbor
@@ -329,7 +331,19 @@
                           (js/util.finnishDateAndTime done
                                                       "D.M.YYYY HH:mm"))
               (common/loc :neighbors.open))]])
-        (path/value path state))])
+        (or (path/value path state)
+            (map (fn [obj]
+                   (console.log "status:" (.status obj))
+
+                   {:property-id (.propertyId obj)
+                    :done (some->> (.status obj)
+                                   (util/find-first #(= (.state %) "mark-done"))
+                                   .created)})
+             (lupapisteApp.models.application.neighbors))))])
+
+(defmethod placeholder :application-id
+  [_]
+  [:span.formatted (lupapisteApp.services.contextService.applicationId)])
 
 (defmethod view-component :placeholder
   [_ {:keys [state path schema] :as options} & [wrap-label?]]

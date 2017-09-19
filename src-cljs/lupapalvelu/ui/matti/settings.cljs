@@ -158,19 +158,19 @@
     [:div.col-4
      [:span.matti-label
       (when edit? {:class :row-text})
-      (path/new-loc options)]]
+      (path/loc options)]]
     (when edit?
       [:div.col-2.col--right
        [:button.ghost
         {:on-click #(path/flip-meta options :editor?)}
-        (common/loc (if (path/react-meta? options :editor?)
+        (common/loc (if (path/react-meta options :editor?)
                       :close
                       :edit))]])]])
 
 (rum/defc settings-section-body < rum/reactive
   [{:keys [schema] :as options}]
   [:div.section-body
-   (if (path/react-meta? options :editor?)
+   (if (path/react-meta options :editor?)
      (case (-> schema :id keyword)
        :reviews (generic-editor :review)
        :plans   (generic-editor :plan))

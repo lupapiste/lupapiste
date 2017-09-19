@@ -181,7 +181,7 @@
 (defschema MattiPlaceholder
   "Placholder for external (filled by backend) data."
   (merge MattiComponent
-         {:type (sc/enum :neighbors)}))
+         {:type (sc/enum :neighbors :application-id)}))
 
 (defschema KeyMap
   "Map with the restricted set of keys. In other words, no new keys
@@ -451,8 +451,8 @@
       :automatic-verdict-dates {:docgen {:name "matti-verdict-check"}}}
      (->> [:julkipano :anto :valitus :lainvoimainen :aloitettava :voimassa]
           (map (fn [kw]
-                 [kw{:docgen {:name      "matti-date"
-                              :disabled? :automatic-verdict-dates}}]))
+                 [kw {:docgen {:name      "matti-date"
+                               :disabled? :automatic-verdict-dates}}]))
           (into {}))
      {:contact-ref      {:reference {:path :contact}}
       :giver            {:docgen "matti-verdict-giver"}
@@ -462,7 +462,7 @@
                                           :loc-prefix :matti-r.verdict-code}}
       :verdict-text     {:phrase-text {:category :paatosteksti}}
       :verdict-text-ref {:reference {:path :verdict-text}}
-      :application-id   {:docgen "matti-verdict-id"}}
+      :application-id   {:placeholder {:type :application-id}}}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
                (let [included (keyword (str (name kw) "-included"))
                      path     (util/kw-path :settings kw)]
@@ -515,7 +515,7 @@
                         :row        (map (fn [kw]
                                            (let [id (name kw)]
                                              {:show?     kw
-                                              :disabled? :automati-verdict-dates
+                                              :disabled? :automatic-verdict-dates
                                               :id        id
                                               :dict      kw}))
                                          [:julkipano :anto :valitus
@@ -568,10 +568,10 @@
                                  :dict  :other-requirements}]])}}
      {:id   "neighbors"
       :grid {:columns 12
-             :rows    [[{:col  8
+             :rows    [[{:col  7
                          :id   "neighbor-notes"
                          :dict :neighbor-text}
-                        {:col   3
+                        {:col   4
                          :id    "neighbor-states"
                          :align :right
                          :dict  :neighbor-states}]
@@ -586,38 +586,6 @@
                          :dict :complexity-text}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
-
-;; Schema utils
-
-(defn child-schema
-  ([options child-key parent]
-   (assoc-in options [child-key :_parent] parent))
-  ([child parent]
-   (assoc child :_parent parent)))
-
-(defn parent-value [schema kw]
-  (let [v (kw schema)]
-    (if (or (nil? schema) v)
-      v
-      (parent-value (:_parent schema) kw))))
-
-(defn cell-path
-  "Path (vector of strings) for the cell with an explicit (non-index)
-  cell-id. Returns the first match so it is advisable to make sure
-  that ids are unique. Schema must have sections."
-  [{sections :sections} cell-id]
-  (letfn [(find-in-row [row-path row]
-            (when-let [cell (util/find-by-id cell-id (get row :row row))]
-              (conj row-path cell-id)))
-          (find-in-section [{:keys [id grid]}]
-            (loop [i 0
-                   [x & xs] (:rows grid)]
-              (if-let [path (find-in-row  [id (get x :id (str i))]
-                                         x)]
-                path
-                (when (seq xs)
-                  (recur (inc i) xs)))))]
-    (some find-in-section sections)))
 
 ;; Other utils
 

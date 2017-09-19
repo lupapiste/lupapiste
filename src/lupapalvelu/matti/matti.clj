@@ -341,30 +341,28 @@
   [template application]
   (let [neighbors? (-> template :versions last :data
                        :removed-sections :neighbors not)]
-    (assoc (data-draft
-               (merge {:giver        :giver
-                       :verdict-code :verdict-code
-                       :verdict-text :paatosteksti}
-                      (reduce (fn [acc kw]
-                                (assoc acc
-                                       kw kw
-                                       (kw-format "%s-included" kw)
-                                       {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
-                              {}
-                              [:foremen :plans :reviews])
-                      {:other-requirements :conditions}
-                     (reduce (fn [acc kw]
-                               (assoc acc
-                                      kw  {:fn   #(when (some-> % kw :enabled) "")
-                                           :skip-nil? true}))
-                             {}
-                             [:julkipano :anto :valitus :lainvoimainen
-                              :aloitettava :voimassa])
-                     (when neighbors?
-                       {:neighbor-text   :neighbors}))
-               template)
-              :application-id (:id application)
-              :neighbor-states (when neighbors? (neighbors application)))))
+    (data-draft (merge {:giver        :giver
+                        :verdict-code :verdict-code
+                        :verdict-text :paatosteksti}
+                       (reduce (fn [acc kw]
+                                 (assoc acc
+                                        kw kw
+                                        (kw-format "%s-included" kw)
+                                        {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
+                    {}
+                    [:foremen :plans :reviews])
+                       {:other-requirements :conditions}
+                       (reduce (fn [acc kw]
+                                 (assoc acc
+                                        kw  {:fn   #(when (some-> % kw :enabled)
+                                                      "")
+                                             :skip-nil? true}))
+                               {}
+                               [:julkipano :anto :valitus :lainvoimainen
+                                :aloitettava :voimassa])
+                       (when neighbors?
+                         {:neighbor-text   :neighbors}))
+                template)))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]

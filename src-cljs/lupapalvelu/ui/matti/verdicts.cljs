@@ -76,11 +76,9 @@
      [:div.verdict-buttons
       [:button.primary.outline
        {:on-click #(path/flip-meta options :editing?)}
-       (common/loc (if (path/react-meta? options :editing?)
+       (common/loc (if (path/react-meta options :editing?)
                      :close
                      :edit))]]]]])
-
-
 
 (defmethod sections/section-header :verdict
   [options _]

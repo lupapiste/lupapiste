@@ -133,77 +133,11 @@
 
 ;; Schema utils
 
-#_(defn- resolve-path-schema
-  "Resolution result is map with two fixed keys (:path, :data) and one
-  depending on the schema type (:schema, :docgen, :reference-list)."
-  [data xs]
-  (let [path         (mapv keyword xs)
-        docgen       (:docgen data)
-        reflist      (:reference-list data)
-        date-delta   (:date-delta data)
-        multi-select (:multi-select data)
-        phrase-text  (:phrase-text data)
-        wrap         (fn [id schema data]
-                       {id {:schema schema
-                            :path   path
-                            :data   data}})]
-    (cond
-      (:grid data) (wrap :section shared/MattiSection data)
-      docgen       (wrap :docgen (doc-schemas/get-schema
-                                  {:name (get docgen :name docgen)}) docgen)
-      date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
-      reflist      (wrap :reference-list shared/MattiReferenceList reflist)
-      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
-      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text))))
-
 (defn- parse-int [x]
   (let [n (-> x str name)]
     (cond
       (integer? x)                 x
       (re-matches #"^[+-]?\d+$" n) (util/->int n))))
-
-#_(defn- resolve-index [xs x]
-  (if-let [index (parse-int x)]
-    index
-    (first (keep-indexed (fn [i data]
-                           (when (= x (:id data))
-                             i))
-                         xs))))
-
-#_(defn- pick-item [xs x]
-  (when-let [i (resolve-index xs x)]
-    (when (contains? (vec xs) i)
-      (nth xs i))))
-
-#_(declare schema-data-helper)
-
-#_(defn item-data [items [x & xs]]
-  (when-let [item (pick-item items x)]
-    (schema-data-helper item xs)))
-
-#_(defn cell-data [grid [x & xs]]
-  (when-let [row (pick-item (:rows grid) x)]
-    (when-let [col (pick-item (get row :row row) (first xs))]
-      (schema-data-helper col (drop 1 xs)))))
-
-#_(defn schema-data-helper
-  [data [x & xs :as path]]
-  (cond
-    (some-> data :schema :list) (item-data (get-in data [:schema :list :items]) path)
-    (:schema data)              (resolve-path-schema (:schema data) path) ;; Leaf
-    (:sections data)            (item-data (:sections data) path)
-    ;; Must be before grid for section properties (removed)
-    (nil? xs)                   (resolve-path-schema data path)
-    (:grid data)                (cell-data (:grid data) path)))
-
-#_(defn schema-data
-  "Data is the reference schema instance (e.g.,
-  shared/default-verdict-template). The second argument is path into
-  data. Returns map with remaining path and resolved schema (see
-  resolve-path-schema)."
-  [data path]
-  (when (and (seq path) (empty? (filter coll? path)))
-    (schema-data-helper data (map #(name (if (number? %) (str %) %)) path))))
 
 (defmulti validate-resolution :type)
 
@@ -220,12 +154,6 @@
 (defn path-error [path & [size]]
   (when (not= (count path) (or size 0))
     :error.invalid-value-path))
-
-#_(defmethod validate-resolution :section
-  [{:keys [path schema value] :as options}]
-  (cond
-    (coll? value) :error.invalid-value
-    :else         (schema-error options)))
 
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
@@ -313,16 +241,6 @@
   (or (path-error path 1)
       (when-not (util/includes-as-kw? (keys data) (first path))
         :error.invalid-value-path)))
-
-#_(defn validate-path-value
-  "Error message if not valid, nil otherwise."
-  [schema-instance data-path value & [{:keys [references schema-overrides]}]]
-  (let [resolution (schema-data schema-instance data-path)]
-    (validate-resolution (assoc  (some-> resolution vals first)
-                                 :type (some-> resolution keys first)
-                                 :value value
-                                 :references references
-                                 :schema-overrides schema-overrides))))
 
 (defn- resolve-dict-value
   [data]

@@ -55,73 +55,29 @@
                   (s/join "-"))
              "." "-"))
 
-(defn loc
-  ([path]
-   (->> (filter identity path)
-        (map name)
-        ;; Index (number) path parts are ignored.
-        (remove #(re-matches #"^\d+$" %))
-        (s/join ".")
-        common/loc))
-  ([path {:keys [i18nkey] :as schema} & extra]
-   (let [loc-prefix (or (some-> schema :body first :locPrefix)
-                        (shared/parent-value schema :loc-prefix))
-         i18nkey (or i18nkey (some-> schema :body first :i18nkey))
-         i18nkey (and i18nkey (flatten [i18nkey]))]
-     (if (> (count i18nkey) 1)
-       (->> (concat i18nkey extra)
-            (remove nil?)
-            (reduce #(common/loc %2 (common/loc %1))))
-       (-> (cond
-            i18nkey    i18nkey
-            loc-prefix (flatten (concat [loc-prefix] [(last path)]))
-            :else      path)
-           (concat extra)
-           flatten
-           loc)))))
+(defmulti loc (fn [a & _]
+                (when (map? a)
+                  :map)))
 
-(defn new-loc
+(defmethod loc :default
+  [& path]
+  (->> (flatten path)
+       (filter identity)
+       (map name)
+       (s/join ".")
+       common/loc))
+
+(defmethod loc :map
   [{:keys [i18nkey loc-path schema] :as arg} & extra]
-  #_(console.log "i18nkey:" i18nkey "loc-path:" loc-path "Extra:" extra)
-  (some->> (concat [(if (sequential? arg)
-                      arg
-                      (or i18nkey
-                          (some-> schema :body first :i18nkey)
-                          (:i18nkey schema)
-                          (:loc-prefix schema)
-                          (:dict schema)
-                          loc-path))]
-                   extra)
-           flatten
-           (filter identity)
-           (map name)
-           (s/join ".")
-           common/loc))
-
-#_(defn latest-helper
-  "The latest non-nil value for the given key in the state* along the
-  path. Path is shortened until the value is found. Nil if value not
-  found. Key can be also be key sequence. Value-fn is either value or
-  react."
-  [value-fn path state* & key]
-  (let [v (value-fn path state* key)]
-    (if (or (some? v) (empty? path))
-      v
-      (latest-helper value-fn (drop-last path) state* key))))
-
-#_(defn latest
-  "The latest non-nil value for the given key in the state* along the
-  path. Path is shortened until the value is found. Nil if value not
-  found. Key can be also be key sequence."
-  [path state* & key]
-  (latest-helper value path state* key))
-
-#_(defn meta?
-  "Truthy if _meta value for the given key is found either within
-  _meta options or as latest _meta from the state."
-  [{:keys [state path _meta]} key]
-  (or (get _meta (keyword key))
-      (latest path state :_meta key)))
+  (loc (concat [(if (sequential? arg)
+                  arg
+                  (or i18nkey
+                      (some-> schema :body first :i18nkey)
+                      (:i18nkey schema)
+                      (:loc-prefix schema)
+                      (:dict schema)
+                      loc-path))]
+               extra)))
 
 (defn- access-meta [{:keys [id-path _meta]} key & [deref-fn]]
   (loop [m ((or deref-fn deref) _meta)
@@ -133,14 +89,14 @@
           (recur m (butlast path))
           v)))))
 
-(defn meta?
-  "_meta is a flat map with kw-mapped keys. meta? returns value for the
+(defn meta-value
+  "_meta is a flat map with kw-mapped keys. meta-value returns value for the
   key that is closest to the id-path of the options."
   [options key]
   (access-meta options key))
 
-(defn react-meta?
-  "Like meta? but uses rum/react to access the _meta atom."
+(defn react-meta
+  "Like meta-value but uses rum/react to access the _meta atom."
   [options key]
   (access-meta options key rum/react))
 
@@ -155,7 +111,7 @@
   "List of CSS classes based on current :css value and status
   classes (matti--edit, matti--view) from the latest _meta."
   [options & other-classes]
-  (->> [(if (meta? options :editing?) "matti--edit" "matti--view")
+  (->> [(if (meta-value options :editing?) "matti--edit" "matti--view")
         (:css options)
         other-classes]
        flatten
@@ -193,7 +149,7 @@
 (defn- path-truthy [{state :state :as options} kw-path]
   (let [[x & [k] :as path] (pathify kw-path)]
     (truthy (if (= x :_meta )
-              (react-meta? options k )
+              (react-meta options k )
               (react path state)))))
 
 (defn- paths-result

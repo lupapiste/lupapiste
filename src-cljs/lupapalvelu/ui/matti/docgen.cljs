@@ -8,7 +8,7 @@
             [sade.shared_util :as util]))
 
 (defn docgen-loc [options & extra]
-  (path/new-loc options extra))
+  (path/loc options extra))
 
 (defn docgen-type [{schema :schema}]
   (-> schema :body first :type keyword))

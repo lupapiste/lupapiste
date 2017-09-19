@@ -53,7 +53,7 @@
   [:div.section-header.matti-grid-2
    [:div.row.row--tight
     [:div.col-1
-     [:span.row-text.section-title (path/new-loc options)]]
+     [:span.row-text.section-title (path/loc options)]]
     [:div.col-1.col--right
      (if (contains? (-> dictionary :removed-sections :keymap)
                     (keyword (:id schema)))
