@@ -16,7 +16,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
                 ["lupicon-circle-arrow-up positive", "application.attachmentSentDate"],
                 ["lupicon-circle-stamp positive", "attachment.stamped"],
                 ["lupicon-circle-section-sign positive", "attachment.verdict-attachment"],
-                ["lupicon-lock primary", "attachment.not-public-attachment"]];
+                ["lupicon-lock primary", "attachment.not-public-attachment"],
+                ["lupicon-archives positive", "attachment.archived"]];
 
   self.legendHtml = _( legend )
     .map( function( leg ) {
