@@ -234,8 +234,10 @@
         other-building-docs (map (partial document-data->op-document created-application) (rest document-datas))
         secondary-ops (mapv #(assoc (-> %1 :schema-info :op) :description %2) other-building-docs (rest structure-descriptions))
 
-        created-application (update-in created-application [:documents] concat other-building-docs new-parties)
-        created-application (update-in created-application [:secondaryOperations] concat secondary-ops)
+        created-application (-> created-application
+                                (update-in [:documents] concat other-building-docs new-parties)
+                                (update-in [:secondaryOperations] concat secondary-ops)
+                                (assoc :opened (:created command)))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
