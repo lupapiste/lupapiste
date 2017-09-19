@@ -14,8 +14,6 @@
             [sade.util :as util]
             [sade.strings :as ss]))
 
-(def bind-states (states/all-application-or-archiving-project-states-but states/terminal-states))
-
 (defn- validate-attachment-ids [command]
   (->> (get-in command [:data :filedatas])
        (map :attachmentId)
@@ -65,7 +63,9 @@
                                                 (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                          att/foreman-must-be-uploader]
    :input-validators    [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
-   :states              bind-states}
+   :states              {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                         :authority    (states/all-states-but :canceled)
+                         :oirAuthority (states/all-states-but :canceled)}}
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}]
                                :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
@@ -91,7 +91,9 @@
                          validate-attachment-ids
                          validate-attachment-groups
                          check-password-for-sign]
-   :states              bind-states}
+   :states              {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                         :authority    (states/all-states-but :canceled)
+                         :oirAuthority (states/all-states-but :canceled)}}
   [command]
   (ok :job (bind/make-bind-job command filedatas
                                :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
@@ -100,6 +102,6 @@
   {:parameters [jobId version]
    :user-roles          #{:applicant :authority :oirAuthority}
    :input-validators    [(partial action/numeric-parameters [:jobId :version])]
-   :states              bind-states}
+   :states              (states/all-states-but :canceled)}
   [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (job/status job-id (util/->long version) (util/->long timeout))))

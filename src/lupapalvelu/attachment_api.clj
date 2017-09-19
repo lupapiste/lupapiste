@@ -217,13 +217,17 @@
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
-   :states     (states/all-states-but :answered :sent)
+   :states     {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                :authority    (states/all-states-but :canceled)
+                :oirAuthority (states/all-states-but :canceled)}
    :pre-checks [app/validate-authority-in-drafts
                 att/foreman-must-be-uploader
                 att/edit-allowed-by-target
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
-                att/attachment-matches-application]
+                att/attachment-matches-application
+                (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                       (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))]
    :on-success [(assignment/run-assignment-triggers on-set-attachment-type-success)]}
   [{:keys [application user created] :as command}]
 
@@ -388,7 +392,9 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
-   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
+   :states      {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                 :authority    (states/all-states-but :canceled)
+                 :oirAuthority (states/all-states-but :canceled)}
    :pre-checks  [app/validate-authority-in-drafts
                  att/foreman-must-be-uploader
                  att/attachment-matches-application
@@ -523,7 +529,9 @@
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))]
-   :states     (conj (states/all-states-but states/terminal-states) :answered)
+   :states     {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                :authority    (states/all-states-but :canceled)
+                :oirAuthority (states/all-states-but :canceled)}
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
@@ -560,7 +568,8 @@
                  (mime-validator "application/pdf")
                  app/validate-authority-in-drafts
                  att/attachment-matches-application]
-   :states      (conj (states/all-states-but states/terminal-states) :answered)
+   :states      {:applicant (conj (states/all-states-but states/terminal-states) :answered)
+                 :authority (states/all-states-but :canceled)}
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
   [{:keys [application created]}]
   (if-let [attachment (att/get-attachment-info application attachmentId)]
@@ -755,7 +764,8 @@
    :categories #{:attachments}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
-   :states     (states/all-states-but :answered :sent)
+   :states     {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                :authority    (states/all-states-but :canceled)}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size]
    :pre-checks [app/validate-authority-in-drafts
@@ -763,6 +773,8 @@
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
                 att/edit-allowed-by-target
+                (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                       (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                 (partial att/validate-group [:meta :group])]}
   [{:keys [created] :as command}]
   (let [data (att/meta->attachment-data meta)]
