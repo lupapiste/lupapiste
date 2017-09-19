@@ -142,47 +142,54 @@
     path))
 
 (defn- truthy [v]
-  (cond
-    (sequential? v) (seq v)
-    :else v))
+  (boolean (cond
+             (sequential? v) (seq v)
+             :else v)))
 
 (defn- path-truthy [{state :state :as options} kw-path]
   (let [[x & [k] :as path] (pathify kw-path)]
+    (when (= x :automatic-verdict-dates))
     (truthy (if (= x :_meta )
               (react-meta options k )
               (react path state)))))
 
-(defn- paths-result
-  "Result is calculated be calling op-fn (e.g., some) to path-truthy
-  results of every path. Result is nil for empty/nil paths."
-  [options op-fn paths]
-  (let [paths (->> [paths] flatten (remove nil?))]
-    (when (seq paths)
-      (->> paths
-           (map (partial path-truthy options))
-           (op-fn identity )))))
+(defn eval-state-condition [options condition]
+  (cond
+    (nil? condition) nil
 
-(defn- flag?
-  "not-any-flag: schema key for NOT-ANY (or empty/nil) condition.
-   or-flag:  schema key for ANY (or empty/nil) condition.
-  True if either conditions met."
-  [{:keys [state schema] :as options} not-any-flag or-flag]
-  (let [results (->> [(->> schema not-any-flag (paths-result options not-any?))
-                      (->> schema or-flag (paths-result options some))]
-                     (remove nil?))]
-    (when (seq results)
-      (some identity results))))
+    (keyword? condition)
+    (path-truthy options condition)
 
-(defn disabled?
-  "Component disabled status as defined in MattiEnabled schema."
-  [options]
-  (flag? options :enabled? :disabled?))
+    (sequential? condition)
+    (loop [op       (first condition)
+           [x & xs] (rest condition)]
+      (if (nil? x)
+        ;; Every item must have been true
+        (= op :AND)
+        (let [flag (eval-state-condition options x)]
+          (cond
+            (and flag (= op :OR))        true
+            (and (not flag) (= op :AND)) false
+            :else (recur op xs)))))))
 
-(defn enabled? [options] (not (disabled? options)))
+(defn good? [{:keys [schema] :as options} good-key bad-key]
+  (let [good (eval-state-condition options
+                                   (good-key schema))
+        bad  (eval-state-condition options
+                                   (bad-key schema))]
+    (cond
+      (and (nil? good)
+           (nil? bad))   true
+      (or bad
+          (false? good)) false
+      :else              true)))
 
-(defn not-visible?
-  "Component not-visible status as defined in MattiVisible schema."
-  [options]
-  (flag? options :show? :hide?))
+(defn enabled? [options]
+  (good? options :enabled? :disabled?))
 
-(defn visible? [options] (not (not-visible? options)))
+(defn disabled? [options] (not (enabled? options)))
+
+(defn visible? [options]
+  (good? options :show? :hide?))
+
+(defn not-visible? [options] (not (visible? options)))

@@ -320,7 +320,6 @@
 ;; mongo.
 (defmethod placeholder :neighbors
   [{:keys [state path] :as options}]
-  (console.log (lupapisteApp.models.application.neighbors))
   [:div.tabby.neighbor-states
    (map (fn [{:keys [property-id done]}]
           [:div.tabby__row.neighbor
@@ -333,8 +332,6 @@
               (common/loc :neighbors.open))]])
         (or (path/value path state)
             (map (fn [obj]
-                   (console.log "status:" (.status obj))
-
                    {:property-id (.propertyId obj)
                     :done (some->> (.status obj)
                                    (util/find-first #(= (.state %) "mark-done"))

@@ -315,7 +315,8 @@
   "Kmap keys are draft targets (kw-paths). Values are either kw-paths or
   maps with :fn and :skip-nil? properties. :fn is the source
   (full) data handler function. If :skip-nil? is true the nil value
-  entries are skipped (default false)."
+  entries are skipped (default false and nil value is substituted with
+  empty string)."
   [kmap template]
   (let [data (-> template :versions last :data)]
     (reduce (fn [acc [k v]]
@@ -327,9 +328,20 @@
                   acc
                   (assoc-in acc
                             (util/split-kw-path k)
-                            value))))
+                            (if (nil? value)
+                              ""
+                              value)))))
             {}
             kmap)))
+
+(defn- map-unremoved-section
+  "Map (for data-draft) section only it has not been removed. If
+  target-key is not given, source-key is used. Result is key-key map
+  or nil."
+  [source-data source-key & [target-key]]
+  (when-not (some-> source-data :removed-sections source-key)
+    (hash-map (or target-key source-key) source-key)))
+
 
 (defmulti initial-draft-data (fn [template & _]
                                (-> template :category keyword)))
@@ -339,30 +351,31 @@
 
 (defmethod initial-draft-data :r
   [template application]
-  (let [neighbors? (-> template :versions last :data
-                       :removed-sections :neighbors not)]
+  (let [source-data (-> template :versions last :data)]
     (data-draft (merge {:giver        :giver
-                        :verdict-code :verdict-code
-                        :verdict-text :paatosteksti}
-                       (reduce (fn [acc kw]
-                                 (assoc acc
-                                        kw kw
-                                        (kw-format "%s-included" kw)
-                                        {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
-                    {}
-                    [:foremen :plans :reviews])
-                       {:other-requirements :conditions}
-                       (reduce (fn [acc kw]
-                                 (assoc acc
-                                        kw  {:fn   #(when (some-> % kw :enabled)
-                                                      "")
-                                             :skip-nil? true}))
-                               {}
-                               [:julkipano :anto :valitus :lainvoimainen
-                                :aloitettava :voimassa])
-                       (when neighbors?
-                         {:neighbor-text   :neighbors}))
-                template)))
+                       :verdict-code :verdict-code
+                       :verdict-text :paatosteksti}
+                      (reduce (fn [acc kw]
+                                (assoc acc
+                                       kw kw
+                                       (kw-format "%s-included" kw)
+                                       {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
+                              {}
+                              [:foremen :plans :reviews])
+                      (reduce (fn [acc kw]
+                                (assoc acc
+                                       kw  {:fn   #(when (some-> % kw :enabled)
+                                                     "")
+                                            :skip-nil? true}))
+                              {}
+                              [:julkipano :anto :valitus :lainvoimainen
+                               :aloitettava :voimassa])
+                      (reduce (fn [acc k]
+                                (merge acc (map-unremoved-section source-data k)))
+                              {}
+                              [:conditions :neighbors :appeal :statements :collateral
+                               :complexity :rights :purpose :buildings]))
+               template)))
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -395,11 +408,7 @@
 
 (defn open-verdict [{:keys [application organization] :as command}]
   (let [verdict (command->verdict command)
-        data    (cond-> (:data verdict)
-                  (and (-> verdict :published not)
-                       (-> verdict :data :neighbors :removed not))
-                  (assoc-in [:neighbors :0 :neighbor-states]
-                            (neighbors application)))]
+        data    (:data verdict)]
 
     {:verdict  (assoc (select-keys verdict [:id :modified :published])
                       :data data)

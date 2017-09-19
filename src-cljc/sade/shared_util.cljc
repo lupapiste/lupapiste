@@ -56,6 +56,11 @@
   [kw]
   (map keyword (s/split (name (or kw "")) #"\.")))
 
+
+;; ---------------------------------------------
+;; The following are not aliased in sade.util.
+;; ---------------------------------------------
+
 (defn kw-path
   "Like sade.util/kw-path on the Clojure side. Note: this is not
   defaliased in sade.util."
@@ -67,3 +72,6 @@
                %))
        (s/join ".")
        keyword))
+
+(defmacro fn->  [& body] `(fn [x#] (-> x# ~@body)))
+(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))

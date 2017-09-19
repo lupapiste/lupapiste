@@ -3,8 +3,6 @@
             [sade.shared-util :as util]
             [schema.core :refer [defschema] :as sc]))
 
-(declare MattiList)
-
 ;; identifier - KuntaGML-paatoskoodi (yhteiset.xsd)
 (def verdict-code-map
   {:annettu-lausunto            "annettu lausunto"
@@ -79,6 +77,19 @@
                         keyword? sc/Keyword
                         :else    sc/Str))
 
+(def PathCondition
+  [(sc/one (sc/enum :OR :AND) :OR)
+   (sc/conditional
+    keyword?    (sc/constrained sc/Keyword
+                                (util/fn-> #{:AND :OR} not))
+    sequential? (sc/recursive #'PathCondition))])
+
+(def condition-type
+  (sc/conditional
+   keyword?    sc/Keyword
+   sequential? PathCondition))
+
+
 (defschema MattiEnabled
   "Component is enabled/disabled if the path value is truthy. Empty
   strings/collections are interpreted as falsey. Default: enabled.
@@ -86,13 +97,13 @@
   other words, each vector item denotes full path. If both are given,
   both are taken into account. On conflicts, component is disabled.
   Paths starting with :_meta are interpreted as _meta queries."
-  {(sc/optional-key :enabled?)  path-type   ;; True if ANY truthy.
-   (sc/optional-key :disabled?) path-type}) ;; True if ANY truthy
+  {(sc/optional-key :enabled?)  condition-type   ;; True if ANY truthy.
+   (sc/optional-key :disabled?) condition-type}) ;; True if ANY truthy
 
 (defschema MattiVisible
   "Similar to MattiEnabled."
-  {(sc/optional-key :show?) path-type   ;; True if ANY truthy.
-   (sc/optional-key :hide?) path-type}) ;; True if ANY truthy.
+  {(sc/optional-key :show?) condition-type   ;; True if ANY truthy.
+   (sc/optional-key :hide?) condition-type}) ;; True if ANY truthy.
 
 (defschema MattiBase
   (merge MattiVisible
@@ -199,7 +210,12 @@
    :multi-select   MattiMultiSelect
    :reference      MattiReference
    :placeholder    MattiPlaceholder
-   :keymap         KeyMap})
+   :keymap         KeyMap
+   ;; Keyword is not used. The :repeating schema is just needed in
+   ;; order to make the different repeating data path prefixes unique.
+   ;; Later on we might add repeating-specific properties (e.g., can
+   ;; add/remove).
+   :repeating      sc/Keyword})
 
 (defn make-conditional [m]
   (->> (reduce (fn [a [k v]]
@@ -207,6 +223,7 @@
                []
                m)
        (apply sc/conditional)))
+
 
 (defschema Dictionary
   "Id to schema mapping."
@@ -251,17 +268,14 @@
                                   (sc/optional-key :loc-prefix) sc/Keyword
                                   (sc/optional-key :css)        [sc/Keyword]
                                   :row                          [MattiCell]})
-                     :else [MattiCell])]}))
+                     :else [MattiCell])]
+          ;; Dict key for a repeating schema.
+          (sc/optional-key :repeating) sc/Keyword}))
 
 (defschema MattiSection
   (merge MattiBase
-         {:id   sc/Str ;; Also title localization key
+         {:id   keyword-or-string ;; Also title localization key
           :grid MattiGrid}))
-
-#_(defschema MattiVerdictSection
-  (merge MattiSection
-         {;; Section removed from the template. Note: the data is not cleared.
-          (sc/optional-key :removed) sc/Bool}))
 
 (defschema MattiVerdict
   (merge Dictionary
@@ -487,19 +501,18 @@
              [[:matti-r.foremen :foremen false false]
               [:matti-plans :plans true false]
               [:matti-reviews :reviews true true]])
-     {:other-requirements {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                         :category :lupaehdot}}
-      :neighbor-text      {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                         :category :naapurit}}
-      :neighbor-states    {:placeholder {:type :neighbors}}
-      :complexity         {:docgen "matti-complexity"}
-      :complexity-text    {:phrase-text {:label?   false
-                                         :category :vaativuus}}
-      :removed-sections   {:keymap (zipmap [:neighbors
-                                            :appeal :statements :collateral
-                                            :complexity :rights :purpose
-                                            :buildings]
-                                           (repeat false))}})
+     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                      :category :lupaehdot}}
+      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                      :category :naapurit}}
+      :neighbor-states {:placeholder {:type :neighbors}}
+      :collateral      {:phrase-text {:category :vakuus}}
+      :appeal          {:phrase-text {:category :muutoksenhaku}}
+      :complexity      {:docgen "matti-complexity"}
+      :complexity-text {:phrase-text {:label?   false
+                                      :category :vaativuus}}
+      :rights          {:phrase-text {:category :rakennusoikeus}}
+      :purpose         {:phrase-text {:category :kaava}}})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -553,7 +566,7 @@
       :grid {:columns 7
              :rows    (concat (map (fn [dict]
                                      (let [check-path (keyword (str (name dict) "-included"))]
-                                       {:show? [:_meta.editing? check-path]
+                                       {:show? [:OR :_meta.editing? check-path]
                                         :row   [{:col  4
                                                  :dict dict}
                                                 {:col   2
@@ -562,28 +575,43 @@
                                                  :id    "included"
                                                  :dict  check-path}]}))
                                    [:foremen :plans :reviews])
-                              [[{:col   6
+                              [[{:show? :conditions
+                                 :col   6
                                  :id    "other"
                                  :align :full
-                                 :dict  :other-requirements}]])}}
+                                 :dict  :conditions}]])}}
+     {:id   "appeal"
+      :grid {:columns 7
+             :rows    [[{:col        6
+                         :loc-prefix :verdict.muutoksenhaku
+                         :dict       :appeal}]
+                       [{:col        6
+                         :loc-prefix :matti-collateral
+                         :dict       :collateral}]]}}
      {:id   "neighbors"
       :grid {:columns 12
              :rows    [[{:col  7
                          :id   "neighbor-notes"
-                         :dict :neighbor-text}
+                         :dict :neighbors}
                         {:col   4
                          :id    "neighbor-states"
                          :align :right
                          :dict  :neighbor-states}]
                        ]}}
-     {:id   "complexity"
+     {:id         "complexity"
       :loc-prefix :matti.complexity
-      :grid {:columns 12
-             :rows    [[{:col  6
-                         :dict :complexity}]
-                       [{:col  8
-                         :id   "text"
-                         :dict :complexity-text}]]}}]}})
+      :grid       {:columns 7
+                   :rows    [[{:col  3
+                               :dict :complexity}]
+                             [{:col  6
+                               :id   "text"
+                               :dict :complexity-text}]
+                             [{:col        6
+                               :loc-prefix :matti-rights
+                               :dict       :rights}]
+                             [{:col        6
+                               :loc-prefix :phrase.category.kaava
+                               :dict       :purpose}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

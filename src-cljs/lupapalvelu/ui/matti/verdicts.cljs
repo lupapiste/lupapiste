@@ -1,5 +1,6 @@
 (ns lupapalvelu.ui.matti.verdicts
-  (:require [lupapalvelu.matti.shared :as shared]
+  (:require [clojure.set :as set]
+            [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
@@ -9,7 +10,6 @@
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
-            [clojure.set :as set]
             [rum.core :as rum]
             [sade.shared_util :as util]))
 
@@ -31,7 +31,7 @@
                                        nil)
                              errors))))
     (when modified
-      (swap! state/current-verdict #(assoc % :modified modified)))))
+      (swap! state/current-verdict #(assoc-in % [:info :modified] modified)))))
 
 (defn updater [{:keys [state path] :as options}]
   (service/edit-verdict @state/application-id
@@ -92,10 +92,7 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       (layout/last-saved options)]]]
-   (for [sec (:sections schema)
-         :let [section-id (-> sec :id keyword)]]
-     (when-not (some-> @state :removed-sections section-id  )
-       (sections/section (path/schema-options options sec) :verdict)))])
+   (sections/sections options :verdict)])
 
 
 (rum/defcs new-verdict < rum/reactive
@@ -132,8 +129,7 @@
              (js/sprintf "Published: %s, Modified: %s"
                          (js/util.finnishDate published)
                          (js/util.finnishDateAndTime modified))]
-            [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}
-             ]])
+            [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}]])
          verdicts)]
    (new-verdict)])
 
@@ -161,8 +157,8 @@
                                                      :schema (dissoc schema :dictionary)
                                                      :dictionary dictionary
                                                      :references state/references)))))
-     #_(components/debug-atom state/current-verdict "state/current-verdict")
-     #_(components/debug-atom state/references "state/references")]))
+     (components/debug-atom state/current-verdict "state/current-verdict")
+     (components/debug-atom state/references "state/references")]))
 
 (defn mount-component []
   (when (common/feature? :matti)
