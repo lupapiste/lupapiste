@@ -39,15 +39,20 @@
     [:div.order-summary-pricing-block
      [:table
       [:thead
-       [:tr
-        [:td.first
-         [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
-        [:td.second
-         [:span.h3 (loc :printing-order.summary.total-price)]]
-        [:td.third
-         [:span.h3 (cond
-                     total-price (util/format-currency-value total-price)
-                     additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc))))]]]
+       (when total-price
+         [:tr
+          [:td.first
+           [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
+          [:td.second
+           [:span.h3 (loc :printing-order.summary.total-price)]]
+          [:td.third
+           [:span.h3 (util/format-currency-value total-price)]]])
+       (when additionalInformation
+         [:tr
+          [:td.first
+           [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
+          [:td
+           [:span.h3 (get additionalInformation (keyword (.getCurrentLanguage js/loc)))]]])
        (when vat
          [:tr
           [:td.first]
