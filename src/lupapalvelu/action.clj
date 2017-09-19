@@ -457,6 +457,12 @@
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
 
+(defn- update-user-application-role [{org-authz :orgAuthz role :role :as user} {app-org :organization :as application}]
+  (assoc user :role (cond
+                      (nil? app-org) role
+                      (contains? org-authz (keyword app-org)) role
+                      :else "applicant")))
+
 (defn response? [r]
   (and (map? r) (:status r)))
 
@@ -491,12 +497,13 @@
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             company (when-let [company-id (get-in command [:user :company :id])]
                       (delay (mongo/by-id :companies company-id)))
-            command (merge {:application application
-                            :organization organization
-                            :user-organizations user-organizations
-                            :company company
-                            :application-assignments assignments}
-                           command)]
+            command (-> {:application application
+                         :organization organization
+                         :user-organizations user-organizations
+                         :company company
+                         :application-assignments assignments}
+                        (merge command)
+                        (update :user update-user-application-role application))]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
