@@ -180,7 +180,8 @@
       (poc/section-header :printing-order.conditions.heading)
       [:div.row
        [:div.col-4
-        (loc-html :span :printing-order.conditions.text)]]
+        [:p (loc-html :span :printing-order.conditions.text)]
+        [:p (loc :printing-order.conditions.data-processing-notice)]]]
       [:div.row
        [:div.col-4
         [:label.like-btn

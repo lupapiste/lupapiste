@@ -19,6 +19,7 @@
 "printing-order.conditions.accepted" "en" "Delivery terms have been accepted"
 "printing-order.conditions.accepted" "fi" "Toimitusehdot on hyväksytty."
 "printing-order.conditions.accepted" "sv" "Leveransvillkoren har godkänts"
+"printing-order.conditions.data-processing-notice" "fi" "Kun lähetät tilauksen, Lupapiste luovuttaa tulosteiden toimittamiseen tarvittavat henkilö- ja yhteystiedot, antamasi laskutustiedot sekä tulostettavat aineistot pdf-tiedostomuodossa Grano Oy:n käsiteltäväksi. Lähettämällä tilauksen hyväksyt myös edellä mainitut tietojen luovutukset."
 "printing-order.conditions.heading" "en" "Delivery terms"
 "printing-order.conditions.heading" "fi" "Toimitusehdot"
 "printing-order.conditions.heading" "sv" "Leveransvillkor"
