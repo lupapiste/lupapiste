@@ -196,7 +196,7 @@
                 (doc-persistence/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
 (defn document-data->op-document [{:keys [schema-version] :as application} data]
-  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+  (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
         doc (assoc-in doc [:schema-info :op] op)
         doc-updates (lupapalvelu.document.model/map2updates [] data)]
@@ -274,7 +274,7 @@
       location-info)))
 
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus authorizeApplicants]} :data :as command}]
-  (let [operation         :aiemmalla-luvalla-hakeminen
+  (let [operation         "aiemmalla-luvalla-hakeminen"
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
@@ -366,7 +366,7 @@
       (mongo/disconnect!))))
 
 (defn- ->op-document [{:keys [schema-version] :as application} building]
-  (let [op (app/make-op :aiemmalla-luvalla-hakeminen (now))
+  (let [op (app/make-op "aiemmalla-luvalla-hakeminen" (now))
         doc (doc-persistence/new-doc application (schemas/get-schema schema-version "aiemman-luvan-toimenpide") (now))
         doc (assoc-in doc [:schema-info :op] op)
         doc-updates (lupapalvelu.document.model/map2updates [] (select-keys building building-fields))]
