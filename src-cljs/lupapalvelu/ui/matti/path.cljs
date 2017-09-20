@@ -38,10 +38,11 @@
 
 (defn dict-options
   "Options corresponding to the the dictionary schema referenced in the
-  given options. Creates path ([dict]) onto top-level."
-  [{{dict :dict} :schema dictionary :dictionary :as options}]
+  given options. Creates path onto top-level. Extends existing
+  path, [dict] otherwise"
+  [{{:keys [dict path]} :schema dictionary :dictionary :as options}]
   (assoc (schema-options options (dict dictionary))
-         :path [dict]))
+         :path (extend path dict)))
 
 (defn value [path state* & extra]
   @(state (extend path extra) state*))

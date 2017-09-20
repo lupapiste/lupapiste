@@ -80,7 +80,7 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.1.5"]
+                 [prismatic/schema "1.1.6"]
                  [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution

@@ -229,8 +229,9 @@
    ;; Keyword is not used. The :repeating schema is just needed in
    ;; order to make the different repeating data path prefixes unique.
    ;; Later on we might add repeating-specific properties (e.g., can
-   ;; add/remove).
-   :repeating      sc/Keyword})
+   ;; add/remove). See NestedGrid for non-dictionary reference.
+   :repeating      sc/Keyword
+   })
 
 (defn make-conditional [m]
   (->> (reduce (fn [a [k v]]
@@ -269,8 +270,11 @@
   (merge CellConfig
          MattiItem))
 
+(declare NestedGrid)
+
 (defschema MattiCell
   (sc/conditional :list MattiList
+                  :grid (sc/recursive #'NestedGrid)
                   :else MattiItemCell))
 
 (defschema MattiGrid
@@ -283,9 +287,19 @@
                                   (sc/optional-key :loc-prefix) sc/Keyword
                                   (sc/optional-key :css)        [sc/Keyword]
                                   :row                          [MattiCell]})
-                     :else [MattiCell])]
-          ;; Dict key for a repeating schema.
-          (sc/optional-key :repeating) sc/Keyword}))
+                     :else [MattiCell])]}))
+
+
+(defschema NestedGrid
+  (merge MattiBase
+         CellConfig
+         {:grid (assoc MattiGrid
+                       ;; Dict key for a repeating schema.
+                       (sc/optional-key :repeating) sc/Keyword)}))
+
+
+
+
 
 (defschema MattiSection
   (merge MattiBase
@@ -620,22 +634,22 @@
      {:id         "complexity"
       :loc-prefix :matti.complexity
       :show? [:OR :?.complexity :?.rights :?.purpose]
-      :grid       {:columns 7
-                   :rows    [{:show? :?.complexity
-                              :row [{:col  3
-                                     :dict :complexity}]}
-                             {:show? :?.complexity
-                              :row [{:col  6
-                                     :id   "text"
+      :grid {:columns 7
+             :rows    [{:show? :?.complexity
+                        :row [{:col  3
+                               :dict :complexity}]}
+                       {:show? :?.complexity
+                        :row [{:col  6
+                               :id   "text"
                                      :dict :complexity-text}]}
-                             {:show? :?.rights
-                              :row [{:col        6
-                                     :loc-prefix :matti-rights
-                                     :dict       :rights}]}
-                             {:show? :?.purpose
-                              :row [{:col        6
-                                     :loc-prefix :phrase.category.kaava
-                                     :dict       :purpose}]}]}}]}})
+                       {:show? :?.rights
+                        :row [{:col        6
+                               :loc-prefix :matti-rights
+                               :dict       :rights}]}
+                       {:show? :?.purpose
+                        :row [{:col        6
+                               :loc-prefix :phrase.category.kaava
+                               :dict       :purpose}]}]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

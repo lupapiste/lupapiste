@@ -385,33 +385,45 @@
                                       false))])))
                 (:items schema))])
 
-(defn matti-grid [{:keys [schema] :as options}]
-  [:div
-   {:class (path/css options
-                     (str "matti-grid-" (:columns schema)))}
-   (map (fn [row-schema]
-          (let [row-options (path/schema-options options row-schema)]
-            ;; Row visibility
-            (when (path/visible? row-options)
-              [:div.row {:class (some->> row-schema :css (map name) s/join )}
-               (map (fn [{:keys [col align] :as cell-schema}]
-                      (let [cell-options (path/schema-options row-options
-                                                              cell-schema)]
-                        ;; Cell visibility
-                        (when (path/visible? cell-options)
-                          [:div {:class (path/css cell-options
-                                                  (str "col-" (or col 1))
-                                                  (when align
-                                                    (str "col--" (name align))))}
-                           (cond
-                             (:dict cell-schema)
-                             (instantiate (path/dict-options cell-options)
-                                          true)
+(defn matti-grid [{:keys [schema path state] :as options}]
+  (letfn [(grid [{:keys [schema] :as options}]
+            [:div
+             {:class (path/css options
+                               (str "matti-grid-" (:columns schema)))}
+             (map (fn [row-schema]
+                    (let [row-options (path/schema-options options row-schema)]
+                      ;; Row visibility
+                      (when (path/visible? row-options)
+                        [:div.row {:class (some->> row-schema :css (map name) s/join )}
+                         (map (fn [{:keys [col align] :as cell-schema}]
+                                (let [cell-options (path/schema-options row-options
+                                                                        cell-schema)]
+                                  ;; Cell visibility
+                                  (when (path/visible? cell-options)
+                                    [:div {:class (path/css cell-options
+                                                            (str "col-" (or col 1))
+                                                            (when align
+                                                              (str "col--" (name align))))}
+                                     (condp #(%1 %2) cell-schema
+                                       :dict
+                                       (instantiate (path/dict-options cell-options)
+                                                    true)
 
-                             (:list cell-schema)
-                             (matti-list (path/schema-options cell-options
-                                                              (:list cell-schema))
-                                         true))])))
+                                       :list
+                                       :>> #(matti-list (path/schema-options cell-options %)
+                                                        true)
 
-                    (get row-schema :row row-schema))])))
-        (-> schema :rows))])
+                                       :grid
+                                       :>> #(matti-grid (path/schema-options cell-options %))
+
+                                       nil)])))
+
+                              (get row-schema :row row-schema))])))
+                  (-> schema :rows))])]
+    (if-let [repeating (:repeating schema)]
+      (map (fn [k]
+             (grid (assoc options
+                          :schema (dissoc schema :repeating)
+                          :path (path/extend path repeating k))))
+           (keys (path/value repeating state)))
+      (grid options))))
