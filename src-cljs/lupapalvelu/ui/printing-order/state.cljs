@@ -93,8 +93,12 @@
   (swap! component-state assoc :submit-pending? true)
   (common/command {:command "submit-printing-order"
                    :show-saved-indicator? false
-                   :success (fn [_]
-                     (swap! component-state assoc :phase 4 :submit-pending? false)
+                   :success
+                   (fn [{order-number :order-number :as result}]
+                     (swap! component-state assoc
+                            :phase 4
+                            :order-number order-number
+                            :submit-pending? false)
                      (js/scrollTo 0 0))}
                   :id (:id @component-state)
                   :order (:order @component-state)

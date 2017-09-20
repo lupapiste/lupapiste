@@ -117,6 +117,7 @@
 "printing-order.phase4.title" "en" "Order successfully sent"
 "printing-order.phase4.title" "fi" "Tilauksen lähettäminen onnistui"
 "printing-order.phase4.title" "sv" "Beställningen skickades"
+"printing-order.phase4.order-reference" "fi" "Jos sinulla on kysyttävää tilauksestasi, ota yhteyttä Granon asiakastukeen <a href=\"mailto:cad.jyvaskyla@grano.fi\">cad.jyvaskyla@grano.fi</a> ja mainitse viestissäsi tilausnumero <b>{0}</b>."
 "printing-order.phone" "en" "Telephone number"
 "printing-order.phone" "fi" "Puhelinnumero"
 "printing-order.phone" "sv" "Telefonnummer"

@@ -136,8 +136,14 @@
   (let [attachments-selected (->> @state/component-state
                                   :attachments
                                   (filter (fn [{id :id}]
-                                            (pos? (get order id)))))]
+                                            (pos? (get order id)))))
+        order-number (-> @state/component-state :order-number)]
     [:div
+     (when order-number
+       [:div.order-section
+        [:div.row
+         [:div.col-4
+          (loc-html :span :printing-order.phase4.order-reference order-number)]]])
      [:div.order-section
       (poc/section-header :printing-order.summary.documents)
       (files/files-table attachments-selected :read-only)]
