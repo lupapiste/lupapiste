@@ -94,12 +94,16 @@
   (common/command {:command "submit-printing-order"
                    :show-saved-indicator? false
                    :success
-                   (fn [{order-number :order-number :as result}]
-                     (swap! component-state assoc
-                            :phase 4
-                            :order-number order-number
-                            :submit-pending? false)
-                     (js/scrollTo 0 0))}
+                     (fn [{order-number :order-number}]
+                       (swap! component-state assoc
+                              :phase 4
+                              :order-number order-number
+                              :submit-pending? false)
+                       (js/scrollTo 0 0))
+                   :error
+                     (fn [e]
+                       (js/notify.ajaxError (clj->js e))
+                       (swap! component-state assoc :phase 3 :submit-pending? false))}
                   :id (:id @component-state)
                   :order (:order @component-state)
                   :contacts (:contacts @component-state)))
