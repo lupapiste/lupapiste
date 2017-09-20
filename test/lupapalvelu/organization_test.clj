@@ -35,10 +35,19 @@
 
 (facts update-assignment-triggers
   (fact "update existing"
-    (update-assignment-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole ..handlerRole... :description ..description..} ..trigger-id..) => "done"
+    (update-assignment-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole {:id ..roleid..} :description ..description..} ..trigger-id..) => "done"
     (provided (mongo/update-by-query :organizations
                                      {:assignment-triggers {"$elemMatch" {:id ..trigger-id..}}, :_id ..org-id..}
-                                     {"$set" {:assignment-triggers.$.targets ..targets.., :assignment-triggers.$.handlerRole ..handlerRole..., :assignment-triggers.$.description ..description..}}) => "done")
+                                     {"$set" {:assignment-triggers.$.targets ..targets.., :assignment-triggers.$.handlerRole {:id ..roleid..}, :assignment-triggers.$.description ..description..}}) => "done")
+    (provided (#'lupapalvelu.organization/user-created? ..trigger-id..) => false)
+    (provided (mongo/update-by-query :assignments {:trigger ..trigger-id..} {$set {:description ..description..}}) => "this is also called, function return value is not used"))
+
+  (fact "remove handler role from existing trigger"
+    (update-assignment-trigger {:id ..org-id..} {:id ..trigger-id.. :targets ..targets.. :handlerRole {:id nil :name nil} :description ..description..} ..trigger-id..) => "done"
+    (provided (mongo/update-by-query :organizations
+                                     {:assignment-triggers {"$elemMatch" {:id ..trigger-id..}}, :_id ..org-id..}
+                                     {"$set" {:assignment-triggers.$.targets ..targets.., :assignment-triggers.$.description ..description..}
+                                      "$unset" {:assignment-triggers.$.handlerRole 1}}) => "done")
     (provided (#'lupapalvelu.organization/user-created? ..trigger-id..) => false)
     (provided (mongo/update-by-query :assignments {:trigger ..trigger-id..} {$set {:description ..description..}}) => "this is also called, function return value is not used")))
 
