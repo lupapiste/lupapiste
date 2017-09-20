@@ -12,7 +12,8 @@
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.printing-order.mylly-client :as mylly]))
+            [lupapalvelu.printing-order.mylly-client :as mylly]
+            [clj-time.core :as t]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -75,6 +76,9 @@
         total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)
       (fail! :error.printing-order.too-large))
-    (let [result {:orderNumber "1"} #_(mylly/login-and-send-order! (processor/enrich-with-file-content user prepared-order))]
-      (processor/save-integration-message user created-ts application prepared-order (:orderNumber result))
-      (ok :order-number (:orderNumber result) :size total-size))))
+    (let [result (mylly/login-and-send-order! (processor/enrich-with-file-content user prepared-order))]
+      (if (:ok result)
+        (do
+          (processor/save-integration-message user created-ts application prepared-order (:orderNumber result))
+          (ok :order-number (:orderNumber result) :size total-size))
+        (fail! :error.printing-order.submit-failed)))))
