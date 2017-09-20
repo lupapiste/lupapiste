@@ -4,36 +4,33 @@
             [sade.schemas :as ssc]
             [sade.util :as util]
             [clojure.set :as set]
+            [lupapalvelu.application-schema :as app-schema]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.states :as states]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.schema-utils :as ssu]))
 
 
-(sc/defschema operation
-  {:id ssc/ObjectIdStr
-   :name sc/Str
-   :displayName (zipmap i18n/supported-langs (repeat sc/Str))
-   (sc/optional-key :description) sc/Str
-   (sc/optional-key :building) {:new sc/Bool
-                                (sc/optional-key :buildingId) sc/Str}})
+(sc/defschema Operation
+  (merge
+    (ssu/select-keys app-schema/Operation [:id :name :description])
+    {:displayName                (zipmap i18n/supported-langs (repeat sc/Str))
+     (sc/optional-key :building) {:new sc/Bool
+                                  (sc/optional-key :buildingId) sc/Str}}))
 
-(sc/defschema base-data
-  {:id            sc/Str
-   :operations    [operation]
-   :propertyId    sc/Str
-   :municipality  sc/Str
-   :location      {:x sc/Num
-                   :y sc/Num}
-   :location-wgs84 {:x sc/Num
-                    :y sc/Num}
-   :address       sc/Str
-   :state         (apply sc/enum (map name states/all-states))
-   :permitType    (apply sc/enum (map name (keys (permit/permit-types))))
-   :applicant     sc/Str
-   :infoRequest   sc/Bool
-   :link          (zipmap i18n/supported-langs (repeat ssc/OptionalHttpUrl))})
+(def base-keys
+  [:address :infoRequest :municipality
+   :state :permitType :location-wgs84
+   :id :applicant :operations :propertyId
+   :location])
+
+(sc/defschema ApplicationBaseData                           ; Format application schema appropriate for integration
+  (merge
+    (ssu/select-keys app-schema/Application base-keys)
+    {:operations     [Operation]
+     :location       {:x sc/Num :y sc/Num}
+     :location-wgs84 {:x sc/Num :y sc/Num}
+     :link           (zipmap i18n/supported-langs (repeat ssc/OptionalHttpUrl))}))
 
 (defn to-lang-map [localize-function]
   (reduce (fn [result lang]
@@ -41,7 +38,7 @@
           {}
           i18n/supported-langs))
 
-(sc/defn ^:always-validate get-op-data :- operation [op]
+(sc/defn ^:always-validate get-op-data :- Operation [op]
   (-> (select-keys op [:id :name :description])
       (assoc :displayName (to-lang-map #(i18n/localize % "operations" (:name op))))))
 
@@ -59,7 +56,8 @@
     (util/assoc-when operation :building (get-building-data op-doc))
     operation))
 
-(defn build-operations [{:keys [primaryOperation secondaryOperations] :as app}]
+(sc/defn ^:always-validate build-operations :- [Operation]
+  [{:keys [primaryOperation secondaryOperations] :as app}]
   (->> (cons (get-op-data primaryOperation)
              (map get-op-data secondaryOperations))
        (map (partial enrich-operation-with-building app))))
@@ -69,8 +67,8 @@
 
 (def location-array-to-map (fn [[x y]] {:x x :y y}))
 
-(sc/defn ^:always-validate app-to-json :- base-data [application]
-  (-> (select-keys application (keys base-data))
+(sc/defn ^:always-validate app-to-json :- ApplicationBaseData [application]
+  (-> (select-keys application (keys ApplicationBaseData))
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
       (assoc :operations (build-operations application))

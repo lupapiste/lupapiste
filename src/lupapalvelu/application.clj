@@ -34,8 +34,8 @@
             [sade.env :as env]
             [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]
-            [sade.schemas :as ssc]))
+            [sade.coordinate :as coord]))
+
 
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
