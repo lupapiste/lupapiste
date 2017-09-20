@@ -33,10 +33,11 @@
 (rum/defc default-section < rum/reactive
   {:key-fn #(path/unique-id "section")}
   [{:keys [schema] :as options} section-type]
-  [:div.matti-section
-   {:class (path/css options)}
-   (section-header options section-type)
-   (section-body options section-type)])
+  (when (path/visible? options)
+    [:div.matti-section
+     {:class (path/css options)}
+     (section-header options section-type)
+     (section-body options section-type)]))
 
 (defn default-section-body
   [{:keys [schema] :as options}]

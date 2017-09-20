@@ -87,7 +87,6 @@
   [options _]
   (verdict-section-header options))
 
-
 (defn verdict
   [{:keys [schema state] :as options}]
   [:div.matti-verdict
@@ -96,7 +95,6 @@
      [:div.col-2.col--right
       (layout/last-saved options)]]]
    (sections/sections options :verdict)])
-
 
 (rum/defcs new-verdict < rum/reactive
   (rum/local nil ::template)
@@ -119,7 +117,6 @@
                                                                reset-verdict)}
                         [:i.lupicon-circle-plus]
                         [:span (common/loc :application.verdict.add)]])]]))
-
 
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]

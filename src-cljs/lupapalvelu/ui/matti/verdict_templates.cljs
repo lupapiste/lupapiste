@@ -39,7 +39,7 @@
                        (js/util.finnishDateAndTime published))
            (common/loc :matti.template-not-published))]
    [:button.ghost
-    {:disabled (state/auth? :publish-verdict-template)
+    {:disabled (not (state/auth? :publish-verdict-template))
      :on-click #(service/publish-template (path/value [:id] info*)
                                           (common/response->state info* :published))}
         (common/loc :matti.publish)]])

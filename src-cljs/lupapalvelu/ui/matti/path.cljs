@@ -154,7 +154,7 @@
              :else v)))
 
 (defn- path-truthy? [{state :state :as options} kw-path]
-  (let [[x & [k] :as path] (pathify kw-path)]
+  (let [[x & k :as path] (pathify kw-path)]
     (when (= x :automatic-verdict-dates))
     (truthy? (case x
               :_meta  (react-meta options k )

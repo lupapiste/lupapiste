@@ -18218,6 +18218,10 @@ input:disabled + .matti-radio-label:hover.matti-radio-label:before {
   border-top: none;
 }
 
+.matti-verdict .matti-section {
+  min-height: 64px;
+}
+
 .matti--view .matti-condition-box + .matti-condition-box:before {
   content: ", ";
 }

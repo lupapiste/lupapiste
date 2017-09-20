@@ -590,43 +590,52 @@
                                                  :id    "included"
                                                  :dict  check-path}]}))
                                    [:foremen :plans :reviews])
-                              [[{:show? :conditions
-                                 :col   6
-                                 :id    "other"
-                                 :align :full
-                                 :dict  :conditions}]])}}
-     {:id   "appeal"
-      :grid {:columns 7
-             :rows    [[{:col        6
-                         :loc-prefix :verdict.muutoksenhaku
-                         :dict       :appeal}]
-                       [{:col        6
-                         :loc-prefix :matti-collateral
-                         :dict       :collateral}]]}}
-     {:id   "neighbors"
-      :grid {:columns 12
-             :rows    [[{:col  7
-                         :id   "neighbor-notes"
-                         :dict :neighbors}
-                        {:col   4
-                         :id    "neighbor-states"
-                         :align :right
-                         :dict  :neighbor-states}]
-                       ]}}
+                              [{:show? :?.conditions
+                                :row   [{:col   6
+                                         :id    "other"
+                                         :align :full
+                                         :dict  :conditions}]}])}}
+     {:id    "appeal"
+      :show? [:OR :?.appeal :?.collateral]
+      :grid  {:columns 7
+              :rows    [{:show? :?.appeal
+                         :row [{:col        6
+                                :loc-prefix :verdict.muutoksenhaku
+                                :dict       :appeal}]}
+                        {:show? :?.collateral
+                         :row [{:col        6
+                                :loc-prefix :matti-collateral
+                                :dict       :collateral}]}]}}
+     {:id    "neighbors"
+      :show? :?.neighbors
+      :grid  {:columns 12
+              :rows    [[{:col  7
+                          :id   "neighbor-notes"
+                          :dict :neighbors}
+                         {:col   4
+                          :id    "neighbor-states"
+                          :align :right
+                          :dict  :neighbor-states}]
+                        ]}}
      {:id         "complexity"
       :loc-prefix :matti.complexity
+      :show? [:OR :?.complexity :?.rights :?.purpose]
       :grid       {:columns 7
-                   :rows    [[{:col  3
-                               :dict :complexity}]
-                             [{:col  6
-                               :id   "text"
-                               :dict :complexity-text}]
-                             [{:col        6
-                               :loc-prefix :matti-rights
-                               :dict       :rights}]
-                             [{:col        6
-                               :loc-prefix :phrase.category.kaava
-                               :dict       :purpose}]]}}]}})
+                   :rows    [{:show? :?.complexity
+                              :row [{:col  3
+                                     :dict :complexity}]}
+                             {:show? :?.complexity
+                              :row [{:col  6
+                                     :id   "text"
+                                     :dict :complexity-text}]}
+                             {:show? :?.rights
+                              :row [{:col        6
+                                     :loc-prefix :matti-rights
+                                     :dict       :rights}]}
+                             {:show? :?.purpose
+                              :row [{:col        6
+                                     :loc-prefix :phrase.category.kaava
+                                     :dict       :purpose}]}]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

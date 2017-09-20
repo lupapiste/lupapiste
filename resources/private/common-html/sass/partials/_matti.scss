@@ -154,6 +154,12 @@ $section-border: 1px solid $gray51;
   }
 }
 
+.matti-verdict {
+  .matti-section {
+    min-height: 64px;
+  }
+}
+
 .matti--view {
   .matti-condition-box + .matti-condition-box:before {
     content: ", ";
