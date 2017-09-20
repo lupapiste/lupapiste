@@ -63,4 +63,5 @@
                   :created created-ts
                   :external-reference order-number
                   :initator (select-keys user [:id :username])
+                  :attached-files (map :fileId (-> delivery :printedMaterials))
                   :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))

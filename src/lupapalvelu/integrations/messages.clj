@@ -28,7 +28,7 @@
    (sc/optional-key :initator)    {:id       sc/Str
                                    :username sc/Str}
    (sc/optional-key :action)            sc/Str
-   (sc/optional-key :attachment-ids)    [ssc/ObjectIdStr]
+   (sc/optional-key :attached-files)    [ssc/ObjectIdStr]
    (sc/optional-key :attachmentsCount)  sc/Int
    (sc/optional-key :acknowledged)      ssc/Timestamp})
 
