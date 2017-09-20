@@ -266,7 +266,8 @@
 (defn application-state-reminder []
   (let [apps (mongo/select :applications
                            {:state {$in ["draft" "open"]}
-                            :modified {$and [(older-than (util/get-timestamp-ago :month 1)) (newer-than (util/get-timestamp-ago :month 6))]}
+                            $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
+                                  {:modified (newer-than (util/get-timestamp-ago :month 6))}]
                             $or [{:reminder-sent {$exists false}}
                                  {:reminder-sent nil}
                                  {:reminder-sent (older-than (util/get-timestamp-ago :month 1))}]}
