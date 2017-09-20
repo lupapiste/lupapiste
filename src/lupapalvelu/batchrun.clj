@@ -684,7 +684,7 @@
                :organizations organizations})
         eraajo-user (user/batchrun-user (map :organization apps))]
     (->> (doall
-          (map
+          (pmap
            (fn [{:keys [id permitType organization] :as app}]
              (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
                (try
@@ -705,12 +705,6 @@
                    ;; Return result for testing purposes
                    result)
                  (catch Throwable t
-                   (println {:run-by "Automatic verdict attachments checking"
-                             :event "Unable to get verdict from backend"
-                             :exception-message (.getMessage t)
-                             :application-id id
-                             :organization {:id organization :permit-type permitType}})
-                   (clojure.stacktrace/print-stack-trace t)
                    (logging/log-event :error {:run-by "Automatic verdict attachments checking"
                                               :event "Unable to get verdict from backend"
                                               :exception-message (.getMessage t)

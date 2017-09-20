@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [clojure.data :refer [diff]]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
@@ -436,7 +437,7 @@
                                              :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
 
 
-;; Fetch missing "päätöspöytäkirja" attachments
+;; Fetch missing verdict attachments
 
 (defn- missing-verdict-attachments-query [{:keys [start end organizations]}]
   (merge {:verdicts {$elemMatch {$and [{:timestamp {$gt start
@@ -508,10 +509,10 @@
        (:poytakirjat app-paatos)))
 
 (defn- poytakirja-update [[app-pk update-pk]]
-  (cond (nil? update-pk)        {:action :keep :pk app-pk}
+  (cond (nil? update-pk)        {:action :keep   :pk app-pk}
         (or (:liite update-pk)
             (:Liite update-pk)) {:action :update :pk app-pk :with-pk update-pk}
-        :else                   {:action :keep :pk app-pk}))
+        :else                   {:action :keep   :pk app-pk}))
 
 (defn- update-poytakirja-entries!
   [app-paatos update-paatos application user timestamp app-verdict-id]
@@ -521,13 +522,13 @@
     (assoc app-paatos
            :poytakirjat
            (doall
-            (for [{:keys [action pk] :as action} update-actions]
+            (for [{:keys [action pk] :as update-info} update-actions]
               (cond (= action :keep)   pk
                     (= action :update) (get-poytakirja! application
                                                         user
                                                         timestamp
                                                         app-verdict-id
-                                                        (:with-pk action))
+                                                        (:with-pk update-info))
                     :else              pk))))))
 
 ;; 3. update the verdicts on application that have a new poytakirja attachment
@@ -538,8 +539,6 @@
   and return an updated verdict with information on the added
   attachments in relevant :poytakirjat arrays."
   [application user timestamp verdicts-from-xml app-verdict]
-  (println "application verdict, kuntalupatunnus" (:kuntalupatunnus app-verdict))
-  (println (map :kuntalupatunnus verdicts-from-xml))
   (if-let [update-verdict (matching-verdict app-verdict
                                             verdicts-from-xml)]
     ;; There is no straightforward way to match :paatokset elements,
@@ -556,14 +555,24 @@
                                                (:id app-verdict))
                   (:paatokset app-verdict)
                   (:paatokset update-verdict)))
-      (do (warn "Cannot match :paatokset elements")))
+      (do (warn "Cannot match :paatokset elements")
+          app-verdict))
     app-verdict))
 
 ;; 4. store the updates to mongo
-(defn- store-verdict-updates! [command updated-verdicts]
+(defn- store-verdict-updates!
+  "Store the updated verdicts to mongo. Return the ones that were
+  actually updated."
+  [command updated-verdicts]
   (action/update-application command
                              {$set {:verdicts updated-verdicts}})
-  updated-verdicts)
+  (->> updated-verdicts
+       (map vector (-> command :application :verdicts))
+       (filter (partial apply not=))
+       (map (juxt (comp :id first)
+                  (comp second
+                        (partial apply diff))))
+       (into {})))
 
 
 (defn update-verdict-attachments-from-xml!
@@ -580,5 +589,4 @@
     (->> (:verdicts application)
          (map (partial add-verdict-attachments! application user created update-verdicts))
          (store-verdict-updates! command)
-         (filter (comp #(= (:timestamp %) created) first :paatokset))
          (ok :id (:id application) :updated-verdicts))))
