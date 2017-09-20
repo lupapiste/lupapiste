@@ -127,7 +127,8 @@
       (poc/section-header :printing-order.conditions.heading)
       [:div.row
        [:div.col-4
-        (loc-html :span :printing-order.conditions.text)]]
+        [:p (loc-html :span :printing-order.conditions.text)]
+        [:p (loc :printing-order.conditions.data-processing-notice)]]]
       [:div.row
        (poc/grid-checkbox conditions-accepted-option [:conditions-accepted] :col-2 :printing-order.conditions.accept true)]]]))
 
