@@ -24037,6 +24037,14 @@ td.comment-text {
   left: 250px;
 }
 
+.permanent-archive-setting .earliest-archiving-date {
+  vertical-align: middle;
+}
+
+.permanent-archive-setting .earliest-archiving-date input {
+  margin: 0;
+}
+
 #notifications p {
   margin-bottom: 0;
 }

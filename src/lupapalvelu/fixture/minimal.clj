@@ -789,6 +789,7 @@
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -865,6 +866,7 @@
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
                        :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
                        :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
                        :assignments-enabled true
                        :areas {:type "FeatureCollection"
@@ -1271,6 +1273,7 @@
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
                        :use-attachment-links-integration true
                        :operations-tos-functions {:masto-tms "10 03 00 01"}
                        :automatic-ok-for-attachments-enabled true

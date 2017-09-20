@@ -11,6 +11,7 @@
     self.calendarsEnabled = ko.observable(false);
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
+    self.earliestArchivingDate = ko.observable();
 
     self.permitTypes = ko.observableArray([]);
     self.municipalities = ko.observableArray([]);
@@ -138,6 +139,11 @@
           self.calendarsEnabled(result.data["calendars-enabled"]);
           self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
           self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
+
+          var archiveTs= result.data["earliest-allowed-archiving-date"];
+          if (archiveTs && archiveTs > 0) {
+            self.earliestArchivingDate(new Date(result.data["earliest-allowed-archiving-date"]));
+          }
           isLoading = false;
         })
         .call();
@@ -235,6 +241,22 @@
     self.permanentArchiveEnabled.subscribe(function(value) {
       setBooleanAttribute("permanent-archive-enabled", value);
     });
+
+    self.earliestArchivingDate.subscribe(function (date) {
+      if (isLoading) {
+        return;
+      }
+      var ts = date ? date.getTime() : 0;
+      ajax.command("set-organization-earliest-allowed-archiving-date", {organizationId: self.organization().id(), date: ts})
+        .success(function(res) {
+          util.showSavedIndicator(res);
+        })
+        .call();
+    });
+
+    self.resetEarliestArchivingDate = function () {
+      self.earliestArchivingDate(null);
+    };
 
     self.digitizerToolsEnabled.subscribe(function(value) {
       setBooleanAttribute("digitizer-tools-enabled", value);

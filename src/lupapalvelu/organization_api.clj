@@ -483,6 +483,21 @@
     (org/update-organization (usr/authority-admins-organization-id user) {$set {:permanent-archive-in-use-since date}})
     (ok)))
 
+(defcommand set-organization-earliest-allowed-archiving-date
+  {:parameters [organizationId date]
+   :user-roles #{:admin}
+   :input-validators  [(partial number-parameters [:date])]}
+  [_]
+  (when-let [{:keys [permanent-archive-in-user-since]} (->> (org/get-organization organizationId)
+                      org/parse-organization)]
+    (when-not (neg? date)
+      (org/update-organization organizationId
+                               {$set (cond-> {:earliest-allowed-archiving-date date}
+
+                                             (< permanent-archive-in-user-since date)
+                                             (assoc :permanent-archive-in-use-since date))})
+      (ok))))
+
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 
 (def email-list-validators [(partial action/string-parameters [:emails])

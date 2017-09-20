@@ -135,6 +135,7 @@
    (sc/optional-key :permanent-archive-enabled) sc/Bool
    (sc/optional-key :digitizer-tools-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :earliest-allowed-archiving-date) sssc/Nat
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
