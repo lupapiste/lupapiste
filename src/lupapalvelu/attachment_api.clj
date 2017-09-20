@@ -562,7 +562,8 @@
    :user-authz-roles (conj roles/all-authz-writer-roles :foreman)
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
-   :pre-checks  [(partial att/if-not-authority-state-must-not-be #{:sent})
+   :pre-checks  [(action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                        (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                  att/foreman-must-be-uploader
                  att/attachment-editable-by-application-state
                  (mime-validator "application/pdf")
