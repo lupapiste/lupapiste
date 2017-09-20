@@ -23,6 +23,7 @@
                                           :billingReference ""
                                           :deliveryInstructions ""}
                             :conditions-accepted false
+                            :submit-pending? false
                             :phase       1
                             :id          nil})
 
@@ -89,12 +90,15 @@
   (swap! component-state assoc :phase 2))
 
 (defn submit-order []
-  (common/command "submit-printing-order"
-                  #(swap! component-state assoc :phase 4)
+  (swap! component-state assoc :submit-pending? true)
+  (common/command {:command "submit-printing-order"
+                   :show-saved-indicator? false
+                   :success (fn [_]
+                     (swap! component-state assoc :phase 4 :submit-pending? false)
+                     (js/scrollTo 0 0))}
                   :id (:id @component-state)
                   :order (:order @component-state)
-                  :contacts (:contacts @component-state)
-                  ))
+                  :contacts (:contacts @component-state)))
 
 (defn back-to-application []
   (.openPage js/pageutil (str "application/" (:id @component-state)) "attachments"))
