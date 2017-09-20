@@ -30,11 +30,11 @@
 
 (defn docgen-attr [{:keys [path state] :as options} & kv]
   (let [id (path/id path)]
-    (assoc (apply hash-map kv)
-           :key id
-           :id  id
-           :disabled (path/disabled? options)
-           :class (common/css-flags :warning (warning? options)))))
+    (merge {:key id
+            :id  id
+            :disabled (path/disabled? options)
+            :class (common/css-flags :warning (warning? options))}
+           (apply hash-map kv))))
 
 (defn- state-change [{:keys [state path] :as options}]
   (let [handler (common/event->state (path/state path state))]
@@ -75,9 +75,10 @@
   (let [state*    (path/state path state)
         input-id  (path/unique-id "checkbox-input")]
     [:div.matti-checkbox-wrapper (docgen-attr options)
-     [:input {:type    "checkbox"
-              :checked (rum/react state*)
-              :id      input-id}]
+     [:input (docgen-attr options
+                          :type    "checkbox"
+                          :checked (rum/react state*)
+                          :id      input-id)]
      [:label.matti-checkbox-label
       {:for      input-id
        :on-click (fn [_]

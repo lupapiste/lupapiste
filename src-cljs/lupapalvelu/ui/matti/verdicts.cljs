@@ -45,7 +45,8 @@
           (when verdict
             {:state (:data verdict)
              :info (dissoc verdict :data)
-             :_meta {:updated updater}}))
+             :_meta {:updated updater
+                     :enabled? (state/auth? :edit-matti-verdict)}}))
   (reset! state/settings settings)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
@@ -55,7 +56,8 @@
       (if app-id
         (do (service/fetch-application-verdict-templates app-id)
             (service/fetch-application-phrases app-id)
-            (service/fetch-verdict-list app-id))
+            (service/fetch-verdict-list app-id)
+            (reset! state/auth-fn lupapisteApp.models.applicationAuthModel.ok))
         (do (reset! state/template-list [])
             (reset! state/phrases [])
             (reset! state/verdict-list nil))))))
@@ -71,14 +73,15 @@
 (rum/defc verdict-section-header < rum/reactive
   [options]
   [:div.matti-grid-1.section-header
-   [:div.row.row--tight
-    [:div.col-1.col--right
-     [:div.verdict-buttons
-      [:button.primary.outline
-       {:on-click #(path/flip-meta options :editing?)}
-       (common/loc (if (path/react-meta options :editing?)
-                     :close
-                     :edit))]]]]])
+   (when (path/enabled? options)
+     [:div.row.row--tight
+      [:div.col-1.col--right
+       [:div.verdict-buttons
+        [:button.primary.outline
+         {:on-click #(path/flip-meta options :editing?)}
+         (common/loc (if (path/react-meta options :editing?)
+                       :close
+                       :edit))]]]])])
 
 (defmethod sections/section-header :verdict
   [options _]

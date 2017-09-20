@@ -141,16 +141,24 @@
     (util/split-kw-path path)
     path))
 
-(defn- truthy [v]
+(defn has-path?
+  "True if the path is found within the state regardless of its
+  value."
+  [path state]
+  (contains? (react (butlast path) state)
+             (last path)))
+
+(defn- truthy? [v]
   (boolean (cond
              (sequential? v) (seq v)
              :else v)))
 
-(defn- path-truthy [{state :state :as options} kw-path]
+(defn- path-truthy? [{state :state :as options} kw-path]
   (let [[x & [k] :as path] (pathify kw-path)]
     (when (= x :automatic-verdict-dates))
-    (truthy (if (= x :_meta )
-              (react-meta options k )
+    (truthy? (case x
+              :_meta  (react-meta options k )
+              :?      (has-path? k state)
               (react path state)))))
 
 (defn eval-state-condition [options condition]
@@ -158,7 +166,7 @@
     (nil? condition) nil
 
     (keyword? condition)
-    (path-truthy options condition)
+    (path-truthy? options condition)
 
     (sequential? condition)
     (loop [op       (first condition)
@@ -185,7 +193,8 @@
       :else              true)))
 
 (defn enabled? [options]
-  (good? options :enabled? :disabled?))
+  (and (react-meta options :enabled?)
+       (good? options :enabled? :disabled?)))
 
 (defn disabled? [options] (not (enabled? options)))
 

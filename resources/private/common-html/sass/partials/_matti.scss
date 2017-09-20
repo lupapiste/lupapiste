@@ -351,6 +351,16 @@ div.matti-autocomplete {
       padding-left: 12px;
     }
   }
+  .ac--selected.disabled {
+    //pointer-events: none;
+    span, i {
+      background-color: $input-disabled-background-color;
+      border-color: $input-disabled-border-color;
+    }
+    i {
+      color: $input-select-disabled-icon
+    }
+  }
   .ac__menu {
     background-color: white;
     position: absolute;

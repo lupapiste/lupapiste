@@ -19,7 +19,7 @@
     (components/checkbox {:label      "matti.template-removed"
                           :value      (rum/react state*)
                           :handler-fn handler-fn
-                          :disabled   false ;; TODO: _meta
+                          :disabled   (path/disabled? options)
                           :negate?    true})))
 
 (declare section)

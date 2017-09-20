@@ -27,7 +27,8 @@
                                        value
                                        (common/response->state info* :modified)))]
     (components/pen-input {:value      (rum/react (path/state [:name] info*))
-                           :handler-fn handler-fn})))
+                           :handler-fn handler-fn
+                           :disabled? (not (state/auth? :set-verdict-template-name))})))
 
 
 (rum/defc verdict-template-publish < rum/reactive
@@ -38,7 +39,8 @@
                        (js/util.finnishDateAndTime published))
            (common/loc :matti.template-not-published))]
    [:button.ghost
-    {:on-click #(service/publish-template (path/value [:id] info*)
+    {:disabled (state/auth? :publish-verdict-template)
+     :on-click #(service/publish-template (path/value [:id] info*)
                                           (common/response->state info* :published))}
         (common/loc :matti.publish)]])
 
@@ -49,7 +51,7 @@
             {:state draft
              :info (dissoc template :draft)
              :_meta {:updated   updater
-                     :can-edit? true
+                     :enabled?  (state/auth? :save-verdict-template-draft-value)
                      :editing?  true}}))
   (reset! state/current-view (if template ::template ::list)))
 
@@ -162,7 +164,7 @@
       [:span (common/loc :matti.add-verdict-template)]]]))
 
 (rum/defc verdict-templates < rum/reactive
-  [_]
+  []
   (when (and (rum/react state/schemas)
              (rum/react state/categories)
              (rum/react state/phrases))
@@ -196,14 +198,14 @@
 
 (defn mount-component []
   (when (common/feature? :matti)
-    (rum/mount (verdict-templates (:auth-model @args))
+    (rum/mount (verdict-templates)
                (.getElementById js/document (:dom-id @args)))))
 
-(defn ^:export start [domId componentParams]
+(defn ^:export start [domId]
   (when (common/feature? :matti)
     (swap! args assoc
-           :auth-model (aget componentParams "authModel")
            :dom-id (name domId))
+    (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
     (service/fetch-schemas)
     (service/fetch-template-list)
     (service/fetch-categories (fn [categories]

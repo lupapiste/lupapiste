@@ -85,25 +85,40 @@
     sequential? (sc/recursive #'PathCondition))])
 
 (def condition-type
+  "Paths with operator (:AND, :OR) and nesting support. A valid value is
+  either a keyword or list. The list must start with operator and it
+  can include nested lists. Valid values:
+
+  :simple.path
+
+  [:AND :first.path :second.path [:OR :alternative.path :other.path]]"
   (sc/conditional
    keyword?    sc/Keyword
    sequential? PathCondition))
 
 
 (defschema MattiEnabled
-  "Component is enabled/disabled if the path value is truthy. Empty
-  strings/collections are interpreted as falsey. Default: enabled.
-  Paths are either joined kw-path or vector of joined kw-paths. In
-  other words, each vector item denotes full path. If both are given,
-  both are taken into account. On conflicts, component is disabled.
-  Paths starting with :_meta are interpreted as _meta queries."
-  {(sc/optional-key :enabled?)  condition-type   ;; True if ANY truthy.
-   (sc/optional-key :disabled?) condition-type}) ;; True if ANY truthy
+  "Component state (enabled/disabled) as defined by paths. Empty
+  strings/collections are interpreted as falsey. Default: enabled.  On
+  conflicts, component is disabled. Some path prefixes are handled specially:
+
+   :_meta denotes that (the rest of) the path is interpreted as _meta
+   query (see path/react-meta).
+
+  :? True if the path is found within the state (regardless of its
+  value)
+
+  Note: :_meta.enabled? is always used as prerequisite."
+  {(sc/optional-key :enabled?)
+  condition-type
+   (sc/optional-key :disabled?) condition-type})
 
 (defschema MattiVisible
-  "Similar to MattiEnabled."
-  {(sc/optional-key :show?) condition-type   ;; True if ANY truthy.
-   (sc/optional-key :hide?) condition-type}) ;; True if ANY truthy.
+  "Similar to MattiEnabled, but without any implicit prerequisite
+  condition. Default is visible."
+  {(sc/optional-key :show?)
+  condition-type
+   (sc/optional-key :hide?) condition-type})
 
 (defschema MattiBase
   (merge MattiVisible

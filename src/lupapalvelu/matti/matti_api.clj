@@ -430,12 +430,13 @@
   [& conditions]
   (let [{:keys [editable?]} (zipmap conditions (repeat true))]
     (fn [{:keys [data application]}]
-      (let [verdict (util/find-by-id (:verdict-id data)
-                                     (:matti-verdicts application))]
-        (when-not verdict
-          (fail! :error.verdict-not-found))
-        (when (and editable? (:published verdict))
-          (fail! :error.verdict.not-draft))))))
+      (when-let [verdict-id (:verdict-id data)]
+        (let [verdict (util/find-by-id verdict-id
+                                       (:matti-verdicts application))]
+          (when-not verdict
+            (fail! :error.verdict-not-found))
+          (when (and editable? (:published verdict))
+            (fail! :error.verdict.not-draft)))))))
 
 (defn- verdict-exists [{:keys [data application]}]
   (when-not (util/find-by-id (:verdict-id data) (:matti-verdicts application))

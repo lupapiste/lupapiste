@@ -43,7 +43,7 @@
 (rum/defcs pen-input < (rum/local "" ::name)
   (rum/local false ::editing?)
   "Editable text via pen button."
-  [{name ::name editing? ::editing?} {:keys [value handler-fn]}]
+  [{name ::name editing? ::editing?} {:keys [value handler-fn disabled?]}]
   (if @editing?
     (letfn [(save-fn []
               (reset! editing? false)
@@ -64,9 +64,10 @@
         [:i.lupicon-save]]])
     (do (common/reset-if-needed! name value)
         [:span.pen-input--view @name
-         [:button.ghost.no-border
-          {:on-click #(swap! editing? not)}
-          [:i.lupicon-pen]]])))
+         (when-not disabled?
+           [:button.ghost.no-border
+            {:on-click #(swap! editing? not)}
+            [:i.lupicon-pen]])])))
 
 (rum/defc checkbox
   [{:keys [label value handler-fn disabled negate?]}]
@@ -177,6 +178,7 @@
 ;;   [callback] change callback
 ;;   [clear?] if truthy, clear button is shown when proper (default
 ;;            false).
+;;   [disabled?] Is component disabled? (false)
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
   (rum/local "" ::term)    ; Filtering term
@@ -186,7 +188,7 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} _ {:keys [items clear? callback]}]
+    :as       local-state} _ {:keys [items clear? callback disabled?]}]
   (let [items-fn (if (fn? items)
                    items
                    (default-items-fn items))
@@ -196,7 +198,9 @@
       (common/reset-if-needed! term* ""))
     [:div.matti-autocomplete
      [:div.like-btn.ac--selected
-      {:on-click #(swap! open?* not)}
+      {:on-click (when-not disabled?
+                   #(swap! open?* not))
+       :class (common/css-flags :disabled disabled?)}
       [:span (:text (util/find-by-key :value
                                       (rum/react selected*)
                                       (items-fn "")))]
@@ -204,7 +208,8 @@
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
                                  :lupicon-chevron-small-up   open?)}]
       (when (and clear?
-                 (not (s/blank? (rum/react selected*))))
+                 (not (s/blank? (rum/react selected*)))
+                 (not disabled?))
         [:i.secondary.ac--clear.lupicon-remove
          {:on-click (fn [event]
                       (set-selected selected* "" callback)

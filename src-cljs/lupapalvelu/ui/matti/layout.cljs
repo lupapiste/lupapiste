@@ -8,13 +8,24 @@
   state (atom): The whole current state atom. Structurally corresponds
   to the dictionary.
 
+  info (atom): State values outside of the current schema (and
+  dictionary). Typical example is the modified timestamp that is
+  updated separately.
+
+  _meta (atom): Runtime 'meta-state' that supports
+  partly/hierarchically resolved path values. See path/meta-value for
+  details.
+
   path (list): Current component's value path within the state. For
   simple components this is just the dictionary key wrapped in a list.
 
   id-path (list): List of ids for the component schema path. Each id
-  that is on the schema path.
+  that is on the schema path. id-path is used when resolving _meta queries.
 
-  loc-path (list): Latest loc-prefix in the schema path and the later ids."
+  loc-path (list): Latest loc-prefix in the schema path and the later ids.
+
+  references (atom): Data for external reference resolution (see
+  reference-list components)"
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.matti.shared :as shared]
@@ -76,7 +87,8 @@
       (docgen/text-edit (assoc options :path (path/extend path :delta))
                         :input.grid-style-input
                         {:type "number"
-                         :disabled (not (path/react enabled-path state))})
+                         :disabled (or (not (path/react enabled-path state))
+                                       (path/disabled? options))})
       (common/loc (str "matti-date-delta." (-> schema :unit name)))]]))
 
 
@@ -184,7 +196,8 @@
             (path/meta-updated options))]
     (when-not @category*
       (set-category (:category schema)))
-    (let [ref-id (path/unique-id "-ref")]
+    (let [ref-id    (path/unique-id "-ref")
+          disabled? (path/disabled? options)]
       [:div.matti-grid-12
        (when (show-label? schema wrap-label?)
          [:h4.matti-label (path/loc options)])
@@ -192,20 +205,23 @@
         [:div.col-3.col--full
          [:div.col--vertical
           [:label (common/loc :phrase.add)]
-          (phrases/phrase-category-select @category* set-category)]]
+          (phrases/phrase-category-select @category*
+                                          set-category
+                                          {:disabled? disabled?})]]
         [:div.col-5
          [:div.col--vertical
           (common/empty-label)
           (components/autocomplete selected*
-                                   {:items    (phrases/phrase-list-for-autocomplete (rum/react category*))
-                                    :callback #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
-                                                     sel-start (.-selectionStart text-node)
-                                                     sel-end   (.-selectionEnd text-node)
-                                                     old-text  (or (path/value path state) "")]
-                                                 (reset! replaced* (subs old-text sel-start sel-end))
-                                                 (update-text (s/join (concat (take sel-start old-text)
-                                                                              %
-                                                                              (drop sel-end old-text)))))})]]
+                                   {:items     (phrases/phrase-list-for-autocomplete (rum/react category*))
+                                    :callback  #(let [text-node (.-firstChild (rum/ref local-state ref-id) )
+                                                      sel-start (.-selectionStart text-node)
+                                                      sel-end   (.-selectionEnd text-node)
+                                                      old-text  (or (path/value path state) "")]
+                                                  (reset! replaced* (subs old-text sel-start sel-end))
+                                                  (update-text (s/join (concat (take sel-start old-text)
+                                                                               %
+                                                                               (drop sel-end old-text)))))
+                                    :disabled? disabled?})]]
         [:div.col-4.col--right
          [:div.col--vertical
           (common/empty-label)
@@ -213,11 +229,13 @@
            [:button.primary.outline
             {:on-click (fn []
                          (update-text "")
-                         (reset! selected* ""))}
+                         (reset! selected* ""))
+             :disabled disabled?}
             (common/loc :matti.clear)]
            [:button.primary.outline
             {:disabled (let [phrase (rum/react selected*)]
-                         (or (s/blank? phrase)
+                         (or disabled?
+                             (s/blank? phrase)
                              (not (re-find (re-pattern (goog.string/regExpEscape phrase))
                                            (path/react path state)))))
              :on-click (fn []
@@ -230,7 +248,8 @@
         [:div.col-12.col--full
          {:ref ref-id}
          (components/textarea-edit (path/state path state)
-                                   {:callback update-text})]]])))
+                                   {:callback update-text
+                                    :disabled disabled?})]]])))
 
 ;; -------------------------------
 ;; Component instantiation

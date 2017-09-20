@@ -18421,6 +18421,15 @@ div.matti-autocomplete .ac--selected i.ac--clear {
   padding-left: 12px;
 }
 
+div.matti-autocomplete .ac--selected.disabled span, div.matti-autocomplete .ac--selected.disabled i {
+  background-color: #f6f6f6;
+  border-color: #dddddd;
+}
+
+div.matti-autocomplete .ac--selected.disabled i {
+  color: #bbbbbb;
+}
+
 div.matti-autocomplete .ac__menu {
   background-color: white;
   position: absolute;

@@ -159,7 +159,7 @@
      [:span.matti-label
       (when edit? {:class :row-text})
       (path/loc options)]]
-    (when edit?
+    (when (and edit? (path/enabled? options))
       [:div.col-2.col--right
        [:button.ghost
         {:on-click #(path/flip-meta options :editor?)}
