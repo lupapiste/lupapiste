@@ -468,16 +468,17 @@
           {:created 12345, :roles [:applicant :authority], :target {:type "application"}, :text "message2", :to nil, :type ..user-role.., :user user}])
 
     (fact application-state
-      (application-state ..any-user.. ..organization-id.. true false) => :info
+      (application-state ..any-user.. ..organization-id.. true "kerrostalo-rivitalo") => :info
 
-      (application-state ..any-user.. ..organization-id.. false true) => :open
+      (application-state ..any-user.. ..organization-id.. false "archiving-project") => :open
 
-      (application-state ..user.. ..organization-id.. false false) => :open
+      (application-state ..user.. ..organization-id.. false "kerrostalo-rivitalo") => :open
       (provided (usr/user-is-authority-in-organization? ..user.. ..organization-id..) => true)
 
-      (application-state ..user.. ..organization-id.. false false) => :draft
+      (application-state ..user.. ..organization-id.. false "kerrostalo-rivitalo") => :draft
       (provided (usr/user-is-authority-in-organization? ..user.. ..organization-id..) => false
-                (usr/rest-user? ..user..) => false))
+                (usr/rest-user? ..user..) => false)
+      (application-state ..user.. ..organization-id.. false "aiemmalla-luvalla-hakeminen") => :verdictGiven)
 
     (fact permit-type-and-operation-map
       (permit-type-and-operation-map "poikkeamis" created)

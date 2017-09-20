@@ -75,7 +75,6 @@
 
 (defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
-        kuvaus (:toimenpiteenKuvaus toimenpide)
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
                                                   :rakennusaine (:kantavaRakennusaine rakenne))
         lammonlahde-map (muu-select-map
@@ -160,6 +159,13 @@
                 :rakennustieto (get-rakennus-data application rakennuksen-muuttaminen-doc)}
    :created (:created rakennuksen-muuttaminen-doc)})
 
+(defn- get-rakennustietojen-korjaus-toimenpide [rakennustietojen-korjaus-doc application]
+  {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennustietojen-korjaus-doc)
+                                    {:perusparannusKytkin false}
+                                    {:muutostyonLaji      schemas/muumuutostyo})
+                :rakennustieto (get-rakennus-data application rakennustietojen-korjaus-doc)}
+   :created (:created rakennustietojen-korjaus-doc)})
+
 (defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
   {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
                                  {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
@@ -223,6 +229,7 @@
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents-by-type))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents-by-type))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents-by-type))
+                                               (map #(get-rakennustietojen-korjaus-toimenpide % application) (:rakennustietojen-korjaus documents-by-type))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents-by-type))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen-ei-huoneistoja documents-by-type))
                                                (map #(get-purku-toimenpide % application) (:purkaminen documents-by-type))
@@ -233,7 +240,7 @@
     (not-empty (sort-by :created toimenpiteet))))
 
 
-(defn- get-lisatiedot [lang]
+(defn get-lisatiedot [lang]
   {:Lisatiedot {:asioimiskieli (case lang
                                  "sv" "ruotsi"
                                  "suomi")}})

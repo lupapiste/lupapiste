@@ -423,6 +423,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:extended-construction-waste-report-enabled enabled}})
   (ok))
 
+(defcommand set-organization-multiple-operations-support
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:multiple-operations-supported enabled}})
+  (ok))
+
 (defcommand set-organization-validate-verdict-given-date
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}

@@ -66,6 +66,10 @@ LUPAPISTE.StateIconsModel = function( params ) {
     return _.get( attachment, "metadata.nakyvyys", "julkinen") !== "julkinen";
   }
 
+  function archived(attachment) {
+    return _.get( attachment, "metadata.tila") === "arkistoitu";
+  }
+
   function signer(attachment) {
     return _(attachment .signatures)
            .filter(function( s ) {
@@ -104,7 +108,10 @@ LUPAPISTE.StateIconsModel = function( params ) {
                                           title: ""}],
                [notPublic,               {css: "lupicon-lock primary",
                                           icon: "not-public",
-                                          title: ""}]] )
+                                          title: ""}],
+               [archived,                {css: "lupicon-archives positive",
+                                          icon: "archived",
+                                          title: loc("arkistoitu")}]] )
       .filter(function(icon) { return _.first(icon)(attachment); })
       .map(_.last)
       .value();

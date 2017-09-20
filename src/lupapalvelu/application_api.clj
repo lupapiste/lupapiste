@@ -492,13 +492,18 @@
                    (not= permit-subtype :muutoslupa))
       (fail :error.add-operation-not-allowed))))
 
+(defn multiple-operations-supported? [{organization :organization}]
+  (when-not (and organization (-> @organization :multiple-operations-supported))
+    (fail :info.multiple-opertions-not-supported)))
+
 (defcommand add-operation
   {:parameters       [id operation]
    :user-roles       #{:applicant :authority}
    :states           states/pre-sent-application-states
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
-                      app/validate-authority-in-drafts]}
+                      app/validate-authority-in-drafts
+                      multiple-operations-supported?]}
   [{{app-state :state
      tos-function :tosFunction :as application} :application
     organization :organization
@@ -986,4 +991,11 @@
    :pre-checks  [(fn [{organization :organization}]
                    (when-not (some-> organization deref :permanent-archive-enabled)
                      (fail :error.archive-not-enabled)))]}
+  [_])
+
+(defquery ya-application
+  {:parameters [id]
+   :states states/all-states
+   :user-roles #{:applicant :authority}
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]}
   [_])

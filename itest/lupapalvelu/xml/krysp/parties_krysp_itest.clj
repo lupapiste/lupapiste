@@ -153,6 +153,5 @@
             (:sentDocuments second-resp) => (just [(:doc post-verdict-suunnittelija1)
                                                    (:doc post-verdict-suunnittelija3)])
             (fact "Post1 and Post3 in KRSYP message"
-              (count designer-elements) => 2
-              (xml/get-text (first designer-elements) [:henkilo :etunimi]) => "Post3"
-              (xml/get-text (second designer-elements) [:henkilo :etunimi]) => "Post1")))))))
+              (count designer-elements) => 1
+              (xml/get-text (first designer-elements) [:henkilo :etunimi]) => "Post3")))))))

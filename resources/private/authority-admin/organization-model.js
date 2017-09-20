@@ -62,6 +62,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.operationsInspectionSummaryTemplates = ko.observable({});
   self.handlerRoles = ko.observableArray();
   self.assignmentTriggers = ko.observableArray();
+  self.multipleOperationsSupported = ko.observable(false);
 
   self.sectionOperations = ko.observableArray();
 
@@ -116,6 +117,16 @@ LUPAPISTE.OrganizationModel = function () {
     var extendedConstructionWasteReportEnabled = self.extendedConstructionWasteReportEnabled();
     if (self.initialized) {
       ajax.command("set-organization-extended-construction-waste-report", {enabled: extendedConstructionWasteReportEnabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  ko.computed(function() {
+    var multipleOperationsSupported = self.multipleOperationsSupported();
+    if (self.initialized) {
+      ajax.command("set-organization-multiple-operations-support", {enabled: multipleOperationsSupported})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -291,6 +302,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.automaticOkForAttachments(organization["automatic-ok-for-attachments-enabled"] || false);
 
     self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
+
+    self.multipleOperationsSupported(organization["multiple-operations-supported"] || false);
 
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 

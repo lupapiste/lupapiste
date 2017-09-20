@@ -112,6 +112,14 @@
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
 
+(defn- no-attachment-is-archived [{{attachments :attachments} :application {:keys [files]} :data}]
+  (when (and (seq files)
+             (some (fn [{:keys [id metadata]}]
+                     (and (contains? (set files) id)
+                          (= :arkistoitu (keyword (:tila metadata)))))
+                   attachments))
+    (fail :error.attachment-is-locked)))
+
 ;;
 ;; Attachments
 ;;
@@ -639,7 +647,8 @@
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
                       (partial action/parameters-matching-schema [:stamp] StampSchema)
                       (partial action/supported-lang :lang)]
-   :pre-checks [any-attachment-has-version]
+   :pre-checks [any-attachment-has-version
+                no-attachment-is-archived]
    :user-roles #{:authority}
    :states     states/post-submitted-states
    :description "Stamps all attachments of given application"}

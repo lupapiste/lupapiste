@@ -15,8 +15,9 @@ LUPAPISTE.StampModel = function(params) {
     if (a.latestVersion) {
       ct = a.latestVersion.contentType;
     }
+    var archived = util.getIn(a, ["metadata", "tila"]) === "arkistoitu";
 
-    return !allVersionsStamped(a.versions) && _.includes(LUPAPISTE.config.stampableMimes, ct);
+    return !allVersionsStamped(a.versions) && _.includes(LUPAPISTE.config.stampableMimes, ct) && !archived;
   }
 
   function enhanceAttachment(a) {

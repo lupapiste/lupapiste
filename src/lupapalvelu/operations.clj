@@ -45,7 +45,8 @@
         ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
         ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
         ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
-        ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]]]
+        ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
+        ["rakennustietojen-korjaus" :rakennustietojen-korjaus]]]
       ["Rakennelman rakentaminen"
        [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
         ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
@@ -744,6 +745,15 @@
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :copying-allowed true
+                                 :min-outgoing-link-permits 0
+                                 :asianhallinta false}
+   :rakennustietojen-korjaus    {:schema "rakennustietojen-korjaus"
+                                 :permit-type permit/R
+                                 :applicant-doc-schema applicant-doc-schema-name-R
+                                 :required ["hankkeen-kuvaus-minimum"]
+                                 :attachments []
+                                 :add-operation-allowed true
+                                 :copying-allowed false
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
    :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
