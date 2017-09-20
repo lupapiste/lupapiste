@@ -173,11 +173,6 @@
 (defn ->attachment-operation [operation]
   (select-keys operation [:id :name]))
 
-(defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
-  (when (and (not (usr/authority? user))
-             (state-set (keyword state)))
-    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
-
 (defn attachment-value-is?
   "predicate is invoked for attachment value of key"
   [pred key attachment]

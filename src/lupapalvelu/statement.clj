@@ -146,9 +146,7 @@
     (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all} command)))
 
 (defmethod att/upload-to-target-allowed :statement [{{:keys [state]} :application :as command}]
-  (or (if (= (keyword state) :sent)
-        (statement-in-sent-state-allowed command)
-        (att/if-not-authority-state-must-not-be #{:sent} command))
+  (or (statement-in-sent-state-allowed command)
       (statement-owner command)))
 
 (defmethod att/edit-allowed-by-target :statement [{{attachment-id :attachmentId} :data user :user {:keys [statements] :as application} :application}]
