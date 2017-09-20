@@ -479,22 +479,24 @@
                   (when-not (org/some-organization-has-archive-enabled? [(usr/authority-admins-organization-id user)])
                     unauthorized))]}
   [{user :user}]
-  (when (pos? date)
-    (org/update-organization (usr/authority-admins-organization-id user) {$set {:permanent-archive-in-use-since date}})
-    (ok)))
+  (let [org-id (usr/authority-admins-organization-id user)
+        {:keys [earliest-allowed-archiving-date]} (org/get-organization org-id)]
+    (if (>= date earliest-allowed-archiving-date)
+      (do (org/update-organization org-id {$set {:permanent-archive-in-use-since date}})
+          (ok))
+      (fail :error.invalid-date))))
 
 (defcommand set-organization-earliest-allowed-archiving-date
   {:parameters [organizationId date]
    :user-roles #{:admin}
    :input-validators  [(partial number-parameters [:date])]}
   [_]
-  (when-let [{:keys [permanent-archive-in-user-since]} (->> (org/get-organization organizationId)
-                      org/parse-organization)]
+  (when-let [{:keys [permanent-archive-in-use-since]} (org/get-organization organizationId)]
     (when-not (neg? date)
       (org/update-organization organizationId
                                {$set (cond-> {:earliest-allowed-archiving-date date}
 
-                                             (< permanent-archive-in-user-since date)
+                                             (and permanent-archive-in-use-since (< permanent-archive-in-use-since date))
                                              (assoc :permanent-archive-in-use-since date))})
       (ok))))
 
