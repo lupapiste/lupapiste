@@ -2,18 +2,15 @@
   (:require [taoensso.timbre :as timbre :refer [error]]
             [lupapalvelu.action :refer [defquery defcommand]]
             [sade.core :refer :all]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.states :as states]
             [lupapalvelu.printing-order.domain :refer :all]
             [lupapalvelu.printing-order.processor :as processor]
             [sade.util :as util]
-            [clojure.java.io :as io]
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.printing-order.mylly-client :as mylly]
-            [clj-time.core :as t]))
+            [lupapalvelu.printing-order.mylly-client :as mylly]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
