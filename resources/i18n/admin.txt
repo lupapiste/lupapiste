@@ -127,3 +127,7 @@
 "financialAuthority.name" "en" "Name"
 "financialAuthority.name" "fi" "Nimi"
 "financialAuthority.name" "sv" "Namn"
+"admin.earliestArchivingDate" "fi" "Aikaisin sallittu sähköisen arkistoinnin aloituspäivämäärä"
+"admin.earliestArchivingDate" "sv" ""
+"admin.removeLimitation" "fi" "Poista rajoitus"
+"admin.removeLimitation" "sv" "Poista rajoitus"
