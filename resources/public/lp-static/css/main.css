@@ -11853,6 +11853,10 @@ div.attachments-table-container table.attachments-table input[type=text] {
   width: 24px;
 }
 
+div.attachments-table-container table.attachments-table #reject-edit-input {
+  width: 20em;
+}
+
 div.attachments-table-container table.attachments-table .amount-controls > [class^="lupicon-"]:before, div.attachments-table-container table.attachments-table [class*=" lupicon-"]:before {
   position: relative;
   top: 4px;
