@@ -42,10 +42,26 @@
   (-> (select-keys op [:id :name :description])
       (assoc :displayName (to-lang-map #(i18n/localize % "operations" (:name op))))))
 
+(def building-id-other-key
+  (or
+    (some
+      (fn [{:keys [name other-key]}]  (when (= name "buildingId") other-key))
+      schemas/rakennuksen-valitsin)
+    (fail! :error.building-id-schema-missing-other-key)))
+
+(defn get-building-id
+  "Returns building ID based on selected value.
+  If selected value is 'other', manually added key will be added.
+  Else national-building-id is supplied."
+  [selected-value doc]
+  (if (= "other" selected-value)
+    (get-in doc [:data (keyword building-id-other-key)])
+    (get-in doc [:data (keyword schemas/national-building-id)])))
+
 (defn get-building-data [document]
   (let [unwrapped (tools/unwrapped document)]
-    (if (get-in unwrapped [:data :buildingId])              ; has 'existing' building
-      {:new false :buildingId (get-in unwrapped [:data (keyword schemas/national-building-id)])}
+    (if-let [select-value (get-in unwrapped [:data :buildingId])]        ; has 'existing' building
+      {:new false :buildingId (get-building-id select-value unwrapped)}
       {:new true})))
 
 (defn enrich-operation-with-building [{:keys [documents]} operation]

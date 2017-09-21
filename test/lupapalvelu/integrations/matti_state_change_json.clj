@@ -19,18 +19,19 @@
           :id "1321321"}
    :id "foo-old"})
 
-#_(def old-building-manuaalinen-rakennusnumero                ; VTJ-PRT is not known and user has inpute buildingId manually
+(def old-building-manuaalinen-rakennusnumero                ; VTJ-PRT is not known and user has inpute buildingId manually
   {:schema-info {:name "rakennuksen-muuttaminen"
                  :op {:id "57603a99edf02d7047774554"}}
-   :data {:buildingId {:value "100840657D"
+   :data {:buildingId {:value "other"
                        :sourceValue "100840657D"}
+          :manuaalinen_rakennusnro {:value "123"}
           :valtakunnallinenNumero {:value "100840657D"
                                    :modified 1491470000000
                                    :source "krysp"
                                    :sourceValue "100840657D"}
           :tunnus {:value "100840657D"}
           :id "1321321"}
-   :id "foo-old"})
+   :id "foo-manual"})
 
 (def new-building-data
   {:id "foo-new"
@@ -78,6 +79,13 @@
        [data]
        (fact "building has new:true"
          (-> data :operations first :building) => (just [[:new true]])))
+     (manual-building-id-test
+       [data]
+       (fact "manual building-id as id"
+         (-> data :operations first :building) => (just [[:new false]
+                                                         [:buildingId
+                                                          (get-in old-building-manuaalinen-rakennusnumero
+                                                                  [:data :manuaalinen_rakennusnro :value])]])))
      (run-test
        [app test-fn]
        (when-let [new-state (sm/next-state app)]
@@ -91,4 +99,7 @@
         (run-test (assoc app :state (name (first (sm/application-state-seq app)))) existing-building-test)))
     (facts "new buildings"
       (let [app (app-with-docs [new-building-data])]
-        (run-test (assoc app :state (name (first (sm/application-state-seq app)))) new-building-test )))))
+        (run-test (assoc app :state (name (first (sm/application-state-seq app)))) new-building-test )))
+    (fact "manuaal building id"
+      (let [app (app-with-docs [old-building-manuaalinen-rakennusnumero])]
+        (run-test (assoc app :state (name (first (sm/application-state-seq app)))) manual-building-id-test)))))
