@@ -380,13 +380,14 @@
 
 (defn create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
-  [application {ts :created :as options}]
+  [application {ts :created set-app-modified? :set-app-modified? :as options :or {set-app-modified? true}}]
   {:pre [(map? application)]}
   (let [attachment-data (create-attachment-data application options)]
     (update-application
      (application->command application)
-      {$set {:modified ts}
-       $push {:attachments attachment-data}})
+     (merge (when set-app-modified?
+              {$set {:modified ts}})
+            {$push {:attachments attachment-data}}))
     (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
@@ -541,8 +542,9 @@
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
-  ([application user {attachment-id :id :as attachment} options]
-    {:pre [(map? application) (map? attachment) (map? options)]}
+  ([application user {attachment-id :id :as attachment}
+    {:keys [set-app-modified?] :as options :or {set-app-modified? true}}]
+   {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
      (let [options       (if (contains? options :group)
                            (update options :group attachment-grouping-for-application application)
@@ -550,12 +552,13 @@
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
-           mongo-updates (util/deep-merge (attachment-comment-updates application user attachment options)
-                                          (when (:constructionTime options)
-                                            (construction-time-state-updates attachment true))
-                                          (when (or (:sign options) (:signature options))
-                                            (signature-updates version-model user (:created options) (:signature options) (:signatures attachment)))
-                                          (build-version-updates user attachment version-model options))
+           mongo-updates (cond-> (util/deep-merge (attachment-comment-updates application user attachment options)
+                                                  (when (:constructionTime options)
+                                                    (construction-time-state-updates attachment true))
+                                                  (when (or (:sign options) (:signature options))
+                                                    (signature-updates version-model user (:created options) (:signature options) (:signatures attachment)))
+                                                  (build-version-updates user attachment version-model options))
+                           (not set-app-modified?) (util/dissoc-in [$set :modified]))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)

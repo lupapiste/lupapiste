@@ -48,7 +48,8 @@
   At least outlier verdicts (KT) poytakirja can have
   multiple attachments. On the other hand, traditional (e.g., R)
   verdict poytakirja can only have one attachment."
-  [application user timestamp {target-type :type verdict-id :id :as target} pk]
+  [application user timestamp {target-type :type verdict-id :id :as target} pk
+   & {:keys [set-app-modified?] :or {set-app-modified? true}}]
   (if-let [attachments (or (:liite pk) (:Liite pk))]
     (let [;; Attachments without link are ignored
           attachments (->> [attachments] flatten (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
@@ -98,7 +99,8 @@
                                                                (to-timestamp attachment-time)
                                                                attachment-time)
                                                              timestamp)
-                                                :state :ok}
+                                                :state :ok
+                                                :set-app-modified? set-app-modified?}
                                                {:filename filename
                                                 :size content-length
                                                 :content temp-file}))

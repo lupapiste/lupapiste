@@ -170,8 +170,8 @@
   At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
   poytakirja can only have one attachment."
-  [application user timestamp verdict-id pk]
-  (verdict-review-util/get-poytakirja! application user timestamp {:type "verdict" :id verdict-id} pk))
+  [application user timestamp verdict-id pk & options]
+  (apply verdict-review-util/get-poytakirja! application user timestamp {:type "verdict" :id verdict-id} pk options))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}
@@ -529,7 +529,8 @@
                                                         user
                                                         timestamp
                                                         app-verdict-id
-                                                        pk)
+                                                        pk
+                                                        :set-app-modified? false)
                     :else              pk))))))
 
 ;; 3. update the verdicts on application that have a new poytakirja attachment

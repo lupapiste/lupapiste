@@ -56,7 +56,7 @@
              (:verdicts application) => empty?)
 
            ;; Fetch a verdict without verdict attachment
-           (fact "verdict without attachment is fetched"
+           (fact "verdict without attachments is fetched"
              (override-krysp-xml sipoo "753-R" :R [{:selector [:yht:liite] :value ""}] :test-db-name db-name) => ok?
              (local-command sonja :check-for-verdict :id app-id) => ok?
              (remove-krysp-xml-overrides sipoo "753-R" :R :test-db-name db-name) => ok?)
@@ -108,8 +108,8 @@
                ;; updates :modified. Discuss if changing
                ;; change-attachment!:s behavior, or circumventing it,
                ;; is desirable.
-               #_(fact ":modified timestamp has not changed"
-                       (:modified application) => (:modified updated-application))
+               (fact ":modified timestamp has not changed"
+                 (:modified application) => (:modified updated-application))
 
                (fact "running fetch-verdict-attachments again does not alter the application"
                  (let [new-batchrun-result (batchrun/fetch-verdict-attachments (-> 3 t/months t/ago c/to-long)
