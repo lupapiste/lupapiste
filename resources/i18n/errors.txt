@@ -900,3 +900,5 @@
 "permanent-archive-disabled" "en" "Municipality's PDF/A conversion was unavailable when the file was uploaded."
 "permanent-archive-disabled" "fi" "Kunnan PDF/A-konversio ei ollut käytettävissä tiedoston lisäyshetkellä."
 "permanent-archive-disabled" "sv" "Kommunens PDF/A-konvertering var inte i bruk när filen lades till."
+"error.application-too-old-for-archival" "fi" "Hakemuksen jättö- tai luontipäivä on aikaisempi kuin sähköisen arkiston käyttöönottopäivä."
+"error.application-too-old-for-archival" "sv" ""

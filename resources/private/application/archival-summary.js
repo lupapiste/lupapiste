@@ -314,6 +314,10 @@
       return _.some(params.application.tosFunction());
     });
 
+    self.archivingTimestampField = self.disposedPureComputed(function() {
+      return params.application.submitted !== null ? loc("submission-date") : loc("creation-date");
+    });
+
     function selectDocuments() {
       _.forEach(self.archivedDocuments(), function(doc) {
         var tila = util.getIn(doc, ["metadata", "tila"]);

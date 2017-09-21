@@ -14,12 +14,22 @@
               (some :permanent-archive-enabled user-orgs))
     unauthorized))
 
+(defn application-within-time-limit
+  [{app-org :organization {:keys [submitted created] :as app} :application}]
+  (when (or (nil? app)
+            (let [archive-in-use-since (:permanent-archive-in-use-since @app-org)]
+              (if submitted
+                (< submitted archive-in-use-since)
+                (< created archive-in-use-since))))
+    (fail :error.application-too-old-for-archival)))
+
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :org-authz-roles  #{:archivist}
-   :states           (conj states/post-verdict-states :underReview)}
+   :states           (conj states/post-verdict-states :underReview)
+   :pre-checks       [application-within-time-limit]}
   [{:keys [application user organization] :as command}]
   (if-let [{:keys [error]} (-> (update command :application app/enrich-application-handlers @organization)
                                (archiving/send-to-archive (set attachmentIds) (set documentIds)))]
@@ -73,3 +83,8 @@
   {:user-roles #{:authority}
    :states     states/archival-final-states}
   (ok))
+
+(defquery application-date-within-time-limit
+  {:user-roles #{:authority}
+   :pre-checks [application-within-time-limit]}
+  [_])
