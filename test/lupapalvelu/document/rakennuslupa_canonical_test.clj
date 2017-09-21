@@ -6,9 +6,13 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
+            [lupapalvelu.operations :as op]
+            [lupapalvelu.document.schemas :as doc-schemas]
+            [lupapalvelu.document.data-schema :as doc-data-schema]
             [lupapalvelu.factlet :as fl]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.schema-generators :as ssg]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
             [midje.sweet :refer :all]
@@ -508,8 +512,10 @@
                  :text "Lausunto tulossa..."}]
    :neighbors ctc/neighbors
    :primaryOperation (op-info rakennuksen-muuttaminen)
-   :secondaryOperations (map op-info [uusi-rakennus laajentaminen
-                                      aidan-rakentaminen puun-kaataminen
+   :secondaryOperations (map op-info [uusi-rakennus
+                                      laajentaminen
+                                      aidan-rakentaminen
+                                      puun-kaataminen
                                       purku])})
 
 (ctc/validate-all-documents application-rakennuslupa)
@@ -852,9 +858,17 @@
 
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-operations)
 
-(facts "Toimenpiteet"
-  (let [documents (by-type (:documents (tools/unwrapped application-rakennuslupa)))
-        actions (get-operations documents (tools/unwrapped application-rakennuslupa))]
+(facts "Toimenpiteet - operation canonical is implemented for all r-operation documents"
+  (let [operations (map (partial hash-map :id) (range 100))
+        actions (->> (vals op/r-operations)
+                     (map (util/fn->> :schema (assoc {} :name)))
+                     (map doc-schemas/get-schema)
+                     (map doc-data-schema/coerce-doc)
+                     (map ssg/generate)
+                     (map #(assoc-in %3 [:schema-info :op] {:id %1 :name (name %2)}) (range) (keys op/r-operations))
+                     (assoc application-rakennuslupa :primaryOperation (first operations) :secondaryOperations (rest operations) :documents)
+                     (tools/unwrapped)
+                     (get-operations))]
     (fact "actions" (seq actions) => truthy)))
 
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-huoneisto-data)
@@ -1040,11 +1054,13 @@
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
         kaavatilanne (:kaavatilanne rakennuspaikka) => truthy
         toimenpiteet(:toimenpidetieto rakennusvalvontaasia) => truthy
+
         toimenpide (:Toimenpide (nth toimenpiteet 1)) => truthy
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0)) => truthy
         laajennus-t (:Toimenpide (nth toimenpiteet 2)) => truthy
-        purku-t (:Toimenpide (nth toimenpiteet 3)) => truthy
-        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 4)) => truthy
+        purku-t (:Toimenpide (nth toimenpiteet 4)) => truthy
+        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 3)) => truthy
+
         rakennustieto (:rakennustieto toimenpide) => truthy
         rakennus (:Rakennus rakennustieto) => truthy
         rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus))) => truthy
@@ -1076,6 +1092,8 @@
       (fact "mapping has added correct :kaavanaste to canonical" (:kaavanaste rakennuspaikka) => "yleis"))
 
     (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
+    (fact "toimenpiteet in correct order"
+      (->> (map :Toimenpide toimenpiteet) (mapcat keys) (remove #{:rakennustieto :rakennelmatieto})) => [:muuMuutosTyo :uusi :laajennus :kaupunkikuvaToimenpide :purkaminen])
     (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "012 kahden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
@@ -1108,7 +1126,7 @@
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
     (fact "valtakunnallinenNumero" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :valtakunnallinenNumero) => "1234567892")
-    (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 2)
+    (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 1)
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
