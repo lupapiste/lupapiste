@@ -44,7 +44,7 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-archives",
                       page: "archiving",
                       loc: "arkistointi",
-                      showIf: showArchivingMenu,},
+                      showIf: showArchivingMenu},
                      {icon: "lupicon-calendar",
                       page: "organization-calendars",
                       loc: "auth-admin.organization-calendars",
