@@ -711,6 +711,7 @@
                                               :application-id id
                                               :organization {:id organization :permit-type permitType}})))))
            apps))
+         (remove #(empty? (:updated-verdicts %)))
          (hash-map :updated-applications)
          (merge {:start start
                  :end end

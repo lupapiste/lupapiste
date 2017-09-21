@@ -116,5 +116,5 @@
                                                                                (now)
                                                                                [])
                        non-updated-application (query-application local-query sonja app-id)]
-                   new-batchrun-result => nil?
+                   (:updated-applications new-batchrun-result) => empty?
                    updated-application => non-updated-application)))))))
