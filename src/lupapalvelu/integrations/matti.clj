@@ -76,8 +76,7 @@
 
 (defn state-map [state]
   {:name state
-   :displayName {:fi (i18n/localize :fi state)
-                 :sv (i18n/localize :sv state)}})
+   :displayName (to-lang-map #(i18n/localize % state))})
 
 (defn state-change-data [application new-state]
   (-> (app-to-json application)
