@@ -217,11 +217,12 @@
                             (partial sc/check schema)
                             "error.illegal-value:schema-validation"))
 
-(defn- localization? [partial? maybe-localization]
+(defn- localization? [mode maybe-localization]
   (and (map? maybe-localization)
-       (if partial?
-         (every? i18n/languages (keys maybe-localization))
-         (= i18n/languages (set (keys maybe-localization))))
+       (case mode
+         :partial    (every? i18n/languages (keys maybe-localization))
+         :all        (= i18n/languages (set (keys maybe-localization)))
+         :supported  (every? (set (keys maybe-localization)) i18n/languages))
        (every? string? (vals maybe-localization))))
 
 (defn partial-localization-parameters
@@ -230,7 +231,7 @@
   not require that all supported languages are included."
   [params command]
   (filter-params-of-command params command
-                            (complement (partial localization? true))
+                            (complement (partial localization? :partial))
                             "error.illegal-localization-value"))
 
 (defn localization-parameters
@@ -239,7 +240,16 @@
   supported languages must be included."
   [params command]
   (filter-params-of-command params command
-                            (complement (partial localization? false))
+                            (complement (partial localization? :all))
+                            "error.illegal-localization-value"))
+
+(defn supported-localization-parameters
+  "Validates that the given parameters are maps with supported
+  language keywords (such as :fi) as keys and strings as values. All
+  supported languages must be included, but can have extra languages."
+  [params command]
+  (filter-params-of-command params command
+                            (complement (partial localization? :supported))
                             "error.illegal-localization-value"))
 
 (defn update-application
