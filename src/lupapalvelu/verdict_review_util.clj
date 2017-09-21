@@ -92,6 +92,7 @@
                                                 :contents contents
                                                 :target target
                                                 :required false
+                                                :read-only true
                                                 :locked true
                                                 :created (or (if (string? attachment-time)
                                                                (to-timestamp attachment-time)
