@@ -3,7 +3,8 @@
             [lupapalvelu.printing-order.mylly-client :as mylly]
             [lupapalvelu.mongo :as mongo]
             [clojure.data.codec.base64 :as base64]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [sade.env :as env])
   (:import (java.io ByteArrayOutputStream)))
 
 (def login-result-xml
@@ -65,7 +66,8 @@
         => {:status 200
             :body order-result-xml})
     (mylly/fetch-login-token!) => "1234567890123456789012345678901234"
-    (mylly/login-and-send-order! mock-order) => {:ok true :orderNumber "1234567890"}))
+    (mylly/login-and-send-order! mock-order) => {:ok true :orderNumber "1234567890"}
+    (against-background (mylly/in-dummy-mode?) => false)))
 
 (facts "mylly backend returns a SOAP error"
   (fact "Faultcode in order message"
@@ -77,11 +79,13 @@
      (mylly/post mylly/order-service-url mylly/order-service-ns :AddOrder anything)
      => {:status 500
          :body ""})
-   (mylly/login-and-send-order! mock-order) => {:ok false}))
+   (mylly/login-and-send-order! mock-order) => {:ok false}
+   (against-background (mylly/in-dummy-mode?) => false)))
 
 (fact "oversized order is not sent over the network"
       (against-background
         (mylly/post mylly/order-service-url mylly/order-service-ns :AddOrder anything)
         => {:status 500
             :body ""})
-      (mylly/login-and-send-order! (assoc-in mock-order [:files 0 :size] 2000000)) => {:ok false :reason :order-too-big})
+      (mylly/login-and-send-order! (assoc-in mock-order [:files 0 :size] 2000000000)) => {:ok false :reason :error.order-too-large}
+      (against-background (mylly/in-dummy-mode?) => false))

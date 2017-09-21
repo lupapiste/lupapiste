@@ -84,7 +84,7 @@
 (def order-service-url
   (-> (env/get-config) :printing-order :mylly :order :url))
 
-(def in-dummy-mode?
+(defn in-dummy-mode? []
   (get-in (env/get-config) [:printing-order :mylly :dummy-mode]))
 
 (defn fetch-login-token! []
@@ -105,7 +105,7 @@
         :else                                      (recur (+ sum (first sizes)) (rest coll))))))
 
 (sc/defn login-and-send-order! [order :- domain/PrintingOrder]
-  (if in-dummy-mode?
+  (if (in-dummy-mode?)
     {:ok          true
      :orderNumber (str "dev-" (.getMillis (t/now)))}
     (if (order-too-large? order)
