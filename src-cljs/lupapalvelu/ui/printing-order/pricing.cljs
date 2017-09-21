@@ -49,7 +49,7 @@
            [:span.h3 (util/format-currency-value total-price)]]])
        (when additionalInformation
          [:tr
-          [:td.first
+          [:td.half
            [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
           [:td
            [:span.h3 (get additionalInformation (keyword (.getCurrentLanguage js/loc)))]]])

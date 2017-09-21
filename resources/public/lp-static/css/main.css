@@ -21568,7 +21568,7 @@ div.order-section div.attachments-table-container {
   border: none;
 }
 
-.order-summary-pricing-block table td.first {
+.order-summary-pricing-block table td.first, .order-summary-pricing-block table td.half {
   width: 50%;
 }
 

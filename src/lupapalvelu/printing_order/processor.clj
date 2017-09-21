@@ -19,7 +19,7 @@
     (util/assoc-when contact
                      :companyName (when (empty? companyName)
                                     (str firstName " " lastName))
-                     :additionalInformation (condp = path
+                     :additionalInformation (case path
                                               :payer (:billingReference contacts)
                                               :delivery (:deliveryInstructions contacts)
                                               ""))))
