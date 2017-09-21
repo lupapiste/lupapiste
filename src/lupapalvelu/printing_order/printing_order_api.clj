@@ -49,7 +49,7 @@
                                   (not (:forPrinting %))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
                         (filter pdf-attachment?))
-      :tagGroups (map vector (concat att-tags/application-group-types att-type/type-groups))))
+      :tagGroups (map vector att-type/type-groups)))
 
 (defquery printing-order-pricing
   {:feature          :printing-order
