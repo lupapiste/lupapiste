@@ -510,8 +510,9 @@
 
 (defn- poytakirja-update [[app-pk update-pk]]
   (cond (nil? update-pk)        {:action :keep   :pk app-pk}
+        (:urlHash app-pk)       {:action :keep   :pk app-pk}
         (or (:liite update-pk)
-            (:Liite update-pk)) {:action :update :pk app-pk :with-pk update-pk}
+            (:Liite update-pk)) {:action :update :pk update-pk}
         :else                   {:action :keep   :pk app-pk}))
 
 (defn- update-poytakirja-entries!
@@ -528,7 +529,7 @@
                                                         user
                                                         timestamp
                                                         app-verdict-id
-                                                        (:with-pk update-info))
+                                                        pk)
                     :else              pk))))))
 
 ;; 3. update the verdicts on application that have a new poytakirja attachment

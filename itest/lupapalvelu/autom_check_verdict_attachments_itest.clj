@@ -88,25 +88,33 @@
                       count)
                  => 2)
 
-              (fact "the verdicts of the application contain two url hashes"
-                (count url-hashes) => 2)
+               (fact "the verdicts of the application contain two url hashes"
+                 (count url-hashes) => 2)
 
-              (facts "verdict attachments"
-                (let [verdict-attachments (->> (:attachments updated-application)
+               (facts "verdict attachments"
+                 (let [verdict-attachments (->> (:attachments updated-application)
                                                (filter #((set url-hashes) (:id %))))]
 
-                  (fact "attachments are read-only"
-                        (map :readOnly verdict-attachments) => (has every? true?))
+                   (fact "attachments are read-only"
+                     (map :readOnly verdict-attachments) => (has every? true?))
 
-                  (fact "the url hashes correspond to attachments in the application, and attachments target correct verdict"
-                    (count verdict-attachments) => 2
-                    (map (partial attachment-targets-correct-verdict? updated-application)
-                         verdict-attachments)
-                    => (has every? true?))))
+                   (fact "the url hashes correspond to attachments in the application, and attachments target correct verdict"
+                     (count verdict-attachments) => 2
+                     (map (partial attachment-targets-correct-verdict? updated-application)
+                          verdict-attachments)
+                     => (has every? true?))))
 
-              ;; TODO This fails, since create-attachment!
-              ;; updates :modified. Discuss if changing
-              ;; change-attachment!:s behavior, or circumventing it,
-              ;; is desirable.
-              #_(fact ":modified timestamp has not changed"
-                  (:modified application) => (:modified updated-application)))))))
+               ;; TODO This fails, since create-attachment!
+               ;; updates :modified. Discuss if changing
+               ;; change-attachment!:s behavior, or circumventing it,
+               ;; is desirable.
+               #_(fact ":modified timestamp has not changed"
+                       (:modified application) => (:modified updated-application))
+
+               (fact "running fetch-verdict-attachments again does not alter the application"
+                 (let [new-batchrun-result (batchrun/fetch-verdict-attachments (-> 3 t/months t/ago c/to-long)
+                                                                               (now)
+                                                                               [])
+                       non-updated-application (query-application local-query sonja app-id)]
+                   new-batchrun-result => nil?
+                   updated-application => non-updated-application)))))))
