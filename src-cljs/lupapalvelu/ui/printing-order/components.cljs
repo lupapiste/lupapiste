@@ -87,7 +87,7 @@
     (grid-text-input (conj path :lastName) :col-1 :sukunimi true)
     (grid-text-input (conj path :companyName) :col-2 :printing-order.company-name)]
    [:div.row
-    (grid-text-input (conj path :address) :col-2 :printing-order.address true)
+    (grid-text-input (conj path :streetAddress) :col-2 :printing-order.address true)
     (grid-text-input (conj path :postalCode) :col-1 :printing-order.postal-code true)
     (grid-text-input (conj path :city) :col-1 :printing-order.city true)]
    [:div.row

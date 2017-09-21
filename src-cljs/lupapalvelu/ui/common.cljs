@@ -33,14 +33,21 @@
                       (keyword? a) :string)))
 
 (defmethod command :map
-  [{:keys [command  show-saved-indicator? success]} & kvs]
-  (-> (js/ajax.command (clj->js command) (-> (apply hash-map kvs) clj->js))
-      (.success (fn [js-result]
-                  (when show-saved-indicator?
-                    (js/util.showSavedIndicator js-result))
-                  (when success
-                    (success (js->clj js-result :keywordize-keys true)))))
-      .call))
+  [{:keys [command  show-saved-indicator? success error]} & kvs]
+  (letfn [(with-error-handler-if-given [call]
+            (if error
+              (.error call (fn [js-result]
+                             (when error
+                               (error (js->clj js-result :keywordize-keys true)))))
+              call))]
+    (-> (js/ajax.command (clj->js command) (-> (apply hash-map kvs) clj->js))
+        (.success (fn [js-result]
+                    (when show-saved-indicator?
+                      (js/util.showSavedIndicator js-result))
+                    (when success
+                      (success (js->clj js-result :keywordize-keys true)))))
+        with-error-handler-if-given
+        .call)))
 
 (defmethod command :string
   [command-name success-fn & kvs]

@@ -18,6 +18,12 @@
   hub.onPageUnload("printing-order", function() {
   });
 
+  $(document).on('click', function() {
+    if (pageutil.getPage() === 'printing-order') {
+      hub.send("printingOrderPage::clickEvent");
+    }
+  });
+
 
   $(function() {
     $("#printing-order").applyBindings({

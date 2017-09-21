@@ -11,9 +11,8 @@
             [taoensso.timbre :as timbre]
             [sade.env :as env]
             [schema.core :as sc]
-            [lupapalvelu.printing-order.domain :refer :all]
-            [clojure.java.io :as io]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.printing-order.domain :as domain]
+            [clj-time.core :as t])
   (:import (java.io ByteArrayOutputStream)))
 
 (defn parse-soap [response]
@@ -51,8 +50,6 @@
 (defn post [url action-ns action xml]
   (http/post url {:content-type (str "text/xml;charset=UTF-8")
                   :headers {"SOAPAction" (str action-ns "/" (name action))}
-                  :socket-timeout 300000
-                  :conn-timeout 300000
                   :throw-exceptions false
                   :body xml}))
 
@@ -70,10 +67,8 @@
                              {:action action, :time total-time})))
       (-> result :Body vals first))))
 
-(defn encoded-file
-  [file-name]
-  (with-open [orig (io/input-stream file-name)
-              output (ByteArrayOutputStream.)]
+(defn encode-file-from-stream [orig]
+  (with-open [output (ByteArrayOutputStream.)]
     (base64/encoding-transfer orig output)
     (.toString output)))
 
@@ -89,6 +84,9 @@
 (def order-service-url
   (-> (env/get-config) :printing-order :mylly :order :url))
 
+(def in-dummy-mode?
+  (get-in (env/get-config) [:printing-order :mylly :dummy-mode]))
+
 (defn fetch-login-token! []
   (:LoginResult (call* authentication-service-url authentication-service-ns :Login
                        (select-keys (-> (env/get-config) :printing-order :mylly)
@@ -102,18 +100,24 @@
     (loop [sum   0
            coll  sizes]
       (cond
-        (empty? coll)                     false
-        (> (+ sum (first sizes)) 1048576) true
-        :else                             (recur (+ sum (first sizes)) (rest coll))))))
+        (empty? coll)                              false
+        (> (+ sum (first sizes)) (* 1024 1048576)) true
+        :else                                      (recur (+ sum (first sizes)) (rest coll))))))
 
-(sc/defn login-and-send-order! [order :- PrintingOrder]
-  (if (order-too-large? order)
-    {:ok false :reason :order-too-big}
-    (try+
-      (let [token  (fetch-login-token!)
-            result (send-order! order-service-url token order)]
-        {:ok true
-         :orderNumber (get-in result [:AddOrderResult :Order :CAD :SonetOrderNumber])})
-      (catch [:type ::error] []
-        (timbre/error "login-and-send-order failed")
-        {:ok false}))))
+(sc/defn login-and-send-order! [order :- domain/PrintingOrder]
+  (if in-dummy-mode?
+    {:ok          true
+     :orderNumber (str "dev-" (.getMillis (t/now)))}
+    (if (order-too-large? order)
+      (do
+        (timbre/error "order-too-large")
+        {:ok false
+         :reason :error.order-too-large})
+      (try+
+        (let [token  (fetch-login-token!)
+              result (send-order! order-service-url token order)]
+          {:ok true
+           :orderNumber (get-in result [:AddOrderResult :Order :CAD :SonetOrderNumber])})
+        (catch [:type ::error] []
+          (timbre/error "login-and-send-order failed")
+          {:ok false})))))

@@ -1,4 +1,6 @@
- (ns lupapalvelu.ui.util)
+ (ns lupapalvelu.ui.util
+   (:require [goog.i18n.NumberFormatSymbols :as symbols]
+             [goog.i18n.NumberFormat :as nf]))
 
  (defonce elemId (atom 0))
  (defn unique-elem-id
@@ -19,3 +21,8 @@
 (def is-edge?
   (let [agent (.-userAgent js/navigator)]
     (not (nil? (re-find #".*Edge/.*" agent)))))
+
+(set! goog.i18n.NumberFormatSymbols goog.i18n.NumberFormatSymbols_fi)
+
+(defn format-currency-value [n]
+  (.format (goog.i18n.NumberFormat. (.-CURRENCY goog.i18n.NumberFormat.Format)) n))

@@ -2,16 +2,15 @@
   (:require [taoensso.timbre :as timbre :refer [error]]
             [lupapalvelu.action :refer [defquery defcommand]]
             [sade.core :refer :all]
-            [lupapalvelu.roles :as roles]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.states :as states]
-            [lupapalvelu.attachment.tag-groups :as att-tag-groups]
             [lupapalvelu.printing-order.domain :refer :all]
+            [lupapalvelu.printing-order.processor :as processor]
             [sade.util :as util]
-            [clojure.java.io :as io]
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.attachment.tags :as att-tags]))
+            [lupapalvelu.attachment.tags :as att-tags]
+            [lupapalvelu.printing-order.mylly-client :as mylly]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -35,6 +34,7 @@
   (when-not pricing
     (fail :error.feature-not-enabled)))
 
+
 (defquery attachments-for-printing-order
   {:feature          :printing-order
    :parameters       [id]
@@ -48,8 +48,8 @@
                                   (util/contains-value? omitted-attachment-type-groups (keyword (-> % :type :type-group)))
                                   (not (:forPrinting %))))
                         (filter (fn [att] (util/contains-value? (:tags att) :hasFile)))
-                        (filter #(= (-> % :latestVersion :contentType) "application/pdf")))
-      :tagGroups (map vector (concat att-tags/application-group-types att-type/type-groups))))
+                        (filter pdf-attachment?))
+      :tagGroups (map vector att-type/type-groups)))
 
 (defquery printing-order-pricing
   {:feature          :printing-order
@@ -59,12 +59,23 @@
   [_]
   (ok :pricing pricing))
 
+(def max-total-file-size ; 1 Gb
+  (* 1024 1024 1024))
+
 (defcommand submit-printing-order
-  {:feature     :printing-order
-   :description ""
-   :parameters [id]
-   :states     states/post-verdict-states
-   :user-roles #{:applicant}
+  {:feature      :printing-order
+   :parameters  [:id order contacts]
+   :states      states/post-verdict-states
+   :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
-  [_]
-  (ok))
+  [{application :application user :user created-ts :created}]
+  (let [prepared-order (processor/prepare-order application order contacts)
+        total-size (reduce + (map :size (:files prepared-order)))]
+    (when (> total-size max-total-file-size)
+      (fail! :error.printing-order.too-large))
+    (let [result (mylly/login-and-send-order! (processor/enrich-with-file-content user prepared-order))]
+      (if (:ok result)
+        (do
+          (processor/save-integration-message user created-ts application prepared-order (:orderNumber result))
+          (ok :order-number (:orderNumber result) :size total-size))
+        (fail! :error.printing-order.submit-failed)))))
