@@ -61,6 +61,9 @@
 
 
     function organizationCommand( command, params ) {
+      if (isLoading) {
+        return;
+      }
       ajax.command( command,
                     _.merge(params,
                             {organizationId: self.organization().id()}))
