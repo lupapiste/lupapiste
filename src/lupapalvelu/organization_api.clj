@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.stamps :as stamps]
@@ -848,7 +848,7 @@
    :parameters [name]
    :optional-parameters [roleId]
    :pre-checks [validate-handler-role-in-organization]
-   :input-validators [(partial localization-parameters [:name])]
+   :input-validators [(partial supported-localization-parameters [:name])]
    :user-roles #{:authorityAdmin}}
   [{user :user user-orgs :user-organizations}]
   (let [handler-role (org/create-handler-role roleId name)]
