@@ -750,7 +750,12 @@
                                       :kopiolaitos-orderer-phone nil
                                       :calendars-enabled false
                                       :use-attachment-links-integration false
-                                      :inspection-summaries-enabled false})
+                                      :inspection-summaries-enabled false
+                                      :docstore-info
+                                       {:docStoreInUse false
+                                        :documentPrice 0
+                                        :organizationDescription (i18n/supported-langs-map
+                                                                   (constantly ""))}})
 
 (defn- names [names-map]
   (i18n/with-default-localization names-map (:fi names-map)))
