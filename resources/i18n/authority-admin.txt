@@ -430,3 +430,5 @@
 "auth-admin.multiple-operations-support.enabled" "en" ""
 "auth-admin.multiple-operations-support.enabled" "fi" "Hakemukselle voi lisätä useita toimenpiteitä"
 "auth-admin.multiple-operations-support.enabled" "sv" ""
+"auth-admin.earliest-archival-date.guide" "fi" "Mikäli haluatte arkistoida aiempia hakemuksia, ottakaa yhteyttä Lupapisteen myyntiin."
+"auth-admin.earliest-archival-date.guide" "sv" ""

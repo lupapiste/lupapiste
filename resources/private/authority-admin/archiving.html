@@ -22,6 +22,9 @@
                type="text"
                id="archiving-start-date"
                class="form-input textinput textinput--big">
+        <div data-bind="if: organization.earliestArchivingDate">
+          <span data-bind="ltext: 'auth-admin.earliest-archival-date.guide'"></span>
+        </div>
       </div>
     </section>
 
