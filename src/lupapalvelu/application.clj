@@ -267,7 +267,7 @@
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
 
-(defn- populate-operation-info [operations {info :schema-info :as doc}]
+(defn populate-operation-info [operations {info :schema-info :as doc}]
   (if (:op info)
     (if-let [operation (util/find-first #(= (:id %) (get-in info [:op :id])) operations)]
       (assoc-in doc [:schema-info :op] operation)

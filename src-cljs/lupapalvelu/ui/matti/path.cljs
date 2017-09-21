@@ -40,7 +40,7 @@
   "Options corresponding to the the dictionary schema referenced in the
   given options. Creates path onto top-level. Extends existing
   path, [dict] otherwise"
-  [{{:keys [dict path]} :schema dictionary :dictionary :as options}]
+  [{{dict :dict} :schema dictionary :dictionary path :path :as options}]
   (assoc (schema-options options (dict dictionary))
          :path (extend path dict)))
 

@@ -449,3 +449,6 @@
 "neighbors.neighbor-states" "sv" "Grannar"
 "neighbors.closed" "fi" "Merkitty kuulluksi {0}"
 "neighbors.open" "fi" "Avoin"
+"buildings.rakennetut-autopaikat" "fi" "Rakennetut autopaikat"
+"buildings.kiinteiston-autopaikat" "fi" "Kiinteistön autopaikat"
+"buildings.autopaikat-yhteensa" "fi" "Autopaikat yhteensä"

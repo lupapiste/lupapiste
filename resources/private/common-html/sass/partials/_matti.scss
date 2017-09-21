@@ -28,11 +28,11 @@ $matti-grid-margin: 10px;
   .matti-grid-#{$columns} {
     width: 100%;
     color: $gray51;
-    .row {
+    > .row {
       @include clearfix;
       padding: $matti-grid-margin 0;
       @for $i from 1 through $columns {
-        .col-#{$i} {
+       > .col-#{$i} {
           @include matti-column($i, $columns);
           &:first-child {
             padding-left: 0;

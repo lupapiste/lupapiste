@@ -1,5 +1,7 @@
 (ns lupapalvelu.matti.matti
   (:require [lupapalvelu.action :as action]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.schemas :as schemas]
@@ -353,29 +355,31 @@
   [template application]
   (let [source-data (-> template :versions last :data)]
     (data-draft (merge {:giver        :giver
-                       :verdict-code :verdict-code
-                       :verdict-text :paatosteksti}
-                      (reduce (fn [acc kw]
-                                (assoc acc
-                                       kw kw
-                                       (kw-format "%s-included" kw)
-                                       {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
-                              {}
-                              [:foremen :plans :reviews])
-                      (reduce (fn [acc kw]
-                                (assoc acc
-                                       kw  {:fn   #(when (some-> % kw :enabled)
-                                                     "")
-                                            :skip-nil? true}))
-                              {}
-                              [:julkipano :anto :valitus :lainvoimainen
-                               :aloitettava :voimassa])
-                      (reduce (fn [acc k]
-                                (merge acc (map-unremoved-section source-data k)))
-                              {}
-                              [:conditions :neighbors :appeal :statements :collateral
-                               :complexity :rights :purpose :buildings]))
-               template)))
+                        :verdict-code :verdict-code
+                        :verdict-text :paatosteksti}
+                       (reduce (fn [acc kw]
+                                 (assoc acc
+                                        kw kw
+                                        (kw-format "%s-included" kw)
+                                        {:fn (util/fn-> (get-in [:removed-sections kw]) not)}))
+                               {}
+                               [:foremen :plans :reviews])
+                       (reduce (fn [acc kw]
+                                 (assoc acc
+                                        kw  {:fn   #(when (some-> % kw :enabled)
+                                                      "")
+                                             :skip-nil? true}))
+                               {}
+                               [:julkipano :anto :valitus :lainvoimainen
+                                :aloitettava :voimassa])
+                       (reduce (fn [acc k]
+                                 (merge acc (map-unremoved-section source-data k)))
+                               {}
+                               [:conditions :neighbors :appeal :statements :collateral
+                                :complexity :rights :purpose]))
+                template)))
+
+(declare enrich-verdict)
 
 (defn new-verdict-draft [template-id {:keys [application organization created]
                                       :as   command}]
@@ -389,14 +393,15 @@
                                        (assoc draft
                                               :template {:id         template-id
                                                          :version-id (:id version)})}})
-    {:verdict  draft
+    {:verdict  (enrich-verdict command draft version)
      :settings (:settings version)}))
 
 (defn verdict-summary [verdict]
   (select-keys verdict [:id :published :modified]))
 
-(defn command->verdict [{:keys [data application]}]
-  (util/find-by-id (:verdict-id data) (:matti-verdicts application)))
+(defn command->verdict [{:keys [data application organization]}]
+  (util/find-by-id (:verdict-id data)
+                   (:matti-verdicts application)))
 
 (defn verdict-template-for-verdict [verdict organization]
   (let [{:keys [id version-id]} (:template verdict)]
@@ -404,16 +409,6 @@
           (verdict-template organization)
           :versions
           (util/find-by-id version-id))))
-
-
-(defn open-verdict [{:keys [application organization] :as command}]
-  (let [verdict (command->verdict command)
-        data    (:data verdict)]
-
-    {:verdict  (assoc (select-keys verdict [:id :modified :published])
-                      :data data)
-     :settings (:settings (verdict-template-for-verdict verdict
-                                                        @organization))}))
 
 (defn delete-verdict [verdict-id command]
   (action/update-application command
@@ -518,3 +513,76 @@
                      (map (fn [[k v]]
                             [(util/split-kw-path k) v])
                           changed))}))))
+
+(defn buildings
+  "Map of building infos: operation id is key and value map contains
+  operation (loc-key), building-id (either national or manual id),
+  tag (tunnus) and description."
+  [{:keys [documents] :as application}]
+  (->> documents
+       tools/unwrapped
+       (filter (util/fn-> :data (contains? :valtakunnallinenNumero)))
+       (map (partial app/populate-operation-info
+                     (app/get-operations application)))
+       (reduce (fn [acc {:keys [schema-info data]}]
+                 (let [{:keys [id name
+                               description]} (:op schema-info)]
+                   (assoc acc
+                          (keyword id) {:operation   name
+                                        :description description
+                                        :building-id (->> [:valtakunnallinenNumero
+                                                           :manuaalinen_rakennusnro]
+                                                          (select-keys data)
+                                                          vals
+                                                          (util/find-first ss/not-blank?)
+                                                          ss/->plain-string)
+                                        :tag         (:tunnus data)})))
+               {})))
+
+(defn- merge-buildings [app-buildings verdict-buildings]
+  (reduce (fn [acc [k v]]
+            (assoc acc k (merge (k verdict-buildings) v)))
+          {}
+          app-buildings))
+
+(defn- buildings?
+  "True if the template (really) supports buildings."
+  [{data :data}]
+  (let [{:keys [removed-sections autopaikat
+                paloluokka vss-luokka]} data]
+    (and (-> removed-sections :buildings not)
+         (some true? [autopaikat paloluokka vss-luokka]))))
+
+;; Augments verdict data, but MUST NOT update mongo (this is called
+;; from query actions, too).
+(defmulti enrich-verdict (fn [{app :application} & _]
+                           (shared/permit-type->category (:permitType app))))
+
+(defmethod enrich-verdict :default [_ verdict _]
+  verdict)
+
+(defmethod enrich-verdict :r
+  [{:keys [application]} {data :data :as verdict} template]
+  (let [addons {;; Buildings added only if the buildings section is in
+                ;; the template AND at least one of the checkboxes has
+                ;; been selected.
+                :buildings (when (buildings? template)
+                             (merge-buildings (buildings application)
+                                              (:buildings data)))
+                }]
+
+    (if (some->> addons vals (remove nil?) seq)
+      (assoc-in verdict [:data] (merge data addons))
+      verdict)))
+
+(defn open-verdict [{:keys [application organization] :as command}]
+  (let [{:keys [data published] :as verdict} (command->verdict command)
+        template (verdict-template-for-verdict verdict
+                                               @organization)]
+    {:verdict  (assoc (select-keys verdict [:id :modified :published])
+                      :data (if published
+                              data
+                              (:data (enrich-verdict command
+                                                     verdict
+                                                     template))))
+     :settings (:settings template)}))

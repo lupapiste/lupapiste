@@ -81,7 +81,9 @@
   [(sc/one (sc/enum :OR :AND) :OR)
    (sc/conditional
     keyword?    (sc/constrained sc/Keyword
-                                (util/fn-> #{:AND :OR} not))
+                                ;; util/fn-> does not pass schema
+                                ;; validation on the ClojureScript!?
+                                #(-> % #{:AND :OR} not))
     sequential? (sc/recursive #'PathCondition))])
 
 (def condition-type
@@ -225,18 +227,12 @@
    :multi-select   MattiMultiSelect
    :reference      MattiReference
    :placeholder    MattiPlaceholder
-   :keymap         KeyMap
-   ;; Keyword is not used. The :repeating schema is just needed in
-   ;; order to make the different repeating data path prefixes unique.
-   ;; Later on we might add repeating-specific properties (e.g., can
-   ;; add/remove). See NestedGrid for non-dictionary reference.
-   :repeating      sc/Keyword
-   })
+   :keymap         KeyMap})
 
 (defn make-conditional [m]
   (->> (reduce (fn [a [k v]]
-                 (concat a [k (hash-map k v)]))
-               []
+                 (concat [k (hash-map k v)] a))
+               [:else (sc/enum :repeating)]
                m)
        (apply sc/conditional)))
 
@@ -294,7 +290,12 @@
   (merge MattiBase
          CellConfig
          {:grid (assoc MattiGrid
-                       ;; Dict key for a repeating schema.
+                       ;; Keyword is not used. The :repeating schema
+                       ;; is just needed in order to make the
+                       ;; different repeating data path prefixes
+                       ;; unique.  Later on we might add
+                       ;; repeating-specific properties (e.g., can
+                       ;; add/remove, sorting).
                        (sc/optional-key :repeating) sc/Keyword)}))
 
 
@@ -530,18 +531,22 @@
              [[:matti-r.foremen :foremen false false]
               [:matti-plans :plans true false]
               [:matti-reviews :reviews true true]])
-     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                      :category :lupaehdot}}
-      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                      :category :naapurit}}
-      :neighbor-states {:placeholder {:type :neighbors}}
-      :collateral      {:phrase-text {:category :vakuus}}
-      :appeal          {:phrase-text {:category :muutoksenhaku}}
-      :complexity      {:docgen "matti-complexity"}
-      :complexity-text {:phrase-text {:label?   false
-                                      :category :vaativuus}}
-      :rights          {:phrase-text {:category :rakennusoikeus}}
-      :purpose         {:phrase-text {:category :kaava}}})
+     {:conditions             {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                             :category :lupaehdot}}
+      :neighbors              {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                             :category :naapurit}}
+      :neighbor-states        {:placeholder {:type :neighbors}}
+      :collateral             {:phrase-text {:category :vakuus}}
+      :appeal                 {:phrase-text {:category :muutoksenhaku}}
+      :complexity             {:docgen "matti-complexity"}
+      :complexity-text        {:phrase-text {:label?   false
+                                             :category :vaativuus}}
+      :rights                 {:phrase-text {:category :rakennusoikeus}}
+      :purpose                {:phrase-text {:category :kaava}}
+      :rakennetut-autopaikat  {:docgen "matti-string"}
+      :kiinteiston-autopaikat {:docgen "matti-string"}
+      :autopaikat-yhteensa    {:docgen "matti-string"}
+      :buildings              :repeating})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -613,13 +618,13 @@
       :show? [:OR :?.appeal :?.collateral]
       :grid  {:columns 7
               :rows    [{:show? :?.appeal
-                         :row [{:col        6
-                                :loc-prefix :verdict.muutoksenhaku
-                                :dict       :appeal}]}
+                         :row   [{:col        6
+                                  :loc-prefix :verdict.muutoksenhaku
+                                  :dict       :appeal}]}
                         {:show? :?.collateral
-                         :row [{:col        6
-                                :loc-prefix :matti-collateral
-                                :dict       :collateral}]}]}}
+                         :row   [{:col        6
+                                  :loc-prefix :matti-collateral
+                                  :dict       :collateral}]}]}}
      {:id    "neighbors"
       :show? :?.neighbors
       :grid  {:columns 12
@@ -633,23 +638,35 @@
                         ]}}
      {:id         "complexity"
       :loc-prefix :matti.complexity
-      :show? [:OR :?.complexity :?.rights :?.purpose]
-      :grid {:columns 7
-             :rows    [{:show? :?.complexity
-                        :row [{:col  3
-                               :dict :complexity}]}
-                       {:show? :?.complexity
-                        :row [{:col  6
-                               :id   "text"
-                                     :dict :complexity-text}]}
-                       {:show? :?.rights
-                        :row [{:col        6
-                               :loc-prefix :matti-rights
-                               :dict       :rights}]}
-                       {:show? :?.purpose
-                        :row [{:col        6
-                               :loc-prefix :phrase.category.kaava
-                               :dict       :purpose}]}]}}]}})
+      :show?      [:OR :?.complexity :?.rights :?.purpose]
+      :grid       {:columns 7
+                   :rows    [{:show? :?.complexity
+                              :row   [{:col  3
+                                       :dict :complexity}]}
+                             {:show? :?.complexity
+                              :row   [{:col  6
+                                       :id   "text"
+                                       :dict :complexity-text}]}
+                             {:show? :?.rights
+                              :row   [{:col        6
+                                       :loc-prefix :matti-rights
+                                       :dict       :rights}]}
+                             {:show? :?.purpose
+                              :row   [{:col        6
+                                       :loc-prefix :phrase.category.kaava
+                                       :dict       :purpose}]}]}}
+     {:id    "buildings"
+      :show? :?.buildings
+      :grid  {:columns 7
+              :rows    [[{:col  7
+                          :grid {:columns   5
+                                 :repeating :buildings
+                                 :rows      [[{:id   :rakennetut-autopaikat
+                                               :dict :rakennetut-autopaikat}
+                                              {:id   :kiinteiston-autopaikat
+                                               :dict :kiinteiston-autopaikat}
+                                              {:id   :autopaikat-yhteensa
+                                               :dict :autopaikat-yhteensa}]]}}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

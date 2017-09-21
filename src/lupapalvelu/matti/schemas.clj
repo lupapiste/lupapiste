@@ -283,7 +283,10 @@
 (defn validate-path-value
   "Convenience wrapper for validate-dictionary-value."
   [{dic :dictionary} path value & [references]]
-  (let [[x & xs] (canonize-path path)]
+  (let [[x & xs] (loop [[x y & xs :as xyxs] (canonize-path path)]
+                   (if (= (x dic) :repeating)
+                     (recur xs)
+                     xyxs))]
     (validate-dictionary-value (get dic x)
                                value
                                xs
