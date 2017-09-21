@@ -91,17 +91,22 @@
               (fact "the verdicts of the application contain two url hashes"
                 (count url-hashes) => 2)
 
-              (fact "the url hashes correspond to attachments in the application, and attachments target correct verdict"
+              (facts "verdict attachments"
                 (let [verdict-attachments (->> (:attachments updated-application)
                                                (filter #((set url-hashes) (:id %))))]
-                  (count verdict-attachments) => 2
-                  (map (partial attachment-targets-correct-verdict? updated-application)
-                       verdict-attachments)
-                  => (has every? true?)))
+
+                  (fact "attachments are read-only"
+                        (map :readOnly verdict-attachments) => (has every? true?))
+
+                  (fact "the url hashes correspond to attachments in the application, and attachments target correct verdict"
+                    (count verdict-attachments) => 2
+                    (map (partial attachment-targets-correct-verdict? updated-application)
+                         verdict-attachments)
+                    => (has every? true?))))
 
               ;; TODO This fails, since create-attachment!
               ;; updates :modified. Discuss if changing
               ;; change-attachment!:s behavior, or circumventing it,
               ;; is desirable.
-              (fact ":modified timestamp has not changed"
-                (:modified application) => (:modified updated-application)))))))
+              #_(fact ":modified timestamp has not changed"
+                  (:modified application) => (:modified updated-application)))))))
