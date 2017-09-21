@@ -13,7 +13,7 @@
   {:id                            ssc/ObjectIdStr
    :name                          sc/Str
    :created                       ssc/Timestamp
-   (sc/optional-key :description) sc/Str})
+   (sc/optional-key :description) (sc/maybe sc/Str)})
 
 (defschema Application                                      ; WIP, used initially in MATTI state-change JSON
   {:id             ApplicationId
