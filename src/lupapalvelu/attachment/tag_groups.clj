@@ -3,7 +3,8 @@
             [sade.util :refer [fn->] :as util]
             [sade.strings :as ss]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.attachment.type :as att-type]))
+            [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.util :as att-util]))
 
 (defn- node
   "(node :foo [:bar :quux]) => [:foo [:bar] [:quux]]"
@@ -19,9 +20,6 @@
          att-type/type-groups)
    (node :operation
          att-type/type-groups)])
-
-(defn- get-operation-ids [{op :op :as attachment}]
-  (mapv :id op))
 
 (defn- tag-set [attachment]
   (-> attachment :tags set))
@@ -53,7 +51,7 @@
   "replace the operation hierarchy template with the actual hierarchies"
   [attachments hierarchy]
   (let [[pre operation post] (partition-by-tag :operation hierarchy)
-        op-ids               (-> (mapcat get-operation-ids attachments) distinct)]
+        op-ids               (-> (mapcat att-util/get-operation-ids attachments) distinct)]
     (if operation
       (concat pre
               (map (fn-> att-tags/op-id->tag (cons (rest operation))) op-ids)
