@@ -52,9 +52,8 @@
                        tasks))))
 
 (defn- task-with-same-name-and-type [mongo-task tasks]
-  (->> tasks
-       (filter #(reviews-have-same-name-and-type? mongo-task %))
-       (first)))
+  (util/find-first #(reviews-have-same-name-and-type? mongo-task %)
+                   tasks))
 
 (defn- katselmus-data [t]
   (-> t :data :katselmus tools/unwrapped))
@@ -68,10 +67,9 @@
                   data-keys)))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
-  (->> tasks
-       (filter #(and (reviews-have-same-name-and-type? mongo-task %)
-                     (matching-data? data-keys mongo-task %)))
-       (first)))
+  (util/find-first #(and (reviews-have-same-name-and-type? mongo-task %)
+                         (matching-data? data-keys mongo-task %))
+                   tasks))
 
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
@@ -80,14 +78,15 @@
    (task-with-matching-background-id mongo-task update-tasks)
 
    ;; 2. task with same name and type WHEN mongo task is empty, or
-   (and (empty-review-task? mongo-task)
-        (task-with-same-name-and-type mongo-task update-tasks))
+   (when (empty-review-task? mongo-task)
+     (task-with-same-name-and-type mongo-task update-tasks))
 
-   ;; 3. task with same name, type and other data related to
-   ;;    holding the review
-   (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
-                                      mongo-task
-                                      update-tasks)))
+   ;; 3. task with same name, type and other data related to holding
+   ;;    the review, given that mongo task does not have background id
+   (when (ss/empty? (background-id mongo-task))
+     (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
+                                        mongo-task
+                                        update-tasks))))
 
 (defn- merge-review-tasks
   "Returns a vector with two values:
