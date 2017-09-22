@@ -16,12 +16,14 @@
 
 (defn application-within-time-limit
   [{app-org :organization {:keys [submitted created] :as app} :application}]
-  (when (or (nil? app)
-            (let [archive-in-use-since (:permanent-archive-in-use-since @app-org)]
-              (if submitted
-                (< submitted archive-in-use-since)
-                (< created archive-in-use-since))))
-    (fail :error.application-too-old-for-archival)))
+  (if-not (:permanent-archive-enabled @app-org)
+    (fail :error.archive-not-enabled)
+    (when (or (nil? app)
+              (let [archive-in-use-since (:permanent-archive-in-use-since @app-org)]
+                (if submitted
+                  (< submitted archive-in-use-since)
+                  (< created archive-in-use-since))))
+      (fail :error.application-too-old-for-archival))))
 
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
