@@ -731,4 +731,4 @@
                              (or (when end
                                    (util/to-millis-from-local-date-string end))
                                  (now))
-                             (or organizations [])))
+                             (or (vec organizations) [])))
