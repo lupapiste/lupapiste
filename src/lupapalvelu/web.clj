@@ -30,6 +30,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.domain :as domain]
@@ -672,7 +673,12 @@
             (app/submit command)
 
             (and (ss/not-blank? state) (not= state (get-in command [:application :state])))
-            (action/update-application command {$set {:state state}, $push {:history (app/history-entry state (:created command) user)}}))
+            (action/update-application command
+                                       (app-state/state-transition-update
+                                         (keyword state)
+                                         (:created command)
+                                         (:application command)
+                                         user)))
 
           (if redirect
             (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))

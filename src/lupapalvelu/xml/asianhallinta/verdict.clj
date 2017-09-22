@@ -5,7 +5,7 @@
             [sade.xml :as xml]
             [taoensso.timbre :refer [error]]
             [monger.operators :refer :all]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.xml.asianhallinta.attachment :as ah-att]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
@@ -68,7 +68,7 @@
             update-clause (util/deep-merge
                             {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
                             (when (= :sent (keyword (:state application)))
-                              (application/state-transition-update verdict-given-state timestamp application system-user)))]
+                              (app-state/state-transition-update verdict-given-state timestamp application system-user)))]
 
         (action/update-application command update-clause)
         (doseq [attachment attachments]

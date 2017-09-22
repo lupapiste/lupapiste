@@ -6,7 +6,7 @@
             [sade.core :refer [def- now]]
             [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
@@ -588,7 +588,7 @@
     (fact "reminder is sent also to applications in state 'construction-started'"
       (mongo/with-db db-name
         (update-application (application->command ya-reminder-application)
-                            (merge (application/state-transition-update :constructionStarted 0 ya-reminder-application {})
+                            (merge (app-state/state-transition-update :constructionStarted 0 ya-reminder-application {})
                                    {$unset {:work-time-expiring-reminder-sent 1}}))
         (batchrun/ya-work-time-is-expiring-reminder)
         (check-sent-reminder-email

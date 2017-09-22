@@ -9,6 +9,7 @@
             [clj-time.coerce :as c]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
@@ -497,7 +498,7 @@
                                  :permitType permit-type
                                  :organization organization-id
                                  :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
-                  (merge app/timestamp-key
+                  (merge app-state/timestamp-key
                          projection))))
 
 (defn- save-reviews [user applications-with-results]

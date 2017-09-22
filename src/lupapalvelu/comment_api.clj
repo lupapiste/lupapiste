@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
@@ -118,4 +119,4 @@
       (util/deep-merge
         (comment/comment-mongo-update (:state application) text target (application/user-role user application) mark-answered user to-user created ensured-visibility)
         (when (and openApplication (= (:state application) "draft"))
-          (application/state-transition-update :open created application user))))))
+          (app-state/state-transition-update :open created application user))))))
