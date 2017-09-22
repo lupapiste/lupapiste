@@ -455,14 +455,9 @@
   [options]
   (mongo/select :applications (missing-verdict-attachments-query options)))
 
-;; Having application and verdict xml, update application verdicts:
-;; 1. get verdicts from xml
 (defn- get-verdicts-from-xml [application organization xml]
   (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
 
-;; 2. only consider verdicts that
-;; - are already present in the application
-;; - do not have poytakirja attachments
 (defn- matching-verdict
   "Return a verdict with a matching kuntalupatunnus from verdicts"
   [verdict verdicts]
@@ -524,18 +519,16 @@
            :poytakirjat
            (doall
             (for [{:keys [action pk] :as update-info} update-actions]
-              (cond (= action :keep)   pk
-                    (= action :update) (get-poytakirja! application
-                                                        user
-                                                        timestamp
-                                                        app-verdict-id
-                                                        pk
-                                                        :set-app-modified? false)
-                    :else              pk))))))
+              (case action
+                :keep   pk
+                :update (get-poytakirja! application
+                                         user
+                                         timestamp
+                                         app-verdict-id
+                                         pk
+                                         :set-app-modified? false)
+                pk))))))
 
-;; 3. update the verdicts on application that have a new poytakirja attachment
-;; 3.1 add poytakirja attachment with get-poytakirja!
-;; 3.2 update verdict entry
 (defn- add-verdict-attachments!
   "When available, add a new verdict attachments (note, side effect)
   and return an updated verdict with information on the added
@@ -561,7 +554,6 @@
           app-verdict))
     app-verdict))
 
-;; 4. store the updates to mongo
 (defn- store-verdict-updates!
   "Store the updated verdicts to mongo. Return the ones that were
   actually updated."
@@ -576,7 +568,15 @@
                         (partial apply diff))))
        (into {})))
 
-
+;; Having application and verdict xml, update application verdicts:
+;; 1. get verdicts from xml
+;; 2. only consider verdicts that
+;; - are already present in the application
+;; - do not have poytakirja attachments
+;; 3. update the verdicts on application that have a new verdict attachments
+;; - add verdict attachment with get-poytakirja!
+;; - update verdict entry
+;; 4. store the updates to mongo
 (defn update-verdict-attachments-from-xml!
   "Update the verdict's poytakirja attachments from the xml, return
   updated verdicts"

@@ -678,7 +678,9 @@
 
 ;; Update verdict attachments
 
-(defn fetch-verdict-attachments [start end organizations]
+(defn fetch-verdict-attachments
+  "Fetch "
+  [start end organizations]
   {:pre [(number? start) (number? end) (< start end) (vector? organizations)]}
   (let [apps (verdict/applications-with-missing-verdict-attachments
               {:start         start
