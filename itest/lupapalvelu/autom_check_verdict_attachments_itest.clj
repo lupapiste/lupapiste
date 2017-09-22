@@ -104,12 +104,16 @@
                           verdict-attachments)
                      => (has every? true?))))
 
-               ;; TODO This fails, since create-attachment!
-               ;; updates :modified. Discuss if changing
-               ;; change-attachment!:s behavior, or circumventing it,
-               ;; is desirable.
                (fact ":modified timestamp has not changed"
                  (:modified application) => (:modified updated-application))
+
+               (fact "comments are added for the attachments"
+                 (count (:comments updated-application)) => 2
+                 (map (comp :id :target) (:comments updated-application)) => (has every? (set url-hashes)))
+
+               (fact "besides comments, verdicts and attachments, the application has not been updated"
+                 (dissoc application :attachments :comments :verdicts)
+                 => (dissoc updated-application :attachments :comments :verdicts))
 
                (fact "running fetch-verdict-attachments again does not alter the application"
                  (let [new-batchrun-result (batchrun/fetch-verdict-attachments (-> 3 t/months t/ago c/to-long)
