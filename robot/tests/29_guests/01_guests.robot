@@ -37,7 +37,7 @@ Luukas cannot be guest authority
   Add bad authority  luukas.lukija@sipoo.fi  Luukas  Lukija  -
 
 Financial authority cannot be guest authority
-  Add bad authority  financial@ara.fi  Rahoituskäsittelijä  ${EMPTY}  -
+  Add bad authority  financial@ara.fi  ARA-käsittelijä  ${EMPTY}  -
 
 Create new statement giver and add it as guest authority
   Create statement giver  statement@giver.net  Statue
