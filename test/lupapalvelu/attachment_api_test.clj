@@ -112,7 +112,8 @@
 
     (provided
       (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
-      (att/update-attachment-data! anything "5234" anything 1000) => {:ok true})))
+      (att/update-attachment-data! anything "5234" anything 1000) => {:ok true}
+      (lupapalvelu.assignment/run-assignment-triggers anything) => nil)))
 
 (facts "Allowed only for authority when application sent"
        (let [app {:organization "753-R"
