@@ -43,8 +43,7 @@
 
   <div data-bind="if: kuntalupatunnukset() !== null">
     <p data-bind="ltext: 'application.kuntalupatunnus'"></p>
-    <span data-bind="text: _.join(kuntalupatunnukset(), ', '), attr: {'data-test-value': id}"
-          data-test-id="application-id"
+    <span data-bind="text: _.join(kuntalupatunnukset(), ', ')"
           class="application_summary_text">
     </span>
   </div>
