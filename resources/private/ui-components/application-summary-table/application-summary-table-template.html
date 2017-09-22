@@ -41,9 +41,9 @@
     </span>
   </div>
 
-  <div data-bind="if: isArchivingProject() && kuntalupatunnus() !== null">
+  <div data-bind="if: kuntalupatunnukset() !== null">
     <p data-bind="ltext: 'application.kuntalupatunnus'"></p>
-    <span data-bind="text: kuntalupatunnus, attr: {'data-test-value': id}"
+    <span data-bind="text: _.join(kuntalupatunnukset(), ', '), attr: {'data-test-value': id}"
           data-test-id="application-id"
           class="application_summary_text">
     </span>
