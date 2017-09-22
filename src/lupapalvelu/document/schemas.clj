@@ -1595,7 +1595,7 @@
 
    {:info {:name "maksaja"
            :i18name "osapuoli"
-           :repeating true
+           :repeating false
            :order 6
            :removable-by :all
            :last-removable-by :authority

@@ -402,6 +402,10 @@ div.attachments-table-container {
       width: $baseline;
     }
 
+    #reject-edit-input {
+      width: 20em;
+    }
+
     .amount-controls > [class^="lupicon-"]:before, [class*=" lupicon-"]:before {
       position: relative;
       top: $baseline / 6;

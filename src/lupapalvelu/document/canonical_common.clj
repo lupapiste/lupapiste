@@ -133,7 +133,7 @@
   [muu-key muu-val sel-key sel-val]
   (let [muu (= "other" sel-val)
         k   (if muu muu-key sel-key)
-        v   (if muu muu-val sel-val)]
+        v   (if muu muu-val (ss/->plain-string sel-val))]
     (when-not (ss/blank? v)
       {k v})))
 

@@ -68,7 +68,9 @@
                          {$and [{:state {$in ["closed" "extinct"]}} {:archived.completed nil} {:permitType "YA"}]}]}]
     (if from-ts
       {$and [base-query
-             {:submitted {$gte from-ts}}]}
+             {$or [{:submitted {$gte from-ts}}
+                   {:submitted nil
+                    :created {$gte from-ts}}]}]}
       base-query)))
 
 (defn- event-search [event]

@@ -3412,6 +3412,12 @@
                                  :created modified)
                           task-id))))
 
+(defmigration add-earliest-allowed-archiving-date-to-orgs
+  {:apply-when (pos? (mongo/count :organizations {:earliest-allowed-archiving-date {$exists false}}))}
+  (mongo/update :organizations
+                {:earliest-allowed-archiving-date {$exists false}}
+                {$set {:earliest-allowed-archiving-date 0}}
+                :multi true))
 
 ;;
 ;; ****** NOTE! ******

@@ -111,7 +111,7 @@ div.order-section {
       border: none;
     }
 
-    td.first {
+    td.first, td.half {
       width: 50%;
     }
 
@@ -160,7 +160,7 @@ div.printing-order-footer {
   div.pricelist-panel {
     position: absolute;
     right: 0px;
-    bottom: $btn-height;
+    bottom: $btn-height * 1.75;
     min-width: 250px;
 
     > div:first-child {

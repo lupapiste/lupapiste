@@ -244,6 +244,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return "/api/raw/view-attachment?attachment-id=" + fileId;
   });
 
+  self.isArchived = self.disposedComputed(function() {
+    return util.getIn(self.attachment(), ["metadata", "tila"]) === "arkistoitu";
+  });
+
   self.rotate = function(rotation) {
     $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
     service.rotatePdf(self.id, rotation);

@@ -12,6 +12,7 @@
             [sade.util :as util]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.permit :as permit]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -463,13 +464,14 @@
     (let [{:keys [user organization application targets assignment-group timestamp]} (apply response-fn response)
           org-id   (:id organization)
           triggers (:assignment-triggers organization)]
-      (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]
-        (upsert-assignment-targets (usr/summary user)
-                                   application
-                                   trigger
-                                   timestamp
-                                   assignment-group
-                                   targets)))))
+      (when-not (= (:permitType application) permit/ARK)
+        (doseq [{:keys [trigger targets]} (group-by-triggers triggers targets)]
+          (upsert-assignment-targets (usr/summary user)
+                                     application
+                                     trigger
+                                     timestamp
+                                     assignment-group
+                                     targets))))))
 
 (defn change-assignment-recipient [app-id role-id handler]
   (let [query       {:application.id app-id

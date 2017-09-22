@@ -18,7 +18,7 @@ Sonja creates application with ARA funding
 Financial authority is added to parties table
   Open tab  parties
   Wait until  Xpath Should Match X Times  //table//tr[contains(@class, 'party')]  2
-  Is authorized party  Rahoituskäsittelijä
+  Is authorized party  ARA-käsittelijä
 
 Financial authority gets mail about new ARA application
   Open last email
@@ -55,7 +55,7 @@ Sonja removes ARA funding from application
 Financial authority is removed from parties
   Open tab  parties
   Wait until  Xpath Should Match X Times  //table//tr[contains(@class, 'party')]  1
-  Is not authorized party  Rahoituskäsittelijä
+  Is not authorized party  ARA-käsittelijä
 
 Financial authority gets notification email
   Open last email

@@ -74,7 +74,16 @@
           <h2>Asetukset</h2>
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
             <label data-bind="ltext: 'organization.archive.enabled'" for="permanentArchiveEnabled"></label>
-            <input type="checkbox" data-bind="checked: permanentArchiveEnabled" class="form-input" id="permanentArchiveEnabled">
+            <input type="checkbox" data-bind="checked: permanentArchiveEnabled" class="form-input" id="permanentArchiveEnabled"><br>
+            <label for="earliest-archiving-date-input" data-bind="ltext: 'admin.earliestArchivingDate'"></label>
+            <div class="earliest-archiving-date">
+              <input type="text" class="form-input inline textinput textinput--big"
+                     data-bind="datepicker: earliestArchivingDate"
+                     placeholder="Ei rajoitettu"
+                     id="earliest-archiving-date-input">
+              <button class="inline" style="vertical-align: middle;"
+                      data-bind="click: resetEarliestArchivingDate, ltext: 'admin.removeLimitation'"></button>
+            </div>
           </div>
 
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">

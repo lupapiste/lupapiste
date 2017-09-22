@@ -29,7 +29,7 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
 
   # => (ns lupapalvelu.operations)
   # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/YM permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))
-  Wait until  Xpath Should Match X Times  //table[@data-test-id='organization-selected-operations']//tr[contains(@class, 'sel-op-row')]  76
+  Wait until  Xpath Should Match X Times  //table[@data-test-id='organization-selected-operations']//tr[contains(@class, 'sel-op-row')]  77
   Xpath Should Match X Times  //span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]  1
 
   Click by test id  authadmin-edit-selected-operations

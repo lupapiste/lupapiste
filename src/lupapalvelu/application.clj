@@ -40,6 +40,11 @@
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
+(defn get-sorted-operation-documents [{docs :documents primary-op :primaryOperation secondary-ops :secondaryOperations}]
+  (let [operations (cons primary-op (sort-by :created secondary-ops))]
+    (->> (filter (comp (set (map :id operations)) :id :op :schema-info) docs)
+         (sort-by (util/fn-> :schema-info :op :id (util/position-by-id operations))))))
+
 (defn resolve-valid-subtypes
   "Returns a set of valid permit and operation subtypes for the application."
   [{permit-type :permitType op :primaryOperation}]
@@ -459,12 +464,13 @@
                   (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
-(defn application-state [user organization-id info-request? archiving-project?]
+(defn application-state [user organization-id info-request? operation-name]
   (cond
     info-request? :info
+    (util/=as-kw "aiemmalla-luvalla-hakeminen" operation-name) :verdictGiven
     (or (usr/user-is-authority-in-organization? user organization-id)
         (usr/rest-user? user)
-        archiving-project?) :open
+        (= "ARK" (op/permit-type-of-operation operation-name))) :open
     :else :draft))
 
 (defn application-history-map [{:keys [created organization state tosFunction]} user]
@@ -540,7 +546,7 @@
                             :organization        (:id organization)
                             :propertyId          property-id
                             :schema-version      (schemas/get-latest-schema-version)
-                            :state               (application-state user (:id organization) info-request? (= "ARK" (op/permit-type-of-operation operation-name)))
+                            :state               (application-state user (:id organization) info-request? operation-name)
                             :title               address
                             :tosFunction         (tos-function organization operation-name)}
                            (when-not (#{:location-service nil} (keyword property-id-source))

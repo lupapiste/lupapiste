@@ -55,6 +55,9 @@ ajax.pendingTimeout = function() {};
 ajax.call = function() {};
 ajax.header = function() {};
 
+var notify = {};
+notify.ajaxError = function() {};
+
 var util = {};
 util.showSavedIndicator = function() {};
 util.partyFullName = function() {};

@@ -135,6 +135,7 @@
    (sc/optional-key :permanent-archive-enabled) sc/Bool
    (sc/optional-key :digitizer-tools-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :earliest-allowed-archiving-date) sssc/Nat
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
@@ -160,7 +161,8 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}})
+   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
+   (sc/optional-key :multiple-operations-supported) sc/Bool})
 
 
 (sc/defschema SimpleOrg
@@ -656,16 +658,19 @@
                            {:trigger trigger-id}
                            {$set {:description description}})))
 
-(defn update-assignment-trigger [{org-id :id} trigger triggerId]
+(defn update-assignment-trigger [{org-id :id} {:keys [targets handlerRole description] :as trigger} triggerId]
   (let [query (assoc {:assignment-triggers {$elemMatch {:id triggerId}}} :_id org-id)
-        changes {$set {:assignment-triggers.$.targets (:targets trigger)
-                       :assignment-triggers.$.handlerRole (:handlerRole trigger)
-                       :assignment-triggers.$.description (:description trigger)}}
+        changes {$set (merge {:assignment-triggers.$.targets targets
+                              :assignment-triggers.$.description description}
+                             (when (:id handlerRole)
+                               {:assignment-triggers.$.handlerRole handlerRole}))}
+        changes (merge changes (when (nil? (:id handlerRole))
+                                 {$unset {:assignment-triggers.$.handlerRole 1}}))
         num-updated (mongo/update-by-query :organizations query changes)]
     ; it is assumed that triggers are not updated very often, so this
     ; description synchronization is done to avoid unnecessary
     ; organization queries elsewhere
-    (update-assignment-descriptions triggerId (:description trigger))
+    (update-assignment-descriptions triggerId description)
     num-updated))
 
 (defn remove-assignment-trigger [{org-id :id} trigger-id]

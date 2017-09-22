@@ -62,6 +62,9 @@
      (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data)
      => [default-sipoo-docstore-info])
 
+    (fact "organizations - permit-type limitation"
+      (-> (docstore-api-call organizations-address {:permit-type "YA"}) :body :data) => [])
+
     (fact "organizations - invalid status"
      (-> (docstore-api-call organizations-address {:status "zorblax"} true))
      => http400?))

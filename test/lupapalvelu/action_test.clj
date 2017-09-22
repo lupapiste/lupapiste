@@ -281,6 +281,12 @@
     (localization-parameters [:name] {:data {:name ""}})                                                   => (localization-error [:name])
     (localization-parameters [:name] {:data {:name (assoc (i18n/supported-langs-map str) :esperanto "")}}) => (localization-error [:name]))
 
+  (fact "supported-localization-parameters"
+    (supported-localization-parameters [:name] {:data {:name (i18n/supported-langs-map str)}})                                    => nil
+    (supported-localization-parameters [:name] {:data {:name (assoc (i18n/supported-langs-map str) :esperanto "")}})              => nil
+    (supported-localization-parameters [:name] {:data {:name (dissoc (i18n/supported-langs-map str) :fi)}})                       => (localization-error [:name])
+    (supported-localization-parameters [:name] {:data {:name (dissoc (assoc (i18n/supported-langs-map str) :esperanto "") :fi)}}) => (localization-error [:name]))
+
   (facts "feature requirements"
    (against-background
      (get-actions) => {:test-command1 {:feature :abba :user-roles #{:anonymous}}})

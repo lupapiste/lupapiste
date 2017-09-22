@@ -9,7 +9,8 @@
             [lupapalvelu.ui.printing-order.files :as files]
             [lupapalvelu.ui.printing-order.pricing :as pricing]
             [lupapalvelu.ui.printing-order.state :as state]
-            [lupapalvelu.ui.printing-order.transitions :as transitions]))
+            [lupapalvelu.ui.printing-order.transitions :as transitions]
+            [lupapalvelu.ui.hub :as hub]))
 
 (def log (.-log js/console))
 
@@ -21,7 +22,7 @@
           (merge
             {:firstName (.firstName js/lupapisteApp.models.currentUser)
              :lastName  (.lastName js/lupapisteApp.models.currentUser)
-             :address   (.street js/lupapisteApp.models.currentUser)
+             :streetAddress   (.street js/lupapisteApp.models.currentUser)
              :postalCode (.zip js/lupapisteApp.models.currentUser)
              :city       (.city js/lupapisteApp.models.currentUser)
              :email      (.email js/lupapisteApp.models.currentUser)}
@@ -54,10 +55,12 @@
       (init-user-details))
     init-state))
 
-(rum/defc pricelist-panel < rum/reactive [open?]
+(rum/defc pricelist-panel < rum/reactive [open? mouse-on-panel?]
   (when (rum/react open?)
     (let [pricing-config (-> @state/component-state :pricing)]
       [:div.pricelist-panel
+       {:on-mouse-enter #(reset! mouse-on-panel? true)
+        :on-mouse-leave #(reset! mouse-on-panel? false)}
        [:div.order-grid-2
         (for [row (:by-volume pricing-config)]
           [:div.row {:key (util/unique-elem-id "pricelist-")} (get-in row [:pricelist-label (keyword (.getCurrentLanguage js/loc))])])
@@ -67,7 +70,11 @@
 (rum/defc order-composer-footer < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
         number-of-printouts (reduce + (vals order-rows))
-        pricelist-panel-open? (atom false)]
+        pricelist-panel-open? (atom false)
+        mouse-on-panel? (atom false)]
+    (hub/subscribe "printingOrderPage::clickEvent" #(do
+                                                     (when-not @mouse-on-panel?
+                                                       (reset! pricelist-panel-open? false))))
     [:div.printing-order-footer
      [:div
       [:button.tertiary-ghost.rollup-button
@@ -80,7 +87,7 @@
         [:h3
          {:on-click #(swap! pricelist-panel-open? not)}
          (loc :printing-order.show-pricing)]
-        (pricelist-panel pricelist-panel-open?)]]]]))
+        (pricelist-panel pricelist-panel-open? mouse-on-panel?)]]]]))
 
 (rum/defc composer-phase1 < rum/reactive []
   (let [tag-groups (rum/react (rum/cursor-in state/component-state [:tagGroups]))]
@@ -114,13 +121,14 @@
       (when (false? (rum/react delivery-option))
         (poc/contact-form [:contacts :delivery]))
       [:div.row
-       (poc/grid-text-input [:billingReference] :col-2 :printing-order.billing-reference)
-       (poc/grid-textarea-input [:deliveryInstructions] :col-2 :printing-order.delivery-instructions)]]
+       (poc/grid-text-input [:contacts :billingReference] :col-2 :printing-order.billing-reference)
+       (poc/grid-textarea-input [:contacts :deliveryInstructions] :col-2 :printing-order.delivery-instructions)]]
      [:div.order-section
       (poc/section-header :printing-order.conditions.heading)
       [:div.row
        [:div.col-4
-        (loc-html :span :printing-order.conditions.text)]]
+        [:p (loc-html :span :printing-order.conditions.text)]
+        [:p (loc :printing-order.conditions.data-processing-notice)]]]
       [:div.row
        (poc/grid-checkbox conditions-accepted-option [:conditions-accepted] :col-2 :printing-order.conditions.accept true)]]]))
 
@@ -128,8 +136,14 @@
   (let [attachments-selected (->> @state/component-state
                                   :attachments
                                   (filter (fn [{id :id}]
-                                            (pos? (get order id)))))]
+                                            (pos? (get order id)))))
+        order-number (-> @state/component-state :order-number)]
     [:div
+     (when order-number
+       [:div.order-section
+        [:div.row
+         [:div.col-4
+          (loc-html :span :printing-order.phase4.order-reference order-number)]]])
      [:div.order-section
       (poc/section-header :printing-order.summary.documents)
       (files/files-table attachments-selected :read-only)]
@@ -159,10 +173,10 @@
       [:div.row
        [:div.col-1
         [:span.order-grid-header (loc :printing-order.billing-reference)]
-        [:span.order-summary-line (-> @state/component-state :billingReference)]]
+        [:span.order-summary-line (-> @state/component-state :contacts :billingReference)]]
        [:div.col-1
         [:span.order-grid-header (loc :printing-order.delivery-instructions)]
-        [:span.order-summary-line (-> @state/component-state :deliveryInstructions)]]]]]))
+        [:span.order-summary-line (-> @state/component-state :contacts :deliveryInstructions)]]]]]))
 
 (rum/defc composer-phase3 < rum/reactive []
   (let [order (rum/react (rum/cursor-in state/component-state [:order]))]
@@ -173,7 +187,8 @@
       (poc/section-header :printing-order.conditions.heading)
       [:div.row
        [:div.col-4
-        (loc-html :span :printing-order.conditions.text)]]
+        [:p (loc-html :span :printing-order.conditions.text)]
+        [:p (loc :printing-order.conditions.data-processing-notice)]]]
       [:div.row
        [:div.col-4
         [:label.like-btn

@@ -34,6 +34,15 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.multiple-operations-support.title'"></h2>
+        <toggle params="value: organization.multipleOperationsSupported,
+                        ltext: 'auth-admin.multiple-operations-support.enabled',
+                        prefix: 'blockbox',
+                        enable: lupapisteApp.models.globalAuthModel.ok('set-organization-multiple-operations-support'),
+                        testId: 'multiple-operations-support-enabled'"></toggle>
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'organization-name-editor'"></div>
@@ -99,22 +108,6 @@
           </tbody>
         </table>
       </section>
-
-      <!-- ko if: organization.permanentArchiveEnabled -->
-      <section>
-        <h2 data-bind="ltext: 'authorityAdmin.archive.heading'"></h2>
-        <div class="permanent-archive-date-input">
-          <span for="archiving-start-date" data-bind="ltext: 'authorityAdmin.archive.startDate'"></span>
-          <input data-bind="datepicker: organization.permanentArchiveInUseSince,
-                            valueUpdate: 'afterkeydown',
-                            enable: $root.authorization.ok('set-organization-permanent-archive-start-date'),
-                            attr: {placeholder: loc('choose')}"
-                 type="text"
-                 id="archiving-start-date"
-                 class="form-input inline textinput textinput--big">
-        </div>
-      </section>
-      <!-- /ko -->
 
     </didiv> <!-- container -->
   </section>
