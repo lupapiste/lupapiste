@@ -725,7 +725,7 @@
   Last of the given updates will be the next state, but timestamps from each update are preserved in $set clause (merged).
   Retruns mongo update map with $set and $push keys, just like state-transition-update."
   [updates]
-  {:pre [(pos? (count updates))]}
+  {:pre [(pos? (count updates)) (every? (fn [[p1 p2 p3 p4]] (and p1 p2 p3 p4 (keyword? p1) (integer? p2) (map? p3) (map? p4))) updates)]}
   (->> updates
        (map (partial apply state-transition-update))
        (reduce merge-updates-and-histories)))

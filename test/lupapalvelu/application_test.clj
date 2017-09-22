@@ -118,6 +118,17 @@
     (fact "apply multiple-updates"
       (fact "empty -> error"
         (state-transition-updates []) => (throws AssertionError))
+      (fact "only 4 args ok"
+        (state-transition-updates [[:open]]) => (throws AssertionError)
+        (state-transition-updates [[:open 1]]) => (throws AssertionError)
+        (state-transition-updates [[:open 1 {:created 0 :permitType "R"}]]) => (throws AssertionError)
+        (state-transition-updates [[:open 1 {:created 0 :permitType "R"} {:user 123}]]) => map?)
+      (fact "types"
+        (state-transition-updates [["open" 1 {:created 0 :permitType "R"} {:user 123}]]) => (throws AssertionError)
+        (state-transition-updates [[:open "123" {:created 0 :permitType "R"} {:user 123}]]) => (throws AssertionError)
+        (state-transition-updates [[:open 1 123 {:user 123}]]) => (throws AssertionError)
+        (state-transition-updates [[:open 1 {:created 0 :permitType "R"} "user"]]) => (throws AssertionError)
+        (state-transition-updates [[:open 1 {:created 0 :permitType "R"} {:user 123}]]) => map?)
       (fact "single update == state-transition-update"
         (state-transition-updates [[:open 1 {:created 0 :permitType "R"} pena]]) => (state-transition-update :open 1 {:created 0 :permitType "R"} pena))
       (fact "timestamps are set, history array pushed with $each"
