@@ -3419,6 +3419,12 @@
                 {$set {:earliest-allowed-archiving-date 0}}
                 :multi true))
 
+(defmigration add-default-for-multiple-operations-supported-to-orgs
+  {:apply-when (pos? (mongo/count :organizations {:multiple-operations-supported {$exists false}}))}
+  (mongo/update :organizations
+                {:multiple-operations-supported {$exists false}}
+                {$set {:multiple-operations-supported true}}
+                :multi true))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
