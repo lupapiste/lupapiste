@@ -628,17 +628,13 @@
                         :upsert true)))
 
 ;; Submit
-
+(declare state-transition-updates)
 (defn submit [{:keys [application created user] :as command} ]
-  (let [history-entries (remove nil?
-                                [(when-not (:opened application) (history-entry :open created user))
-                                 (history-entry :submitted created user)])]
-    (action/update-application command
-                               {$set {:state     :submitted
-                                      :modified  created
-                                      :opened    (or (:opened application) created)
-                                      :submitted (or (:submitted application) created)}
-                                $push {:history {$each history-entries}}}))
+  (let [transitions (remove nil?
+                            [(when-not (:opened application)
+                               [:open created application user])
+                             [:submitted created application user]])]
+    (action/update-application command (state-transition-updates transitions)))
   (try
     (mongo/insert :submitted-applications (-> application
                                               meta-fields/enrich-with-link-permit-data
