@@ -1,7 +1,7 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [monger.operators :refer [$set $push]]
+            [monger.operators :refer [$set $push $each]]
             [swiss.arrows :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.action :refer [update-application]]
@@ -26,7 +26,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user push-history-to-$each)
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
@@ -114,7 +114,39 @@
     (fact "re-update"
       (state-transition-update :open 4 {:opened 3  :permitType "R"} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
       (state-transition-update :submitted 5 {:submitted 4 :permitType "R"} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
-      (state-transition-update :constructionStarted 6 {:started 5 :permitType "R"} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})))
+      (state-transition-update :constructionStarted 6 {:started 5 :permitType "R"} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})
+    (fact "apply multiple-updates"
+      (fact "empty -> error"
+        (state-transition-updates []) => (throws AssertionError))
+      (fact "single update == state-transition-update"
+        (state-transition-updates [[:open 1 {:created 0 :permitType "R"} pena]]) => (state-transition-update :open 1 {:created 0 :permitType "R"} pena))
+      (fact "timestamps are set, history array pushed with $each"
+        (state-transition-updates [[:open 1 {:created 0 :permitType "R"} pena]
+                                   [:submitted 2 {:created 0 :opened 1  :permitType "R"} pena]]) => {$set {:state :submitted :modified 2 :submitted 2 :opened 1}
+                                                                                                     $push {:history
+                                                                                                            {$each [{:state :open, :ts 1, :user pena}
+                                                                                                                    {:state :submitted, :ts 2, :user pena}]}}}
+        (state-transition-updates [[:verdictGiven 4 {:permitType "R" :modified 4} pena]
+                                   [:constructionStarted 5 {:permitType "R" :modified 4} pena]
+                                   [:constructionStarted 6 {:started 5 :permitType "R"} pena]]) => {$set {:state :constructionStarted :modified 6 :started 5}
+                                                                                                    $push {:history
+                                                                                                           {$each
+                                                                                                            [{:state :verdictGiven :ts 4 :user pena}
+                                                                                                             {:state :constructionStarted :ts 5 :user pena}
+                                                                                                             {:state :constructionStarted :ts 6 :user pena}]}}})))
+  (facts "push-history-to-$each"
+    (fact "$each is added for vanilla histories"
+      (push-history-to-$each {:state :foo} {:state :faa}) => {$each [{:state :foo}
+                                                                     {:state :faa}]})
+    (fact "other keys from root are stripped and moved to $each array"
+      (push-history-to-$each {:state :foo :modified 1} {:state :faa :modified 2}) => {$each [{:state :foo :modified 1}
+                                                                                             {:state :faa :modified 2}]})
+    (fact "old $each is preserved"
+      (push-history-to-$each {$each [{:state :foo :modified 1}
+                                     {:state :faa :modified 2}]}
+                             {:state :fuu :modified 3}) => {$each [{:state :foo :modified 1}
+                                                                   {:state :faa :modified 2}
+                                                                   {:state :fuu :modified 3}]})))
 
 (fact "Valid permit types pre-checker"
       (let [error {:ok false :text "error.unsupported-permit-type"}

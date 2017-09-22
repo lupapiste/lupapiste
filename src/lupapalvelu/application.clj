@@ -702,6 +702,34 @@
                  (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
      $push {:history (history-entry to-state timestamp user)}}))
 
+(defn- push-history-to-$each
+  "If $each exists in current, conjoins new history to that $each.
+  If $each does not exist, it's created and "
+  [current-his new-history]
+  (if (get current-his $each)
+    (update current-his $each conj new-history)
+    (apply dissoc                                           ; move history entries under $each key, remove other keys
+           (assoc current-his $each [current-his new-history])
+           (difference (set (keys current-his)) #{$each}))))
+
+(defn merge-updates-and-histories
+  "Adds next's history to accumulators :history $push.
+  Next's $set clause is merged to accumulator's $set."
+  [acc next]
+  (-> acc
+      (update-in [$push :history] push-history-to-$each (get-in next [$push :history]))
+      (update $set merge (get next $set))))
+
+(defn state-transition-updates
+  "Applies given updates using state-transition-update, but resulting in history entries pushed with $each.
+  Last of the given updates will be the next state, but timestamps from each update are preserved in $set clause (merged).
+  Retruns mongo update map with $set and $push keys, just like state-transition-update."
+  [updates]
+  {:pre [(pos? (count updates))]}
+  (->> updates
+       (map (partial apply state-transition-update))
+       (reduce merge-updates-and-histories)))
+
 (defn change-application-state-targets
   "Namesake query implementation."
   [{:keys [state] :as application}]
