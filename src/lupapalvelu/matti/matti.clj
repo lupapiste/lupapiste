@@ -539,19 +539,29 @@
                                         :tag         (:tunnus data)})))
                {})))
 
-(defn- merge-buildings [app-buildings verdict-buildings]
-  (reduce (fn [acc [k v]]
-            (assoc acc k (merge (k verdict-buildings) v)))
+(defn- merge-buildings [app-buildings verdict-buildings defaults]
+  (reduce (fn [acc [op-id v]]
+            (assoc acc op-id (merge defaults (op-id verdict-buildings) v)))
           {}
           app-buildings))
 
-(defn- buildings?
-  "True if the template (really) supports buildings."
+(defn- building-defaults
+  "Verdict building defaults (keys with empty values). Nil if building
+  or every detail is not to be included in the verdict."
   [{data :data}]
   (let [{:keys [removed-sections autopaikat
                 paloluokka vss-luokka]} data]
-    (and (-> removed-sections :buildings not)
-         (some true? [autopaikat paloluokka vss-luokka]))))
+    (when (and (-> removed-sections :buildings not)
+               (some true? [autopaikat paloluokka vss-luokka]))
+      (merge {:show-building true}
+             (when autopaikat
+               {:rakennetut-autopaikat ""
+                :kiinteiston-autopaikat ""
+                :autopaikat-yhteensa ""})
+             (when paloluokka
+               {:paloluokka ""})
+             (when vss-luokka
+               {:vss-luokka ""})))))
 
 ;; Augments verdict data, but MUST NOT update mongo (this is called
 ;; from query actions, too).
@@ -566,9 +576,10 @@
   (let [addons {;; Buildings added only if the buildings section is in
                 ;; the template AND at least one of the checkboxes has
                 ;; been selected.
-                :buildings (when (buildings? template)
+                :buildings (when-let [defaults (building-defaults template)]
                              (merge-buildings (buildings application)
-                                              (:buildings data)))
+                                              (:buildings data)
+                                              defaults))
                 }]
 
     (if (some->> addons vals (remove nil?) seq)

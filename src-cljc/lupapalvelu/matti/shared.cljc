@@ -209,7 +209,7 @@
 (defschema MattiPlaceholder
   "Placholder for external (filled by backend) data."
   (merge MattiComponent
-         {:type (sc/enum :neighbors :application-id)}))
+         {:type (sc/enum :neighbors :application-id :building)}))
 
 (defschema KeyMap
   "Map with the restricted set of keys. In other words, no new keys
@@ -543,10 +543,15 @@
                                              :category :vaativuus}}
       :rights                 {:phrase-text {:category :rakennusoikeus}}
       :purpose                {:phrase-text {:category :kaava}}
+      :buildings              :repeating
+      :building-name          {:placeholder {:label? false
+                                             :type :building}}
       :rakennetut-autopaikat  {:docgen "matti-string"}
       :kiinteiston-autopaikat {:docgen "matti-string"}
       :autopaikat-yhteensa    {:docgen "matti-string"}
-      :buildings              :repeating})
+      :vss-luokka             {:docgen "matti-string"}
+      :paloluokka             {:docgen "matti-string"}
+      :show-building          {:docgen "required-in-verdict"}})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -659,14 +664,28 @@
       :show? :?.buildings
       :grid  {:columns 7
               :rows    [[{:col  7
-                          :grid {:columns   5
-                                 :repeating :buildings
-                                 :rows      [[{:id   :rakennetut-autopaikat
-                                               :dict :rakennetut-autopaikat}
-                                              {:id   :kiinteiston-autopaikat
-                                               :dict :kiinteiston-autopaikat}
-                                              {:id   :autopaikat-yhteensa
-                                               :dict :autopaikat-yhteensa}]]}}]]}}]}})
+                          :grid {:columns    6
+                                 :loc-prefix :matti-buildings.info
+                                 :repeating  :buildings
+                                 :rows       [{:css [:row--tight]
+                                               :show? [:OR :_meta.editing? :+.show-building]
+                                               :row [{:col 6
+                                                      :dict :building-name}]}
+                                              {:show? [:OR :_meta.editing? :+.show-building]
+                                               :css [:row--indent]
+                                               :row [{:col 5
+                                                      :list {:items (as-> [:rakennetut-autopaikat
+                                                                           :kiinteiston-autopaikat
+                                                                           :autopaikat-yhteensa
+                                                                           :vss-luokka
+                                                                           :paloluokka] $
+                                                                      (map #(hash-map :id %
+                                                                               :dict %
+                                                                               :show? (util/kw-path :?+ %)
+                                                                               :enabled? :-.show-building) $))}}
+                                                     {:dict  :show-building
+                                                      :show? :_meta.editing?}]}
+                                              ]}}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

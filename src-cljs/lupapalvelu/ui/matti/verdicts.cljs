@@ -17,19 +17,20 @@
 
 (defn update-changes-and-errors [{:keys [state path]}]
   (fn [{:keys [modified changes errors] :as response}]
-    (swap! state (fn [state]
-                   (let [state (reduce (fn [acc [k v]]
-                                         (assoc-in acc (map keyword k) v))
-                                       state
-                                       changes)]
-                     (reduce (fn [acc [k v]]
-                               (assoc-in acc
-                                         (cons :_errors (map keyword k))
-                                         v))
-                             (assoc-in state
-                                       (cons :_errors (map keyword path))
-                                       nil)
-                             errors))))
+    (when (or (seq changes) (seq errors))
+      (swap! state (fn [state]
+                     (let [state (reduce (fn [acc [k v]]
+                                           (assoc-in acc (map keyword k) v))
+                                         state
+                                         changes)]
+                       (reduce (fn [acc [k v]]
+                                 (assoc-in acc
+                                           (cons :_errors (map keyword k))
+                                           v))
+                               (assoc-in state
+                                         (cons :_errors (map keyword path))
+                                         nil)
+                               errors)))))
     (when modified
       (swap! state/current-verdict #(assoc-in % [:info :modified] modified)))))
 

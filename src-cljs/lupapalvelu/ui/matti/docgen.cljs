@@ -123,7 +123,6 @@
     (common/reset-if-needed! text* @state)
     [tag
      (merge (docgen-attr options
-                         :disabled  (-> schema :body first :readonly)
                          :value     @text*
                          :on-change identity ;; A function is needed
                          :on-blur   (state-change options))

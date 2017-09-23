@@ -15281,6 +15281,11 @@ button.rollup-button {
   margin: 0 0 0 0;
 }
 
+.matti-grid-1 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
+}
+
 .matti-grid-2 {
   width: 100%;
   color: #333333;
@@ -15384,6 +15389,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-2 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-3 {
@@ -15517,6 +15527,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-3 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-4 {
@@ -15678,6 +15693,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-4 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-5 {
@@ -15867,6 +15887,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-5 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-6 {
@@ -16084,6 +16109,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-6 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-7 {
@@ -16329,6 +16359,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-7 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-8 {
@@ -16602,6 +16637,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-8 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-9 {
@@ -16903,6 +16943,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-9 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-10 {
@@ -17232,6 +17277,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-10 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-11 {
@@ -17589,6 +17639,11 @@ button.rollup-button {
   padding-top: 6px;
   padding-bottom: 6px;
   margin: 0 0 0 0;
+}
+
+.matti-grid-11 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
 }
 
 .matti-grid-12 {
@@ -17976,6 +18031,11 @@ button.rollup-button {
   margin: 0 0 0 0;
 }
 
+.matti-grid-12 > .row.row--indent {
+  padding-left: 24px;
+  padding-top: 0;
+}
+
 .matti-list > .item {
   display: inline-block;
 }
@@ -18334,6 +18394,7 @@ div.matti-verdict div.matti-section div.section-header div.verdict-buttons {
   padding-top: 6px;
   position: absolute;
   right: 0;
+  z-index: 888;
 }
 
 div.matti-verdict div.matti-section div.section-body {

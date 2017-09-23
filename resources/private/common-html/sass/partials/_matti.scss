@@ -62,6 +62,10 @@ $matti-grid-margin: 10px;
         padding-bottom: $marginS;
         margin: 0 0 0 0;
       }
+      &.row--indent {
+        padding-left: $marginL;
+        padding-top: 0;
+      }
     }
   }
 }
@@ -276,6 +280,7 @@ div.matti-verdict {
         padding-top: $marginS;
         position: absolute;
         right: 0;
+        z-index: 888;
       }
     }
     div.section-body {

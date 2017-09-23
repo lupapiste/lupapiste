@@ -28,11 +28,13 @@
   (extend id-path id))
 
 (defn schema-options
-  "Options for a child schema. Options are parent options."
+  "Options for a child schema. Options are parent options (and are
+  stored into _parent property)."
   [options schema]
   (let [{:keys [id-path loc-path]} options]
     (assoc options
            :schema schema
+           :_parent options
            :loc-path (loc-extend loc-path schema)
            :id-path (id-extend id-path schema))))
 
@@ -62,6 +64,7 @@
 
 (defmethod loc :default
   [& path]
+  #_(console.log "loc:" path)
   (->> (flatten path)
        (filter identity)
        (map name)
@@ -154,9 +157,32 @@
              (sequential? v) (seq v)
              :else v)))
 
+(defn- resolve-path
+  "Resolve relative path. Relative path is denoted with + or -. The
+  former refers to child path and the latter to sibling: Meta paths
+  cannot have +/-.
+
+  Examples (current path is [:foo :bar])
+
+  :?+.hii.hoo -> [:? :foo :bar :hii :hoo]
+  :-.hii.hoo  -> [:foo :hii :hoo]
+  :-?.hii.hoo -> [? :foo :hii :hoo]"
+  [{path :path :as options} kw-path]
+  (let [path                   (pathify path)
+        [x & xs :as unchanged] (pathify kw-path)
+        result (->> (condp #(%2 %1) x
+                     #{:?+ :+?} [:? path xs]
+                     #{:?- :-?} [:? (butlast path) xs]
+
+                     #{:+}      [path xs]
+                     #{:-}      [(butlast path) xs]
+                     unchanged)
+                    flatten
+                    (map keyword))]
+    result))
+
 (defn- path-truthy? [{state :state :as options} kw-path]
-  (let [[x & k :as path] (pathify kw-path)]
-    (when (= x :automatic-verdict-dates))
+  (let [[x & k :as path] (resolve-path options kw-path)]
     (truthy? (case x
               :_meta  (react-meta options k )
               :?      (has-path? k state)
@@ -173,7 +199,7 @@
     (loop [op       (first condition)
            [x & xs] (rest condition)]
       (if (nil? x)
-        ;; Every item must have been true
+        ;; Every item must have been true for :AND
         (= op :AND)
         (let [flag (eval-state-condition options x)]
           (cond
@@ -181,11 +207,9 @@
             (and (not flag) (= op :AND)) false
             :else (recur op xs)))))))
 
-(defn good? [{:keys [schema] :as options} good-key bad-key]
-  (let [good (eval-state-condition options
-                                   (good-key schema))
-        bad  (eval-state-condition options
-                                   (bad-key schema))]
+(defn good? [options good-condition bad-condition]
+  (let [good (eval-state-condition options good-condition)
+        bad  (eval-state-condition options bad-condition)]
     (cond
       (and (nil? good)
            (nil? bad))   true
@@ -193,13 +217,29 @@
           (false? good)) false
       :else              true)))
 
-(defn enabled? [options]
+(defn- climb-to-condition [options schema-key]
+            (loop [{:keys [schema _parent]} options]
+              (if-let [condition (schema-key schema)]
+                condition
+                (when _parent
+                  (recur _parent)))))
+(defn enabled?
+  "Enable disable climbs schema tree until conditions are found. Thus,
+  if parent is disabled, the children are also automatically
+  disabled."
+  [options]
   (and (react-meta options :enabled?)
-       (good? options :enabled? :disabled?)))
+       (good? options
+              (climb-to-condition options :enabled?)
+              (climb-to-condition options :disabled?))))
 
 (defn disabled? [options] (not (enabled? options)))
 
-(defn visible? [options]
-  (good? options :show? :hide?))
+(defn visible?
+  "Similar to enabled? but for show? and hide? properties."
+  [{schema :schema :as options}]
+  (good? options
+         (climb-to-condition options :show?)
+         (climb-to-condition options :hide?)))
 
 (defn not-visible? [options] (not (visible? options)))

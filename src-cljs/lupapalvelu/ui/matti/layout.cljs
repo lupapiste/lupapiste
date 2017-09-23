@@ -16,6 +16,9 @@
   partly/hierarchically resolved path values. See path/meta-value for
   details.
 
+  _parent (map): Options of the parent component. The parent can also
+  be a part of a component (cell for example).
+
   path (list): Current component's value path within the state. For
   simple components this is just the dictionary key wrapped in a list.
 
@@ -361,6 +364,16 @@
   [_]
   [:span.formatted (lupapisteApp.services.contextService.applicationId)])
 
+(defmethod placeholder :building
+  [{:keys [state path]}]
+  (let [{:keys [operation building-id tag description]} (path/value (butlast path) state)]
+    [:span.formatted (s/join " - "
+                             [(path/loc :operations operation)
+                              (s/join ": " (remove nil? [tag description]))
+                              building-id])]))
+
+
+
 (defmethod view-component :placeholder
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [elem (placeholder options)]
@@ -382,7 +395,7 @@
                                                      (str "item--" (name item-align))))}
                        (when (:dict item-schema)
                          (instantiate (path/dict-options item-options)
-                                      false))])))
+                                      true))])))
                 (:items schema))])
 
 (defn matti-grid [{:keys [schema path state] :as options}]
