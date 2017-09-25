@@ -69,7 +69,7 @@
 "admin.converted.inforequests" "sv" "{0} begäranden om rådgivning ändrades till vanliga."
 "admin.earliestArchivingDate" "en" "Earliest allowed start date for archiving"
 "admin.earliestArchivingDate" "fi" "Aikaisin sallittu sähköisen arkistoinnin aloituspäivämäärä"
-"admin.earliestArchivingDate" "sv" ""
+"admin.earliestArchivingDate" "sv" "Den tidigaste dagen då elektronisk arkivering kan påbörjas"
 "admin.editAdminUser" "en" "Edit administrator"
 "admin.editAdminUser" "fi" "Muokkaa pääkäyttäjää"
 "admin.editAdminUser" "sv" "Redigera huvudanvändare"
