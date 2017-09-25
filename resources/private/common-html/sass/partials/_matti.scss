@@ -101,6 +101,12 @@ $matti-grid-margin: 10px;
   }
 }
 
+.matti-list.list--sparse {
+  > .item + .item {
+    margin-left: 4 * $matti-grid-margin;
+  }
+}
+
 // toggle-helper is defined in _inputs.scss
 @include toggle-helper ( matti-checkbox, "e604", "e603",
                          $wrapper-display: inline-block ) {}

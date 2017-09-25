@@ -18068,6 +18068,10 @@ button.rollup-button {
   display: inline-block;
 }
 
+.matti-list.list--sparse > .item + .item {
+  margin-left: 40px;
+}
+
 label.matti-checkbox-label {
   width: 100%;
   display: inline-block;

@@ -122,11 +122,16 @@
   condition-type
    (sc/optional-key :hide?) condition-type})
 
+(defschema MattiCss
+  {(sc/optional-key :css) (sc/conditional
+                           keyword? sc/Keyword
+                           :else    [sc/Keyword])})
+
 (defschema MattiBase
   (merge MattiVisible
          MattiEnabled
-         {(sc/optional-key :css)        [sc/Keyword]
-          ;; If an schema ancestor has :loc-prefix then localization
+         MattiCss
+         {;; If an schema ancestor has :loc-prefix then localization
           ;; term is loc-prefix + id-path, where id-path from
           ;; loc-prefix schema element util current.
           (sc/optional-key :loc-prefix) keyword-or-string
@@ -253,8 +258,9 @@
 (defschema MattiList
   (merge MattiBase
          CellConfig
-         {:list {(sc/optional-key :title) sc/Str
-                 :items                   [MattiItem]}}))
+         {:list (merge MattiCss
+                       {(sc/optional-key :title) sc/Str
+                        :items                   [MattiItem]})}))
 
 (defschema MattiItemCell
   (merge CellConfig
@@ -272,10 +278,10 @@
          {:columns (apply sc/enum (range 1 13)) ;; Grid size (.matti-grid-n)
           :rows    [(sc/conditional
                      :row (merge MattiVisible
+                                 MattiCss
                                  {(sc/optional-key :id)         sc/Str
                                   ;; The same semantics as in MattiBase.
                                   (sc/optional-key :loc-prefix) sc/Keyword
-                                  (sc/optional-key :css)        [sc/Keyword]
                                   :row                          [MattiCell]})
                      :else [MattiCell])]}))
 
@@ -667,7 +673,8 @@
                                               {:show? [:OR :_meta.editing? :+.show-building]
                                                :css [:row--indent]
                                                :row [{:col 5
-                                                      :list {:items (map #(hash-map :id %
+                                                      :list {:css :list--sparse
+                                                             :items (map #(hash-map :id %
                                                                                     :dict %
                                                                                     :show? (util/kw-path :?+ %)
                                                                                     :enabled? :-.show-building)

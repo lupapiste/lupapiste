@@ -119,7 +119,7 @@
   classes (matti--edit, matti--view) from the latest _meta."
   [options & other-classes]
   (->> [(if (meta-value options :editing?) "matti--edit" "matti--view")
-        (:css options)
+        (some-> options :schema :css)
         other-classes]
        flatten
        (remove nil?)
