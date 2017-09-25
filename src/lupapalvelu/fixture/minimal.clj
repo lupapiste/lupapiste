@@ -751,11 +751,7 @@
                                       :calendars-enabled false
                                       :use-attachment-links-integration false
                                       :inspection-summaries-enabled false
-                                      :docstore-info
-                                       {:docStoreInUse false
-                                        :documentPrice 0
-                                        :organizationDescription (i18n/supported-langs-map
-                                                                   (constantly ""))}})
+                                      :docstore-info org/default-docstore-info})
 
 (defn- names [names-map]
   (i18n/with-default-localization names-map (:fi names-map)))
@@ -933,7 +929,9 @@
                                         [{:type :organization}]]}]
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
-                       :docstore-info org/default-docstore-info}
+                       :docstore-info (assoc org/default-docstore-info
+                                        :docStoreInUse true
+                                        :documentPrice 314)}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
