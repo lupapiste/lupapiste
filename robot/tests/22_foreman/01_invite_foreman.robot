@@ -89,10 +89,8 @@ Applicant sees sent invitation on the original application
 
 Owner is invited to foreman app, approves invitation
   Open application by id  ${foremanAppId}
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${foremanAppId}
   Confirm yes no dialog
   Wait until  New modal mask is invisible
-
 
 Applicant sees sent invitations on the foreman application
   Open tab  parties

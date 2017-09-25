@@ -20,10 +20,7 @@ Admin filters financial users
   User count is  1
 
 Admin creates new financial user
-  Import Library  DebugLibrary
-  Debug
   Create financial user  ARA-käsittelijä2  massi.mies@mail.com
-  Debug
   User count is  2
 
 Admin resets financial authority password

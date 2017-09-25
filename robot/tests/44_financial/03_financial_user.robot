@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Sonja creates bunch of application with ARA funding
-  Sonja logs in
+  Sonja logs in  False
   Create application the fast way  sipoo-funding-app-1  753-416-25-31  kerrostalo-rivitalo
   Create application the fast way  sipoo-funding-app-2  753-416-25-32  kerrostalo-rivitalo
   Create application the fast way  sipoo-funding-app-3  753-416-25-33  kerrostalo-rivitalo
@@ -30,7 +30,7 @@ Sonja creates bunch of application with ARA funding
   Logout
 
 Olli creates applications with ARA funding
-  Olli logs in
+  Olli logs in  False
   Create application the fast way  oulu-funding-app-1  564-1-9901-0  kerrostalo-rivitalo
   Create application the fast way  oulu-funding-app-2  564-1-9901-1  kerrostalo-rivitalo
   Add ARA funding  oulu-funding-app-1  564-1-9901-0
