@@ -123,12 +123,18 @@
       (auth/has-organization-authz-roles? roles/commenter-org-authz-roles (:organization app) user)
       (auth/has-auth? app (get-in user [:company :id]))))
 
+(defn- can-read-comment? [{:keys [roles]} {:keys [role]}]
+  (let [effective-role (if (= (keyword role) :financialAuthority)
+                         "applicant"
+                         (name role))]
+    ((set roles) effective-role)))
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (-> application
         (update-in [:comments] (partial filter (fn [comment] (and
                                                                (can-read-comments? application user)
-                                                               ((set (:roles comment)) (name (:role user)))))))
+                                                               (can-read-comment? comment user)))))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
