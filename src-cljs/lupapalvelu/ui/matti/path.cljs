@@ -41,10 +41,13 @@
 (defn dict-options
   "Options corresponding to the the dictionary schema referenced in the
   given options. Creates path onto top-level. Extends existing
-  path, [dict] otherwise"
+  path, [dict] otherwise."
   [{{dict :dict} :schema dictionary :dictionary path :path :as options}]
-  (assoc (schema-options options (dict dictionary))
-         :path (extend path dict)))
+  (let [{dict-schema :schema
+         dict-path   :path :as res} (shared/dict-resolve (concat path [dict])
+                                                         dictionary)]
+    (assoc (schema-options options dict-schema )
+           :path (extend path dict dict-path))))
 
 (defn value [path state* & extra]
   @(state (extend path extra) state*))

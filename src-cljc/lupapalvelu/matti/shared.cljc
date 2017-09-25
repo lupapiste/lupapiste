@@ -216,30 +216,24 @@
   after the instantiation can be added. No UI counterpart."
   {sc/Keyword sc/Any})
 
-(def schema-type-alternatives
-  {:docgen         (sc/conditional
-                    :name MattiDocgen
-                    :else sc/Str)
-   :reference-list MattiReferenceList
-   :phrase-text    MattiPhraseText
-   :loc-text       sc/Keyword ;; Localisation term shown as text.
-   :date-delta     MattiDateDelta
-   :multi-select   MattiMultiSelect
-   :reference      MattiReference
-   :placeholder    MattiPlaceholder
-   :keymap         KeyMap})
-
-(defn make-conditional [m]
-  (->> (reduce (fn [a [k v]]
-                 (concat [k (hash-map k v)] a))
-               [:else (sc/enum :repeating)]
-               m)
-       (apply sc/conditional)))
-
+(defschema SchemaTypes
+  {sc/Keyword (sc/conditional
+               :docgen         {:docgen (sc/conditional
+                                         :name MattiDocgen
+                                         :else sc/Str)}
+               :reference-list {:reference-list MattiReferenceList}
+               :phrase-text    {:phrase-text MattiPhraseText}
+               :loc-text       {:loc-text sc/Keyword} ;; Localisation term shown as text.
+               :date-delta     {:date-delta MattiDateDelta}
+               :multi-select   {:multi-select MattiMultiSelect}
+               :reference      {:reference MattiReference}
+               :placeholder    {:placeholder MattiPlaceholder}
+               :keymap         {:keymap KeyMap}
+               :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
 
 (defschema Dictionary
   "Id to schema mapping."
-  {:dictionary {sc/Keyword (make-conditional schema-type-alternatives)}})
+  {:dictionary SchemaTypes})
 
 (defschema MattiMeta
   "Dynamic management. No UI counterpart. Not part of the saved data."
@@ -543,15 +537,14 @@
                                              :category :vaativuus}}
       :rights                 {:phrase-text {:category :rakennusoikeus}}
       :purpose                {:phrase-text {:category :kaava}}
-      :buildings              :repeating
-      :building-name          {:placeholder {:label? false
-                                             :type :building}}
-      :rakennetut-autopaikat  {:docgen "matti-string"}
-      :kiinteiston-autopaikat {:docgen "matti-string"}
-      :autopaikat-yhteensa    {:docgen "matti-string"}
-      :vss-luokka             {:docgen "matti-string"}
-      :paloluokka             {:docgen "matti-string"}
-      :show-building          {:docgen "required-in-verdict"}})
+      :buildings              {:repeating {:building-name          {:placeholder {:label? false
+                                                                                  :type :building}}
+                                           :rakennetut-autopaikat  {:docgen "matti-string"}
+                                           :kiinteiston-autopaikat {:docgen "matti-string"}
+                                           :autopaikat-yhteensa    {:docgen "matti-string"}
+                                           :vss-luokka             {:docgen "matti-string"}
+                                           :paloluokka             {:docgen "matti-string"}
+                                           :show-building          {:docgen "required-in-verdict"}}}})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -674,15 +667,15 @@
                                               {:show? [:OR :_meta.editing? :+.show-building]
                                                :css [:row--indent]
                                                :row [{:col 5
-                                                      :list {:items (as-> [:rakennetut-autopaikat
-                                                                           :kiinteiston-autopaikat
-                                                                           :autopaikat-yhteensa
-                                                                           :vss-luokka
-                                                                           :paloluokka] $
-                                                                      (map #(hash-map :id %
-                                                                               :dict %
-                                                                               :show? (util/kw-path :?+ %)
-                                                                               :enabled? :-.show-building) $))}}
+                                                      :list {:items (map #(hash-map :id %
+                                                                                    :dict %
+                                                                                    :show? (util/kw-path :?+ %)
+                                                                                    :enabled? :-.show-building)
+                                                                         [:rakennetut-autopaikat
+                                                                          :kiinteiston-autopaikat
+                                                                          :autopaikat-yhteensa
+                                                                          :vss-luokka
+                                                                          :paloluokka])}}
                                                      {:dict  :show-building
                                                       :show? :_meta.editing?}]}
                                               ]}}]]}}]}})
@@ -699,3 +692,23 @@
       (#{:r :p :ya} kw)              kw
       (#{:kt :mm} kw)                :kt
       (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+
+(defn dict-resolve
+  "Path format: [repeating index repeating index ... value-dict].
+ Repeating denotes :repeating schema, index is arbitrary repeating
+  index (skipped during resolution) and value-dict is the final dict
+  for the item schema.
+
+  Returns map with :schema and :path keys. The path is
+  the remaining path (e.g., [:delta] for matti-delta). Note: the
+  result is empty map if the path resolves to the repeating schema."
+  [path dictionary]
+  (loop [[x & xs]   (->> path
+                         (remove nil?)
+                         (map keyword))
+         dictionary dictionary]
+    (if-let [schema (get dictionary x)]
+      (if (:repeating schema)
+        (recur (rest xs) (:repeating schema))
+        {:schema schema :path xs})
+      {})))

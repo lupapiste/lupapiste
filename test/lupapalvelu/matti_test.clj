@@ -29,7 +29,10 @@
                 :keymap     {:keymap {:one   "hello"
                                       :two   :world
                                       :three 88}}
-                :placeholder {:placeholder {:type :neighbors}}}
+                :placeholder {:placeholder {:type :neighbors}}
+                :loop {:repeating {:delta3 {:date-delta {:unit :years}}
+                                   :date2 {:docgen "matti-date"}
+                                   :inner-loop {:repeating {:date {:docgen "matti-verdict-check"}}}}}}
    :name       "test"
    :sections   [{:id   "one"
                  :grid {:columns 4
@@ -55,7 +58,16 @@
                                          {:dict :giver}
                                          {:dict :radio}
                                          {:dict :date}
-                                         {:dict :complexity}]}]}}]})
+                                         {:dict :complexity}]}]}}
+                {:id "repeat"
+                 :grid {:columns 1
+                        :rows [[{:grid {:columns 3
+                                        :repeating :loop
+                                        :rows [[{:dict :delta3}
+                                                {:dict :date2}
+                                                {:grid {:columns 1
+                                                        :repeating :inner-loop
+                                                        :rows [[{:dict :date}]]}}]]}}]]}}]})
 
 (facts "Test template is valid"
   (sc/validate shared/MattiVerdict test-template)
@@ -182,7 +194,35 @@
   (facts "Placeholder: always fails"
     (validate-path-value [:placeholder] :hii) => :error.invalid-value-path
     (validate-path-value [:placeholder :type] :neighbors)
-    => :error.invalid-value-path))
+    => :error.invalid-value-path)
+  (facts "Repeating"
+    (validate-path-value [:loop] :hii) => :error.invalid-value-path
+    (validate-path-value [:loop :delta3 :enabled] true)
+    => :error.invalid-value-path
+    (validate-path-value [:loop :some-index :delta3 :enabled] true)
+    => nil
+    (validate-path-value [:loop :date2] "25.9.2017")
+    => :error.invalid-value-path
+    (validate-path-value [:loop :i :date2] "25.9.2017")
+    => nil
+    (validate-path-value [:date2] "25.9.2017")
+    => :error.invalid-value-path
+    (validate-path-value [:loop :innerloop] :foo)
+    => :error.invalid-value-path
+    (validate-path-value [:loop :i :innerloop] :foo)
+    => :error.invalid-value-path
+    (validate-path-value [:loop :i :innerloop :j] :foo)
+    => :error.invalid-value-path
+    ;; Dict :date refers to docgen checkbox within inner-loop.
+    (validate-path-value [:loop :i :inner-loop :j :date] "25.9.2017")
+    => :error.invalid-value
+    (validate-path-value [:loop :i :inner-loop :j :date] false)
+    => nil
+    ;; Top-level date is still docgen date.
+    (validate-path-value [:date] false)
+    => :error.invalid-value
+    (validate-path-value [:date] "25.9.2017")
+    => nil))
 
 (defn work-day
   ([id from]
