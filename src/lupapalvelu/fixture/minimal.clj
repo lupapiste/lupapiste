@@ -703,7 +703,7 @@
     :enabled true
     :role "financialAuthority"
     :language "fi"
-    :firstName "Rahoitusk\u00e4sittelij\u00e4"
+    :firstName "ARA-k\u00e4sittelij\u00e4"
     :lastName ""
     :phone ""
     :username "financial"

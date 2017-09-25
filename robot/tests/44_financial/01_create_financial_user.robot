@@ -12,7 +12,7 @@ Admin logs in and goes to 'users' page
   Wait until  Element should be visible  xpath=//section[@id='users']
 
 Admin filters financial users
-  Input text by test id  users-list-input-search  ARA-käsittelijä
+  Input text by test id  users-list-input-search  ARA
   Set Suite Variable  ${userRowXpath}  //div[contains(@class, 'users-table')]//table/tbody/tr
   Wait Until  Element Should Be Visible  ${userRowXpath}
   ${userCount} =  Get Matching Xpath Count  ${userRowXpath}
@@ -20,7 +20,10 @@ Admin filters financial users
   User count is  1
 
 Admin creates new financial user
+  Import Library  DebugLibrary
+  Debug
   Create financial user  ARA-käsittelijä2  massi.mies@mail.com
+  Debug
   User count is  2
 
 Admin resets financial authority password

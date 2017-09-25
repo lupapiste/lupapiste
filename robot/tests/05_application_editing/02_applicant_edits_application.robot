@@ -142,6 +142,7 @@ Mikko cannot add party maksaja since maksaja doc is not repeating
   Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
   Wait Until  Element should contain  xpath=//div[@data-test-id='dialog-add-party']//select  Hakija
   Wait Until  Element should not contain  xpath=//div[@data-test-id='dialog-add-party']//select  Maksaja
+  Deny yes no dialog
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
