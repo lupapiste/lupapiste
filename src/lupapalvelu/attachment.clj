@@ -173,11 +173,6 @@
 (defn ->attachment-operation [operation]
   (select-keys operation [:id :name]))
 
-(defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
-  (when (and (not (usr/authority? user))
-             (state-set (keyword state)))
-    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
-
 (defn attachment-value-is?
   "predicate is invoked for attachment value of key"
   [pred key attachment]
@@ -989,23 +984,20 @@
     (access/has-attachment-auth-role :uploader command)))
 
 (defn allowed-only-for-authority-when-application-sent
-  "Pre-check is OK if the user is application authority or the
-  application has an environmental permit type."
+  "Pre-check is OK if the user is application authority"
   [{:keys [application user]}]
-  (when (util/=as-kw :sent (:state application))
-    (when-not (or (auth/application-authority? application user)
-                  (contains? #{:YI :YL :YM :VVVL :MAL} (-> application :permitType keyword)))
-      (fail :error.unauthorized))))
+  (when (and (util/=as-kw :sent (:state application))
+             (not (auth/application-authority? application user)))
+    (fail :error.unauthorized)))
 
 (defn attachment-editable-by-application-state
+  "Pre-check that fails for applicant user if called for a pre-verdict attachment in post-verdict state."
   [{{attachmentId :attachmentId} :data user :user {current-state :state organization :organization :as application} :application}]
   (when-not (ss/blank? attachmentId)
     (let [{create-state :applicationState} (get-attachment-info application attachmentId)]
-      (when-not (if (states/terminal-states (keyword current-state))
-                  (usr/user-is-archivist? user organization)
-                  (or (not (states/post-verdict-states (keyword current-state)))
-                      (states/post-verdict-states (keyword create-state))
-                      (usr/authority? user)))
+      (when (and (not (usr/user-is-authority-in-organization? user organization))
+                 (not (states/post-verdict-states (keyword create-state)))
+                 (states/post-verdict-states (keyword current-state)))
         (fail :error.pre-verdict-attachment)))))
 
 (defn validate-group-is-selectable [{application :application}]
