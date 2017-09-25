@@ -676,15 +676,16 @@
                         (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
                         (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
 
-;; Update verdict attachments
 
 (defn fetch-verdict-attachments
-  "Fetch "
-  [start end organizations]
-  {:pre [(number? start) (number? end) (< start end) (vector? organizations)]}
+  [start-timestamp end-timestamp organizations]
+  {:pre [(number? start-timestamp)
+         (number? end-timestamp)
+         (< start-timestamp end-timestamp)
+         (vector? organizations)]}
   (let [apps (verdict/applications-with-missing-verdict-attachments
-              {:start         start
-               :end           end
+              {:start         start-timestamp
+               :end           end-timestamp
                :organizations organizations})
         eraajo-user (user/batchrun-user (map :organization apps))]
     (->> (doall
@@ -717,20 +718,25 @@
            apps))
          (remove #(empty? (:updated-verdicts %)))
          (hash-map :updated-applications)
-         (merge {:start start
-                 :end end
+         (merge {:start start-timestamp
+                 :end   end-timestamp
                  :organizations organizations
                  :applications (map :id apps)}))))
 
-(defn check-for-verdict-attachments [& [start end & organizations]]
+(defn check-for-verdict-attachment
+  "Fetch missing verdict attachments for verdicts given in the time
+  interval between start-timestamp and end-timestamp (last 3 months by
+  default), for the organizations whose id's are provided as
+  arguments (all organizations by default)."
+  [& [start-timestamp end-timestamp & organizations]]
   (when-not (system-not-in-lockdown?)
     (logging/log-event :info {:run-by "Automatic verdict attachment checking" :event "Not run - system in lockdown"})
     (fail! :system-in-lockdown))
   (mongo/connect!)
-  (fetch-verdict-attachments (or (when start
-                                   (util/to-millis-from-local-date-string start))
+  (fetch-verdict-attachments (or (when start-timestamp
+                                   (util/to-millis-from-local-date-string start-timestamp))
                                  (-> 3 t/months t/ago c/to-long))
-                             (or (when end
-                                   (util/to-millis-from-local-date-string end))
+                             (or (when end-timestamp
+                                   (util/to-millis-from-local-date-string end-timestamp))
                                  (now))
                              (or (vec organizations) [])))
