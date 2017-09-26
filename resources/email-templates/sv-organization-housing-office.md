@@ -1,16 +1,16 @@
-# Hei,
+# Hej,
 
-Lupapisteessä on jätetty vireille hakemus, jossa on ilmoitettu ARA-rahoituksesta. Hanke on {{operation}} osoitteessa {{address}}, {{municipality}}.
+I Lupapiste har lämnats in en ansökan där det har rapporterats om ARA-finansiering. Projektet gäller {{operation}} på adressen {{address}}, {{municipality}}.
 
-Onko sinulla käyttäjätunnus Lupapisteeseen? Klikkaa alla olevaa linkkiä nähdäksesi hankkeen tiedot. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+Har du redan ett användarnamn för Lupapiste? För att kunna se uppgifter om projektet, klicka på länken nedan. Om länken inte fungerar, kopiera adressen och klistra in den i adressfältet på din webbläsare.
 
-Jos käyttäjätunnusta ei ole, ota yhteyttä hanketta käsittelevän kunnan viranomaiseen saadaksesi viranomaistunnukset. Älä rekisteröidy itsenäisesti Lupapisteen käyttäjäksi.
+Om du inte ännu har ett användarnamn, var vänlig och kontakta myndigheterna i handläggningskommunen för att få ett användarnamn för myndigheter. Registrera dig inte självständigt till Lupapiste.
 
 {{link}}
 
-Lupapisteessä voidaan hoitaa lupa-asiointia yhdessä muiden hankkeen osapuolten kanssa. Vuorokauden ympäri. Onko sinulla kysyttävää palvelun käytöstä? 
-Suosittelemme tutustumaan Lupapisteen ohjesivustoon sekä usein kysyttyihin kysymyksiin.
+Via Lupapiste kan du sköta dina tillståndsärenden tillsammans med andra parter i projektet. Dygnet runt. Har du frågor om användning av tjänsten? 
+Vi rekommenderar att du bekantar dig med Lupapistes anvisningar och de vanligaste frågorna.
 
-Terveisin,
+Med vänlig hälsning
 
 {{lupapiste.link}}
