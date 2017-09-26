@@ -1018,10 +1018,14 @@ h2 > i.is-right {
 div.review-tasks {
   margin-top: 20px;
   .faulty {
-    text-decoration: line-through;
+    td {
+      text-decoration: line-through;
+    }
+    td.reviews-table--action {
+      text-decoration: none;
+    }
   }
 }
-
 
 .assignment-creator {
   margin: {

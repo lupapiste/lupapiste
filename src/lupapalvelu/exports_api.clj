@@ -72,6 +72,7 @@
    :maalampo                    "D"
    :jatevesi                    "D"
    :muu-rakentaminen            "D"
+   :rakennustietojen-korjaus    "D"
    :purkaminen                  "D"
    :kaivuu                      "D"
    :puun-kaataminen             "D"

@@ -14,10 +14,11 @@
                   css: editorCss">
     <div class="reject-edits">
       <input type="text"
-             class="reject-edits--input" 
+             class="reject-edits--input"
              data-bind="textInput: editorNote,
                         hasFocus: true,
-                        testId: testPrefix + '-editor'">
+                        testId: testPrefix + '-editor'"
+             id="reject-edit-input">
       <button class="primary reject-edits--input"
               data-bind="click: saveNote,
                          testId: testPrefix + '-save'">

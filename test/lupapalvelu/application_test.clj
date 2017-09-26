@@ -71,6 +71,39 @@
   (fact "muutoslupa+aloitusilmoitus+ya-jatkoaika"
     (required-link-permits {:permitSubtype "muutoslupa" :primaryOperation {:name "aloitusoikeus"} :secondaryOperations [{:name "ya-jatkoaika"}]}) => 3))
 
+(facts get-sorted-operation-documents
+  (fact "one operation - two docs"
+    (get-sorted-operation-documents {:documents           [{:schema-info {:name ..doc-name-1.. :op {:id ..op-id-1..}}}
+                                                           {:schema-info {:name ..doc-name-2..}}]
+                                     :primaryOperation     {:id ..op-id-1.. :name "paatoimenpide" :description "" :created 0}
+                                     :secondaryOperations []})
+    => [{:schema-info {:name ..doc-name-1.. :op {:id ..op-id-1..}}}])
+
+  (fact "one operation - missing doc"
+    (get-sorted-operation-documents {:documents           [{:schema-info {:name ..doc-name-2.. :op {:id ..op-id-2..}}}]
+                                     :primaryOperation     {:id ..op-id-1.. :name "paatoimenpide" :description "" :created 0}
+                                     :secondaryOperations []})
+    => [])
+
+  (fact "multiple operations"
+    (get-sorted-operation-documents {:documents           [{:schema-info {:name ..doc-name-1.. :op {:id ..op-id-1..}}}
+                                                           {:schema-info {:name ..doc-name-2..}}
+                                                           {:schema-info {:name ..doc-name-3.. :op {:id ..op-id-3..}}}
+                                                           {:schema-info {:name ..doc-name-4.. :op {:id ..op-id-4..}}}
+                                                           {:schema-info {:name ..doc-name-5.. :op {:id ..op-id-5..}}}
+                                                           {:schema-info {:name ..doc-name-6.. :op {:id ..op-id-2..}}}
+                                                           {:schema-info {:name ..doc-name-7..}}]
+                                     :primaryOperation     {:id ..op-id-5.. :name "paatoimenpide" :description "" :created 4}
+                                     :secondaryOperations [{:id ..op-id-4.. :name "muutoimenpide" :description "" :created 3}
+                                                           {:id ..op-id-2.. :name "eritoimenpide" :description "" :created 1}
+                                                           {:id ..op-id-3.. :name "jokutoimenpide" :description "" :created 2}
+                                                           {:id ..op-id-1.. :name "sivutoimenpide" :description "" :created 0}]})
+    => [{:schema-info {:name ..doc-name-5.. :op {:id ..op-id-5..}}}
+        {:schema-info {:name ..doc-name-1.. :op {:id ..op-id-1..}}}
+        {:schema-info {:name ..doc-name-6.. :op {:id ..op-id-2..}}}
+        {:schema-info {:name ..doc-name-3.. :op {:id ..op-id-3..}}}
+        {:schema-info {:name ..doc-name-4.. :op {:id ..op-id-4..}}}]))
+
 (facts "Add operation allowed"
        (let [not-allowed-for #{;; R-operations, adding not allowed
                                :raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen

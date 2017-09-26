@@ -12,7 +12,7 @@ Init...
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
   Set Suite Variable  ${paasuunnittelijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='paasuunnittelija']
-  Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
+  Set Suite Variable  ${hakijanasiamiesXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakijan-asiamies']
   Set Suite Variable  ${asiamiesXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakijan-asiamies']
 
 Mikko opens an application
@@ -137,15 +137,12 @@ Mikko can't delete paasuunnittelija, as it's only removable by authority
 Mikko can't delete maksaja, as it's only removable by authority
   Element should not be visible  xpath=//section[@data-doc-type='maksaja']//button[@data-test-class='delete-schemas.maksaja']
 
-Mikko adds party maksaja using dialog
+Mikko cannot add party maksaja since maksaja doc is not repeating
   Click enabled by test id  add-party
   Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
-  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
-  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
-  Confirm yes no dialog
-  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
-  Open accordions  parties
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
+  Wait Until  Element should contain  xpath=//div[@data-test-id='dialog-add-party']//select  Hakija
+  Wait Until  Element should not contain  xpath=//div[@data-test-id='dialog-add-party']//select  Maksaja
+  Deny yes no dialog
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
@@ -218,12 +215,12 @@ Authority deletes paasuunnittelija
   Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  0
 
-Authority deletes maksaja
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
-  Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
+Authority deletes hakijan-asiamies
+  Wait until  Xpath Should Match X Times  ${hakijanasiamiesXpath}  1
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
+  Execute Javascript  $("button[data-test-class='delete-schemas.hakijan-asiamies']").click();
   Confirm yes no dialog
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+  Wait until  Xpath Should Match X Times  ${hakijanasiamiesXpath}  1
 
 No errors logged in editing
   There are no frontend errors

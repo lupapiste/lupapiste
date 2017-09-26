@@ -19,7 +19,14 @@
       </div>
     </div>
 
-    <div data-bind="if: tosFunctionExists()">
+    <div data-bind="ifnot: $root.authorization.ok('application-date-within-time-limit')">
+      <div class="info-line like-btn">
+          <i class="lupicon-circle-attention"></i>
+          <span data-bind="text: loc('archivalSummary.submitted-application-too-old-for-archival', archivingTimestampField())"></span>
+      </div>
+    </div>
+
+    <div data-bind="if: tosFunctionExists() && $root.authorization.ok('application-date-within-time-limit')">
       <div data-bind="if: showArchived" class="archival-summary-document-set">
         <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
         <div data-bind="ltext: 'archivalSummary.guide'"></div>
@@ -68,9 +75,8 @@
           <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
         </div>
       </div>
-    </div>
 
-    <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
+      <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
       <div class="tos-function-correction">
         <div>
           <h2 data-bind="ltext: 'tos.function.fix'"></h2>
@@ -97,15 +103,17 @@
            </div>
         </div>
       </div>
-    <!-- /ko -->
+      <!-- /ko -->
 
-    <!-- ko if: $data.showMarkArchivedSection() && !$root.authorization.ok("common-area-application") && $data.tosFunctionExists() -->
-    <div class="mark-as-archived">
-      <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
-      <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
-      <button class="btn-primary" data-bind="click: markApplicationArchived, ltext: 'archivalSummary.markArchived.button'">Merkitse hakemusvaihe arkistoiduksi</button>
+      <!-- ko if: $data.showMarkArchivedSection() && !$root.authorization.ok("common-area-application") -->
+      <div class="mark-as-archived">
+        <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
+        <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
+        <button class="btn-primary" data-bind="click: markApplicationArchived, ltext: 'archivalSummary.markArchived.button'">Merkitse hakemusvaihe arkistoiduksi</button>
+      </div>
+      <!-- /ko -->
+
     </div>
-    <!-- /ko -->
 
   </script>
   <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">

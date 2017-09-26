@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
+            [clojure.walk :as walk]
             [swiss.arrows :refer [-<>]]
             [sade.core :refer [now]]
             [sade.strings :as ss]
@@ -9,6 +10,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.application :as app]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- muutostapa
@@ -75,7 +77,6 @@
 
 (defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
-        kuvaus (:toimenpiteenKuvaus toimenpide)
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
                                                   :rakennusaine (:kantavaRakennusaine rakenne))
         lammonlahde-map (muu-select-map
@@ -160,6 +161,13 @@
                 :rakennustieto (get-rakennus-data application rakennuksen-muuttaminen-doc)}
    :created (:created rakennuksen-muuttaminen-doc)})
 
+(defn- get-rakennustietojen-korjaus-toimenpide [rakennustietojen-korjaus-doc application]
+  {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennustietojen-korjaus-doc)
+                                    {:perusparannusKytkin false}
+                                    {:muutostyonLaji      schemas/muumuutostyo})
+                :rakennustieto (get-rakennus-data application rakennustietojen-korjaus-doc)}
+   :created (:created rakennustietojen-korjaus-doc)})
+
 (defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
   {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
                                  {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
@@ -211,29 +219,75 @@
       (assoc-in
        [:kayttotarkoitus] "Maal\u00e4mp\u00f6pumppuj\u00e4rjestelm\u00e4")))
 
-(defn- get-toimenpide-with-count [toimenpide n]
-  (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
+(defn- get-toimenpide-with-count [n toimenpide]
+  (walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
                             (assoc % :jarjestysnumero n)
                             %) toimenpide))
 
+(defmulti operation-canonical
+  {:arglists '([application document])}
+  (fn [application document] (-> document :schema-info :name keyword)))
 
-(defn- get-operations [documents-by-type application]
-  (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents-by-type))
-                                               (map #(get-uusi-toimenpide % application) (:uusi-rakennus-ei-huoneistoa documents-by-type))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents-by-type))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja documents-by-type))
-                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents-by-type))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents-by-type))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen-ei-huoneistoja documents-by-type))
-                                               (map #(get-purku-toimenpide % application) (:purkaminen documents-by-type))
-                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents-by-type))
-                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide-ei-tunnusta documents-by-type))
-                                               (map #(get-maalampokaivo % application) (:maalampokaivo documents-by-type))))
-        toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
-    (not-empty (sort-by :created toimenpiteet))))
+(defmethod operation-canonical :hankkeen-kuvaus-minimum [& _]
+  nil)
 
+(defmethod operation-canonical :maisematyo [& _]
+  nil)
 
-(defn- get-lisatiedot [lang]
+(defmethod operation-canonical :aloitusoikeus [& _]
+  nil)
+
+(defmethod operation-canonical :aiemman-luvan-toimenpide [& _]
+  nil)
+
+(defmethod operation-canonical :tyonjohtaja-v2 [& _]
+  nil)
+
+(defmethod operation-canonical :uusiRakennus [application document]
+  (get-uusi-toimenpide document application))
+
+(defmethod operation-canonical :uusi-rakennus-ei-huoneistoa [application document]
+  (get-uusi-toimenpide document application))
+
+(defmethod operation-canonical :rakennuksen-muuttaminen [application document]
+  (get-rakennuksen-muuttaminen-toimenpide document application))
+
+(defmethod operation-canonical :rakennuksen-muuttaminen-ei-huoneistoja [application document]
+  (get-rakennuksen-muuttaminen-toimenpide document application))
+
+(defmethod operation-canonical :rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia [application document]
+  (get-rakennuksen-muuttaminen-toimenpide document application))
+
+(defmethod operation-canonical :rakennustietojen-korjaus [application document]
+  (get-rakennustietojen-korjaus-toimenpide document application))
+
+(defmethod operation-canonical :rakennuksen-laajentaminen [application document]
+  (get-rakennuksen-laajentaminen-toimenpide document application))
+
+(defmethod operation-canonical :rakennuksen-laajentaminen-ei-huoneistoja [application document]
+  (get-rakennuksen-laajentaminen-toimenpide document application))
+
+(defmethod operation-canonical :purkaminen [application document]
+  (get-purku-toimenpide document application))
+
+(defmethod operation-canonical :kaupunkikuvatoimenpide [application document]
+  (get-kaupunkikuvatoimenpide document application))
+
+(defmethod operation-canonical :kaupunkikuvatoimenpide-ei-tunnusta [application document]
+  (get-kaupunkikuvatoimenpide document application))
+
+(defmethod operation-canonical :maalampokaivo [application document]
+  (get-maalampokaivo document application))
+
+(defn- get-operations [application]
+  (->> (app/get-sorted-operation-documents application)
+       (map (partial walk/postwalk empty-strings-to-nil))
+       (map (partial operation-canonical application))
+       (remove nil?)
+       (map get-toimenpide-with-count (range 1 1000))
+       not-empty))
+
+(defn get-lisatiedot [lang]
   {:Lisatiedot {:asioimiskieli (case lang
                                  "sv" "ruotsi"
                                  "suomi")}})
@@ -261,9 +315,7 @@
 
 (defn application-to-canonical-operations
   [application]
-  (let [application (tools/unwrapped application)
-        documents-by-type (documents-by-type-without-blanks application)]
-    (get-operations documents-by-type application)))
+  (-> application tools/unwrapped get-operations))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -271,7 +323,7 @@
   (let [application (tools/unwrapped application)
         link-permits (:linkPermitData application)
         documents-by-type (documents-by-type-without-blanks application)
-        toimenpiteet (get-operations documents-by-type application)
+        toimenpiteet (get-operations application)
         operation-name (-> application :primaryOperation :name)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
@@ -356,24 +408,23 @@
                                              :rakennusnro (:rakennusnro building)
                                              :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
                                              ))
-                         :katselmuksenRakennustieto (map #(let [building (:rakennus %)
-                                                                building-canonical (merge
-                                                                                     (select-keys building [:jarjestysnumero :kiinttun])
-                                                                                     (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
-                                                                                     (when-not (s/blank? (:valtakunnallinenNumero building)) {:valtakunnallinenNumero (:valtakunnallinenNumero building)})
-                                                                                     {:katselmusOsittainen (get-in % [:tila :tila])
-                                                                                      :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
-                                                                building-canonical (if (s/blank? (:kiinttun building-canonical))
-                                                                                     (assoc building-canonical :kiinttun (:propertyId application))
-                                                                                     building-canonical)
-                                                                building-canonical (util/assoc-when-pred
-                                                                                    building-canonical util/not-empty-or-nil?
-                                                                                    :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                                      [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                                                                                                       {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
-                                                                                    :rakennuksenSelite (:description building)) ; v2.2.0
-                                                                ]
-                                                            {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
+                         :katselmuksenRakennustieto (map (fn [{building :rakennus state :tila}]
+                                                           {:KatselmuksenRakennus
+                                                            (-> {:jarjestysnumero                     (:jarjestysnumero building)
+                                                                 :kiinttun                            (:propertyId application) ; overwritten by (:kiinttun building) if exists
+                                                                 :katselmusOsittainen                 (:tila state)
+                                                                 :kayttoonottoKytkin                  (:kayttoonottava state)}
+                                                                (util/assoc-when-pred ss/not-blank?
+                                                                  :kiinttun                           (:kiinttun building)
+                                                                  :rakennusnro                        (:rakennusnro building)
+                                                                  :valtakunnallinenNumero             (:valtakunnallinenNumero building)
+                                                                  :kunnanSisainenPysyvaRakennusnumero (:kunnanSisainenPysyvaRakennusnumero building))
+                                                                (util/assoc-when-pred util/not-empty-or-nil?
+                                                                  :muuTunnustieto (when-let [op-id (:operationId building)]
+                                                                                    [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                                                     {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
+                                                                  :rakennuksenSelite (:description building)))})
+                                                         buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
                                                                                 (fn [m k v] (if-not (ss/blank? v)
                                                                                               (assoc m k (util/to-xml-date-from-string v))

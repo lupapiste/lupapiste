@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Sonja creates bunch of application with ARA funding
-  Sonja logs in
+  Sonja logs in  False
   Create application the fast way  sipoo-funding-app-1  753-416-25-31  kerrostalo-rivitalo
   Create application the fast way  sipoo-funding-app-2  753-416-25-32  kerrostalo-rivitalo
   Create application the fast way  sipoo-funding-app-3  753-416-25-33  kerrostalo-rivitalo
@@ -30,7 +30,7 @@ Sonja creates bunch of application with ARA funding
   Logout
 
 Olli creates applications with ARA funding
-  Olli logs in
+  Olli logs in  False
   Create application the fast way  oulu-funding-app-1  564-1-9901-0  kerrostalo-rivitalo
   Create application the fast way  oulu-funding-app-2  564-1-9901-1  kerrostalo-rivitalo
   Add ARA funding  oulu-funding-app-1  564-1-9901-0
@@ -81,7 +81,7 @@ Application summary tab is visible but everything is disabled
 Parties tab is visible but everything is disabled
   Open tab  parties
   Wait until  Xpath Should Match X Times  //table//tr[contains(@class, 'party')]  2
-  Is authorized party  Rahoituskäsittelijä
+  Is authorized party  ARA-käsittelijä
   Visible accordion count is  5
   Element is visible and disabled by test id  henkilo.userId
   Element is visible and disabled by test id  henkilo.osoite.maa
@@ -120,7 +120,7 @@ Financial authority can go to my page and change password
   Click enabled by test id  change-my-password
   Wait until  Page should contain  Tallennettu
   Logout
-  User logs in  financial  admin1234  Rahoituskäsittelijä
+  User logs in  financial  admin1234  ARA-käsittelijä
 
 Financial authority can go to my page and change email
   Go to  ${SERVER}/app/fi/financial-authority#!/mypage
@@ -130,7 +130,7 @@ Financial authority can go to my page and change email
   Open last email
   Click link  xpath=//a
   Go to login page
-  User logs in  financial@ara.com  admin1234  Rahoituskäsittelijä
+  User logs in  financial@ara.com  admin1234  ARA-käsittelijä
 
 
 *** Keywords ***

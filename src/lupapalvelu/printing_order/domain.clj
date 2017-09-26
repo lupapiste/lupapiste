@@ -1,7 +1,10 @@
 (ns lupapalvelu.printing-order.domain
   (:require [schema.core :as sc]
-            [sade.schemas :as ssc]))
-
+            [sade.core :refer [fail!]]
+            [sade.schemas :as ssc]
+            [sade.util :as util]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.attachment :as att]))
 
 (defn str-max-length [l]
   (sc/constrained sc/Str
@@ -10,13 +13,13 @@
 
 (sc/defschema ContactDetails
               {:companyName                     (str-max-length  150)
-               (sc/optional-key :streetAddress) (str-max-length   50)
-               (sc/optional-key :postalCode)    sc/Str
-               (sc/optional-key :city)          (str-max-length   50)
-               (sc/optional-key :firstName)     (str-max-length  150)
-               (sc/optional-key :surname)       (str-max-length  150)
-               (sc/optional-key :phone)         (str-max-length   25)
-               (sc/optional-key :email)         (str-max-length 1024)})
+               :streetAddress                   (str-max-length   50)
+               :postalCode                      sc/Str
+               :city                            (str-max-length   50)
+               :firstName                       (str-max-length  150)
+               :lastName                        (str-max-length  150)
+               (sc/optional-key :phoneNumber)   (str-max-length   25)
+               :email                           ssc/Email})
 
 (def Orderer
   ContactDetails)
@@ -60,3 +63,6 @@
 
 (sc/defschema PricingConfiguration
   {:by-volume   [PricingItem]})
+
+(defn pdf-attachment? [attachment]
+  (= (-> attachment :latestVersion :contentType) "application/pdf"))

@@ -6,7 +6,7 @@
              [lupapalvelu.tasks :as tasks]
              [sade.util :as util]))
 
-(testable-privates lupapalvelu.review merge-review-tasks)
+(testable-privates lupapalvelu.review merge-review-tasks matching-task)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
                                                     :rakennusnro "001",
@@ -84,7 +84,7 @@
          :pitoPvm 1463097600000}]))
 
 (fact "merging the review vector with itself leaves everything unchanged"
-  (let [[unchanged added-or-updated] (merge-review-tasks reviews-fixture reviews-fixture)]
+  (let [[unchanged added-or-updated _] (merge-review-tasks reviews-fixture reviews-fixture)]
     (count unchanged) => (count reviews-fixture)
     (diff unchanged reviews-fixture) => [nil nil reviews-fixture]
     added-or-updated => empty?))
@@ -92,16 +92,96 @@
 (fact "review is updated on top of empty review"
   (let [mutated (-> (into [] reviews-fixture)
                     (assoc-in [2 :data :katselmus :pitoPvm :value] "13.05.2016"))
-        [unchanged added-or-updated] (merge-review-tasks mutated reviews-fixture)]
+        [unchanged added-or-updated _] (merge-review-tasks mutated reviews-fixture)]
     unchanged => (just (util/drop-nth 2 mutated) :in-any-order)
     added-or-updated => (just (nth mutated 2))))
 
 (fact "illegal review type causes failure"
-      (let [mutated (-> (into [] reviews-fixture)
+  (let [mutated (-> (into [] reviews-fixture)
                         (assoc-in [2 :data :katselmus :pitoPvm :value] "2")
                         (assoc-in [2 :data :katselmuksenLaji :value] "13.05.2016"))
-            [_ added-or-updated] (merge-review-tasks mutated reviews-fixture)
+            [_ added-or-updated _] (merge-review-tasks mutated reviews-fixture)
             errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) added-or-updated))]
         added-or-updated => (just (nth mutated 2))
         (count errors) => 1
         (-> errors flatten first) => (contains {:result [:warn "illegal-value:select"]})))
+
+(fact "more recent review from XML does not overwrite the review in mongo"
+  (let [mutated (-> (into [] reviews-fixture)
+                    (assoc-in [1 :data :katselmus :lasnaolijat :value] "Lasse Lasna"))
+        [unchanged added-or-updated _] (merge-review-tasks mutated reviews-fixture)]
+    (count unchanged) => (count reviews-fixture)
+    (diff unchanged reviews-fixture) => [nil nil reviews-fixture]
+    added-or-updated => empty?))
+
+(fact "more recent review from XML can overwrite if flag is passed to merge-review-tasks"
+      (let [mutated (-> (into [] reviews-fixture)
+                        (assoc-in [1 :data :katselmus :lasnaolijat :value] "Lasse Lasna"))
+            [unchanged added-or-updated new-faulty] (merge-review-tasks mutated reviews-fixture true)]
+        (count unchanged)        => (dec (count reviews-fixture))
+        (count added-or-updated) => 1
+        (count new-faulty)       => 1
+        (first new-faulty)       => (second reviews-fixture)
+        (first added-or-updated) => (second mutated)))
+
+(facts "matching-task"
+  (let [mongo-task {:data {:muuTunnus {:value "ID"}
+                           :katselmus {}
+                           :katselmuksenLaji {:value "muu katselmus"}}
+                    :taskname "Paikan merkitseminen"}]
+
+    (fact "matches ta sks with the same background id"
+      (matching-task mongo-task
+                     [{:data {:muuTunnus {:value "DI"}}}
+                      {:data {:muuTunnus {:value "ID"}}}
+                      {:data {}}])
+      => {:data {:muuTunnus {:value "ID"}}}
+
+      (matching-task mongo-task
+                     [{:data {:muuTunnus {:value "DI"}}}
+                      {:data {}}])
+      => nil?)
+
+
+  (fact "matches tasks with same name and type given that the task given as first argument contains no review data"
+    (let [update-task (update mongo-task :data dissoc :muuTunnus)]
+      (matching-task mongo-task [update-task])
+      => update-task
+
+      ;; :muuTunnus prevails over same name and type
+      (matching-task mongo-task [update-task {:data {:muuTunnus {:value "ID"}}}])
+      => {:data {:muuTunnus {:value "ID"}}}
+
+      ;; No match, since mongo task contains review data
+      (matching-task (assoc-in mongo-task [:data :katselmus :pitaja :value]
+                               "Pekka Pitaja")
+                     [update-task])
+      => nil?))
+
+  (fact "matches task with same name, type and proper related data"
+    (let [held-review-task (assoc-in mongo-task
+                                     [:data :katselmus]
+                                     {:tila    {:value "lopullinen"}
+                                      :pitoPvm {:value "8.9.2017"}
+                                      :pitaja  {:value "Pekka Pitaja"}})
+          held-review-task-modified (-> held-review-task
+                                        (assoc-in [:data :katselmus :lasnaolijat]
+                                                  {:value "Lasse Lasnaolija"})
+                                        (update :data dissoc :muuTunnus))]
+      (matching-task held-review-task
+                     [{:data {:muuTunnus {:value "DI"}}}
+                      held-review-task-modified
+                      {:data {:muuTunnus {:value "DD"}}}])
+      => held-review-task-modified
+
+      ;; No match, since :tila changed
+      (matching-task held-review-task
+                     [(assoc-in held-review-task-modified
+                                [:data :katselmus :tila]
+                                {:value "osittainen"})])
+      => nil?
+
+      ;; :muuTunnus prevails
+      (matching-task mongo-task [held-review-task-modified
+                                 {:data {:muuTunnus {:value "ID"}}}])
+      => {:data {:muuTunnus {:value "ID"}}}))))

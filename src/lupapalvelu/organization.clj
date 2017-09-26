@@ -135,6 +135,7 @@
    (sc/optional-key :permanent-archive-enabled) sc/Bool
    (sc/optional-key :digitizer-tools-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :earliest-allowed-archiving-date) sssc/Nat
    (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
@@ -160,7 +161,8 @@
    (sc/optional-key :docstore-info) DocStoreInfo
    (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
-   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}})
+   (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
+   (sc/optional-key :multiple-operations-supported) sc/Bool})
 
 
 (sc/defschema SimpleOrg

@@ -223,7 +223,7 @@
           "Pohjakatselmus 1" ; task name
           "2.5.1974"
           [{:tila {:tila "osittainen" :kayttoonottava true}
-            :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892"}}]
+            :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892" :kunnanSisainenPysyvaRakennusnumero "b123"}}]
           user
           "pohjakatselmus" ; katselmuksen-nimi
           :katselmus ;tyyppi
@@ -251,7 +251,7 @@
                 :vaadittuLupaehtona {:value false}
                 :rakennus {:0
                            {:rakennus
-                            {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"}}
+                            {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"} :kunnanSisainenPysyvaRakennusnumero {:value "b123"}}
                             :tila {:tila {:value "osittainen"}
                                    :kayttoonottava {:value true}}}}
                 :katselmus {:pitoPvm {:value "2.5.1974"}

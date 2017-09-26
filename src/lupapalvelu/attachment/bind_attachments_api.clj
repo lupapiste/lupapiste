@@ -6,14 +6,13 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.bind :as bind]
             [lupapalvelu.job :as job]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]))
-
-(def bind-states (states/all-application-or-archiving-project-states-but states/terminal-states))
 
 (defn- validate-attachment-ids [command]
   (->> (get-in command [:data :filedatas])
@@ -60,10 +59,13 @@
                          att/attachment-not-readOnly
                          att/attachment-is-needed
                          att/attachment-editable-by-application-state
-                         att/allowed-only-for-authority-when-application-sent
+                         (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                                (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                          att/foreman-must-be-uploader]
    :input-validators    [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
-   :states              bind-states}
+   :states              {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                         :authority    (states/all-states-but :canceled)
+                         :oirAuthority (states/all-states-but :canceled)}}
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}]
                                :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
@@ -82,13 +84,16 @@
    :user-roles          #{:applicant :authority :oirAuthority}
    :user-authz-roles    (conj roles/all-authz-writer-roles :foreman)
    :pre-checks          [app/validate-authority-in-drafts
-                         att/allowed-only-for-authority-when-application-sent
+                         (action/some-pre-check att/allowed-only-for-authority-when-application-sent
+                                                (permit/validate-permit-type-is :YI :YL :YM :VVVL :MAL))
                          att/foreman-must-be-uploader
                          (filedatas-precheck att/upload-to-target-allowed)
                          validate-attachment-ids
                          validate-attachment-groups
                          check-password-for-sign]
-   :states              bind-states}
+   :states              {:applicant    (conj (states/all-states-but states/terminal-states) :answered)
+                         :authority    (states/all-states-but :canceled)
+                         :oirAuthority (states/all-states-but :canceled)}}
   [command]
   (ok :job (bind/make-bind-job command filedatas
                                :postprocess-fn (assignment/run-assignment-triggers (partial job-response-fn command)))))
@@ -97,6 +102,6 @@
   {:parameters [jobId version]
    :user-roles          #{:applicant :authority :oirAuthority}
    :input-validators    [(partial action/numeric-parameters [:jobId :version])]
-   :states              bind-states}
+   :states              (states/all-states-but :canceled)}
   [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (job/status job-id (util/->long version) (util/->long timeout))))

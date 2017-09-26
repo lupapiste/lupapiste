@@ -601,37 +601,39 @@
 (defn get-doc-value [doc path-prefix path]
   (tools/unwrapped (get-in doc (into path-prefix path))))
 
-(defn company-to-document [apikey app-id company-id user-data & [doc-id]]
-  (let [doc-id (or doc-id (:doc (command apikey :create-doc
-                                         :id app-id
-                                         :collection "documents"
-                                         :schemaName "maksaja")))
-        _             (command apikey :set-company-to-document
-                               :id app-id
-                               :companyId company-id
-                               :path "yritys"
-                               :documentId doc-id) => ok?
-        app (query-application apikey app-id)
+(defn company-to-document [apikey app-id company-id user-data doc-id]
+  (fact "doc-id"
+    doc-id => truthy)
+  (fact "set-company-to-document"
+    (command apikey :set-company-to-document
+             :id app-id
+             :companyId company-id
+             :path "yritys"
+             :documentId doc-id)) => ok?
+  (let [app (query-application apikey app-id)
         doc (domain/get-document-by-id app doc-id)
         company (company-from-minimal-by-id company-id)
         check (partial get-doc-value doc [:data :yritys])]
     (fact "Company to document"
-      (check [:yritysnimi]) => (:name company)
-      (check [:liikeJaYhteisoTunnus]) => (:y company)
-      (check [:verkkolaskutustieto :ovtTunnus]) => (:ovt company)
-      (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
-      (check [:yhteyshenkilo :henkilotiedot :etunimi]) => (:firstName user-data)
-      (check [:yhteyshenkilo :henkilotiedot :sukunimi]) => (:lastName user-data)
-      (check [:yhteyshenkilo :yhteystiedot :email]) => (:email user-data)
-      (check [:yhteyshenkilo :yhteystiedot :puhelin]) => (:phone user-data))
+      (fact "yritysnimi" (check [:yritysnimi]) => (:name company))
+      (fact "liikeJaYhteisoTunnus" (check [:liikeJaYhteisoTunnus]) => (:y company))
+
+      (when (-> doc :schema-info :name (= "maksaja"))
+        (fact "ovtTunnus" (check [:verkkolaskutustieto :ovtTunnus]) => (:ovt company))
+        (fact "valittajaTunnus" (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)))
+
+      (fact "etunimi" (check [:yhteyshenkilo :henkilotiedot :etunimi]) => (:firstName user-data))
+      (fact "sukunimi" (check [:yhteyshenkilo :henkilotiedot :sukunimi]) => (:lastName user-data))
+      (fact "email" (check [:yhteyshenkilo :yhteystiedot :email]) => (:email user-data))
+      (fact "puhelin" (check [:yhteyshenkilo :yhteystiedot :puhelin]) => (:phone user-data)))
     doc-id))
 
 (facts "Set company to document"
   (let [{app-id :id :as app} (create-and-open-application pena :propertyId sipoo-property-id)
-        maksaja              (domain/get-document-by-name app "maksaja")]
+        hakija              (domain/get-document-by-name app "hakija-r")]
 
-    (fact "initially maksaja company is empty"
-      (let [check (partial get-doc-value maksaja [:data :yritys])]
+    (fact "initially hakija company is empty"
+      (let [check (partial get-doc-value hakija [:data :yritys])]
         (doseq [path [[:yritysnimi]
                       [:liikeJaYhteisoTunnus]
                       [:verkkolaskutustieto :ovtTunnus]
@@ -645,34 +647,72 @@
       (invite-company-and-accept-invitation pena app-id "solita" kaino) => ok?)
 
     (fact "No company auth, no company user"
-      (company-to-document pena app-id "esimerkki"
-                           {:firstName "" :lastName ""
-                            :email "" :phone ""}))
+      (->> (command pena :create-doc
+                           :id app-id
+                           :collection "documents"
+                           :schemaName "hakija-r")
+           :doc
+           (company-to-document pena app-id "esimerkki"
+                                {:firstName "" :lastName ""
+                                 :email "" :phone ""})))
     (fact "No company auth, company user"
-          (company-to-document erkki app-id "esimerkki"
-                               {:firstName "Erkki" :lastName "Esimerkki"
-                                :email "erkki@example.com" :phone "556677"}))
+      (->> (command erkki :create-doc
+                           :id app-id
+                           :collection "documents"
+                           :schemaName "hakija-r")
+           :doc
+           (company-to-document erkki app-id "esimerkki"
+                                {:firstName "Erkki" :lastName "Esimerkki"
+                                 :email "erkki@example.com" :phone "556677"})))
     (fact "Pena joins Esimerkki"
           (command erkki :company-invite-user :firstName "Pena" :lastName "Panaani"
                    :email "pena@example.com" :admin false :submit true) => ok?
           (->> (last-email) (token-from-email "pena@example.com") http-token-call) => true)
     (fact "Company auth, no company user"
-          (company-to-document sonja app-id "esimerkki"
-                               {:firstName "Pena" :lastName "Panaani"
-                                :email "pena@example.com" :phone "0102030405"}))
+      (->> (command sonja :create-doc
+                           :id app-id
+                           :collection "documents"
+                           :schemaName "hakija-r")
+           :doc
+           (company-to-document sonja app-id "esimerkki"
+                                {:firstName "Pena" :lastName "Panaani"
+                                 :email "pena@example.com" :phone "0102030405"} )))
     (fact "Company auth, different company user"
-      (company-to-document erkki app-id "solita"
-                           {:firstName "" :lastName ""
-                            :email "" :phone ""}))
-    (fact "Company auth, company user"
-      (let [doc-id (company-to-document erkki app-id "esimerkki"
-                                        {:firstName "Erkki" :lastName "Esimerkki"
-                                         :email "erkki@example.com" :phone "556677"})]
-        (fact "Contact person info cleared, if not available"
-          (company-to-document erkki app-id "solita"
-                               {:firstName "" :lastName ""
-                                :email "" :phone ""}
-                               doc-id))))))
+      (->> (command erkki :create-doc
+                           :id app-id
+                           :collection "documents"
+                           :schemaName "hakija-r")
+           :doc
+           (company-to-document erkki app-id "solita"
+                                {:firstName "" :lastName ""
+                                 :email "" :phone ""}))))
+  (fact "Company auth, company user"
+    (let [{app-id :id :as app} (create-and-open-application pena :propertyId sipoo-property-id)
+          doc-id (->> (command erkki :create-doc
+                           :id app-id
+                           :collection "documents"
+                           :schemaName "hakija-r")
+                      :doc
+                      (company-to-document erkki app-id "esimerkki"
+                                           {:firstName "Erkki" :lastName "Esimerkki"
+                                            :email "erkki@example.com" :phone "556677"} ))]
+      (fact "Contact person info cleared, if not available"
+        (company-to-document erkki app-id "solita"
+                             {:firstName "" :lastName ""
+                              :email "" :phone ""}
+                             doc-id))))
+
+  (fact "Company auth, company user, maksaja doc"
+    (let [{app-id :id :as app} (create-and-open-application pena :propertyId sipoo-property-id)
+          maksaja              (domain/get-document-by-name app "maksaja")
+          doc-id               (company-to-document erkki app-id "esimerkki"
+                                                    {:firstName "Erkki" :lastName "Esimerkki"
+                                                     :email "erkki@example.com" :phone "556677"} (:id maksaja))]
+      (fact "Contact person info cleared, if not available"
+        (company-to-document erkki app-id "solita"
+                             {:firstName "" :lastName ""
+                              :email "" :phone ""}
+                             doc-id)))))
 
 (facts "Facts about update operation description"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
@@ -900,3 +940,11 @@
          (fact "Archive enabled"
                (query pena :application-organization-archive-enabled :id app-id )
                => ok?)))
+
+(facts "Multiple operations support can be selected"
+  (let [app-id-1 (create-app-id pena :operation :pientalo :propertyId sipoo-property-id)
+        app-id-2 (create-app-id velho :operation :pientalo :propertyId kuopio-property-id)]
+    (fact "Multiple operations is allowed in Sipoo"
+      pena => (allowed? :add-operation :id app-id-1 :operation "vapaa-ajan-asuinrakennus"))
+    (fact "Multiple operations is not allowed in Kuopio"
+      velho =not=> (allowed? :add-operation :id app-id-2 :operation "vapaa-ajan-asuinrakennus"))))

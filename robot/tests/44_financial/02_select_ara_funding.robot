@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Sonja creates application with ARA funding
-  Sonja logs in
+  Sonja logs in  False
   Create application the fast way  fundig-app-1  753-416-25-31  kerrostalo-rivitalo
   Open application  fundig-app-1  753-416-25-31
   Open tab  info
@@ -18,7 +18,7 @@ Sonja creates application with ARA funding
 Financial authority is added to parties table
   Open tab  parties
   Wait until  Xpath Should Match X Times  //table//tr[contains(@class, 'party')]  2
-  Is authorized party  Rahoituskäsittelijä
+  Is authorized party  ARA-käsittelijä
 
 Financial authority gets mail about new ARA application
   Open last email
@@ -49,13 +49,15 @@ Sonja removes ARA funding from application
   Open application  fundig-app-1  753-416-25-31
   Open tab  info
   Open accordions  info
+  Wait until  Element should be visible  select-funding-checkbox
+  Scroll to xpath  //*[@id="select-funding-checkbox"]
   Unselect checkbox  select-funding-checkbox
   Confirm  dynamic-yes-no-confirm-dialog
 
 Financial authority is removed from parties
   Open tab  parties
   Wait until  Xpath Should Match X Times  //table//tr[contains(@class, 'party')]  1
-  Is not authorized party  Rahoituskäsittelijä
+  Is not authorized party  ARA-käsittelijä
 
 Financial authority gets notification email
   Open last email

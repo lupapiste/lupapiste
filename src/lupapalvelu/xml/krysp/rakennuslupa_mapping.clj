@@ -47,8 +47,11 @@
   [{:tag :MuuTunnus :child [{:tag :tunnus :ns "yht"}
                             {:tag :sovellus :ns "yht"}]}])
 
+(def- rakennustunnus_216
+  (mapping-common/merge-into-coll-after-tag rakennustunnus_213 :valtakunnallinenNumero [{:tag :kunnanSisainenPysyvaRakennusnumero}]))
+
 (def- rakennustunnus_220
-  (conj rakennustunnus_213
+  (conj rakennustunnus_216
         {:tag :muuTunnustieto :child muu-tunnus}
         {:tag :rakennuksenSelite}))
 
@@ -121,6 +124,13 @@
                                :child [{:tag :muu}
                                        {:tag :omistajalaji}]}]}))
 
+(def- rakennus_216
+  (-> rakennus_215
+      (update-in [:child]
+                 mapping-common/update-child-element
+                 [:rakennuksenTiedot :rakennustunnus]
+                 {:tag :rakennustunnus :child rakennustunnus_216})))
+
 (def- rakennus_220
   (-> rakennus
       (update-in [:child] mapping-common/update-child-element
@@ -182,9 +192,13 @@
     {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
 (def- katselmustieto_216
-  (update-in katselmustieto_215 [:child] mapping-common/update-child-element
-             [:Katselmus]
-             #(update-in % [:child] concat [{:tag :verottajanTvLlKytkin}])))
+  (-> katselmustieto_215
+      (update-in [:child] mapping-common/update-child-element
+                 [:Katselmus :verottajanTvLlKytkin]
+                 #(update % :child concat [{:tag :verottajanTvLlKytkin}]))
+      (update-in [:child] mapping-common/update-child-element
+                 [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+                 {:tag :KatselmuksenRakennus :child rakennustunnus_216})))
 
 (def- katselmustieto_220
   (-> katselmustieto_216
@@ -316,7 +330,10 @@
                  katselmustieto_216)
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-                 {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
+                 {:tag :rakennustieto :child [rakennus_216]})))
 
 (def rakennuslupa_to_krysp_218
   (-> rakennuslupa_to_krysp_216

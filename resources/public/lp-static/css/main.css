@@ -11853,6 +11853,10 @@ div.attachments-table-container table.attachments-table input[type=text] {
   width: 24px;
 }
 
+div.attachments-table-container table.attachments-table #reject-edit-input {
+  width: 20em;
+}
+
 div.attachments-table-container table.attachments-table .amount-controls > [class^="lupicon-"]:before, div.attachments-table-container table.attachments-table [class*=" lupicon-"]:before {
   position: relative;
   top: 4px;
@@ -21568,7 +21572,7 @@ div.order-section div.attachments-table-container {
   border: none;
 }
 
-.order-summary-pricing-block table td.first {
+.order-summary-pricing-block table td.first, .order-summary-pricing-block table td.half {
   width: 50%;
 }
 
@@ -21617,7 +21621,7 @@ div.printing-order-footer .open-pricelist-btn h3 {
 div.printing-order-footer div.pricelist-panel {
   position: absolute;
   right: 0px;
-  bottom: 40px;
+  bottom: 70px;
   min-width: 250px;
 }
 
@@ -23151,8 +23155,12 @@ div.review-tasks {
   margin-top: 20px;
 }
 
-div.review-tasks .faulty {
+div.review-tasks .faulty td {
   text-decoration: line-through;
+}
+
+div.review-tasks .faulty td.reviews-table--action {
+  text-decoration: none;
 }
 
 .assignment-creator {
@@ -24027,6 +24035,14 @@ td.comment-text {
   top: -5px;
   right: auto;
   left: 250px;
+}
+
+.permanent-archive-setting .earliest-archiving-date {
+  vertical-align: middle;
+}
+
+.permanent-archive-setting .earliest-archiving-date input {
+  margin: 0;
 }
 
 #notifications p {

@@ -53,6 +53,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.archivingProjectTosFunction = ko.observable();
   self.permanentArchiveEnabled = ko.observable(true);
   self.permanentArchiveInUseSince = ko.observable();
+  self.earliestArchivingDate = ko.observable();
   self.features = ko.observable();
   self.allowedRoles = ko.observable([]);
   self.permitTypes = ko.observable([]);
@@ -62,6 +63,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.operationsInspectionSummaryTemplates = ko.observable({});
   self.handlerRoles = ko.observableArray();
   self.assignmentTriggers = ko.observableArray();
+  self.multipleOperationsSupported = ko.observable(false);
 
   self.sectionOperations = ko.observableArray();
 
@@ -116,6 +118,16 @@ LUPAPISTE.OrganizationModel = function () {
     var extendedConstructionWasteReportEnabled = self.extendedConstructionWasteReportEnabled();
     if (self.initialized) {
       ajax.command("set-organization-extended-construction-waste-report", {enabled: extendedConstructionWasteReportEnabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  ko.computed(function() {
+    var multipleOperationsSupported = self.multipleOperationsSupported();
+    if (self.initialized) {
+      ajax.command("set-organization-multiple-operations-support", {enabled: multipleOperationsSupported})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -203,7 +215,12 @@ LUPAPISTE.OrganizationModel = function () {
     if (self.initialized && startDate) {
       ajax.command("set-organization-permanent-archive-start-date", {date: startDate.getTime()})
         .success(util.showSavedIndicator)
-        .error(util.showSavedIndicator)
+        .error(function(res) {
+          util.showSavedIndicator(res);
+          if (res.text === "error.invalid-date") {
+            self.permanentArchiveInUseSince(null);
+          }
+        })
         .call();
     }
   });
@@ -292,10 +309,16 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
 
+    self.multipleOperationsSupported(organization["multiple-operations-supported"] || false);
+
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
+    var earliestArchivingTs = organization["earliest-allowed-archiving-date"];
+    if (earliestArchivingTs > 0) {
+      self.earliestArchivingDate(new Date(earliestArchivingTs));
+    }
 
     self.inspectionSummariesEnabled(organization["inspection-summaries-enabled"] || false);
 

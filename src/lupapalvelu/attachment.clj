@@ -138,8 +138,8 @@
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
-   :locked                               sc/Bool            ;;
-   (sc/optional-key :readOnly)           sc/Bool            ;;
+   :locked                               sc/Bool            ;; Locked prevents new version
+   (sc/optional-key :readOnly)           sc/Bool            ;; Readonly attachment (or its versions) cannot be deleted
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created if not forced to any other
    (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
    :target                               (sc/maybe Target)  ;;
@@ -172,11 +172,6 @@
 
 (defn ->attachment-operation [operation]
   (select-keys operation [:id :name]))
-
-(defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
-  (when (and (not (usr/authority? user))
-             (state-set (keyword state)))
-    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
 (defn attachment-value-is?
   "predicate is invoked for attachment value of key"
@@ -329,9 +324,9 @@
   [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
   (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]} myyntipalvelu-disabled?]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts primaryOperation submitted]} myyntipalvelu-disabled?]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
-                     (tos/update-end-dates verdicts))]
+                     (tos/update-end-dates verdicts primaryOperation submitted))]
     (if (seq metadata)
       ; Myyntipalvelu can be only negatively overridden, it can't be forced on if TOS says otherwise
       (if (and myyntipalvelu-disabled? (:myyntipalvelu metadata))
@@ -433,7 +428,7 @@
                        #{:ok :requires_user_action})
            :cannot-delete))))
 
-(defn- delete-attachment-file-and-preview! [file-id]
+(defn delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
   (mongo/delete-file-by-id (str file-id "-preview")))
 
@@ -989,23 +984,20 @@
     (access/has-attachment-auth-role :uploader command)))
 
 (defn allowed-only-for-authority-when-application-sent
-  "Pre-check is OK if the user is application authority or the
-  application has an environmental permit type."
+  "Pre-check is OK if the user is application authority"
   [{:keys [application user]}]
-  (when (util/=as-kw :sent (:state application))
-    (when-not (or (auth/application-authority? application user)
-                  (contains? #{:YI :YL :YM :VVVL :MAL} (-> application :permitType keyword)))
-      (fail :error.unauthorized))))
+  (when (and (util/=as-kw :sent (:state application))
+             (not (auth/application-authority? application user)))
+    (fail :error.unauthorized)))
 
 (defn attachment-editable-by-application-state
+  "Pre-check that fails for applicant user if called for a pre-verdict attachment in post-verdict state."
   [{{attachmentId :attachmentId} :data user :user {current-state :state organization :organization :as application} :application}]
   (when-not (ss/blank? attachmentId)
     (let [{create-state :applicationState} (get-attachment-info application attachmentId)]
-      (when-not (if (states/terminal-states (keyword current-state))
-                  (usr/user-is-archivist? user organization)
-                  (or (not (states/post-verdict-states (keyword current-state)))
-                      (states/post-verdict-states (keyword create-state))
-                      (usr/authority? user)))
+      (when (and (not (usr/user-is-authority-in-organization? user organization))
+                 (not (states/post-verdict-states (keyword create-state)))
+                 (states/post-verdict-states (keyword current-state)))
         (fail :error.pre-verdict-attachment)))))
 
 (defn validate-group-is-selectable [{application :application}]
