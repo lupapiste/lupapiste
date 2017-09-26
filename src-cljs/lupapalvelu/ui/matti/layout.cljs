@@ -352,13 +352,7 @@
                           (js/util.finnishDateAndTime done
                                                       "D.M.YYYY HH:mm"))
               (common/loc :neighbors.open))]])
-        (or (path/value path state)
-            (map (fn [obj]
-                   {:property-id (.propertyId obj)
-                    :done (some->> (.status obj)
-                                   (util/find-first #(= (.state %) "mark-done"))
-                                   .created)})
-             (lupapisteApp.models.application.neighbors))))])
+        (path/value path state))])
 
 (defmethod placeholder :application-id
   [_]
@@ -367,10 +361,11 @@
 (defmethod placeholder :building
   [{:keys [state path]}]
   (let [{:keys [operation building-id tag description]} (path/value (butlast path) state)]
-    [:span.formatted (s/join " - "
-                             [(path/loc :operations operation)
-                              (s/join ": " (remove nil? [tag description]))
-                              building-id])]))
+    [:span.formatted (->> [(path/loc :operations operation)
+                           (s/join ": " (remove nil? [tag description]))
+                           building-id]
+                          (remove s/blank?)
+                          (s/join " \u2013 "))]))
 
 
 

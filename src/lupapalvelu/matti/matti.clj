@@ -302,8 +302,8 @@
                  :default? (= id (get operation-verdict-templates
                                       app-operation))})))))
 
-(defn neighbors
-  "Application neighbors data in a format suitable for verdicts: list
+(defn neighbor-states
+  "Application neighbor-states data in a format suitable for verdicts: list
   of property-id, done (timestamp) maps."
   [{neighbors :neighbors}]
   (map (fn [{:keys [propertyId status]}]
@@ -573,18 +573,19 @@
 
 (defmethod enrich-verdict :r
   [{:keys [application]} {data :data :as verdict} template]
-  (let [addons {;; Buildings added only if the buildings section is in
+  (let [addons (merge
+                ;; Buildings added only if the buildings section is in
                 ;; the template AND at least one of the checkboxes has
                 ;; been selected.
-                :buildings (when-let [defaults (building-defaults template)]
-                             (merge-buildings (buildings application)
-                                              (:buildings data)
-                                              defaults))
-                }]
+                (when-let [defaults (building-defaults template)]
+                  {:buildings (merge-buildings (buildings application)
+                                               (:buildings data)
+                                               defaults)})
+                ;; Neighbors added if in the template
+                (when-not (some-> template :removed-sections :neighbors)
+                  {:neighbor-states (neighbor-states application)}))]
 
-    (if (some->> addons vals (remove nil?) seq)
-      (assoc-in verdict [:data] (merge data addons))
-      verdict)))
+    (assoc-in verdict [:data] (merge data addons))))
 
 (defn open-verdict [{:keys [application organization] :as command}]
   (let [{:keys [data published] :as verdict} (command->verdict command)
