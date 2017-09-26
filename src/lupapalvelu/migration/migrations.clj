@@ -2913,7 +2913,7 @@
                              {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
 
 (defmigration fix-empty-foreman-user
-  {:apply-when (pos? (mongo/count :users {:email ""}))}
+  {:apply-when (pos? (mongo/count :users {:email "" :id "58afe17a28e06f2484a6e82f"}))}
   (let [malformed-user-id "58afe17a28e06f2484a6e82f"]
     (mongo/remove :users malformed-user-id)
     (mongo/update-by-query :submitted-applications
