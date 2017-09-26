@@ -452,6 +452,12 @@ div.matti-autocomplete {
     font-family: Consolas, "Lucida Console", monospace;
     white-space: pre-wrap;
   }
+  > a {
+    @include styled-input( none, none, none,
+                           $text: $red-link, $hover-text: $red-hover,
+                           $active-text: $red-active, $disabled-bg: none);
+    float: right;
+  }
 }
 
 // The default input width is browser specific and the dateinput

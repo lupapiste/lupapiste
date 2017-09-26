@@ -148,12 +148,12 @@
     (util/split-kw-path path)
     path))
 
-(defn has-path?
-  "True if the path is found within the state regardless of its
-  value."
+(defn- has-path?
+  "True if the path value in the state is not nil. No existing path
+  should resolve into nil value. Note: this is not reactive, since the
+  idea is that the state 'structure' is not dynamic."
   [path state]
-  (contains? (react (butlast path) state)
-             (last path)))
+  (-> (value path state) nil? not))
 
 (defn- truthy? [v]
   (boolean (cond

@@ -280,13 +280,6 @@
                                text])))
                li-items))]]))]))
 
-;; Prettyprints the contents of the given atom.
-(rum/defc debug-atom < rum/reactive
-  [a & [title]]
-  [:div.pprint
-   [:div.title [:h4(or title "debug")]]
-   [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])
-
 ;; Dropwdown is a styled select.
 ;; Parameters: initial-value options
 ;; Options [optional]:
@@ -308,10 +301,12 @@
 
 ;; Prettyprints the contents of the given atom.
 (rum/defc debug-atom < rum/reactive
-  [a & [title]]
-  [:div.pprint
-   [:div.title [:h4(or title "debug")]]
-   [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])
+  ([atom* title]
+   [:div.pprint
+    [:div.title [:h4 title]]
+    [:a {:on-click #(console.log @atom*)} "console"]
+    [:div.code (with-out-str (cljs.pprint/pprint (rum/react atom*)))]])
+  ([atom*] (debug-atom atom* "debug")))
 
 ;; Special options (all optional):
 ;;   callback: on-blur callback

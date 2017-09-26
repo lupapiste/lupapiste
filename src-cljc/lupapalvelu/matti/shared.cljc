@@ -565,7 +565,7 @@
                         :loc-prefix :matti-verdict
                         :row        (map (fn [kw]
                                            (let [id (name kw)]
-                                             {:show?     kw
+                                             {:show?     (util/kw-path :? kw)
                                               :disabled? :automatic-verdict-dates
                                               :id        id
                                               :dict      kw}))
@@ -578,8 +578,7 @@
                          :dict       :contact-ref}
                         {:col   3
                          :show? :_meta.editing?
-                         :list  {:title "matti-verdict.giver"
-                                 :items [{:id   :giver
+                         :list  {:items [{:id   :giver
                                           :dict :giver}
                                          {:id    :contact
                                           :show? :_meta.editing?

@@ -18584,6 +18584,34 @@ div.matti-autocomplete .ac__menu ul.ac__items li.ac--grouped {
   white-space: pre-wrap;
 }
 
+.pprint > a {
+  color: #df3215;
+  background-color: none;
+  float: right;
+}
+
+.pprint > a:link, .pprint > a:visited {
+  color: #df3215;
+  background-color: none;
+}
+
+.pprint > a:hover {
+  color: #e34319;
+  background-color: none;
+  text-decoration: none;
+}
+
+.pprint > a:active, .pprint > a.active {
+  color: #e7541d;
+  background-color: none;
+}
+
+.pprint > a:disabled, .pprint > a.disabled, .pprint > a.waiting {
+  cursor: default !important;
+  color: #999999 !important;
+  background-color: none !important;
+}
+
 .dateinput.dateinput--safe {
   max-width: 90%;
 }
