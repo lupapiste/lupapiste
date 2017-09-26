@@ -107,6 +107,7 @@
 (defn- authorized-to-statement? [user statement]
   (or (:given statement)
       (user/authority? user)
+      (user/financial-authority? user)
       (and (user/applicant? user)
            (= (-> statement :person :email ss/canonize-email)
               (-> user :email ss/canonize-email)))))
