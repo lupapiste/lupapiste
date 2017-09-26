@@ -157,6 +157,7 @@
                                   :application (select-keys application [:id :organization :state])
                                   :target      {:id (:id statement) :type "statement"}
                                   :initator    (select-keys user [:id :username])
+                                  :status      "done"
                                   :action      (:action command)}
         canonical    (create-statement-request-canonical user application statement lang)
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link #(not= "verdict" (-> % :target :type)))

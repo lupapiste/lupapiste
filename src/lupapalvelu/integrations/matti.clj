@@ -1,15 +1,17 @@
 (ns lupapalvelu.integrations.matti
-  (:require [schema.core :as sc]
+  (:require [taoensso.timbre :refer [infof]]
+            [schema.core :as sc]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.schemas :as ssc]
+            [sade.schema-utils :as ssu]
             [sade.util :as util]
             [clojure.set :as set]
             [lupapalvelu.application-schema :as app-schema]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.messages :as messages]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]
-            [sade.schema-utils :as ssu]))
+            [lupapalvelu.document.schemas :as schemas]))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
 
@@ -90,7 +92,7 @@
 
 (def location-array-to-map (fn [[x y]] {:x x :y y}))
 
-(sc/defn ^:always-validate app-to-json :- ApplicationBaseData [application]
+(sc/defn ^:always-validate application-data :- ApplicationBaseData [application]
   (-> (select-keys application (keys ApplicationBaseData))
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
@@ -102,8 +104,24 @@
    :displayName (to-lang-map #(i18n/localize % state))})
 
 (sc/defn ^:always-validate state-change-data :- StateChangeMessage [application new-state]
-  (-> (app-to-json application)
+  (-> (application-data application)
       (set/rename-keys {:location-wgs84 :locationWGS84})
       (assoc :state (name new-state))
       (assoc :fromState (state-map (:state application)))
       (assoc :toState (state-map new-state))))
+
+(defn persist-state-change [command new-state]
+  (when-let [outgoing-data (state-change-data (:application command) new-state)]
+    (let [message-id (messages/create-id)
+          app (:application command)
+          msg {:id message-id :direction "out"
+               :status "published" :messageType "state-change"
+               :partner "matti" :format "json"
+               :created (or (:created command) (now))
+               :application (-> (select-keys app [:id :organization])
+                                (assoc :state (name new-state)))
+               :initator (select-keys (:user command) [:id :username])
+               :action (:action command)
+               :data outgoing-data}]
+      (messages/save msg)
+      (infof "MATTI state-change payload written, messageId: %s" message-id))))

@@ -13,6 +13,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.matti :as matti]
             [lupapalvelu.logging :as log]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -273,6 +274,8 @@
     (with-application command
       (fn [{:keys [id]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+          (when-let [new-state (get-in changes [$set :state])]
+            (util/future* (matti/persist-state-change command new-state)))
           (if return-count? n nil))))))
 
 (defn application->command

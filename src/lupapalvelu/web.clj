@@ -727,6 +727,11 @@
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
+  (defpage "/dev/integration-messages/:id" {:keys [id]}
+    (if-let [r (mongo/select :integration-messages {:application.id id})]
+      (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"}))))
+
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors-api/->public r)}))

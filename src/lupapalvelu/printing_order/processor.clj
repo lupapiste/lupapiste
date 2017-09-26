@@ -60,6 +60,7 @@
                   :messageType "printing-order"
                   :partner "mylly"
                   :format "xml"
+                  :status "done"
                   :created created-ts
                   :external-reference order-number
                   :initator (select-keys user [:id :username])
