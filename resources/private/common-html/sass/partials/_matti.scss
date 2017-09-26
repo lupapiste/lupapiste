@@ -178,6 +178,7 @@ $section-border: 1px solid $gray51;
 
 span.formatted {
   white-space: pre-wrap;
+  display: inline-block;
   &.warning {
     color: $negative;
   }

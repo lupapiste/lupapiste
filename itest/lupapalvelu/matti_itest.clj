@@ -47,7 +47,13 @@
                :category "r")
         => (contains {:settings {:draft    {:verdict-code ["ehdollinen" "ei-puollettu"
                                                            "evatty" "hyvaksytty"]}
-                                 :modified modified}})))))
+                                 :modified modified}})))
+    (fact "Select three foremen"
+      (command sipoo :save-verdict-template-settings-value
+               :category :r
+               :path [:foremen]
+               :value [:vastaava-tj :iv-tj :erityis-tj])
+      => ok?)))
 
 (fact "Sipoo categories"
   (:categories (query sipoo :verdict-template-categories))
@@ -104,6 +110,12 @@
                        :template-id id
                        :path [:anto :delta]
                        :value 2)=> ok?)
+            (fact "vv-tj is not supported by settings"
+              (command sipoo :save-verdict-template-draft-value
+                       :template-id id
+                       :path [:foremen]
+                       :value [:vv-tj])
+              => (err :error.invalid-value))
             (fact "Set foremen removed"
               (command sipoo :save-verdict-template-draft-value
                        :template-id id
@@ -350,7 +362,12 @@
                    :review-id "notfoun"
                    :type :aloituskokous
                    :fi "Hei")
-          => (err :error.settings-item-not-found))))))
+          => (err :error.settings-item-not-found))
+        (fact "Select review"
+          (command sipoo :save-verdict-template-settings-value
+                   :category "r"
+                   :path [:reviews]
+                   :value [id]) => ok?)))))
 
 (facts "Plans"
   (fact "Initially empty"
@@ -413,7 +430,7 @@
                    :plan-id id
                    :deleted true)
           => (contains {:plan (contains {:id id
-                                           :deleted true})}))
+                                         :deleted true})}))
         (fact "Deleted plan cannot be re-deleted"
           (command sipoo :update-verdict-template-plan
                    :plan-id id
@@ -436,7 +453,12 @@
           (command sipoo :update-verdict-template-plan
                    :plan-id "notfound"
                    :fi "Hei")
-          => (err :error.settings-item-not-found))))))
+          => (err :error.settings-item-not-found))
+        (fact "Select plan"
+          (command sipoo :save-verdict-template-settings-value
+                   :category "r"
+                   :path [:plans]
+                   :value [id]) => ok?)))))
 
 (facts "Operation default verdict template"
   (fact "No defaults yet"
@@ -523,3 +545,52 @@
                   (just {:id #"\w+"
                          :default? false
                          :name "Uusi nimi"})] :in-any-order)))))
+
+(facts "Verdicts"
+  (let [{template-id :id} (command sipoo :new-verdict-template :category "r")
+        plan (-> (query sipoo :verdict-template-plans :category "r")
+                 :plans first)
+        review (-> (query sipoo :verdict-template-reviews :category "r")
+                   :reviews first)]
+    (fact "Plan" plan =not=> nil)
+    (fact "Review" review =not=> nil)
+    (letfn [(set-draft-value [path value]
+              (fact {:midje/description (format "Draft value: %s %s"
+                                                path value)}
+                (command sipoo :save-verdict-template-draft-value
+                         :template-id template-id
+                         :path (flatten [path])
+                         :value value) => ok?))
+            (set-date-delta [k v]
+              (set-draft-value [k :enabled] true)
+              (set-draft-value [k :delta] v))]
+      (fact "Full template"
+        (command sipoo :set-verdict-template-name
+                 :template-id template-id
+                 :name "Full template") => ok?)
+      (facts "Enable and set all deltas"
+        (set-date-delta "julkipano" 1)
+        (set-date-delta "anto" 2)
+        (set-date-delta "valitus" 3)
+        (set-date-delta "lainvoimainen" 4)
+        (set-date-delta "aloitettava" 1) ;; years
+        (set-date-delta "voimassa" 2) ;; years
+        )
+      (set-draft-value "giver" :lautakunta)
+      (set-draft-value "verdict-code" :ehdollinen)
+      (set-draft-value "paatosteksti" "Verdict text.")
+      (set-draft-value :foremen [:iv-tj :erityis-tj])
+      (set-draft-value "plans" (:id plan))
+      (set-draft-value "reviews" (:id review))
+      (set-draft-value "conditions" "Other conditions.")
+      (set-draft-value "appeal" "Humble appeal.")
+      (set-draft-value "complexity" "medium")
+      (set-draft-value "complexity-text" "Complex explanation.")
+      (set-draft-value "autopaikat" true)
+      (set-draft-value "paloluokka" true)
+      (set-draft-value "vss-luokka" true)
+      (fact "Publish Full template"
+        (command sipoo :publish-verdict-template
+                 :template-id template-id)
+        => ok?)
+      )))

@@ -157,9 +157,7 @@
                                                                        [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)
                                                      :dictionary dictionary
-                                                     :references state/references)))))
-     (components/debug-atom state/current-verdict "state/current-verdict")
-     (components/debug-atom state/references "state/references")]))
+                                                     :references state/references)))))]))
 
 (defn mount-component []
   (when (common/feature? :matti)

@@ -25,7 +25,8 @@
                               {:info  {:modified (:modified settings)
                                        :category category}
                                :_meta {:updated  settings-updater
-                                       :editing? true}})))
+                                       :editing? true
+                                       :enabled? (state/auth? :save-verdict-template-settings-value)}})))
   (service/generics :review
                     category
                     (fn [{reviews :reviews}]

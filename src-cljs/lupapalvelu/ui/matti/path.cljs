@@ -90,7 +90,7 @@
   ([{:keys [id-path _meta]} key deref-fn]
    (loop [path id-path]
      (let [v (deref-fn (rum/cursor-in _meta [(util/kw-path path key)]))]
-       (if (or v (empty? path))
+       (if (or (not (nil? v)) (empty? path))
          v
          (recur (butlast path))))))
   ([options key]
@@ -111,8 +111,7 @@
   "Flips (toggles boolean) on the id-path _meta."
   [{:keys [_meta id-path]} key]
   (let [kw (util/kw-path id-path key)]
-    (swap! _meta (fn [m]
-                   (assoc m kw (not (kw m)))))))
+    (swap! (rum/cursor-in _meta [kw]) not)))
 
 (defn css
   "List of CSS classes based on current :css value and status

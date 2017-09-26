@@ -18296,6 +18296,7 @@ input:disabled + .matti-radio-label:hover.matti-radio-label:before {
 
 span.formatted {
   white-space: pre-wrap;
+  display: inline-block;
 }
 
 span.formatted.warning {
