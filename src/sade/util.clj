@@ -282,6 +282,38 @@
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
+(defmacro pcond->
+  "Takes an expression and a set of pred/form pairs. Threads expr (via ->)
+  through each form for which the corresponding pred returns truthy value
+  for threaded expr. Otherwise form is skipped and expr is passed to next
+  form. Note: like cond-> but static test is replaced by pred"
+  [expr & clauses]
+  (assert (even? (count clauses)))
+  (let [g (gensym)
+        steps (map (fn [[pred step]] `(if (~pred ~g) (-> ~g ~step) ~g))
+                   (partition 2 clauses))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (butlast steps))]
+       ~(if (empty? steps)
+          g
+          (last steps)))))
+
+(defmacro pcond->>
+  "Takes an expression and a set of pred/form pairs. Threads expr (via ->>)
+  through each form for which the corresponding pred returns truthy value
+  for threaded expr. Otherwise form is skipped and expr is passed to next
+  form.  Note: like cond-> but static test is replaced by pred"
+  [expr & clauses]
+  (assert (even? (count clauses)))
+  (let [g (gensym)
+        steps (map (fn [[pred step]] `(if (~pred ~g) (->> ~g ~step) ~g))
+                   (partition 2 clauses))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (butlast steps))]
+       ~(if (empty? steps)
+          g
+          (last steps)))))
+
 ;; https://gist.github.com/rplevy/3021378
 
 (defmacro with

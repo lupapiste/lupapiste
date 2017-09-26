@@ -7,7 +7,9 @@
             [lupapalvelu.rest.rest-api :refer [defendpoint-for]]
             [lupapalvelu.rest.schemas :refer [ApiResponse]]
             [lupapalvelu.user :as usr]
-            [sade.core :refer [fail]]))
+            [sade.core :refer [fail]]
+            [clojure.string :as str]
+            [lupapalvelu.permit :as permit]))
 
 (sc/defschema OrganizationDocstoreInfo
   (assoc org/DocStoreInfo
@@ -25,7 +27,7 @@
 (defn- municipality-name [municipality-code]
   (i18n/supported-langs-map #(i18n/localize % (str "municipality." municipality-code))))
 
-(defn- municipality-info [{:keys [municipality permitType]}]
+(defn municipality-info [{:keys [municipality permitType]}]
   {:id         municipality
    :name       (municipality-name municipality)})
 
@@ -66,10 +68,13 @@
     (resp/status 404 (resp/json (fail :error.missing-organization)))))
 
 (defendpoint-for usr/docstore-user? "/rest/docstore/organizations" false
-  {:summary     ""
-   :description ""
-   :parameters  []
-   :optional-parameters [:status OrganizationStatusFilter]
-   :returns     OrganizationsResponse}
-  {:ok true :data (get-docstore-infos (get status-query status {}))})
+  {:summary             ""
+   :description         ""
+   :parameters          []
+   :optional-parameters [:status OrganizationStatusFilter
+                         :permit-type (apply sc/enum (keys (permit/permit-types)))]
+   :returns             OrganizationsResponse}
+  (let [query (cond-> (get status-query status {})
+                      (not (str/blank? permit-type)) (assoc :scope.permitType permit-type))]
+    {:ok true :data (get-docstore-infos query)}))
 

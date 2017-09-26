@@ -40,6 +40,11 @@
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
+(defn get-sorted-operation-documents [{docs :documents primary-op :primaryOperation secondary-ops :secondaryOperations}]
+  (let [operations (cons primary-op (sort-by :created secondary-ops))]
+    (->> (filter (comp (set (map :id operations)) :id :op :schema-info) docs)
+         (sort-by (util/fn-> :schema-info :op :id (util/position-by-id operations))))))
+
 (defn resolve-valid-subtypes
   "Returns a set of valid permit and operation subtypes for the application."
   [{permit-type :permitType op :primaryOperation}]

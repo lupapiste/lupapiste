@@ -3413,7 +3413,19 @@
                                  :created modified)
                           task-id))))
 
+(defmigration add-earliest-allowed-archiving-date-to-orgs
+  {:apply-when (pos? (mongo/count :organizations {:earliest-allowed-archiving-date {$exists false}}))}
+  (mongo/update :organizations
+                {:earliest-allowed-archiving-date {$exists false}}
+                {$set {:earliest-allowed-archiving-date 0}}
+                :multi true))
 
+(defmigration add-default-for-multiple-operations-supported-to-orgs
+  {:apply-when (pos? (mongo/count :organizations {:multiple-operations-supported {$exists false}}))}
+  (mongo/update :organizations
+                {:multiple-operations-supported {$exists false}}
+                {$set {:multiple-operations-supported true}}
+                :multi true))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

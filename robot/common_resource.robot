@@ -468,7 +468,7 @@ Jussi logs in
   Authority logs in  jussi  jussi  Jussi Viranomainen  ${showAll}
 
 Financial logs in
-  User logs in  financial  admin  Rahoituskäsittelijä
+  User logs in  financial  admin  ARA-käsittelijä
 
 
 #

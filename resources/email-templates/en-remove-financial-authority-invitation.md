@@ -1,12 +1,11 @@
-# Hei {{user.firstName}},
+# Hi {{user.firstName}},
 
-Ilmoitus ARA-hankkeesta Lupapisteessä on peruttu. Hanke on {{operation}} osoitteessa {{address}}, {{municipality}}.
+The announcement of an ARA project in Lupapiste has been cancelled. The project concerns {{operation}} at address {{address}}, {{municipality}}.
 
-Jos haluat lisätietoja asiasta, ole hyvä ja ota yhteyttä hanketta käsittelevän kunnan viranomaiseen. Hankkeen asiointitunnus Lupapisteessä on {{operation}}.
+In case you need additional information, please contact the authorities in the municipality handling the matter. Project’s identification number in Lupapiste is {{operation}}.
 
-Lupapisteessä voidaan hoitaa lupa-asiointia yhdessä muiden hankkeen osapuolten kanssa. Vuorokauden ympäri. Onko sinulla kysyttävää palvelun käytöstä? 
-Suosittelemme tutustumaan Lupapisteen ohjesivustoon sekä usein kysyttyihin kysymyksiin.
+In Lupapiste, you can handle your building permits in co-operation with other parties. Around the clock. Do you have questions about the service? We recommend that you read Lupapiste’s instructions and the frequently asked questions.
 
-Terveisin,
+Best regards,
 
 {{lupapiste.link}}

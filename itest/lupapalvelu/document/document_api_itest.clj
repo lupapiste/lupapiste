@@ -102,7 +102,7 @@
         ok-result        (command pena :create-doc :id application-id :schemaName "hakija-r")
         doc-id           (:doc ok-result)
         no-schema-result        (command pena :create-doc :id application-id :schemaName "foo")
-        repeating-schema-result (command pena :create-doc :id application-id :schemaName "maksaja")
+        repeating-schema-result (command pena :create-doc :id application-id :schemaName "hakija-r")
         non-repeating-result    (command pena :create-doc :id application-id :schemaName "paasuunnittelija")
         application1     (query-application pena application-id)]
     (fact ok-result => ok?)
@@ -159,7 +159,7 @@
   (let [application-id        (create-app-id pena)
         party-document-names  (:partyDocumentNames (query pena :party-document-names :id application-id))]
     (fact "pre-verdict"
-      party-document-names => ["hakija-r" "hakijan-asiamies" "maksaja" "suunnittelija"])
+      party-document-names => ["hakija-r" "hakijan-asiamies" "suunnittelija"])
 
     (command pena :submit-application :id application-id) => ok?
     (give-verdict sonja application-id) => ok?

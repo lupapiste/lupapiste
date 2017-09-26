@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters vector-parameters-with-at-least-n-non-blank-items boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys string-parameters partial-localization-parameters localization-parameters supported-localization-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.stamps :as stamps]
@@ -479,9 +479,26 @@
                   (when-not (org/some-organization-has-archive-enabled? [(usr/authority-admins-organization-id user)])
                     unauthorized))]}
   [{user :user}]
-  (when (pos? date)
-    (org/update-organization (usr/authority-admins-organization-id user) {$set {:permanent-archive-in-use-since date}})
-    (ok)))
+  (let [org-id (usr/authority-admins-organization-id user)
+        {:keys [earliest-allowed-archiving-date]} (org/get-organization org-id)]
+    (if (>= date earliest-allowed-archiving-date)
+      (do (org/update-organization org-id {$set {:permanent-archive-in-use-since date}})
+          (ok))
+      (fail :error.invalid-date))))
+
+(defcommand set-organization-earliest-allowed-archiving-date
+  {:parameters [organizationId date]
+   :user-roles #{:admin}
+   :input-validators  [(partial number-parameters [:date])]}
+  [_]
+  (when-let [{:keys [permanent-archive-in-use-since]} (org/get-organization organizationId)]
+    (when-not (neg? date)
+      (org/update-organization organizationId
+                               {$set (cond-> {:earliest-allowed-archiving-date date}
+
+                                             (and permanent-archive-in-use-since (< permanent-archive-in-use-since date))
+                                             (assoc :permanent-archive-in-use-since date))})
+      (ok))))
 
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 
@@ -831,7 +848,7 @@
    :parameters [name]
    :optional-parameters [roleId]
    :pre-checks [validate-handler-role-in-organization]
-   :input-validators [(partial localization-parameters [:name])]
+   :input-validators [(partial supported-localization-parameters [:name])]
    :user-roles #{:authorityAdmin}}
   [{user :user user-orgs :user-organizations}]
   (let [handler-role (org/create-handler-role roleId name)]

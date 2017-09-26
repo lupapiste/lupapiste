@@ -703,7 +703,7 @@
     :enabled true
     :role "financialAuthority"
     :language "fi"
-    :firstName "Rahoitusk\u00e4sittelij\u00e4"
+    :firstName "ARA-k\u00e4sittelij\u00e4"
     :lastName ""
     :phone ""
     :username "financial"
@@ -750,7 +750,8 @@
                                       :kopiolaitos-orderer-phone nil
                                       :calendars-enabled false
                                       :use-attachment-links-integration false
-                                      :inspection-summaries-enabled false})
+                                      :inspection-summaries-enabled false
+                                      :docstore-info org/default-docstore-info})
 
 (defn- names [names-map]
   (i18n/with-default-localization names-map (:fi names-map)))
@@ -789,6 +790,7 @@
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true}
 
@@ -865,6 +867,7 @@
                        :permanent-archive-enabled false
                        :digitizer-tools-enabled false
                        :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
                        :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
                        :assignments-enabled true
                        :areas {:type "FeatureCollection"
@@ -926,7 +929,9 @@
                                         [{:type :organization}]]}]
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
-                       :docstore-info org/default-docstore-info}
+                       :docstore-info (assoc org/default-docstore-info
+                                        :docStoreInUse true
+                                        :documentPrice 314)}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
@@ -1271,6 +1276,7 @@
                        :permanent-archive-enabled true
                        :digitizer-tools-enabled true
                        :permanent-archive-in-use-since 1451613600000
+                       :earliest-allowed-archiving-date 0
                        :use-attachment-links-integration true
                        :operations-tos-functions {:masto-tms "10 03 00 01"}
                        :automatic-ok-for-attachments-enabled true

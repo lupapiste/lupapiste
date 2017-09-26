@@ -151,7 +151,7 @@
      :opened 1397487653750
      :created 1397487653097
      :propertyId "75312312341234"
-     :modified timestamp-the-beginning-of-time
+     :modified (util/get-timestamp-ago :month 2)
      :permitType "R"
      :id "LP-753-2014-12345"
      :municipality "753"}))

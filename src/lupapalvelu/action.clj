@@ -217,11 +217,12 @@
                             (partial sc/check schema)
                             "error.illegal-value:schema-validation"))
 
-(defn- localization? [partial? maybe-localization]
+(defn- localization? [mode maybe-localization]
   (and (map? maybe-localization)
-       (if partial?
-         (every? i18n/languages (keys maybe-localization))
-         (= i18n/languages (set (keys maybe-localization))))
+       (case mode
+         :partial    (every? i18n/languages (keys maybe-localization))
+         :all        (= i18n/languages (set (keys maybe-localization)))
+         :supported  (every? (set (keys maybe-localization)) i18n/languages))
        (every? string? (vals maybe-localization))))
 
 (defn partial-localization-parameters
@@ -230,7 +231,7 @@
   not require that all supported languages are included."
   [params command]
   (filter-params-of-command params command
-                            (complement (partial localization? true))
+                            (complement (partial localization? :partial))
                             "error.illegal-localization-value"))
 
 (defn localization-parameters
@@ -239,7 +240,16 @@
   supported languages must be included."
   [params command]
   (filter-params-of-command params command
-                            (complement (partial localization? false))
+                            (complement (partial localization? :all))
+                            "error.illegal-localization-value"))
+
+(defn supported-localization-parameters
+  "Validates that the given parameters are maps with supported
+  language keywords (such as :fi) as keys and strings as values. All
+  supported languages must be included, but can have extra languages."
+  [params command]
+  (filter-params-of-command params command
+                            (complement (partial localization? :supported))
                             "error.illegal-localization-value"))
 
 (defn update-application
@@ -364,8 +374,9 @@
     (when (seq validators)
       (reduce #(or %1 (%2 command)) nil validators))))
 
-(defn invalid-state-in-application [command {state :state}]
-  (when-let [valid-states (:states (meta-data command))]
+(defn invalid-state-in-application [{{role :role} :user :as command} {state :state}]
+  (when-let [valid-states (util/pcond-> (:states (meta-data command))
+                                        map? (get (keyword role)))]
     (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
@@ -457,6 +468,12 @@
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
 
+(defn- update-user-application-role [{org-authz :orgAuthz role :role :as user} {app-org :organization :as application}]
+  (assoc user :role (cond
+                      (nil? app-org) role
+                      (contains? org-authz (keyword app-org)) role
+                      :else "applicant")))
+
 (defn response? [r]
   (and (map? r) (:status r)))
 
@@ -491,12 +508,13 @@
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
             company (when-let [company-id (get-in command [:user :company :id])]
                       (delay (mongo/by-id :companies company-id)))
-            command (merge {:application application
-                            :organization organization
-                            :user-organizations user-organizations
-                            :company company
-                            :application-assignments assignments}
-                           command)]
+            command (-> {:application application
+                         :organization organization
+                         :user-organizations user-organizations
+                         :company company
+                         :application-assignments assignments}
+                        (merge command)
+                        (update :user update-user-application-role application))]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -578,7 +596,9 @@
    ; Input validators take one parameter, the command. Application is not yet available.
    (sc/optional-key :input-validators)  [(sc/cond-pre util/Fn sc/Symbol)]
    ; Application state keywords
-   (sc/optional-key :states)      (subset-of states/all-states)
+   (sc/optional-key :states)      (sc/if map?
+                                    {(apply sc/enum roles/all-user-roles) (subset-of states/all-states)}
+                                    (subset-of states/all-states))
    (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-success)  (sc/cond-pre util/Fn [util/Fn])
    (sc/optional-key :on-fail)     (sc/cond-pre util/Fn [util/Fn])
@@ -614,6 +634,9 @@
       (or (seq (:states meta-data)) (seq (:pre-checks meta-data)))
       true)
     (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
+
+  (assert (or  (nil? (:states meta-data)) (set? (:states meta-data)) (-> meta-data :states keys set (= (:user-roles meta-data))))
+    (str "Keys of :states should match :user-roles for " action-name " when :states is defined as a map."))
 
   (assert (or (seq (:input-validators meta-data))
               (empty? (:parameters meta-data))

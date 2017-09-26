@@ -40,6 +40,8 @@
 
 (defn- older-than [timestamp] {$lt timestamp})
 
+(defn- newer-than [timestamp] {$gt timestamp})
+
 (defn- get-app-owner [application]
   (let [owner (auth/get-auths-by-role application :owner)]
     (user/get-user-by-id (-> owner first :id))))
@@ -261,15 +263,15 @@
 
 
 
-;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
+;; "Hakemus: Hakemuksen tila on luonnos tai valmisteilla, mutta edellisesta paivityksesta on aikaa yli kuukausi ja alle puoli vuotta. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
-  (let [timestamp-1-month-ago (util/get-timestamp-ago :month 1)
-        apps (mongo/select :applications
-                           {:state {$in ["open" "submitted"]}
-                            :modified (older-than timestamp-1-month-ago)
+  (let [apps (mongo/select :applications
+                           {:state {$in ["draft" "open"]}
+                            $and [{:modified (older-than (util/get-timestamp-ago :month 1))}
+                                  {:modified (newer-than (util/get-timestamp-ago :month 6))}]
                             $or [{:reminder-sent {$exists false}}
                                  {:reminder-sent nil}
-                                 {:reminder-sent (older-than timestamp-1-month-ago)}]}
+                                 {:reminder-sent (older-than (util/get-timestamp-ago :month 1))}]}
                            [:auth :state :modified :title :address :municipality :infoRequest :primaryOperation])]
     (doseq [app apps]
       (logging/with-logging-context {:applicationId (:id app)}

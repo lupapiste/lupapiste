@@ -2,7 +2,7 @@
   (:require [lupapalvelu.ui.printing-order.state :as state]
             [lupapalvelu.ui.common :refer [loc]]
             [rum.core :as rum]
-            [lupapalvelu.ui.rum-util :as rum-util]))
+            [lupapalvelu.ui.util :as util]))
 
 (defn vat [total-vat-included]
   (-> total-vat-included
@@ -26,10 +26,11 @@
 
 (defn footer-price-for-order-amount [amount]
   (let [{:keys [total additionalInformation]} (price-for-order-amount amount)]
-    (str (loc :printing-order.footer.price) " "
-      (cond
-        total                 (str total " € " (loc :printing-order.footer.includes-vat))
-        additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc)))))))
+    (cond
+      total                 (str (loc :printing-order.footer.price) " "
+                                 (util/format-currency-value total) " "
+                                 (loc :printing-order.footer.includes-vat))
+      additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc))))))
 
 (rum/defc order-summary-pricing < rum/reactive []
   (let [order-rows (rum/react (rum/cursor-in state/component-state [:order]))
@@ -38,18 +39,24 @@
     [:div.order-summary-pricing-block
      [:table
       [:thead
-       [:tr
-        [:td.first
-         [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
-        [:td.second
-         [:span.h3 (loc :printing-order.summary.total-price)]]
-        [:td.third
-         [:span.h3 (cond
-                     total-price (str total-price " €")
-                     additionalInformation (get additionalInformation (keyword (.getCurrentLanguage js/loc))))]]]
-       [:tr
-        [:td.first]
-        [:td.second
-         [:span (loc :printing-order.summary.includes-vat)]]
-        [:td.third
-         [:span (str vat " €")]]]]]]))
+       (when total-price
+         [:tr
+          [:td.first
+           [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
+          [:td.second
+           [:span.h3 (loc :printing-order.summary.total-price)]]
+          [:td.third
+           [:span.h3 (util/format-currency-value total-price)]]])
+       (when additionalInformation
+         [:tr
+          [:td.half
+           [:span.h3 (loc :printing-order.summary.total-amount (str total-amount))]]
+          [:td
+           [:span.h3 (get additionalInformation (keyword (.getCurrentLanguage js/loc)))]]])
+       (when vat
+         [:tr
+          [:td.first]
+          [:td.second
+           [:span (loc :printing-order.summary.includes-vat)]]
+          [:td.third
+           [:span (util/format-currency-value vat)]]])]]]))

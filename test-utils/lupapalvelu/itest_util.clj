@@ -32,7 +32,8 @@
             [lupapalvelu.server]
             [ring.util.codec :as codec])
   (:import org.apache.http.client.CookieStore
-           org.apache.http.cookie.Cookie))
+           org.apache.http.cookie.Cookie
+           java.io.FileNotFoundException))
 
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
 (defn find-user-from-minimal-by-apikey [apikey] (u/with-org-auth (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users)))
@@ -889,14 +890,18 @@
 ;; File actions
 
 
-(defn get-local-filename [directory file-prefix]
-  (if-let [filename (some->> (file-seq (io/file directory))
-                             (filter #(and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml")))
-                             (sort-by #(.getName %))
-                             last
-                             (.getName))]
-    (str directory filename)
-    (throw (AssertionError. (str "File not found: " directory file-prefix ".xml")))))
+(defn get-local-filename [directory file-prefix-or-pred]
+  (let [pred (if (fn? file-prefix-or-pred)
+               file-prefix-or-pred
+               #(and (.startsWith (.getName %) file-prefix-or-pred)
+                     (.endsWith (.getName %) ".xml")))]
+    (if-let [filename (some->> (file-seq (io/file directory))
+                               (filter pred)
+                               (sort-by #(.getName %))
+                               last
+                               (.getName))]
+      (str directory filename)
+      (throw (AssertionError. (str "File not found: " directory file-prefix-or-pred ".xml"))))))
 
 (def dev-password "Lupapiste")
 
@@ -905,22 +910,27 @@
     (timbre/info "sftp" (str user "@" server ":" file-to-get) target-file-name)
     (ssh-cli/sftp server :get file-to-get target-file-name :username user :password dev-password :strict-host-key-checking :no)
     target-file-name)
-  ([user server file-prefix target-file-name path-to-file]
+  ([user server file-prefix-or-some-pred target-file-name path-to-file]
     (try
-      (let [agent (ssh/ssh-agent {})
-           session (ssh/session agent server {:username user :password dev-password :strict-host-key-checking :no})]
+      (let [some-pred (if (fn? file-prefix-or-some-pred)
+                        file-prefix-or-some-pred
+                        #(when (and (.startsWith (.getFilename %) file-prefix-or-some-pred) (.endsWith (.getFilename %) ".xml"))
+                           (.getFilename %)))
+            agent (ssh/ssh-agent {})
+            session (ssh/session agent server {:username user :password dev-password :strict-host-key-checking :no})]
        (ssh/with-connection session
          (let [channel (ssh/ssh-sftp session)]
            (ssh/with-channel-connection channel
              (timbre/info "sftp: ls" path-to-file)
-             (let [filename (some #(when (and (.startsWith (.getFilename %) file-prefix) (.endsWith (.getFilename %) ".xml"))
-                                     (.getFilename %))
+             (let [filename (some some-pred
                               (sort-by #(.getMTime (.getAttrs %)) > (ssh/sftp channel {} :ls path-to-file)))
                    file-to-get (str path-to-file filename)]
-               (timbre/info "sftp: get" file-to-get)
-               (ssh/sftp channel {} :get file-to-get target-file-name)
-               (timbre/info "sftp: done.")
-               target-file-name)))))
+               (if filename
+                 (do (timbre/info "sftp: get" file-to-get)
+                     (ssh/sftp channel {} :get file-to-get target-file-name)
+                     (timbre/info "sftp: done.")
+                     target-file-name)
+                 (throw (FileNotFoundException. (str "file not found from sftp, pred:" file-prefix-or-some-pred)))))))))
       (catch com.jcraft.jsch.JSchException e
         (error e (str "SSH connection " user "@" server))))))
 

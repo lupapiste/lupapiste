@@ -1,14 +1,13 @@
-# Hei {{user.firstName}},
+# Hi {{user.firstName}},
 
-Lupapisteessä on ilmoitettu uudesta ARA-hankkeesta. Hanke on {{operation}} osoitteessa {{address}}, {{municipality}}.
+A new ARA project has been announced in Lupapiste. The project concerns {{operation}} at address {{address}}, {{municipality}}.
 
-Nähdäksesi hankkeen tiedot klikkaa alla olevaa linkkiä ja kirjaudu tarvittaessa sisään sähköpostiosoitteella {{user.email}}. Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+To be able to see information on the project, click on the link below and log in to the service using e-mail address xxx. If the link does not work, copy the address and paste it into the address field of your browser.
 
 {{link}}
- 
-Lupapisteessä voidaan hoitaa lupa-asiointia yhdessä muiden hankkeen osapuolten kanssa. Vuorokauden ympäri. Onko sinulla kysyttävää palvelun käytöstä? Suosittelemme tutustumaan Lupapisteen ohjesivustoon sekä usein kysyttyihin kysymyksiin.
 
+In Lupapiste, you can handle your building permits in co-operation with other parties. Around the clock. Do you have questions about the service? We recommend that you read Lupapiste’s instructions and the frequently asked questions.
 
-Terveisin,
+Best regards,
 
 {{lupapiste.link}}
