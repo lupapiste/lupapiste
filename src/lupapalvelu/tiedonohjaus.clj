@@ -77,21 +77,32 @@
         (t/plus (t/years years))
         (.toDate))))
 
-(defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts]
-  (when (and (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi)) (seq verdicts))
-    (paatospvm-plus-years verdicts pituus)))
+(defn- submitted-plus-years [submitted years]
+  (-> (c/from-long (long submitted))
+      (t/plus (t/years years))
+      (.toDate)))
+
+(defn foreman-app? [primaryOperation] (= :tyonjohtajan-nimeaminen-v2 (-> primaryOperation :name keyword)))
+
+(defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts primaryOperation submitted]
+  (if (and (foreman-app? primaryOperation) (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi)))
+      (submitted-plus-years submitted pituus)
+    (when (and (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi)) (seq verdicts))
+      (paatospvm-plus-years verdicts pituus))))
 
 (defn- security-end-date [{:keys [salassapitoaika julkisuusluokka]} verdicts]
   (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika (seq verdicts))
     (paatospvm-plus-years verdicts salassapitoaika)))
 
-(defn update-end-dates [metadata verdicts]
-  (let [retention-end (retention-end-date metadata verdicts)
+(defn update-end-dates
+  ([metadata verdicts] (update-end-dates metadata verdicts nil nil))
+  ([metadata verdicts primaryOperation submitted]
+  (let [retention-end (retention-end-date metadata verdicts primaryOperation submitted)
         security-end (security-end-date metadata verdicts)]
     (cond-> (-> (util/dissoc-in metadata [:sailytysaika :retention-period-end])
                 (dissoc :security-period-end))
             retention-end (assoc-in [:sailytysaika :retention-period-end] retention-end)
-            security-end (assoc :security-period-end security-end))))
+            security-end (assoc :security-period-end security-end)))))
 
 (defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function application & [type]]
   (if (#{:arkistoidaan :arkistoitu :ei-arkistoida-virheellinen} (keyword (:tila metadata)))
