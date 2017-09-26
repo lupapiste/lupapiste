@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rakval:Rakennusvalvonta
-  xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yhteiset
-                      http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.7/yhteiset.xsd
-                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
-                      http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.2/rakennusvalvonta.xsd
+  xsi:schemaLocation="http://www.kuntatietopalvelu.fi/gml/yhteiset
+                      http://www.kuntatietopalvelu.fi/gml/yhteiset/2.1.7/yhteiset.xsd
+                      http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta
+                      http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta/2.2.2/rakennusvalvonta.xsd
                       http://www.opengis.net/wfs
                       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
-  xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:ogc="http://www.opengis.net/ogc"
+  xmlns:yht="http://www.kuntatietopalvelu.fi/gml/yhteiset" xmlns:ogc="http://www.opengis.net/ogc"
   xmlns:wfs="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:rakval="http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+  xmlns:rakval="http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"
   xmlns:ows="http://www.opengis.net/ows" xmlns:gml="http://www.opengis.net/gml"
   xmlns:xlink="http://www.w3.org/1999/xlink">
   <rakval:toimituksenTiedot>
@@ -195,6 +195,12 @@
               <yht:Katselmus>
                 <yht:katselmuksenLaji>muu tarkastus</yht:katselmuksenLaji>
                 <yht:tarkastuksenTaiKatselmuksenNimi>Käyttöönottotarkastus</yht:tarkastuksenTaiKatselmuksenNimi>
+                <yht:muuTunnustieto>
+                  <yht:MuuTunnus>
+                    <yht:tunnus>999</yht:tunnus>
+                    <yht:sovellus>RakApp</yht:sovellus>
+                  </yht:MuuTunnus>
+                </yht:muuTunnustieto>
               </yht:Katselmus>
             </yht:vaaditutKatselmukset>
             <yht:maaraystieto>
@@ -214,17 +220,19 @@
             <yht:vaadittuErityissuunnitelmatieto>
               <yht:VaadittuErityissuunnitelma>
                 <yht:vaadittuErityissuunnitelma>ES 1</yht:vaadittuErityissuunnitelma>
+                <yht:toteutumisPvm>2017-07-01</yht:toteutumisPvm>
               </yht:VaadittuErityissuunnitelma>
             </yht:vaadittuErityissuunnitelmatieto>
             <yht:vaadittuErityissuunnitelmatieto>
               <yht:VaadittuErityissuunnitelma>
                 <yht:vaadittuErityissuunnitelma>ES 22</yht:vaadittuErityissuunnitelma>
+                <yht:toteutumisPvm>2017-07-02</yht:toteutumisPvm>
               </yht:VaadittuErityissuunnitelma>
             </yht:vaadittuErityissuunnitelmatieto>
             <yht:vaadittuErityissuunnitelmatieto>
               <yht:VaadittuErityissuunnitelma>
                 <yht:vaadittuErityissuunnitelma>ES 333</yht:vaadittuErityissuunnitelma>
-                <yht:toteutumisHetki>2017-07-07T12:34:56</yht:toteutumisHetki>
+                <yht:toteutumisPvm>2017-07-03</yht:toteutumisPvm>
               </yht:VaadittuErityissuunnitelma>
             </yht:vaadittuErityissuunnitelmatieto>
             <yht:vaadittuTyonjohtajatieto>
@@ -309,6 +317,12 @@ Lyökämme käsi kätehen, sormet sormien lomahan, lauloaksemme hyviä, parahia 
               <yht:Katselmus>
                 <yht:katselmuksenLaji>loppukatselmus</yht:katselmuksenLaji>
                 <yht:tarkastuksenTaiKatselmuksenNimi>Asunnon loppukatselmus</yht:tarkastuksenTaiKatselmuksenNimi>
+                <yht:muuTunnustieto>
+                  <yht:MuuTunnus>
+                    <yht:tunnus>123</yht:tunnus>
+                    <yht:sovellus>PiliPali</yht:sovellus>
+                  </yht:MuuTunnus>
+                </yht:muuTunnustieto>
               </yht:Katselmus>
             </yht:vaaditutKatselmukset>
             <yht:maaraystieto>

@@ -7,6 +7,7 @@
             [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state]]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url]]
             [lupapalvelu.xml.krysp.review-reader :as review-reader]
+            [lupapalvelu.xml.validator :as xml-validator]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [sade.common-reader :as cr]
             [lupapalvelu.permit :as permit]
@@ -223,9 +224,14 @@
 
 
 (facts "KRYSP verdict 2.2.0"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.2.0.xml"))
+  (let [xml-s (slurp "dev-resources/krysp/verdict-r-2.2.0.xml")
+        xml (xml/parse xml-s)
         cases (->verdicts xml :R permit/read-verdict-xml)]
 
+    (fact "validate xml"
+      (try (xml-validator/validate xml-s :R "2.2.0")
+           (catch org.xml.sax.SAXParseException e
+             (.getMessage e))) => nil)
     (fact "xml is parsed" cases => truthy)
     (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
@@ -246,9 +252,14 @@
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "KRYSP verdict 2.2.2"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.2.2.xml"))
+  (let [xml-s (slurp "dev-resources/krysp/verdict-r-2.2.2.xml")
+        xml (xml/parse xml-s)
         cases (->verdicts xml :R permit/read-verdict-xml)]
 
+    (fact "validate xml"
+      (try (xml-validator/validate xml-s :R "2.2.2")
+           (catch org.xml.sax.SAXParseException e
+             (.getMessage e))) => nil)
     (fact "xml is parsed" cases => truthy)
     (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
@@ -256,7 +267,7 @@
           lupamaaraykset (:lupamaaraykset verdict)
           maaraykset     (:maaraykset lupamaaraykset)]
 
-      (facts "lupamaaraukset data is correct"
+      (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
         (:vaaditutErityissuunnitelmat lupamaaraykset) => (just ["ES 1" "ES 22" "ES 333"] :in-any-order)))))
