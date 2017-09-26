@@ -67,6 +67,7 @@
   [& path]
   (->> path
        flatten
+       (remove nil?)
        (map #(if (keyword? %)
                (name %)
                %))

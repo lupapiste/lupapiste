@@ -86,15 +86,15 @@
                       loc-path))]
                extra)))
 
-(defn- access-meta [{:keys [id-path _meta]} key & [deref-fn]]
-  (loop [m ((or deref-fn deref) _meta)
-         path id-path]
-    (if (empty? path)
-      (get m key)
-      (let [v (get m (util/kw-path path key))]
-        (if (nil? v)
-          (recur m (butlast path))
-          v)))))
+(defn- access-meta
+  ([{:keys [id-path _meta]} key deref-fn]
+   (loop [path id-path]
+     (let [v (deref-fn (rum/cursor-in _meta [(util/kw-path path key)]))]
+       (if (or v (empty? path))
+         v
+         (recur (butlast path))))))
+  ([options key]
+   (access-meta options key deref)))
 
 (defn meta-value
   "_meta is a flat map with kw-mapped keys. meta-value returns value for the
