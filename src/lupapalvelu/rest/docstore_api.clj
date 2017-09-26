@@ -27,7 +27,7 @@
 (defn- municipality-name [municipality-code]
   (i18n/supported-langs-map #(i18n/localize % (str "municipality." municipality-code))))
 
-(defn- municipality-info [{:keys [municipality permitType]}]
+(defn municipality-info [{:keys [municipality permitType]}]
   {:id         municipality
    :name       (municipality-name municipality)})
 

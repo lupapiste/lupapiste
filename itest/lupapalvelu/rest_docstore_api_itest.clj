@@ -2,7 +2,9 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.rest.docstore-api :as api]))
 
 (apply-remote-minimal)
 
@@ -21,11 +23,22 @@
                                  {:query-params query-params})))
       ((if undecoded? identity decode-response))))
 
+(def all-docstore-orgs
+  (->> (filter :docstore-info minimal/organizations)
+       (map (fn [{:keys [docstore-info scope] :as org}]
+              (-> (merge docstore-info (select-keys org [:id :name :municipalities]))
+                  (assoc :municipalities (->> scope
+                                              (map api/municipality-info)
+                                              (distinct))))))))
+
 (def default-sipoo-docstore-info
-  (assoc org/default-docstore-info
-         :id "753-R"
-         :name (i18n/supported-langs-map (constantly "Sipoon rakennusvalvonta"))
-         :municipalities [{:id "753", :name {:en "Sipoo", :fi "Sipoo", :sv "Sibbo"}}]))
+  (first (filter #(= "753-R" (:id %)) all-docstore-orgs)))
+
+(def inactive-orgs
+  (remove :docStoreInUse all-docstore-orgs))
+
+(def R-orgs
+  (filter #(re-matches #".+-R(-.+)?" (:id %)) all-docstore-orgs))
 
 (facts "REST interface for organization docstore information"
 
@@ -48,22 +61,19 @@
           => http404?)
 
     (fact "organizations"
-      (-> (docstore-api-call organizations-address {}) :body :data)
-      => [default-sipoo-docstore-info])
+      (-> (docstore-api-call organizations-address {}) :body :data) => all-docstore-orgs)
 
     (fact "organizations - status=all"
-      (-> (docstore-api-call organizations-address {:status "all"}) :body :data)
-      => [default-sipoo-docstore-info])
+      (-> (docstore-api-call organizations-address {:status "all"}) :body :data) => all-docstore-orgs)
 
     (fact "organizations - status=active"
-      (-> (docstore-api-call organizations-address {:status "active"}) :body :data)
-      => [])
+      (-> (docstore-api-call organizations-address {:status "active"}) :body :data) => [default-sipoo-docstore-info])
+
     (fact "organizations - status=inactive"
-     (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data)
-     => [default-sipoo-docstore-info])
+     (-> (docstore-api-call organizations-address {:status "inactive"}) :body :data) => inactive-orgs)
 
     (fact "organizations - permit-type limitation"
-      (-> (docstore-api-call organizations-address {:permit-type "YA"}) :body :data) => [])
+      (-> (docstore-api-call organizations-address {:permit-type "R"}) :body :data) => R-orgs)
 
     (fact "organizations - invalid status"
      (-> (docstore-api-call organizations-address {:status "zorblax"} true))

@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
@@ -37,10 +38,11 @@
             :comment-text text})))
 
 (notifications/defemail :new-comment
-  {:pred-fn (fn [{user :user {roles :roles target :target} :data}]
+  {:pred-fn (fn [{user :user {roles :roles target :target} :data app :application}]
               (and
                 (not= (:type target) "verdict") ; target might be comment target or attachment target
-                (usr/authority? user)))
+                (or (usr/authority? user)
+                    (auth/has-auth-role? app (:id user) :statementGiver)))) ; Statement giver actions send email
    :recipients-fn notifications/comment-recipients-fn
    :model-fn create-model})
 
