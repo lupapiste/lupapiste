@@ -245,6 +245,22 @@
         (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
+(facts "KRYSP verdict 2.2.2"
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.2.2.xml"))
+        cases (->verdicts xml :R permit/read-verdict-xml)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
+
+    (let [verdict        (-> cases last :paatokset first)
+          lupamaaraykset (:lupamaaraykset verdict)
+          maaraykset     (:maaraykset lupamaaraykset)]
+
+      (facts "lupamaaraukset data is correct"
+        lupamaaraykset => truthy
+        (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
+        (:vaaditutErityissuunnitelmat lupamaaraykset) => (just ["ES 1" "ES 22" "ES 333"] :in-any-order)))))
+
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r.xml"))
         cases (->verdicts xml :R permit/read-verdict-xml)]
