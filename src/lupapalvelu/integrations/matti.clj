@@ -1,5 +1,6 @@
 (ns lupapalvelu.integrations.matti
   (:require [schema.core :as sc]
+            [sade.core :refer :all]
             [sade.env :as env]
             [sade.schemas :as ssc]
             [sade.util :as util]
@@ -10,12 +11,13 @@
             [lupapalvelu.document.schemas :as schemas]
             [sade.schema-utils :as ssu]))
 
+(def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
 
 (sc/defschema Operation
   (merge
     (ssu/select-keys app-schema/Operation [:id :name :description])
-    {:displayName                (zipmap i18n/supported-langs (repeat sc/Str))
-     (sc/optional-key :building) {:new sc/Bool
+    displayName
+    {(sc/optional-key :building) {:new sc/Bool
                                   (sc/optional-key :buildingId) sc/Str}}))
 
 (def base-keys
@@ -31,6 +33,11 @@
      :location       {:x sc/Num :y sc/Num}
      :location-wgs84 {:x sc/Num :y sc/Num}
      :link           (zipmap i18n/supported-langs (repeat ssc/OptionalHttpUrl))}))
+
+(sc/defschema StateChangeMessage                            ; Actual state-change message
+  (merge (set/rename-keys ApplicationBaseData {:location-wgs84 :locationWGS84})
+         {:fromState (merge {:name (get app-schema/Application :state)} displayName)
+          :toState   (merge {:name (get app-schema/Application :state)} displayName)}))
 
 (defn to-lang-map [localize-function]
   (reduce (fn [result lang]
@@ -91,10 +98,10 @@
       (assoc :link (to-lang-map #(make-app-link (:id application) %)))))
 
 (defn state-map [state]
-  {:name state
+  {:name (name state)
    :displayName (to-lang-map #(i18n/localize % state))})
 
-(defn state-change-data [application new-state]
+(sc/defn ^:always-validate state-change-data :- StateChangeMessage [application new-state]
   (-> (app-to-json application)
       (set/rename-keys {:location-wgs84 :locationWGS84})
       (assoc :state (name new-state))
