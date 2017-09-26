@@ -10,11 +10,23 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.validator :refer [validate]]))
+            [lupapalvelu.xml.validator :refer [validate]]
+            [sade.strings :as ss]))
 
 (apply-remote-minimal)
 
-(defn- get-valid-krysp-xml [application]
+(defn get-doc-id-filename-pred
+  [doc-id]
+  (letfn [(file-name-accessor [file]
+            (if get-files-from-sftp-server?
+              (.getFilename file)                           ;file is instance of com.jcraft.jsch.ChannelSftp$LsEntry
+              (.getName file)))]
+    (fn [file]
+      (when (and (ss/contains? (file-name-accessor file) doc-id)
+                 (.endsWith (file-name-accessor file) ".xml"))
+        (file-name-accessor file)))))
+
+(defn- get-valid-krysp-xml [application filename-prefix-or-pred]
   (let [permit-type      (keyword (permit/permit-type application))
         organization     (organization-from-minimal-by-id (:organization application))
         sftp-user        (get-in organization [:krysp permit-type :ftpUser])
@@ -23,22 +35,20 @@
         output-dir       (str "target/" sftp-user permit-type-dir "/")
         sftp-server      (subs (env/value :fileserver-address) 7)
         target-file-name (str "target/Downloaded-" (:id application) "-" (now) ".xml")
-        file-starts-with (:id application)
         xml-file (if get-files-from-sftp-server?
                    (io/file (get-file-from-server
                               sftp-user
                               sftp-server
-                              file-starts-with
+                              filename-prefix-or-pred
                               target-file-name
                               (str permit-type-dir "/")))
-                   (io/file (get-local-filename output-dir file-starts-with)))
+                   (io/file (get-local-filename output-dir filename-prefix-or-pred)))
         xml-as-string (slurp xml-file)
         xml (parse xml-file)]
 
     (fact "Correctly named xml file is created" (.exists xml-file) => true)
     (fact "XML file is valid"
       (validate xml-as-string (:permitType application) krysp-version))
-
     xml))
 
 (defn- check-pre-verdict-parties [application xml]
@@ -74,7 +84,7 @@
     (command sonja :approve-application :id application-id :lang "fi") => ok?
 
     (let [application (query-application sonja application-id)
-          xml (get-valid-krysp-xml application)]
+          xml (get-valid-krysp-xml application (:id application))]
       (check-pre-verdict-parties application xml))
 
     (give-verdict sonja application-id) => ok?
@@ -115,8 +125,9 @@
 
       (facts "Sonja sends parties KRYSP message"
         (let [krysp-resp (command sonja :parties-as-krysp :id application-id :lang "fi")
+              _ (count (:sentDocuments krysp-resp)) => 1
               application (query-application sonja application-id)
-              xml (get-valid-krysp-xml application)
+              xml (get-valid-krysp-xml application (get-doc-id-filename-pred (first (:sentDocuments krysp-resp))))
               asia-path [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
               parties-path (conj asia-path :osapuolettieto :Osapuolet)
               designers-path (conj parties-path :suunnittelijatieto)
@@ -126,6 +137,7 @@
 
           (fact "Parties transfer item"
             (count (:transfers application)) => 2
+            (count (filter #(= :parties-to-backing-system (keyword (:type %))) (:transfers application))) => 1
             (let [transfer (util/find-first #(= :parties-to-backing-system (keyword (:type %))) (:transfers application))]
               (:party-documents transfer) => (just (:sentDocuments krysp-resp))))
 
@@ -146,12 +158,19 @@
           (command sonja :approve-doc :id application-id :doc (:doc post-verdict-suunnittelija3) :path nil :collection "documents") => ok?
           (let [second-resp (command sonja :parties-as-krysp :id application-id :lang "fi")
                 application (query-application sonja application-id)
-                second-xml (get-valid-krysp-xml application)
+                first-xml (get-valid-krysp-xml application (get-doc-id-filename-pred (:doc post-verdict-suunnittelija1)))
+                second-xml (get-valid-krysp-xml application (get-doc-id-filename-pred (:doc post-verdict-suunnittelija3)))
                 designers-path [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
-                designer-elements (xml/select second-xml designers-path)]
+                first-designer-elements (xml/select first-xml designers-path)
+                second-designer-elements (xml/select second-xml designers-path)]
             second-resp => ok?
-            (:sentDocuments second-resp) => (just [(:doc post-verdict-suunnittelija1)
-                                                   (:doc post-verdict-suunnittelija3)])
-            (fact "Post1 and Post3 in KRSYP message"
-              (count designer-elements) => 1
-              (xml/get-text (first designer-elements) [:henkilo :etunimi]) => "Post3")))))))
+            (count (:transfers application)) => 3
+            (fact "two documents have been sent"
+              (:sentDocuments second-resp) => (just [(:doc post-verdict-suunnittelija1)
+                                                     (:doc post-verdict-suunnittelija3)]))
+            (fact "Post1 in KRSYP message"
+              (count first-designer-elements) => 1
+              (xml/get-text (first first-designer-elements) [:henkilo :etunimi]) => "Post1")
+            (fact "Post3 in KRSYP message"
+              (count second-designer-elements) => 1
+              (xml/get-text (first second-designer-elements) [:henkilo :etunimi]) => "Post3")))))))
