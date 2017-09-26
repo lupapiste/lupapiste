@@ -723,7 +723,7 @@
                  :organizations organizations
                  :applications (map :id apps)}))))
 
-(defn check-for-verdict-attachment
+(defn check-for-verdict-attachments
   "Fetch missing verdict attachments for verdicts given in the time
   interval between start-timestamp and end-timestamp (last 3 months by
   default), for the organizations whose id's are provided as
