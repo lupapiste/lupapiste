@@ -298,11 +298,13 @@ input.tip.dateinput.dateinput--small {
 
 input.grid-style-input {
   @include input-fields;
+  vertical-align: middle;
 }
 
 input.grid-style-input--wide {
   @include input-fields;
   width: 100%;
+  vertical-align: middle;
 }
 
 @mixin input-and-button( $cls, $padding: 8px, $input-width: 20em) {

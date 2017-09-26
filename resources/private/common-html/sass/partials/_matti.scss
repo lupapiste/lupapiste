@@ -28,11 +28,11 @@ $matti-grid-margin: 10px;
   .matti-grid-#{$columns} {
     width: 100%;
     color: $gray51;
-    .row {
+    > .row {
       @include clearfix;
       padding: $matti-grid-margin 0;
       @for $i from 1 through $columns {
-        .col-#{$i} {
+       > .col-#{$i} {
           @include matti-column($i, $columns);
           &:first-child {
             padding-left: 0;
@@ -62,6 +62,10 @@ $matti-grid-margin: 10px;
         padding-bottom: $marginS;
         margin: 0 0 0 0;
       }
+      &.row--indent {
+        padding-left: $marginL;
+        padding-top: 0;
+      }
     }
   }
 }
@@ -73,6 +77,9 @@ $matti-grid-margin: 10px;
 .matti-list {
   > .item {
     display: inline-block;
+  }
+  > .item + .item {
+    margin-left: $matti-grid-margin;
   }
   > .item.item--full {
     display: block;
@@ -91,6 +98,12 @@ $matti-grid-margin: 10px;
     > * {
       display: inline-block;
     }
+  }
+}
+
+.matti-list.list--sparse {
+  > .item + .item {
+    margin-left: 4 * $matti-grid-margin;
   }
 }
 
@@ -151,6 +164,12 @@ $section-border: 1px solid $gray51;
   }
 }
 
+.matti-verdict {
+  .matti-section {
+    min-height: 64px;
+  }
+}
+
 .matti--view {
   .matti-condition-box + .matti-condition-box:before {
     content: ", ";
@@ -159,6 +178,9 @@ $section-border: 1px solid $gray51;
 
 span.formatted {
   white-space: pre-wrap;
+  &.warning {
+    color: $negative;
+  }
 }
 
 .matti-label {
@@ -223,15 +245,17 @@ div.matti-template-list {
 
 // Settings
 
-
 div.matti-settings {
-h2.matti-settings-title {
-  margin-top: 0;
-}
-.section-header {
-  background-color: initial;
-  border-bottom: none;
-}
+  h2.matti-settings-title {
+    margin-top: 0;
+  }
+  .section-header {
+    background-color: initial;
+    border-bottom: none;
+  }
+  // .section-body {
+  //   border: none;
+  // }
 }
 
 // Reviews
@@ -248,6 +272,30 @@ div.matti-settings-editor {
     margin-top: 0;
   }
 }
+
+// Verdicts
+
+div.matti-verdict {
+  div.matti-section {
+    div.section-header {
+      background-color: initial;
+      border: none;
+      border-top: 1px solid $gray221;
+      padding: 0;
+      div.verdict-buttons {
+        padding-top: $marginS;
+        position: absolute;
+        right: 0;
+        z-index: 888;
+      }
+    }
+    div.section-body {
+      border: none;
+      padding: 0;
+    }
+  }
+}
+
 
 // Phrases
 
@@ -270,6 +318,10 @@ div.matti-phrases {
       overflow-x: hidden;
     }
   }
+}
+
+span.phrase-text {
+  white-space: pre-wrap;
 }
 
 // Autocomplete
@@ -314,6 +366,16 @@ div.matti-autocomplete {
     }
     i.ac--clear {
       padding-left: 12px;
+    }
+  }
+  .ac--selected.disabled {
+    //pointer-events: none;
+    span, i {
+      background-color: $input-disabled-background-color;
+      border-color: $input-disabled-border-color;
+    }
+    i {
+      color: $input-select-disabled-icon
     }
   }
   .ac__menu {
@@ -361,6 +423,60 @@ div.matti-autocomplete {
           padding-left: 10px;
         }
       }
+    }
+  }
+}
+
+// For debugging
+.pprint {
+  margin-top: $marginS;
+  padding: 4px;
+  font-size: 12px;
+  line-height: initial;
+  border: 1px solid $red-dark;
+  > .title {
+    text-align: center;
+    margin-top: -13px;
+    > h4 {
+      font-family: Consolas, "Lucida Console", monospace;
+      display: inline-block;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: $red-dark;
+      text-align: center;
+      background-color: white;
+      padding-left: 1em;
+      padding-right: 1em;
+    }}
+  > .code {
+    font-family: Consolas, "Lucida Console", monospace;
+    white-space: pre-wrap;
+  }
+  > a {
+    @include styled-input( none, none, none,
+                           $text: $red-link, $hover-text: $red-hover,
+                           $active-text: $red-active, $disabled-bg: none);
+    float: right;
+  }
+}
+
+// The default input width is browser specific and the dateinput
+// especially does not play nicely with matti-grid.
+.dateinput.dateinput--safe {
+  max-width: 90%;
+  &.warning {
+    border-color: $negative;
+  }
+}
+
+.neighbor-states {
+  margin: 0;
+  .tabby__row.neighbor > .tabby__cell {
+    vertical-align: top;
+    padding-top: 0;
+    padding-bottom: 0;
+    &.property-id {
+      white-space: nowrap;
     }
   }
 }

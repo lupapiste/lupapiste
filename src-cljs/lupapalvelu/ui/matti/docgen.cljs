@@ -1,12 +1,14 @@
 (ns lupapalvelu.ui.matti.docgen
   "Rudimentary support for docgen subset in the Matti context."
-  (:require [rum.core :as rum]
-            [lupapalvelu.ui.matti.path :as path]
+  (:require [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
-            [lupapalvelu.matti.shared :as shared]))
+            [lupapalvelu.ui.components :as components]
+            [lupapalvelu.ui.matti.path :as path]
+            [rum.core :as rum]
+            [sade.shared_util :as util]))
 
-(defn docgen-loc [{:keys [path schema]} & extra]
-  (path/loc path schema extra))
+(defn docgen-loc [options & extra]
+  (path/loc options extra))
 
 (defn docgen-type [{schema :schema}]
   (-> schema :body first :type keyword))
@@ -16,22 +18,23 @@
 
 (defmethod docgen-label-wrap :default
   [{:keys [schema path] :as options} component]
-  (if (-> schema :body first :label false?)
-    component
-    [:div.col--vertical
+  [:div.col--vertical
+   (if (-> schema :body first :label false?)
+     (common/empty-label)
      [:label.matti-label {:for (path/id path)}
-      (docgen-loc options)]
-     component]))
+      (docgen-loc options)])
+   component])
 
-(defmethod docgen-label-wrap :checkbox
-  [_ component]
-  component)
+(defn warning? [{:keys [path state]}]
+  (path/react (cons :_errors path) state ))
 
-(defn docgen-attr [{:keys [path]} & kv]
+(defn docgen-attr [{:keys [path state] :as options} & kv]
   (let [id (path/id path)]
-    (assoc (apply hash-map kv)
-           :key id
-           :id  id)))
+    (merge {:key id
+            :id  id
+            :disabled (path/disabled? options)
+            :class (common/css-flags :warning (warning? options))}
+           (apply hash-map kv))))
 
 (defn- state-change [{:keys [state path] :as options}]
   (let [handler (common/event->state (path/state path state))]
@@ -45,7 +48,11 @@
 
 (rum/defc docgen-select < rum/reactive
   [{:keys [schema state path] :as options}]
-  (let [local-state (path/state path state)]
+  (let [local-state (path/state path state)
+        sort-fn (if (some->> schema :body first
+                             :sortBy (util/=as-kw :displayName))
+                  (partial sort-by :text)
+                  identity)]
     [:select.dropdown
      (docgen-attr options
                   :value     (rum/react local-state)
@@ -57,7 +64,7 @@
                   :text  (if-let [item-loc (:item-loc-prefix schema)]
                            (path/loc [item-loc n])
                            (docgen-loc options n))}))
-          (sort-by :text)
+          sort-fn
           (cons {:value ""
                  :text  (common/loc "selectone")})
           (map (fn [{:keys [value text]}]
@@ -65,16 +72,17 @@
 
 (rum/defc docgen-checkbox < rum/reactive
   [{:keys [schema state path] :as options}]
-  (let [state    (path/state path state)
-        input-id (str (path/id path) "input")]
+  (let [state*    (path/state path state)
+        input-id  (path/unique-id "checkbox-input")]
     [:div.matti-checkbox-wrapper (docgen-attr options)
-     [:input {:type    "checkbox"
-              :checked (rum/react state)
-              :id      input-id}]
+     [:input (docgen-attr options
+                          :type    "checkbox"
+                          :checked (rum/react state*)
+                          :id      input-id)]
      [:label.matti-checkbox-label
       {:for      input-id
        :on-click (fn [_]
-                   (swap! state not)
+                   (swap! state* not)
                    (path/meta-updated options))}
       (when-not (false? (:label schema))
         (docgen-loc options))]]))
@@ -105,6 +113,7 @@
 
 
 (rum/defcs text-edit < (rum/local "" ::text)
+  rum/reactive
   {:key-fn (fn [_ {path :path} _ & _] (path/id path))}
   "Update the options model state only on blur. Immediate update does
   not work reliably."
@@ -119,6 +128,11 @@
                          :on-blur   (state-change options))
             attr)]))
 
+(rum/defc docgen-date < rum/reactive
+  [{:keys [schema path state] :as options}]
+  (components/date-edit (path/state path state)
+                        (docgen-attr options
+                                     :callback #(path/meta-updated options))))
 
 ;; ---------------------------------------
 ;; Component dispatch
@@ -130,12 +144,12 @@
     :checkbox   (docgen-checkbox options)
     :radioGroup (docgen-radio-group options)
     :string     (text-edit options :input.grid-style-input {:type "text"})
-    :text       (text-edit options :textarea.grid-style-input)))
+    :text       (text-edit options :textarea.grid-style-input)
+    :date       (docgen-date options)))
 
 ;; ---------------------------------------
-;; Multimethods
+;; Docgen view components
 ;; ---------------------------------------
-
 
 (defmulti docgen-view docgen-type)
 

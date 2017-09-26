@@ -1,17 +1,18 @@
 (ns lupapalvelu.ui.matti.settings
-  (:require [lupapalvelu.matti.shared :as shared]
+  (:require [clojure.string :as s]
+            [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
-            [clojure.string :as s]
-            [lupapalvelu.ui.components :as components]
-            [rum.core :as rum]))
+            [rum.core :as rum]
+            [sade.shared-util :as util]))
 
-(defn settings-updater [{:keys [path state]}]
-  (service/save-settings-value (path/value [:category] state)
+(defn settings-updater [{:keys [path state info]}]
+  (service/save-settings-value (path/value [:category] info)
                                path
                                (path/value path state)
                                (common/response->state state :modified)))
@@ -19,11 +20,12 @@
 (defn fetch-settings [category]
   (service/settings category
                     (fn [{settings :settings}]
-                      (reset! state/settings
-                              (assoc (:draft settings)
-                                     :modified (:modified settings)
-                                     :category category
-                                     :_meta {:updated settings-updater}))))
+                      (reset! state/settings (:draft settings))
+                      (reset! state/settings-info
+                              {:info  {:modified (:modified settings)
+                                       :category category}
+                               :_meta {:updated  settings-updater
+                                       :editing? true}})))
   (service/generics :review
                     category
                     (fn [{reviews :reviews}]
@@ -146,49 +148,52 @@
       [:i.lupicon-circle-plus]
       [:span (common/loc "add")]]]))
 
+;; -------------------------
+;; Settings sections
+;; -------------------------
+
 (defn settings-section-header [{:keys [path schema state] :as options} edit?]
   [:div.matti-grid-6.section-header
    [:div.row.row--tight
     [:div.col-4
      [:span.matti-label
       (when edit? {:class :row-text})
-      (common/loc (str "matti-settings."
-                       (-> path first name)))]]
-    (when edit?
+      (path/loc options)]]
+    (when (and edit? (path/enabled? options))
       [:div.col-2.col--right
        [:button.ghost
         {:on-click #(path/flip-meta options :editor?)}
-        (common/loc (if (path/meta? options :editor?)
+        (common/loc (if (path/react-meta options :editor?)
                       :close
                       :edit))]])]])
 
-(rum/defc settings-section < rum/reactive
-  {:key-fn path/key-fn}
-  [{:keys [state path id css] :as options}]
-  [:div.matti-section
-   {:class (path/css options)}
-   (settings-section-header options (contains? #{:reviews :plans}
-                                               (keyword id)))
-   [:div.section-body
-    (if (path/react-meta? options :editor?)
-      (case (keyword id)
-        :reviews (generic-editor :review)
-        :plans   (generic-editor :plan))
-      (layout/matti-grid (shared/child-schema options
-                                              :grid
-                                              options)))]])
+(rum/defc settings-section-body < rum/reactive
+  [{:keys [schema] :as options}]
+  [:div.section-body
+   (if (path/react-meta options :editor?)
+     (case (-> schema :id keyword)
+       :reviews (generic-editor :review)
+       :plans   (generic-editor :plan))
+     (layout/matti-grid (path/schema-options options
+                                             (:grid schema))))])
+
+(defmethod sections/section-header :settings
+  [{schema :schema :as options} _]
+  (settings-section-header options (util/includes-as-kw? [:reviews :plans]
+                                                         (:id schema))))
+
+(defmethod sections/section-body :settings
+  [options _]
+  (settings-section-body options))
 
 (rum/defc verdict-template-settings < rum/reactive
-  [{:keys [title sections] :as options}]
+  [{:keys [schema] :as options}]
   [:div.matti-settings
    [:div.matti-grid-2
     [:div.row.row--tight
      [:div.col-1
       [:h2.matti-settings-title (common/loc :matti-settings
-                                            (common/loc title))]]
+                                            (common/loc (:title schema)))]]
      [:div.col-1.col--right
-      (layout/last-saved (assoc options :state state/settings))]]]
-   (for [{id :id :as sec} sections]
-     (settings-section (assoc sec
-                              :path [id]
-                              :state state/settings)))])
+      (layout/last-saved options)]]]
+   (sections/sections options :settings)])

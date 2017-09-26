@@ -2,6 +2,7 @@
   (:require [lupapalvelu.ui.inspection-summaries :as inspection-summaries]
             [lupapalvelu.ui.auth-admin.stamp.editor :as stamp-editor]
             [lupapalvelu.ui.matti.verdict-templates :as verdict-templates]
+            [lupapalvelu.ui.matti.verdicts :as verdicts]
             [lupapalvelu.ui.printing-order.composer :as printing-order-composer]))
 
 (defn reload-hook []
@@ -9,6 +10,7 @@
   (->> [inspection-summaries/mount-component
         stamp-editor/mount-component
         verdict-templates/mount-component
+        verdicts/mount-component
         printing-order-composer/mount-component]
 
        (run! (fn [mount-fn]

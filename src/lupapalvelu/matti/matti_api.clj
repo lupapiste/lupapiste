@@ -4,6 +4,7 @@
             [lupapalvelu.matti.matti :as matti]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -16,14 +17,18 @@
 (defn- verdict-template-check
   "Returns prechecker for template-id parameters.
    Condition parameters:
-     :editable  Template must be editable (not deleted)
-     :published Template must hav been published
-     :blank     Template-id can be empty. Note: this does not
-                replace input-validator.
-     :named     Template name cannot be empty
+     :editable    Template must be editable (not deleted)
+     :published   Template must hav been published
+     :blank       Template-id can be empty. Note: this does not
+                  replace input-validator.
+     :named       Template name cannot be empty
+     :application Template must belong to the same category as the
+                  application
+
    Template's existence is always checked unless :blank matches."
   [& conditions]
-  (let [{:keys [editable published blank named]} (zipmap conditions (repeat true))]
+  (let [{:keys [editable published blank named application]} (zipmap conditions
+                                                                     (repeat true))]
     (fn [{{template-id :template-id} :data :as command}]
       (when template-id
         (if (ss/blank? template-id)
@@ -39,7 +44,12 @@
             (when (and published (-> template :published not))
               (fail! :error.verdict-template-not-published))
             (when (and named (-> template :name ss/blank?))
-              (fail! :error.verdict-template-name-missing))))))))
+              (fail! :error.verdict-template-name-missing))
+            (when (and application
+                       (util/not=as-kw (:category template)
+                                       (-> command :application :permitType
+                                           shared/permit-type->category)))
+              (fail! :error.invalid-category))))))))
 
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
@@ -250,12 +260,13 @@
                       (partial action/vector-parameters [:path])]
    :pre-checks       [valid-category]}
   [{:keys [created] :as command}]
-  (matti/save-settings-value (matti/command->organization command)
-                             category
-                             created
-                             path
-                             value)
-  (ok :modified created))
+  (if-let [error (matti/save-settings-value (matti/command->organization command)
+                                            category
+                                            created
+                                            path
+                                            value)]
+    (fail error)
+    (ok :modified created)))
 
 ;; ----------------------------------
 ;; Verdict template reviews API
@@ -359,7 +370,6 @@
 ;; Default verdict templates for operations
 ;; ------------------------------------------
 
-
 ;; Operation related pre-checkers
 
 (defn- organization-operation
@@ -405,3 +415,104 @@
   (matti/set-operation-verdict-template (usr/authority-admins-organization-id user)
                                         operation
                                         template-id))
+
+;; ------------------------------------------
+;; Verdict API
+;; ------------------------------------------
+
+;; TODO: Make sure that the functionality (including notifications)
+;; and constraints are in sync with the legacy verdict API.
+
+(defn- verdict-check
+  "Returns pre-checker that fails if the verdict does not exist.
+  Additional conditions:
+    :editable? fails if the verdict has been published."
+  [& conditions]
+  (let [{:keys [editable?]} (zipmap conditions (repeat true))]
+    (fn [{:keys [data application]}]
+      (when-let [verdict-id (:verdict-id data)]
+        (let [verdict (util/find-by-id verdict-id
+                                       (:matti-verdicts application))]
+          (when-not verdict
+            (fail! :error.verdict-not-found))
+          (when (and editable? (:published verdict))
+            (fail! :error.verdict.not-draft)))))))
+
+(defn- verdict-exists [{:keys [data application]}]
+  (when-not (util/find-by-id (:verdict-id data) (:matti-verdicts application))
+    (fail :error.verdict-not-found)))
+
+(defquery application-verdict-templates
+  {:description      "List of id, name, default? maps for suitable
+  application verdict templates."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :states           states/give-verdict-states}
+  [{:keys [application organization]}]
+  (ok :templates (matti/application-verdict-templates @organization
+                                                      application)))
+
+(defcommand new-matti-verdict-draft
+  {:description      "Composes new verdict draft from the latest published
+  template and its settings."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id template-id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [(verdict-template-check :application :published)]
+   :states           states/give-verdict-states}
+  [command]
+  (ok (matti/new-verdict-draft template-id command)))
+
+(defquery matti-verdicts
+  {:description      "List of verdicts. Item properties:
+                       id:        Verdict id
+                       published: timestamp (can be nil)
+                       modified:  timestamp"
+   :feature          :matti
+   :user-roles       #{:authority :applicant}
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :states           (states/all-states-but [:draft :open])}
+  [{:keys [application]}]
+  (ok :verdicts (map matti/verdict-summary
+                     (:matti-verdicts application))))
+
+(defquery matti-verdict
+  {:description "Verdict and its settings."
+   :feature :matti
+   :user-roles       #{:authority :applicant}
+   :parameters [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-check)]
+   :states           states/give-verdict-states}
+  [command]
+  (ok (matti/open-verdict command)))
+
+(defcommand delete-matti-verdict
+  {:description      "Deletes verdict. Published verdicts cannot be
+  deleted."
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-check :editable?)]
+   :states           (states/all-states-but [:draft :open])}
+  [command]
+  (matti/delete-verdict verdict-id command)
+  (ok))
+
+(defcommand edit-matti-verdict
+  {:description      "Updates verdict data. Returns changes and errors
+  lists (items are path-vector value pairs)"
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id path value]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
+                      (partial action/vector-parameters [:path])]
+   :pre-checks       [(verdict-check :editable?)]
+   :states           states/give-verdict-states}
+  [command]
+  (ok (matti/edit-verdict command)))
