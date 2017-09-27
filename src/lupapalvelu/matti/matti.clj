@@ -529,7 +529,7 @@
                                description]} (:op schema-info)]
                    (assoc acc
                           (keyword id) {:operation   name
-                                        :description description
+                                        :description (or description "")
                                         :building-id (->> [:valtakunnallinenNumero
                                                            :manuaalinen_rakennusnro]
                                                           (select-keys data)

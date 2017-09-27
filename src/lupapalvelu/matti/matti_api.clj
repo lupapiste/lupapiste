@@ -41,7 +41,7 @@
               (fail! :error.verdict-template-not-found))
             (when (and editable (:deleted template))
               (fail! :error.verdict-template-deleted))
-            (when (and published (-> template :published not))
+            (when (and published (not (:published template)))
               (fail! :error.verdict-template-not-published))
             (when (and named (-> template :name ss/blank?))
               (fail! :error.verdict-template-name-missing))

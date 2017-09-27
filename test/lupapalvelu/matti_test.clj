@@ -138,7 +138,9 @@
       (validate-path-value [:ref-multi] [:two :three :bad] refs)
       => :error.invalid-value
       (validate-path-value [:ref-multi] [] refs) => nil
-      (validate-path-value [:ref-multi] nil refs) => nil))
+      (validate-path-value [:ref-multi] nil refs) => nil
+      (validate-path-value [:ref-multi] "one" refs)
+      => :error.invalid-value))
     (facts "Reference list with item-key"
       (let [refs {:my {:path [{:name "One" :value :one}
                               {:name "Two" :value :two}

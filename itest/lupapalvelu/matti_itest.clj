@@ -548,10 +548,10 @@
 
 (facts "Verdicts"
   (let [{template-id :id} (command sipoo :new-verdict-template :category "r")
-        plan (-> (query sipoo :verdict-template-plans :category "r")
-                 :plans first)
-        review (-> (query sipoo :verdict-template-reviews :category "r")
-                   :reviews first)]
+        plan              (-> (query sipoo :verdict-template-plans :category "r")
+                              :plans first)
+        review            (-> (query sipoo :verdict-template-reviews :category "r")
+                              :reviews first)]
     (fact "Plan" plan =not=> nil)
     (fact "Review" review =not=> nil)
     (letfn [(set-draft-value [path value]
@@ -580,8 +580,8 @@
       (set-draft-value "verdict-code" :ehdollinen)
       (set-draft-value "paatosteksti" "Verdict text.")
       (set-draft-value :foremen [:iv-tj :erityis-tj])
-      (set-draft-value "plans" (:id plan))
-      (set-draft-value "reviews" (:id review))
+      (set-draft-value "plans" [(:id plan)])
+      (set-draft-value "reviews" [(:id review)])
       (set-draft-value "conditions" "Other conditions.")
       (set-draft-value "appeal" "Humble appeal.")
       (set-draft-value "complexity" "medium")
@@ -589,8 +589,87 @@
       (set-draft-value "autopaikat" true)
       (set-draft-value "paloluokka" true)
       (set-draft-value "vss-luokka" true)
-      (fact "Publish Full template"
-        (command sipoo :publish-verdict-template
-                 :template-id template-id)
-        => ok?)
-      )))
+
+      (facts "New verdict using Full template"
+        (let [{app-id :id} (create-and-submit-application pena
+                                                          :propertyId sipoo-property-id
+                                                          :operation  :pientalo)]
+          (fact "Error: unpublished template-id for verdict draft"
+            (command sonja :new-matti-verdict-draft :id app-id :template-id template-id)
+            => fail?)
+          (fact "Publish Full template"
+            (command sipoo :publish-verdict-template
+                     :template-id template-id)
+            => ok?)
+          (fact "Pena cannot create verdict"
+            (command pena :new-matti-verdict-draft :id app-id :template-id template-id)
+            => (err :error.unauthorized))
+          (fact "Error: bad template-id for verdict draft"
+            (command sonja :new-matti-verdict-draft :id app-id :template-id "bad")
+            => fail?)
+          (fact "Sonja creates verdict draft"
+            (let [draft    (command sonja :new-matti-verdict-draft
+                                    :id app-id :template-id template-id)
+                  verdict-id (-> draft :verdict :id)
+                  data     (-> draft :verdict :data)
+                  op-id    (-> data :buildings keys first keyword)
+                  open-verdict #(query sonja :matti-verdict :id app-id
+                                         :verdict-id verdict-id)
+                  edit-verdict #(command sonja :edit-matti-verdict :id app-id
+                                         :verdict-id verdict-id
+                                         :path (flatten [%1])
+                                         :value %2)]
+              data => (contains {:voimassa         ""
+                                 :appeal           "Humble appeal."
+                                 :julkipano        ""
+                                 :purpose          ""
+                                 :verdict-text     "Verdict text."
+                                 :anto             ""
+                                 :giver            "lautakunta"
+                                 :complexity       "medium"
+                                 :aloitettava      ""
+                                 :valitus          ""
+                                 :foremen          ["iv-tj" "erityis-tj"]
+                                 :verdict-code     "ehdollinen"
+                                 :collateral       ""
+                                 :conditions       "Other conditions."
+                                 :rights           ""
+                                 :plans-included   true
+                                 :foremen-included true
+                                 :neighbors        ""
+                                 :neighbor-states  []
+                                 :lainvoimainen    ""
+                                 :reviews-included true
+                                 :statements       ""})
+              (fact "Building info is empty but contains the template fields"
+                (-> data :buildings op-id) => (contains {:description            ""
+                                                         :show-building          true
+                                                         :vss-luokka             ""
+                                                         :kiinteiston-autopaikat ""
+                                                         :building-id            ""
+                                                         :operation              "pientalo"
+                                                         :rakennetut-autopaikat  ""
+                                                         :tag                    ""
+                                                         :autopaikat-yhteensa    ""
+                                                         :paloluokka             ""}))
+              (facts "Verdict settings"
+                (let [{:keys [foremen plans reviews]} (:settings draft)]
+                  (fact "Foremen"
+                    foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
+                  (fact "Reviews"
+                    (:reviews data) => [(-> reviews first :id)])
+                  (fact "Plans"
+                    (:plans data) => [(-> plans first :id)])))
+              (facts "Verdict dates"
+                (fact "Set julkipano date"
+                  (edit-verdict "julkipano" "20.9.2017") => ok?)
+                (fact "Set verdict date"
+                  (let [{:keys [modified changes]}
+                        (edit-verdict "verdict-date" "27.9.2017")]
+                    changes => []
+                    modified => pos?
+                    (fact "Verdict data has been updated"
+                      (let [data  (:verdict (open-verdict))]
+                        (:modified data) => modified
+                        (:data data) => (contains {:verdict-date "27.9.2017"
+                                                   :julkipano "20.9.2017"})))))))))))))

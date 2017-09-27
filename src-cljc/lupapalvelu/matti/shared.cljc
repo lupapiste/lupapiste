@@ -290,12 +290,16 @@
   (merge MattiBase
          CellConfig
          {:grid (assoc MattiGrid
-                       ;; Keyword is not used. The :repeating schema
-                       ;; is just needed in order to make the
-                       ;; different repeating data path prefixes
-                       ;; unique.  Later on we might add
-                       ;; repeating-specific properties (e.g., can
-                       ;; add/remove, sorting).
+                       ;; The :repeating value is a nested dictionary
+                       ;; for the repeating grid dicts. The
+                       ;; corresponding state paths also include the
+                       ;; index part (can be anything, provided by the
+                       ;; backend.). For example, for buildings (see
+                       ;; the verdict schema below) the state path
+                       ;; is [:buildings <id> <dict>] where <id> is
+                       ;; the id for the operation containing the
+                       ;; building and <dict> is a dict reference to
+                       ;; the nested dictionary.
                        (sc/optional-key :repeating) sc/Keyword)}))
 
 
