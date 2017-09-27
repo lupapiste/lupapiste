@@ -275,7 +275,9 @@
       (fn [{:keys [id]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
           (when-let [new-state (get-in changes [$set :state])]
-            (util/future* (matti/persist-state-change command new-state)))
+            (when (env/feature? :matti-json)
+              (util/future*
+                (matti/trigger-state-change command new-state))))
           (if return-count? n nil))))))
 
 (defn application->command

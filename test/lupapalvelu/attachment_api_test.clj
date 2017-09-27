@@ -112,8 +112,7 @@
     (execute (assoc type-command :user archivist-user)) => {:ok true}
 
     (provided
-      (att/update-attachment-data! anything "5234" anything 1000) => {:ok true}
-      (lupapalvelu.assignment/run-assignment-triggers anything) => nil)))
+      (att/update-attachment-data! anything "5234" anything 1000) => {:ok true})))
 
 (facts "Allowed only for authority when application sent"
        (let [app {:organization "753-R"

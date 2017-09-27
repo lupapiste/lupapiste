@@ -1,8 +1,10 @@
 (ns lupapalvelu.integrations.matti
   (:require [taoensso.timbre :refer [infof]]
             [schema.core :as sc]
+            [clj-http.client :as clj-http]
             [sade.core :refer :all]
             [sade.env :as env]
+            [sade.http :as http]
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
             [sade.util :as util]
@@ -110,7 +112,7 @@
       (assoc :fromState (state-map (:state application)))
       (assoc :toState (state-map new-state))))
 
-(defn persist-state-change [command new-state]
+(defn trigger-state-change [command new-state]
   (when-let [outgoing-data (state-change-data (:application command) new-state)]
     (let [message-id (messages/create-id)
           app (:application command)
@@ -125,4 +127,12 @@
                  :data outgoing-data}
                 :action (:action command))]
       (messages/save msg)
-      (infof "MATTI state-change payload written, messageId: %s" message-id))))
+      (infof "MATTI state-change payload written to mongo, messageId: %s" message-id)
+      (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
+        (let [resp (http/post (str url "/" ((env/value :matti :rest :path :state-change)))
+                              {:headers          {"X-Username" (env/value :matti :rest :username)
+                                                  "X-Password" (env/value :matti :rest :password)
+                                                  "X-Vault"    (env/value :matti :rest :password)}
+                               :body             (clj-http/json-encode outgoing-data)
+                               :throw-exceptions true})]
+          (infof "MATTI JSON sent to state-change endpoint successfully"))))))
