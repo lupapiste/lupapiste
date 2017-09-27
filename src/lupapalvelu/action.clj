@@ -269,7 +269,10 @@
           (states/all-inforequest-states new-state)
           ; delete-verdict commands sets state back, but no logging is required (LPK-917)
           (seq (get-in changes [$pull :verdicts])))
-        "event must be pushed to history array when state is set"))
+        "event must be pushed to history array when state is set")
+      (if (env/dev-mode?)
+        (assert (map? (:user command)) (format "no user defined in command %s for update-application call state was %s" (:action command) new-state))
+        (warnf "no user defined in command '%s' for update-application call" (:action command))))
 
     (with-application command
       (fn [{:keys [id]}]
