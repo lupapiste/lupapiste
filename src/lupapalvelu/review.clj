@@ -261,12 +261,12 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn save-review-updates [user application updates added-tasks-with-updated-buildings attachments-by-task-id]
-  (let [update-result (update-application (application->command application) updates)
-        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
+(defn save-review-updates [command updates added-tasks-with-updated-buildings attachments-by-task-id]
+  (let [update-result (update-application command updates)
+        updated-application (domain/get-application-no-access-checking (get-in command [:application :id] ))] ;; TODO: mongo projection
     (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
       (let [attachments (get attachments-by-task-id id)]
         (if-not (empty? attachments)
           (doseq [att attachments]
-            (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
-          (tasks/generate-task-pdfa updated-application added-task user "fi"))))))
+            (verdict-review-util/get-poytakirja (:application command) (:user command) (now) {:type "task" :id id} att))
+          (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))

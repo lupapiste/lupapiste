@@ -8,7 +8,6 @@
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
@@ -27,12 +26,10 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [sade.util :refer [fn->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
-            [sade.strings :as ss]
             [sade.http :as http]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import [org.xml.sax SAXParseException]))
@@ -315,7 +312,7 @@
             (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
                 (if-not (s/blank? url)
-                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdicts)
+                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action "fetch-verdicts")
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
@@ -407,7 +404,10 @@
   (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
     (when (ok? result)
       (try
-        (review/save-review-updates user application updates added-tasks-with-updated-buildings attachments-by-task-id)
+        (review/save-review-updates (assoc (application->command application) :user user)
+                                    updates
+                                    added-tasks-with-updated-buildings
+                                    attachments-by-task-id)
         (catch Throwable t
           (logging/log-event :error {:run-by "Automatic review checking"
                                      :event "Failed to save"

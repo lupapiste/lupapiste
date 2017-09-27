@@ -53,9 +53,10 @@
         (action/application->command application)
         {$set {:archived.completed now}}))
 
-    (action/update-application
+    (when archiving-project?
+      (action/update-application
       (action/application->command application)
       {:archived.application {$ne nil}
        :archived.completed   {$ne nil}
        :permitType           :ARK}
-      (app-state/state-transition-update :archived now application (usr/summary user)))))
+      (app-state/state-transition-update :archived now application (usr/summary user))))))

@@ -114,14 +114,15 @@
   (when-let [outgoing-data (state-change-data (:application command) new-state)]
     (let [message-id (messages/create-id)
           app (:application command)
-          msg {:id message-id :direction "out"
-               :status "published" :messageType "state-change"
-               :partner "matti" :format "json"
-               :created (or (:created command) (now))
-               :application (-> (select-keys app [:id :organization])
-                                (assoc :state (name new-state)))
-               :initator (select-keys (:user command) [:id :username])
-               :action (:action command)
-               :data outgoing-data}]
+          msg (util/assoc-when
+                {:id message-id :direction "out"
+                 :status "published" :messageType "state-change"
+                 :partner "matti" :format "json"
+                 :created (or (:created command) (now))
+                 :application (-> (select-keys app [:id :organization])
+                                  (assoc :state (name new-state)))
+                 :initator (select-keys (:user command) [:id :username])
+                 :data outgoing-data}
+                :action (:action command))]
       (messages/save msg)
       (infof "MATTI state-change payload written, messageId: %s" message-id))))

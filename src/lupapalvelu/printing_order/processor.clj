@@ -54,7 +54,7 @@
                                       (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
 
-(defn save-integration-message [user created-ts application {:keys [internalOrderId delivery] :as prepared-order} order-number]
+(defn save-integration-message [user created-ts cmd-name {:keys [internalOrderId delivery] :as prepared-order} order-number]
   (messages/save {:id internalOrderId
                   :direction "out"
                   :messageType "printing-order"
@@ -63,6 +63,7 @@
                   :status "done"
                   :created created-ts
                   :external-reference order-number
+                  :action cmd-name
                   :initator (select-keys user [:id :username])
                   :attached-files (map :fileId (-> delivery :printedMaterials))
                   :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))
