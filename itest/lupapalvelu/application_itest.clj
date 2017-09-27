@@ -318,7 +318,7 @@
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id :address "Penahouse 88")
         intial-submitted (:submitted application)
         application-id (:id application)
-        generated-messages (get-in (integration-messages application-id) [:body :data])
+        generated-messages (integration-messages application-id)
         reason-text "Cancellation notice."]
     (count generated-messages) => 1
     (first generated-messages) => (contains {:status "published"

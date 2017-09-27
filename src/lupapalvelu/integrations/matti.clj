@@ -10,10 +10,11 @@
             [sade.util :as util]
             [clojure.set :as set]
             [lupapalvelu.application-schema :as app-schema]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.integrations.messages :as messages]
-            [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.states :as states]))
 
 (def displayName {:displayName (zipmap i18n/supported-langs (repeat sc/Str))})
 
@@ -112,27 +113,30 @@
       (assoc :fromState (state-map (:state application)))
       (assoc :toState (state-map new-state))))
 
+(def valid-states (states/all-application-states-but :draft :open))
+
 (defn trigger-state-change [command new-state]
-  (when-let [outgoing-data (state-change-data (:application command) new-state)]
-    (let [message-id (messages/create-id)
-          app (:application command)
-          msg (util/assoc-when
-                {:id message-id :direction "out"
-                 :status "published" :messageType "state-change"
-                 :partner "matti" :format "json"
-                 :created (or (:created command) (now))
-                 :application (-> (select-keys app [:id :organization])
-                                  (assoc :state (name new-state)))
-                 :initator (select-keys (:user command) [:id :username])
-                 :data outgoing-data}
-                :action (:action command))]
-      (messages/save msg)
-      (infof "MATTI state-change payload written to mongo, messageId: %s" message-id)
-      (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
-        (let [resp (http/post (str url "/" ((env/value :matti :rest :path :state-change)))
-                              {:headers          {"X-Username" (env/value :matti :rest :username)
-                                                  "X-Password" (env/value :matti :rest :password)
-                                                  "X-Vault"    (env/value :matti :rest :password)}
-                               :body             (clj-http/json-encode outgoing-data)
-                               :throw-exceptions true})]
+  (when (valid-states (keyword new-state))
+    (when-let [outgoing-data (state-change-data (:application command) new-state)]
+      (let [message-id (messages/create-id)
+            app (:application command)
+            msg (util/assoc-when
+                  {:id message-id :direction "out"
+                   :status "published" :messageType "state-change"
+                   :partner "matti" :format "json"
+                   :created (or (:created command) (now))
+                   :application (-> (select-keys app [:id :organization])
+                                    (assoc :state (name new-state)))
+                   :initator (select-keys (:user command) [:id :username])
+                   :data outgoing-data}
+                  :action (:action command))]
+        (messages/save msg)
+        (infof "MATTI state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
+        (when-let [url nil #_(env/value :matti :rest :url)]         ; TODO send to MQ
+          (http/post (str url "/" ((env/value :matti :rest :path :state-change)))
+                     {:headers          {"X-Username" (env/value :matti :rest :username)
+                                         "X-Password" (env/value :matti :rest :password)
+                                         "X-Vault"    (env/value :matti :rest :vault)}
+                      :body             (clj-http/json-encode outgoing-data)
+                      :throw-exceptions true})
           (infof "MATTI JSON sent to state-change endpoint successfully"))))))
