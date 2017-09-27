@@ -113,10 +113,11 @@
                       mongo-query
                       (util/deep-merge
                         {$push {:transfers transfer}}
-                        (util/deep-merge (when handlers
-                                           {:handlers handlers})
-                                         attachments-updates
-                                         indicator-updates)
+                        {$set (util/deep-merge
+                                (when handlers
+                                  {:handlers handlers})
+                                attachments-updates
+                                indicator-updates)}
                         (app-state/state-transition-update next-state created application user)))
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
