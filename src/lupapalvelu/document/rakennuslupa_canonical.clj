@@ -385,16 +385,50 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
-(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat tiedoksianto]
-  (let [application (tools/unwrapped application)
+
+(defn- bad-review-building?
+  "Building can be bad either by choice (no state selected) or by
+  accident (ghost buildings)."
+  [building]
+  (or (nil? building)
+      (= "ei tiedossa" (get-in building [:rakennus :jarjestysnumero]))
+      (util/empty-or-nil? (get-in building [:tila :tila]))
+      (every? ss/blank? (-> building :rakennus vals))))
+
+(defn- enrich-review-building [{app-buildings :buildings :as app} {{national-id :valtakunnallinenNumero kiinttun :kiinttun rakennusnro :rakennusnro :as rakennus} :rakennus :as building}]
+  (when rakennus
+    (let [app-building (util/find-first (every-pred (comp #{kiinttun} :propertyId)
+                                                    (comp #{rakennusnro} :localShortId)) app-buildings)]
+      (update building :rakennus util/assoc-when
+              :valtakunnallinenNumero (when (ss/blank? national-id) (:nationalId app-building))
+              :operationId (:operationId app-building)
+              :description (:description app-building)))))
+
+(defn katselmus-canonical [application lang task user]
+  (let [{{{pito-pvm     :pitoPvm
+           pitaja       :pitaja
+           lasnaolijat  :lasnaolijat
+           poikkeamat   :poikkeamat
+           tila         :tila
+           tiedoksianto :tiedoksianto
+           huomautukset :huomautukset} :katselmus
+          katselmuksen-laji            :katselmuksenLaji
+          vaadittu-lupaehtona          :vaadittuLupaehtona
+          rakennus                     :rakennus} :data
+         task-id      :id
+         task-name    :taskname} (tools/unwrapped task)
+        buildings (->> (vals rakennus)
+                       (map (partial enrich-review-building application))
+                       (remove bad-review-building?))
+        application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
-        katselmusTyyppi (katselmusnimi-to-type katselmuksen-nimi tyyppi)
+        katselmustyyppi (katselmusnimi-to-type katselmuksen-laji :katselmus)
         katselmus (util/strip-nils
                     (merge
-                      {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
-                       :katselmuksenLaji katselmusTyyppi
-                       :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :osittainen osittainen
+                      {:pitoPvm (if (number? pito-pvm) (util/to-xml-date pito-pvm) (util/to-xml-date-from-string pito-pvm))
+                       :katselmuksenLaji katselmustyyppi
+                       :vaadittuLupaehtonaKytkin (true? vaadittu-lupaehtona)
+                       :osittainen tila
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat
@@ -449,7 +483,7 @@
                                                                                          :puhelin (:phone user)}}}}}
                       :katselmustieto {:Katselmus katselmus}
                       :lisatiedot (get-lisatiedot lang)
-                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
+                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-laji :katselmus)
                       }}}}]
     canonical))
 

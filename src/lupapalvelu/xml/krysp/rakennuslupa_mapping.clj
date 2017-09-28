@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [debug]]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.tools :as tools]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -382,26 +381,9 @@
   (and (= type-group "katselmukset_ja_tarkastukset")
     (#{"katselmuksen_tai_tarkastuksen_poytakirja" "aloituskokouksen_poytakirja"} type-id)))
 
-(defn- save-katselmus-xml [application
-                           lang
-                           output-dir
-                           task-id
-                           task-name
-                           started
-                           buildings
-                           user
-                           katselmuksen-nimi
-                           tyyppi
-                           osittainen
-                           pitaja
-                           lupaehtona
-                           huomautukset
-                           lasnaolijat
-                           poikkeamat
-                           tiedoksianto
-                           krysp-version
-                           begin-of-link
-                           attachment-target]
+(defn- save-katselmus-xml
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang output-dir task user krysp-version begin-of-link attachment-target]
   (let [target-pred #(= attachment-target (:target %))
         attachments (filter target-pred  (:attachments application))
         poytakirja  (some #(when (katselmus-pk? (:type %)) %) attachments)
@@ -416,9 +398,7 @@
 
         all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
 
-        canonical-without-attachments (canonical/katselmus-canonical application lang task-id task-name started buildings user
-                                                                     katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
-                                                                     huomautukset lasnaolijat poikkeamat tiedoksianto)
+        canonical-without-attachments (canonical/katselmus-canonical application lang task user)
         canonical (-> canonical-without-attachments
                     (#(if (seq canonical-attachments)
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
@@ -435,73 +415,19 @@
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir nil nil "review")))
 
-(defn- bad-building?
-  "Building can be bad either by choice (no state selected) or by
-  accident (ghost buildings)."
-  [building]
-  (or
-   (nil? building)
-   (= "ei tiedossa" (get-in building [:rakennus :jarjestysnumero]))
-   (util/empty-or-nil? (get-in building [:tila :tila]))
-   (every? ss/blank? (-> building :rakennus vals))))
-
-(defn save-katselmus-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application katselmus user lang krysp-version output-dir begin-of-link]
-  (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
-                           (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
-        find-building (fn [nid] (some #(when (= (:nationalId %) nid) %) (:buildings application)))
-        data (tools/unwrapped (:data katselmus))
-        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
-        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila tiedoksianto]} (:katselmus data)
-        huomautukset (-> data :katselmus :huomautukset)
-        buildings    (->> (vals rakennus)
-                       (map
-                         (fn [{rakennus :rakennus :as b}]
-                           (when rakennus
-                             (let [nid (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                                         (find-national-id rakennus)
-                                         (:valtakunnallinenNumero rakennus))
-                                   b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
-                                   op-id (:operationId (find-building nid))
-                                   b (if op-id (assoc-in b [:rakennus :operationId] op-id) b)
-                                   desc (:description (find-building nid))
-                                   b (if desc (assoc-in b [:rakennus :description] desc) b)]
-                               b))))
-                       (remove bad-building?))]
-    (save-katselmus-xml
-      application
-      lang
-      output-dir
-      (:id katselmus)
-      (:taskname katselmus)
-      pitoPvm
-      buildings
-      user
-      katselmuksenLaji
-      :katselmus
-      tila
-      pitaja
-      vaadittuLupaehtona
-      huomautukset
-      lasnaolijat
-      poikkeamat
-      tiedoksianto
-      krysp-version
-      begin-of-link
-      {:type "task" :id (:id katselmus)})))
-
 (defmethod permit/review-krysp-mapper :R [application review user lang krysp-version output-dir begin-of-link]
-  (save-katselmus-as-krysp application review user lang krysp-version output-dir begin-of-link))
+  (save-katselmus-xml application lang output-dir review user krysp-version begin-of-link {:type "task" :id (:id review)}))
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started
-                                     {:keys [index localShortId nationalId propertyId] :as building}
-                                     user krysp-version]
-  (let [building-id {:rakennus {:jarjestysnumero index
-                                :kiinttun        propertyId
-                                :rakennusnro     localShortId
-                                :valtakunnallinenNumero nationalId}}]
-    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil krysp-version nil nil)))
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
+  (let [task {:taskname "Aloitusilmoitus"
+              :data {:katselmus {:pitoPvm started}
+                     :katselmuksenLaji "Aloitusilmoitus"
+                     :rakennus {:0 {:tila {:tila "ei tiedossa"}
+                                    :rakennus {:jarjestysnumero index
+                                               :kiinttun propertyId
+                                               :rakennusnro localShortId
+                                               :valtakunnallinenNumero nationalId}}}}}]
+    (save-katselmus-xml application lang output-dir task user krysp-version nil nil)))
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
