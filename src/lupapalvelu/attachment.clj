@@ -553,7 +553,7 @@
                                           (when (or (:sign options) (:signature options))
                                             (if (> (count (:signature options)) 1)
                                               {$push {:attachments.$.signatures {$each (map (fn [original-signature] (signature version-model (:created options) user original-signature)) (:signature options))}}}
-                                              (signature-updates version-model user (:created options) (:signature options) (:signatures attachment))))
+                                              (signature-updates version-model user (:created options) (first (:signature options)) (:signatures attachment))))
                                           (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
