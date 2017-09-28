@@ -548,6 +548,14 @@
                              :js ["financial-authority-app.js"]}
    :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
                              :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
+
+   :local-bulletins-app {:depends []
+                         :html ["local-bulletins.html"]
+                         :js ["local-bulletins-app.js"]}
+
+   :local-bulletins {:depends [:local-bulletins-app :ui-components :map :docgen :services]
+                     :html ["local-bulletins-template.html"]
+                     :js ["local-bulletins-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:
