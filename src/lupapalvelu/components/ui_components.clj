@@ -508,9 +508,12 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins {:depends [:ui-components :map :docgen :services]
-               :html ["header.html" "footer.html"
-                      "bulletins.html" "bulletins-template.html"
+   :bulletins-common {:depends []
+                      :js ["header.js"]
+                      :html ["header.html" "footer.html"]}
+
+   :bulletins {:depends [:bulletins-common :ui-components :map :docgen :services]
+               :html ["bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
@@ -527,8 +530,7 @@
                       "application-bulletins/bulletins-search/bulletins-search-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
-               :js ["header.js"
-                    "bulletins.js" "bulletins-model.js"
+               :js ["bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
                     "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
@@ -553,7 +555,7 @@
                          :html ["local-bulletins.html"]
                          :js ["local-bulletins-app.js"]}
 
-   :local-bulletins {:depends [:local-bulletins-app :ui-components :map :docgen :services]
+   :local-bulletins {:depends [:bulletins-common :local-bulletins-app :ui-components :map :docgen :services]
                      :html ["local-bulletins-template.html"]
                      :js ["local-bulletins-model.js"]}
    })
