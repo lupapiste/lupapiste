@@ -38,7 +38,7 @@
 (defquery attachments-for-printing-order
   {:feature          :printing-order
    :parameters       [id]
-   :states           states/post-verdict-states
+   :states           states/all-application-states
    :user-roles       #{:applicant}
    :pre-checks       [pricing-available?]}
   [{application :application :as command}]
@@ -53,7 +53,7 @@
 
 (defquery printing-order-pricing
   {:feature          :printing-order
-   :states           states/post-verdict-states
+   :states           states/all-application-states
    :user-roles       #{:applicant}
    :pre-checks       [pricing-available?]}
   [_]
@@ -65,7 +65,7 @@
 (defcommand submit-printing-order
   {:feature      :printing-order
    :parameters  [:id order contacts]
-   :states      states/post-verdict-states
+   :states      states/all-application-states
    :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
   [{application :application user :user created-ts :created}]

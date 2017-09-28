@@ -26,7 +26,8 @@
       </div>
     </div>
 
-    <div data-bind="if: tosFunctionExists() && $root.authorization.ok('application-date-within-time-limit')">
+    <div data-bind="if: $root.authorization.ok('application-date-within-time-limit')">
+      <!-- ko if: tosFunctionExists() -->
       <div data-bind="if: showArchived" class="archival-summary-document-set">
         <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
         <div data-bind="ltext: 'archivalSummary.guide'"></div>
@@ -75,7 +76,7 @@
           <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
         </div>
       </div>
-
+      <!-- /ko -->
       <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
       <div class="tos-function-correction">
         <div>
@@ -104,8 +105,7 @@
         </div>
       </div>
       <!-- /ko -->
-
-      <!-- ko if: $data.showMarkArchivedSection() && !$root.authorization.ok("common-area-application") -->
+      <!-- ko if: tosFunctionExists() && $data.showMarkArchivedSection() && !$root.authorization.ok("common-area-application") -->
       <div class="mark-as-archived">
         <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
         <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>

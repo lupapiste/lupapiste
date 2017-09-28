@@ -311,13 +311,17 @@
                                             (-> canonical-body
                                                 (update :luvanTunnisteTiedot add-kuntalupatunnus-link-in-luvan-tunniste-tiedot application))}}}))
 
+(defn- get-ya-katselmus-muu-tunnustieto [katselmus]
+  (->> [{:tunnus (:id katselmus) :sovellus "Lupapiste"}
+        {:tunnus (:muuTunnus katselmus) :sovellus (:muuTunnusSovellus katselmus)}]
+       (filter :tunnus)
+       (map (partial hash-map :MuuTunnus))))
 
 (defn- get-ya-katselmus [katselmus]
   (let [data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
-        task-id (:id katselmus)
         task-name (:taskname katselmus)]
     (util/strip-nils
       (merge
@@ -328,9 +332,8 @@
           :lasnaolijat lasnaolijat
           :pitaja pitaja
           :poikkeamat poikkeamat
-          :tarkastuksenTaiKatselmuksenNimi (ss/trim task-name))
-        (when task-id
-          {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
+          :tarkastuksenTaiKatselmuksenNimi (ss/trim task-name)
+          :muuTunnustieto (get-ya-katselmus-muu-tunnustieto katselmus))
         (when (:kuvaus huomautukset)
           {:huomautustieto {:Huomautus (util/strip-nils (reduce-kv
                                                           (fn [m k v]
