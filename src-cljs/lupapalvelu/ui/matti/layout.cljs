@@ -362,7 +362,7 @@
   [{:keys [state path]}]
   (let [{:keys [operation building-id tag description]} (path/value (butlast path) state)]
     [:span.formatted (->> [(path/loc :operations operation)
-                           (s/join ": " (remove nil? [tag description]))
+                           (s/join ": " (remove s/blank? [tag description]))
                            building-id]
                           (remove s/blank?)
                           (s/join " \u2013 "))]))

@@ -48,7 +48,7 @@
              :info (dissoc verdict :data)
              :_meta {:updated updater
                      :enabled? (state/auth? :edit-matti-verdict)}}))
-  (reset! state/settings settings)
+  (reset! state/references settings)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
 (defn update-application-id []

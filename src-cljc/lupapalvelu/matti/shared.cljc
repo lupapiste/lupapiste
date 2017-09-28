@@ -505,7 +505,7 @@
      {:contact-ref      {:reference {:path :contact}}
       :giver            {:docgen "matti-verdict-giver"}
       :contact          {:docgen "matti-verdict-contact"}
-      :verdict-code     {:reference-list {:path       :settings.verdict-code
+      :verdict-code     {:reference-list {:path       :verdict-code
                                           :type       :select
                                           :loc-prefix :matti-r.verdict-code}}
       :verdict-text     {:phrase-text {:category :paatosteksti}}
@@ -513,9 +513,9 @@
       :application-id   {:placeholder {:type :application-id}}}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
                (let [included (keyword (str (name kw) "-included"))
-                     path     (util/kw-path :settings kw)]
+                     path     kw]
                  (assoc acc
-                        kw
+                        (util/kw-path kw)
                         {:reference-list
                          (merge {:enabled?   included
                                  :loc-prefix loc-prefix

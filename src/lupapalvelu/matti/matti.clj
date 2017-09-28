@@ -457,7 +457,8 @@
                     (assoc acc
                            kw
                            (date/parse-and-forward datestring
-                                                   (util/->long delta)
+                                                   ;; Delta could be empty.
+                                                   (or (util/->long delta) 0)
                                                    unit))
                     acc)))
               {}
@@ -528,15 +529,17 @@
                  (let [{:keys [id name
                                description]} (:op schema-info)]
                    (assoc acc
-                          (keyword id) {:operation   name
-                                        :description (or description "")
-                                        :building-id (->> [:valtakunnallinenNumero
-                                                           :manuaalinen_rakennusnro]
-                                                          (select-keys data)
-                                                          vals
-                                                          (util/find-first ss/not-blank?)
-                                                          ss/->plain-string)
-                                        :tag         (:tunnus data)})))
+                          (keyword id)
+                          (util/convert-values
+                           {:operation   name
+                            :description description
+                            :building-id (->> [:valtakunnallinenNumero
+                                               :manuaalinen_rakennusnro]
+                                              (select-keys data)
+                                              vals
+                                              (util/find-first ss/not-blank?))
+                            :tag         (:tunnus data)}
+                           ss/->plain-string))))
                {})))
 
 (defn- merge-buildings [app-buildings verdict-buildings defaults]
@@ -582,7 +585,7 @@
                                                (:buildings data)
                                                defaults)})
                 ;; Neighbors added if in the template
-                (when-not (some-> template :removed-sections :neighbors)
+                (when-not (some-> template :data :removed-sections :neighbors)
                   {:neighbor-states (neighbor-states application)}))]
 
     (assoc-in verdict [:data] (merge data addons))))
