@@ -22,7 +22,6 @@
                                                                 rakennuslupa_to_krysp_216
                                                                 rakennuslupa_to_krysp_218
                                                                 rakennuslupa_to_krysp_220
-                                                                save-katselmus-as-krysp
                                                                 rakennuslupa-element-to-xml]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
@@ -195,82 +194,6 @@
 
   (fact "Aloitusoikeus -> canonical -> xml"
     (do-test aloitusoikeus-hakemus :finnish? true)))
-
-(facts "Katselmus"
-  (let [application (assoc application-rakennuslupa
-                      :state "verdictGiven"
-                      :buildings [{:index "1" :propertyId "09100200990013" :localShortId "001" :nationalId "1234567892"}])
-        user        {:id "777777777777777777000017"
-                     :email "jussi.viranomainen@tampere.fi"
-                     :enabled true
-                     :role "authority"
-                     :username "jussi"
-                     :organizations ["837-YA"]
-                     :firstName "Jussi"
-                     :lastName "Viranomainen"
-                     :street "Katuosoite 1 a 1"
-                     :phone "1231234567"
-                     :zip "33456"
-                     :city "Tampere"}]
-
-    (fact "Katselmus data is parsed correctly from task. Not caring about actual mapping here."
-      (against-background
-        (#'lupapalvelu.xml.krysp.rakennuslupa-mapping/save-katselmus-xml
-          application
-          "fi"
-          "target"
-          "123" ; task id
-          "Pohjakatselmus 1" ; task name
-          "2.5.1974"
-          [{:tila {:tila "osittainen" :kayttoonottava true}
-            :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892" :kunnanSisainenPysyvaRakennusnumero "b123"}}]
-          user
-          "pohjakatselmus" ; katselmuksen-nimi
-          :katselmus ;tyyppi
-          "pidetty" ;osittainen
-          "pitaja" ;pitaja
-          false ;lupaehtona
-          {:kuvaus "kuvaus"
-           :maaraAika "3.5.1974"
-           :toteaja "toteaja"
-           :toteamisHetki "1.5.1974"} ;huomautukset
-          "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
-          "Ei poikkeamisia" ;poikkeamat
-          false ; tiedoksianto
-          "2.1.2" ;krysp-version
-          "begin-of-link" ;begin-of-link
-          {:type "task" :id "123"} ;attachment-target
-          ) => nil)
-
-      (save-katselmus-as-krysp
-        application
-        {:id "123"
-         :taskname "Pohjakatselmus 1"
-         :schema-info {:name "task-katselmus"}
-         :data {:katselmuksenLaji {:value "pohjakatselmus"},
-                :vaadittuLupaehtona {:value false}
-                :rakennus {:0
-                           {:rakennus
-                            {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"} :kunnanSisainenPysyvaRakennusnumero {:value "b123"}}
-                            :tila {:tila {:value "osittainen"}
-                                   :kayttoonottava {:value true}}}}
-                :katselmus {:pitoPvm {:value "2.5.1974"}
-                            :pitaja {:value "pitaja"}
-                            :huomautukset {:kuvaus {:value "kuvaus"}
-                                           :maaraAika {:value "3.5.1974"}
-                                           :toteaja {:value "toteaja"}
-                                           :toteamisHetki {:value "1.5.1974"}}
-                            :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
-                            :poikkeamat {:value "Ei poikkeamisia"}
-                            :tiedoksianto {:value false}
-                            :tila {:value "pidetty"}}}}
-        user
-        "fi"
-        "2.1.2"
-        "target"
-        "begin-of-link") => nil
-      )))
-
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")

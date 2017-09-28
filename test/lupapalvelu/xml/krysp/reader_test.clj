@@ -264,13 +264,14 @@
     (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
 
     (let [verdict        (-> cases last :paatokset first)
-          lupamaaraykset (:lupamaaraykset verdict)
-          maaraykset     (:maaraykset lupamaaraykset)]
+          lupamaaraykset (:lupamaaraykset verdict)]
 
       (facts "lupamaaraykset data is correct"
         lupamaaraykset => truthy
         (:rakennusoikeudellinenKerrosala lupamaaraykset) => "101"
-        (:vaaditutErityissuunnitelmat lupamaaraykset) => (just ["ES 1" "ES 22" "ES 333"] :in-any-order)))))
+        (:vaaditutErityissuunnitelmat lupamaaraykset) => (just ["ES 1" "ES 22" "ES 333"] :in-any-order)
+        (->> (:vaaditutKatselmukset lupamaaraykset) (map :muuTunnus)) => (just ["" "999"] :in-any-order)
+        (->> (:vaaditutKatselmukset lupamaaraykset) (map :muuTunnusSovellus)) => (just ["" "RakApp"] :in-any-order)))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r.xml"))

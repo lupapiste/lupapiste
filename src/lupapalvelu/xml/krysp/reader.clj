@@ -102,6 +102,10 @@
       (map #(rename-keys % {:maaraysPvm :maaraysaika}))
       (remove nil?))))
 
+(defn extract-muu-tunnus [muu-tunnus]
+  {:muuTunnus (:tunnus muu-tunnus "")
+   :muuTunnusSovellus (:sovellus muu-tunnus "")})
+
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cr/cleanup)
@@ -114,7 +118,10 @@
     (dissoc :vaadittuErityissuunnitelma :vaadittuErityissuunnitelmatieto)
 
     (util/ensure-sequential :vaaditutKatselmukset)
-    (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
+    (#(let [kats (->> (map :Katselmus (:vaaditutKatselmukset %))
+                      (map (fn [katselmus] (-> katselmus
+                                               (merge (-> katselmus :muuTunnustieto :MuuTunnus extract-muu-tunnus))
+                                               (dissoc :muuTunnustieto)))))]
         (if (seq kats)
           (assoc % :vaaditutKatselmukset kats)
           (dissoc % :vaaditutKatselmukset))))

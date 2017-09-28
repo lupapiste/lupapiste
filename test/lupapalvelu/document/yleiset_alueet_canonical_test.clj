@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.canonical-common-test
+(ns lupapalvelu.document.yleiset-alueet-canonical-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))

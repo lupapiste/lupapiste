@@ -12,6 +12,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [monger.operators :refer :all]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -131,8 +132,8 @@
       :full-width :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:disabled [:is-faulty-review]}}]}
-   {:name "muuTunnus" :type :text
-    :readonly true :hidden true}])
+   {:name "muuTunnus" :type :text :readonly true :hidden true}
+   {:name "muuTunnusSovellus" :type :text :readonly true :hidden true}])
 
 (def- task-katselmus-body-backend
   (-> task-katselmus-body
@@ -297,21 +298,15 @@
     initial-rakennus
     buildings))
 
+(defn- get-muu-tunnus-data [katselmus]
+  (->> (:muuTunnustieto katselmus)
+       (map :MuuTunnus)
+       (util/find-first (util/fn-> :sovellus ss/lower-case (not= "lupapiste")))
+       (krysp-reader/extract-muu-tunnus)))
+
 (defn katselmus->task [meta source {:keys [buildings]} katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         rakennustieto (map :KatselmuksenRakennus (:katselmuksenRakennustieto katselmus))
-        get-muuTunnus (fn [katselmus]
-                        ;; get first {:sovellus "BackendName" :tunnus "BackendIdNumber"} that doesn't have :sovellus "lupapiste"
-                        ;; and combine to a single string like "BackendName-BackendIdNumber" (or just "BackendIdNumber" of "BackendName" is missing or empty)
-                        (let [MuuTunnus (-> (util/find-first #(not= "lupapiste" (-> % :MuuTunnus :sovellus sade.strings/lower-case)) (:muuTunnustieto katselmus))
-                                            :MuuTunnus)
-                              sovellus (:sovellus MuuTunnus)
-                              tunnus (:tunnus MuuTunnus "")
-                              ]
-                          (if (and (not-empty sovellus) (not-empty tunnus))
-                            (str tunnus "-" sovellus)
-                            ;; else
-                            tunnus)))
         first-huomautus (first (get-in katselmus [:huomautukset]))
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
@@ -319,15 +314,13 @@
                         :lasnaolijat (get katselmus :lasnaolijat "")
                         :huomautukset {:kuvaus (or (-> first-huomautus :huomautus :kuvaus)
                                                    "")}
-                        :poikkeamat (get katselmus :poikkeamat "")
-                        }
-        data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
-              :vaadittuLupaehtona true
-              :rakennus (merge-rakennustieto rakennustieto
-                                             (rakennus-data-from-buildings {} buildings))
-              :katselmus katselmus-data
-              :muuTunnus (get-muuTunnus katselmus)
-              }
+                        :poikkeamat (get katselmus :poikkeamat "")}
+        data (merge {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
+                     :vaadittuLupaehtona true
+                     :rakennus (merge-rakennustieto rakennustieto
+                                                    (rakennus-data-from-buildings {} buildings))
+                     :katselmus katselmus-data}
+                    (get-muu-tunnus-data katselmus))
 
         schema-name (if (-> katselmus-data :tila (= "pidetty"))
                       "task-katselmus-backend"
