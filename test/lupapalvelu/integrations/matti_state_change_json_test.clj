@@ -1,4 +1,4 @@
-(ns lupapalvelu.integrations.matti-state-change-json
+(ns lupapalvelu.integrations.matti-state-change-json-test
   (:require [midje.sweet :refer :all]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.integrations.matti :as mjson]
