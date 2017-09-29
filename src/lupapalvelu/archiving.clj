@@ -18,7 +18,7 @@
             [sade.util :as util]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.action :as action]
             [lupapalvelu.archiving-util :refer [metadata-query mark-application-archived-if-done]]
             [lupapalvelu.application-meta-fields :as amf]
@@ -250,7 +250,7 @@
       _projectDescriptionIndex)))
 
 (defn- op-specific-data-for-attachment [{:keys [buildings documents] :as application} attachment]
-  (let [attachment-op-ids (set (att/get-operation-ids attachment))
+  (let [attachment-op-ids (set (att-util/get-operation-ids attachment))
         op-filtered-bldgs (if (seq attachment-op-ids)
                             (filter #(attachment-op-ids (:operationId %)) buildings)
                             buildings)

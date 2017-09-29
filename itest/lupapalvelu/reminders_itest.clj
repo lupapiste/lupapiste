@@ -4,15 +4,17 @@
             [midje.sweet :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]
+            [sade.coordinate :as coord]
             [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.batchrun :as batchrun]))
+            [lupapalvelu.batchrun :as batchrun]
+            [lupapalvelu.user :as usr]))
 
 (def db-name (str "test_reminders-itest_" (now)))
 
@@ -223,6 +225,7 @@
       :state "verdictGiven",
       :permitType "YA",
       :organization "753-YA",
+      :location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 [404369.304 6693806.957])
       :auth [{:lastName "Panaani"
               :firstName "Pena"
               :username "pena"
@@ -587,8 +590,8 @@
 
     (fact "reminder is sent also to applications in state 'construction-started'"
       (mongo/with-db db-name
-        (update-application (application->command ya-reminder-application)
-                            (merge (application/state-transition-update :constructionStarted 0 ya-reminder-application {})
+        (update-application (assoc (application->command ya-reminder-application) :user usr/batchrun-user-data)
+                            (merge (app-state/state-transition-update :constructionStarted 0 ya-reminder-application {})
                                    {$unset {:work-time-expiring-reminder-sent 1}}))
         (batchrun/ya-work-time-is-expiring-reminder)
         (check-sent-reminder-email

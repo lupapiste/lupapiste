@@ -6,6 +6,7 @@
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
             [lupapalvelu.attachment :as attachment]
@@ -100,24 +101,24 @@
                        (sm/next-state application))
         _           (assert (sm/valid-state? application next-state))
 
-        timestamps  (zipmap [:modified next-state] (repeat created))
-        _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
-
-        history-entry (app/history-entry next-state created user)
-
-        app-updates (util/assoc-when timestamps
-                                     :state next-state
-                                     :handlers (ensure-general-handler-is-set (:handlers application) user @organization)) ; LUPA-1450
-        application (app/post-process-app-for-krysp (merge application app-updates) @organization)
+        handlers    (ensure-general-handler-is-set (:handlers application) user @organization)
+        application (-> application
+                        (assoc :handlers handlers)
+                        (app/post-process-app-for-krysp @organization))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (app/mark-indicators-seen-updates application user created)
         transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$push {:transfers transfer
-                              :history history-entry}
-                       $set (util/deep-merge app-updates attachments-updates indicator-updates)})
+                      (util/deep-merge
+                        {$push {:transfers transfer}}
+                        {$set (util/deep-merge
+                                (when handlers
+                                  {:handlers handlers})
+                                attachments-updates
+                                indicator-updates)}
+                        (app-state/state-transition-update next-state created application user)))
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
     (do-approve application @organization created id current-state lang do-update)))
@@ -309,7 +310,7 @@
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         (util/deep-merge
-                          (app/state-transition-update (sm/next-state application) created orig-app user)
+                          (app-state/state-transition-update (sm/next-state application) created orig-app user)
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))

@@ -2,16 +2,15 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.attachment.stamps :as stamps]
+            [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
             [lupapalvelu.i18n :as i18n]
             [sade.files :as files]
             [sade.util :refer [future* fn-> fn->>] :as util]
-            [sade.strings :as ss]
-            [lupapalvelu.attachment.stamps :as stamps]))
+            [sade.strings :as ss]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -23,7 +22,7 @@
     (assoc (select-keys source [:contentType :fileId :filename :size])
       :signature (util/find-by-key :fileId (:fileId (first versions)) (:signatures attachment))
       :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
-      :operation-ids (set (att/get-operation-ids attachment))
+      :operation-ids (set (att-util/get-operation-ids attachment))
       :attachment-id (:id attachment)
       :attachment-type (:type attachment))))
 
