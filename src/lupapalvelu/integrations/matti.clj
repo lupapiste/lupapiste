@@ -132,7 +132,7 @@
                   :action (:action command))]
         (messages/save msg)
         (infof "MATTI state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
-        (when-let [url nil #_(env/value :matti :rest :url)]         ; TODO send to MQ
+        (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
           (http/post (str url "/" ((env/value :matti :rest :path :state-change)))
                      {:headers          {"X-Username" (env/value :matti :rest :username)
                                          "X-Password" (env/value :matti :rest :password)
