@@ -78,6 +78,7 @@
                                       :subtype "hakija"
                                       :version 1}
    :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
+                                             :postitetaanPaatos {:value true}
                                              :suoramarkkinointilupa {:value false}})}})
 (def- asiamies-henkilo
   {:id "asiamies-henkilo" :schema-info {:name "hakijan-asiamies"
@@ -109,6 +110,7 @@
                        :kokemus {:value "5"}
                        :fise {:value "http://www.ym.fi"}
                        :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+           {:kytkimet {:postitetaanPaatos {:value false}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija1
@@ -137,6 +139,7 @@
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
                             :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                {:kytkimet {:postitetaanPaatos {:value true}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija-old-schema-LUPA-771
@@ -630,6 +633,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "postitetaanKytkin" (:postitetaanKytkin hakija-model) => true)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
@@ -645,6 +649,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi asiamies-model) => "muu osapuoli")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin asiamies-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "postitetaanKytkin" (:postitetaanKytkin asiamies-model) => false)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin asiamies-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
@@ -659,6 +664,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
+    (fact "postitetaanKytkin" (:postitetaanKytkin hakija-model) => false)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => false)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
@@ -682,6 +688,7 @@
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "FISEpatevyyskortti" (:FISEpatevyyskortti suunnittelija-model) => "http://www.ym.fi")
     (fact "FISEkelpoisuus" (:FISEkelpoisuus suunnittelija-model) => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -696,6 +703,7 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -710,6 +718,7 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "A")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => true)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -722,7 +731,8 @@
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
-    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)))
 
 (facts "Canonical suunnittelija-blank-role model is correct"
   (let [suunnittelija (tools/unwrapped (:data suunnittelija-blank-role))

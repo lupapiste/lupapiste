@@ -401,6 +401,7 @@
             :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
             ;; Only explicit check allows direct marketing
             :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
+            :postitetaanKytkin (-> henkilo :kytkimet :postitetaanPaatos true?)
             :henkilo (merge
                        (get-name (:henkilotiedot henkilo))
                        (get-yhteystiedot-data (:yhteystiedot henkilo))
@@ -452,7 +453,8 @@
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :FISEpatevyyskortti (:fise patevyys)
          :FISEkelpoisuus (:fiseKelpoisuus patevyys)
-         :kokemusvuodet (:kokemus patevyys)}
+         :kokemusvuodet (:kokemus patevyys)
+         :postitetaanKytkin (-> suunnittelija :kytkimet :postitetaanPaatos true?)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
         (when (-> suunnittelija :yritys :yritysnimi ss/blank? not)

@@ -349,6 +349,9 @@
 (def osapuoli-body_216
   (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
+(def osapuoli-body_218
+  (update-in osapuoli-body_216 [:child] concat [{:tag :postitetaanKytkin}]))
+
 (def osapuolitieto_210
   {:tag :osapuolitieto :child [osapuoli-body_211]})
 
@@ -360,6 +363,9 @@
 
 (def osapuolitieto_216
   {:tag :osapuolitieto :child [osapuoli-body_216]})
+
+(def osapuolitieto_218
+  {:tag :osapuolitieto :child [osapuoli-body_218]})
 
 
 (def- naapuri {:tag :naapuritieto
@@ -483,6 +489,9 @@
   (update-in suunnittelija_215 [:child] concat [{:tag :FISEpatevyyskortti}
                                                 {:tag :FISEkelpoisuus}]))
 
+(def- suunnittelija_218
+  (update-in suunnittelija_216 [:child] concat [{:tag :postitetaanKytkin}]))
+
 (def suunnittelijatieto_210
   {:tag :suunnittelijatieto :child [suunnittelija_210]})
 
@@ -498,6 +507,8 @@
 (def suunnittelijatieto_216
   {:tag :suunnittelijatieto :child [suunnittelija_216]})
 
+(def suunnittelijatieto_218
+  {:tag :suunnittelijatieto :child [suunnittelija_218]})
 
 (def osapuolet_210
   {:tag :Osapuolet :ns "yht"
@@ -532,6 +543,11 @@
     (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_216)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_216)
     (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
+
+(def osapuolet_218
+  (-> osapuolet_216
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_218)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_218)))
 
 
 (def tilamuutos

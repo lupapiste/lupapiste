@@ -370,7 +370,10 @@
       (update-in [:attr] merge
                  {:xsi:schemaLocation (mapping-common/schemalocation :R "2.2.2")
                   :xmlns:rakval "http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"}
-                 (mapping-common/common-namespaces :R "2.2.2"))))
+                 (mapping-common/common-namespaces :R "2.2.2"))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
