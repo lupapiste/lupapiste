@@ -408,13 +408,15 @@
       {$set   {:attachments.$.applicationState originalApplicationState}
        $unset {:attachments.$.originalApplicationState true}})))
 
-(defn- signature [{:keys [fileId version]} user ts original-signature]
-  {:user   (or (:user original-signature) (usr/summary user))
-   :created (or (:created original-signature) ts (now))
+(defn- signature [{:keys [fileId version]} current-user ts {:keys [user created]}]
+  {:user (or user (usr/summary current-user))
+   :created (or created ts (now))
    :version version
    :fileId fileId})
 
 (defn- signature-updates [version-model user ts original-signature attachment-signatures]
+  "Returns update query for single signature. If attachment version is signed updates signature,
+  if attachment version is not signed add signature."
     (if-let [orig-index (util/position-by-key :version (:version version-model) attachment-signatures)]
       {$set {(util/kw-path :attachments.$.signatures orig-index) (signature version-model user ts original-signature)}}
       {$push {:attachments.$.signatures (signature version-model user ts original-signature)}}))
