@@ -2025,5 +2025,11 @@
 
         (get-in lupa-tunnus [:muuTunnustieto :MuuTunnus]) => {:tunnus (:id aloitusoikeus-hakemus), :sovellus "Lupapiste"}
 
+        (fact "maksaja laskuviite"
+          (->> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto
+               (map :Osapuoli)
+               (util/find-by-key :VRKrooliKoodi "maksaja")
+               :laskuviite) => "1234567890")
+
         (fact "SaapumisPvm = submitted date"
           (:saapumisPvm lupa-tunnus) => "2014-01-02")))

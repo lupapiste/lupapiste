@@ -350,7 +350,8 @@
   (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
 (def osapuoli-body_218
-  (update-in osapuoli-body_216 [:child] concat [{:tag :postitetaanKytkin}]))
+  (update-in osapuoli-body_216 [:child] concat [{:tag :postitetaanKytkin}
+                                                {:tag :laskuviite}]))
 
 (def osapuolitieto_210
   {:tag :osapuolitieto :child [osapuoli-body_211]})

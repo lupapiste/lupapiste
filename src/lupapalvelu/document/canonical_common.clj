@@ -409,6 +409,8 @@
                          {:henkilotunnus (get-in henkilo [:henkilotiedot :hetu])
                           :osoite (get-simple-osoite (:osoite henkilo))
                           :vainsahkoinenAsiointiKytkin (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)}))}
+           (when (not-empty (:laskuviite osapuoli))
+             {:laskuviite (not-empty (:laskuviite osapuoli))})
            (when yritys-type-osapuoli?
              {:yritys (get-yritys-data (:yritys osapuoli))})
            (when omistajalaji {:omistajalaji omistajalaji})))))))
