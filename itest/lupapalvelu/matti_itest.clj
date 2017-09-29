@@ -598,7 +598,14 @@
         (let [{app-id :id
                :as    application} (create-and-submit-application pena
                                                                   :propertyId sipoo-property-id
-                                                                  :operation  :sisatila-muutos)]
+                                                                  :operation  :sisatila-muutos)
+              verdict-fn-factory   (fn [verdict-id]
+                                     {:open #(query sonja :matti-verdict :id app-id
+                                                    :verdict-id verdict-id)
+                                      :edit #(command sonja :edit-matti-verdict :id app-id
+                                                      :verdict-id verdict-id
+                                                      :path (map name (flatten [%1]))
+                                                      :value %2)})]
           (fact "Error: unpublished template-id for verdict draft"
             (command sonja :new-matti-verdict-draft :id app-id :template-id template-id)
             => fail?)
@@ -613,37 +620,35 @@
             (command sonja :new-matti-verdict-draft :id app-id :template-id "bad")
             => fail?)
           (fact "Sonja creates verdict draft"
-            (let [draft         (command sonja :new-matti-verdict-draft
-                                         :id app-id :template-id template-id)
-                  verdict-id    (-> draft :verdict :id)
-                  data          (-> draft :verdict :data)
-                  op-id         (-> data :buildings keys first keyword)
-                  open-verdict  #(query sonja :matti-verdict :id app-id
-                                        :verdict-id verdict-id)
-                  edit-verdict  #(command sonja :edit-matti-verdict :id app-id
-                                          :verdict-id verdict-id
-                                          :path (map name (flatten [%1]))
-                                          :value %2)
-                  check-changes (fn [{changes :changes} expected]
-                                  (fact "Check changes"
-                                    changes => expected)
-                                  (fact "Check that verdict has been updated"
-                                    (-> (open-verdict) :verdict :data)
-                                    => (contains (reduce (fn [acc [x y]]
-                                                           (assoc acc
-                                                                  (-> x first keyword)
-                                                                  y))
-                                                         {}
-                                                         changes))))
-                  check-error   (fn [{errors :errors} & [kw]]
-                                  (if kw
-                                    (fact "Check errors"
-                                      (some (fn [[x y]]
-                                              (and (= kw (util/kw-path x))
-                                                   (util/=as-kw :error.invalid-value y)))
-                                            errors) => true)
-                                    (fact "No errors"
-                                      errors => nil)))]
+            (let [draft                (command sonja :new-matti-verdict-draft
+                                                :id app-id :template-id template-id)
+                  verdict-id           (-> draft :verdict :id)
+                  data                 (-> draft :verdict :data)
+                  op-id                (-> data :buildings keys first keyword)
+                  {open-verdict :open
+                   edit-verdict :edit} (verdict-fn-factory verdict-id)
+                  check-changes        (fn [{changes :changes} expected]
+                                         (fact "Check changes"
+                                           changes => expected)
+                                         (fact "Check that verdict has been updated"
+                                           (-> (open-verdict) :verdict :data)
+                                           => (contains (reduce (fn [acc [x y]]
+                                                                  (assoc acc
+                                                                         (-> x first keyword)
+                                                                         y))
+                                                                {}
+                                                                changes))))
+                  check-error          (fn [{errors :errors} & [kw err-kw]]
+                                         (if kw
+                                           (fact "Check errors"
+                                             (some (fn [[x y]]
+                                                     (and (= kw (util/kw-path x))
+                                                          (util/=as-kw y
+                                                                       (or err-kw
+                                                                           :error.invalid-value))))
+                                                   errors) => true)
+                                           (fact "No errors"
+                                             errors => nil)))]
               data => (contains {:voimassa         ""
                                  :appeal           "Humble appeal."
                                  :julkipano        ""
@@ -911,29 +916,36 @@
                         (command sipoo :publish-verdict-template
                                  :template-id template-id) => ok?)))
                   (fact "New verdict"
-                    (-> (command sonja :new-matti-verdict-draft :id app-id
-                                 :template-id template-id)
-                        :verdict :data)
-                    => {:voimassa         ""
-                        :verdict-text     "Verdict text."
-                        :anto             ""
-                        :giver            "lautakunta"
-                        :foremen-included false
-                        :foremen          ["iv-tj" "erityis-tj"]
-                        :verdict-code     "ehdollinen"
-                        :plans-included   false
-                        :plans            [(:id plan)]
-                        :reviews-included false
-                        :reviews          [(:id review)]
-                        :buildings        {op-id          {:description   "Hello world!"
-                                                           :show-building true
-                                                           :building-id   "789"
-                                                           :operation     "sisatila-muutos"
-                                                           :tag           ""
-                                                           :paloluokka    ""}
-                                           op-id-pientalo {:description   "Hen piaoliang!"
-                                                           :show-building true
-                                                           :building-id   ""
-                                                           :operation     "pientalo"
-                                                           :tag           "Hao"
-                                                           :paloluokka    ""}}}))))))))))
+                    (let  [{verdict :verdict} (command sonja :new-matti-verdict-draft
+                                                       :id app-id
+                                                       :template-id template-id)
+                           {data       :data
+                            verdict-id :id}   verdict
+                           {open-verdict :open
+                            edit-verdict :edit} (verdict-fn-factory verdict-id)]
+                      data => {:voimassa         ""
+                               :verdict-text     "Verdict text."
+                               :anto             ""
+                               :giver            "lautakunta"
+                               :foremen-included false
+                               :foremen          ["iv-tj" "erityis-tj"]
+                               :verdict-code     "ehdollinen"
+                               :plans-included   false
+                               :plans            [(:id plan)]
+                               :reviews-included false
+                               :reviews          [(:id review)]
+                               :buildings        {op-id          {:description   "Hello world!"
+                                                                  :show-building true
+                                                                  :building-id   "789"
+                                                                  :operation     "sisatila-muutos"
+                                                                  :tag           ""
+                                                                  :paloluokka    ""}
+                                                  op-id-pientalo {:description   "Hen piaoliang!"
+                                                                  :show-building true
+                                                                  :building-id   ""
+                                                                  :operation     "pientalo"
+                                                                  :tag           "Hao"
+                                                                  :paloluokka    ""}}}
+                      (facts "Cannot edit verdict values not in the template"
+                        (check-error (edit-verdict :julkipano "29.9.2017")
+                                     :julkipano :error-invalid-value-path)))))))))))))
