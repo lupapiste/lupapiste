@@ -468,19 +468,22 @@
               (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
-(def designer-roles-mapping-new-to-old-220 {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
-                                            "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
-                                            "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
-                                            "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
-                                            "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
-                                            "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
-                                            "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"})
+(def designer-roles-mapping-new-to-old-222 {"muu" "ei tiedossa"})
 
-(defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
+(def designer-roles-mapping-new-to-old-220 (merge designer-roles-mapping-new-to-old-222
+                                                  {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
+                                                   "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
+                                                   "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
+                                                   "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
+                                                   "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
+                                                   "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
+                                                   "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"}))
+
+(defn map-suunnittelija-kuntaroolikoodi [mapping canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
     #(map (fn [suunnittelija]
             (update-in suunnittelija [:Suunnittelija :suunnittelijaRoolikoodi]
-              (fn [role] (or (designer-roles-mapping-new-to-old-220 role) role))))
+              (fn [role] (or (mapping role) role))))
        %)))
 
 (def hakijan-asiamies-mapping-new-to-old-220 {"Hakijan asiamies"  "ei tiedossa"})
@@ -491,9 +494,14 @@
             (update-in osapuoli [:Osapuoli :kuntaRooliKoodi]
               (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role)))) %)))
 
-(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka map-hakijan-asiamies-pre220))
+(def map-enums-212 (comp (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-220)
+                         map-tyonjohtaja-patevyysvaatimusluokka
+                         map-hakijan-asiamies-pre220))
 
-(def map-enums-213-218 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-hakijan-asiamies-pre220))
+(def map-enums-213-218 (comp (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-220)
+                             map-hakijan-asiamies-pre220))
+
+(def map-enums-220 (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-222))
 
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
@@ -511,6 +519,7 @@
         "2.1.6" (map-enums-213-218 canonical)
         "2.1.7" (map-enums-213-218 canonical)
         "2.1.8" (map-enums-213-218 canonical)
+        "2.2.0" (map-enums-220 canonical)
         canonical)
       (common-map-enums krysp-version)))
 

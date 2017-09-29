@@ -142,6 +142,21 @@
                 {:kytkimet {:postitetaanPaatos {:value true}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
+(def- suunnittelija3
+  {:id "suunnittelija3" :schema-info {:name "suunnittelija"
+                                      :version 1}
+   :data (merge suunnittelija-henkilo
+                {:kuntaRoolikoodi {:value "other"}}
+                {:muuSuunnittelijaRooli {:value "ei listassa -rooli"}}
+                {:suunnittelutehtavanVaativuusluokka {:value "C"}}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
+                            :patevyysluokka {:value "B"}
+                            :valmistumisvuosi {:value "2010"}
+                            :kokemus {:value "5"}
+                            :fise {:value "http://www.ym.fi"}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                {:yritys yritysnimi-ja-ytunnus})})
+
 (def- suunnittelija-old-schema-LUPA-771
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
@@ -445,6 +460,7 @@
                 paasuunnittelija
                 suunnittelija1
                 suunnittelija2
+                suunnittelija3
                 maksaja-henkilo
                 maksaja-yritys
                 tyonjohtaja
@@ -697,6 +713,7 @@
         suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "rakennusfysikaalinen suunnittelija")
+    (fact "muuSuunnittelijarooli" (contains? suunnittelija-model :muuSuunnittelijaRooli) => false)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
@@ -712,6 +729,7 @@
         suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
+    (fact "muuSuunnittelijarooli" (contains? suunnittelija-model :muuSuunnittelijaRooli) => false)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "muu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
@@ -719,6 +737,22 @@
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => true)
+    (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
+    (fact "yritys" (:yritys suunnittelija-model) => truthy)))
+
+(facts "Canonical suunnittelija3 model is correct"
+  (let [suunnittelija (tools/unwrapped (:data suunnittelija3))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "muu")
+    (fact "muuSuunnittelijarooli" (:muuSuunnittelijaRooli suunnittelija-model) => "ei listassa -rooli")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
+    (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -1090,7 +1124,7 @@
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
-    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 9)
+    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 10)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
     (fact "tilanNimi" (:tilannimi Kiinteisto) => "Hiekkametsa")
     (fact "kiinteistotunnus" (:kiinteistotunnus Kiinteisto) => "21111111111111")

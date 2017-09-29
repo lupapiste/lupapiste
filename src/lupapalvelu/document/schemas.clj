@@ -454,6 +454,7 @@
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
                        :type :select :sortBy :displayname :required true
+                       :other-key "muuSuunnittelijaRooli"
                        :body [{:name "p\u00e4\u00e4suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.p\u00e4\u00e4suunnittelija"}
                               {:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
                               {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
@@ -477,6 +478,7 @@
 
 (def suunnittelija (body
                     kuntaroolikoodi
+                    {:name "muuSuunnittelijaRooli" :type :string}
                     suunnittelutehtavan-vaativuusluokka
                     henkilo-valitsin
                     designer-basic
