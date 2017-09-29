@@ -67,7 +67,8 @@
     [(valid-fn
        [data]
        (fact {:midje/description (str "data is valid for - " (:state data))}
-         data => map?))
+         data => map?
+         (:messageType data) => "state-change"))
      (existing-building-test
        [data]
        (fact "has buildingId and new:false"

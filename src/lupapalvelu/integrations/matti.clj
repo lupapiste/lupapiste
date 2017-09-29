@@ -42,7 +42,8 @@
 (sc/defschema StateChangeMessage                            ; Actual state-change message
   (merge (set/rename-keys ApplicationBaseData {:location-wgs84 :locationWGS84})
          {:fromState (merge {:name (get app-schema/Application :state)} displayName)
-          :toState   (merge {:name (get app-schema/Application :state)} displayName)}))
+          :toState   (merge {:name (get app-schema/Application :state)} displayName)
+          :messageType sc/Str}))
 
 (defn to-lang-map [localize-function]
   (reduce (fn [result lang]
@@ -111,7 +112,8 @@
       (set/rename-keys {:location-wgs84 :locationWGS84})
       (assoc :state (name new-state))
       (assoc :fromState (state-map (:state application)))
-      (assoc :toState (state-map new-state))))
+      (assoc :toState (state-map new-state))
+      (assoc :messageType "state-change")))
 
 (def valid-states (states/all-application-states-but :draft :open))
 
@@ -133,7 +135,7 @@
         (messages/save msg)
         (infof "MATTI state-change payload written to mongo for state '%s', messageId: %s" (name new-state) message-id)
         (when-let [url (env/value :matti :rest :url)]         ; TODO send to MQ
-          (http/post (str url "/" ((env/value :matti :rest :path :state-change)))
+          (http/post (str url "/" (env/value :matti :rest :path :state-change))
                      {:headers          {"X-Username" (env/value :matti :rest :username)
                                          "X-Password" (env/value :matti :rest :password)
                                          "X-Vault"    (env/value :matti :rest :vault)}
