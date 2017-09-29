@@ -94,6 +94,13 @@ $bulletin-breakpoint: 1166px;
     background-color: $gray238;
   }
 
+  .orange-bg {
+    background-color: $orange-dark;
+    h1,h2,p {
+      color: #fff;
+    }
+  }
+
   .content-center {
     max-width: $application-max-width;
     margin: 0 auto;

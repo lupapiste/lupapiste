@@ -26473,6 +26473,14 @@ div.summary-button-bar {
   background-color: #eeeeee;
 }
 
+#bulletins .orange-bg, #local-bulletins .orange-bg {
+  background-color: #f39129;
+}
+
+#bulletins .orange-bg h1, #bulletins .orange-bg h2, #bulletins .orange-bg p, #local-bulletins .orange-bg h1, #local-bulletins .orange-bg h2, #local-bulletins .orange-bg p {
+  color: #fff;
+}
+
 #bulletins .content-center, #local-bulletins .content-center {
   max-width: 1280px;
   margin: 0 auto;
