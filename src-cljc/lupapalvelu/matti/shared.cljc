@@ -28,7 +28,7 @@
    :muutti-maaraysta            "muutti m\u00e4\u00e4r\u00e4yst\u00e4 tai p\u00e4\u00e4t\u00f6st\u00e4"
    :muutti-myonnetyksi          "muutti my\u00f6nnetyksi"
    :myonnetty                   "my\u00f6nnetty"
-   :myonnetty-aloitusoikeudella "my\u00f6nnetty aloitusoikeudella "
+   :myonnetty-aloitusoikeudella "my\u00f6nnetty aloitusoikeudella"
    :osittain-myonnetty          "osittain my\u00f6nnetty"
    :peruutettu                  "peruutettu"
    :puollettu                   "puollettu"
