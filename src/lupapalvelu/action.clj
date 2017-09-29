@@ -271,8 +271,10 @@
           (seq (get-in changes [$pull :verdicts])))
         "event must be pushed to history array when state is set")
       (if (env/dev-mode?)
-        (assert (map? (:user command)) (format "no user defined in command %s for update-application call state was %s" (:action command) new-state))
-        (warnf "no user defined in command '%s' for update-application call" (:action command))))
+        (when-not (map? (:user command))
+          (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
+        (when-not (map? (:user command))
+          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command)))))
 
     (with-application command
       (fn [{:keys [id]}]
