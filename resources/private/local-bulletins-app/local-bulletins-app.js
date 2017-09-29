@@ -12,6 +12,6 @@
 
       ko.registerLupapisteComponents(components);
 
-      $("#local-bulletins").applyBindings({});
+      $("#local-bulletins").applyBindings({vetumaService: new LUPAPISTE.VetumaService()});
     });
 })();

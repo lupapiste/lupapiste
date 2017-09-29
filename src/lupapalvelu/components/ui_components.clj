@@ -509,7 +509,7 @@
               :js ["neighbor-show.js"]}
 
    :bulletins-common {:depends []
-                      :js ["header.js"]
+                      :js ["header.js" "vetuma-service.js"]
                       :html ["header.html" "footer.html"]}
 
    :bulletins {:depends [:bulletins-common :ui-components :map :docgen :services]
@@ -532,7 +532,6 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
-                    "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
