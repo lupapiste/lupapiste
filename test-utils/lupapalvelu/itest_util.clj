@@ -236,7 +236,9 @@
   (decode-response (http-get (str (server-address) "/dev/by-id/" (name collection) "/" id) (apply hash-map args))))
 
 (defn integration-messages [app-id & args]
-  (decode-response (http-get (str (server-address) "/dev/integration-messages/" app-id) (apply hash-map args))))
+  (-> (http-get (str (server-address) "/dev/integration-messages/" app-id) (apply hash-map args))
+      (decode-response)
+      (get-in [:body :data])))
 
 (defn clear-collection [collection]
   (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
