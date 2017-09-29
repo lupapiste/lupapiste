@@ -184,7 +184,7 @@ body {
   height: 100%;
 }
 
-body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins, body.financial-authority {
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins, body.local-bulletins, body.financial-authority {
   min-height: 100vh;
   padding-bottom: 320px;
   position: relative;
@@ -26497,6 +26497,22 @@ div.summary-button-bar {
   text-align: center;
   width: 80%;
   margin: 0 auto 20px;
+}
+
+#bulletins .municipal-heading, #local-bulletins .municipal-heading {
+  font-weight: 900;
+  padding-top: 40px;
+}
+
+#bulletins .municipal-caption, #local-bulletins .municipal-caption {
+  border: 1px solid;
+  padding: 20px;
+  margin-top: 40px;
+  border-color: #f39129;
+}
+
+#bulletins .municipal-caption p:last-child, #local-bulletins .municipal-caption p:last-child {
+  margin-bottom: auto;
 }
 
 #bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron, #local-bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {

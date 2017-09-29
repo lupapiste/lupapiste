@@ -119,6 +119,22 @@ $bulletin-breakpoint: 1166px;
     margin: 0 auto $grid-margin;
   }
 
+  .municipal-heading {
+    font-weight: 900;
+    padding-top: $grid-margin-large;
+  }
+
+  .municipal-caption {
+    border: 1px solid;
+    padding: $grid-margin;
+    margin-top: $grid-margin-large;
+    border-color: $orange-dark;
+
+    p:last-child {
+      margin-bottom: auto;
+    }
+  }
+
   .autocomplete-component {
     .autocomplete-selection-wrapper {
       i.tag-chevron {
