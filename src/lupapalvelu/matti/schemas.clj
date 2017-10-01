@@ -11,6 +11,8 @@
             [schema.core :refer [defschema] :as sc]))
 
 
+;; Note: remember to add Matti docgen schema names to
+;; pdf-export-test/ignored-schemas.
 (def matti-string {:name "matti-string"
                    :type :string})
 
@@ -20,10 +22,6 @@
 (def verdict-contact {:name  "matti-verdict-contact"
                       :label false
                       :type  :string})
-
-(def verdict-id {:name     "matti-verdict-id"
-                 :readonly true
-                 :type     :string})
 
 (def verdict-giver {:name "matti-verdict-giver"
                     :type :select
@@ -109,7 +107,7 @@
          {:info {:name (:name m)}
           :body (body m)})
        [matti-string verdict-text verdict-contact verdict-check
-        in-verdict verdict-giver verdict-id automatic-vs-manual
+        in-verdict verdict-giver automatic-vs-manual
         complexity date]))
 
 ;; Phrases
