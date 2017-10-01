@@ -7,7 +7,7 @@
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
-(defn ->mapping []
+(def kiinteistotoimitus_to_krysp_102
   (let [osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
                 :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka]
         toimitus [{:toimituksenTiedottieto
@@ -59,8 +59,22 @@
     {:tag :Kiinteistotoimitus :ns "kiito"
      :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :KT "1.0.2")
                    :xmlns:kiito "http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"}
-                  mapping-common/common-namespaces)
+                  (mapping-common/common-namespaces :KT "1.0.2"))
      :child [(mapping-common/mapper toimitus-types "gml")]}))
+
+(def kiinteistotoimitus_to_krysp_105
+  (-> kiinteistotoimitus_to_krysp_102
+      (update-in [:attr] merge
+                 {:xsi:schemaLocation (mapping-common/schemalocation :KT "1.0.5")
+                  :xmlns:kiito "http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus"}
+                 (mapping-common/common-namespaces :R "1.0.5"))))
+
+(defn- get-mapping [krysp-version]
+  {:pre [krysp-version]}
+  (case (name krysp-version)
+    "1.0.2" kiinteistotoimitus_to_krysp_102
+    "1.0.5" kiinteistotoimitus_to_krysp_105
+    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn bind-attachments
   "As agreed with CGI, the attachments are part of
@@ -68,10 +82,10 @@
   attachments to every operative document."
   [canon attachments]
   (letfn [(binder [[k xs]]
-            {k (map #(assoc-in % 
-                               [:toimitushakemustieto :Toimitushakemus :liitetieto] 
-                               attachments) 
-                    xs)})] 
+            {k (map #(assoc-in %
+                               [:toimitushakemustieto :Toimitushakemus :liitetieto]
+                               attachments)
+                    xs)})]
     (if attachments
       (let [m (-> canon :Kiinteistotoimitus :featureMembers)
             attached (reduce #(conj %1 (binder %2)) {} m)]
@@ -86,7 +100,7 @@
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         canonical (bind-attachments canonical-without-attachments
                                     (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical lang))
-        mapping (->mapping)
+        mapping (get-mapping krysp-version)
         xml (emit/element-to-xml canonical mapping)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
     (writer/write-to-disk

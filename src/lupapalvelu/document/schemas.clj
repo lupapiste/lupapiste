@@ -202,10 +202,11 @@
 
 (def ei-tiedossa {:name "ei tiedossa" :i18nkey "ei-tiedossa"})
 
+(def postitetaan-paatos {:name "postitetaanPaatos" :type :checkbox :layout :full-width :i18nkey "osapuoli.postitetaanPaatos"})
 (def suoramarkkinointilupa {:name "suoramarkkinointilupa" :type :checkbox :layout :full-width :i18nkey "osapuoli.suoramarkkinointilupa"})
 (def vain-sahkoinen-asiointi {:name "vainsahkoinenAsiointiKytkin" :type :checkbox :layout :full-width :i18nkey "osapuoli.vainsahkoinenAsiointiKytkin" :default true})
 
-(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa]})
+(def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa postitetaan-paatos]})
 (def kytkimet-with-vain-sahkoinen-asiointi (update-in kytkimet [:body] conj vain-sahkoinen-asiointi))
 
 (def national-building-id "valtakunnallinenNumero")
@@ -447,7 +448,8 @@
                        suunnittelutehtavan-vaativuusluokka
                        henkilo-valitsin
                        designer-basic
-                       {:name "patevyys" :type :group :body patevyys}))
+                       {:name "patevyys" :type :group :body patevyys}
+                       {:name "kytkimet" :type :group :i18nkey "empty" :body [postitetaan-paatos]}))
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
@@ -478,7 +480,8 @@
                     suunnittelutehtavan-vaativuusluokka
                     henkilo-valitsin
                     designer-basic
-                    {:name "patevyys" :type :group :body patevyys}))
+                    {:name "patevyys" :type :group :body patevyys}
+                    {:name "kytkimet" :type :group :i18nkey "empty" :body [postitetaan-paatos]}))
 
 (def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
                                            :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"

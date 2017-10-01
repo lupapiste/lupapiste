@@ -3,6 +3,7 @@
             [lupapiste.mongocheck.checks :as checks]
             [lupapalvelu.server]                            ; ensure all namespaces are loaded
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.model :as model]
@@ -189,7 +190,7 @@
 (defn validate-verdict-history-entry [{:keys [state history verdicts] :as application}]
   (when (contains? (difference states/post-verdict-states ignore-states-set) (keyword state))
     (let [verdict-state (sm/verdict-given-state application)
-          verdict-history-entries (->> (app/state-history-entries history)
+          verdict-history-entries (->> (app-state/state-history-entries history)
                                        (filter #(= (:state %) (name verdict-state))))]
       (when (and (zero? (count verdict-history-entries)) (not (zero? (count verdicts))))
         (format "Application has verdict, but no verdict history entry ('%s' required, has %d verdicts)" verdict-state (count verdicts))))))

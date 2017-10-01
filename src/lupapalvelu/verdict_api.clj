@@ -1,7 +1,9 @@
 (ns lupapalvelu.verdict-api
-  (:require [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
+  (:require [clojure.set :as set]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.transformations :as doc-transformations]
@@ -121,7 +123,7 @@
     (when-let [next-state (sm/verdict-given-state application)]
       (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)
             verdict-updates (util/deep-merge
-                              (app/state-transition-update next-state timestamp application user)
+                              (app-state/state-transition-update next-state timestamp application user)
                               {$set {:verdicts.$.draft false}})]
         (update-application command {:verdicts {$elemMatch {:id id}}} verdict-updates)
         (inspection-summary/process-verdict-given application)
@@ -171,7 +173,7 @@
                                  :comments {:target target}
                                  :tasks {:id {$in task-ids}}}}
                          (when step-back?
-                           (app/state-transition-update (if (and sent (sm/valid-state? application :sent))
+                           (app-state/state-transition-update (if (and sent (sm/valid-state? application :sent))
                                                           :sent
                                                           :submitted)
                                                         created
@@ -203,7 +205,7 @@
                             (when (and (ya/sijoittaminen? application)
                                        (:sopimus verdict)
                                        (not= (:state application) "agreementSigned"))
-                              (app/state-transition-update :agreementSigned created application user))))]
+                              (app-state/state-transition-update :agreementSigned created application user))))]
           (create-verdict-pdfa! user application verdictId lang)
           result))
     (do

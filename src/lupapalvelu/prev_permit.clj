@@ -248,8 +248,9 @@
       (action/update-application command updates))
 
     (let [updated-application (mongo/by-id :applications (:id created-application))
-          {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)]
-      (review/save-review-updates user/batchrun-user-data updated-application updates added-tasks-with-updated-buildings attachments-by-task-id))
+          {:keys [updates added-tasks-with-updated-buildings attachments-by-task-id]} (review/read-reviews-from-xml user/batchrun-user-data (now) updated-application xml)
+          review-command (assoc (action/application->command updated-application) :user user/batchrun-user-data :action "prev-permit-review-udpates")]
+      (review/save-review-updates review-command updates added-tasks-with-updated-buildings attachments-by-task-id))
 
     (invite-applicants command hakijat authorize-applicants)
 

@@ -14,6 +14,7 @@
             [lupapalvelu.action :refer [defraw defquery defcommand
                                         update-application notify] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.assignment :as assignment]
@@ -260,14 +261,14 @@
    :user-authz-roles (conj roles/default-authz-writer-roles :foreman)
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
-                                     ((comp keyword :state) (app/last-history-item application)))
+                                     ((comp keyword :state) (app-state/last-history-item application)))
                           (fail :error.latest-state-not-canceled)))
                       (fn [{:keys [application]}]
-                        (when-not (states/all-states (app/get-previous-app-state application))
+                        (when-not (states/all-states (app-state/get-previous-app-state application))
                           (fail :error.illegal-state)))
                       (fn [{:keys [application user]}]
                         (when-not (usr/authority? user)
-                          (let [canceled-entry (app/last-history-item application)]
+                          (let [canceled-entry (app-state/last-history-item application)]
                             (when-not (= (:username user) (get-in canceled-entry [:user :username]))
                               (fail :error.undo-only-for-canceler)))))]
    :on-success       (notify :undo-cancellation)
@@ -284,7 +285,7 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
-  (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created application user))))
+  (update-application command (util/deep-merge (app-state/state-transition-update :complementNeeded created application user))))
 
 (defcommand cleanup-krysp
   {:description      "Removes application KRYSP messages. The cleanup
@@ -618,9 +619,9 @@
         warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
     (if warranty?
       (update-application command (util/deep-merge
-                                    (app/state-transition-update (keyword state) (:created command) application user)
+                                    (app-state/state-transition-update (keyword state) (:created command) application user)
                                     {$set (app/warranty-period (:created command))}))
-      (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
+      (update-application command (app-state/state-transition-update (keyword state) (:created command) application user)))))
 
 (defcommand return-to-draft
   {:description "Returns the application to draft state."
@@ -635,7 +636,7 @@
     created                         :created
     :as command}]
   (->> (util/deep-merge
-        (app/state-transition-update :draft created application user)
+        (app-state/state-transition-update :draft created application user)
         (when (seq text)
           (comment/comment-mongo-update state text {:type "application"} role false user nil created))
         {$set {:submitted nil}})
@@ -815,7 +816,7 @@
                                                          (:documents application)))
                                :state         state
 
-                               :history [(app/history-entry state created user)]
+                               :history [(app-state/history-entry state created user)]
                                :infoRequest false
                                :openInfoRequest false
                                :convertedToApplication nil
@@ -900,7 +901,7 @@
   [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]
   (update-application command
                       (util/deep-merge
-                       (app/state-transition-update :open created (assoc app :infoRequest false) user)
+                       (app-state/state-transition-update :open created (assoc app :infoRequest false) user)
                        {$set  {:infoRequest            false
                                :openInfoRequest        false
                                :convertedToApplication created

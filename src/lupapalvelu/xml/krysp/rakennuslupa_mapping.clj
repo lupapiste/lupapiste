@@ -214,7 +214,7 @@
    :ns "rakval"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :R "2.1.2")
                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
-           mapping-common/common-namespaces)
+                (mapping-common/common-namespaces :R "2.1.2"))
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
@@ -365,6 +365,16 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
                  {:tag :Liite :child mapping-common/liite-children_216})))
 
+(def rakennuslupa_to_krysp_222
+  (-> rakennuslupa_to_krysp_220
+      (update-in [:attr] merge
+                 {:xsi:schemaLocation (mapping-common/schemalocation :R "2.2.2")
+                  :xmlns:rakval "http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"}
+                 (mapping-common/common-namespaces :R "2.2.2"))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})))
+
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
@@ -375,6 +385,7 @@
     "2.1.6" rakennuslupa_to_krysp_216
     "2.1.8" rakennuslupa_to_krysp_218
     "2.2.0" rakennuslupa_to_krysp_220
+    "2.2.2" rakennuslupa_to_krysp_222
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- katselmus-pk? [{:keys [type-group type-id] :as attachment-type}]

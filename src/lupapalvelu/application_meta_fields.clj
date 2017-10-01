@@ -9,7 +9,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.util :as att-util]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -125,7 +125,7 @@
     0))
 
 (defn- state-base-filter [required-state attachment]
-  (util/=as-kw required-state (att/attachment-state attachment)))
+  (util/=as-kw required-state (att-util/attachment-state attachment)))
 
 (defn- count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset] :as application}]
   (if-not infoRequest

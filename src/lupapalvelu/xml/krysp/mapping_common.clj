@@ -11,36 +11,43 @@
                   "2.1.5" "2.1.3"
                   "2.1.6" "2.1.5"
                   "2.1.8" "2.1.5"
-                  "2.2.0" "2.1.6"})
+                  "2.2.0" "2.1.6"
+                  "2.2.2" "2.1.8"})
 
 (def- ya-yht {"2.1.2" "2.1.0"
               "2.1.3" "2.1.3"
               "2.2.0" "2.1.5"
-              "2.2.1" "2.1.6"})
+              "2.2.1" "2.1.6"
+              "2.2.3" "2.1.8"})
 
 (def- poik-yht {"2.1.2" "2.1.0"
                 "2.1.3" "2.1.1"
                 "2.1.4" "2.1.2"
                 "2.1.5" "2.1.3"
                 "2.2.0" "2.1.5"
-                "2.2.1" "2.1.6"})
+                "2.2.1" "2.1.6"
+                "2.2.3" "2.1.8"})
 
 (def- ymp-yht {"2.1.2" "2.1.3"
-               "2.2.1" "2.1.6"})
+               "2.2.1" "2.1.6"
+               "2.2.3" "2.1.8"})
 
 (def- vvvl-yht {"2.1.3" "2.1.3"
-                "2.2.1" "2.1.6"})
+                "2.2.1" "2.1.6"
+                "2.2.3" "2.1.8"})
 
 (def- kt-yht {"0.9"   "2.1.3"
               "0.9.1" "2.1.4"
               "0.9.2" "2.1.5"
               "1.0.0" "2.1.5"
               "1.0.1" "2.1.5"
-              "1.0.2" "2.1.6"})
+              "1.0.2" "2.1.6"
+              "1.0.5" "2.1.8"})
 
 (def- mm-yht {"0.9"   "2.1.5"
               "1.0.0" "2.1.5"
-              "1.0.1" "2.1.6"})
+              "1.0.1" "2.1.6"
+              "1.0.3" "2.1.8"})
 
 (def- yht-version
   {:R rakval-yht
@@ -64,26 +71,43 @@
     "maa_ainesluvat" "maaAinesluvat.xsd"
     (str (ss/suffix ns-name "/") ".xsd")))
 
-(defn- paikkatietopalvelu [ns-name ns-version]
-  (format "http://www.paikkatietopalvelu.fi/gml/%s http://www.paikkatietopalvelu.fi/gml/%s/%s/%s"
+(defn schema-domain
+  ([permit-type ns-version]
+   (schema-domain (get-yht-version permit-type ns-version)))
+  ([common-version]
+   (if (->> (map read-string (ss/split common-version #"\."))
+            (map <= [2 1 8])
+            (some false?))
+     "www.paikkatietopalvelu.fi"
+     "www.kuntatietopalvelu.fi")))
+
+(defn- paikkatietopalvelu [domain ns-name ns-version]
+  (format "http://%s/gml/%s http://%s/gml/%s/%s/%s"
+    domain
     ns-name
+    domain
     ns-name
     ns-version
     (xsd-filename ns-name)))
 
 (defn schemalocation [permit-type ns-version]
   {:pre [(get-yht-version permit-type ns-version)]}
-  (let [ns-name (permit/get-metadata permit-type :wfs-krysp-ns-name)]
+  (let [common-version (get-yht-version permit-type ns-version)
+        domain (schema-domain common-version)
+        ns-name (permit/get-metadata permit-type :wfs-krysp-ns-name)]
     (str
-     (paikkatietopalvelu "yhteiset" (get-yht-version permit-type ns-version))
+     (paikkatietopalvelu domain "yhteiset" common-version)
      "\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n"
-     (paikkatietopalvelu ns-name ns-version))))
+     (paikkatietopalvelu domain ns-name ns-version))))
 
-(def common-namespaces
-  {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-   :xmlns:gml   "http://www.opengis.net/gml"
-   :xmlns:xlink "http://www.w3.org/1999/xlink"
-   :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"})
+(defn common-namespaces
+  ([permit-type ns-version]
+   (common-namespaces (get-yht-version permit-type ns-version)))
+  ([common-version]
+   {:xmlns:yht   (format "http://%s/gml/yhteiset" (schema-domain common-version))
+    :xmlns:gml   "http://www.opengis.net/gml"
+    :xmlns:xlink "http://www.w3.org/1999/xlink"
+    :xmlns:xsi   "http://www.w3.org/2001/XMLSchema-instance"}))
 
 (defn update-child-element
   "Utility for updating mappings: replace child in a given path with v.
@@ -325,6 +349,10 @@
 (def osapuoli-body_216
   (update-in osapuoli-body_215 [:child] concat [{:tag :suoramarkkinointikieltoKytkin}]))
 
+(def osapuoli-body_218
+  (update-in osapuoli-body_216 [:child] concat [{:tag :postitetaanKytkin}
+                                                {:tag :laskuviite}]))
+
 (def osapuolitieto_210
   {:tag :osapuolitieto :child [osapuoli-body_211]})
 
@@ -336,6 +364,9 @@
 
 (def osapuolitieto_216
   {:tag :osapuolitieto :child [osapuoli-body_216]})
+
+(def osapuolitieto_218
+  {:tag :osapuolitieto :child [osapuoli-body_218]})
 
 
 (def- naapuri {:tag :naapuritieto
@@ -459,6 +490,9 @@
   (update-in suunnittelija_215 [:child] concat [{:tag :FISEpatevyyskortti}
                                                 {:tag :FISEkelpoisuus}]))
 
+(def- suunnittelija_218
+  (update-in suunnittelija_216 [:child] concat [{:tag :postitetaanKytkin}]))
+
 (def suunnittelijatieto_210
   {:tag :suunnittelijatieto :child [suunnittelija_210]})
 
@@ -474,6 +508,8 @@
 (def suunnittelijatieto_216
   {:tag :suunnittelijatieto :child [suunnittelija_216]})
 
+(def suunnittelijatieto_218
+  {:tag :suunnittelijatieto :child [suunnittelija_218]})
 
 (def osapuolet_210
   {:tag :Osapuolet :ns "yht"
@@ -508,6 +544,11 @@
     (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_216)
     (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_216)
     (update-in [:child] update-child-element [:naapuritieto] naapuri-216)))
+
+(def osapuolet_218
+  (-> osapuolet_216
+    (update-in [:child] update-child-element [:osapuolitieto] osapuolitieto_218)
+    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_218)))
 
 
 (def tilamuutos
