@@ -93,10 +93,10 @@
           :deleted  sc/Bool
           :draft    sc/Any ;; draft is copied to version data on publish.
           :modified ssc/Timestamp
-          :versions [{:id        ssc/ObjectIdStr
+          :published {:id        ssc/ObjectIdStr
                       :published ssc/Timestamp
                       :data      sc/Any
-                      :settings  MattiPublishedSettings}]}))
+                      :settings  MattiPublishedSettings}}))
 
 (defschema MattiSavedVerdictTemplates
   {:templates [MattiSavedTemplate]
@@ -123,13 +123,22 @@
 
 ;; Verdicts
 
+(defschema Exclusions
+  "Excluded dicts are removed from the verdict dictionary prior to
+  validation. Rationale: the verdict should enforce the constraints
+  selected in the verdict template."
+  {(sc/optional-key sc/Keyword) (sc/conditional
+                                 map? (sc/recursive #'Exclusions)
+                                 :else true)})
+
 (defschema MattiVerdict
-  {:id                          ssc/ObjectIdStr
-   :template-id                 ssc/ObjectIdStr
-   ;; Verdict is draft until it is published
-   (sc/optional-key :published) ssc/Timestamp
-   :modified                    ssc/Timestamp
-   :data                        sc/Any})
+  (merge MattiCategory
+         {;; Verdict is draft until it is published
+          (sc/optional-key :published)  ssc/Timestamp
+          :modified                     ssc/Timestamp
+          :data                         sc/Any
+          (sc/optional-key :references) MattiPublishedSettings
+          (sc/optional-key :exclusions) Exclusions}))
 
 ;; Schema utils
 

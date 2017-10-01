@@ -1,4 +1,6 @@
 (ns lupapalvelu.ui.matti.path
+  "Various utilities for component state, path, schema and _meta
+  handling."
   (:require [clojure.string :as s]
             [goog.events :as googe]
             [lupapalvelu.matti.shared :as shared]
@@ -6,16 +8,23 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
-(defn state [path state]
+(defn state
+  "Cursor for substate or rather state-within-state."
+  [path state]
   (rum/cursor-in state (map keyword path)))
 
-(defn extend [path & extra]
+(defn extend
+  "New extended path. Extension args can be either items or lists. The
+  result is flattened and nils removed."
+  [path & extra]
   (->> (concat [path] extra)
        flatten
        (remove nil?)
        (map keyword)))
 
 (defn loc-extend
+  "Extends loc-path based on the options. The options can include
+  loc-prefix, locPrefix (via docgen body) or id."
   [loc-path {:keys [id loc-prefix body]}]
   (let [locPrefix (some-> body first :locPrefix)]
     (cond
@@ -24,7 +33,9 @@
       id (extend loc-path id)
       :else loc-path)))
 
-(defn id-extend [id-path {id :id}]
+(defn id-extend
+  "Extends id-path with the options id."
+  [id-path {id :id}]
   (extend id-path id))
 
 (defn schema-options
@@ -49,41 +60,51 @@
     (assoc (schema-options options dict-schema )
            :path (extend path dict dict-path))))
 
-(defn value [path state* & extra]
+(defn value
+  "Value of the substate denoted by path (and extras)."
+  [path state* & extra]
   @(state (extend path extra) state*))
 
-(defn react [path state* & extra]
+(defn react
+  "Like value but uses rum/reac for deref."
+  [path state* & extra]
   (rum/react (state (extend path extra) state*)))
 
-(defn id [path]
+(defn id
+  "Transforms path (list) to id (string).
+
+  ['foo.bar' :hii nil 'hoo'] -> 'foo-bar-hii-hoo'"
+  [path]
   (s/replace (->> (filter identity path)
                   (map name)
                   (s/join "-"))
              "." "-"))
 
-(defmulti loc (fn [a & _]
-                (when (map? a)
-                  :map)))
+(defmulti loc
+  "Localization resolution for different scenarios."
+  (fn [a & _]
+    (when (map? a)
+      :map)))
 
+;; Default localization: args are combined into loc-key and localized.
 (defmethod loc :default
   [& path]
-  #_(console.log "loc:" path)
   (->> (flatten path)
        (filter identity)
        (map name)
        (s/join ".")
        common/loc))
 
+;; Component-aware localization: i18nkey(s), loc-prefix and dict
+;; override the loc-path.
 (defmethod loc :map
   [{:keys [i18nkey loc-path schema] :as arg} & extra]
-  (loc (concat [(if (sequential? arg)
-                  arg
-                  (or i18nkey
-                      (some-> schema :body first :i18nkey)
-                      (:i18nkey schema)
-                      (:loc-prefix schema)
-                      (:dict schema)
-                      loc-path))]
+  (loc (concat [(or i18nkey
+                    (some-> schema :body first :i18nkey)
+                    (:i18nkey schema)
+                    (:loc-prefix schema)
+                    (:dict schema)
+                    loc-path)]
                extra)))
 
 (defn- access-meta
@@ -190,7 +211,7 @@
               :?      (has-path? k state)
               (react path state)))))
 
-(defn eval-state-condition [options condition]
+(defn- eval-state-condition [options condition]
   (cond
     (nil? condition) nil
 
@@ -209,7 +230,7 @@
             (and (not flag) (= op :AND)) false
             :else (recur op xs)))))))
 
-(defn good? [options good-condition bad-condition]
+(defn- good? [options good-condition bad-condition]
   (let [good (eval-state-condition options good-condition)
         bad  (eval-state-condition options bad-condition)]
     (cond

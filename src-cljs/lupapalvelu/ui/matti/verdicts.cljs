@@ -41,14 +41,14 @@
                         (path/value path state)
                         (update-changes-and-errors options)))
 
-(defn reset-verdict [{:keys [verdict settings]}]
+(defn reset-verdict [{:keys [verdict references]}]
   (reset! state/current-verdict
           (when verdict
             {:state (:data verdict)
              :info (dissoc verdict :data)
              :_meta {:updated updater
                      :enabled? (state/auth? :edit-matti-verdict)}}))
-  (reset! state/references settings)
+  (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
 (defn update-application-id []

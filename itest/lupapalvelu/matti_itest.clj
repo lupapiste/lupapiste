@@ -643,10 +643,9 @@
                                            (fact "Check errors"
                                              (some (fn [[x y]]
                                                      (and (= kw (util/kw-path x))
-                                                          (util/=as-kw y
-                                                                       (or err-kw
-                                                                           :error.invalid-value))))
-                                                   errors) => true)
+                                                          (keyword y)))
+                                                   errors) => (or err-kw
+                                                                  :error.invalid-value))
                                            (fact "No errors"
                                              errors => nil)))]
               data => (contains {:voimassa         ""
@@ -672,19 +671,19 @@
                                  :reviews-included true
                                  :statements       ""})
               (fact "Building info is empty but contains the template fields"
-                (-> data :buildings op-id) => {:description            ""
-                                               :show-building          true
-                                               :vss-luokka             ""
-                                               :kiinteiston-autopaikat ""
-                                               :building-id            ""
-                                               :operation              "sisatila-muutos"
-                                               :rakennetut-autopaikat  ""
-                                               :tag                    ""
-                                               :autopaikat-yhteensa    ""
-                                               :paloluokka             ""})
+                data => (contains {:buildings {op-id {:description            ""
+                                                      :show-building          true
+                                                      :vss-luokka             ""
+                                                      :kiinteiston-autopaikat ""
+                                                      :building-id            ""
+                                                      :operation              "sisatila-muutos"
+                                                      :rakennetut-autopaikat  ""
+                                                      :tag                    ""
+                                                      :autopaikat-yhteensa    ""
+                                                      :paloluokka             ""}}}))
 
-              (facts "Verdict settings"
-                (let [{:keys [foremen plans reviews]} (:settings draft)]
+              (facts "Verdict references"
+                (let [{:keys [foremen plans reviews]} (:references draft)]
                   (fact "Foremen"
                     foremen => (just ["vastaava-tj" "iv-tj" "erityis-tj"] :in-any-order))
                   (fact "Reviews"
@@ -916,11 +915,11 @@
                         (command sipoo :publish-verdict-template
                                  :template-id template-id) => ok?)))
                   (fact "New verdict"
-                    (let  [{verdict :verdict} (command sonja :new-matti-verdict-draft
-                                                       :id app-id
-                                                       :template-id template-id)
+                    (let  [{verdict :verdict}   (command sonja :new-matti-verdict-draft
+                                                         :id app-id
+                                                         :template-id template-id)
                            {data       :data
-                            verdict-id :id}   verdict
+                            verdict-id :id}     verdict
                            {open-verdict :open
                             edit-verdict :edit} (verdict-fn-factory verdict-id)]
                       data => {:voimassa         ""
@@ -947,5 +946,10 @@
                                                                   :tag           "Hao"
                                                                   :paloluokka    ""}}}
                       (facts "Cannot edit verdict values not in the template"
-                        (check-error (edit-verdict :julkipano "29.9.2017")
-                                     :julkipano :error-invalid-value-path)))))))))))))
+                        (let [check-fn (fn [kwp value]
+                                         (check-error (edit-verdict (util/split-kw-path kwp)
+                                                                    value)
+                                                      kwp :error.invalid-value-path))]
+                          (check-fn :julkipano "29.9.2017")
+                          (check-fn :buildings.vss-luokka "12")
+                          (check-fn :buildings.kiinteiston-autopaikat 34))))))))))))))

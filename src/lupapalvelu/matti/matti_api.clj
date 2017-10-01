@@ -160,8 +160,8 @@
     (ok :modified created)))
 
 (defcommand publish-verdict-template
-  {:description      "Creates new verdict template version. The version
-  includes also the current settings."
+  {:description      "Publish creates a frozen snapshot of the current
+  template draft. The snapshot includes also the current settings."
    :feature          :matti
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
@@ -423,7 +423,7 @@
 ;; TODO: Make sure that the functionality (including notifications)
 ;; and constraints are in sync with the legacy verdict API.
 
-(defn- verdict-check
+(defn- verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
     :editable? fails if the verdict has been published."
@@ -437,10 +437,6 @@
             (fail! :error.verdict-not-found))
           (when (and editable? (:published verdict))
             (fail! :error.verdict.not-draft)))))))
-
-(defn- verdict-exists [{:keys [data application]}]
-  (when-not (util/find-by-id (:verdict-id data) (:matti-verdicts application))
-    (fail :error.verdict-not-found)))
 
 (defquery application-verdict-templates
   {:description      "List of id, name, default? maps for suitable
@@ -486,7 +482,7 @@
    :user-roles       #{:authority :applicant}
    :parameters [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-check)]
+   :pre-checks       [(verdict-exists)]
    :states           states/give-verdict-states}
   [command]
   (ok (matti/open-verdict command)))
@@ -498,7 +494,7 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-check :editable?)]
+   :pre-checks       [(verdict-exists :editable?)]
    :states           (states/all-states-but [:draft :open])}
   [command]
   (matti/delete-verdict verdict-id command)
@@ -512,7 +508,7 @@
    :parameters       [id verdict-id path value]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [(verdict-check :editable?)]
+   :pre-checks       [(verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [command]
   (ok (matti/edit-verdict command)))

@@ -342,6 +342,8 @@
          {:col 2 :dict kw :id (name kw)})
        kws))
 
+
+;; TODO: access via category
 (def default-verdict-template
   {:dictionary {;; Verdict section
                 :verdict-dates {:loc-text :matti-verdict-dates}
