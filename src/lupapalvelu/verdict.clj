@@ -453,7 +453,17 @@
    - end:           consider verdicts with timestamp < end
    - organizations: when defined, only consider given organizations"
   [options]
-  (mongo/select :applications (missing-verdict-attachments-query options)))
+  (mongo/select :applications
+                (missing-verdict-attachments-query options)
+                {:state            true
+                 :municipality     true
+                 :address          true
+                 :permitType       true
+                 :permitSubtype    true
+                 :organization     true
+                 :primaryOperation true
+                 :verdicts         true
+                 :attachments      true}))
 
 (defn- get-verdicts-from-xml [application organization xml]
   (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
