@@ -699,7 +699,8 @@
                    (when (-> result :updated-verdicts count pos?)
                      ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                      (logging/log-event :info {:run-by "Automatic verdict attachments checking"
-                                               :event "Found new verdict attachments"}))
+                                               :event "Found new verdict attachments"
+                                               :updated-verdicts (-> result :updated-verdicts)}))
                    (when (or (nil? result) (fail? result))
                      (logging/log-event :error {:run-by "Automatic verdict attachment checking"
                                                 :event "Failed to check verdict attachments"
