@@ -1,18 +1,18 @@
 (ns lupapalvelu.matti.phrases-api
   "Phrases support for verdicts and verdict templates."
   (:require [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.matti.matti :as matti]
+            [lupapalvelu.matti.phrases :as phrases]
+            [lupapalvelu.matti.verdict-template :as template]
             [lupapalvelu.states :as states]
-            [sade.core :refer :all]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.matti.phrases :as phrases]))
+            [sade.core :refer :all]))
 
 (defquery organization-phrases
   {:description "Phrases for the authority admin's organization."
    :user-roles  #{:authorityAdmin}
    :feature     :matti}
   [command]
-  (ok :phrases (get (matti/command->organization command)
+  (ok :phrases (get (template/command->organization command)
                     :phrases
                     [])))
 

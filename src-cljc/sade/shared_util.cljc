@@ -1,6 +1,7 @@
 (ns sade.shared-util
   "Required and passed-through by sade.util"
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojure.string :as s]))
 
 (defn find-first
   "Returns first element from coll for which (pred item)
@@ -13,6 +14,11 @@
   matches value v."
   [k v col]
   (some (fn [m] (when (= v (get m k)) m)) col))
+
+(defn find-by-id
+  "Return item from sequence col of maps where :id matches id."
+  [id col]
+  (find-by-key :id id col))
 
 (defn =as-kw
   "Converts arguments to keywords and compares if they are the same"
@@ -44,3 +50,29 @@
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
   [pred m]
   (into {} (filter (fn [[_ v]] (pred v)) m)))
+
+(defn split-kw-path
+  ":a.b.c -> [:a :b :c]"
+  [kw]
+  (map keyword (s/split (name (or kw "")) #"\.")))
+
+
+;; ---------------------------------------------
+;; The following are not aliased in sade.util.
+;; ---------------------------------------------
+
+(defn kw-path
+  "Like sade.util/kw-path on the Clojure side. Note: this is not
+  defaliased in sade.util."
+  [& path]
+  (->> path
+       flatten
+       (remove nil?)
+       (map #(if (keyword? %)
+               (name %)
+               %))
+       (s/join ".")
+       keyword))
+
+(defmacro fn->  [& body] `(fn [x#] (-> x# ~@body)))
+(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))

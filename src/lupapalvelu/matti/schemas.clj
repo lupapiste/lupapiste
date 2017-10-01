@@ -2,8 +2,10 @@
   (:require [clojure.set :as set]
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.tools :refer [body] :as tools]
+            [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.shared :as shared]
             [sade.schemas :as ssc]
+            [sade.strings :as ss]
             [sade.util :as util]
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
@@ -13,7 +15,15 @@
                    :type :string})
 
 (def verdict-text {:name "matti-verdict-text"
-                   :type :text})
+                   :type :string})
+
+(def verdict-contact {:name  "matti-verdict-contact"
+                      :label false
+                      :type  :string})
+
+(def verdict-id {:name     "matti-verdict-id"
+                 :readonly true
+                 :type     :string})
 
 (def verdict-giver {:name "matti-verdict-giver"
                     :type :select
@@ -27,7 +37,21 @@
                                   {:name "manual"}]})
 
 (def verdict-check {:name "matti-verdict-check"
+                    :label false
                     :type :checkbox})
+
+(def in-verdict {:name "required-in-verdict"
+                 :label false
+                 :i18nkey "matti.template-removed"
+                 :type :checkbox})
+
+(def complexity {:name "matti-complexity"
+                 :type :select
+                 :body (map #(hash-map :name %)
+                            ["small" "medium" "large" "extra-large"])})
+
+(def date {:name "matti-date"
+           :type :date})
 
 (defschema MattiCategory
   {:id       ssc/ObjectIdStr
@@ -69,10 +93,10 @@
           :deleted  sc/Bool
           :draft    sc/Any ;; draft is copied to version data on publish.
           :modified ssc/Timestamp
-          :versions [{:id        ssc/ObjectIdStr
+          :published {:id        ssc/ObjectIdStr
                       :published ssc/Timestamp
                       :data      sc/Any
-                      :settings  MattiPublishedSettings}]}))
+                      :settings  MattiPublishedSettings}}))
 
 (defschema MattiSavedVerdictTemplates
   {:templates [MattiSavedTemplate]
@@ -84,8 +108,9 @@
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [matti-string verdict-text verdict-check
-        verdict-giver automatic-vs-manual]))
+       [matti-string verdict-text verdict-contact verdict-check
+        in-verdict verdict-giver verdict-id automatic-vs-manual
+        complexity date]))
 
 ;; Phrases
 
@@ -95,78 +120,33 @@
    :tag      sc/Str
    :phrase   sc/Str})
 
-;; Schema utils
 
-(defn- resolve-path-schema
-  "Resolution result is map with two fixed keys (:path, :data) and one
-  depending on the schema type (:schema, :docgen, :reference-list)."
-  [data xs]
-  (let [path         (mapv keyword xs)
-        docgen       (:docgen data)
-        reflist      (:reference-list data)
-        date-delta   (:date-delta data)
-        multi-select (:multi-select data)
-        phrase-text  (:phrase-text data)
-        wrap         (fn [id schema data]
-                       {id {:schema schema
-                            :path   path
-                            :data   data}})]
-    (cond
-      (:grid data) (wrap :section shared/MattiSection data)
-      docgen       (wrap :docgen (doc-schemas/get-schema {:name docgen}) docgen)
-      date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
-      reflist      (wrap :reference-list shared/MattiReferenceList reflist)
-      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
-      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text))))
+;; Verdicts
+
+(defschema Exclusions
+  "Excluded dicts are removed from the verdict dictionary prior to
+  validation. Rationale: the verdict should enforce the constraints
+  selected in the verdict template."
+  {(sc/optional-key sc/Keyword) (sc/conditional
+                                 map? (sc/recursive #'Exclusions)
+                                 :else true)})
+
+(defschema MattiVerdict
+  (merge MattiCategory
+         {;; Verdict is draft until it is published
+          (sc/optional-key :published)  ssc/Timestamp
+          :modified                     ssc/Timestamp
+          :data                         sc/Any
+          (sc/optional-key :references) MattiPublishedSettings
+          (sc/optional-key :exclusions) Exclusions}))
+
+;; Schema utils
 
 (defn- parse-int [x]
   (let [n (-> x str name)]
-   (cond
-     (integer? x)                 x
-     (re-matches #"^[+-]?\d+$" n) (util/->int n))))
-
-(defn- resolve-index [xs x]
-  (if-let [index (parse-int x)]
-    index
-    (first (keep-indexed (fn [i data]
-                           (when (= x (:id data))
-                             i))
-                         xs))))
-
-(defn- pick-item [xs x]
-  (when-let [i (resolve-index xs x)]
-    (when (contains? (vec xs) i)
-      (nth xs i))))
-
-(declare schema-data-helper)
-
-(defn item-data [items [x & xs]]
-  (when-let [item (pick-item items x)]
-    (schema-data-helper item xs)))
-
-(defn cell-data [grid [x & xs]]
-  (when-let [row (pick-item (:rows grid) x)]
-    (when-let [col (pick-item (get row :row row) (first xs))]
-      (schema-data-helper col (drop 1 xs)))))
-
-(defn schema-data-helper
-  [data [x & xs :as path]]
-  (cond
-    (some-> data :schema :list) (item-data (get-in data [:schema :list :items]) path)
-    (:schema data)              (resolve-path-schema (:schema data) path) ;; Leaf
-    (:sections data)            (item-data (:sections data) path)
-    ;; Must be before grid for section properties (pdf, removed)
-    (nil? xs)                   (resolve-path-schema data path)
-    (:grid data)                (cell-data (:grid data) path)))
-
-(defn schema-data
-  "Data is the reference schema instance (e.g.,
-  shared/default-verdict-template). The second argument is path into
-  data. Returns map with remaining path and resolved schema (see
-  resolve-path-schema)."
-  [data path]
-  (when (and (seq path) (empty? (filter coll? path)))
-    (schema-data-helper data (map #(name (if (number? %) (str %) %)) path))))
+    (cond
+      (integer? x)                 x
+      (re-matches #"^[+-]?\d+$" n) (util/->int n))))
 
 (defmulti validate-resolution :type)
 
@@ -180,11 +160,9 @@
       :error.invalid-value)
     :error.invalid-value-path))
 
-(defmethod validate-resolution :section
-  [{:keys [path schema value] :as options}]
-  (cond
-    (coll? value) :error.invalid-value
-    :else         (schema-error options)))
+(defn path-error [path & [size]]
+  (when (not= (count path) (or size 0))
+    :error.invalid-value-path))
 
 (defmethod validate-resolution :date-delta
   [{:keys [path schema value] :as options}]
@@ -206,6 +184,15 @@
       (not (set/subset? v-set d-set))    :error.invalid-value
       (not= (count items) (count v-set)) :error.duplicate-items)))
 
+(defn check-date
+  "The date is always in the Finnish format: 21.8.2017. Day and month
+  zero-padding is accepted. Empty string is a valid date."
+  [value]
+  (let [trimmed (ss/trim (str value))]
+    (when-not (or (ss/blank? trimmed)
+                  (date/parse-finnish-date trimmed))
+      :error.invalid-value)))
+
 (defmethod validate-resolution :docgen
   [{:keys [path schema value data] :as options}]
   ;; TODO: Use the old-school docgen validation if possible
@@ -221,35 +208,101 @@
       (data-type #{:text :string}) (check sc/Str)
       (= data-type :checkbox)      (check sc/Bool)
       ;; TODO: Nil handling should follow valueAllowUnset.
-      (= data-type :select)        (when-not (nil? value)
+      (= data-type :select)        (when-not (ss/blank? (str value))
                                      (check-items [value] names))
       (= data-type :radioGroup)    (check-items [value] names)
-      :else                        :error.invalid-value))
-  )
+      (= data-type :date)          (check-date value)
+      :else                        :error.invalid-value)))
 
 (defmethod validate-resolution :multi-select
   [{:keys [path schema data value] :as options}]
   ;; Items should not be part of the original path.
-  (or (schema-error (assoc options
-                           :path (conj path :items)))
-      (check-items value (:items data))))
+  (or (path-error path)
+      (schema-error (assoc options
+                           :path [:items]))
+      (check-items value (->> data :items (map #(get % :value %))))))
+
+(defn- get-path [{path :path}]
+  (if (keyword? path)
+    (util/split-kw-path path)
+    path))
 
 (defmethod validate-resolution :reference-list
   [{:keys [path schema data value references] :as options}]
-  (cond
-    (not-empty path) :error.invalid-value-path
-    :else            (check-items value (get-in references (:path data)))))
+  (let [canon-value (->> [value] flatten (remove nil?))]
+    (or
+     (path-error path)
+     (when (and (= (:type data) :select)
+                (> (count canon-value) 1))
+       :error.invalid-value)
+     (when (and (= (:type data) :multi-select)
+                (not (or (nil? value)
+                         (sequential? value))))
+       :error.invalid-value)
+     (when (seq canon-value) ;; Empty selection is allowed.
+       (check-items canon-value
+                    (map #(get % (:item-key data) %)
+                         (get-in references (get-path data))))))))
 
 (defmethod validate-resolution :phrase-text
   [{:keys [path schema value data] :as options}]
-  (schema-error (assoc options :path (conj path :text))))
+  (or (path-error path)
+      (schema-error (assoc options :path [:text]))))
+
+(defmethod validate-resolution :keymap
+  [{:keys [path schema value data] :as options}]
+  (or (path-error path 1)
+      (when-not (util/includes-as-kw? (keys data) (first path))
+        :error.invalid-value-path)))
+
+(defn- resolve-dict-value
+  [data]
+  (let [docgen       (:docgen data)
+        reflist      (:reference-list data)
+        date-delta   (:date-delta data)
+        multi-select (:multi-select data)
+        phrase-text  (:phrase-text data)
+        keymap       (:keymap data)
+        wrap         (fn [type schema data]
+                       {:type   type
+                        :schema schema
+                        :data   data})]
+    (cond
+      docgen       (wrap :docgen (doc-schemas/get-schema
+                                  {:name (get docgen :name docgen)}) docgen)
+      date-delta   (wrap :date-delta shared/MattiDateDelta date-delta)
+      reflist      (wrap :reference-list shared/MattiReferenceList reflist)
+      multi-select (wrap :multi-select shared/MattiMultiSelect multi-select)
+      phrase-text  (wrap :phrase-text shared/MattiPhraseText phrase-text)
+      keymap       (wrap :keymap shared/KeyMap keymap))))
+
+(defn- validate-dictionary-value
+  "Validates that path-value combination is valid for the given
+  dictionary value. Returns error if not valid, nil otherwise."
+  [dict-value value & [path references]]
+  (if dict-value
+    (validate-resolution (assoc (resolve-dict-value dict-value)
+                                :value value
+                                :path path
+                                :references references))
+    :error.invalid-value-path))
+
+(defn- canonize-path [path]
+  (cond
+    (keyword? path) (util/split-kw-path path)
+    (sequential? path) (map keyword path)
+    :else path))
 
 (defn validate-path-value
-  "Error message if not valid, nil otherwise."
-  [schema-instance data-path value & [{:keys [references schema-overrides]}]]
-  (let [resolution (schema-data schema-instance data-path)]
-    (validate-resolution (assoc  (some-> resolution vals first)
-                                 :type (some-> resolution keys first)
-                                 :value value
-                                 :references references
-                                 :schema-overrides schema-overrides))))
+  "Convenience wrapper for validate-dictionary-value."
+  ([{dic :dictionary} path value references]
+   (let [{:keys [schema path]} (shared/dict-resolve (canonize-path path)
+                                                    dic)]
+     (if schema
+       (validate-dictionary-value schema
+                                  value
+                                  path
+                                  references)
+       :error.invalid-value-path)))
+  ([options path value]
+   (validate-path-value options path value nil)))

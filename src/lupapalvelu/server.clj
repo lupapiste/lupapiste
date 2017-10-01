@@ -89,7 +89,8 @@
             [lupapalvelu.admin-reports-api]
             [lupapalvelu.campaign-api]
             [lupapalvelu.digitizer-api]
-            [lupapalvelu.matti.matti-api]
+            [lupapalvelu.matti.verdict-template-api]
+            [lupapalvelu.matti.verdict-api]
             [lupapalvelu.matti.phrases-api]
             [lupapalvelu.financial-api])
 
