@@ -54,3 +54,8 @@
     (->> result-point
       .getCoordinate
       (map (comp #(.doubleValue %) #(round-to % result-accuracy) bigdec)))))
+
+(def known-bad-coordinates
+  "Coordinates from KRYSP message that are known to be invalid."
+  ; Used by Facta at least in 186-R to mark unknown location
+  #{["2.52E7" "6600000.0"]})

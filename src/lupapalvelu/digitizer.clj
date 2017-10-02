@@ -129,7 +129,7 @@
                           {$set {:buildings updated-buildings}}))))
 
 (defn create-archiving-project-application!
-  [command operation buildings-and-structures app-info location-info permit-type building-xml]
+  [command operation buildings-and-structures app-info location-info permit-type building-xml backend-id]
   (let [{:keys [hakijat]} app-info
         document-datas (schema-datas app-info buildings-and-structures)
         manual-schema-datas {"archiving-project" (first document-datas)}
@@ -153,7 +153,8 @@
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
 
-    (when-let [updates (verdict/find-verdicts-from-xml command building-xml false)]
+    (let [updates (or (verdict/find-verdicts-from-xml command building-xml false)
+                      (verdict/backend-id-mongo-updates {} [backend-id]))]
       (action/update-application command updates))
 
     (add-applicant-documents command hakijat)
@@ -170,7 +171,8 @@
       rakennuspaikka-exists?                             (:rakennuspaikka app-info)
       (pp/enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))))
 
-(defn fetch-or-create-archiving-project! [{{:keys [organizationId kuntalupatunnus createAnyway createWithoutBuildings]} :data :as command}]
+(defn fetch-or-create-archiving-project!
+  [{{:keys [organizationId kuntalupatunnus createAnyway createWithoutBuildings]} :data :as command}]
   (let [operation         :archiving-project
         permit-type       "R"                                ; No support for other permit types currently
         dummy-application {:id "" :permitType permit-type :organization organizationId}
@@ -197,5 +199,6 @@
                                                                                                app-info
                                                                                                location-info
                                                                                                permit-type
-                                                                                               building-xml)]
+                                                                                               building-xml
+                                                                                               kuntalupatunnus)]
                                            (ok :id id)))))
