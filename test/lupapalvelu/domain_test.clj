@@ -210,8 +210,16 @@
     (enrich-application-tags {:id ..app-id.. :tags []} {:tags [{:id ..tag-1.. :label ..label-1..}]})
     => {:id ..app-id.. :tags []})
 
+  (fact "no application tags"
+    (enrich-application-tags {:id ..app-id..} {:tags [{:id ..tag-1.. :label ..label-1..}]})
+    => {:id ..app-id.. :tags []})
+
   (fact "empty organization tags (invalid case)"
     (enrich-application-tags {:id ..app-id.. :tags [..tag-1..]} {:tags []})
+    => {:id ..app-id.. :tags []})
+
+  (fact "no organization tags (invalid case)"
+    (enrich-application-tags {:id ..app-id.. :tags [..tag-1..]} {})
     => {:id ..app-id.. :tags []})
 
   (fact "one organization tag and one application tag"
