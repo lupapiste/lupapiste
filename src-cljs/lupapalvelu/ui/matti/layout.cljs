@@ -258,13 +258,8 @@
 ;; Component instantiation
 ;; -------------------------------
 
-(declare view-component)
-
-(defmulti instantiate (fn [options & _]
-                        (schema-type options)))
-
-(defmethod instantiate :docgen
-  [{:keys [schema] :as options} & [wrap-label?]]
+(rum/defc instantiate-docgen < rum/reactive
+  [{:keys [schema] :as options} wrap-label?]
   (let [docgen      (:docgen schema)
         schema-name (get docgen :name docgen)
         options     (path/schema-options options
@@ -277,8 +272,8 @@
       (not editing?) docgen/docgen-view
       wrap-label?    (docgen/docgen-label-wrap options))))
 
-(defmethod instantiate :default
-  [{:keys [schema] :as options} & [wrap-label?]]
+(rum/defc  instantiate-default < rum/reactive
+  [{:keys [schema] :as options} wrap-label?]
   (let [cell-type    (schema-type options)
         schema-value (cell-type schema)
         options      (path/schema-options options schema-value)]
@@ -293,6 +288,19 @@
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
+
+(declare view-component)
+
+(defmulti instantiate (fn [options & _]
+                        (schema-type options)))
+
+(defmethod instantiate :docgen
+  [options & [wrap-label?]]
+  (instantiate-docgen options wrap-label?))
+
+(defmethod instantiate :default
+  [options & [wrap-label?]]
+  (instantiate-default options wrap-label?))
 
 (defmethod instantiate :loc-text
   [{:keys [schema]} & _]
@@ -376,7 +384,8 @@
       (docgen/docgen-label-wrap options elem)
       elem)))
 
-(defn matti-list [{:keys [schema] :as options} & [wrap-label?]]
+(rum/defc matti-list < rum/reactive
+  [{:keys [schema] :as options} & [wrap-label?]]
   [:div.matti-list
    {:class (path/css options)}
    (when (and wrap-label? (:title schema))
@@ -393,7 +402,8 @@
                                       true))])))
                 (:items schema))])
 
-(defn matti-grid [{:keys [schema path state] :as options}]
+(rum/defc matti-grid < rum/reactive
+  [{:keys [schema path state] :as options}]
   (letfn [(grid [{:keys [schema] :as options}]
             [:div
              {:class (path/css options
@@ -429,9 +439,9 @@
                               (get row-schema :row row-schema))])))
                   (-> schema :rows))])]
     (if-let [repeating (:repeating schema)]
-      (map (fn [k]
-             (grid (assoc options
-                          :schema (dissoc schema :repeating)
-                          :path (path/extend path repeating k))))
-           (keys (path/value repeating state)))
+      [:div (map (fn [k]
+                   (grid (assoc options
+                                :schema (dissoc schema :repeating)
+                                :path (path/extend path repeating k))))
+                 (keys (path/value repeating state)))]
       (grid options))))
