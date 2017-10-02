@@ -313,7 +313,7 @@
         :tasks (get-in updates [$set :tasks])
         :state (get-in updates [$set :state] (:state application)))))
 
-(defn- backend-id-mongo-updates
+(defn backend-id-mongo-updates
   [{verdicts :verdicts} backend-ids]
   (some->> backend-ids
            (remove (set (map :kuntalupatunnus verdicts)))
