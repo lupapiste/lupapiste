@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment-itest
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.attachment.util :refer [attachment-state]]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.itest-util :refer :all]

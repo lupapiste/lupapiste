@@ -6,6 +6,7 @@
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.notifications :refer [defemail] :as notifications]
             [lupapalvelu.user :as usr]
             [lupapalvelu.tiedonohjaus :as tos]))
@@ -48,7 +49,7 @@
 (defn attachment-status-ok
   "Pre-checker that fails only if the attachment is not approved"
   [{{attachment-id :attachmentId} :data app :application}]
-  (when (util/not=as-kw (att/attachment-state (util/find-by-id attachment-id (:attachments app))) :ok)
+  (when (util/not=as-kw (att-util/attachment-state (util/find-by-id attachment-id (:attachments app))) :ok)
     (fail :error.attachment-not-approved)))
 
 (defn ram-status-not-ok
@@ -56,7 +57,7 @@
   [{{attachment-id :attachmentId} :data app :application}]
   (let [{:keys [ramLink] :as attachment} (util/find-by-id attachment-id (:attachments app))]
     (when (and (ss/not-blank? ramLink)
-               (util/=as-kw (att/attachment-state attachment) :ok))
+               (util/=as-kw (att-util/attachment-state attachment) :ok))
       (fail :error.ram-approved))))
 
 (defn- find-by-ram-link [link attachments]

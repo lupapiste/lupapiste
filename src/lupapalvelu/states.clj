@@ -1,8 +1,8 @@
 (ns lupapalvelu.states
-  (:require [clojure.set :refer [difference union ]]
+  (:require [clojure.set :refer [difference union]]
+            [lupapiste-commons.states :as common-states]
             [sade.strings :as ss]
-            [sade.util :refer [map-values]]
-            [lupapiste-commons.states :as common-states]))
+            [sade.util :refer [map-values]]))
 
 (defn initial-state [graph]
   {:pre [(map? graph)], :post [%]}
@@ -179,6 +179,10 @@
     (map (fn [g] (->> g (filter #(terminal-state? g (first %))) (map first))))
     (apply concat)
     set))
+
+(def give-verdict-states (union #{:submitted :sent}
+                                (difference verdict-given-states
+                                            terminal-states)))
 
 (def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
 (def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))

@@ -1,6 +1,6 @@
 (ns lupapalvelu.matti.phrases
-  (:require [lupapalvelu.matti.matti :as matti]
-            [lupapalvelu.matti.shared :as shared]
+  (:require [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.matti.verdict-template :as template]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
@@ -15,7 +15,7 @@
 
 (defn phrase-id-exists [command]
   (when-not (util/find-by-id  (some-> command :data :phrase-id)
-                              (:phrases (matti/command->organization command)))
+                              (:phrases (template/command->organization command)))
     (fail :error.phrase-not-found)))
 
 (defn phrase-id-ok

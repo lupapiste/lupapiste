@@ -1,5 +1,6 @@
 (ns lupapalvelu.archiving-util
   (:require [lupapalvelu.action :as action]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]
@@ -52,11 +53,10 @@
         (action/application->command application)
         {$set {:archived.completed now}}))
 
-    (action/update-application
+    (when archiving-project?
+      (action/update-application
       (action/application->command application)
       {:archived.application {$ne nil}
        :archived.completed   {$ne nil}
        :permitType           :ARK}
-      {$set  {:state    :archived
-              :modified now}
-       $push {:history {:state :archived, :ts now, :user (usr/summary user)}}})))
+      (app-state/state-transition-update :archived now application (usr/summary user))))))

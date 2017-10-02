@@ -76,7 +76,7 @@
    :ns "ymy"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YL "2.1.2")
                  :xmlns:ymy "http://www.paikkatietopalvelu.fi/gml/ymparisto/ymparistoluvat"}
-           mapping-common/common-namespaces)
+                (mapping-common/common-namespaces :YL "2.1.2"))
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :ymparistolupatieto :child [{:tag :Ymparistolupa :child ymparistolupaType}]}]})
 
@@ -106,11 +106,19 @@
       ; No change to attachments
       ))
 
+(def ymparistolupa_to_krysp_223
+  (-> ymparistolupa_to_krysp_212
+      (update :attr merge
+              {:xsi:schemaLocation (mapping-common/schemalocation :YL "2.2.3")
+               :xmlns:ymy "http://www.kuntatietopalvelu.fi/gml/ymparisto/ymparistoluvat"}
+              (mapping-common/common-namespaces :YL "2.2.3"))))
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" ymparistolupa_to_krysp_212
     "2.2.1" ymparistolupa_to_krysp_221
+    "2.2.3" ymparistolupa_to_krysp_223
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- common-map-enums [canonical krysp-version]

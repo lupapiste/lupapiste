@@ -80,7 +80,7 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.1.5"]
+                 [prismatic/schema "1.1.6"]
                  [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution
@@ -150,70 +150,71 @@
   :source-paths ["src" "src-cljc"]
   :java-source-paths ["java-src"]
   :cljsbuild {:builds {:rum {:source-paths ^:replace ["src-cljs" "src-cljc"]}}}
-  :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
-                                  [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
-                                  [com.raspasov/clj-ssh "0.5.12"]
-                                  [rhizome "0.2.7"]
-                                  [pdfboxing "0.1.13"]
-                                  [com.cemerick/piggieback "0.2.1"]
-                                  [binaryage/devtools "0.9.4"]]
-                   :plugins [[lein-midje "3.2"]
-                             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
-                             [lupapiste/lein-buildid "0.4.2"]
-                             [lupapiste/lein-nitpicker "0.5.1"]
-                             [lein-figwheel "0.5.9"]]
-                   :resource-paths ["dev-resources"]
-                   :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
-                   :eastwood {:continue-on-exception true
-                              :source-paths ["src"]
-                              :test-paths []}
-                   :sass {:output-style :expanded
-                          :source-map   true}
-                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
-                                  :timeout 200000}
-                   :cljsbuild {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
-                                                         :on-jsload lupapalvelu.ui.ui-components/reload-hook}
-                                              :compiler {:output-dir "resources/public/lp-static/js/out"
-                                                         :output-to "resources/public/lp-static/js/rum-app.js"
-                                                         :main lupapalvelu.ui.ui-components
-                                                         :source-map true
-                                                         :asset-path "/lp-static/js/out"
-                                                         :parallel-build true
-                                                         :pretty-print true
-                                                         :optimizations :none
-                                                         :preloads  [devtools.preload]}}}}}
-             :uberjar  {:main lupapalvelu.main
-                        :cljsbuild {:builds {:rum {:compiler ^:replace {:output-dir "resources/public/lp-static/js/out"
-                                                                        :output-to "resources/public/lp-static/js/rum-app.js"
-                                                                        :asset-path "/lp-static/js/out"
-                                                                        :externs ["src-cljs/lupapalvelu/ui/lupapiste-externs.js"
-                                                                                  "src-cljs/lupapalvelu/ui/moment.ext.js"]
-                                                                        :parallel-build true
-                                                                        :pretty-print false
-                                                                        :optimizations :advanced}}}}
+  :profiles {:dev      {:dependencies   [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
+                                         [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
+                                         [com.raspasov/clj-ssh "0.5.12"]
+                                         [rhizome "0.2.7"]
+                                         [pdfboxing "0.1.13"]
+                                         [com.cemerick/piggieback "0.2.2"]
+                                         ;; Better Chrome Dev Tools support
+                                         [binaryage/devtools "0.9.4"]]
+                        :plugins        [[lein-midje "3.2"]
+                                         [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
+                                         [lupapiste/lein-buildid "0.4.2"]
+                                         [lupapiste/lein-nitpicker "0.5.1"]
+                                         [lein-figwheel "0.5.13"]]
+                        :resource-paths ["dev-resources"]
+                        :source-paths   ["dev-src" "test-utils"]
+                        :jvm-opts       ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
+                        :eastwood       {:continue-on-exception true
+                                         :source-paths          ["src"]
+                                         :test-paths            []}
+                        :sass           {:output-style :expanded
+                                         :source-map   true}
+                        :repl-options   {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]
+                                         :timeout          200000}
+                        :cljsbuild      {:builds {:rum {:figwheel {:websocket-host "lupapiste.local"
+                                                                   :on-jsload      lupapalvelu.ui.ui-components/reload-hook}
+                                                        :compiler {:output-dir     "resources/public/lp-static/js/out"
+                                                                   :output-to      "resources/public/lp-static/js/rum-app.js"
+                                                                   :main           lupapalvelu.ui.ui-components
+                                                                   :source-map     true
+                                                                   :asset-path     "/lp-static/js/out"
+                                                                   :parallel-build true
+                                                                   :pretty-print   true
+                                                                   :optimizations  :none
+                                                                   :preloads       [devtools.preload]}}}}}
+             :uberjar  {:main       lupapalvelu.main
+                        :cljsbuild  {:builds {:rum {:compiler ^:replace {:output-dir     "resources/public/lp-static/js/out"
+                                                                         :output-to      "resources/public/lp-static/js/rum-app.js"
+                                                                         :asset-path     "/lp-static/js/out"
+                                                                         :externs        ["src-cljs/lupapalvelu/ui/lupapiste-externs.js"
+                                                                                          "src-cljs/lupapalvelu/ui/moment.ext.js"]
+                                                                         :parallel-build true
+                                                                         :pretty-print   false
+                                                                         :optimizations  :advanced}}}}
                         :prep-tasks [["cljsbuild" "once" "rum"]
                                      "javac"
                                      "compile"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
-                        :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
+                        :jvm-opts     ["-Djava.awt.headless=true" "-Xmx1G"]}
              :intellij {:test-paths ["itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :figwheel {:server-port 3666
-             :css-dirs ["resources/public/lp-static/css/main.css"]}
+             :css-dirs    ["resources/public/lp-static/css/main.css"]}
   :sass {:target-path  "resources/public/lp-static/css/"
          :source-paths ["resources/private/common-html/sass/"]
          :output-style :compressed}
   :jvm-opts ["-Dfile.encoding=UTF-8"]
-  :nitpicker {:exts ["clj" "js" "html"]
+  :nitpicker {:exts     ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug" #"lp-static/js/"]}
-  :repositories [["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
+  :repositories [["mygrid-repository" {:url       "http://www.mygrid.org.uk/maven/repository"
                                        :snapshots false}]
                  ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
-                 ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
+                 ["com.levigo.jbig2" {:url       "http://jbig2-imageio.googlecode.com/svn/maven-repository"
                                       :snapshots false}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]

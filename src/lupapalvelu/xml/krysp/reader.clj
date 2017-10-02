@@ -73,12 +73,19 @@
 ;;
 
 (defn- extract-vaadittuErityissuunnitelma-elements [lupamaaraykset]
-  (let [vaadittuErityissuunnitelma-array (->>
-                                           (or
-                                             (->> lupamaaraykset :vaadittuErityissuunnitelmatieto (map :vaadittuErityissuunnitelma) seq)  ;; Yhteiset Krysp 2.1.6 ->
-                                             (:vaadittuErityissuunnitelma lupamaaraykset))                                                ;; Yhteiset Krysp -> 2.1.5
-                                           (map ss/trim)
-                                           (remove ss/blank?))]
+  (let [vaaditut-erityissuunnitelmat-217 (->> (:vaadittuErityissuunnitelmatieto lupamaaraykset)
+                                              (map (comp :vaadittuErityissuunnitelma :VaadittuErityissuunnitelma))
+                                              (remove nil?)
+                                              seq)
+        vaaditut-erityissuunnitelmat-216 (->> (:vaadittuErityissuunnitelmatieto lupamaaraykset)
+                                              (map :vaadittuErityissuunnitelma)
+                                              seq)
+        vaaditut-erityissuunnitelmat-215 (:vaadittuErityissuunnitelma lupamaaraykset)
+        vaadittuErityissuunnitelma-array (->> (or vaaditut-erityissuunnitelmat-217
+                                                  vaaditut-erityissuunnitelmat-216
+                                                  vaaditut-erityissuunnitelmat-215)
+                                              (map ss/trim)
+                                              (remove ss/blank?))]
 
     ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
     (if (and
@@ -95,6 +102,10 @@
       (map #(rename-keys % {:maaraysPvm :maaraysaika}))
       (remove nil?))))
 
+(defn extract-muu-tunnus [muu-tunnus]
+  {:muuTunnus (:tunnus muu-tunnus "")
+   :muuTunnusSovellus (:sovellus muu-tunnus "")})
+
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cr/cleanup)
@@ -107,7 +118,10 @@
     (dissoc :vaadittuErityissuunnitelma :vaadittuErityissuunnitelmatieto)
 
     (util/ensure-sequential :vaaditutKatselmukset)
-    (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
+    (#(let [kats (->> (map :Katselmus (:vaaditutKatselmukset %))
+                      (map (fn [katselmus] (-> katselmus
+                                               (merge (-> katselmus :muuTunnustieto :MuuTunnus extract-muu-tunnus))
+                                               (dissoc :muuTunnustieto)))))]
         (if (seq kats)
           (assoc % :vaaditutKatselmukset kats)
           (dissoc % :vaaditutKatselmukset))))

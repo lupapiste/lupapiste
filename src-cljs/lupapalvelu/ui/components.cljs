@@ -1,6 +1,7 @@
 (ns lupapalvelu.ui.components
   (:require [clojure.string :as s]
             [lupapalvelu.ui.common :as common]
+            [lupapalvelu.ui.components.datepicker :as datepicker]
             [lupapalvelu.ui.hub :as hub]
             [rum.core :as rum]
             [sade.shared-util :as util])
@@ -42,7 +43,7 @@
 (rum/defcs pen-input < (rum/local "" ::name)
   (rum/local false ::editing?)
   "Editable text via pen button."
-  [{name ::name editing? ::editing?} {:keys [value handler-fn]}]
+  [{name ::name editing? ::editing?} {:keys [value handler-fn disabled?]}]
   (if @editing?
     (letfn [(save-fn []
               (reset! editing? false)
@@ -63,9 +64,10 @@
         [:i.lupicon-save]]])
     (do (common/reset-if-needed! name value)
         [:span.pen-input--view @name
-         [:button.ghost.no-border
-          {:on-click #(swap! editing? not)}
-          [:i.lupicon-pen]]])))
+         (when-not disabled?
+           [:button.ghost.no-border
+            {:on-click #(swap! editing? not)}
+            [:i.lupicon-pen]])])))
 
 (rum/defc checkbox
   [{:keys [label value handler-fn disabled negate?]}]
@@ -133,6 +135,10 @@
   rum/reactive
   [local-state _ & [options]]
   (let [text* (::text local-state)]
+    ;; Textarea loses focus without blur when the typing starts if the
+    ;; contents are nil.
+    (when (nil? @text*)
+      (reset! text* ""))
     [:textarea.grid-style-input
      (text-options text* options)]))
 
@@ -158,6 +164,11 @@
     (when (integer? scroll)
       (aset container "scrollTop" scroll))))
 
+(defn- set-selected  [selected* value callback]
+  (when (common/reset-if-needed! selected* value)
+    (when callback
+      (callback value))))
+
 ;; Parameters: initial-value options
 ;; Initial value can be atom for two-way binding (see the mixin).
 ;; Options [optional]:
@@ -167,6 +178,7 @@
 ;;   [callback] change callback
 ;;   [clear?] if truthy, clear button is shown when proper (default
 ;;            false).
+;;   [disabled?] Is component disabled? (false)
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
   (rum/local "" ::term)    ; Filtering term
@@ -176,21 +188,19 @@
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} _ {:keys [items clear? callback]}]
+    :as       local-state} _ {:keys [items clear? callback disabled?]}]
   (let [items-fn (if (fn? items)
                    items
                    (default-items-fn items))
         open?    (rum/react open?*)
-        items    (vec (items-fn (rum/react term*)))
-        set-selected (fn [value]
-                       (reset! selected* value)
-                       (when callback
-                         (callback value)))]
+        items    (vec (items-fn (rum/react term*)))]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.matti-autocomplete
      [:div.like-btn.ac--selected
-      {:on-click #(swap! open?* not)}
+      {:on-click (when-not disabled?
+                   #(swap! open?* not))
+       :class (common/css-flags :disabled disabled?)}
       [:span (:text (util/find-by-key :value
                                       (rum/react selected*)
                                       (items-fn "")))]
@@ -198,10 +208,11 @@
        {:class (common/css-flags :lupicon-chevron-small-down (not open?)
                                  :lupicon-chevron-small-up   open?)}]
       (when (and clear?
-                 (not (s/blank? (rum/react selected*))))
+                 (not (s/blank? (rum/react selected*)))
+                 (not disabled?))
         [:i.secondary.ac--clear.lupicon-remove
          {:on-click (fn [event]
-                      (set-selected "")
+                      (set-selected selected* "" callback)
                       (.stopPropagation event))}])]
      (when (rum/react open?*)
        (letfn [(close []
@@ -209,7 +220,7 @@
                  (reset! current* 0))
                (select [value]
                  (when value
-                   (set-selected value))
+                   (set-selected selected* value callback))
                  (close))
                (inc-current [n]
                  (when (pos? (count items))
@@ -269,9 +280,46 @@
                                text])))
                li-items))]]))]))
 
+;; Dropwdown is a styled select.
+;; Parameters: initial-value options
+;; Options [optional]:
+;;   items list of :value, :text maps. Items are rendered ordered by
+;;         text.
+;;   [choose?] If true, the select caption (nil selection) is included. (default true)
+;;   [callback] Selection callback
+(rum/defcs dropdown < rum/reactive
+  (initial-value-mixin ::selected)
+  [{selected* ::selected} _ {:keys [items choose? callback]}]
+  [:select.dropdown
+   {:value (rum/react selected*)
+    :on-change #(set-selected selected* (.. % -target -value) callback)}
+   (cond->> (sort-by :text items)
+     choose? (cons {:text (common/loc "choose")})
+     true    (map (fn [{:keys [text value]}]
+                    [:option {:key   value
+                              :value value} text])))])
+
 ;; Prettyprints the contents of the given atom.
 (rum/defc debug-atom < rum/reactive
-  [a & [title]]
-  [:div.pprint
-   [:div.title [:h4(or title "debug")]]
-   [:div.code (with-out-str (cljs.pprint/pprint (rum/react a)))]])
+  ([atom* title]
+   [:div.pprint
+    [:div.title [:h4 title]]
+    [:a {:on-click #(console.log @atom*)} "console"]
+    [:div.code (with-out-str (cljs.pprint/pprint (rum/react atom*)))]])
+  ([atom*] (debug-atom atom* "debug")))
+
+;; Special options (all optional):
+;;   callback: on-blur callback
+;; The rest of the options are passed to the underlying input.
+;; Note: date format is always the Finnish format (21.8.2017).
+(rum/defcs date-edit < rum/reactive
+  (initial-value-mixin ::date)
+  (datepicker/date-state-mixin ::date {:format "D.M.YYYY"})
+  [{date* ::date :as local-state} _ {:keys [callback] :as options}]
+  [:input.dateinput.dateinput--safe
+   (merge {:type      "text"
+           :value     @date*
+           :on-blur #(set-selected date*
+                                   (.. % -target -value)
+                                   callback)}
+          (dissoc options :callback))])
