@@ -12,7 +12,7 @@
   {:tag :Vesihuoltolaki :ns "ymv"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :VVVL "2.1.3")
                  :xmlns:ymv "http://www.paikkatietopalvelu.fi/gml/ymparisto/vesihuoltolaki"}
-           mapping-common/common-namespaces)
+                (mapping-common/common-namespaces :VVVL "2.1.3"))
    :child
    [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
     {:tag :vapautukset
@@ -68,11 +68,19 @@
       ; No changes to attachments
   ))
 
+(def vesihuolto-to-krysp_223
+  (-> vesihuolto-to-krysp_221
+      (update-in [:attr] merge
+                 {:xsi:schemaLocation (mapping-common/schemalocation :VVVL "2.2.3")
+                  :xmlns:ymv "http://www.kuntatietopalvelu.fi/gml/vesihuoltolaki"}
+                 (mapping-common/common-namespaces :VVVL "2.2.3"))))
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.3" vesihuolto-to-krysp_213
     "2.2.1" vesihuolto-to-krysp_221
+    "2.2.3" vesihuolto-to-krysp_223
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- common-map-enums [canonical krysp-version]

@@ -20,8 +20,6 @@
           _ (upload-attachment pena application-id (first attachments) true :filename "dev-resources/test-pdf.pdf") ; upload file to asemapiirros placeholder
           _ (command pena :submit-application :id application-id)]
       resp => ok?
-      (fact "feature not enabled in pre-verdict-state"
-        (query pena :attachments-for-printing-order :id application-id) => (partial expected-failure? :error.command-illegal-state))
       (command veikko :check-for-verdict :id application-id) => ok?
       (fact "feature not in use for authorities"
         (query veikko :attachments-for-printing-order :id application-id) => (partial expected-failure? :error.unauthorized))

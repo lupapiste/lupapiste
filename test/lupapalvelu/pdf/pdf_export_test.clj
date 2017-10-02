@@ -31,9 +31,13 @@
                        ;; Matti
                        "matti-string"
                        "matti-verdict-text"
+                       "matti-verdict-contact"
                        "matti-verdict-giver"
                        "automatic-vs-manual"
-                       "matti-verdict-check"})
+                       "matti-verdict-check"
+                       "matti-date"
+                       "required-in-verdict"
+                       "matti-complexity"})
 
 (defn- localized-doc-headings [schema-names]
   (map #(loc (str % "._group_label")) schema-names))

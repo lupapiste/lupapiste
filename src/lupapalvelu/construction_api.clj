@@ -2,8 +2,7 @@
   (:require [monger.operators :refer [$set $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify defquery] :as action]
             [lupapalvelu.application :as app]
-            [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.state-machine :as sm]
@@ -39,7 +38,7 @@
                      :started   timestamp}
         krysp?      (save-as-krysp-if-possible application @organization lang app-updates)]
     (update-application command (util/deep-merge
-                                 (app/state-transition-update :constructionStarted created application user)
+                                 (app-state/state-transition-update :constructionStarted created application user)
                                  {$set app-updates}))
     (ok :integrationAvailable krysp?)))
 
@@ -60,7 +59,7 @@
         krysp?      (save-as-krysp-if-possible orig-app @org lang app-updates)]
 
     (update-application command (util/deep-merge
-                                  (app/state-transition-update :closed created orig-app user)
+                                  (app-state/state-transition-update :closed created orig-app user)
                                    (if krysp?
                                      {$set app-updates}
                                      {$set (merge app-updates (app/warranty-period timestamp))})))

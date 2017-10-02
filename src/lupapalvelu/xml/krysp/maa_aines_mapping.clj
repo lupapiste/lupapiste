@@ -62,7 +62,7 @@
    :ns "ymm"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :MAL "2.1.2")
                  :xmlns:ymm "http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"}
-           mapping-common/common-namespaces)
+                (mapping-common/common-namespaces :MAL "2.1.2"))
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :maaAineslupaAsiatieto :child [{:tag :MaaAineslupaAsia :child maaAineslupaAsia}]}
            {:tag :kotitarveottoasiaTieto} ; To be mapped in the future?
@@ -107,11 +107,19 @@
       ; No changes to attachments
       ))
 
+(def maa-aines_to_krysp_223
+  (-> maa-aines_to_krysp_221
+      (update-in [:attr] merge
+                 {:xsi:schemaLocation (mapping-common/schemalocation :MAL "2.2.3")
+                  :xmlns:ymm "http://www.kuntatietopalvelu.fi/gml/ymparisto/maa_ainesluvat"}
+                 (mapping-common/common-namespaces :MAL "2.2.3"))))
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" maa-aines_to_krysp_212
     "2.2.1" maa-aines_to_krysp_221
+    "2.2.3" maa-aines_to_krysp_223
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- common-map-enums [canonical krysp-version]

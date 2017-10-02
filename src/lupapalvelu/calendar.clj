@@ -7,7 +7,8 @@
             [lupapalvelu.action :refer [application->command update-application]]
             [lupapalvelu.application :as app]
             [lupapalvelu.comment :as comment]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.application-utils :as app-utils]
             [sade.core :refer [fail! unauthorized]]
             [sade.env :as env]
             [sade.http :as http]
@@ -16,7 +17,6 @@
             [lupapalvelu.application-search :as search]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application-utils :as app-utils]
             [clj-time.coerce :as tc]
             [clj-time.core :as t]))
 
@@ -171,7 +171,7 @@
                                                      timestamp)
         reservation-push {$push {:reservations reservation}}
         state-change (case (keyword (:state application))
-                       :draft (application/state-transition-update :open timestamp application user)
+                       :draft (app-state/state-transition-update :open timestamp application user)
                        nil)]
     (update-application
       (application->command application)

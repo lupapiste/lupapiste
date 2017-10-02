@@ -3,22 +3,18 @@
             [clojure.data :refer [diff]]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
-            [pandect.core :as pandect]
-            [plumbing.core :as pc]
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.common-reader :as cr]
             [sade.core :refer :all]
-            [sade.env :as env]
-            [sade.files :as files]
-            [sade.http :as http]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :as xml]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.authorization :as auth]
@@ -27,7 +23,6 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]
@@ -209,14 +204,14 @@
          (get-task-updates application created verdicts-with-attachments app-xml)
          (permit/read-verdict-extras-xml application app-xml)
          (when (and update-state? (not (states/post-verdict-states (keyword (:state application)))))
-           (application/state-transition-update (sm/verdict-given-state application) created application user)))))))
+           (app-state/state-transition-update (sm/verdict-given-state application) created application user)))))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
   {:pre [(every? command [:application :user :created]) app-xml]}
   (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-tj-suunnittelija-verdict-xml doc osapuoli-type target-kuntaRoolikoodi))]
     (util/deep-merge
-     (application/state-transition-update (sm/verdict-given-state application) created application user)
+     (app-state/state-transition-update (sm/verdict-given-state application) created application user)
      {$set {:verdicts verdicts-with-attachments}})))
 
 (defn- get-tj-suunnittelija-doc-name
@@ -402,7 +397,7 @@
                        krysp-reader/krysp-state->application-state)]
     (cond
       (nil? new-state) nil
-      (sm/can-proceed? application new-state)  (application/state-transition-update new-state created application user)
+      (sm/can-proceed? application new-state)  (app-state/state-transition-update new-state created application user)
       (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
                                                        (:id application) current-state (name new-state)))))
 

@@ -322,7 +322,10 @@
         (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
       (fact "read verdict"
         read-result => ok?)
-      (review/save-review-updates batchrun-user application (:updates read-result) (:added-tasks-with-updated-buildings read-result) {})
+      (review/save-review-updates (assoc (action/application->command application) :user batchrun-user)
+                                  (:updates read-result)
+                                  (:added-tasks-with-updated-buildings read-result)
+                                  {})
       (let [updated-application (domain/get-application-no-access-checking application-id)
             last-attachment-id (last (get-attachment-ids updated-application))
             last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]

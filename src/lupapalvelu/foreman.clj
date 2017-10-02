@@ -14,7 +14,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.notifications :as notif]
             [lupapalvelu.operations :as op]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]

@@ -78,6 +78,7 @@
                                       :subtype "hakija"
                                       :version 1}
    :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
+                                             :postitetaanPaatos {:value true}
                                              :suoramarkkinointilupa {:value false}})}})
 (def- asiamies-henkilo
   {:id "asiamies-henkilo" :schema-info {:name "hakijan-asiamies"
@@ -109,6 +110,7 @@
                        :kokemus {:value "5"}
                        :fise {:value "http://www.ym.fi"}
                        :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+           {:kytkimet {:postitetaanPaatos {:value false}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija1
@@ -137,6 +139,7 @@
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
                             :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                {:kytkimet {:postitetaanPaatos {:value true}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija-old-schema-LUPA-771
@@ -630,6 +633,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "postitetaanKytkin" (:postitetaanKytkin hakija-model) => true)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
@@ -645,6 +649,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi asiamies-model) => "muu osapuoli")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin asiamies-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "postitetaanKytkin" (:postitetaanKytkin asiamies-model) => false)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin asiamies-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
@@ -659,6 +664,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
+    (fact "postitetaanKytkin" (:postitetaanKytkin hakija-model) => false)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => false)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
@@ -682,6 +688,7 @@
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "FISEpatevyyskortti" (:FISEpatevyyskortti suunnittelija-model) => "http://www.ym.fi")
     (fact "FISEkelpoisuus" (:FISEkelpoisuus suunnittelija-model) => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -696,6 +703,7 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -710,6 +718,7 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "A")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => true)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -722,7 +731,8 @@
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
-    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)))
 
 (facts "Canonical suunnittelija-blank-role model is correct"
   (let [suunnittelija (tools/unwrapped (:data suunnittelija-blank-role))
@@ -1351,23 +1361,291 @@
   (assoc application-rakennuslupa
     :state "verdictGiven"
     :verdicts [{:timestamp (:modified application-rakennuslupa)
-                :kuntalupatunnus "2013-01"}]))
+                :kuntalupatunnus "2013-01"}]
+    :buildings [{:propertyId   "21111111111111"
+                 :nationalId   "098098098"
+                 :localShortId "001"
+                 :description  "Talo"
+                 :operationId  "op1"}
+                {:propertyId   "21111111111111"
+                 :nationalId   "1234567892"
+                 :localShortId "002"
+                 :description  "Eri talo"}
+                {:propertyId   "21111111111111"
+                 :nationalId   "098098098"
+                 :localShortId "003"
+                 :operationId  "op3"}
+                {:propertyId   "21111111111111"
+                 :nationalId   "098098098"
+                 :localShortId "004"
+                 :operationId  "op4"}]))
+
+(testable-privates lupapalvelu.document.rakennuslupa-canonical enrich-review-building get-review-muutunnustieto get-review-rakennustunnus get-review-katselmuksenrakennus get-review-huomautus)
+
+(facts enrich-review-building
+  (fact "empty building"
+    (enrich-review-building application-rakennuslupa-verdict-given {}) => nil)
+
+  (fact "nil building"
+    (enrich-review-building application-rakennuslupa-verdict-given nil) => nil)
+
+  (fact "with all data"
+    (enrich-review-building application-rakennuslupa-verdict-given {:rakennus {:rakennusnro "001"
+                                                                               :jarjestysnumero 1
+                                                                               :valtakunnallinenNumero "123"
+                                                                               :kiinttun "21111111111111"}})
+    => {:rakennus {:rakennusnro "001"
+                   :jarjestysnumero 1
+                   :valtakunnallinenNumero "123"
+                   :kiinttun "21111111111111"
+                   :description "Talo"
+                   :operationId "op1"}})
+
+  (fact "rakennusnro missing"
+    (enrich-review-building application-rakennuslupa-verdict-given {:rakennus {:jarjestysnumero 1
+                                                                               :valtakunnallinenNumero "123"
+                                                                               :kiinttun "21111111111111"}})
+    => {:rakennus {:jarjestysnumero 1
+                   :valtakunnallinenNumero "123"
+                   :kiinttun "21111111111111"}})
+
+  (fact "kiinttun missing"
+    (enrich-review-building application-rakennuslupa-verdict-given {:rakennus {:rakennusnro "001"
+                                                                               :jarjestysnumero 1
+                                                                               :valtakunnallinenNumero "123"}})
+    => {:rakennus {:rakennusnro "001"
+                   :jarjestysnumero 1
+                   :valtakunnallinenNumero "123"
+                   :kiinttun "21111111111111"
+                   :description "Talo"
+                   :operationId "op1"}})
+
+  (fact "valtakunnallinenNumero missing"
+    (enrich-review-building application-rakennuslupa-verdict-given {:rakennus {:rakennusnro "002"
+                                                                               :jarjestysnumero 2
+                                                                               :kiinttun "21111111111111"}})
+    => {:rakennus {:rakennusnro "002"
+                   :jarjestysnumero 2
+                   :valtakunnallinenNumero "1234567892"
+                   :kiinttun "21111111111111"
+                   :description "Eri talo"}}))
+
+(facts get-review-muutunnustieto
+  (fact "emtpy task"
+    (get-review-muutunnustieto {}) => [])
+
+  (fact "nil task"
+    (get-review-muutunnustieto nil) => [])
+
+  (fact "with all required data"
+    (get-review-muutunnustieto {:id "123" :data {:muuTunnus "456" :muuTunnusSovellus "RapApp"}})
+    => [{:MuuTunnus {:tunnus "123" :sovellus "Lupapiste"}}
+        {:MuuTunnus {:tunnus "456" :sovellus "RapApp"}}])
+
+  (fact "with empty muuTunnusSovellus"
+    (get-review-muutunnustieto {:id "123" :data {:muuTunnus "456" :muuTunnusSovellus ""}})
+    => [{:MuuTunnus {:tunnus "123" :sovellus "Lupapiste"}}
+        {:MuuTunnus {:tunnus "456" :sovellus ""}}])
+
+  (fact "without muuTunnusSovellus"
+    (get-review-muutunnustieto {:id "123" :data {:muuTunnus "456" :muuTunnusSovellus nil}})
+    => [{:MuuTunnus {:tunnus "123" :sovellus "Lupapiste"}}
+        {:MuuTunnus {:tunnus "456" :sovellus nil}}])
+
+  (fact "with empty muuTunnus"
+    (get-review-muutunnustieto {:id "123" :data {:muuTunnus "" :muuTunnusSovellus "RakApp"}})
+    => [{:MuuTunnus {:tunnus "123" :sovellus "Lupapiste"}} ])
+
+  (fact "without muuTunnus"
+    (get-review-muutunnustieto {:id "123" :data {:muuTunnus nil :muuTunnusSovellus "RakApp"}})
+    => [{:MuuTunnus {:tunnus "123" :sovellus "Lupapiste"}} ])
+
+  (fact "with empty task id"
+    (get-review-muutunnustieto {:id "" :data {:muuTunnus "456" :muuTunnusSovellus "RakApp"}})
+    => [{:MuuTunnus {:tunnus "456" :sovellus "RakApp"}}])
+
+  (fact "without task id"
+    (get-review-muutunnustieto {:data {:muuTunnus "456" :muuTunnusSovellus "RakApp"}})
+    => [{:MuuTunnus {:tunnus "456" :sovellus "RakApp"}}]))
+
+(facts get-review-rakennustunnus
+  (fact "emtpy buildings"
+    (get-review-rakennustunnus []) => {})
+
+  (fact "nil buildings"
+    (get-review-rakennustunnus nil) => {})
+
+  (fact "with all building data"
+    (get-review-rakennustunnus [{:rakennus {:rakennusnro "002"
+                                            :jarjestysnumero 2
+                                            :valtakunnallinenNumero "1234567892"
+                                            :kiinttun "21111111111111"
+                                            :operationId "op2"
+                                            :description "Eri talo"}}]) =>
+    {:rakennusnro "002"
+     :jarjestysnumero 2
+     :valtakunnallinenNumero "1234567892"
+     :kiinttun "21111111111111"})
+
+  (fact "rakennusnro empty"
+    (get-review-rakennustunnus [{:rakennus {:rakennusnro ""
+                                            :jarjestysnumero 2
+                                            :valtakunnallinenNumero "1234567892"
+                                            :kiinttun "21111111111111"
+                                            :operationId "op2"
+                                            :description "Eri talo"}}]) =>
+    {:jarjestysnumero 2
+     :valtakunnallinenNumero "1234567892"
+     :kiinttun "21111111111111"})
+
+  (fact "valtakunnallinenNumero is nil"
+    (get-review-rakennustunnus [{:rakennus {:rakennusnro "002"
+                                            :jarjestysnumero 2
+                                            :valtakunnallinenNumero nil
+                                            :kiinttun "21111111111111"
+                                            :operationId "op2"
+                                            :description "Eri talo"}}]) =>
+    {:rakennusnro "002"
+     :jarjestysnumero 2
+     :kiinttun "21111111111111"}))
+
+(facts get-review-katselmuksenrakennus
+  (fact "with all data"
+    (get-review-katselmuksenrakennus {:tila     {:tila "pidetty"
+                                                 :kayttoonottava true}
+                                      :rakennus {:rakennusnro "001"
+                                                 :jarjestysnumero 1
+                                                 :valtakunnallinenNumero "123"
+                                                 :kunnanSisainenPysyvaRakennusnumero "internal-123"
+                                                 :kiinttun "21111111111111"
+                                                 :description "Talo"
+                                                 :operationId "op1"}})
+    => {:KatselmuksenRakennus {:jarjestysnumero 1
+                               :katselmusOsittainen "pidetty"
+                               :kayttoonottoKytkin true
+                               :kiinttun "21111111111111"
+                               :rakennusnro "001"
+                               :valtakunnallinenNumero "123"
+                               :kunnanSisainenPysyvaRakennusnumero "internal-123"
+                               :muuTunnustieto [{:MuuTunnus {:tunnus "op1" :sovellus "toimenpideId"}}
+                                                {:MuuTunnus {:tunnus "op1" :sovellus "Lupapiste"}}]
+                               :rakennuksenSelite "Talo"}})
+
+  (fact "operation id missing"
+    (get-review-katselmuksenrakennus {:tila     {:tila "pidetty"
+                                                 :kayttoonottava true}
+                                      :rakennus {:rakennusnro "001"
+                                                 :jarjestysnumero 1
+                                                 :valtakunnallinenNumero "123"
+                                                 :kunnanSisainenPysyvaRakennusnumero "internal-123"
+                                                 :kiinttun "21111111111111"
+                                                 :description "Talo"}})
+    => {:KatselmuksenRakennus {:jarjestysnumero 1
+                               :katselmusOsittainen "pidetty"
+                               :kayttoonottoKytkin true
+                               :kiinttun "21111111111111"
+                               :rakennusnro "001"
+                               :valtakunnallinenNumero "123"
+                               :kunnanSisainenPysyvaRakennusnumero "internal-123"
+                               :rakennuksenSelite "Talo"}})
+
+  (fact "description missing"
+    (get-review-katselmuksenrakennus {:tila     {:tila "pidetty"
+                                                 :kayttoonottava false}
+                                      :rakennus {:rakennusnro "001"
+                                                 :jarjestysnumero 1
+                                                 :valtakunnallinenNumero "123"
+                                                 :kunnanSisainenPysyvaRakennusnumero "internal-123"
+                                                 :kiinttun "21111111111111"
+                                                 :operationId "op1"}})
+    => {:KatselmuksenRakennus {:jarjestysnumero 1
+                               :katselmusOsittainen "pidetty"
+                               :kayttoonottoKytkin false
+                               :kiinttun "21111111111111"
+                               :rakennusnro "001"
+                               :valtakunnallinenNumero "123"
+                               :kunnanSisainenPysyvaRakennusnumero "internal-123"
+                               :muuTunnustieto [{:MuuTunnus {:tunnus "op1" :sovellus "toimenpideId"}}
+                                                {:MuuTunnus {:tunnus "op1" :sovellus "Lupapiste"}}]}})
+
+  (fact "minimal data"
+    (get-review-katselmuksenrakennus {:tila     {:tila "osittain"}
+                                      :rakennus {:jarjestysnumero 1}})
+    => {:KatselmuksenRakennus {:jarjestysnumero 1
+                               :katselmusOsittainen "osittain"
+                               :kayttoonottoKytkin nil}}))
+
+(facts get-review-huomautus
+  (facts "empty huomautukset"
+    (get-review-huomautus {}) => nil)
+
+  (facts "huomautukset is nil"
+    (get-review-huomautus nil) => nil)
+
+  (facts "all huomautukset data"
+    (get-review-huomautus {:kuvaus "korjattava"
+                           :toteaja "Kaapo Katselmoinen"
+                           :maaraAika "05.06.2017"
+                           :toteamisHetki "07.08.2017"})
+    => {:huomautus {:kuvaus "korjattava"
+                    :toteaja "Kaapo Katselmoinen"
+                    :maaraAika "2017-06-05"
+                    :toteamisHetki "2017-08-07"}})
+
+  (facts "kuvaus is missing"
+    (get-review-huomautus {:toteaja "Kaapo Katselmoinen"
+                           :maaraAika "05.06.2017"
+                           :toteamisHetki "07.08.2017"})
+    => nil)
+
+  (facts "kuvaus is empty"
+    (get-review-huomautus {:kuvaus ""
+                           :toteaja "Kaapo Katselmoinen"
+                           :maaraAika "05.06.2017"
+                           :toteamisHetki "07.08.2017"})
+    => {:huomautus {:kuvaus "-"
+                    :toteaja "Kaapo Katselmoinen"
+                    :maaraAika "2017-06-05"
+                    :toteamisHetki "2017-08-07"}})
+
+  (facts "toteaja is missing"
+    (get-review-huomautus {:kuvaus "korjattava"
+                           :maaraAika "05.06.2017"
+                           :toteamisHetki "07.08.2017"})
+    => {:huomautus {:kuvaus "korjattava"
+                    :maaraAika "2017-06-05"
+                    :toteamisHetki "2017-08-07"}}))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
   (let [application application-rakennuslupa-verdict-given
-        canonical (katselmus-canonical
-                    application
-                    "sv"
-                    "123"
-                    "Aloitusilmoitus 1 "
-                    1354532324658
-                    [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111" :valtakunnallinenNumero "1234567892"}}
-                     {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111" :valtakunnallinenNumero "1234567892"}}]
-                    authority-user-jussi
-                    "Aloitusilmoitus"
-                    :katselmus
-                    ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat tiedoksianto
-                    nil nil nil nil nil nil nil)
+        review {:data {:katselmus {:pitoPvm {:value 1354532324658}
+                                   :pitaja {:value nil}
+                                   :lasnaolijat {:value nil}
+                                   :poikkeamat {:value nil}
+                                   :tila {:value nil}
+                                   :tiedoksianto {:value nil}
+                                   :huomautukset []}
+                       :katselmuksenLaji {:value "Aloitusilmoitus"}
+                       :vaadittuLupaehtona {:value nil}
+                       :rakennus {:0 {:tila {:tila {:value "osittainen"}}
+                                      :rakennus {:rakennusnro {:value "002"}
+                                                 :jarjestysnumero {:value 1}
+                                                 :kiinttun {:value "21111111111111"}}}
+                                  :1 {:tila {:tila {:value "lopullinen"}}
+                                      :rakennus {:rakennusnro {:value "003"}
+                                                 :jarjestysnumero {:value 3}
+                                                 :kiinttun {:value "21111111111111"}
+                                                 :valtakunnallinenNumero {:value "1234567892"}}}
+                                  :2 {:tila {:tila {:value ""}}
+                                      :rakennus {:rakennusnro {:value "004"}
+                                                 :jarjestysnumero {:value 3}
+                                                 :kiinttun {:value "21111111111111"}
+                                                 :valtakunnallinenNumero {:value "1234567892"}}}}
+                       :muuTunnus "review1"
+                       :muuTunnusSovellus "RakApp"}
+                :id "123"
+                :taskname "Aloitusilmoitus 1"}
+        canonical (katselmus-canonical application "sv" review authority-user-jussi)
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
         kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
@@ -1376,7 +1654,6 @@
         kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
         Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
         tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
-
         luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
@@ -1415,7 +1692,8 @@
       (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1")
 
     (fact "KRYSP 2.1.3 data is present"
-      (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
+      (get-in katselmustieto [:Katselmus :muuTunnustieto]) => [{:MuuTunnus {:tunnus "123" :sovellus "Lupapiste"}}
+                                                               {:MuuTunnus {:tunnus "review1" :sovellus "RakApp"}}]
       (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
         (fact "has 2 buildings" (count rakennukset) => 2)
         (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
@@ -1504,27 +1782,28 @@
 
 
 (fl/facts* "Canonical model for katselmus is correct"
-           (let [canonical (katselmus-canonical
-                             application-rakennuslupa-verdict-given
-                             "fi"
-                             "123"
-                             "Pohjakatselmus 1"
-                             1354532324658
-                             [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
-                               :tila     {:tila "pidetty" :kayttoonottava false}}]
-                             authority-user-jussi
-                             "pohjakatselmus"
-                             :katselmus
-                             "pidetty"
-                             "Sonja Silja"
-                             true
-                             {:kuvaus "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
-                              :maaraAika "05.5.2014"
-                              :toteaja "Jussi"
-                              :toteamisHetki "4.04.2014"}
-                             "Tiivi Taavi, Hipsu ja Lala"
-                             "Ei poikkeamisia"
-                             false)
+           (let [review {:data {:katselmus {:pitoPvm {:value 1354532324658}
+                                            :pitaja {:value "Sonja Silja"}
+                                            :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
+                                            :poikkeamat {:value "Ei poikkeamisia"}
+                                            :tila {:value "pidetty"}
+                                            :tiedoksianto {:value false}
+                                            :huomautukset {:kuvaus {:value "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."}
+                                                           :maaraAika {:value "05.5.2014"}
+                                                           :toteaja {:value "Jussi"}
+                                                           :toteamisHetki {:value "4.04.2014"}}}
+                                :katselmuksenLaji {:value "pohjakatselmus"}
+                                :vaadittuLupaehtona {:value true}
+                                :rakennus {:0 {:tila {:tila {:value "pidetty"}
+                                                      :kayttoonottava {:value false}}
+                                               :rakennus {:rakennusnro {:value "002"}
+                                                          :jarjestysnumero {:value 1}
+                                                          :kiinttun {:value "01234567891234"}}}}
+                                :muuTunnus {:value "review2"}
+                                :muuTunnusSovellus {:value "RakApp"}}
+                         :id "123"
+                         :taskname "Pohjakatselmus 1"}
+                 canonical (katselmus-canonical application-rakennuslupa-verdict-given "fi" review authority-user-jussi)
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -1584,48 +1863,51 @@
              (:toteaja huomautus) => "Jussi")
 
            (fact "If huomautus kuvaus is empty, a dash (-) is put as kuvaus value for huomautus"
-             (let [katselmus-huomautus (katselmus-canonical
-                                         application-rakennuslupa-verdict-given
-                                         "fi"
-                                         "123"
-                                         "Pohjakatselmus 1"
-                                         1354532324658
-                                         [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
-                                           :tila     {:tila "pidetty" :kayttoonottava false}}]
-                                         authority-user-jussi
-                                         "pohjakatselmus"
-                                         :katselmus
-                                         "pidetty"
-                                         "Sonja Silja"
-                                         true
-                                         {:kuvaus ""}
-                                         "Tiivi Taavi, Hipsu ja Lala"
-                                         "Ei poikkeamisia"
-                                         false)]
+             (let [review {:data {:katselmus {:pitoPvm {:value 1354532324658}
+                                              :pitaja {:value "Sonja Silja"}
+                                              :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
+                                              :poikkeamat {:value "Ei poikkeamisia"}
+                                              :tila {:value "pidetty"}
+                                              :tiedoksianto {:value false}
+                                              :huomautukset {:kuvaus {:value ""}}}
+                                  :katselmuksenLaji {:value "pohjakatselmus"}
+                                  :vaadittuLupaehtona {:value true}
+                                  :rakennus {:0 {:tila {:tila {:value "pidetty"}
+                                                        :kayttoonottava {:value false}}
+                                                 :rakennus {:rakennusnro {:value "002"}
+                                                            :jarjestysnumero {:value 1}
+                                                            :kiinttun {:value "01234567891234"}}}}
+                                  :muuTunnus {:value "review2"}
+                                  :muuTunnusSovellus {:value "RakApp"}}
+                           :id "123"
+                           :taskname "Pohjakatselmus 1"}
+                   katselmus-huomautus (katselmus-canonical application-rakennuslupa-verdict-given "fi" review authority-user-jussi)]
                (get-in katselmus-huomautus [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia
                                             :katselmustieto :Katselmus :huomautukset :huomautus :kuvaus]) => "-")))
 
 (fl/facts* "Katselmus with empty buildings is OK (no buildings in canonical)"
-  (let [canonical (katselmus-canonical
+  (let [review {:data {:katselmus {:pitoPvm {:value 1354532324658}
+                                   :pitaja {:value "Sonja Silja"}
+                                   :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
+                                   :poikkeamat {:value "Ei poikkeamisia"}
+                                   :tila {:value "pidetty"}
+                                   :tiedoksianto {:value false}
+                                   :huomautukset {:kuvaus {:value "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."}
+                                                  :maaraAika {:value "05.5.2014"}
+                                                  :toteaja {:value "Jussi"}
+                                                  :toteamisHetki {:value "4.04.2014"}}}
+                       :katselmuksenLaji {:value "pohjakatselmus"}
+                       :vaadittuLupaehtona {:value true}
+                       :rakennus {}
+                       :muuTunnus {:value "review2"}
+                       :muuTunnusSovellus {:value "RakApp"}}
+                :id "123"
+                :taskname "Pohjakatselmus 1"}
+        canonical (katselmus-canonical
                    application-rakennuslupa-verdict-given
                    "fi"
-                   "123"
-                   "Pohjakatselmus 1"
-                   1354532324658
-                   []
-                   authority-user-jussi
-                   "pohjakatselmus"
-                   :katselmus
-                   "pidetty"
-                   "Sonja Silja"
-                   true
-                   {:kuvaus "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
-                    :maaraAika "05.5.2014"
-                    :toteaja "Jussi"
-                    :toteamisHetki "4.04.2014"}
-                   "Tiivi Taavi, Hipsu ja Lala"
-                   "Ei poikkeamisia"
-                   false) => truthy
+                   review
+                   authority-user-jussi) => truthy
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
         kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
@@ -1742,6 +2024,12 @@
         (:rakennusvalvontaasianKuvaus Asiantiedot) => "Tarttis aloitta asp rakentaminen."
 
         (get-in lupa-tunnus [:muuTunnustieto :MuuTunnus]) => {:tunnus (:id aloitusoikeus-hakemus), :sovellus "Lupapiste"}
+
+        (fact "maksaja laskuviite"
+          (->> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto
+               (map :Osapuoli)
+               (util/find-by-key :VRKrooliKoodi "maksaja")
+               :laskuviite) => "1234567890")
 
         (fact "SaapumisPvm = submitted date"
           (:saapumisPvm lupa-tunnus) => "2014-01-02")))

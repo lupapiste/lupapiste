@@ -3,7 +3,7 @@
   (:require [sade.core :refer :all]
             [sade.util :refer [fn->]]
             [lupapalvelu.action :as action :refer [defquery]]
-            [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.roles :as roles]
@@ -26,7 +26,7 @@
   [_])
 
 (defn- state-before-last-canceled [{{history :history} :application}]
-  (->> (app/state-history-entries history)
+  (->> (app-state/state-history-entries history)
        (map (comp keyword :state))
        (remove #{:canceled})
        last))

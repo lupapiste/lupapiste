@@ -189,7 +189,7 @@
                            :ns "yak"
                            :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YA "2.1.2")
                                          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
-                                   mapping-common/common-namespaces)
+                                        (mapping-common/common-namespaces :YA "2.1.2"))
                            :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                                    {:tag :yleinenAlueAsiatieto
                                     :child [{:tag lupa-name-key :child (remove #(= :katselmustieto (:tag %)) case-body)}]}]}
@@ -228,12 +228,18 @@
                                        {:tag :vastuuhenkilotieto :child vastuuhenkilo-215}))
         ya_to_krysp_2_2_1 (-> ya_to_krysp_2_2_0
                             (assoc-in [:attr :xsi:schemaLocation]
-                                      (mapping-common/schemalocation :YA "2.2.1")))]
+                                      (mapping-common/schemalocation :YA "2.2.1")))
+        ya_to_krysp_2_2_3 (-> ya_to_krysp_2_2_1
+                              (update :attr merge
+                                      {:xsi:schemaLocation (mapping-common/schemalocation :YA "2.2.3")
+                                       :xmlns:yak "http://www.kuntatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
+                                      (mapping-common/common-namespaces :YA "2.2.3")))]
     (case (name krysp-version)
       "2.1.2" ya_to_krysp_2_1_2
       "2.1.3" ya_to_krysp_2_1_3
       "2.2.0" ya_to_krysp_2_2_0
       "2.2.1" ya_to_krysp_2_2_1
+      "2.2.3" ya_to_krysp_2_2_3
       (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
 
 (defn- map-kayttotarkoitus [canonical lupa-name-key]

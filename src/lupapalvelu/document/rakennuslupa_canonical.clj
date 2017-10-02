@@ -385,73 +385,112 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
-(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat tiedoksianto]
-  (let [application (tools/unwrapped application)
+
+(defn- bad-review-building?
+  "Building can be bad either by choice (no state selected) or by
+  accident (ghost buildings)."
+  [building]
+  (or (nil? building)
+      (= "ei tiedossa" (get-in building [:rakennus :jarjestysnumero]))
+      (util/empty-or-nil? (get-in building [:tila :tila]))
+      (every? ss/blank? (-> building :rakennus vals))))
+
+(defn- enrich-review-building [{app-buildings :buildings :as app} {{national-id :valtakunnallinenNumero kiinttun :kiinttun rakennusnro :rakennusnro :as rakennus} :rakennus :as building}]
+  (when rakennus
+    (let [property-id (or (not-empty kiinttun) (:propertyId app))
+          app-building (util/find-first (every-pred (comp #{property-id} :propertyId)
+                                                    (comp #{rakennusnro} :localShortId)) app-buildings)]
+      (update building :rakennus util/assoc-when
+              :kiinttun property-id
+              :valtakunnallinenNumero (when (ss/blank? national-id) (:nationalId app-building))
+              :operationId (:operationId app-building)
+              :description (:description app-building)))))
+
+(defn- get-review-muutunnustieto [task]
+  (->> [{:tunnus (:id task) :sovellus "Lupapiste"}
+        {:tunnus (get-in task [:data :muuTunnus]) :sovellus (get-in task [:data :muuTunnusSovellus])}]
+       (remove (comp ss/blank? :tunnus))
+       (map (partial hash-map :MuuTunnus))))
+
+(defn- get-review-rakennustunnus [[{rakennus :rakennus :as building} & _]]
+  (util/assoc-when-pred
+      (select-keys rakennus [:jarjestysnumero :kiinttun]) util/not-empty-or-nil?
+      :rakennusnro (:rakennusnro rakennus)
+      :valtakunnallinenNumero (:valtakunnallinenNumero rakennus)))
+
+(defn- get-review-katselmuksenrakennus [{rakennus :rakennus state :tila}]
+  {:KatselmuksenRakennus
+   (-> {:jarjestysnumero                     (:jarjestysnumero rakennus)
+        :katselmusOsittainen                 (:tila state)
+        :kayttoonottoKytkin                  (:kayttoonottava state)}
+       (util/assoc-when-pred util/not-empty-or-nil?
+         :kiinttun                           (:kiinttun rakennus)
+         :rakennusnro                        (:rakennusnro rakennus)
+         :valtakunnallinenNumero             (:valtakunnallinenNumero rakennus)
+         :kunnanSisainenPysyvaRakennusnumero (:kunnanSisainenPysyvaRakennusnumero rakennus)
+         :muuTunnustieto (when-let [op-id (:operationId rakennus)]
+                           [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                            {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
+         :rakennuksenSelite (:description rakennus)))})
+
+(defn- get-review-huomautus [{kuvaus :kuvaus toteaja :toteaja maara-aika :maaraAika toteamis-hetki :toteamisHetki :as huomautukset}]
+  (when kuvaus
+    {:huomautus (util/assoc-when-pred
+                    {:kuvaus "-"} util/not-empty-or-nil?
+                    :kuvaus kuvaus
+                    :toteaja toteaja
+                    :maaraAika (util/to-xml-date-from-string maara-aika)
+                    :toteamisHetki (util/to-xml-date-from-string toteamis-hetki))}))
+
+(defn katselmus-canonical [application lang task user]
+  (let [{{{pito-pvm     :pitoPvm
+           pitaja       :pitaja
+           lasnaolijat  :lasnaolijat
+           poikkeamat   :poikkeamat
+           tila         :tila
+           tiedoksianto :tiedoksianto
+           huomautukset :huomautukset} :katselmus
+          katselmuksen-laji            :katselmuksenLaji
+          vaadittu-lupaehtona          :vaadittuLupaehtona
+          rakennus                     :rakennus} :data
+         task-name    :taskname
+         :as          task}     (tools/unwrapped task)
+        buildings (->> (vals rakennus)
+                       (map (partial enrich-review-building application))
+                       (remove bad-review-building?))
+        application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
-        katselmusTyyppi (katselmusnimi-to-type katselmuksen-nimi tyyppi)
-        katselmus (util/strip-nils
-                    (merge
-                      {:pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
-                       :katselmuksenLaji katselmusTyyppi
-                       :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :osittainen osittainen
-                       :lasnaolijat lasnaolijat
-                       :pitaja pitaja
-                       :poikkeamat poikkeamat
-                       :verottajanTvLlKytkin tiedoksianto
-                       :tarkastuksenTaiKatselmuksenNimi (ss/trim task-name)}
-                      (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
-                      (when (seq buildings)
-                        {:rakennustunnus (let [building (-> buildings first :rakennus)]
-                                           (util/assoc-when-pred
-                                             (select-keys building [:jarjestysnumero :kiinttun]) util/not-empty-or-nil?
-                                             :rakennusnro (:rakennusnro building)
-                                             :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
-                                             ))
-                         :katselmuksenRakennustieto (map (fn [{building :rakennus state :tila}]
-                                                           {:KatselmuksenRakennus
-                                                            (-> {:jarjestysnumero                     (:jarjestysnumero building)
-                                                                 :kiinttun                            (:propertyId application) ; overwritten by (:kiinttun building) if exists
-                                                                 :katselmusOsittainen                 (:tila state)
-                                                                 :kayttoonottoKytkin                  (:kayttoonottava state)}
-                                                                (util/assoc-when-pred ss/not-blank?
-                                                                  :kiinttun                           (:kiinttun building)
-                                                                  :rakennusnro                        (:rakennusnro building)
-                                                                  :valtakunnallinenNumero             (:valtakunnallinenNumero building)
-                                                                  :kunnanSisainenPysyvaRakennusnumero (:kunnanSisainenPysyvaRakennusnumero building))
-                                                                (util/assoc-when-pred util/not-empty-or-nil?
-                                                                  :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                    [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                                                                                     {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
-                                                                  :rakennuksenSelite (:description building)))})
-                                                         buildings)}) ; v2.1.3
-                      (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
-                                                                                (fn [m k v] (if-not (ss/blank? v)
-                                                                                              (assoc m k (util/to-xml-date-from-string v))
-                                                                                              m))
-                                                                                {:kuvaus (if (ss/blank? (:kuvaus huomautukset)) "-" (:kuvaus huomautukset))
-                                                                                 :toteaja (:toteaja huomautukset)}
-                                                                                (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
-        canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot (toimituksen-tiedot application lang)
-                    :rakennusvalvontaAsiatieto
-                    {:RakennusvalvontaAsia
-                     {:kasittelynTilatieto (get-state application)
-                      :luvanTunnisteTiedot (lupatunnus application)
-                      ; Osapuoli is not required in KRYSP 2.1.3
-                      :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
-                                                                              :henkilo {:nimi {:etunimi (:firstName user)
-                                                                                               :sukunimi (:lastName user)}
-                                                                                        :osoite {:osoitenimi {:teksti (or (:street user) "")}
-                                                                                                 :postitoimipaikannimi (:city user)
-                                                                                                 :postinumero (:zip user)}
-                                                                                         :sahkopostiosoite (:email user)
-                                                                                         :puhelin (:phone user)}}}}}
-                      :katselmustieto {:Katselmus katselmus}
-                      :lisatiedot (get-lisatiedot lang)
-                      :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
-                      }}}}]
-    canonical))
+        katselmustyyppi (katselmusnimi-to-type katselmuksen-laji :katselmus)]
+    {:Rakennusvalvonta
+     {:toimituksenTiedot (toimituksen-tiedot application lang)
+      :rakennusvalvontaAsiatieto
+      {:RakennusvalvontaAsia
+       {:kasittelynTilatieto (get-state application)
+        :luvanTunnisteTiedot (lupatunnus application)
+        :osapuolettieto {:Osapuolet {:osapuolitieto {:Osapuoli {:kuntaRooliKoodi "Ilmoituksen tekij\u00e4"
+                                                                :henkilo {:nimi {:etunimi (:firstName user)
+                                                                                 :sukunimi (:lastName user)}
+                                                                          :osoite {:osoitenimi {:teksti (or (:street user) "")}
+                                                                                   :postitoimipaikannimi (:city user)
+                                                                                   :postinumero (:zip user)}
+                                                                          :sahkopostiosoite (:email user)
+                                                                          :puhelin (:phone user)}}}}}
+        :katselmustieto {:Katselmus (-> {:pitoPvm (if (number? pito-pvm) (util/to-xml-date pito-pvm) (util/to-xml-date-from-string pito-pvm))
+                                         :katselmuksenLaji katselmustyyppi
+                                         :vaadittuLupaehtonaKytkin (true? vaadittu-lupaehtona)
+                                         :osittainen tila
+                                         :lasnaolijat lasnaolijat
+                                         :pitaja pitaja
+                                         :poikkeamat poikkeamat
+                                         :verottajanTvLlKytkin tiedoksianto
+                                         :tarkastuksenTaiKatselmuksenNimi (ss/trim task-name)}
+                                        (util/assoc-when-pred util/not-empty-or-nil?
+                                          :muuTunnustieto (get-review-muutunnustieto task)
+                                          :rakennustunnus (get-review-rakennustunnus buildings)
+                                          :katselmuksenRakennustieto (map get-review-katselmuksenrakennus buildings)
+                                          :huomautukset (get-review-huomautus huomautukset)))}
+        :lisatiedot (get-lisatiedot lang)
+        :kayttotapaus (katselmus-kayttotapaus katselmuksen-laji :katselmus)}}}}))
 
 (defn unsent-attachments-to-canonical [application lang]
   (let [application (tools/unwrapped application)

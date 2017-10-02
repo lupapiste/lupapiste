@@ -5,7 +5,7 @@
             [sade.xml :as xml]
             [taoensso.timbre :refer [error]]
             [monger.operators :refer :all]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.xml.asianhallinta.attachment :as ah-att]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
@@ -63,12 +63,13 @@
       ;; -> build update clause
       ;; -> update-application
       (let [new-verdict   (build-verdict xml-edn timestamp)
-            command       (assoc (action/application->command application) :action :process-ah-verdict)
+            command       (assoc (action/application->command application)
+                            :user system-user :action "process-ah-verdict")
             poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
             update-clause (util/deep-merge
                             {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
                             (when (= :sent (keyword (:state application)))
-                              (application/state-transition-update verdict-given-state timestamp application system-user)))]
+                              (app-state/state-transition-update verdict-given-state timestamp application system-user)))]
 
         (action/update-application command update-clause)
         (doseq [attachment attachments]

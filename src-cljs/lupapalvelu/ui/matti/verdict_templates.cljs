@@ -4,58 +4,55 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.matti.phrases :as phrases]
             [lupapalvelu.ui.matti.sections :as sections]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.settings :as settings]
             [lupapalvelu.ui.matti.state :as state]
-            [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]))
 
 
-(defn updater [{:keys [state path]}]
-  (service/save-draft-value (path/value [:id] state)
+(defn updater [{:keys [state info path]}]
+  (service/save-draft-value (path/value [:id] info)
                             path
                             (path/value path state)
-                            (common/response->state state :modified)))
+                            (common/response->state info :modified)))
 
 
 (rum/defc verdict-template-name < rum/reactive
-  [{state :state}]
+  [{info* :info}]
   (letfn [(handler-fn [value]
-            (reset! (path/state [:name] state) value)
-            (service/set-template-name @(path/state [:id] state)
+            (reset! (path/state [:name] info*) value)
+            (service/set-template-name @(path/state [:id] info*)
                                        value
-                                       (common/response->state state :modified)))]
-    (components/pen-input {:value      (rum/react (path/state [:name] state))
-                           :handler-fn handler-fn})))
+                                       (common/response->state info* :modified)))]
+    (components/pen-input {:value      (rum/react (path/state [:name] info*))
+                           :handler-fn handler-fn
+                           :disabled? (not (state/auth? :set-verdict-template-name))})))
 
 
 (rum/defc verdict-template-publish < rum/reactive
-  [{state :state}]
+  [{info* :info}]
   [:div [:span.row-text.row-text--margin
-         (if-let [published (path/react [:published] state)]
+         (if-let [published (path/react [:published] info*)]
            (common/loc :matti.last-published
                        (js/util.finnishDateAndTime published))
            (common/loc :matti.template-not-published))]
    [:button.ghost
-    {:on-click #(service/publish-template (path/value [:id] state)
-                                          (common/response->state state :published))}
+    {:disabled (not (state/auth? :publish-verdict-template))
+     :on-click #(service/publish-template (path/value [:id] info*)
+                                          (common/response->state info* :published))}
         (common/loc :matti.publish)]])
 
 
-(defn reset-template [{:keys [id name modified published draft] :as template}]
+(defn reset-template [{draft :draft :as template}]
   (reset! state/current-template
-          (if template
-            (assoc draft
-                   :name name
-                   :id id
-                   :modified modified
-                   :published published
-                   :_meta
-                   {:updated   updater
-                    :can-edit? true?
-                    :editing? true})
-            nil))
+          (when template
+            {:state draft
+             :info (dissoc template :draft)
+             :_meta {:updated   updater
+                     :enabled?  (state/auth? :save-verdict-template-draft-value)
+                     :editing?  true}}))
   (reset! state/current-view (if template ::template ::list)))
 
 (defn with-back-button [component]
@@ -67,7 +64,7 @@
    component])
 
 (defn verdict-template
-  [{:keys [sections state settings] :as options}]
+  [{:keys [schema state] :as options}]
   [:div.verdict-template
    [:div.matti-grid-2
     [:div.row.row--tight
@@ -80,11 +77,7 @@
     [:div.row.row--tight
      [:div.col-2.col--right
       (layout/last-saved options)]]]
-   (for [sec sections]
-     (sections/section (assoc sec
-                              :path (path/extend (:id sec))
-                              :state state
-                              :settings settings)))])
+   (sections/sections options :verdict-template)])
 
 (defn new-template [options]
   (reset-template options))
@@ -150,7 +143,10 @@
           [:tbody
            (for [{:keys [id name published deleted]} filtered]
              [:tr {:key id}
-              [:td name]
+              [:td (if deleted
+                     name
+                     [:a {:on-click #(service/fetch-template id reset-template)}
+                      name])]
               [:td (js/util.finnishDate published)]
               [:td
                [:div.matti-buttons
@@ -168,29 +164,48 @@
       [:span (common/loc :matti.add-verdict-template)]]]))
 
 (rum/defc verdict-templates < rum/reactive
-  [_]
+  []
   (when (and (rum/react state/schemas)
              (rum/react state/categories)
              (rum/react state/phrases))
     [:div
      (case (rum/react state/current-view)
-       ::template (with-back-button (verdict-template (assoc shared/default-verdict-template
-                                                             :state state/current-template)))
-       ::list     [:div (verdict-template-list) (phrases/phrases-table)]
-       ::settings (with-back-button (settings/verdict-template-settings (get shared/settings-schemas (keyword @state/current-category)))))]))
+       ::template
+       (with-back-button
+         (verdict-template
+          (merge
+           {:schema     (dissoc shared/default-verdict-template
+                                :dictionary)
+            :dictionary (:dictionary shared/default-verdict-template)
+            :references state/references}
+           (state/select-keys state/current-template [:state :info :_meta]))))
+
+       ::list
+       [:div (verdict-template-list) (phrases/phrases-table)]
+
+       ::settings
+       (when-let [full-schema ((keyword @state/current-category) shared/settings-schemas)]
+         (with-back-button
+           (settings/verdict-template-settings
+            (merge
+             {:schema     (dissoc full-schema :dictionary)
+              :dictionary (:dictionary full-schema)
+              :references state/references
+              :state state/settings}
+             (state/select-keys state/settings-info [:info :_meta]))))))]))
 
 (defonce args (atom {}))
 
 (defn mount-component []
   (when (common/feature? :matti)
-    (rum/mount (verdict-templates (:auth-model @args))
+    (rum/mount (verdict-templates)
                (.getElementById js/document (:dom-id @args)))))
 
-(defn ^:export start [domId componentParams]
+(defn ^:export start [domId]
   (when (common/feature? :matti)
     (swap! args assoc
-           :auth-model (aget componentParams "authModel")
            :dom-id (name domId))
+    (reset! state/auth-fn lupapisteApp.models.globalAuthModel.ok)
     (service/fetch-schemas)
     (service/fetch-template-list)
     (service/fetch-categories (fn [categories]

@@ -1,25 +1,26 @@
 (ns lupapalvelu.verdict-api
-  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
-            [monger.operators :refer :all]
-            [clojure.set :as set]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.core :refer [ok fail fail! ok?]]
+  (:require [clojure.set :as set]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
-            [lupapalvelu.application :as app]
             [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.inspection-summary :as inspection-summary]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.ya :as ya]))
+            [lupapalvelu.ya :as ya]
+            [monger.operators :refer :all]
+            [sade.core :refer [ok fail fail! ok?]]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]))
 
 ;;
 ;; KRYSP verdicts
@@ -28,9 +29,6 @@
 (defn application-has-verdict-given-state [{:keys [application]}]
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
-
-(def give-verdict-states (set/union #{:submitted :sent}
-                                    (set/difference states/verdict-given-states states/terminal-states)))
 
 (defquery verdict-attachment-type
   {:parameters       [:id]
@@ -44,7 +42,7 @@
                  If the command is run more than once, existing verdicts are
                  replaced by the new ones."
    :parameters [:id]
-   :states     (conj give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
+   :states     (conj states/give-verdict-states :constructionStarted) ; states reviewed 2015-10-12
    :user-roles #{:authority}
    :notified   true
    :pre-checks [application-has-verdict-given-state]
@@ -66,7 +64,7 @@
 
 (defcommand new-verdict-draft
   {:parameters [:id]
-   :states     give-verdict-states
+   :states     states/give-verdict-states
    :pre-checks [application-has-verdict-given-state]
    :user-roles #{:authority}}
   [{:keys [application] :as command}]
@@ -91,7 +89,7 @@
    :input-validators [validate-status
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:agreement])]
-   :states     give-verdict-states
+   :states     states/give-verdict-states
    :user-roles #{:authority}
    :pre-checks [application-has-verdict-given-state
                 (fn [{{:keys [verdictId]} :data application :application}]
@@ -125,7 +123,7 @@
     (when-let [next-state (sm/verdict-given-state application)]
       (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)
             verdict-updates (util/deep-merge
-                              (app/state-transition-update next-state timestamp application user)
+                              (app-state/state-transition-update next-state timestamp application user)
                               {$set {:verdicts.$.draft false}})]
         (update-application command {:verdicts {$elemMatch {:id id}}} verdict-updates)
         (inspection-summary/process-verdict-given application)
@@ -141,7 +139,7 @@
 (defcommand publish-verdict
   {:parameters [id verdictId lang]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId :lang])]
-   :states     give-verdict-states
+   :states     states/give-verdict-states
    :pre-checks [application-has-verdict-given-state
                 ya/check-ya-sijoitussopimus-subtype
                 ya/check-ya-sijoituslupa-subtype]
@@ -156,7 +154,7 @@
 (defcommand delete-verdict
   {:parameters [id verdictId]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
-   :states     give-verdict-states
+   :states     states/give-verdict-states
    :notified true
    :user-roles #{:authority}}
   [{:keys [application created user] :as command}]
@@ -175,7 +173,7 @@
                                  :comments {:target target}
                                  :tasks {:id {$in task-ids}}}}
                          (when step-back?
-                           (app/state-transition-update (if (and sent (sm/valid-state? application :sent))
+                           (app-state/state-transition-update (if (and sent (sm/valid-state? application :sent))
                                                           :sent
                                                           :submitted)
                                                         created
@@ -207,7 +205,7 @@
                             (when (and (ya/sijoittaminen? application)
                                        (:sopimus verdict)
                                        (not= (:state application) "agreementSigned"))
-                              (app/state-transition-update :agreementSigned created application user))))]
+                              (app-state/state-transition-update :agreementSigned created application user))))]
           (create-verdict-pdfa! user application verdictId lang)
           result))
     (do
