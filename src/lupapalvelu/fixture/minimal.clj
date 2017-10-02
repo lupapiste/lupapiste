@@ -929,6 +929,7 @@
                                         [{:type :organization}]]}]
                        :automatic-ok-for-attachments-enabled true
                        :multiple-operations-supported true
+                       :matti-enabled true
                        :docstore-info (assoc org/default-docstore-info
                                         :docStoreInUse true
                                         :documentPrice 314)}
