@@ -51,7 +51,7 @@
 (def app-snapshot-fields
   [:_applicantIndex :address :applicant :created :documents :location
    :modified :municipality :organization :permitType
-   :primaryOperation :propertyId :state :verdicts :tasks])
+   :primaryOperation :propertyId :state :verdicts :matti-verdicts :tasks])
 
 (def attachment-snapshot-fields
   [:id :type :latestVersion :auth :metadata :contents :target])

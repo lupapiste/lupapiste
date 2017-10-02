@@ -49,7 +49,7 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
-(defn- get-application-bulletins
+(defn get-application-bulletins
   "Queries bulletins from mongo. Returns latest versions of bulletins.
    Bulletins which have starting dates in the future will be omitted."
   [page searchText municipality state sort]
