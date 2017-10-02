@@ -130,7 +130,8 @@
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
-   [:h1 (common/loc "application.tabVerdict")]
+   (lupapalvelu.ui.attachment.components/dropzone "my-dropzone")
+   [:h2 (common/loc "application.tabVerdict")]
    [:ol
     (map (fn [{:keys [id published modified]}]
            [:li {:key id}
@@ -166,7 +167,17 @@
                                                                        [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)
                                                      :dictionary dictionary
-                                                     :references state/references)))))]))
+                                                     :references state/references)))))
+     (lupapalvelu.ui.attachment.components/upload-link console.log)
+     (lupapalvelu.ui.attachment.components/upload-wrapper {:callback console.log
+                                                           :dropzone "#application-matti-verdict-tab"
+                                                           :component (fn [{:keys [input input-id callback] :as options}]
+                                                                        (console.log "Options:" options)
+                                                                        [:div
+                                                                         input
+                                                                         [:label.btn.positive {:for input-id }
+                                                                          [:i.lupicon-circle-plus]
+                                                                          [:span (path/loc :attachment.addFile)]]])})]))
 
 (defn mount-component []
   (when (common/feature? :matti)
