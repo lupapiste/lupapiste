@@ -13,6 +13,7 @@
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-tyonjohtajan-nimeaminen-v2
                                                                       application-suunnittelijan-nimeaminen
+                                                                      application-suunnittelijan-nimeaminen-muu
                                                                       jatkolupa-application
                                                                       aloitusoikeus-hakemus]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
@@ -251,6 +252,7 @@
 
       (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
       (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "postitetaanKytkin"       (xml/get-text suunnittelija [:postitetaanKytkin])       => nil)
       (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
       (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
       (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
@@ -265,6 +267,26 @@
 
       (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "rakennusfysikaalinen suunnittelija")
       (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "postitetaanKytkin"       (xml/get-text suunnittelija [:postitetaanKytkin])       => nil)
+      (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
+      (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
+      (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
+      (fact "vaadittuPatevyysluokka"  (xml/get-text suunnittelija [:vaadittuPatevyysluokka])  => "C")
+      (fact "kokemusvuodet"           (xml/get-text suunnittelija [:kokemusvuodet])           => "5")
+      (fact "FISEpatevyyskortti"      (xml/get-text suunnittelija [:FISEpatevyyskortti])      => "http://www.ym.fi")
+      (fact "FISEkelpoisuus"          (xml/get-text suunnittelija [:FISEkelpoisuus])          => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
+      (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy")))
+
+  (facts "2.2.2"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.2.2") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.2")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "muu")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => "ei listassa -rooli")
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "postitetaanKytkin"       (xml/get-text suunnittelija [:postitetaanKytkin])       => "false")
       (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
       (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
       (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
@@ -273,3 +295,37 @@
       (fact "FISEpatevyyskortti"      (xml/get-text suunnittelija [:FISEpatevyyskortti])      => "http://www.ym.fi")
       (fact "FISEkelpoisuus"          (xml/get-text suunnittelija [:FISEkelpoisuus])          => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
       (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy"))))
+
+(def suunnittelijan-nimaminen-muu-canonical (application-to-canonical application-suunnittelijan-nimeaminen-muu "fi"))
+
+(facts "Muu suunnittelija"
+
+  (facts "2.1.2"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.1.2") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.2")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => nil)
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")))
+
+  (facts "2.2.0"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.2.0") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.0")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => nil)
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")))
+
+  (facts "2.2.2"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.2.2") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.2")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "muu")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => "ei listassa -rooli")
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija"))))

@@ -591,6 +591,22 @@
                                    :linkPermitData [link-permit-data-lupapistetunnus]
                                    :appsLinkingToUs [app-linking-to-us]}))
 
+(def application-suunnittelijan-nimeaminen-muu
+  (merge application-rakennuslupa {:id "LP-753-2013-00003"
+                                   :organization "753-R"
+                                   :state "submitted"
+                                   :submitted 1426247899490
+                                   :propertyId "75341600550007"
+                                   :primaryOperation {:name "suunnittelijan-nimeaminen"
+                                                      :id "527b3392e8dbbb95047a89de"
+                                                      :created 1383805842761}
+                                   :documents [hakija-henkilo
+                                               maksaja-henkilo
+                                               suunnittelija3
+                                               hankkeen-kuvaus-minimum]
+                                   :linkPermitData [link-permit-data-lupapistetunnus]
+                                   :appsLinkingToUs [app-linking-to-us]}))
+
 (ctc/validate-all-documents application-suunnittelijan-nimeaminen)
 
 
