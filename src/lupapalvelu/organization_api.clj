@@ -457,6 +457,17 @@
   (org/update-organization organizationId {$set {:calendars-enabled enabled}})
   (ok))
 
+(defcommand set-organization-boolean-path
+  {:parameters [path value organizationId]
+   :description "Set boolean value to given path in organization settgins. Path must be string with dot denoted path. Eg 'foo.bar.baz'."
+   :user-roles #{:admin}
+   :input-validators  [(partial non-blank-parameters [:organizationId :path])
+                       (partial boolean-parameters [:value])]}
+  [{user :user}]
+  (when-let [kw-path (-> path (ss/split #"\.") (util/kw-path))]
+    (org/update-organization organizationId {$set {kw-path value}}))
+  (ok))
+
 (defcommand set-organization-boolean-attribute
   {:parameters [enabled organizationId attribute]
    :user-roles #{:admin}
