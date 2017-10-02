@@ -158,6 +158,11 @@
   ([application {roles :handler-roles :as organization}]
    (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %)))))
 
+(defn enrich-application-tags [{app-tags :tags :as application} {org-tags :tags :as organization}]
+  (->> (map (util/key-by :id org-tags) app-tags)
+       (remove nil?)
+       (assoc application :tags)))
+
 (defn- enrich-application [application]
   (some-> application
           (update :documents (partial map schemas/with-current-schema-info))

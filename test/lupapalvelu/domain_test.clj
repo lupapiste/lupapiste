@@ -203,3 +203,39 @@
     (enrich-application-handlers {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2..} {:id ..handler-id-0.. :roleId ..role-id-0..}]}) =>
     {:organization ..org-id.. :data ..data.. :handlers [{:id ..handler-id-2.. :roleId ..role-id-2.. :name ..name-2..} {:id ..handler-id-0.. :roleId ..role-id-0.. :name ..name-0..}]}
     (provided (lupapalvelu.mongo/select-one :organizations {:_id ..org-id..} [:handler-roles]) => {:handler-roles [{:id ..role-id-0.. :name ..name-0..} {:id ..role-id-1.. :name ..name-1..} {:id ..role-id-2.. :name ..name-2..}  {:id ..role-id-3.. :name ..name-3..}]})))
+
+
+(facts enrich-application-tags
+  (fact "empty application tags"
+    (enrich-application-tags {:id ..app-id.. :tags []} {:tags [{:id ..tag-1.. :label ..label-1..}]})
+    => {:id ..app-id.. :tags []})
+
+  (fact "empty organization tags (invalid case)"
+    (enrich-application-tags {:id ..app-id.. :tags [..tag-1..]} {:tags []})
+    => {:id ..app-id.. :tags []})
+
+  (fact "one organization tag and one application tag"
+    (enrich-application-tags {:id ..app-id.. :tags [..tag-1..]} {:tags [{:id ..tag-1.. :label ..label-1..}]})
+    => {:id ..app-id.. :tags [{:id ..tag-1.. :label ..label-1..}]})
+
+  (fact "one organization tag and one non matching application tag (invalid case)"
+    (enrich-application-tags {:id ..app-id.. :tags [..tag-2..]} {:tags [{:id ..tag-1.. :label ..label-1..}]})
+    => {:id ..app-id.. :tags []})
+
+  (fact "multiple organization tags and one application tag"
+    (enrich-application-tags {:id ..app-id.. :tags [..tag-2..]}
+                             {:tags [{:id ..tag-1.. :label ..label-1..}
+                                     {:id ..tag-2.. :label ..label-2..}
+                                     {:id ..tag-3.. :label ..label-3..}]})
+    => {:id ..app-id.. :tags [{:id ..tag-2.. :label ..label-2..}]})
+
+  (fact "multiple organization tags and multiple application tags"
+    (enrich-application-tags {:id ..app-id.. :tags [..tag-2.. ..tag-3.. ..tag-5.. ..tag-6..]}
+                             {:tags [{:id ..tag-1.. :label ..label-1..}
+                                     {:id ..tag-2.. :label ..label-2..}
+                                     {:id ..tag-3.. :label ..label-3..}
+                                     {:id ..tag-4.. :label ..label-4..}
+                                     {:id ..tag-5.. :label ..label-5..}]})
+    => {:id ..app-id.. :tags [{:id ..tag-2.. :label ..label-2..}
+                              {:id ..tag-3.. :label ..label-3..}
+                              {:id ..tag-5.. :label ..label-5..}]}))

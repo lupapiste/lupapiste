@@ -328,6 +328,7 @@
 (defn post-process-app-for-krysp [application organization]
   (-> application
       (domain/enrich-application-handlers organization)
+      (domain/enrich-application-tags organization)
       meta-fields/enrich-with-link-permit-data
       link-permit/update-backend-ids-in-link-permit-data))
 
