@@ -81,10 +81,15 @@
 (defn has-some-auth-role? [{auth :auth} user-id roles]
   (has-auth? {:auth (get-auths-by-roles {:auth auth} roles)} user-id))
 
-(defn get-company-auths [{auth :auth} {{company-id :id company-role :role} :company :as user}]
-  (filter #(and (= company-id (:id %))
-                (contains? #{(keyword company-role) nil} (keyword (:company-role %))))
-          auth))
+(defn get-company-auths
+  ([{auth :auth}]
+   (filter #(and (= "writer" (:role %))
+                 (= "company" (:type %)))
+           auth))
+  ([{auth :auth} {{company-id :id company-role :role} :company :as user}]
+   (filter #(and (= company-id (:id %))
+                 (contains? #{(keyword company-role) nil} (keyword (:company-role %))))
+           auth)))
 
 (defn auth-via-company [application user-id]
   (->> (usr/get-user-by-id user-id)
