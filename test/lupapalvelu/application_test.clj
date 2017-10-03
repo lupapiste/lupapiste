@@ -26,7 +26,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name)
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
@@ -522,3 +522,31 @@
         (map :id (:attachments attachments-map)) => (has every? #(= "mongo-id" %))
         (:attachments (application-attachments-map (assoc application :infoRequest true) {})) => [])))
   (against-background (mongo/create-id) => "mongo-id"))
+
+(facts enrich-tos-function-name
+  (fact "no tos-function"
+    (enrich-tos-function-name {:id ..app-id.. :organization "753-R"}) => {:id ..app-id.. :organization "753-R" :tosFunctionName nil}
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions anything) => irrelevant :times 0))
+
+  (fact "one matching tos-function"
+    (-> {:id ..app-id.. :organization "753-R" :tosFunction "12 13 14 15"}
+        enrich-tos-function-name
+        :tosFunctionName) => ..tos-name..
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "12 13 14 15" :name ..tos-name..}]))
+
+  (fact "no matching tos-function"
+    (-> {:id ..app-id.. :organization "753-R" :tosFunction "12 13 14 15"}
+        enrich-tos-function-name
+        :tosFunctionName) => nil
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "00 00 00 00" :name ..tos-name..}]))
+
+  (fact "multiple tos-functions for organization"
+    (-> {:id ..app-id.. :organization "753-R" :tosFunction "12 13 14 15"}
+        enrich-tos-function-name
+        :tosFunctionName) => ..tos-name-2..
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "12 13 14 14" :name ..tos-name-1..}
+                                                                             {:code "12 13 14 15" :name ..tos-name-2..}
+                                                                             {:code "12 13 14 16" :name ..tos-name-3..}
+                                                                             {:code "12 13 14 17" :name ..tos-name-4..}
+                                                                             {:code "12 13 14 18" :name ..tos-name-5..}
+                                                                             {:code "12 13 14 19" :name ..tos-name-6..}])))
