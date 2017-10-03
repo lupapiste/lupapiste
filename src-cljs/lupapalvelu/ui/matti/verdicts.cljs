@@ -5,6 +5,7 @@
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.matti.layout :as layout]
+            [lupapalvelu.ui.matti.components :as matti-components]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.phrases :as phrases]
             [lupapalvelu.ui.matti.sections :as sections]
@@ -73,6 +74,7 @@
 
 (defn with-back-button [component]
   [:div
+   (lupapalvelu.ui.attachment.components/dropzone)
    [:button.secondary
     {:on-click #(reset-verdict nil)}
     [:i.lupicon-chevron-left]
@@ -102,7 +104,7 @@
    [:div.matti-grid-2
     [:div.row.row--tight
      [:div.col-2.col--right
-      (layout/last-saved options)]]]
+      (matti-components/last-saved options)]]]
    (sections/sections options :verdict)])
 
 (rum/defcs new-verdict < rum/reactive
@@ -130,7 +132,6 @@
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
-   (lupapalvelu.ui.attachment.components/dropzone "my-dropzone")
    [:h2 (common/loc "application.tabVerdict")]
    [:ol
     (map (fn [{:keys [id published modified]}]
@@ -164,12 +165,13 @@
        ::verdict (let [{dictionary :dictionary :as schema} (get shared/verdict-schemas
                                                                 (shared/permit-type->category (js/lupapisteApp.models.application.permitType)))]
                    (with-back-button (verdict (assoc (state/select-keys state/current-verdict
-                                                                       [:state :info :_meta])
+                                                                        [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)
                                                      :dictionary dictionary
                                                      :references state/references)))))
-     (lupapalvelu.ui.attachment.components/upload-link console.log)
-     (lupapalvelu.ui.attachment.components/upload-wrapper {:callback console.log
+
+     #_(lupapalvelu.ui.attachment.components/upload-link console.log)
+     #_(lupapalvelu.ui.attachment.components/upload-wrapper {:callback console.log
                                                            :dropzone "#application-matti-verdict-tab"
                                                            :component (fn [{:keys [input input-id callback] :as options}]
                                                                         (console.log "Options:" options)

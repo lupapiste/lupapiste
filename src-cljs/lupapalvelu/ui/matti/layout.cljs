@@ -37,9 +37,10 @@
             [lupapalvelu.ui.matti.components :as matti-components]
             [lupapalvelu.ui.matti.docgen :as docgen]
             [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.matti.phrases :as phrases]
+            [lupapalvelu.ui.matti.placeholder :as placeholder]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
-            [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -73,10 +74,6 @@
                            (string? label) label
                            :default common/nbsp)]
      component]]))
-
-(defn show-label? [{label? :label?} wrap-label?]
-  (and wrap-label? (not (false? label?))))
-
 
 ;; -------------------------------
 ;; Component instantiation
@@ -146,14 +143,14 @@
                          (filter #(contains? values (:value %)))
                          (map :text)
                          (s/join (get schema :separator ", ")))]]
-    (if (show-label? schema wrap-label?)
+    (if (matti-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
 (defmethod view-component :phrase-text
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.phrase-text (path/value path state)]]
-    (if (show-label? schema wrap-label?)
+    (if (matti-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
@@ -161,50 +158,14 @@
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
   (let [span [:span.formatted (path/react (-> schema :path util/split-kw-path)
                                           state)]]
-    (if (show-label? schema wrap-label?)
+    (if (matti-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options span)
       span)))
 
-(defmulti placeholder (fn [options & _]
-                        (-> options :schema :type)))
-
-;; Neighbors value is a list of property-id, timestamp maps.  Before
-;; publishing the verdict, the neighbors are taken from the
-;; applicationModel. On publishing the neighbor states are frozen into
-;; mongo.
-(defmethod placeholder :neighbors
-  [{:keys [state path] :as options}]
-  [:div.tabby.neighbor-states
-   (map (fn [{:keys [property-id done]}]
-          [:div.tabby__row.neighbor
-           [:div.tabby__cell.property-id (js/util.prop.toHumanFormat property-id)]
-           [:div.tabby__cell
-            (if done
-              (common/loc :neighbors.closed
-                          (js/util.finnishDateAndTime done
-                                                      "D.M.YYYY HH:mm"))
-              (common/loc :neighbors.open))]])
-        (path/value path state))])
-
-(defmethod placeholder :application-id
-  [_]
-  [:span.formatted (lupapisteApp.services.contextService.applicationId)])
-
-(defmethod placeholder :building
-  [{:keys [state path]}]
-  (let [{:keys [operation building-id tag description]} (path/value (butlast path) state)]
-    [:span.formatted (->> [(path/loc :operations operation)
-                           (s/join ": " (remove s/blank? [tag description]))
-                           building-id]
-                          (remove s/blank?)
-                          (s/join " \u2013 "))]))
-
-
-
 (defmethod view-component :placeholder
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [elem (placeholder options)]
-    (if (show-label? schema wrap-label?)
+  (let [elem (placeholder/placeholder options)]
+    (if (matti-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))
 

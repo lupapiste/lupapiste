@@ -5,18 +5,24 @@
             [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.hub :as hub]))
 
-(defn- destroy-file-upload-subscription [state]
+(defn- destroy-file-upload-subscriptions [state]
   (hub/send "fileuploadService::destroy" {:input (::input-id state)})
-  (hub/unsubscribe (::fileupload-subscription-id state))
+  (doseq [id (vals (::fileupload-subscription-ids state))]
+    (hub/unsubscribe id))
   true)
 
 (defn upload-mixin
   "The first component argument is either callback function or options map.
   Options [optional]:
-    callback:   callback function
+
+    callback: callback function or map. See upload/service-hubscribe
+              for details.
+
     [dropzone]: dropzone container (!) selector that will be passed to
-                $() on the jQuery side. Note: the selector is for the some element
-                that (ultimately) contains the drop-zone element.
+                $() on the jQuery side. Note: the selector is for the
+                some element that (ultimately) contains the drop-zone
+                element.
+
     [input-id]: (hidden) file input-id. Default is generated unique id."
   []
   (letfn [(parse-args [state]
@@ -31,8 +37,8 @@
                                          "dropZone" dropzone))
               (assoc state
                      ::file-callback callback
-                     ::fileupload-subscription-id (upload/subscribe-files-uploaded input-id
-                                                                                   callback))))]
+                     ::fileupload-subscription-ids (upload/service-hubscribe input-id
+                                                                             callback))))]
     {:will-mount (fn [state]
                    (assoc state ::input-id (get (parse-args state)
                                                 :input-id
@@ -45,13 +51,13 @@
                             {new-callback :callback} (parse-args new)]
                         (if (or (not= (::input-id old) (::input-id new))
                                 (not= old-callback new-callback))
-                          (destroy-file-upload-subscription old)
+                          (destroy-file-upload-subscriptions old)
                           false)))
 
      :did-update initialize
 
      :will-unmount (fn [state]
-                     (destroy-file-upload-subscription state)
+                     (destroy-file-upload-subscriptions state)
                      (dissoc state ::input-id)
                      state)}))
 
@@ -82,29 +88,35 @@
 (rum/defcs upload-wrapper < (upload-mixin)
   "Convenience wrapper file upload components. The idea is that the
   wrapper takes care of the mundane upload details and provides the
-  wrapped component with the necessary options.
+  wrapped component with the necessary upload-options.
 
   Wrapper options [optional]. In addition to upload-mixin options (see
   above):
     :component Wrapped component
     [:test-id]   Test id (prefix).
 
-  The wrapped component receives the following options:
-    :callback Callback function (passthrough from wrapper)
-    :test-id  Passthrough from wrapper
+  The wrapped component receives the following options as the first
+  argument:
+
+    :callback Callback function (pass-through from wrapper)
+    :test-id  Pass-through from wrapper
     :input    Hidden file input (test-id is wrapper-test-id-option-input)
-    :input-id Id of the hidden file input."
-  [{input-id ::input-id} {:keys [component test-id] :as options}]
-  (component (-> options
-                 (dissoc :component)
-                 (assoc :input [:input.hidden
-                                (merge {:type "file"
-                                        :name "files[]"
-                                        :id input-id}
-                                       (when test-id
-                                         {:data-test-id (str test-id
-                                                             "-input")}))]
-                        :input-id input-id))))
+    :input-id Id of the hidden file input.
+
+  The other-args are passed as is to the wrapped component."
+  [{input-id ::input-id} {:keys [component test-id] :as options} & other-options]
+  (apply component
+         (-> options
+                   (dissoc :component)
+                   (assoc :input [:input.hidden
+                                  (merge {:type "file"
+                                          :name "files[]"
+                                          :id input-id}
+                                         (when test-id
+                                           {:data-test-id (str test-id
+                                                               "-input")}))]
+                          :input-id input-id))
+         other-options))
 
 (rum/defc view-with-download < {:key-fn #(str "view-with-download-" (:fileId %))}
   "Port of ko.bindingHandlers.viewWithDownload"

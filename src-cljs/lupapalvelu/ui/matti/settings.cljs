@@ -3,6 +3,7 @@
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
+            [lupapalvelu.ui.matti.components :as matti-components]
             [lupapalvelu.ui.matti.layout :as layout]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.sections :as sections]
@@ -196,5 +197,5 @@
       [:h2.matti-settings-title (common/loc :matti-settings
                                             (common/loc (:title schema)))]]
      [:div.col-1.col--right
-      (layout/last-saved options)]]]
+      (matti-components/last-saved options)]]]
    (sections/sections options :settings)])

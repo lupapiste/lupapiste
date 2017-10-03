@@ -5,7 +5,13 @@
  *
  * You can try out the advanced compilation locally (remember to stop figwheel first)
  *
+ * lein with-profiles uberjar uberjar once
+ *
+ * A "lighter" alternative is
+ *
  * lein with-profiles uberjar cljsbuild once
+ *
+ * but that does not find all the problematic issues.
  */
 var ajax = {};
 

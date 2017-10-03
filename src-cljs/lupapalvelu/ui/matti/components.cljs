@@ -15,6 +15,9 @@
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
+(defn show-label? [{label? :label?} wrap-label?]
+  (and wrap-label? (not (false? label?))))
+
 (rum/defc matti-date-delta < rum/reactive
   [{:keys [state path schema] :as options}  & [wrap-label?]]
   (let [enabled-path (path/extend path :enabled)]

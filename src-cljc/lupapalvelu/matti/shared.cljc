@@ -111,8 +111,7 @@
   value)
 
   Note: :_meta.enabled? is always used as prerequisite."
-  {(sc/optional-key :enabled?)
-  condition-type
+  {(sc/optional-key :enabled?)  condition-type
    (sc/optional-key :disabled?) condition-type})
 
 (defschema MattiVisible
@@ -214,7 +213,7 @@
 (defschema MattiPlaceholder
   "Placholder for external (filled by backend) data."
   (merge MattiComponent
-         {:type (sc/enum :neighbors :application-id :building)}))
+         {:type (sc/enum :neighbors :application-id :building :attachments)}))
 
 (defschema KeyMap
   "Map with the restricted set of keys. In other words, no new keys
@@ -538,26 +537,27 @@
              [[:matti-r.foremen :foremen false false]
               [:matti-plans :plans true false]
               [:matti-reviews :reviews true true]])
-     {:conditions             {:phrase-text {:i18nkey  :phrase.category.lupaehdot
-                                             :category :lupaehdot}}
-      :neighbors              {:phrase-text {:i18nkey  :phrase.category.naapurit
-                                             :category :naapurit}}
-      :neighbor-states        {:placeholder {:type :neighbors}}
-      :collateral             {:phrase-text {:category :vakuus}}
-      :appeal                 {:phrase-text {:category :muutoksenhaku}}
-      :complexity             {:docgen "matti-complexity"}
-      :complexity-text        {:phrase-text {:label?   false
-                                             :category :vaativuus}}
-      :rights                 {:phrase-text {:category :rakennusoikeus}}
-      :purpose                {:phrase-text {:category :kaava}}
-      :buildings              {:repeating {:building-name          {:placeholder {:label? false
-                                                                                  :type :building}}
-                                           :rakennetut-autopaikat  {:docgen "matti-string"}
-                                           :kiinteiston-autopaikat {:docgen "matti-string"}
-                                           :autopaikat-yhteensa    {:docgen "matti-string"}
-                                           :vss-luokka             {:docgen "matti-string"}
-                                           :paloluokka             {:docgen "matti-string"}
-                                           :show-building          {:docgen "required-in-verdict"}}}})
+     {:conditions      {:phrase-text {:i18nkey  :phrase.category.lupaehdot
+                                      :category :lupaehdot}}
+      :neighbors       {:phrase-text {:i18nkey  :phrase.category.naapurit
+                                      :category :naapurit}}
+      :neighbor-states {:placeholder {:type :neighbors}}
+      :collateral      {:phrase-text {:category :vakuus}}
+      :appeal          {:phrase-text {:category :muutoksenhaku}}
+      :complexity      {:docgen "matti-complexity"}
+      :complexity-text {:phrase-text {:label?   false
+                                      :category :vaativuus}}
+      :rights          {:phrase-text {:category :rakennusoikeus}}
+      :purpose         {:phrase-text {:category :kaava}}
+      :buildings       {:repeating {:building-name          {:placeholder {:label? false
+                                                                           :type   :building}}
+                                    :rakennetut-autopaikat  {:docgen "matti-string"}
+                                    :kiinteiston-autopaikat {:docgen "matti-string"}
+                                    :autopaikat-yhteensa    {:docgen "matti-string"}
+                                    :vss-luokka             {:docgen "matti-string"}
+                                    :paloluokka             {:docgen "matti-string"}
+                                    :show-building          {:docgen "required-in-verdict"}}}
+      :attachments     {:placeholder {:type :attachments}}})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -672,26 +672,32 @@
                           :grid {:columns    6
                                  :loc-prefix :matti-buildings.info
                                  :repeating  :buildings
-                                 :rows       [{:css [:row--tight]
+                                 :rows       [{:css   [:row--tight]
                                                :show? [:OR :_meta.editing? :+.show-building]
-                                               :row [{:col 6
-                                                      :dict :building-name}]}
+                                               :row   [{:col  6
+                                                        :dict :building-name}]}
                                               {:show? [:OR :_meta.editing? :+.show-building]
-                                               :css [:row--indent]
-                                               :row [{:col 5
-                                                      :list {:css :list--sparse
-                                                             :items (map #(hash-map :id %
-                                                                                    :dict %
-                                                                                    :show? (util/kw-path :?+ %)
-                                                                                    :enabled? :-.show-building)
-                                                                         [:rakennetut-autopaikat
-                                                                          :kiinteiston-autopaikat
-                                                                          :autopaikat-yhteensa
-                                                                          :vss-luokka
-                                                                          :paloluokka])}}
-                                                     {:dict  :show-building
-                                                      :show? :_meta.editing?}]}
-                                              ]}}]]}}]}})
+                                               :css   [:row--indent]
+                                               :row   [{:col  5
+                                                        :list {:css   :list--sparse
+                                                               :items (map #(hash-map :id %
+                                                                                      :dict %
+                                                                                      :show? (util/kw-path :?+ %)
+                                                                                      :enabled? :-.show-building)
+                                                                           [:rakennetut-autopaikat
+                                                                            :kiinteiston-autopaikat
+                                                                            :autopaikat-yhteensa
+                                                                            :vss-luokka
+                                                                            :paloluokka])}}
+                                                       {:dict  :show-building
+                                                        :show? :_meta.editing?}]}
+                                              ]}}]]}}
+     {:id "attachments"
+      :i18nkey :application.verdict-attachments
+      :grid {:columns 7
+             :rows [[{:col 6
+                      :align :full
+                      :dict :attachments}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 
