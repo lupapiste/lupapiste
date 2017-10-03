@@ -183,6 +183,9 @@
                         <div data-bind="if: $root.application.state() == 'draft'">
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
+
+                        <backend-id-manager params="application: application"></backend-id-manager>
+
                         <div class="operation-info">
                             <!-- ko if: !$root.authorization.ok('link-permit-required') -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
