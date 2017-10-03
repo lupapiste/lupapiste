@@ -208,6 +208,8 @@
       [:Katselmus :katselmuspoytakirja]
       {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]})))
 
+(def- avainsanatieto_222
+  {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
 
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
@@ -373,7 +375,10 @@
                  (mapping-common/common-namespaces :R "2.2.2"))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})))
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                 #(update % :child concat [avainsanatieto_222]))))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}

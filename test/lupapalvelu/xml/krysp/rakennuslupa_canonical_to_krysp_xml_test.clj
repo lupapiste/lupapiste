@@ -203,6 +203,23 @@
   (fact "Aloitusoikeus -> canonical -> xml"
     (do-test aloitusoikeus-hakemus :finnish? true)))
 
+(facts "Rakennusvalvonta tests"
+  (let [canonical (application-to-canonical application-rakennuslupa "fi")
+        xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
+        xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")
+        xml_220_s (indent-str xml_220)
+        xml_222_s (indent-str xml_222)
+        lp-xml_220 (cr/strip-xml-namespaces (xml/parse xml_220_s))
+        lp-xml_222 (cr/strip-xml-namespaces (xml/parse xml_222_s))]
+
+    (facts "2.2.0"
+      (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
+
+    (facts "2.2.2"
+      (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
+           (map :content)) => [["avainsana"]
+                               ["toinen avainsana"]])))
+
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")

@@ -510,6 +510,8 @@
    :propertyId "21111111111111"
    :modified 1354532324691
    :address "Katutie 54"
+   :tags [{:id "tag1" :label "avainsana"}
+          {:id "tag2" :label "toinen avainsana"}]
    :statements [{:given 1368080324142
                  :id "518b3ee60364ff9a63c6d6a1"
                  :person {:text "Paloviranomainen"
@@ -1136,7 +1138,8 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
+        kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy
+        avainsanatieto (:avainsanaTieto rakennusvalvontaasia) => truthy]
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
@@ -1178,6 +1181,8 @@
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")
+
+    (fact "avainsanaTieto" avainsanatieto => [{:Avainsana "avainsana"} {:Avainsana "toinen avainsana"}])
 
     (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
     (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
