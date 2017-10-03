@@ -213,12 +213,19 @@
         lp-xml_222 (cr/strip-xml-namespaces (xml/parse xml_222_s))]
 
     (facts "2.2.0"
-      (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
+      (fact "avainsanatieto"
+        (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
+
+      (fact "menettelyTOS"
+        (xml/get-text lp-xml_220 [:menettelyTOS]) => nil))
 
     (facts "2.2.2"
-      (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
-           (map :content)) => [["avainsana"]
-                               ["toinen avainsana"]])))
+      (fact "avainsanatieto"
+        (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
+             (map :content)) => [["avainsana"]
+                                 ["toinen avainsana"]])
+      (fact "menettelyTOS"
+        (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely"))))
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")

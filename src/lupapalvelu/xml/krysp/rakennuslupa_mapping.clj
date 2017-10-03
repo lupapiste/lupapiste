@@ -211,6 +211,9 @@
 (def- avainsanatieto_222
   {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
 
+(def- menettely-tos_222
+  {:tag :menettelyTOS})
+
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
@@ -378,7 +381,7 @@
                  {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
-                 #(update % :child concat [avainsanatieto_222]))))
+                 #(update % :child concat [avainsanatieto_222 menettely-tos_222]))))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}

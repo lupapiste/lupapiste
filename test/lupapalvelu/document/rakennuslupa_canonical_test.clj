@@ -537,7 +537,9 @@
                                       laajentaminen
                                       aidan-rakentaminen
                                       puun-kaataminen
-                                      purku])})
+                                      purku])
+   :tosFunction "00 00 00 01"
+   :tosFunctionName "tos menettely"})
 
 (ctc/validate-all-documents application-rakennuslupa)
 
@@ -1234,7 +1236,9 @@
           (:lausuntotieto lausunto1) => truthy)
         (fact "Second is draft, does not have lausuntotieto"
           (:lausuntotieto lausunto2) => nil
-          (keys lausunto2) => (just [:id :pyyntoPvm :viranomainen] :in-any-order))))))
+          (keys lausunto2) => (just [:id :pyyntoPvm :viranomainen] :in-any-order))))
+
+    (fact "menttelyTos" (:menettelyTOS rakennusvalvontaasia) => "tos menettely")))
 
 (fl/facts* "Canonical model ilman ilmoitusta is correct"
   (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv") => truthy

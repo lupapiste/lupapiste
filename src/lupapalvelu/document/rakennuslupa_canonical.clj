@@ -354,6 +354,7 @@
                  util/not-empty-or-nil?
                  :viitelupatieto (map get-viitelupatieto link-permits)
                  :avainsanaTieto (get-avainsanaTieto application)
+                 :menettelyTOS (:tosFunctionName application)
                  :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)
                                                                   (:rakennuspaikka-ilman-ilmoitusta documents-by-type))
                                                           application)
