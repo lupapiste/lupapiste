@@ -162,6 +162,7 @@
    (sc/optional-key :verdict-templates) MattiSavedVerdictTemplates
    (sc/optional-key :phrases) [Phrase]
    (sc/optional-key :operation-verdict-templates) {sc/Keyword sc/Str}
+   (sc/optional-key :matti-enabled)                 sc/Bool
    (sc/optional-key :multiple-operations-supported) sc/Bool})
 
 
@@ -223,6 +224,9 @@
 
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
+
+(defn matti-org? [org-id]
+  (pos? (mongo/count :organizations {:_id org-id :matti-enabled true})))
 
 (defn encode-credentials
   [username password]

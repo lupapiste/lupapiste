@@ -277,10 +277,10 @@
           (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command)))))
 
     (with-application command
-      (fn [{:keys [id]}]
+      (fn [{:keys [id organization]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
           (when-let [new-state (get-in changes [$set :state])]
-            (when (env/feature? :matti-json)
+            (when (and (env/feature? :matti-json) organization (org/matti-org? organization))
               (util/future*
                 (matti/trigger-state-change command new-state))))
           (if return-count? n nil))))))

@@ -13,7 +13,10 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.verdict :as verdict]
-            [lupapalvelu.xml.krysp.common-reader :as common]))
+            [lupapalvelu.xml.krysp.common-reader :as common]
+            [lupapalvelu.find-address :as find-address]
+            [lupapalvelu.proxy-services :as proxy-services]
+            [cheshire.core :as json]))
 
 (defn- post-body-for-ya-application [ids id-path]
   (let [filter-content (->> (wfs/property-in id-path ids)
@@ -490,7 +493,8 @@
   (try
     (when-let [source-projection (common/->source-projection point-xml-with-ns [:Point])]
       (let [coords (ss/split point-str #" ")]
-        (coordinate/convert source-projection common/to-projection 3 coords)))
+        (when-not (contains? coordinate/known-bad-coordinates coords)
+          (coordinate/convert source-projection common/to-projection 3 coords))))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
 
@@ -519,6 +523,27 @@
                            (:porras osoite)
                            (apply build-huoneisto (util/select-values osoite [:huoneisto :jakokirjain :jakokirjain2]))]]
     (ss/join " " (remove nil? osoite-components))))
+
+(defn- resolve-location-by-property-id [property-id kuntalupatunnus]
+  (warn "Falling back to resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)
+  (if-let [location (-> (find-address/search-property-id "fi" property-id)
+                        first
+                        :location)]
+    (let [{:keys [x y]} location
+          resp (-> {:params {:x x :y y :lang "fi"}}
+                   proxy-services/address-by-point-proxy
+                   :body)
+          {:keys [street number]} (when (string? resp)
+                                    (try
+                                      (json/parse-string resp true)
+                                      (catch Exception _)))]
+      {:rakennuspaikka {:x          x
+                        :y          y
+                        :address    (if street
+                                      (str street " " number)
+                                      "Tuntematon osoite")
+                        :propertyId property-id}})
+    (warn "Could not resolve location for kuntalupatunnus" kuntalupatunnus "by property id" property-id)))
 
 ;;
 ;; Information parsed from verdict xml message for application creation
@@ -574,10 +599,15 @@
                :muutOsapuolet               muut-osapuolet
                :suunnittelijat              suunnittelijat}
 
-              (when (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
+              (cond
+                (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
                 {:rakennuspaikka {:x          (first coord-array-Rakennuspaikka)
                                   :y          (second coord-array-Rakennuspaikka)
                                   :address    osoite-Rakennuspaikka
-                                  :propertyId kiinteistotunnus}}))
+                                  :propertyId kiinteistotunnus}}
+
+                (and (nil? coord-array-Rakennuspaikka) (not (ss/blank? kiinteistotunnus)))
+                (resolve-location-by-property-id kiinteistotunnus kuntalupatunnus)))
+
             cr/convert-booleans
             cr/cleanup)))))

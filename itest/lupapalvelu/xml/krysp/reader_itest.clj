@@ -149,7 +149,8 @@
                                :osoite {:katu "", :postinumero "", :postitoimipaikannimi "" :maa "FIN"}
                                :userId nil
                                :yhteystiedot {:email "", :puhelin ""}
-                               :kytkimet {:suoramarkkinointilupa false}}
+                               :kytkimet {:suoramarkkinointilupa false
+                                          :postitetaanPaatos false}}
                      :muu-omistajalaji "", :omistajalaji nil
                      :yritys {:companyId nil
                               :liikeJaYhteisoTunnus "1234567-1"

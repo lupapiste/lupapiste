@@ -142,6 +142,21 @@
                 {:kytkimet {:postitetaanPaatos {:value true}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
+(def- suunnittelija3
+  {:id "suunnittelija3" :schema-info {:name "suunnittelija"
+                                      :version 1}
+   :data (merge suunnittelija-henkilo
+                {:kuntaRoolikoodi {:value "other"}}
+                {:muuSuunnittelijaRooli {:value "ei listassa -rooli"}}
+                {:suunnittelutehtavanVaativuusluokka {:value "C"}}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
+                            :patevyysluokka {:value "B"}
+                            :valmistumisvuosi {:value "2010"}
+                            :kokemus {:value "5"}
+                            :fise {:value "http://www.ym.fi"}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
+                {:yritys yritysnimi-ja-ytunnus})})
+
 (def- suunnittelija-old-schema-LUPA-771
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
@@ -403,6 +418,19 @@
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
 
+(def- aurinkopaneeli
+  {:id "muu-rakentaminen-1"
+   :schema-info {:name "kaupunkikuvatoimenpide"
+                 :op {:id  "muu-rakentaminen-id"
+                      :name "muu-rakentaminen"}
+                 :version 1}
+   :created 4
+   :data {:tunnus                 {:value "muu2"}
+          :kokonaisala            {:value "6"}
+          :kayttotarkoitus        {:value "Aurinkopaneeli"}
+          :kuvaus                 {:value "virtaa maailmaan"}
+          :valtakunnallinenNumero {:value "1940427695"}}})
+
 (def- aidan-rakentaminen {:data {:kokonaisala {:value "0"}
                                  :kayttotarkoitus {:value "Aita"}
                                           :kuvaus { :value "Aidan rakentaminen rajalle"}}
@@ -445,6 +473,7 @@
                 paasuunnittelija
                 suunnittelija1
                 suunnittelija2
+                suunnittelija3
                 maksaja-henkilo
                 maksaja-yritys
                 tyonjohtaja
@@ -494,6 +523,8 @@
    :propertyId "21111111111111"
    :modified 1354532324691
    :address "Katutie 54"
+   :tags [{:id "tag1" :label "avainsana"}
+          {:id "tag2" :label "toinen avainsana"}]
    :statements [{:given 1368080324142
                  :id "518b3ee60364ff9a63c6d6a1"
                  :person {:text "Paloviranomainen"
@@ -519,7 +550,9 @@
                                       laajentaminen
                                       aidan-rakentaminen
                                       puun-kaataminen
-                                      purku])})
+                                      purku])
+   :tosFunction "00 00 00 01"
+   :tosFunctionName "tos menettely"})
 
 (ctc/validate-all-documents application-rakennuslupa)
 
@@ -575,8 +608,36 @@
                                    :linkPermitData [link-permit-data-lupapistetunnus]
                                    :appsLinkingToUs [app-linking-to-us]}))
 
+(def application-suunnittelijan-nimeaminen-muu
+  (merge application-rakennuslupa {:id "LP-753-2013-00003"
+                                   :organization "753-R"
+                                   :state "submitted"
+                                   :submitted 1426247899490
+                                   :propertyId "75341600550007"
+                                   :primaryOperation {:name "suunnittelijan-nimeaminen"
+                                                      :id "527b3392e8dbbb95047a89de"
+                                                      :created 1383805842761}
+                                   :documents [hakija-henkilo
+                                               maksaja-henkilo
+                                               suunnittelija3
+                                               hankkeen-kuvaus-minimum]
+                                   :linkPermitData [link-permit-data-lupapistetunnus]
+                                   :appsLinkingToUs [app-linking-to-us]}))
+
 (ctc/validate-all-documents application-suunnittelijan-nimeaminen)
 
+(def application-aurinkopaneeli
+  (merge application-rakennuslupa {:primaryOperation (op-info aurinkopaneeli)
+                                   :secondaryOperations []
+                                   :documents [hankkeen-kuvaus
+                                               hakija-henkilo
+                                               paasuunnittelija
+                                               suunnittelija1
+                                               maksaja-henkilo
+                                               rakennuspaikka
+                                               aurinkopaneeli]}))
+
+(ctc/validate-all-documents application-aurinkopaneeli)
 
 (defn- validate-minimal-person [person]
   (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
@@ -697,6 +758,7 @@
         suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "rakennusfysikaalinen suunnittelija")
+    (fact "muuSuunnittelijarooli" (contains? suunnittelija-model :muuSuunnittelijaRooli) => false)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
@@ -712,6 +774,7 @@
         suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
+    (fact "muuSuunnittelijarooli" (contains? suunnittelija-model :muuSuunnittelijaRooli) => false)
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "muu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
@@ -719,6 +782,22 @@
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => true)
+    (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
+    (fact "yritys" (:yritys suunnittelija-model) => truthy)))
+
+(facts "Canonical suunnittelija3 model is correct"
+  (let [suunnittelija (tools/unwrapped (:data suunnittelija3))
+        suunnittelija-model (get-suunnittelija-data suunnittelija :suunnittelija)]
+    (fact "model" suunnittelija-model => truthy)
+    (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "muu")
+    (fact "muuSuunnittelijarooli" (:muuSuunnittelijaRooli suunnittelija-model) => "ei listassa -rooli")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
+    (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -1086,11 +1165,12 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
-        kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
+        kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy
+        avainsanatieto (:avainsanaTieto rakennusvalvontaasia) => truthy]
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
-    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 9)
+    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 10)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
     (fact "tilanNimi" (:tilannimi Kiinteisto) => "Hiekkametsa")
     (fact "kiinteistotunnus" (:kiinteistotunnus Kiinteisto) => "21111111111111")
@@ -1128,6 +1208,8 @@
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")
+
+    (fact "avainsanaTieto" avainsanatieto => [{:Avainsana "avainsana"} {:Avainsana "toinen avainsana"}])
 
     (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
     (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
@@ -1179,7 +1261,9 @@
           (:lausuntotieto lausunto1) => truthy)
         (fact "Second is draft, does not have lausuntotieto"
           (:lausuntotieto lausunto2) => nil
-          (keys lausunto2) => (just [:id :pyyntoPvm :viranomainen] :in-any-order))))))
+          (keys lausunto2) => (just [:id :pyyntoPvm :viranomainen] :in-any-order))))
+
+    (fact "menttelyTos" (:menettelyTOS rakennusvalvontaasia) => "tos menettely")))
 
 (fl/facts* "Canonical model ilman ilmoitusta is correct"
   (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv") => truthy
@@ -2033,3 +2117,33 @@
 
         (fact "SaapumisPvm = submitted date"
           (:saapumisPvm lupa-tunnus) => "2014-01-02")))
+
+(fl/facts* "Canonical model for kaupunkikuvatoimenpide/aurinkopaneeli is correct"
+  (let [canonical (application-to-canonical application-aurinkopaneeli "fi") => truthy
+        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy]
+
+    (fact "kayttotarkoitus"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kayttotarkoitus)
+        => "Aurinkopaneeli")
+
+    (fact "kokonaisala"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kiinttun)
+        => "21111111111111")
+
+    (fact "kokonaisala"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kokonaisala)
+        => "6")
+
+    (fact "kuvaus"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kuvaus :kuvaus)
+        => "virtaa maailmaan")
+
+    (fact "yksilointitieto"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :yksilointitieto)
+        => "muu-rakentaminen-id")
+
+    (fact "jarjestysnumero"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :tunnus :jarjestysnumero)
+      => 1)))

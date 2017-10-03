@@ -208,6 +208,11 @@
       [:Katselmus :katselmuspoytakirja]
       {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]})))
 
+(def- avainsanatieto_222
+  {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
+
+(def- menettely-tos_222
+  {:tag :menettelyTOS})
 
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
@@ -373,7 +378,10 @@
                  (mapping-common/common-namespaces :R "2.2.2"))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})))
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                 #(update % :child concat [avainsanatieto_222 menettely-tos_222]))))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
@@ -468,19 +476,22 @@
               (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
-(def designer-roles-mapping-new-to-old-220 {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
-                                            "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
-                                            "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
-                                            "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
-                                            "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
-                                            "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
-                                            "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"})
+(def designer-roles-mapping-new-to-old-222 {"muu" "ei tiedossa"})
 
-(defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
+(def designer-roles-mapping-new-to-old-220 (merge designer-roles-mapping-new-to-old-222
+                                                  {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
+                                                   "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
+                                                   "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
+                                                   "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
+                                                   "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
+                                                   "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
+                                                   "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"}))
+
+(defn map-suunnittelija-kuntaroolikoodi [mapping canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
     #(map (fn [suunnittelija]
             (update-in suunnittelija [:Suunnittelija :suunnittelijaRoolikoodi]
-              (fn [role] (or (designer-roles-mapping-new-to-old-220 role) role))))
+              (fn [role] (or (mapping role) role))))
        %)))
 
 (def hakijan-asiamies-mapping-new-to-old-220 {"Hakijan asiamies"  "ei tiedossa"})
@@ -491,9 +502,26 @@
             (update-in osapuoli [:Osapuoli :kuntaRooliKoodi]
               (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role)))) %)))
 
-(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka map-hakijan-asiamies-pre220))
+(def rakennelman-kayttotarkoitus-pre-222 {"Aurinkopaneeli" "Muu rakennelma"
+                                          "Varastointis\u00e4ili\u00f6" "Muu rakennelma"})
 
-(def map-enums-213-218 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-hakijan-asiamies-pre220))
+(defn map-rakennelman-kayttotarkoitus-pre-222 [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+             (partial map (fn [{{{{kayttotarkoitus :kayttotarkoitus} :Rakennelma} :rakennelmatieto} :Toimenpide :as toimenpide}]
+                            (if kayttotarkoitus
+                              (assoc-in toimenpide [:Toimenpide :rakennelmatieto :Rakennelma :kayttotarkoitus]
+                                        (get rakennelman-kayttotarkoitus-pre-222 kayttotarkoitus kayttotarkoitus))
+                              toimenpide)))))
+
+(def map-enums-220 (comp (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-222)
+                         map-rakennelman-kayttotarkoitus-pre-222))
+
+(def map-enums-213-218 (comp map-enums-220
+                             (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-220)
+                             map-hakijan-asiamies-pre220))
+
+(def map-enums-212 (comp map-enums-213-218
+                         map-tyonjohtaja-patevyysvaatimusluokka))
 
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
@@ -511,6 +539,7 @@
         "2.1.6" (map-enums-213-218 canonical)
         "2.1.7" (map-enums-213-218 canonical)
         "2.1.8" (map-enums-213-218 canonical)
+        "2.2.0" (map-enums-220 canonical)
         canonical)
       (common-map-enums krysp-version)))
 

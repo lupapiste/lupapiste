@@ -220,11 +220,13 @@
                            :redirect-to-3d-map :ya-extensions
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            :application-organization-archive-enabled
-                           ; raw
+                           ;; matti
+                           :matti-verdicts :matti-verdict
+                           ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export
                            :application-guests :submitted-application-pdf-export
-                           ; tab visibility
+                           ;; tab visibility
                            :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
                            :application-verdict-tab-visible}]
     (doseq [command (foreach-action {:web {} :user user :application application :data {}})

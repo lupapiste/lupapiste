@@ -15,11 +15,11 @@
 
 (defmethod party-canonical-info :hakija
   [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
-  {:osapuolitieto {:Osapuoli (canonical-common/get-osapuoli-data doc-data party-type doc-subtype)}})
+  {:osapuolitieto [{:Osapuoli (canonical-common/get-osapuoli-data doc-data party-type doc-subtype)}]})
 
 (defmethod party-canonical-info :suunnittelija
   [{doc-data :data {party-type :name doc-subtype :subtype} :schema-info :as party-doc}]
-  {:suunnittelijatieto {:Suunnittelija (canonical-common/get-suunnittelija-data doc-data party-type doc-subtype)}})
+  {:suunnittelijatieto [{:Suunnittelija (canonical-common/get-suunnittelija-data doc-data party-type doc-subtype)}]})
 
 (defmulti party-usage-info
   {:arglists '([party-doc])}
@@ -53,7 +53,7 @@
      {:kasittelynTilatieto (canonical-common/get-state application)
       :luvanTunnisteTiedot (canonical-common/lupatunnus (:id party-doc) (:submitted application) nil)
       :viitelupatieto (canonical-common/lupatunnus application)
-      :osapuolettieto {:Osapuolet [(party-canonical-info party-doc)]}
+      :osapuolettieto {:Osapuolet (party-canonical-info party-doc)}
       :kayttotapaus (party-usage-info party-doc)
       :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus (party-krysp-description party-doc)}}
       :lisatiedot (rl-canonical/get-lisatiedot lang)}}}})

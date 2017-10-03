@@ -64,6 +64,10 @@
         user (usr/get-user-by-id (:id owner))]
     (:phone user)))
 
+(defn get-applicant-companies [_ app]
+  (let [companies (auth/get-company-auths app)]
+    (map :name companies)))
+
 (defn foreman-name-from-doc [doc]
   (let [first-name (get-in doc [:data :henkilotiedot :etunimi :value])
         last-name (get-in doc [:data :henkilotiedot :sukunimi :value])]
@@ -188,6 +192,7 @@
 (def meta-fields (conj indicator-meta-fields
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
+                   {:field :applicantCompanies :fn get-applicant-companies}
                    {:field :organizationMeta :fn organization-meta}
                    {:field :stateSeq :fn #(sm/application-state-seq %2)}))
 
