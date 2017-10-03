@@ -448,7 +448,7 @@
                                              :organization-id (:id organization)
                                              :exception (.getName (class t))
                                              :message (.getMessage t)
-                                             :event (format "Unable to get reviews for %s from %s backend: %s - %s"  permit-type (:id organization))})
+                                             :event (format "Unable to get reviews for %s from %s backend"  permit-type (:id organization))})
                   nil)))
             applications)
        (apply concat)
