@@ -95,4 +95,4 @@
                      :muuTunnustieto [{:MuuTunnus {:sovellus "lupapiste" :tunnus "999"}}
                                       {:MuuTunnus {:sovellus "RakApp" :tunnus "998"}}
                                       {:MuuTunnus {:sovellus "RakApp" :tunnus "997"}}]
-                     :tarkastuksenTaiKatselmuksenNimi "Käyttöönottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp"}))
+                          :tarkastuksenTaiKatselmuksenNimi "K\u00E4ytt\u00F6\u00F6nottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp"}))

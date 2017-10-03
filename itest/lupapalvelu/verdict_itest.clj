@@ -1,12 +1,15 @@
 (ns lupapalvelu.verdict-itest
   (:require [midje.sweet :refer :all]
             [clj-time.coerce :as coerce]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libreclient]))
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libreclient]
+            [sade.core :refer [now]]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 

@@ -7,6 +7,7 @@
             [clojure.core.async :as async]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
+            [clj-time.core :as t]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
@@ -675,3 +676,69 @@
                       (if (:archivabilityError result)
                         (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
                         (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
+
+
+(defn fetch-verdict-attachments
+  [start-timestamp end-timestamp organizations]
+  {:pre [(number? start-timestamp)
+         (number? end-timestamp)
+         (< start-timestamp end-timestamp)
+         (vector? organizations)]}
+  (let [apps (verdict/applications-with-missing-verdict-attachments
+              {:start         start-timestamp
+               :end           end-timestamp
+               :organizations organizations})
+        eraajo-user (user/batchrun-user (map :organization apps))]
+    (->> (doall
+          (pmap
+           (fn [{:keys [id permitType organization] :as app}]
+             (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+               (try
+                 (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdict-attachments)
+                       app-xml (krysp-fetch/get-application-xml-by-application-id app)
+                       result  (verdict/update-verdict-attachments-from-xml! command app-xml)]
+                   (when (-> result :updated-verdicts count pos?)
+                     ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+                     (logging/log-event :info {:run-by "Automatic verdict attachments checking"
+                                               :event "Found new verdict attachments"
+                                               :updated-verdicts (-> result :updated-verdicts)}))
+                   (when (or (nil? result) (fail? result))
+                     (logging/log-event :error {:run-by "Automatic verdict attachment checking"
+                                                :event "Failed to check verdict attachments"
+                                                :failure (if (nil? result) :error.no-app-xml result)
+                                                :organization {:id organization :permit-type permitType}
+                                                }))
+
+                   ;; Return result for testing purposes
+                   result)
+                 (catch Throwable t
+                   (logging/log-event :error {:run-by "Automatic verdict attachments checking"
+                                              :event "Unable to get verdict from backend"
+                                              :exception-message (.getMessage t)
+                                              :application-id id
+                                              :organization {:id organization :permit-type permitType}})))))
+           apps))
+         (remove #(empty? (:updated-verdicts %)))
+         (hash-map :updated-applications)
+         (merge {:start start-timestamp
+                 :end   end-timestamp
+                 :organizations organizations
+                 :applications (map :id apps)}))))
+
+(defn check-for-verdict-attachments
+  "Fetch missing verdict attachments for verdicts given in the time
+  interval between start-timestamp and end-timestamp (last 3 months by
+  default), for the organizations whose id's are provided as
+  arguments (all organizations by default)."
+  [& [start-timestamp end-timestamp & organizations]]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic verdict attachment checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
+  (mongo/connect!)
+  (fetch-verdict-attachments (or (when start-timestamp
+                                   (util/to-millis-from-local-date-string start-timestamp))
+                                 (-> 3 t/months t/ago c/to-long))
+                             (or (when end-timestamp
+                                   (util/to-millis-from-local-date-string end-timestamp))
+                                 (now))
+                             (or (vec organizations) [])))

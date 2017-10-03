@@ -1,17 +1,17 @@
 (ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer [fact* facts*]]
-            [sade.core :refer [now fail]]
-            [sade.dummy-email-server :as dummy-email-server]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.integrations-api]
-            [lupapalvelu.verdict-api]
-            [lupapalvelu.fixture.minimal :as minimal]
-            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]
-            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]))
+            [lupapalvelu.factlet :refer [fact* facts*]]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.integrations-api]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.verdict-api]
+            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
+            [sade.core :refer [now fail]]
+            [sade.dummy-email-server :as dummy-email-server]))
 
 (defonce db-name (str "test_autom-check-verdicts-itest_" (now)))
 
