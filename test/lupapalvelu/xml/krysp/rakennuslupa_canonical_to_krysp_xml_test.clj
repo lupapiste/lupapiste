@@ -218,7 +218,9 @@
     (facts "2.2.2"
       (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
            (map :content)) => [["avainsana"]
-                               ["toinen avainsana"]])))
+                               ["toinen avainsana"]]
+      (fact "rakennustietojEiMmutetaKytkin"
+        (xml/get-text lp-xml_222 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => "true"))))
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")
