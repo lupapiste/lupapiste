@@ -1,9 +1,44 @@
 (ns lupapalvelu.ui.bulletins.local-bulletins
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [lupapalvelu.ui.bulletins.state :as state]
+            [lupapalvelu.ui.common :as common]))
 
 (defonce args (atom {}))
 
-(rum/defc local-bulletins < rum/reactive
+(defn init
+  [init-state props]
+  (reset! state/current-organization "753-R")
+  (common/query :local-application-bulletins
+                (fn [{:keys [data]}] (reset! state/local-bulletins data))
+                :organization @state/current-organization :searchText "" :page 1)
+  init-state)
+
+(rum/defc bulletins-table < rum/reactive
+  [_]
+  (let [bulletins (rum/react state/local-bulletins)]
+    [:table.application-bulletins-list
+     [:thead
+      [:tr
+       [:th "Pykälä (§)"]
+       [:th "Lupatunnus"]
+       [:th "Rakennuspaikka"]
+       [:th "Asia/Toimenpide"]
+       [:th "Päättäjä"]
+       [:th "Päätöksen antopäivä"]
+       [:th "Viimeinen oikaisuvaatimuspäivä"]]]
+      [:tbody
+       (for [{:keys [id address verdictGivenAt appealPeriodStartsAt]} bulletins]
+         [:tr
+          {:key id}
+          [:td "-"]
+          [:td id]
+          [:td address]
+          [:td ""]
+          [:td ""]
+          [:td (common/format-timestamp verdictGivenAt)]
+          [:td (common/format-timestamp appealPeriodStartsAt)]])]]))
+
+(rum/defc local-bulletins < {:init         init}
   [_]
   [:div
    [:div.full.content.orange-bg
@@ -17,17 +52,7 @@
      [:p "Kunnan rakennuslupapäätökset annetaan julkipanon jälkeen, jolloin niiden katsotaan tulleen asianosaisten tietoon."]]]
    [:div.full.content
     [:div.content-center
-     [:table.application-bulletins-list
-      [:thead
-       [:tr
-        [:th "Pykälä (§)"]
-        [:th "Lupatunnus"]
-        [:th "Rakennuspaikka"]
-        [:th "Asia/Toimenpide"]
-        [:th "Päättäjä"]
-        [:th "Päätöksen antopäivä"]
-        [:th "Viimeinen oikaisuvaatimuspäivä"]]
-       [:tbody]]]]]])
+     (bulletins-table)]]])
 
 (defn mount-component []
   (rum/mount (local-bulletins)
