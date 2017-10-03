@@ -312,6 +312,8 @@
         fields-with-defaults (merge operation-meta-fields-to-enrich enrichable-fields)]
     (update app :primaryOperation merge fields-with-defaults)))
 
+(defn- enrich-tos-function-name [{tos-function :tosFunction org-id :organization :as application}]
+  (assoc application :tosFunctionName (:name (tos/tos-function-with-name tos-function org-id))))
 
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
@@ -329,6 +331,7 @@
   (-> application
       (domain/enrich-application-handlers organization)
       (domain/enrich-application-tags organization)
+      enrich-tos-function-name
       meta-fields/enrich-with-link-permit-data
       link-permit/update-backend-ids-in-link-permit-data))
 
