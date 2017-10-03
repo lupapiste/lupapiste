@@ -10,6 +10,7 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
+                                                                      application-aurinkopaneeli
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-tyonjohtajan-nimeaminen-v2
                                                                       application-suunnittelijan-nimeaminen
@@ -201,6 +202,46 @@
 
   (fact "Aloitusoikeus -> canonical -> xml"
     (do-test aloitusoikeus-hakemus :finnish? true)))
+
+(facts "Rakennelma"
+  (let [canonical (application-to-canonical application-aurinkopaneeli "fi")
+        xml_218 (rakennuslupa-element-to-xml canonical "2.1.8")
+        xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
+        xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")
+        xml_218_s (indent-str xml_218)
+        xml_220_s (indent-str xml_220)
+        xml_222_s (indent-str xml_222)]
+
+    (validator/validate xml_218_s :R "2.1.8")
+    (validator/validate xml_220_s :R "2.2.0")
+    (validator/validate xml_222_s :R "2.2.2")
+
+    (facts "2.1.8"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_218_s))
+            toimenpide (xml/select1 lp-xml [:Toimenpide])
+            rakennelma (xml/select1 toimenpide [:Rakennelma])]
+
+        (fact "yksilointitieto" (xml/get-text toimenpide [:yksilointitieto]) => "muu-rakentaminen-id")
+        (fact "kuvaus"          (xml/get-text rakennelma [:kuvaus :kuvaus])  => "virtaa maailmaan")
+        (fact "kayttotarkoitus" (xml/get-text rakennelma [:kayttotarkoitus]) => nil)))
+
+    (facts "2.2.0"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_220_s))
+            toimenpide (xml/select1 lp-xml [:Toimenpide])
+            rakennelma (xml/select1 toimenpide [:Rakennelma])]
+
+        (fact "yksilointitieto" (xml/get-text toimenpide [:yksilointitieto]) => "muu-rakentaminen-id")
+        (fact "kuvaus"          (xml/get-text rakennelma [:kuvaus :kuvaus])  => "virtaa maailmaan")
+        (fact "kayttotarkoitus" (xml/get-text rakennelma [:kayttotarkoitus]) => "Muu rakennelma")))
+
+    (facts "2.2.2"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_222_s))
+            toimenpide (xml/select1 lp-xml [:Toimenpide])
+            rakennelma (xml/select1 toimenpide [:Rakennelma])]
+
+        (fact "yksilointitieto" (xml/get-text toimenpide [:yksilointitieto]) => "muu-rakentaminen-id")
+        (fact "kuvaus"          (xml/get-text rakennelma [:kuvaus :kuvaus])  => "virtaa maailmaan")
+        (fact "kayttotarkoitus" (xml/get-text rakennelma [:kayttotarkoitus]) => "Aurinkopaneeli")))))
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")

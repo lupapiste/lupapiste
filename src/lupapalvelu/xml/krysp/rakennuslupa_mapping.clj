@@ -491,9 +491,25 @@
             (update-in osapuoli [:Osapuoli :kuntaRooliKoodi]
               (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role)))) %)))
 
-(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka map-hakijan-asiamies-pre220))
+(def rakennelman-kayttotarkoitus-pre-222 {"Aurinkopaneeli" "Muu rakennelma"
+                                          "Varastointis\u00e4ili\u00f6" "Muu rakennelma"})
 
-(def map-enums-213-218 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-hakijan-asiamies-pre220))
+(defn map-rakennelman-kayttotarkoitus-pre-222 [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+             (partial map (fn [{{{{kayttotarkoitus :kayttotarkoitus} :Rakennelma} :rakennelmatieto} :Toimenpide :as toimenpide}]
+                            (if kayttotarkoitus
+                              (assoc-in toimenpide [:Toimenpide :rakennelmatieto :Rakennelma :kayttotarkoitus]
+                                        (get rakennelman-kayttotarkoitus-pre-222 kayttotarkoitus kayttotarkoitus))
+                              toimenpide)))))
+
+(def map-enums-220 map-rakennelman-kayttotarkoitus-pre-222)
+
+(def map-enums-213-218 (comp map-enums-220
+                             map-suunnittelija-kuntaroolikoodi-pre220
+                             map-hakijan-asiamies-pre220))
+
+(def map-enums-212 (comp map-enums-213-218
+                         map-tyonjohtaja-patevyysvaatimusluokka))
 
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
@@ -511,6 +527,7 @@
         "2.1.6" (map-enums-213-218 canonical)
         "2.1.7" (map-enums-213-218 canonical)
         "2.1.8" (map-enums-213-218 canonical)
+        "2.2.0" (map-enums-220 canonical)
         canonical)
       (common-map-enums krysp-version)))
 

@@ -403,6 +403,19 @@
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
 
+(def- aurinkopaneeli
+  {:id "muu-rakentaminen-1"
+   :schema-info {:name "kaupunkikuvatoimenpide"
+                 :op {:id  "muu-rakentaminen-id"
+                      :name "muu-rakentaminen"}
+                 :version 1}
+   :created 4
+   :data {:tunnus                 {:value "muu2"}
+          :kokonaisala            {:value "6"}
+          :kayttotarkoitus        {:value "Aurinkopaneeli"}
+          :kuvaus                 {:value "virtaa maailmaan"}
+          :valtakunnallinenNumero {:value "1940427695"}}})
+
 (def- aidan-rakentaminen {:data {:kokonaisala {:value "0"}
                                  :kayttotarkoitus {:value "Aita"}
                                           :kuvaus { :value "Aidan rakentaminen rajalle"}}
@@ -577,6 +590,18 @@
 
 (ctc/validate-all-documents application-suunnittelijan-nimeaminen)
 
+(def application-aurinkopaneeli
+  (merge application-rakennuslupa {:primaryOperation (op-info aurinkopaneeli)
+                                   :secondaryOperations []
+                                   :documents [hankkeen-kuvaus
+                                               hakija-henkilo
+                                               paasuunnittelija
+                                               suunnittelija1
+                                               maksaja-henkilo
+                                               rakennuspaikka
+                                               aurinkopaneeli]}))
+
+(ctc/validate-all-documents application-aurinkopaneeli)
 
 (defn- validate-minimal-person [person]
   (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
@@ -2033,3 +2058,33 @@
 
         (fact "SaapumisPvm = submitted date"
           (:saapumisPvm lupa-tunnus) => "2014-01-02")))
+
+(fl/facts* "Canonical model for kaupunkikuvatoimenpide/aurinkopaneeli is correct"
+  (let [canonical (application-to-canonical application-aurinkopaneeli "fi") => truthy
+        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy]
+
+    (fact "kayttotarkoitus"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kayttotarkoitus)
+        => "Aurinkopaneeli")
+
+    (fact "kokonaisala"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kiinttun)
+        => "21111111111111")
+
+    (fact "kokonaisala"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kokonaisala)
+        => "6")
+
+    (fact "kuvaus"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :kuvaus :kuvaus)
+        => "virtaa maailmaan")
+
+    (fact "yksilointitieto"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :yksilointitieto)
+        => "muu-rakentaminen-id")
+
+    (fact "jarjestysnumero"
+      (-> rakennusvalvontaasia :toimenpidetieto first :Toimenpide :rakennelmatieto :Rakennelma :tunnus :jarjestysnumero)
+      => 1)))
