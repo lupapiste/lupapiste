@@ -313,10 +313,7 @@
     (update app :primaryOperation merge fields-with-defaults)))
 
 (defn- enrich-tos-function-name [{tos-function :tosFunction org-id :organization :as application}]
-  (assoc application :tosFunctionName (when tos-function
-                                        (->> (tos/available-tos-functions org-id)
-                                             (util/find-first (comp #{tos-function} :code))
-                                             :name))))
+  (assoc application :tosFunctionName (:name (tos/tos-function-with-name tos-function org-id))))
 
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
