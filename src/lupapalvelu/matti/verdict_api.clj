@@ -120,7 +120,7 @@
         app-snapshot (if updates
                        (merge app-snapshot updates)
                        app-snapshot)
-        search-fields [:municipality :address :verdicts :matti-verdicts :_applicantIndex :bulletinState :applicant]
+        search-fields [:municipality :address :verdicts :matti-verdicts :_applicantIndex :bulletinState :applicant :organization]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 
@@ -134,7 +134,8 @@
    :states           states/give-verdict-states}
   [{application :application created :created}]
   (let [today-long (tc/to-long (t/today-at-midnight))
-        updates (create-bulletin application created {:verdictGivenAt       today-long
+        updates (create-bulletin application created {:bulletinState :verdictGiven
+                                                      :verdictGivenAt       today-long
                                                       :appealPeriodStartsAt today-long
                                                       :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))
                                                       :verdictGivenText ""})]
