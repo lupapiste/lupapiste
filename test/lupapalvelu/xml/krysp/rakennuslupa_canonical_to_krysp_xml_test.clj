@@ -292,25 +292,6 @@
       (fact "kokemusvuodet"           (xml/get-text suunnittelija [:kokemusvuodet])           => "5")
       (fact "FISEpatevyyskortti"      (xml/get-text suunnittelija [:FISEpatevyyskortti])      => "http://www.ym.fi")
       (fact "FISEkelpoisuus"          (xml/get-text suunnittelija [:FISEkelpoisuus])          => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
-      (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy")))
-
-  (facts "2.2.2"
-    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.2.2") indent-str)
-          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
-
-      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.2")
-
-      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "muu")
-      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => "ei listassa -rooli")
-      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
-      (fact "postitetaanKytkin"       (xml/get-text suunnittelija [:postitetaanKytkin])       => "false")
-      (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
-      (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
-      (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
-      (fact "vaadittuPatevyysluokka"  (xml/get-text suunnittelija [:vaadittuPatevyysluokka])  => "C")
-      (fact "kokemusvuodet"           (xml/get-text suunnittelija [:kokemusvuodet])           => "5")
-      (fact "FISEpatevyyskortti"      (xml/get-text suunnittelija [:FISEpatevyyskortti])      => "http://www.ym.fi")
-      (fact "FISEkelpoisuus"          (xml/get-text suunnittelija [:FISEkelpoisuus])          => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
       (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy"))))
 
 (def suunnittelijan-nimaminen-muu-canonical (application-to-canonical application-suunnittelijan-nimeaminen-muu "fi"))
