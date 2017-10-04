@@ -156,10 +156,10 @@
   [{id-path :id-path}]
   (id id-path))
 
-(defn unique-id
-  "Callthrough for goog.events.getUniqueId."
-  [prefix]
-  (googe/getUniqueId prefix))
+
+;; Callthrough for goog.events.getUniqueId.
+;; Must be in the global scope.
+(def unique-id googe/getUniqueId)
 
 (defn pathify
   "Splits kw-path if necessary."

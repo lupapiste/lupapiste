@@ -65,7 +65,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.assignee = ko.observable();
-  self.applicantPhone = ko.observable();
   self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
@@ -102,6 +101,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.organizationMeta = ko.observable();
   self.neighbors = ko.observable([]);
   self.submitErrors = ko.observableArray();
+  self.applicantCompanies = ko.observableArray();
 
   self.organization = ko.observable([]);
 

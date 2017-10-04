@@ -76,3 +76,12 @@
 
 (defmacro fn->  [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
+
+(defn safe-update-in [a-map path fn & params]
+  "Like update-in, but does nothing in case the given path does not exist"
+  (if (empty? path)
+    (apply fn a-map params)
+    (let [[fst & rst] path]
+      (if (contains? a-map fst)
+        (apply update a-map fst safe-update-in rst fn params)
+        a-map))))

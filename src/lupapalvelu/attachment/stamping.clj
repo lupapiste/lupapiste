@@ -20,7 +20,7 @@
         re-stamp? (:stamped (first versions))
         source (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size])
-      :signature (util/find-by-key :fileId (:fileId (first versions)) (:signatures attachment))
+      :signature (filter #(= (:fileId (first versions)) (:fileId %)) (:signatures attachment))
       :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
       :operation-ids (set (att-util/get-operation-ids attachment))
       :attachment-id (:id attachment)

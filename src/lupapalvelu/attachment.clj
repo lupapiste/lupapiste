@@ -354,13 +354,14 @@
 
 (defn create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
-  [application {ts :created :as options}]
+  [application {ts :created set-app-modified? :set-app-modified? :as options :or {set-app-modified? true}}]
   {:pre [(map? application)]}
   (let [attachment-data (create-attachment-data application options)]
     (update-application
      (application->command application)
-      {$set {:modified ts}
-       $push {:attachments attachment-data}})
+     (merge (when set-app-modified?
+              {$set {:modified ts}})
+            {$push {:attachments attachment-data}}))
     (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
@@ -387,14 +388,18 @@
       {$set   {:attachments.$.applicationState originalApplicationState}
        $unset {:attachments.$.originalApplicationState true}})))
 
-(defn- signature-updates [{:keys [fileId version]} user ts original-signature attachment-signatures]
-  (let [signature {:user   (or (:user original-signature) (usr/summary user))
-                   :created (or (:created original-signature) ts (now))
-                   :version version
-                   :fileId fileId}]
-    (if-let [orig-index (util/position-by-key :version version attachment-signatures)]
-      {$set  {(util/kw-path :attachments.$.signatures orig-index) signature}}
-      {$push {:attachments.$.signatures signature}})))
+(defn- signature [{:keys [fileId version]} current-user ts {:keys [user created]}]
+  {:user (or user (usr/summary current-user))
+   :created (or created ts (now))
+   :version version
+   :fileId fileId})
+
+(defn- signature-updates [version-model user ts original-signature attachment-signatures]
+  "Returns update query for single signature. If attachment version is signed updates signature,
+  if attachment version is not signed add signature."
+    (if-let [orig-index (util/position-by-key :version (:version version-model) attachment-signatures)]
+      {$set {(util/kw-path :attachments.$.signatures orig-index) (signature version-model user ts original-signature)}}
+      {$push {:attachments.$.signatures (signature version-model user ts original-signature)}}))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -515,8 +520,9 @@
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
-  ([application user {attachment-id :id :as attachment} options]
-    {:pre [(map? application) (map? attachment) (map? options)]}
+  ([application user {attachment-id :id :as attachment}
+    {:keys [set-app-modified?] :as options :or {set-app-modified? true}}]
+   {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
      (let [options       (if (contains? options :group)
                            (update options :group attachment-grouping-for-application application)
@@ -524,12 +530,16 @@
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
-           mongo-updates (util/deep-merge (attachment-comment-updates application user attachment options)
-                                          (when (:constructionTime options)
-                                            (construction-time-state-updates attachment true))
-                                          (when (or (:sign options) (:signature options))
-                                            (signature-updates version-model user (:created options) (:signature options) (:signatures attachment)))
-                                          (build-version-updates user attachment version-model options))
+
+           mongo-updates (cond-> (util/deep-merge (attachment-comment-updates application user attachment options)
+                                                  (when (:constructionTime options)
+                                                    (construction-time-state-updates attachment true))
+                                                  (when (or (:sign options) (:signature options))
+                                                    (if (> (count (:signature options)) 1)
+                                                      {$push {:attachments.$.signatures {$each (map (fn [original-signature] (signature version-model (:created options) user original-signature)) (:signature options))}}}
+                                                      (signature-updates version-model user (:created options) (first (:signature options)) (:signatures attachment))))
+                                                  (build-version-updates user attachment version-model options))
+                           (not set-app-modified?) (util/dissoc-in [$set :modified]))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)

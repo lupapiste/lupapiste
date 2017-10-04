@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [clojure.data :refer [diff]]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [net.cgrand.enlive-html :as enlive]
@@ -155,12 +156,17 @@
                               (String. StandardCharsets/UTF_8))
       raw-filename)))
 
-(defn- get-poytakirja
-  "At least outlier verdicts (KT) poytakirja can have multiple
+(defn- get-poytakirja!
+  "Fetches the verdict attachments listed in the verdict xml. If the
+  fetch is successful, uploads and attaches them to the
+  application. Returns pk (with urlHash assoced if upload and attach
+  was successful).
+
+  At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
   poytakirja can only have one attachment."
-  [application user timestamp verdict-id pk]
-  (verdict-review-util/get-poytakirja application user timestamp {:type "verdict" :id verdict-id} pk))
+  [application user timestamp verdict-id pk & options]
+  (apply verdict-review-util/get-poytakirja! application user timestamp {:type "verdict" :id verdict-id} pk options))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}
@@ -168,7 +174,7 @@
     (let [verdict-id (mongo/create-id)]
       (-> (assoc verdict :id verdict-id, :timestamp timestamp)
           (update :paatokset
-                  (fn->> (map #(update % :poytakirjat (partial map (partial get-poytakirja application user timestamp verdict-id))))
+                  (fn->> (map #(update % :poytakirjat (partial map (partial get-poytakirja! application user timestamp verdict-id))))
                          (map #(assoc % :id (mongo/create-id)))
                          (filter seq)))))))
 
@@ -313,7 +319,7 @@
         :tasks (get-in updates [$set :tasks])
         :state (get-in updates [$set :state] (:state application)))))
 
-(defn- backend-id-mongo-updates
+(defn backend-id-mongo-updates
   [{verdicts :verdicts} backend-ids]
   (some->> backend-ids
            (remove (set (map :kuntalupatunnus verdicts)))
@@ -424,3 +430,170 @@
                          :model-fn       (fn [command conf recipient]
                                            (assoc (notifications/create-app-model command conf recipient)
                                              :state-text #(i18n/localize % "email.state-description.undoCancellation")))})
+
+
+;; Fetch missing verdict attachments
+
+(defn- missing-verdict-attachments-query [{:keys [start end organizations]}]
+  (merge {:verdicts {$elemMatch {$and [{:timestamp {$gt start
+                                                    $lt end} }
+                                       {$or [{:paatokset.poytakirjat {$size 0}}
+                                             {:paatokset.poytakirjat.urlHash {$exists false}}]}]}}}
+         (when (not-empty organizations)
+           {:organization {$in organizations}})))
+
+(defn applications-with-missing-verdict-attachments
+  "Options:
+   - start:         consider verdicts with timestamp > start
+   - end:           consider verdicts with timestamp < end
+   - organizations: when defined, only consider given organizations"
+  [options]
+  (mongo/select :applications
+                (missing-verdict-attachments-query options)
+                {:state            true
+                 :municipality     true
+                 :address          true
+                 :permitType       true
+                 :permitSubtype    true
+                 :organization     true
+                 :primaryOperation true
+                 :verdicts         true
+                 :attachments      true}))
+
+(defn- get-verdicts-from-xml [application organization xml]
+  (krysp-reader/->verdicts xml (:permitType application) permit/read-verdict-xml organization))
+
+(defn- matching-verdict
+  "Return a verdict with a matching kuntalupatunnus from verdicts"
+  [verdict verdicts]
+  (util/find-first #(= (:kuntalupatunnus %)
+                       (:kuntalupatunnus verdict))
+                   verdicts))
+
+(defn- verdict-in-application-without-attachment?
+  "Is the verdict from xml present in the application without an attachment?"
+  [application verdict-from-xml]
+  (boolean
+   (when-let [existing-verdict (matching-verdict verdict-from-xml
+                                                 (:verdicts application))]
+     (let [url-hashes (->> existing-verdict
+                           :paatokset
+                           (map :poytakirjat)
+                           (mapcat (partial map :urlHash)))]
+       (or (empty? url-hashes)
+           (some empty? url-hashes))))))
+
+
+
+(defn- matching-poytakirja
+  "Returns the first element from update-pks that has equal values for
+  keys that 1) are in match keys and 2) are present in app-pk"
+  [app-pk match-keys update-pks]
+  (let [app-pk-match (select-keys app-pk match-keys)
+        ;; Only compare the keys that are actually present in the poytakirja
+        app-pk-match-keys (keys app-pk-match)]
+    (util/find-first #(= app-pk-match
+                         (select-keys % app-pk-match-keys))
+                     update-pks)))
+
+
+(defn- poytakirja-matches
+  "Return a sequence of pairs of matching poytakirja's such that the
+  first one is from the existing application and the second one, if
+  any, is from the update"
+  [app-paatos update-paatos match-keys]
+  (map (juxt identity
+             #(matching-poytakirja %
+                                   match-keys
+                                   (:poytakirjat update-paatos)))
+       (:poytakirjat app-paatos)))
+
+(defn- poytakirja-update [[app-pk update-pk]]
+  (cond (nil? update-pk)        {:action :keep   :pk app-pk}
+        (:urlHash app-pk)       {:action :keep   :pk app-pk}
+        (or (:liite update-pk)
+            (:Liite update-pk)) {:action :update :pk update-pk}
+        :else                   {:action :keep   :pk app-pk}))
+
+(defn- update-poytakirja-entries!
+  [app-paatos update-paatos application user timestamp app-verdict-id]
+  (let [update-actions (->> (poytakirja-matches app-paatos update-paatos
+                                                [:paatoskoodi :paatospvm :paatoksentekija :pykala :status])
+                            (map poytakirja-update))]
+    (assoc app-paatos
+           :poytakirjat
+           (doall
+            (for [{:keys [action pk] :as update-info} update-actions]
+              (case action
+                :keep   pk
+                :update (get-poytakirja! application
+                                         user
+                                         timestamp
+                                         app-verdict-id
+                                         pk
+                                         :set-app-modified? false)
+                pk))))))
+
+(defn- add-verdict-attachments!
+  "When available, add a new verdict attachments (note, side effect)
+  and return an updated verdict with information on the added
+  attachments in relevant :poytakirjat arrays."
+  [application user timestamp verdicts-from-xml app-verdict]
+  (if-let [update-verdict (matching-verdict app-verdict
+                                            verdicts-from-xml)]
+    ;; There is no straightforward way to match :paatokset elements,
+    ;; but this should not be a problem, since all the verdicts in
+    ;; production contain only one element in :paatokset.
+    (if (= (count (:paatokset app-verdict))
+           (count (:paatokset update-verdict)))
+      (assoc app-verdict
+             :paatokset
+             (map #(update-poytakirja-entries! %1
+                                               %2
+                                               application
+                                               user timestamp
+                                               (:id app-verdict))
+                  (:paatokset app-verdict)
+                  (:paatokset update-verdict)))
+      (do (warn "Cannot match :paatokset elements")
+          app-verdict))
+    app-verdict))
+
+(defn- store-verdict-updates!
+  "Store the updated verdicts to mongo. Return the ones that were
+  actually updated."
+  [command updated-verdicts]
+  (action/update-application command
+                             {$set {:verdicts updated-verdicts}})
+  (->> updated-verdicts
+       (map vector (-> command :application :verdicts))
+       (filter (partial apply not=))
+       (map (juxt (comp :id first)
+                  (comp second
+                        (partial apply diff))))
+       (into {})))
+
+;; Having application and verdict xml, update application verdicts:
+;; 1. get verdicts from xml
+;; 2. only consider verdicts that
+;; - are already present in the application
+;; - do not have poytakirja attachments
+;; 3. update the verdicts on application that have a new verdict attachments
+;; - add verdict attachment with get-poytakirja!
+;; - update verdict entry
+;; 4. store the updates to mongo
+(defn update-verdict-attachments-from-xml!
+  "Update the verdict's poytakirja attachments from the xml, return
+  updated verdicts"
+  [{:keys [application organization user created] :as command} app-xml]
+  (let [organization    (if organization
+                          @organization
+                          (org/get-organization (:organization application)))
+        update-verdicts (->> (get-verdicts-from-xml application
+                                                    organization app-xml)
+                             (filter (partial verdict-in-application-without-attachment?
+                                              application)))]
+    (->> (:verdicts application)
+         (map (partial add-verdict-attachments! application user created update-verdicts))
+         (store-verdict-updates! command)
+         (ok :id (:id application) :updated-verdicts))))

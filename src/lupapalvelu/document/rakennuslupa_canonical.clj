@@ -313,6 +313,11 @@
 (defn- get-hankkeen-vaativuus [documents-by-type]
   (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
+(defn- get-avainsanaTieto [{tags :tags :as application}]
+  (->> (map :label tags)
+       (remove nil?)
+       (map (partial hash-map :Avainsana))))
+
 (defn application-to-canonical-operations
   [application]
   (-> application tools/unwrapped get-operations))
@@ -324,11 +329,12 @@
         link-permits (:linkPermitData application)
         documents-by-type (documents-by-type-without-blanks application)
         toimenpiteet (get-operations application)
-        operation-name (-> application :primaryOperation :name)
-        canonical {:Rakennusvalvonta
-                   {:toimituksenTiedot (toimituksen-tiedot application lang)
-                    :rakennusvalvontaAsiatieto
-                    {:RakennusvalvontaAsia
+        operation-name (-> application :primaryOperation :name)]
+    {:Rakennusvalvonta
+     {:toimituksenTiedot (toimituksen-tiedot application lang)
+      :rakennusvalvontaAsiatieto
+      {:RakennusvalvontaAsia
+       (cond-> (util/assoc-when-pred
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus application)
                       :osapuolettieto (osapuolet application documents-by-type lang)
@@ -344,22 +350,19 @@
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
                       :lisatiedot (get-lisatiedot lang)
-                      :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}}}}
-        canonical (if (not-empty link-permits)
-                    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                              (map get-viitelupatieto link-permits))
-                    canonical)
-        canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
-                              (= operation-name "suunnittelijan-nimeaminen"))
-                    (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
-                      util/assoc-when-pred util/not-empty-or-nil?
-                      :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)
-                                                                       (:rakennuspaikka-ilman-ilmoitusta documents-by-type))
-                                                               application)
-                      :toimenpidetieto toimenpiteet
-                      :lausuntotieto (get-statements (:statements application)))
-                    canonical)]
-    canonical))
+                      :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}
+                 util/not-empty-or-nil?
+                 :viitelupatieto (map get-viitelupatieto link-permits)
+                 :avainsanaTieto (get-avainsanaTieto application)
+                 :menettelyTOS (:tosFunctionName application)
+                 :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)
+                                                                  (:rakennuspaikka-ilman-ilmoitusta documents-by-type))
+                                                          application)
+                 :toimenpidetieto toimenpiteet
+                 :lausuntotieto (get-statements (:statements application)))
+
+         (#{"tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} operation-name)
+         (dissoc :rakennuspaikkatieto :toimenpidetieto :lausuntotieto))}}}))
 
 (defn katselmusnimi-to-type [nimi tyyppi]
   (if (= :tarkastus tyyppi)

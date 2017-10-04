@@ -5,6 +5,7 @@
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.matti.verdict :as verdict]
             [lupapalvelu.matti.verdict-template :as template]
+            [lupapalvelu.roles :as roles]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -68,6 +69,7 @@
                        modified:  timestamp"
    :feature          :matti
    :user-roles       #{:authority :applicant}
+   :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :states           (states/all-states-but [:draft :open])}
@@ -76,10 +78,11 @@
                      (:matti-verdicts application))))
 
 (defquery matti-verdict
-  {:description "Verdict and its settings."
-   :feature :matti
+  {:description      "Verdict and its settings."
+   :feature          :matti
    :user-roles       #{:authority :applicant}
-   :parameters [id verdict-id]
+   :org-authz-roles  roles/reader-org-authz-roles
+   :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
    :pre-checks       [(verdict-exists)]
    :states           states/give-verdict-states}

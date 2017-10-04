@@ -227,6 +227,8 @@
       (checker coll)
       (= coll checker))))
 
+(defalias safe-update-in shared/safe-update-in)
+
 (defn ->keyword [x]
   ((if (number? x)
      (comp keyword str)

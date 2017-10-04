@@ -1,43 +1,36 @@
 (ns lupapalvelu.pdf.pdf-export-test
-  (:require [clojure.string :as str]
-            [sade.files :as files]
-            [sade.util :as util]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.domain :as domain]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.test-util :as test-util]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
+            [lupapalvelu.matti.schemas :as matti-schemas]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.test-util :as test-util]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [pdfboxing.text :as pdfbox]
-            [clojure.java.io :as io])
+            [sade.files :as files]
+            [sade.util :as util]
+            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof
+                                                warn warnf error errorf fatal fatalf]])
   (:import (java.io File FileOutputStream)))
 
 (testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups)
 
-(def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
-                       "poikkeusasian-rakennuspaikka"
-                       "hulevedet"
-                       "talousvedet"
-                       "ottamismaara"
-                       "ottamis-suunnitelman-laatija"
-                       "kaupunkikuvatoimenpide"
-                       "task-katselmus"
-                       "tyonjohtaja"
-                       "approval-model-with-approvals"
-                       "approval-model-without-approvals"
-                       "rahoitus"
-                       ;; Matti
-                       "matti-string"
-                       "matti-verdict-text"
-                       "matti-verdict-contact"
-                       "matti-verdict-giver"
-                       "automatic-vs-manual"
-                       "matti-verdict-check"
-                       "matti-date"
-                       "required-in-verdict"
-                       "matti-complexity"})
+(def ignored-schemas (set (concat ["hankkeen-kuvaus-jatkoaika"
+                                   "poikkeusasian-rakennuspaikka"
+                                   "hulevedet"
+                                   "talousvedet"
+                                   "ottamismaara"
+                                   "ottamis-suunnitelman-laatija"
+                                   "kaupunkikuvatoimenpide"
+                                   "task-katselmus"
+                                   "tyonjohtaja"
+                                   "approval-model-with-approvals"
+                                   "approval-model-without-approvals"
+                                   "rahoitus"]
+                                  (map :name matti-schemas/matti-schemas))))
 
 (defn- localized-doc-headings [schema-names]
   (map #(loc (str % "._group_label")) schema-names))

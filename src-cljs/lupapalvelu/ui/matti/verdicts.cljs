@@ -15,6 +15,12 @@
 
 (defonce args (atom {}))
 
+(defn- can-edit? []
+  (state/auth? :edit-matti-verdict))
+
+(defn- can-view? []
+  (state/auth? :matti-verdicts))
+
 (defn update-changes-and-errors [{:keys [state path]}]
   (fn [{:keys [modified changes errors] :as response}]
     (when (or (seq changes) (seq errors))
@@ -47,18 +53,20 @@
             {:state (:data verdict)
              :info (dissoc verdict :data)
              :_meta {:updated updater
-                     :enabled? (state/auth? :edit-matti-verdict)}}))
+                     :enabled? (can-edit?)}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 
 (defn update-application-id []
-  (let [app-id (lupapisteApp.services.contextService.applicationId)]
+  (let [app-id (js/lupapisteApp.services.contextService.applicationId)]
     (when (common/reset-if-needed! state/application-id app-id)
       (if app-id
-        (do (service/fetch-application-verdict-templates app-id)
-            (service/fetch-application-phrases app-id)
-            (service/fetch-verdict-list app-id)
-            (reset! state/auth-fn lupapisteApp.models.applicationAuthModel.ok))
+        (do (reset! state/auth-fn js/lupapisteApp.models.applicationAuthModel.ok)
+            (when (can-edit?)
+              (service/fetch-application-verdict-templates app-id))
+            (when (can-edit?)
+              (service/fetch-application-phrases app-id))
+            (service/fetch-verdict-list app-id))
         (do (reset! state/template-list [])
             (reset! state/phrases [])
             (reset! state/verdict-list nil))))))
@@ -129,7 +137,7 @@
 (rum/defc verdict-list < rum/reactive
   [verdicts app-id]
   [:div
-   [:h2 (common/loc "application.tabVerdict")]
+   [:h1 (common/loc "application.tabVerdict")]
    [:ol
     (map (fn [{:keys [id published modified]}]
            [:li {:key id}
@@ -137,9 +145,11 @@
              (js/sprintf "Published: %s, Modified: %s"
                          (js/util.finnishDate published)
                          (js/util.finnishDateAndTime modified))]
-            [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}]])
+            (when (can-edit?)
+              [:i.lupicon-remove.primary {:on-click #(service/delete-verdict app-id id reset-verdict)}])])
          verdicts)]
-   (new-verdict)])
+   (when (state/auth? :new-matti-verdict-draft)
+     (new-verdict))])
 
 (rum/defc verdicts < rum/reactive
   {:will-mount   (fn [state]
@@ -153,13 +163,12 @@
   []
   (when (and (rum/react state/application-id)
              (rum/react state/schemas)
-             (rum/react state/phrases)
              (rum/react state/verdict-list))
     [:div
      (case (rum/react state/current-view)
        ::list (verdict-list @state/verdict-list @state/application-id)
        ::verdict (let [{dictionary :dictionary :as schema} (get shared/verdict-schemas
-                                                                (shared/permit-type->category (lupapisteApp.models.application.permitType)))]
+                                                                (shared/permit-type->category (js/lupapisteApp.models.application.permitType)))]
                    (with-back-button (verdict (assoc (state/select-keys state/current-verdict
                                                                        [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)

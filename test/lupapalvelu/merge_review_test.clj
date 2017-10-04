@@ -130,7 +130,7 @@
                            :katselmuksenLaji {:value "muu katselmus"}}
                     :taskname "Paikan merkitseminen"}]
 
-    (fact "matches ta sks with the same background id"
+    (fact "matches tasks with the same background id"
       (matching-task mongo-task
                      [{:data {:muuTunnus {:value "DI"}}}
                       {:data {:muuTunnus {:value "ID"}}}
@@ -168,11 +168,20 @@
                                         (assoc-in [:data :katselmus :lasnaolijat]
                                                   {:value "Lasse Lasnaolija"})
                                         (update :data dissoc :muuTunnus))]
+
+      ;; Match if :tila, :pitoPvm and :pitaja and mongo task does not have :muuTunnus
+      (matching-task (update held-review-task dissoc :muuTunnus)
+                     [{:data {:muuTunnus {:value "DI"}}}
+                      held-review-task-modified
+                      {:data {:muuTunnus {:value "DD"}}}])
+      => nil?
+
+      ;; No match if mongo task has :muuTunnus
       (matching-task held-review-task
                      [{:data {:muuTunnus {:value "DI"}}}
                       held-review-task-modified
                       {:data {:muuTunnus {:value "DD"}}}])
-      => held-review-task-modified
+      => nil?
 
       ;; No match, since :tila changed
       (matching-task held-review-task

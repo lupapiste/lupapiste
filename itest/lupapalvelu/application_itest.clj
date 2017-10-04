@@ -320,11 +320,12 @@
         application-id (:id application)
         generated-messages (integration-messages application-id)
         reason-text "Cancellation notice."]
-    (count generated-messages) => 1
-    (first generated-messages) => (contains {:status "published"
-                                             :partner "matti"
-                                             :data (contains {:fromState (contains {:name "draft"})
-                                                              :toState   (contains {:name "submitted"})})})
+    (fact "integration messages"
+      (count generated-messages) => 1
+      (first generated-messages) => (contains {:status "published"
+                                               :partner "matti"
+                                               :data (contains {:fromState (contains {:name "draft"})
+                                                                :toState   (contains {:name "submitted"})})}))
 
     (fact "Pena sees the application" (query pena :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)

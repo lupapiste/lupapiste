@@ -491,7 +491,8 @@
                                                 {:tag :FISEkelpoisuus}]))
 
 (def- suunnittelija_218
-  (update-in suunnittelija_216 [:child] concat [{:tag :postitetaanKytkin}]))
+  (update-in suunnittelija_216 [:child] concat [{:tag :muuSuunnittelijaRooli}
+                                                {:tag :postitetaanKytkin}]))
 
 (def suunnittelijatieto_210
   {:tag :suunnittelijatieto :child [suunnittelija_210]})

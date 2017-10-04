@@ -379,7 +379,9 @@
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])
                    (get kuntaRoolikoodit (keyword subtype) default-role))]
-      (if (ss/blank? code) default-role code))))
+      (cond (ss/blank? code) default-role
+            (= "other" code) "muu"
+            :else            code))))
 
 (defn get-osapuoli-data
   ([osapuoli party-type]
@@ -436,9 +438,7 @@
 
 (defn get-suunnittelija-data [suunnittelija party-type & [subtype]]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
-    (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type subtype)
-          codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
-                 :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
+    (let [kuntaroolikoodi (get-kuntaRooliKoodi suunnittelija party-type subtype)
           patevyys (:patevyys suunnittelija)
           koulutus (if (= "other" (:koulutusvalinta patevyys))
                      "muu"
@@ -448,8 +448,12 @@
                     {:osoite osoite}
                     {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
-      (merge codes
-        {:koulutus koulutus
+      (merge
+        {:suunnittelijaRoolikoodi kuntaroolikoodi ; Note the lower case 'koodi'
+         :VRKrooliKoodi (if (= kuntaroolikoodi "muu")
+                          "erityissuunnittelija"
+                          (kuntaRoolikoodi-to-vrkRooliKoodi kuntaroolikoodi))
+         :koulutus koulutus
          :vaadittuPatevyysluokka (:suunnittelutehtavanVaativuusluokka suunnittelija)
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
@@ -457,6 +461,8 @@
          :FISEkelpoisuus (:fiseKelpoisuus patevyys)
          :kokemusvuodet (:kokemus patevyys)
          :postitetaanKytkin (-> suunnittelija :kytkimet :postitetaanPaatos true?)}
+        (when (and (= kuntaroolikoodi "muu") (not-empty (:muuSuunnittelijaRooli suunnittelija)))
+          {:muuSuunnittelijaRooli (:muuSuunnittelijaRooli suunnittelija)})
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
         (when (-> suunnittelija :yritys :yritysnimi ss/blank? not)

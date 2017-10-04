@@ -507,6 +507,7 @@
      {:contact-ref      {:reference {:path :contact}}
       :giver            {:docgen "matti-verdict-giver"}
       :contact          {:docgen "matti-verdict-contact"}
+      :verdict-section  {:docgen "matti-verdict-section"}
       :verdict-code     {:reference-list {:path       :verdict-code
                                           :type       :select
                                           :loc-prefix :matti-r.verdict-code}}
