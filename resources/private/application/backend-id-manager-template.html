@@ -22,10 +22,10 @@
          </span>
        </div>
       </div>
-      <button data-bind="click: addBackendId, disable: addButtonDisabled">
-        <span class="waiting" data-bind="css: { waiting: loading }">
-          <i class="spin lupicon-refresh wait"></i>
-        </span>
+      <button class="primary"
+              data-bind="click: addBackendId, disable: addButtonDisabled, css: { waiting: loading }">
+        <i class="lupicon-circle-plus" data-bind="visible: !loading()"></i>
+        <i class="spin lupicon-refresh wait"></i>
         <span data-bind="ltext: 'info.addBackendId'"></span>
       </button>
     </div>
