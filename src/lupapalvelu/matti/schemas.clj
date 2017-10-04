@@ -10,14 +10,14 @@
             [schema-tools.core :as st]
             [schema.core :refer [defschema] :as sc]))
 
-
-;; Note: remember to add Matti docgen schema names to
-;; pdf-export-test/ignored-schemas.
 (def matti-string {:name "matti-string"
                    :type :string})
 
 (def verdict-text {:name "matti-verdict-text"
                    :type :string})
+
+(def verdict-section {:name "matti-verdict-section"
+                      :type :string})
 
 (def verdict-contact {:name  "matti-verdict-contact"
                       :label false
@@ -102,13 +102,18 @@
    (sc/optional-key :reviews)   [MattiSettingsReview]
    (sc/optional-key :plans)     [MattiGeneric]})
 
+(def matti-schemas
+  "Raw schemas are combined here for the benefit of
+  pdf-export-test/ignored-schemas."
+  [matti-string verdict-section verdict-text verdict-contact
+   verdict-check in-verdict verdict-giver automatic-vs-manual
+   complexity date])
+
 (doc-schemas/defschemas 1
   (map (fn [m]
          {:info {:name (:name m)}
           :body (body m)})
-       [matti-string verdict-text verdict-contact verdict-check
-        in-verdict verdict-giver automatic-vs-manual
-        complexity date]))
+       matti-schemas))
 
 ;; Phrases
 
