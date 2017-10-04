@@ -5,14 +5,14 @@
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
-                 [org.clojure/tools.reader "0.10.0"]
+                 [org.clojure/tools.reader "1.0.4"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
                  [org.clojure/core.async "0.3.443"]
 
                  ; Web frameworks
-                 [ring "1.5.1" :exclusions [commons-fileupload org.clojure/tools.reader]]
+                 [ring "1.6.2" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro ring]]
                  [metosin/ring-swagger "0.22.12"]
