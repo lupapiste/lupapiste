@@ -521,7 +521,10 @@
                                                (map (juxt (comp :id first)
                                                           (comp :new-faulty-tasks
                                                                 second)))
-                                               (into {}))}))
+                                               (into {}))
+                            :not-saved    (->> applications-with-results
+                                               (remove (comp :changes-saved second))
+                                               (map first))}))
 
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
@@ -535,10 +538,11 @@
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
          (map (fn [[{app-id :id permit-type :permitType} app-xml]]
                 (let [app    (first (organization-applications-for-review-fetching (:id organization) permit-type projection app-id))
-                      result (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)]
-                  (save-reviews-for-application eraajo-user app result)
-                  (mark-reviews-faulty-for-application app result)
-                  [app result])))
+                      result (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)
+                      saved? (save-reviews-for-application eraajo-user app result)]
+                  (when saved?
+                    (mark-reviews-faulty-for-application app result))
+                  [app (assoc result :changes-saved saved?)])))
          (remove (comp nil? first))
          (log-review-results-for-organization (:id organization)))))
 

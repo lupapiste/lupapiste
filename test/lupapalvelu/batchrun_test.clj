@@ -110,7 +110,8 @@
                                                       :event "Review checking finished for organization"
                                                       :organization-id "org-id"
                                                       :application-count 1
-                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}})
+                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}
+                                                      :not-saved []})
               => ..test-result.. :times 1))
 
   (fact "fetch all organization applications - one dropped in fetch"
@@ -165,7 +166,8 @@
                                                       :organization-id "org-id"
                                                       :application-count 2
                                                       :faulty-tasks {"LP-ORG-2000-00001" nil
-                                                                     "LP-ORG-2000-00003" ..faulty-tasks..}})
+                                                                     "LP-ORG-2000-00003" ..faulty-tasks..}
+                                                      :not-saved []})
               => ..test-result.. :times 1))
 
   (fact "application becomes irrelevant during review fetch - nothing is done"
@@ -188,5 +190,40 @@
                                                       :event "Review checking finished for organization"
                                                       :organization-id "org-id"
                                                       :application-count 0
-                                                      :faulty-tasks {}})
+                                                      :faulty-tasks {}
+                                                      :not-saved []})
+              => ..test-result.. :times 1))
+
+  (fact "application changed while reading reviews - changes not saved"
+    (fetch-reviews-for-organization ..test-user.. 1 {:id "org-id" :krysp {:R {:url "url"}}} [:R] nil {})
+    => ..test-result..
+
+
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" :R anything)
+              => [{:id "LP-ORG-2000-00001" :permitType "R" :modified 0}])
+
+
+    (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
+               ..test-user.. {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R" :modified 0}])
+              => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]] :times 1)
+
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00001")
+              => [{:id "LP-ORG-2000-00001" :permitType "R" :modified 1}])
+
+    (provided (#'lupapalvelu.batchrun/read-reviews-for-application
+               ..test-user.. 1 {:id "LP-ORG-2000-00001" :permitType "R" :modified 1} ..xml1.. nil)
+              => {:ok true :updates ..updates..} :times 1)
+
+    (provided (#'lupapalvelu.action/update-application anything {:modified 1} ..updates.. :return-count? true)
+              => 0)
+
+    (provided (#'lupapalvelu.domain/get-application-no-access-checking "LP-ORG-2000-00001")
+              => 0)
+
+    (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                      :event "Review checking finished for organization"
+                                                      :organization-id "org-id"
+                                                      :application-count 1
+                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}
+                                                      :not-saved ["LP-ORG-2000-00001"]})
               => ..test-result.. :times 1)))
