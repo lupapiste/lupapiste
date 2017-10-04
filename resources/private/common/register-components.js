@@ -201,7 +201,8 @@ jQuery(document).ready(function() {
     {name: "login"},
     {name: "campaign-editor"},
     {name: "date-editor"},
-    {name: "mark-review-faulty-dialog"}
+    {name: "mark-review-faulty-dialog"},
+    {name: "backend-id-manager"}
 ];
 
   ko.registerLupapisteComponents(components);

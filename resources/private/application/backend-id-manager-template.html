@@ -2,10 +2,32 @@
 
   <div>
     <div>
-    <h2>Pääluvan myöntöpäivä</h2>
+      <h2 data-bind="ltext: 'info.mainVerdictDate'"></h2>
+      <div>
+      <input type="text" class="form-input inline textinput textinput--big"
+                     data-bind="datepicker: mainVerdictDate, attr: { placeholder: loc('info.verdictDate') }">
+      </div>
     </div>
     <div>
-    <h2>Liittyvät kuntalupatunnukset</h2>
+      <h2 data-bind="ltext: 'info.backendIds'"></h2>
+      <div data-bind="foreach: backendIds">
+       <div>
+         <input class="form-input inline textinput textinput--big"
+                data-bind="value: kuntalupatunnus, disable: $component.allInputsDisabled">
+         <span data-bind="if: $index() > 0 && !$component.loading()">
+           <i class="lupicon-circle-remove negative"
+              style="cursor: pointer"
+              data-bind="click: function() { $parent.deleteBackendId($index()); },
+                         attr: { title: loc('remove') }"></i>
+         </span>
+       </div>
+      </div>
+      <button data-bind="click: addBackendId, disable: addButtonDisabled">
+        <span class="waiting" data-bind="css: { waiting: loading }">
+          <i class="spin lupicon-refresh wait"></i>
+        </span>
+        <span data-bind="ltext: 'info.addBackendId'"></span>
+      </button>
     </div>
   </div>
 

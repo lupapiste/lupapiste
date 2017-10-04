@@ -184,7 +184,9 @@
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
 
-                        <backend-id-manager params="application: application"></backend-id-manager>
+                        <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                                    applicationId: $root.application.id,
+                                                    authModel: $root.authorization"></backend-id-manager>
 
                         <div class="operation-info">
                             <!-- ko if: !$root.authorization.ok('link-permit-required') -->

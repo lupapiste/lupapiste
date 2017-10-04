@@ -57,6 +57,18 @@
                                      :opened    (:opened application)}
                               $push {:history (app/history-entry :underReview created user)}}))
 
+(defcommand store-archival-project-backend-ids
+  {:parameters [id verdicts]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/vector-parameters [:verdicts])]
+   :user-roles #{:authority}
+   :user-authz-roles roles/default-authz-writer-roles
+   :states           #{:open :underReview}
+   :pre-checks       [permit/is-archiving-project]}
+  [command]
+  (d/update-verdicts command verdicts)
+  (ok))
+
 (defquery user-is-pure-digitizer
   {:user-roles #{:authority}
    :pre-checks [(fn [{{org-authz :orgAuthz} :user}]
