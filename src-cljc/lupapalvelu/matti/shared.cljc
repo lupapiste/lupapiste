@@ -354,6 +354,7 @@
                 :aloitettava   {:date-delta {:unit :years}}
                 :voimassa      {:date-delta {:unit :years}}
                 :giver         {:docgen "matti-verdict-giver"}
+                :verdict-section  {:docgen "matti-verdict-section"}
                 :verdict-code  {:reference-list {:path       :settings.verdict-code
                                                  :type       :select
                                                  :loc-prefix :matti-r.verdict-code}}
@@ -404,6 +405,9 @@
                                       [{:col  3
                                         :id   :giver
                                         :dict :giver}
+                                       {:col  2
+                                        :id   :section
+                                        :dict :verdict-section}
                                        {:align :full
                                         :col   3
                                         :dict  :verdict-code}]
@@ -591,7 +595,8 @@
                                           :show? :_meta.editing?
                                           :dict  :contact}]}}
                         {:col   2
-                         :hide? :_meta.editing?}
+                         :loc-prefix :matti-verdict.section
+                         :dict  :verdict-section}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
