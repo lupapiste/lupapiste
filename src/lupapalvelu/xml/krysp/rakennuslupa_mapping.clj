@@ -384,7 +384,10 @@
                  #(update % :child concat [avainsanatieto_222 menettely-tos_222]))
       (update :child mapping-common/update-child-element
               [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :muuMuutosTyo]
-              #(update % :child conj {:tag :rakennustietojaEimuutetaKytkin}))))
+              #(update % :child conj {:tag :rakennustietojaEimuutetaKytkin}))
+      (update :child mapping-common/update-child-element
+              [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lisatiedot :Lisatiedot]
+              #(update % :child conj {:tag :asiakirjatToimitettuPvm}))))
 
 
 (defn get-rakennuslupa-mapping [krysp-version]
