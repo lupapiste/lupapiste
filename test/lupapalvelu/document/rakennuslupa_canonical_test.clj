@@ -375,6 +375,7 @@
             :buildingId {:value "000"}
             :valtakunnallinenNumero {:value "1234567892"}
             :perusparannuskytkin {:value true}
+            :rakennustietojaEimuutetaKytkin {:value true}
             :muutostyolaji {:value "muut muutosty\u00f6t"}})})
 
 (def- laajentaminen
@@ -1216,6 +1217,7 @@
     (fact "Toimenpiteen kuvaus" (-> toimenpide :uusi :kuvaus) => "Asuinkerrostalon tai rivitalon rakentaminen")
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
+    (fact "Muu muutostyon rakennustietojaEimuutetaKytkin" (-> muu-muutostyo :muuMuutosTyo :rakennustietojaEimuutetaKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
     (fact "valtakunnallinenNumero" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :valtakunnallinenNumero) => "1234567892")
     (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 1)

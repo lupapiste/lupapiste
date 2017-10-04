@@ -151,7 +151,7 @@
          {:body schema/rakennuksen-muuttaminen}
          (tools/create-unwrapped-data tools/default-values)
          ; Dissoc values that are not read
-         (dissoc :buildingId :muutostyolaji :perusparannuskytkin)
+         (dissoc :buildingId :muutostyolaji :perusparannuskytkin :rakennustietojaEimuutetaKytkin)
          (util/dissoc-in [:huoneistot :0 :muutostapa]))
        (polished
          (util/assoc-when-pred
@@ -222,7 +222,7 @@
   {:rakennusnro (ss/trim (get-text rakennelma :tunnus :rakennusnro))
    :rakennelman-kuvaus  (get-text rakennelma :kuvaus :kuvaus)})
 
-(defn ->buildings-and-structures 
+(defn ->buildings-and-structures
   "Produces a building or structure for each (valid) construction operation in the application"
   [app-xml]
   (remove empty?

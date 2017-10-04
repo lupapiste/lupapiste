@@ -913,6 +913,7 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
+                     {:name "rakennustietojaEimuutetaKytkin" :type :checkbox}
                      {:name "muutostyolaji" :type :select :sortBy :displayname :required true :i18nkey "muutostyolaji"
                       :body
                       [{:name perustusten-korjaus}

@@ -219,7 +219,9 @@
         (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
 
       (fact "menettelyTOS"
-        (xml/get-text lp-xml_220 [:menettelyTOS]) => nil))
+        (xml/get-text lp-xml_220 [:menettelyTOS]) => nil)
+      (fact "rakennustietojEiMmutetaKytkin not exists"
+        (xml/get-text lp-xml_220 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => nil))
 
     (facts "2.2.2"
       (fact "avainsanatieto"
@@ -227,7 +229,9 @@
              (map :content)) => [["avainsana"]
                                  ["toinen avainsana"]])
       (fact "menettelyTOS"
-        (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely"))))
+        (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely")
+      (fact "rakennustietojEiMmutetaKytkin"
+        (xml/get-text lp-xml_222 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => "true"))))
 
 (facts "Rakennelma"
   (let [canonical (application-to-canonical application-aurinkopaneeli "fi")

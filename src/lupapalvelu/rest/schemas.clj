@@ -65,6 +65,7 @@
 (sc/defschema MuuMuutostyo
   {:kuvaus (field sc/Str "Muu muutosty\u00f6, toimenpiteen kuvaus")
    :perusparannusKytkin (field sc/Bool "Perusparannusta (kyll\u00e4/ei)")
+   (sc/optional-key :rakennustietojaEimuutetaKytkin) (field sc/Bool "Rakennustietoja ei muuteta (kyll\u00e4/ei)")
    (sc/optional-key :muutostyonLaji) (field sc/Str "Muutosty\u00f6n laji")})
 
 (sc/defschema Purkaminen
