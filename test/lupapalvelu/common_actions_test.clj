@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [sade.util :refer [safe-update-in]]
             [clojure.test.check :as tc]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.generators :as gen]
@@ -92,18 +93,27 @@
                                                 application
                                                 user)]
     (with-mocked-orgs orgs
-      (cond (not allowed-to-access?)   (is (fail? (validate action)))
+      (cond (not allowed-to-access?)         (fail? (validate action))
             (and authority-in-org?
-                 (= permit-type "YA")) (is (ok? (validate action)))
-            authority?                 (is (fail? (validate action)))
-            :else                      (is (ok? (validate action)))))))
+                 (or (= permit-type "YA")
+                     (= permit-type "ARK"))) (ok? (validate action))
+            authority?                       (fail? (validate action))
+            :else                            (ok? (validate action))))))
 
 (def enable-accordions-prop
   (prop/for-all [gen-data enable-accordions-gen]
     (enable-accordions-test gen-data)))
 
+(defn relevant-keys-accordions [quick-check-result]
+  (-> quick-check-result
+      (safe-update-in [:shrunk :smallest 0 :application]
+                             select-keys [:permitType :organization :id])
+      (dissoc :fail)))
+
 (fact "enable-accordions-spec"
-  (tc/quick-check 200 enable-accordions-prop :max-size 10))
+  (relevant-keys-accordions (tc/quick-check 500 enable-accordions-prop :max-size 20))
+  =>
+  passing-quick-check)
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
