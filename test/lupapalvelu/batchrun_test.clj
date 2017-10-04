@@ -87,6 +87,9 @@
     (fetch-reviews-for-organization ..test-user.. 1 {:id "org-id"} [:R] [{:id "LP-ORG-2000-00001" :permitType "R"}] {})
     => ..test-result..
 
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00001")
+              => [{:id "LP-ORG-2000-00001" :permitType "R"}])
+
     (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
                ..test-user.. {:id "org-id"} "R" [{:id "LP-ORG-2000-00001" :permitType "R"}])
               => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]] :times 1)
@@ -105,12 +108,12 @@
 
     (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
                                                       :event "Review checking finished for organization"
-                                                      :organization-id nil
+                                                      :organization-id "org-id"
                                                       :application-count 1
                                                       :faulty-tasks {"LP-ORG-2000-00001" nil}})
               => ..test-result.. :times 1))
 
-  (fact "fetch all organization applications"
+  (fact "fetch all organization applications - one dropped in fetch"
     (fetch-reviews-for-organization ..test-user.. 1 {:id "org-id" :krysp {:R {:url "url"}}} [:R] nil {})
     => ..test-result..
 
@@ -127,20 +130,26 @@
               => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]
                   [{:id "LP-ORG-2000-00003" :permitType "R"} ..xml3..]] :times 1)
 
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00001")
+              => [{:id "LP-ORG-2000-00001" :permitType "R"}])
+
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00003")
+              => [{:id "LP-ORG-2000-00003" :permitType "R"}])
+
     (provided (#'lupapalvelu.batchrun/read-reviews-for-application
                ..test-user.. 1 {:id "LP-ORG-2000-00001" :permitType "R"} ..xml1.. nil)
               => {:result "read result"} :times 1)
 
     (provided (#'lupapalvelu.batchrun/read-reviews-for-application
                ..test-user.. 1 {:id "LP-ORG-2000-00003" :permitType "R"} ..xml3.. nil)
-              => {:result "read result"} :times 1)
+              => {:new-faulty-tasks ..faulty-tasks..} :times 1)
 
     (provided (#'lupapalvelu.batchrun/save-reviews-for-application
                ..test-user.. {:id "LP-ORG-2000-00001" :permitType "R"} {:result "read result"})
               => irrelevant :times 1)
 
     (provided (#'lupapalvelu.batchrun/save-reviews-for-application
-               ..test-user.. {:id "LP-ORG-2000-00003" :permitType "R"} {:result "read result"})
+               ..test-user.. {:id "LP-ORG-2000-00003" :permitType "R"} {:new-faulty-tasks ..faulty-tasks..})
               => irrelevant :times 1)
 
     (provided (#'lupapalvelu.batchrun/mark-reviews-faulty-for-application
@@ -148,13 +157,36 @@
               => irrelevant :times 1)
 
     (provided (#'lupapalvelu.batchrun/mark-reviews-faulty-for-application
-               {:id "LP-ORG-2000-00003" :permitType "R"} {:result "read result"})
+               {:id "LP-ORG-2000-00003" :permitType "R"} {:new-faulty-tasks ..faulty-tasks..})
               => irrelevant :times 1)
 
     (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
                                                       :event "Review checking finished for organization"
-                                                      :organization-id nil
+                                                      :organization-id "org-id"
                                                       :application-count 2
                                                       :faulty-tasks {"LP-ORG-2000-00001" nil
-                                                                     "LP-ORG-2000-00003" nil}})
+                                                                     "LP-ORG-2000-00003" ..faulty-tasks..}})
+              => ..test-result.. :times 1))
+
+  (fact "application becomes irrelevant during review fetch - nothing is done"
+    (fetch-reviews-for-organization ..test-user.. 1 {:id "org-id" :krysp {:R {:url "url"}}} [:R] nil {})
+    => ..test-result..
+
+
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" :R anything)
+              => [{:id "LP-ORG-2000-00001" :permitType "R"}])
+
+
+    (provided (#'lupapalvelu.batchrun/fetch-reviews-for-organization-permit-type
+               ..test-user.. {:id "org-id" :krysp {:R {:url "url"}}} :R [{:id "LP-ORG-2000-00001" :permitType "R"}])
+              => [[{:id "LP-ORG-2000-00001" :permitType "R"} ..xml1..]] :times 1)
+
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "R" anything "LP-ORG-2000-00001")
+              => [])
+
+    (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                      :event "Review checking finished for organization"
+                                                      :organization-id "org-id"
+                                                      :application-count 0
+                                                      :faulty-tasks {}})
               => ..test-result.. :times 1)))
