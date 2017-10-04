@@ -7,8 +7,6 @@
   collection of various components that are needed for the
   implmentation of :placeholder schemas (see shared.cljc)."
   (:require [clojure.string :as s]
-            [lupapalvelu.ui.attachment.components :as att]
-            [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.path :as path]
@@ -50,27 +48,3 @@
                            building-id]
                           (remove s/blank?)
                           (s/join " \u2013 "))]))
-
-#_(rum/defc attachments-batch < rum/reactive
-  "Metadata editor for file upload. The name is a hat-tip to the
-  AttachmentBatchModel."
-  [{:keys []}])
-
-(rum/defc attachments-placeholder < rum/reactive
-  "We need this 'component middleware' in order to have a reactive context."
-  [{:keys [schema path state] :as options}]
-  (let [files* (atom [])]
-    [:div (att/upload-wrapper {:callback (upload/file-monitors files*)
-                               :dropzone  "#application-matti-verdict-tab"
-                               :component (fn [{:keys [input input-id]}]
-                                            [:div
-                                             input
-                                             [:label.btn.positive {:for input-id }
-                                              [:i.lupicon-circle-plus]
-                                              [:span (path/loc :attachment.addFile)]]])})
-     (components/debug-atom files* "Files")]))
-
-
-(defmethod placeholder :attachments
-  [options]
-  (attachments-placeholder options))

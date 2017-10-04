@@ -169,6 +169,18 @@
       (docgen/docgen-label-wrap options elem)
       elem)))
 
+(defmethod view-component :attachments
+  [_ {:keys [state path schema] :as options} & [wrap-label?]]
+  (let [elem (matti-components/matti-attachments options)]
+    (if (matti-components/show-label? schema wrap-label?)
+      (docgen/docgen-label-wrap options elem)
+      elem)))
+
+;; -------------------------------
+;; Containers
+;; -------------------------------
+
+
 (rum/defc matti-list < rum/reactive
   [{:keys [schema] :as options} & [wrap-label?]]
   [:div.matti-list

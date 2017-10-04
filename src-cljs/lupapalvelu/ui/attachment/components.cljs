@@ -18,23 +18,26 @@
     callback: callback function or map. See upload/service-hubscribe
               for details.
 
-    [dropzone]: dropzone container (!) selector that will be passed to
-                $() on the jQuery side. Note: the selector is for the
-                some element that (ultimately) contains the drop-zone
-                element.
+    [multiple?]: whether multiple files can be selected/uploaded.
+
+    [dropzone]:  dropzone container (!) selector that will be passed to
+                 $() on the jQuery side. Note: the selector is for the
+                 some element that (ultimately) contains the drop-zone
+                 element.
 
     [input-id]: (hidden) file input-id. Default is generated unique id."
   []
   (letfn [(parse-args [state]
             (let [[args] (:rum/args state)]
               (if (map? args)
-                (select-keys args [:callback :dropzone :input-id])
+                (select-keys args [:callback :dropzone :input-id :multiple?])
                 {:callback args})))
           (initialize [state]
-            (let [{:keys [callback dropzone]} (parse-args state)
-                  input-id                    (::input-id state)]
+            (let [{:keys [callback dropzone multiple?]} (parse-args state)
+                  input-id                              (::input-id state)]
               (upload/bindToElem (js-obj "id" input-id
-                                         "dropZone" dropzone))
+                                         "dropZone" dropzone
+                                         "allowMultiple" (boolean multiple?)))
               (assoc state
                      ::file-callback callback
                      ::fileupload-subscription-ids (upload/service-hubscribe input-id
@@ -104,7 +107,7 @@
     :input-id Id of the hidden file input.
 
   The other-args are passed as is to the wrapped component."
-  [{input-id ::input-id} {:keys [component test-id] :as options} & other-options]
+  [{input-id ::input-id} {:keys [component test-id multiple?] :as options} & other-options]
   (apply component
          (-> options
                    (dissoc :component)
@@ -114,7 +117,9 @@
                                           :id input-id}
                                          (when test-id
                                            {:data-test-id (str test-id
-                                                               "-input")}))]
+                                                               "-input")})
+                                         (when multiple?
+                                           {:multiple true}))]
                           :input-id input-id))
          other-options))
 

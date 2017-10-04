@@ -5,12 +5,6 @@
 (defn bindToElem [options]
   (.bindFileInput js/lupapisteApp.services.fileUploadService options))
 
-#_(defn subscribe-files-uploaded [input-id callback]
-  (hub/subscribe {:eventType "fileuploadService::filesUploaded"
-                  :input input-id
-                  :status "success"}
-                 callback))
-
 (defn subscribe-bind-attachments-status [opts callback]
   (hub/subscribe (assoc opts :eventType "attachmentsService::bind-attachments-status") callback))
 

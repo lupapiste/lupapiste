@@ -82,9 +82,10 @@
    component])
 
 (rum/defc verdict-section-header < rum/reactive
-  [options]
+  [{:keys [schema] :as options}]
   [:div.matti-grid-1.section-header
-   (when (path/enabled? options)
+   (when (and (not (-> schema :buttons? false?))
+              (path/enabled? options))
      [:div.row.row--tight
       [:div.col-1.col--right
        [:div.verdict-buttons

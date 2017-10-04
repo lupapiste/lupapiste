@@ -213,12 +213,25 @@
 (defschema MattiPlaceholder
   "Placholder for external (filled by backend) data."
   (merge MattiComponent
-         {:type (sc/enum :neighbors :application-id :building :attachments)}))
+         {:type (sc/enum :neighbors :application-id :building)}))
 
 (defschema KeyMap
   "Map with the restricted set of keys. In other words, no new keys
   after the instantiation can be added. No UI counterpart."
   {sc/Keyword sc/Any})
+
+(defschema MattiAttachments
+  (merge MattiComponent
+         {;; Matching type groups are listed on the type
+          ;; selector. Default all type groups.
+          (sc/optional-key :type-group) sc/Regex
+          ;; Dropzone is jQuery selector for the dropzone. For the
+          ;; best visual effect the container should include dropzone
+          ;; component. If not given, drag'n'drop is not supported.
+          (sc/optional-key :dropzone)   sc/Str
+          ;; If true, multiple files can be uploaded at the same
+          ;; time. Default false.
+          (sc/optional-key :multiple?)  sc/Bool}))
 
 (defschema SchemaTypes
   {sc/Keyword (sc/conditional
@@ -233,6 +246,7 @@
                :reference      {:reference MattiReference}
                :placeholder    {:placeholder MattiPlaceholder}
                :keymap         {:keymap KeyMap}
+               :attachments    {:attachments MattiAttachments}
                :repeating      {:repeating (sc/recursive #'SchemaTypes)})})
 
 (defschema Dictionary
@@ -494,7 +508,7 @@
 (defschema MattiVerdictSection
   (merge MattiBase
          {:id   keyword-or-string ;; Also title localization key
-          (sc/optional-key :buttons) sc/Bool ;; Show edit button? (default true)
+          (sc/optional-key :buttons?) sc/Bool ;; Show edit button? (default true)
           :grid MattiGrid}))
 
 (defschema MattiVerdict
@@ -572,7 +586,10 @@
                                     :vss-luokka             {:docgen "matti-string"}
                                     :paloluokka             {:docgen "matti-string"}
                                     :show-building          {:docgen "required-in-verdict"}}}
-      :attachments     {:placeholder {:type :attachments}}})
+      :attachments     {:attachments {:i18nkey    :application.verdict-attachments
+                                      :type-group #"paatoksenteko"
+                                      :dropzone   "#application-matti-verdict-tab"
+                                      :multiple?  true}}})
     :sections
     [{:id   "matti-dates"
       :grid {:columns 7
@@ -707,12 +724,11 @@
                                                        {:dict  :show-building
                                                         :show? :_meta.editing?}]}
                                               ]}}]]}}
-     {:id "attachments"
-      :i18nkey :application.verdict-attachments
-      :grid {:columns 7
-             :rows [[{:col 6
-                      :align :full
-                      :dict :attachments}]]}}]}})
+     {:id       "attachments"
+      :buttons? false
+      :grid     {:columns 7
+                 :rows    [[{:col   6
+                             :dict  :attachments}]]}}]}})
 
 (sc/validate MattiVerdict (:r verdict-schemas))
 

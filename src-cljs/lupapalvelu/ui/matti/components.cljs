@@ -5,13 +5,15 @@
   (:require [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.matti.shared :as shared]
+            [lupapalvelu.ui.attachment.components :as att]
+            [lupapalvelu.ui.attachment.file-upload :as upload]
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.docgen :as docgen]
             [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.matti.phrases :as phrases]
             [lupapalvelu.ui.matti.service :as service]
             [lupapalvelu.ui.matti.state :as state]
-            [lupapalvelu.ui.matti.phrases :as phrases]
             [rum.core :as rum]
             [sade.shared-util :as util]))
 
@@ -195,3 +197,31 @@
          (components/textarea-edit (path/state path state)
                                    {:callback update-text
                                     :disabled disabled?})]]])))
+
+
+#_(rum/defcs attachments-batch < rum/reactive
+  (components/initial-value-mixin ::files)
+  "Metadata editor for file upload. The name is a hat-tip to the
+  AttachmentBatchModel."
+  [{files* ::files} {:keys [schema] :as options}]
+  (let []))
+
+(rum/defc matti-attachments < rum/reactive
+  "Displays and supports adding new attachments."
+  [{:keys [schema path state] :as options}]
+  (let [files* (atom [])]
+    [:div
+     (when (path/enabled? options)
+       (att/upload-wrapper {:callback  (upload/file-monitors files*)
+                            :dropzone  (:dropzone schema)
+                            :multiple? (:multiple? schema)
+                            :component (fn [{:keys [input input-id]}]
+                                         [:div
+                                          input
+                                          [:label.btn.positive {:for input-id }
+                                           [:i.lupicon-circle-plus]
+                                           [:span (path/loc :attachment.addFile)]]])}))
+     #_(if (rum/react files*)
+         )
+
+     (components/debug-atom files* "Files")]))
