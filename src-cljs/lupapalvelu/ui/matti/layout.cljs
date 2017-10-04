@@ -258,6 +258,8 @@
 ;; Component instantiation
 ;; -------------------------------
 
+(declare view-component)
+
 (rum/defc instantiate-docgen < rum/reactive
   [{:keys [schema] :as options} wrap-label?]
   (let [docgen      (:docgen schema)
@@ -288,8 +290,6 @@
          ;; The rest are always displayed as view components
          (partial view-component cell-type)) options wrap-label?)
       (view-component cell-type options wrap-label?))))
-
-(declare view-component)
 
 (defmulti instantiate (fn [options & _]
                         (schema-type options)))
