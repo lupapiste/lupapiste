@@ -114,15 +114,14 @@
                                 <span data-bind="if: unseenVerdicts">
                                       <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
-                                           css: {'active': $parent.selectedTabName() === 'matti-verdict'}">
+                            <li data-bind="if: $root.authorization.ok( 'matti-verdict-tab')">
                               <a  data-bind="click: changeTab,
-                                            feature: 'matti'"
-                                 href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
-                                 class="link-btn feature--no-border">
-                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
-                                <span data-bind="if: unseenVerdicts">
-                                  <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
+                                             feature: 'matti'"
+                                  href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
+                                  class="link-btn">
+                                <span data-bind="ltext: 'application.tabVerdict'"></span>
+                              </a>
+                            </li>
 
                             <!-- In post-verdict states plus 'canceled' -->
                             <li data-bind="if: $root.authorization.ok('application-summary-tab-visible'), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">

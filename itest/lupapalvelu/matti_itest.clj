@@ -19,6 +19,21 @@
 (defn prefix-keys [m prefix]
   (mangle-keys m (util/fn->> name (str (name prefix)) keyword)))
 
+(defn toggle-sipoo-matti [flag]
+  (fact {:midje/description (str "Sipoo Matti: " flag)}
+    (command admin :set-organization-boolean-path
+             :organizationId "753-R"
+             :path "matti-enabled"
+             :value flag) => ok?))
+
+(facts "Matti enabled"
+  (fact "Disable Matti in Sipoo"
+    (toggle-sipoo-matti false)
+    (query sipoo :matti-enabled) => (err :error.matti-disabled))
+  (fact "Enable Matti in Sipoo"
+    (toggle-sipoo-matti true)
+    (query sipoo :matti-enabled) => ok?))
+
 (facts "Settings"
   (fact "Bad category"
     (query sipoo :verdict-template-settings
@@ -619,6 +634,17 @@
           (fact "Error: bad template-id for verdict draft"
             (command sonja :new-matti-verdict-draft :id app-id :template-id "bad")
             => fail?)
+          (fact "Error: Matti disabled in Sipoo"
+            (toggle-sipoo-matti false)
+            (command sonja :new-matti-verdict-draft
+                     :id app-id :template-id template-id)
+            => (err :error.matti-disabled))
+          (fact "Matti verdict tab pseudo query fails"
+            (query sonja :matti-verdict-tab :id app-id)
+            => (err :error.matti-disabled))
+          (fact "Enable Matti in Sipoo"
+            (toggle-sipoo-matti true)
+            (query sonja :matti-verdict-tab :id app-id) => ok?)
           (fact "Sonja creates verdict draft"
             (let [draft                (command sonja :new-matti-verdict-draft
                                                 :id app-id :template-id template-id)
