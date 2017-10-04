@@ -221,3 +221,8 @@
     (->> (map :kuntalupatunnus new-verdicts)
          (verdict/backend-id-mongo-updates application)
          (action/update-application command))))
+
+(defn update-verdict-date [command date]
+  (action/update-application command
+                             {$set {:verdicts.0.paatokset [{:id (mongo/create-id)
+                                                            :poytakirjat [{:paatospvm date}]}]}}))

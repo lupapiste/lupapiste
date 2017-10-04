@@ -2,19 +2,26 @@
 
   <div>
     <div>
-      <h2 data-bind="ltext: 'info.mainVerdictDate'"></h2>
+      <h3 data-bind="ltext: 'info.mainVerdictDate'"></h3>
       <div>
-      <input type="text" class="form-input inline textinput textinput--big"
-                     data-bind="datepicker: mainVerdictDate, attr: { placeholder: loc('info.verdictDate') }">
+      <input type="text"
+             class="form-input inline textinput textinput--big"
+             data-bind="datepicker: mainVerdictDate,
+                        attr: { placeholder: loc('info.verdictDate') },
+                        css: { warn: invalidDate },
+                        disable: allInputsDisabled">
       </div>
     </div>
     <div>
-      <h2 data-bind="ltext: 'info.backendIds'"></h2>
+      <h3 data-bind="ltext: 'info.backendIds'"></h3>
       <div data-bind="foreach: backendIds">
        <div>
-         <input class="form-input inline textinput textinput--big"
-                data-bind="value: kuntalupatunnus, disable: $component.allInputsDisabled">
-         <span data-bind="if: $index() > 0 && !$component.loading()">
+         <input type="text" class="form-input inline textinput textinput--big"
+                data-bind="value: kuntalupatunnus,
+                           disable: $component.allInputsDisabled,
+                           css: {tip: kuntalupatunnus().length === 0,
+                                 warn: kuntalupatunnus().length > 0 && _.trim(kuntalupatunnus()).length === 0}">
+         <span data-bind="if: $index() > 0 && !$component.allInputsDisabled()">
            <i class="lupicon-circle-remove negative"
               style="cursor: pointer"
               data-bind="click: function() { $parent.deleteBackendId($index()); },

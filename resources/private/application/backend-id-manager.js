@@ -37,7 +37,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
 
   var allIdsValid = function(backendIds) {
     return _.every(backendIds, function(val) {
-      return val().kuntalupatunnus().length > 0;
+      return _.trim(val().kuntalupatunnus()).length > 0;
     });
   };
 
@@ -46,7 +46,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
   });
 
   self.addButtonDisabled = self.disposedPureComputed(function() {
-    return !allIdsValid(self.backendIds()) || self.loading();
+    return !allIdsValid(self.backendIds()) || self.allInputsDisabled();
   });
 
   var verdictsModified = function() {
@@ -76,8 +76,35 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
           self.loading(false);
         })
         .error(function () {
-          hub.send("indicator", {style: "negative"});
+          hub.send("indicator", {style: "negative", message: e.text});
           self.loading(false);
+        })
+        .call();
+    }
+  });
+
+  var validDate = function(d) {
+    return _.isDate(d) && d <= (new Date());
+  };
+
+  self.invalidDate = self.disposedPureComputed(function() {
+    return !validDate(self.mainVerdictDate());
+  });
+
+  self.disposedComputed(function() {
+    var d = self.mainVerdictDate();
+    if (validDate(d)) {
+      ajax
+        .command("set-archival-project-permit-date", {
+          id: ko.unwrap(params.applicationId),
+          date: d.getTime()
+        })
+        .success(function () {
+          hub.send("indicator", {style: "positive"});
+        })
+        .error(function (e) {
+          hub.send("indicator", {style: "negative", message: e.text});
+          repository.load(ko.unwrap(params.applicationId));
         })
         .call();
     }
