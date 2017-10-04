@@ -33,9 +33,12 @@
       {$and and-query})))
 
 (defn- get-application-bulletins-left [{:keys [page] :as parameters}]
-  (let [query (make-query parameters)]
+  (let [query (make-query parameters)
+        page (cond
+               (string? page) (read-string page)
+               :default page)]
     (- (mongo/count :application-bulletins query)
-       (* (read-string page) bulletin-page-size))))
+       (* page bulletin-page-size))))
 
 (def- sort-field-mapping {"bulletinState" :bulletinState
                           "municipality" :municipality
@@ -55,12 +58,14 @@
    Bulletins which have starting dates in the future will be omitted."
   [{:keys [page sort] :as parameters}]
   (let [query (or (make-query parameters) {})
-        _ (println "page" query)
+        page (cond
+               (string? page) (read-string page)
+               :default page)
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
                (query/fields bulletins/bulletins-fields)
                (query/sort (make-sort sort))
-               (query/paginate :page (read-string page) :per-page bulletin-page-size))]
+               (query/paginate :page page :per-page bulletin-page-size))]
     (->> apps
          (map #(assoc (first (:versions %)) :id (:_id %)))
          (filter bulletins/bulletin-date-valid?))))
