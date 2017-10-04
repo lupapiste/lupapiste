@@ -107,8 +107,8 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               sc/Str             ;; fileId in GridFS
-   :originalFileId                       sc/Str             ;; fileId of the unrotated/unconverted file
+   :fileId                               ssc/ObjectIdStr             ;; fileId in GridFS
+   :originalFileId                       ssc/ObjectIdStr             ;; fileId of the unrotated/unconverted file
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only
