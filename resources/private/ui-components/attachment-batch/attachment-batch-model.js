@@ -31,6 +31,20 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
             mouseout: _.wrap( {}, currentHover)};
   };
 
+  self.colspan = self.disposedPureComputed(function() {
+    var span = 5;
+    if (self.showResell()) {
+      span = span + 1;
+    }
+    if (self.showSign()) {
+      span = span + 1;
+    }
+    if (self.showConstruction()) {
+      span = span + 1;
+    }
+    return span;
+  });
+
   // Rows is {fileId: {column: Cell}}
   var rows = ko.observable({});
 
