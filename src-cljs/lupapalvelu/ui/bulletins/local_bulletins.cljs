@@ -27,10 +27,12 @@
        [:th "Päätöksen antopäivä"]
        [:th "Viimeinen oikaisuvaatimuspäivä"]]]
       [:tbody
-       (for [{:keys [id address verdictGivenAt appealPeriodStartsAt]} bulletins]
+       (for [{:keys [id address verdictGivenAt appealPeriodStartsAt]
+              [{verdictData :data category :category} & _] :matti-verdicts}                bulletins]
          [:tr
           {:key id}
-          [:td "-"]
+          [:td (str (:verdict-section verdictData) " "
+                    (common/loc (str "matti-" category ".verdict-code." (:verdict-code verdictData))))]
           [:td id]
           [:td address]
           [:td ""]
