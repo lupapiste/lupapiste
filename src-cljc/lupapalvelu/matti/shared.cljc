@@ -310,7 +310,7 @@
          {:id   keyword-or-string ;; Also title localization key
           :grid MattiGrid}))
 
-(defschema MattiVerdict
+(defschema MattiVerdictTemplate
   (merge Dictionary
          MattiMeta
          {(sc/optional-key :id)       sc/Str
@@ -441,7 +441,7 @@
                                                                      :css  [:matti-condition-box]})
                                                                   [:autopaikat :vss-luokka :paloluokka])}}]]}}]})
 
-(sc/validate MattiVerdict default-verdict-template)
+(sc/validate MattiVerdictTemplate default-verdict-template)
 
 (defschema MattiSettings
   (merge Dictionary
@@ -489,6 +489,21 @@
   {:r r-settings})
 
 (sc/validate MattiSettings r-settings)
+
+
+(defschema MattiVerdictSection
+  (merge MattiBase
+         {:id   keyword-or-string ;; Also title localization key
+          (sc/optional-key :buttons) sc/Bool ;; Show edit button? (default true)
+          :grid MattiGrid}))
+
+(defschema MattiVerdict
+  (merge Dictionary
+         MattiMeta
+         {(sc/optional-key :id)       sc/Str
+          (sc/optional-key :modified) sc/Int
+          :sections                   [MattiVerdictSection]}))
+
 
 ;; It is advisable to reuse ids from template when possible. This
 ;; makes localization work automatically.
