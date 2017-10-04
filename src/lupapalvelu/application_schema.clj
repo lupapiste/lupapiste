@@ -365,12 +365,9 @@ Is this always a map?"
   "TODO: this is probably available somewhere in the codebase already?"
   ["applicant" "authority" "rest-api"])
 
-(defschema AuthInviterRole
-  (apply sc/enum auth-inviter-roles))
-
 (defschema AuthInviterMap
   "TODO: this schema is likely a duplicate"
-  {:role AuthInviterRole
+  {:role (apply sc/enum auth-inviter-roles)
    :lastName ssc/NonBlankStr ;;verify existence, nonBlankness and nonNullness
    :firstName ssc/NonBlankStr ;;verify existence, nonNullness and nonBlankness
    :username ssc/Username ;; verify existence and nonNullness
@@ -384,17 +381,24 @@ Is this always a map?"
     'AuthInviterById))
 
 (defschema AuthInviter
+  "TODO: verify that inviter is always either an id string or a map.
+TODO: what does the id refer to?
+AuthInviter is represented by an id string or or an AuthInviterMap"
   (sc/cond-pre
     AuthInviterMap
     AuthInviterId))
 
+(def auth-invite-inviter-roles
+  "TODO: get these from somewhere instead of hard coding them"
+  ["authority" "applicant" "rest-api"])
+
 (defschema AuthInviteInviter
-  "TODO: similar to other schemas describing some person"
+  "TODO: similar to other schemas describing people"
   {:id ssc/ObjectIdStr
    :username ssc/Username
    :firstName sc/Str ;; NonBlank? Allways exist?
    :lastName sc/Str ;; NonBlank? Allways exist?
-   :role (sc/enum ["authority" "applicant" "rest-api"])
+   :role (apply sc/enum auth-invite-inviter-roles)
    })
 
 (defschema AuthInvite
@@ -409,17 +413,21 @@ Is this always a map?"
    })
 
 (defschema BaseAuthElement
-  "firstName and lastName can be empty, even for type owner"
+  "firstName and lastName can be empty, even for type owner
+TODO: are there other possible fields?"
   {:username ssc/Username
    :firstName sc/Str
    :lastName sc/Str
    :role AuthRole
-   (sc/optional-key :type) AuthType
    :id sc/Str ;; 22 applications where an auth has empty string as id
+   (sc/optional-key :type) AuthType
    (sc/optional-key :inviter) AuthInviter
-   ;; if :type is "owner", then :inviter never exists
-   ;; this should be encoded in the schema
    (sc/optional-key :invite) AuthInvite
+   ;; if :type is "owner", then :inviter and :invite never exist
+   ;; this should be encoded in the schema
+   ;;
+   ;; it is possible for both inviter and invite to exist on the same AuthElement
+   ;; TODO: is the inviter of the invite always equal to the inviter?
    (sc/optional-key :unsubscribed) sc/Bool ;; document
    (sc/optional-key :statementId) ssc/ObjectIdStr ;; document
    (sc/optional-key :inviteAccepted) ssc/Timestamp
@@ -434,15 +442,61 @@ Is this always a map?"
   "A Company always has a name, y-tunnus and its type is company. The name is always
 exactly the same as firstName."
   (merge BaseAuthElement
-         {:name CompanyAuthName
+         {:name CompanyAuthName ;;TODO: add the constraint that this equals :firstName?
           :type (sc/eq "company")
           :y ssc/FinnishY}))
 
+(defschema OwnerAuthElement
+  "Owner never has an inviter or an invite.
+TODO: add better documentation."
+  (dissoc BaseAuthElement
+          (sc/optional-key :inviter)
+          (sc/optional-key :invite)))
+
 (defschema AuthElement
   "TODO: document"
-  sc/Any ;;TODO: turn into conditional
-  )
+  (sc/conditional (fn [x] (= "company"
+                            (:type x)))
+                  CompanyAuthElement
+                  (fn [x] (= "owner"
+                            (:type x)))
+                  OwnerAuthElement
+                  (fn [x] true)
+                  BaseAuthElement))
 
 (defschema Auth
-  "TODO: "
   [AuthElement])
+
+(defschema GeometryString
+  "TODO: document this, and it should have a better schema that checks the contents.
+Should these be parsed and represented as something other than strings?"
+  (sc/named
+    sc/Str
+    'GeometryString))
+
+(def geometry-wgs84-types
+  ["Polygon" "LineString" "Point" "Multilinestring"])
+
+(defschema GeometryWgs84Coordinate
+  [double double])
+
+(defschema GeometryWgs84
+  "TODO: document"
+  {:type (apply sc/enum geometry-wgs84-types)
+   :coordinates [GeometryWgs84Coordinate]})
+
+(defschema Drawing
+  "TODO: document.
+There are 357 applications where 'drawings' does not exist."
+  {:id sc/Int
+   :geometry GeometryString
+   :geometry-wgs84 GeometryWgs84
+   :category (sc/eq "123") ;;TODO: what is this and why is it always "123"
+   :desc sc/Str
+   :name sc/Str
+   :area sc/Str ;;this seems to be numeric, perhaps integer
+   :height sc/Str ;;this seems to be a decimal number string
+   })
+
+(defschema Drawings
+  [Drawing])
