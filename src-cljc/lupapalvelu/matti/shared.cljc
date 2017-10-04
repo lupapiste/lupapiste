@@ -587,14 +587,14 @@
              :rows    [[{:loc-prefix :matti-verdict.giver
                          :hide?      :_meta.editing?
                          :dict       :contact-ref}
-                        {:col   3
+                        {:col   2
                          :show? :_meta.editing?
                          :list  {:items [{:id   :giver
                                           :dict :giver}
                                          {:id    :contact
                                           :show? :_meta.editing?
                                           :dict  :contact}]}}
-                        {:col   2
+                        {:col   1
                          :loc-prefix :matti-verdict.section
                          :dict  :verdict-section}
                         {:col   2
