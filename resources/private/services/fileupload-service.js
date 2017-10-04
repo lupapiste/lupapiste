@@ -117,7 +117,8 @@ LUPAPISTE.FileuploadService = function() {
       },
       done: function(e, data) {
         hubSend("filesUploaded", {status: "success",
-                                  files: data.result.files});
+                                  files: data.result.files,
+                                  originalFiles: data.originalFiles});
       },
       fail: function(e, data) {
         hubSend("filesUploaded", {
