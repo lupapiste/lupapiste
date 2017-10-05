@@ -704,6 +704,9 @@
     a
     [a]))
 
+(defn- split-kw [kw]
+  (-> kw str rest ss/join (ss/split #"/")))
+
 (defn taggy
   "Returns list [map ns] where the map contains :tag and :ns (if given).
   The tag name is defined by argument k. The format is
@@ -711,7 +714,7 @@
   is returned but not used on this element.  The namespace for this
   element is the ns argument or nothing."
   [k & [ns]]
-  (let [[tag new-ns] (-> k str rest ss/join (ss/split #"/"))]
+  (let [[tag new-ns] (split-kw k)]
     [(merge (when ns {:ns ns})
             {:tag (keyword tag)}) (or new-ns ns)]))
 
@@ -734,6 +737,7 @@
     (mapv map-lausuntotieto lausuntotieto-canonical)
     lausuntotieto-canonical))
 
+
 (defmulti mapper
   "Recursively generates a 'traditional' mapping (with :tag, :ns
   and :child properties) from the shorthand form. As the shorthand
@@ -751,15 +755,18 @@
             :sequential))))))
 
 (defmethod mapper :map [m & [ns]]
-  (let [k (-> m keys first)
-        [tag ns] (taggy k ns)
-        v (k m)]
-    ;; Mapping sanity check
-    (assert (= (count m) 1) k)
-    (assoc tag :child (make-seq (mapper v ns)))))
+  (if-not (:tag m)
+    (let [k (-> m keys first)
+          [tag ns] (taggy k ns)
+          v (k m)]
+      ;; Mapping sanity check
+      (assert (= (count m) 1) k)
+      (assoc tag :child (make-seq (mapper v ns))))
+    m))
 
 (defmethod mapper :keyword [kw & [ns]]
-  (first (taggy kw ns)))
+  (let [[tag new-ns] (split-kw kw)]
+    {:tag (keyword tag) :ns (or new-ns ns)}))
 
 (defmethod mapper :sequential [xs & [ns]]
   (map #(mapper % ns) xs))

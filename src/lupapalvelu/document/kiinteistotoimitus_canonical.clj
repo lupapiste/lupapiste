@@ -129,10 +129,11 @@
                                (merge all-properties-canon
                                       {:osapuolitieto parties
                                        :sijaintitieto (canonical-common/get-sijaintitieto application)
-                                       :tilatieto (canonical-common/application-state app)
+                                       :tilatieto (canonical-common/simple-application-state app)
                                        :hakemustunnustieto {:Hakemustunnus {:tunnus (:id application)
                                                                             :sovellus "Lupapiste"}}})}
-                              :toimituksenTila "Hakemus"}
+                              :toimituksenTila "Hakemus"
+                              :kayttotapaus "Lupapiste kiinteist\u00f6toimitus"} ; LPK-3295 kayttotapaus from schema update
                              main-property-canon
                              details))]
     {:Kiinteistotoimitus

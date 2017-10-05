@@ -33,7 +33,7 @@
           :sijaintitieto (canonical-common/get-sijaintitieto application)
           :kohdekiinteisto (:propertyId application)
           :maaraAla (canonical-common/maaraalatunnus app property)
-          :tilatieto (canonical-common/application-state app)}
+          :tilatieto (canonical-common/simple-application-state app)}
          }
         :toimituksenTila (toimituksen-tila app)
         :uusiKytkin (= op-age "uusi")
