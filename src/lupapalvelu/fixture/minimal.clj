@@ -418,29 +418,29 @@
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f850"}}
    ;; rakennustarkastaja@jarvenpaa.fi / jarvenpaa
-   {:id        "50ac77ecd2e6c2ea6e73f852"
-    :email     "lupasihteeri@jarvenpaa.fi"
-    :enabled   true
-    :language  "fi"
-    :role      "authority"
-    :orgAuthz  {:186-R #{:authority}}
-    :firstName "Lupasihteeri"
-    :lastName  "J\u00E4rvenp\u00E4\u00E4"
-    :username  "lupasihteeri@jarvenpaa.fi"
-    :private   {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
-                :apikey   "a0ac77ecd2e6c2ea6e73f852"}}
-   ;; lupasihteeri@jarvenpaa.fi / jarvenpaa
-   {:id        "50ac77ecd2e6c2ea6e73f851"
-    :email     "rakennustarkastaja@jarvenpaa.fi"
-    :enabled   true
-    :language  "fi"
-    :role      "authority"
-    :orgAuthz  {:186-R #{:authority :archivist}}
+   {:id "50ac77ecd2e6c2ea6e73f851"
+    :email "rakennustarkastaja@jarvenpaa.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:186-R #{:authority :archivist}}
     :firstName "Rakennustarkastaja"
-    :lastName  "J\u00E4rvenp\u00E4\u00E4"
-    :username  "rakennustarkastaja@jarvenpaa.fi"
-    :private   {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
-                :apikey   "a0ac77ecd2e6c2ea6e73f851"}}
+    :lastName "J\u00E4rvenp\u00E4\u00E4"
+    :username "rakennustarkastaja@jarvenpaa.fi"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f851"}}
+   ;; lupasihteeri@jarvenpaa.fi / jarvenpaa
+   {:id "50ac77ecd2e6c2ea6e73f852"
+    :email "lupasihteeri@jarvenpaa.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:186-R #{:authority}}
+    :firstName "Lupasihteeri"
+    :lastName "J\u00E4rvenp\u00E4\u00E4"
+    :username "lupasihteeri@jarvenpaa.fi"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f852"}}
    ;; digitoija@jarvenpaa.fi / jarvenpaa
    {:id "50ac77ecd2e6c2ea6e73f853"
     :email "digitoija@jarvenpaa.fi"
