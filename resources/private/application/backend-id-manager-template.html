@@ -29,12 +29,14 @@
          </span>
        </div>
       </div>
+      <!-- ko if: auth.ok("store-archival-project-backend-ids") -->
       <button class="primary"
-              data-bind="click: addBackendId, disable: addButtonDisabled, css: { waiting: loading }">
+              data-bind="click: addBackendId, disable: addButtonDisabled, css: { waiting: loading },">
         <i class="lupicon-circle-plus" data-bind="visible: !loading()"></i>
         <i class="spin lupicon-refresh wait"></i>
         <span data-bind="ltext: 'info.addBackendId'"></span>
       </button>
+      <!-- /ko -->
     </div>
   </div>
 

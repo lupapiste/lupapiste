@@ -124,7 +124,9 @@
                             <li data-bind="if: $root.authorization.ok('application-summary-tab-visible'), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
                                    class="link-btn">
-                                    <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+                                    <span data-bind="ltext: 'application.applicationSummary', visible: !$root.application.isArchivingProject()"></span>
+                                    <span data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></span>
+                                </a></li>
 
                             <!-- Can be shown if calendars are active in the target municipality and sector -->
                             <li data-bind="if: $root.calendarConfig.initialized, css: {'active': $parent.selectedTabName() === 'calendar'}">
@@ -262,17 +264,26 @@
 
                     <div id="application-applicationSummary-tab" data-bind="with: $root.application" class="tab-content" >
 
-                        <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
+                        <h1 data-bind="ltext: 'application.tabApplicationSummary', visible: !$root.application.isArchivingProject()"></h1>
+                        <h1 data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.application.summary'}
                                          }"></span>
+
+                        <div data-bind="if: $root.application.isArchivingProject" style="margin-bottom: 2em;">
+                        <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                                      applicationId: $root.application.id,
+                                                      authModel: $root.authorization"></backend-id-manager>
+                        </div>
+
                         <div class="application_section">
                             <div id="applicationAndPartiesDocgen" class="docgen-content">
                                 <!-- This is where the generated documents will be placed. -->
                             </div>
                         </div>
 
+                        <!-- ko ifnot: $root.application.isArchivingProject -->
                         <section class="accordion" id="accordion-application-summary-statements">
                             <button onclick="accordion.click(this)"
                                     data-test-id="accordion-application-summary-statements-header"
@@ -316,6 +327,8 @@
                                 </div>
                             </div>
                         </section>
+
+                        <!-- /ko -->
 
                         <div class="process-nav">
                             <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
