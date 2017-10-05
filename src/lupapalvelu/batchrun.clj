@@ -407,9 +407,7 @@
       (try
         (review/save-review-updates user application updates added-tasks-with-updated-buildings attachments-by-task-id)
         (catch Throwable t
-          (logging/log-event :error {:run-by "Automatic review checking"
-                                     :event "Failed to save"
-                                     :exception-message (.getMessage t)}))))))
+          {:ok false :desc (.getMessage t)})))))
 
 (defn- read-reviews-for-application
   [user created application app-xml & [overwrite-background-reviews?]]
@@ -521,10 +519,7 @@
                                                (map (juxt (comp :id first)
                                                           (comp :new-faulty-tasks
                                                                 second)))
-                                               (into {}))
-                            :not-saved    (->> applications-with-results
-                                               (remove (comp :changes-saved second))
-                                               (map first))}))
+                                               (into {}))}))
 
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
@@ -539,11 +534,18 @@
          (map (fn [[{app-id :id permit-type :permitType} app-xml]]
                 (let [app    (first (organization-applications-for-review-fetching (:id organization) permit-type projection app-id))
                       result (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)
-                      saved? (save-reviews-for-application eraajo-user app result)]
-                  (when saved?
-                    (mark-reviews-faulty-for-application app result))
-                  [app (assoc result :changes-saved saved?)])))
-         (remove (comp nil? first))
+                      save-result (save-reviews-for-application eraajo-user app result)]
+                  ;; save-result is nil when application query fails (application became irrelevant for review fetching) -> no actions taken
+                  (when (fail? save-result)
+                    (logging/log-event :info {:run-by "Automatic review checking"
+                                              :event  "Failed to save review updates for application"
+                                              :reason (:desc save-result)
+                                              :application-id app-id
+                                              :result result}))
+                  (when (ok? save-result)
+                    (mark-reviews-faulty-for-application app result)
+                    [app result]))))
+         (remove nil?)
          (log-review-results-for-organization (:id organization)))))
 
 (defn poll-verdicts-for-reviews

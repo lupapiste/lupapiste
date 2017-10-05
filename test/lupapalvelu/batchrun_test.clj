@@ -100,7 +100,7 @@
 
     (provided (#'lupapalvelu.batchrun/save-reviews-for-application
                ..test-user.. {:id "LP-ORG-2000-00001" :permitType "R"} {:result "read result"})
-              => irrelevant :times 1)
+              => {:ok true} :times 1)
 
     (provided (#'lupapalvelu.batchrun/mark-reviews-faulty-for-application
                {:id "LP-ORG-2000-00001" :permitType "R"} {:result "read result"})
@@ -110,8 +110,7 @@
                                                       :event "Review checking finished for organization"
                                                       :organization-id "org-id"
                                                       :application-count 1
-                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}
-                                                      :not-saved []})
+                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}})
               => ..test-result.. :times 1))
 
   (fact "fetch all organization applications - one dropped in fetch"
@@ -147,11 +146,11 @@
 
     (provided (#'lupapalvelu.batchrun/save-reviews-for-application
                ..test-user.. {:id "LP-ORG-2000-00001" :permitType "R"} {:result "read result"})
-              => irrelevant :times 1)
+              => {:ok true} :times 1)
 
     (provided (#'lupapalvelu.batchrun/save-reviews-for-application
                ..test-user.. {:id "LP-ORG-2000-00003" :permitType "R"} {:new-faulty-tasks ..faulty-tasks..})
-              => irrelevant :times 1)
+              => {:ok true} :times 1)
 
     (provided (#'lupapalvelu.batchrun/mark-reviews-faulty-for-application
                {:id "LP-ORG-2000-00001" :permitType "R"} {:result "read result"})
@@ -166,8 +165,7 @@
                                                       :organization-id "org-id"
                                                       :application-count 2
                                                       :faulty-tasks {"LP-ORG-2000-00001" nil
-                                                                     "LP-ORG-2000-00003" ..faulty-tasks..}
-                                                      :not-saved []})
+                                                                     "LP-ORG-2000-00003" ..faulty-tasks..}})
               => ..test-result.. :times 1))
 
   (fact "application becomes irrelevant during review fetch - nothing is done"
@@ -190,8 +188,7 @@
                                                       :event "Review checking finished for organization"
                                                       :organization-id "org-id"
                                                       :application-count 0
-                                                      :faulty-tasks {}
-                                                      :not-saved []})
+                                                      :faulty-tasks {}})
               => ..test-result.. :times 1))
 
   (fact "application changed while reading reviews - changes not saved"
@@ -218,12 +215,18 @@
               => 0)
 
     (provided (#'lupapalvelu.domain/get-application-no-access-checking "LP-ORG-2000-00001")
-              => 0)
+              => irrelevant :times 1)
+
+    (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                      :event  "Failed to save review updates for application"
+                                                      :reason "Application modified before update"
+                                                      :application-id "LP-ORG-2000-00001"
+                                                      :result {:ok true :updates ..updates..}})
+              => irrelevant :times 1)
 
     (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
                                                       :event "Review checking finished for organization"
                                                       :organization-id "org-id"
-                                                      :application-count 1
-                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}
-                                                      :not-saved ["LP-ORG-2000-00001"]})
+                                                      :application-count 0
+                                                      :faulty-tasks {}})
               => ..test-result.. :times 1)))

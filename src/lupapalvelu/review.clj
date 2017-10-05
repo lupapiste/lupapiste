@@ -271,4 +271,5 @@
             (doseq [att attachments]
               (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
             (tasks/generate-task-pdfa updated-application added-task user "fi")))))
-    update-result))
+    (cond-> {:ok update-result}
+      (false? update-result) (assoc :desc "Application modified before update"))))
