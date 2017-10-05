@@ -231,32 +231,30 @@
                                      {$set {:statements.$ updated :modified created}})))
       (warnf "No statement found for ah response-message (%s), statementId in original message was: %s", (:id responded-message) statement-id))))
 
+(defn- get-giver [statement-data name]
+  (if (ss/not-blank? (:giver statement-data))
+    (str name " (" (:giver statement-data) ")")
+    name))
+
 (defn save-ah-statement-response
   "Save statement response data from asianhallinta LausuntoVastaus to application statement.
    Validation of required data has been made on reader side.
    Returns updated statement on success"
   [app ftp-user statement-data created]
-  (let [statement (get-statement app (:id statement-data))
-        add-giver (fn [name]
-                    (if (ss/not-blank? (:giver statement-data))
-                    (str name " (" (:giver statement-data) ")")
-                      name))]
-    (if statement
-      (do
-        (validate-external-statement-update! statement ftp-user)
-        (when-let [updated (update-statement
-                             (update statement :state keyword)
-                             (:modify-id statement)
-                             :status (:status statement-data)
-                             :state  :given
-                             :given  (:given statement-data)
-                             :text   (:text statement-data)
-                             :person (update (:person statement) :name add-giver))]
-          (action/update-application (action/application->command app)
-                                     {:statements {$elemMatch {:id (:id statement)}}}
-                                     {$set {:statements.$ updated :modified created}})
-          updated))
-      (warnf "No statement found for ah statement response, app-id: %s, statement: %s", (:id app) (:id statement)))))
+  (when-let [statement (get-statement app (:id statement-data))]
+    (validate-external-statement-update! statement ftp-user)
+    (when-let [updated (update-statement
+                         (update statement :state keyword)
+                         (:modify-id statement)
+                         :status (:status statement-data)
+                         :state  :given
+                         :given  (:given statement-data)
+                         :text   (:text statement-data)
+                         :person (update (:person statement) :name (partial get-giver statement-data)))]
+      (action/update-application (action/application->command app)
+                                 {:statements {$elemMatch {:id (:id statement)}}}
+                                 {$set {:statements.$ updated :modified created}})
+      updated)))
 
 ;;
 ;; Statement givers
