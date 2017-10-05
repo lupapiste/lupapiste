@@ -6,6 +6,7 @@
     <!-- ko if: fileCount -->
     <table class="attachment-batch-table">
       <thead>
+        <tr>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentType'"></span>
         </th>
@@ -23,6 +24,7 @@
         <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
         <!-- /ko -->
         <th class="td-center" data-bind="ltext:'remove'"></th>
+        </tr>
       </thead>
       <tbody data-bind="foreach: upload.files">
         <tr class="file">
@@ -136,7 +138,10 @@
       </tbody>
       <tfoot data-bind="if: fileCount() > 1">
         <tr>
-          <td colspan="5"></td>
+          <td colspan="4"></td>
+          <!-- ko if: $component.showResell -->
+          <td class="td-center"></td>
+          <!-- /ko -->
           <!-- ko if: showSign -->
           <td class="td-center">
             <a class="link-btn"
