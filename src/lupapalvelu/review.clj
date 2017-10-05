@@ -262,11 +262,14 @@
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
 (defn save-review-updates [user application updates added-tasks-with-updated-buildings attachments-by-task-id]
-  (let [update-result (update-application (application->command application) updates)
+  (let [update-result (pos? (update-application (application->command application) {:modified (:modified application)} updates :return-count? true))
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
-    (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
-      (let [attachments (get attachments-by-task-id id)]
-        (if-not (empty? attachments)
-          (doseq [att attachments]
-            (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
-          (tasks/generate-task-pdfa updated-application added-task user "fi"))))))
+    (when update-result
+      (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
+        (let [attachments (get attachments-by-task-id id)]
+          (if-not (empty? attachments)
+            (doseq [att attachments]
+              (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
+            (tasks/generate-task-pdfa updated-application added-task user "fi")))))
+    (cond-> {:ok update-result}
+      (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

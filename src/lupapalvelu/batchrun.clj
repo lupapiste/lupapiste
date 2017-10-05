@@ -4,7 +4,6 @@
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
-            [clojure.core.async :as async]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [lupapalvelu.action :refer :all]
@@ -27,7 +26,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [sade.util :refer [fn->] :as util]
+            [sade.util :refer [fn-> pcond->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
@@ -408,9 +407,7 @@
       (try
         (review/save-review-updates user application updates added-tasks-with-updated-buildings attachments-by-task-id)
         (catch Throwable t
-          (logging/log-event :error {:run-by "Automatic review checking"
-                                     :event "Failed to save"
-                                     :exception-message (.getMessage t)}))))))
+          {:ok false :desc (.getMessage t)})))))
 
 (defn- read-reviews-for-application
   [user created application app-xml & [overwrite-background-reviews?]]
@@ -493,22 +490,17 @@
                                                (:id organization) (.getName (class o)) (get &throw-context :message ""))}))))
 
 (defn- organization-applications-for-review-fetching
-  [organization-id permit-type projection]
+  [organization-id permit-type projection & application-ids]
   (let [eligible-application-states (set/difference states/post-verdict-but-terminal #{:foremanVerdictGiven})]
-    (mongo/select :applications {:state {$in eligible-application-states}
-                                 :permitType permit-type
-                                 :organization organization-id
-                                 :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
+    (mongo/select :applications (merge {:state {$in eligible-application-states}
+                                        :permitType permit-type
+                                        :organization organization-id
+                                        :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
+                                       (when (not-empty application-ids)
+                                         {:_id {$in application-ids}}))
                   (merge app/timestamp-key
-                         projection))))
-
-(defn- save-reviews [user applications-with-results]
-  (when (not-empty applications-with-results)
-    (logging/log-event :info {:run-by "Automatic review checking"
-                              :event "Save organization reviews"
-                              :organization-id (:organization (first (first applications-with-results)))
-                              :application-count (count applications-with-results)})
-    (run! (fn [[app result]] (save-reviews-for-application user app result)) applications-with-results)))
+                         (pcond-> projection
+                                  sequential? (zipmap (repeat true)))))))
 
 (defn mark-reviews-faulty-for-application [application {:keys [new-faulty-tasks]}]
   (when (not (empty? new-faulty-tasks))
@@ -518,67 +510,58 @@
                                    :created timestamp)
                             task-id)))))
 
-(defn mark-reviews-faulty [applications-with-results]
-  (when (not-empty applications-with-results)
-    (logging/log-event :info {:run-by "Automatic review checking"
-                              :event "Mark overwritten reviews faulty"
-                              :organization-id (:organization (first (first applications-with-results)))
-                              :faulty-tasks (->> applications-with-results
-                                                 (map (juxt (comp :id first)
-                                                            (comp :new-faulty-tasks
-                                                                  second)))
-                                                 (into {}))})
-    (run! (fn [[app result]]
-            (mark-reviews-faulty-for-application app result))
-          applications-with-results)))
+(defn- log-review-results-for-organization [organization-id applications-with-results]
+  (logging/log-event :info {:run-by "Automatic review checking"
+                            :event "Review checking finished for organization"
+                            :organization-id organization-id
+                            :application-count (count applications-with-results)
+                            :faulty-tasks (->> applications-with-results
+                                               (map (juxt (comp :id first)
+                                                          (comp :new-faulty-tasks
+                                                                second)))
+                                               (into {}))}))
 
-(defn- fetch-review-updates-for-organization
-  [eraajo-user created applications permit-types {org-krysp :krysp :as organization} & [overwrite-background-reviews?]]
-  (let [projection (merge {:state            true
-                           :municipality     true
-                           :address          true
-                           :permitType       true
-                           :permitSubtype    true
-                           :organization     true
-                           :primaryOperation true
-                           :tasks            true
-                           :verdicts         true
-                           :history          true}
-                          (when overwrite-background-reviews?
-                            {:attachments true}))
+(defn- fetch-reviews-for-organization
+  [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
+  (let [projection (cond-> [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified]
+                     overwrite-background-reviews? (conj :attachments))
+        permit-types (remove (fn-> keyword org-krysp :url ss/blank?) permit-types)
         grouped-apps (if (seq applications)
-                         (group-by :permitType applications)
-                         (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
-                              (map #(vector % (organization-applications-for-review-fetching (:id organization)
-                                                                                             %
-                                                                                             projection)))))]
+                       (group-by :permitType applications)
+                       (->> (map #(organization-applications-for-review-fetching (:id organization) % projection) permit-types)
+                            (zipmap permit-types)))]
     (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
-         (mapv (fn [[app app-xml]]
-                 [app (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)])))))
+         (map (fn [[{app-id :id permit-type :permitType} app-xml]]
+                (let [app    (first (organization-applications-for-review-fetching (:id organization) permit-type projection app-id))
+                      result (read-reviews-for-application eraajo-user created app app-xml overwrite-background-reviews?)
+                      save-result (save-reviews-for-application eraajo-user app result)]
+                  ;; save-result is nil when application query fails (application became irrelevant for review fetching) -> no actions taken
+                  (when (fail? save-result)
+                    (logging/log-event :info {:run-by "Automatic review checking"
+                                              :event  "Failed to save review updates for application"
+                                              :reason (:desc save-result)
+                                              :application-id app-id
+                                              :result result}))
+                  (when (ok? save-result)
+                    (mark-reviews-faulty-for-application app result)
+                    [app result]))))
+         (remove nil?)
+         (log-review-results-for-organization (:id organization)))))
 
 (defn poll-verdicts-for-reviews
-  [& {:keys [application-ids organization-ids overwrite-background-reviews?]}]
-  (let [applications (when (seq application-ids)
-                       (mongo/select :applications {:_id {$in application-ids}}))
-        organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
-        eraajo-user (user/batchrun-user (map :id organizations))
-        fetch-results-fn #(fetch-review-updates-for-organization eraajo-user
-                                                                 (now)
-                                                                 applications
-                                                                 [:R]
-                                                                 %
-                                                                 overwrite-background-reviews?)
-        channel (async/chan)]
-    (run! (util/fn->> fetch-results-fn
-                      (async/>! channel)
-                      (async/go))
-          organizations)
-    (run! (fn [_]
-            (let [results (async/<!! channel)]
-              ;; Note that the order in which these are called matters!
-              (save-reviews eraajo-user results)
-              (mark-reviews-faulty results)))
-          organizations)))
+  [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
+  (let [applications  (when (seq application-ids)
+                        (mongo/select :applications {:_id {$in application-ids}}))
+        permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
+        organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
+        eraajo-user   (user/batchrun-user (map :id organizations))
+        threads       (map (fn [org]
+                             (util/future* (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
+                           organizations)]
+    (loop []
+      (when-not (every? realized? threads)
+        (Thread/sleep 1000)
+        (recur)))))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
