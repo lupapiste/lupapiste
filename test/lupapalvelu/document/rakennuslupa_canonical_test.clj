@@ -789,7 +789,6 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
-    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
