@@ -3,7 +3,6 @@
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
-            [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
@@ -26,11 +25,12 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [sade.util :refer [fn-> pcond->] :as util]
+            [sade.core :refer :all]
             [sade.env :as env]
             [sade.dummy-email-server]
-            [sade.core :refer :all]
             [sade.http :as http]
+            [sade.strings :as ss]
+            [sade.util :refer [fn-> pcond->] :as util]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import [org.xml.sax SAXParseException]))
 
@@ -311,7 +311,7 @@
           (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
             (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
-                (if-not (s/blank? url)
+                (if-not (ss/blank? url)
                   (let [command (assoc (application->command app) :user eraajo-user :created (now) :action "fetch-verdicts")
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
