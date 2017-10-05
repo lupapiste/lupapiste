@@ -25,7 +25,12 @@
                                   <span data-bind="ltext: state, attr: {'title' : loc([state(), 'title']), 'class': state() + '-box'}"></span>
                                   <!-- /ko -->
                                   <!-- ko  foreach: stateSeq -->
-                                  <span data-bind="ltext: $data, attr: {'title' : loc([$data, 'title']), 'class': $data + '-box'}"></span>
+                                  <span data-bind="ltext: $data,
+                                                   attr: {
+                                                    'title': $root.application.isArchivingProject() ? loc([$data, 'archivingProject', 'title']) : loc([$data, 'title']),
+                                                    'class': $data + '-box'
+                                                   }">
+                                  </span>
                                   <!-- /ko -->
                                 </div>
                             </div>
