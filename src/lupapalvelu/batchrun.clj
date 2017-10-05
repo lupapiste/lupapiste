@@ -552,10 +552,11 @@
   [& {:keys [application-ids organization-ids overwrite-background-reviews?] :as options}]
   (let [applications  (when (seq application-ids)
                         (mongo/select :applications {:_id {$in application-ids}}))
-        organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
+        permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
+        organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
         threads       (map (fn [org]
-                             (util/future* (fetch-reviews-for-organization eraajo-user (now) org [:R] applications options)))
+                             (util/future* (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
                            organizations)]
     (loop []
       (when-not (every? realized? threads)

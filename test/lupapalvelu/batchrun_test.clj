@@ -231,3 +231,143 @@
                                                       :application-count 0
                                                       :faulty-tasks {}})
               => ..test-result.. :times 1)))
+
+(defmethod lupapalvelu.xml.krysp.common-reader/get-tunnus-xml-path :TEST [& _]
+  [:tunnus])
+
+(def result (atom []))
+
+(defmethod lupapalvelu.permit/fetch-xml-from-krysp :TEST [permit-type url creds ids st & _]
+  (Thread/sleep (+ (* (count ids) 30) 1))
+  (swap! result conj ids)
+  (->> (map (fn [id] {:tag :app-xml :content [{:tag :tunnus :content [id]}]}) ids)
+       (hash-map :tag :xml :content)))
+
+(facts poll-verdicst-for-reviews
+  (fact "single application"
+    (batchrun/poll-verdicts-for-reviews :application-ids ["LP-ORG-2000-00001"]) => nil
+
+    (provided (#'lupapalvelu.mongo/select :applications {:_id {"$in" ["LP-ORG-2000-00001"]}})
+              => [{:id "LP-ORG-2000-00001" :permitType "TEST" :organization "org-id"}])
+
+    (provided (#'lupapalvelu.batchrun/orgs-for-review-fetch "org-id")
+              => [{:id "org-id" :krysp {:TEST {:url "url"}}}])
+
+    (provided (lupapalvelu.user/batchrun-user ["org-id"])
+              => ..test-user..)
+
+    (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching "org-id" "TEST" anything "LP-ORG-2000-00001")
+              => [{:id "LP-ORG-2000-00001" :permitType "TEST"}])
+
+    (provided (#'lupapalvelu.batchrun/read-reviews-for-application
+               ..test-user.. anything {:id "LP-ORG-2000-00001" :permitType "TEST"} anything nil)
+              => {:result "read result"} :times 1)
+
+    (provided (#'lupapalvelu.batchrun/save-reviews-for-application
+               ..test-user.. {:id "LP-ORG-2000-00001" :permitType "TEST"} {:result "read result"})
+              => {:ok true} :times 1)
+
+    (provided (#'lupapalvelu.batchrun/mark-reviews-faulty-for-application
+               {:id "LP-ORG-2000-00001" :permitType "TEST"} {:result "read result"})
+              => irrelevant :times 1)
+
+    (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                      :event "Start fetching xmls"
+                                                      :organization-id "org-id"
+                                                      :application-count 1
+                                                      :applications ["LP-ORG-2000-00001"]})
+              => ..test-result.. :times 1)
+
+    (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                      :event "Review checking finished for organization"
+                                                      :organization-id "org-id"
+                                                      :application-count 1
+                                                      :faulty-tasks {"LP-ORG-2000-00001" nil}})
+              => ..test-result.. :times 1))
+
+  (fact "multiple applications"
+    (reset! result [])
+
+    (fact
+        (batchrun/poll-verdicts-for-reviews :application-ids ["lots-of-applications-ids"]) => nil
+
+        (provided (#'lupapalvelu.mongo/select :applications {:_id {"$in" ["lots-of-applications-ids"]}})
+                  => [{:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}
+                      {:id "LP-ORB-2000-00001" :permitType "TEST" :organization "org-id2"}
+                      {:id "LP-ORB-2000-00002" :permitType "TEST" :organization "org-id2"}
+                      {:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}
+                      {:id "LP-ORB-2000-00001" :permitType "TEST" :organization "org-id2"}
+                      {:id "LP-ORB-2000-00002" :permitType "TEST" :organization "org-id2"}
+                      {:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}
+                      {:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}
+                      {:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}
+                      {:id "LP-ORA-2000-00001" :permitType "TEST" :organization "org-id"}])
+
+        (provided (#'lupapalvelu.batchrun/orgs-for-review-fetch "org-id" "org-id2")
+                  => [{:id "org-id" :krysp {:TEST {:url "url"  :fetch-chunk-size 1}}}
+                      {:id "org-id2" :krysp {:TEST {:url "url"  :fetch-chunk-size 2}}}])
+
+        (provided (lupapalvelu.user/batchrun-user ["org-id" "org-id2"])
+                  => ..test-user..)
+
+        (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching anything "TEST" anything "LP-ORA-2000-00001")
+                  => [{:id "LP-ORA-2000-00001" :permitType "TEST"}])
+
+        (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching anything "TEST" anything "LP-ORB-2000-00001")
+                  => [{:id "LP-ORB-2000-00001" :permitType "TEST"}])
+
+        (provided (#'lupapalvelu.batchrun/organization-applications-for-review-fetching anything "TEST" anything "LP-ORB-2000-00002")
+                  => [{:id "LP-ORB-2000-00002" :permitType "TEST"}])
+
+        (provided (#'lupapalvelu.batchrun/read-reviews-for-application
+                   ..test-user.. anything anything anything nil)
+                  => {:result "read result"} :times 10)
+
+        (provided (#'lupapalvelu.batchrun/save-reviews-for-application
+                   ..test-user.. anything {:result "read result"})
+                  => {:ok true} :times 10)
+
+
+        (provided (#'lupapalvelu.batchrun/mark-reviews-faulty-for-application
+                   anything {:result "read result"})
+                  => irrelevant :times 10)
+
+        (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                          :event "Start fetching xmls"
+                                                          :organization-id "org-id"
+                                                          :application-count 6
+                                                          :applications ["LP-ORA-2000-00001"
+                                                                         "LP-ORA-2000-00001"
+                                                                         "LP-ORA-2000-00001"
+                                                                         "LP-ORA-2000-00001"
+                                                                         "LP-ORA-2000-00001"
+                                                                         "LP-ORA-2000-00001"]})
+                  => ..test-result.. :times 1)
+
+        (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                          :event "Start fetching xmls"
+                                                          :organization-id "org-id2"
+                                                          :application-count 4
+                                                          :applications ["LP-ORB-2000-00001"
+                                                                         "LP-ORB-2000-00002"
+                                                                         "LP-ORB-2000-00001"
+                                                                         "LP-ORB-2000-00002"]})
+                  => ..test-result.. :times 1)
+
+        (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                          :event "Review checking finished for organization"
+                                                          :organization-id "org-id"
+                                                          :application-count 6
+                                                          :faulty-tasks {"LP-ORA-2000-00001" nil}})
+                  => ..test-result.. :times 1)
+
+        (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
+                                                          :event "Review checking finished for organization"
+                                                          :organization-id "org-id2"
+                                                          :application-count 4
+                                                          :faulty-tasks {"LP-ORB-2000-00001" nil
+                                                                         "LP-ORB-2000-00002" nil}})
+                  => ..test-result.. :times 1))
+
+    #_(fact "result - sometimes fails on timing issue"
+      @result => [["LP-ORA-2000-00001"] ["LP-ORB-2000-00001" "LP-ORB-2000-00002"] ["LP-ORA-2000-00001"] ["LP-ORA-2000-00001"] ["LP-ORB-2000-00001" "LP-ORB-2000-00002"] ["LP-ORA-2000-00001"] ["LP-ORA-2000-00001"] ["LP-ORA-2000-00001"]])))
