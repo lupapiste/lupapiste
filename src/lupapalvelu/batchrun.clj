@@ -500,7 +500,7 @@
                                         :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
                                        (when (not-empty application-ids)
                                          {:_id {$in application-ids}}))
-                  (merge app/timestamp-key
+                  (merge app-state/timestamp-key
                          (pcond-> projection
                                   sequential? (zipmap (repeat true)))))))
 
