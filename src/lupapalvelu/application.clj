@@ -653,7 +653,9 @@
                  (= state :appealed) :appealed
                  (= state :archived) :open
                  :else verdict-state)]
-    (set (cons state (remove #{:canceled} (target graph))))))
+    (if (= state :underReview)
+      (set #{state :archived})
+      (set (cons state (remove #{:canceled} (target graph)))))))
 
 (defn valid-new-state
   "Pre-check for change-application-state command."

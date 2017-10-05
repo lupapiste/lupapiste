@@ -6,7 +6,7 @@
     <!-- ko if: fileCount -->
     <table class="attachment-batch-table">
       <thead>
-        <th><span data-bind="ltext:'attachment.file'"></span></th>
+        <tr>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentType'"></span>
         </th>
@@ -24,9 +24,13 @@
         <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
         <!-- /ko -->
         <th class="td-center" data-bind="ltext:'remove'"></th>
+        </tr>
       </thead>
       <tbody data-bind="foreach: upload.files">
-        <td data-bind="file: $data"></td>
+        <tr class="file">
+          <td data-bind="file: $data, attr: {colspan: $component.colspan}"></td>
+        </tr>
+        <tr class="metadata">
         <td>
           <div class="batch-autocomplete fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'type'),
@@ -130,10 +134,14 @@
           <i class="icon-spin lupicon-refresh"></i>
           <!-- /ko -->
         </td>
+        </tr>
       </tbody>
       <tfoot data-bind="if: fileCount() > 1">
         <tr>
-          <td colspan="5"></td>
+          <td colspan="4"></td>
+          <!-- ko if: $component.showResell -->
+          <td class="td-center"></td>
+          <!-- /ko -->
           <!-- ko if: showSign -->
           <td class="td-center">
             <a class="link-btn"

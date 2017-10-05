@@ -25,7 +25,12 @@
                                   <span data-bind="ltext: state, attr: {'title' : loc([state(), 'title']), 'class': state() + '-box'}"></span>
                                   <!-- /ko -->
                                   <!-- ko  foreach: stateSeq -->
-                                  <span data-bind="ltext: $data, attr: {'title' : loc([$data, 'title']), 'class': $data + '-box'}"></span>
+                                  <span data-bind="ltext: $data,
+                                                   attr: {
+                                                    'title': $root.application.isArchivingProject() ? loc([$data, 'archivingProject', 'title']) : loc([$data, 'title']),
+                                                    'class': $data + '-box'
+                                                   }">
+                                  </span>
                                   <!-- /ko -->
                                 </div>
                             </div>
@@ -65,7 +70,8 @@
                         <ul class="tabs" id="applicationTabs">
                             <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
-                                    <span data-bind="ltext: 'application.tabInfo'"></span>
+                                    <span data-bind="ltext: 'application.tabInfo', visible: !$root.application.isArchivingProject()"></span>
+                                    <span data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></span>
                                     <span data-bind="if: nonpartyDocumentIndicator">
                                         <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span>
                                     </span></a></li>
@@ -176,7 +182,8 @@
 
                     <div id="application-info-tab" class="tab-content" data-bind="with: application">
                         <div>
-                            <h1 data-bind="ltext: 'application.tabInfo'"></h1>
+                            <h1 data-bind="ltext: 'application.tabInfo', visible: !$root.application.isArchivingProject()"></h1>
+                            <h1 data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></h1>
                             <span data-bind="component: {
                                              name: 'help-toggle',
                                              params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
@@ -192,6 +199,13 @@
                         <div data-bind="if: $root.application.state() == 'draft'">
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
+
+                        <!-- ko if: $root.application.isArchivingProject -->
+                        <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                                    applicationId: $root.application.id,
+                                                    authModel: $root.authorization"></backend-id-manager>
+                        <!-- /ko -->
+
                         <div class="operation-info">
                             <!-- ko if: !$root.authorization.ok('link-permit-required') -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
