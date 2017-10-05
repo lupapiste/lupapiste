@@ -10,7 +10,6 @@
             [sade.core :refer [now]]
             [sade.util :as util]))
 
-(when false
 (defonce db-name (str "test_autom-check-verdict-attachments-itest_" (now)))
 
 (defn- application-verdict-url-hashes [application]
@@ -34,6 +33,7 @@
                          (-> attachment :target :id)
                          (-> attachment :target :urlHash)))
 
+(apply-remote-minimal)
 (mongo/connect!)
 (mongo/with-db db-name
   (fixture/apply-fixture "minimal")
@@ -123,4 +123,3 @@
                        non-updated-application (query-application local-query sonja app-id)]
                    (:updated-applications new-batchrun-result) => empty?
                    updated-application => non-updated-application)))))))
-)
