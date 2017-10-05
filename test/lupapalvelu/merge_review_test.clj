@@ -159,34 +159,51 @@
                      [update-task])
       => nil?))
 
-  (fact "matches task with same name, type and proper related data"
-    (let [held-review-task (assoc-in mongo-task
-                                     [:data :katselmus]
-                                     {:tila    {:value "lopullinen"}
-                                      :pitoPvm {:value "8.9.2017"}
-                                      :pitaja  {:value "Pekka Pitaja"}})
+  (facts "matches task with same name, type and proper related data"
+    (let [held-review-task (-> mongo-task
+                               (assoc-in [:data :katselmus]
+                                         {:tila    {:value "lopullinen"}
+                                          :pitoPvm {:value "8.9.2017"}
+                                          :pitaja  {:value "Pekka Pitaja"}})
+                               (update :data dissoc :muuTunnus))
           held-review-task-modified (-> held-review-task
                                         (assoc-in [:data :katselmus :lasnaolijat]
                                                   {:value "Lasse Lasnaolija"})
-                                        (update :data dissoc :muuTunnus))]
-      (matching-task held-review-task
-                     [{:data {:muuTunnus {:value "DI"}}}
-                      held-review-task-modified
-                      {:data {:muuTunnus {:value "DD"}}}])
-      => held-review-task-modified
+                                        (update :data assoc :muuTunnus {:value "ID"}))
+          held-review-task-edit-distance (-> held-review-task-modified
+                                             (assoc-in [:data :katselmus :pitaja]
+                                                       {:value ", Pekka Pitaja"}))]
+      (fact "other data modified"
+        (matching-task held-review-task
+                       [{:data {:muuTunnus {:value "DI"}}}
+                        held-review-task-modified
+                        {:data {:muuTunnus {:value "DD"}}}])
+        => held-review-task-modified)
 
-      ;; No match, since :tila changed
-      (matching-task held-review-task
-                     [(assoc-in held-review-task-modified
-                                [:data :katselmus :tila]
-                                {:value "osittainen"})])
-      => #_nil?
-      ;; NOTE :tila is ignored temporarily
-      (assoc-in held-review-task-modified
-                [:data :katselmus :tila]
-                {:value "osittainen"})
+      (fact ":pitaja has small edit distance"
+        (matching-task held-review-task
+                       [held-review-task-edit-distance])
+        => held-review-task-edit-distance)
 
-      ;; :muuTunnus prevails
-      (matching-task mongo-task [held-review-task-modified
-                                 {:data {:muuTunnus {:value "ID"}}}])
-      => {:data {:muuTunnus {:value "ID"}}}))))
+      (fact ":pitaja has large edit distance"
+            (matching-task held-review-task
+                           [(assoc-in held-review-task-modified
+                                      [:data :katselmus :pitaja :value]
+                                      ", Pekka Piirakka")])
+        => nil?)
+
+      (fact ":tila changed"
+        (matching-task held-review-task
+                       [(assoc-in held-review-task-modified
+                                  [:data :katselmus :tila]
+                                  {:value "osittainen"})])
+        => #_nil?
+        ;; NOTE :tila is ignored temporarily
+        (assoc-in held-review-task-modified
+                  [:data :katselmus :tila]
+                  {:value "osittainen"}))
+
+      (fact ":muuTunnus prevails"
+        (matching-task mongo-task [held-review-task
+                                   {:data {:muuTunnus {:value "ID"}}}])
+        => {:data {:muuTunnus {:value "ID"}}})))))
