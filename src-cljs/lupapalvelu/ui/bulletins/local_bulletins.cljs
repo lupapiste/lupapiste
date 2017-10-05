@@ -19,13 +19,13 @@
     [:table.application-bulletins-list
      [:thead
       [:tr
-       [:th "Pykälä (§)"]
-       [:th "Lupatunnus"]
-       [:th "Rakennuspaikka"]
-       [:th "Asia/Toimenpide"]
-       [:th "Päättäjä"]
-       [:th "Päätöksen antopäivä"]
-       [:th "Viimeinen oikaisuvaatimuspäivä"]]]
+       [:th (common/loc :bulletin.verdict-section)]
+       [:th (common/loc :bulletin.lupatunnus)]
+       [:th (common/loc :bulletin.building-site)]
+       [:th (common/loc :bulletin.type)]
+       [:th (common/loc :bulletin.verdict-giver)]
+       [:th (common/loc :bulletin.verdict.verdictGivenAt)]
+       [:th (common/loc :bulletin.rectification-period-ends)]]]
       [:tbody
        (for [{:keys [id address verdictGivenAt appealPeriodStartsAt bulletin-op-description]
               [{verdictData :data category :category} & _] :matti-verdicts}                bulletins]
@@ -45,7 +45,7 @@
   [:div
    [:div.full.content.orange-bg
     [:div.content-center
-     [:h1.slogan.municipal-heading "Kunnan julkipanolista"]
+     [:h1.slogan.municipal-heading "Kunnan julkipanolista"] ; NB: These will be read from db, no need now for localization
      [:h2.slogan.municipal-heading "Kunnan julkipanolista"]]]
    [:div.full.content
     [:div.content-center.municipal-caption
