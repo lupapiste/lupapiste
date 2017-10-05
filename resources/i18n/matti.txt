@@ -416,6 +416,7 @@
 "phrase.category.rakennusoikeus" "en" "Building right"
 "phrase.category.rakennusoikeus" "fi" "Rakennusoikeus"
 "phrase.category.rakennusoikeus" "sv" "Byggnadsrätt"
+"phrase.category.toimenpide-julkipanoon" "fi" "Toimenpideteksti julkipanoon"
 "phrase.category.vaativuus" "en" "Complexity of the project"
 "phrase.category.vaativuus" "fi" "Hankkeen vaativuus"
 "phrase.category.vaativuus" "sv" "Projektets svårighetsgrad"

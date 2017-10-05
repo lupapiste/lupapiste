@@ -14,7 +14,8 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
-            [swiss.arrows :refer :all]))
+            [swiss.arrows :refer :all]
+            [lupapalvelu.authorization :as auth]))
 
 
 (defn neighbor-states
@@ -78,7 +79,8 @@
   {:data       (data-draft
                 (merge {:giver        :giver
                         :verdict-code :verdict-code
-                        :verdict-text :paatosteksti}
+                        :verdict-text :paatosteksti
+                        :bulletin-op-description :bulletin-op-description}
                        (reduce (fn [acc kw]
                                  (assoc acc
                                         kw kw
@@ -171,9 +173,15 @@
 (defn verdict-summary [verdict]
   (select-keys verdict [:id :published :modified]))
 
-(defn command->verdict [{:keys [data application organization]}]
-  (update (util/find-by-id (:verdict-id data)
-                           (:matti-verdicts application))
+(defn mask-verdict-data [{:keys [user application]} verdict]
+  (cond
+    (not (auth/application-authority? application user))
+        (util/dissoc-in verdict [:data :bulletin-op-description])
+    :default verdict))
+
+(defn command->verdict [{:keys [data application] :as command}]
+  (update (->> (util/find-by-id (:verdict-id data) (:matti-verdicts application))
+               (mask-verdict-data command))
           :category keyword))
 
 (defn verdict-template-for-verdict [verdict organization]
