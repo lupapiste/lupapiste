@@ -80,7 +80,7 @@
    :states           #{:open :underReview}
    :pre-checks       [permit/is-archiving-project
                       (fn [{{d :date} :data}]
-                        (when (> d (now))
+                        (when (and (number? d) (> d (now)))
                           (fail :error.invalid-date)))]}
   [command]
   (d/update-verdict-date command date)
