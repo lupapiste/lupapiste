@@ -82,7 +82,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
           repository.load(ko.unwrap(params.applicationId));
           self.loading(false);
         })
-        .error(function () {
+        .error(function (e) {
           hub.send("indicator", {style: "negative", message: e.text});
           self.loading(false);
         })
