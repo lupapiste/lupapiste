@@ -62,16 +62,31 @@
 (defn- matching-data?
   "Do the two tasks have matching review data for the given keys?"
   [data-keys a b]
-  (= (select-keys (katselmus-data a)
-                  data-keys)
-     (select-keys (katselmus-data b)
-                  data-keys)))
+  (let [key-comparator-map (->> data-keys
+                                (map #(if (vector? %) % [% =]))
+                                (into {}))
+        compared-keys (keys key-comparator-map)]
+    (every? true? (map (fn [key]
+                         ((key-comparator-map key) (get (katselmus-data a) key)
+                                                   (get (katselmus-data b) key)))
+                       compared-keys))))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
   (->> tasks
        (filter #(and (reviews-have-same-name-and-type? mongo-task %)
                      (matching-data? data-keys mongo-task %)))
        (first)))
+
+(def maximum-pitaja-edit-distance 3)
+
+(defn- compare-pitaja
+  "In order to accommodate for small inconsistensies with how backends
+  store pitaja information, small edit distance is allowed"
+  [pitaja-a pitaja-b]
+  (if (or (nil? pitaja-a) (nil? pitaja-b))
+    (= pitaja-a pitaja-b)
+    (<= (util/edit-distance pitaja-a pitaja-b)
+        maximum-pitaja-edit-distance)))
 
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
@@ -85,7 +100,9 @@
 
    ;; 3. task with same name, type and other data related to
    ;;    holding the review
-   (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
+   (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
+                                       :pitoPvm
+                                       [:pitaja compare-pitaja]]
                                       mongo-task
                                       update-tasks)))
 

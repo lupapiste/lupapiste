@@ -6,6 +6,7 @@
              [lupapalvelu.tasks :as tasks]
              [sade.util :as util]))
 
+
 (testable-privates lupapalvelu.review merge-review-tasks matching-task)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
@@ -179,7 +180,11 @@
                      [(assoc-in held-review-task-modified
                                 [:data :katselmus :tila]
                                 {:value "osittainen"})])
-      => nil?
+      => #_nil?
+      ;; NOTE :tila is ignored temporarily
+      (assoc-in held-review-task-modified
+                [:data :katselmus :tila]
+                {:value "osittainen"})
 
       ;; :muuTunnus prevails
       (matching-task mongo-task [held-review-task-modified
