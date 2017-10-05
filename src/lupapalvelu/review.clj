@@ -272,4 +272,4 @@
               (verdict-review-util/get-poytakirja application user (now) {:type "task" :id id} att))
             (tasks/generate-task-pdfa updated-application added-task user "fi")))))
     (cond-> {:ok update-result}
-      (false? update-result) (assoc :desc "Application modified before update"))))
+      (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

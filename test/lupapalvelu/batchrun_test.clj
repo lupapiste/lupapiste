@@ -1,4 +1,5 @@
 (ns lupapalvelu.batchrun-test
+  "Tests rely heavily on 'provided' beacause of non-functional nature (lots of side effects) of batchrun processes."
   (:require [midje.sweet :refer :all]
             [clojure.core.async :as async]
             [midje.util :refer [testable-privates]]
@@ -215,11 +216,11 @@
               => 0)
 
     (provided (#'lupapalvelu.domain/get-application-no-access-checking "LP-ORG-2000-00001")
-              => irrelevant :times 1)
+              => {:modified 123} :times 1)
 
     (provided (#'lupapalvelu.logging/log-event :info {:run-by "Automatic review checking"
                                                       :event  "Failed to save review updates for application"
-                                                      :reason "Application modified before update"
+                                                      :reason "Application modified does not match (was: 1, now: 123)"
                                                       :application-id "LP-ORG-2000-00001"
                                                       :result {:ok true :updates ..updates..}})
               => irrelevant :times 1)
