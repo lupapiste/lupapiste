@@ -36,7 +36,8 @@
    :versions.officialAt 1
    :versions.matti-verdicts.data 1
    :versions.matti-verdicts.category 1
-   :modified 1})
+   :modified 1
+   :versions.bulletin-op-description 1})
 
 (def bulletin-fields
   (merge bulletins-fields

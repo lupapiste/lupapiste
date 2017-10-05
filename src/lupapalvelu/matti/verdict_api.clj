@@ -123,7 +123,8 @@
         app-snapshot (if updates
                        (merge app-snapshot updates)
                        app-snapshot)
-        search-fields [:municipality :address :verdicts :matti-verdicts :_applicantIndex :bulletinState :applicant :organization]
+        search-fields [:municipality :address :verdicts :matti-verdicts :_applicantIndex
+                       :bulletinState :applicant :organization :bulletin-op-description]
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 
@@ -136,11 +137,14 @@
    :pre-checks       [(verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [{application :application created :created}]
-  (let [today-long (tc/to-long (t/today-at-midnight))
+  (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
+        today-long (tc/to-long (t/today-at-midnight))
+        _ (println verdict)
         updates (create-bulletin application created {:bulletinState :verdictGiven
                                                       :verdictGivenAt       today-long
                                                       :appealPeriodStartsAt today-long
                                                       :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))
-                                                      :verdictGivenText ""})]
+                                                      :verdictGivenText ""
+                                                      :bulletin-op-description (-> verdict :data :bulletin-op-description)})]
     (bulletins/upsert-bulletin-by-id id updates)
     (ok)))

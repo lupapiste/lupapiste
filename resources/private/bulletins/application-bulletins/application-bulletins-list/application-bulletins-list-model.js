@@ -18,7 +18,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
-      var commentingType, commentingEndsAt, enddate;
+      var commentingType, commentingEndsAt, enddate, typeText;
       if (bulletin.proclamationEndsAt) {
         commentingType = loc("bulletin.comment.period");
         enddate = moment(bulletin.proclamationEndsAt).endOf("day");
@@ -31,13 +31,15 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
           enddate.format("D.M.YYYY") : loc("bulletin.period.ended");
       }
 
+      var opDesc = _.get(bulletin, "bulletin-op-description");
+
       return {
         id: bulletin.id,
         bulletinState: bulletin.bulletinState,
         bulletinStateLoc: ["bulletin", "state", bulletin.bulletinState],
         municipality: "municipality." + bulletin.municipality,
         address: bulletin.address,
-        type: "operations." + bulletin.primaryOperation.name,
+        type: opDesc || loc("operations." + bulletin.primaryOperation.name),
         applicant: bulletin.applicant,
         date: bulletin.modified,
         commentingType: commentingType,

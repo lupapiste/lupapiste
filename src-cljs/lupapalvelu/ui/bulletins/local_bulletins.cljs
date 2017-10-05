@@ -27,7 +27,7 @@
        [:th "Päätöksen antopäivä"]
        [:th "Viimeinen oikaisuvaatimuspäivä"]]]
       [:tbody
-       (for [{:keys [id address verdictGivenAt appealPeriodStartsAt]
+       (for [{:keys [id address verdictGivenAt appealPeriodStartsAt bulletin-op-description]
               [{verdictData :data category :category} & _] :matti-verdicts}                bulletins]
          [:tr
           {:key id}
@@ -35,8 +35,8 @@
                     (common/loc (str "matti-" category ".verdict-code." (:verdict-code verdictData))))]
           [:td id]
           [:td address]
-          [:td ""]
-          [:td ""]
+          [:td bulletin-op-description]
+          [:td (:contact verdictData)]
           [:td (common/format-timestamp verdictGivenAt)]
           [:td (common/format-timestamp appealPeriodStartsAt)]])]]))
 
