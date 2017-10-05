@@ -555,7 +555,7 @@
         organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
         eraajo-user   (user/batchrun-user (map :id organizations))
         threads       (map (fn [org]
-                             (future (fetch-reviews-for-organization eraajo-user (now) org [:R] applications options)))
+                             (util/future* (fetch-reviews-for-organization eraajo-user (now) org [:R] applications options)))
                            organizations)]
     (loop []
       (when-not (every? realized? threads)
