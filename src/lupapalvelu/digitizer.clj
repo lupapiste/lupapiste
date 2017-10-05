@@ -218,9 +218,9 @@
     (doseq [{:keys [id]} removed-verdicts]
       (action/update-application command
                                  {$pull {:verdicts {:id id}}}))
-    (->> (map :kuntalupatunnus new-verdicts)
-         (verdict/backend-id-mongo-updates application)
-         (action/update-application command))))
+    (some->> (seq (map :kuntalupatunnus new-verdicts))
+             (verdict/backend-id-mongo-updates application)
+             (action/update-application command))))
 
 (defn update-verdict-date [command date]
   (action/update-application command
