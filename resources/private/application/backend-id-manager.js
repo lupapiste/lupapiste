@@ -11,21 +11,28 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
   self.mainVerdictDate = ko.observable();
   self.loading = ko.observable(false);
   var initialized = false;
+  var initialVerdictsTs = null;
 
-  self.verdicts.subscribe(function(verdicts) {
-    if (verdicts) {
+  var initialize = function(verdicts) {
+    if (_.isArray(verdicts)) {
       var filteredVerdicts = _.filter(verdicts, "kuntalupatunnus");
       self.backendIds(_.map(filteredVerdicts,
         function(verdict) {
           return ko.observable({id: verdict.id, kuntalupatunnus: ko.observable(verdict.kuntalupatunnus)});
         }));
-      var ts = util.getIn(filteredVerdicts, [0, "paatokset", 0, "poytakirjat", 0, "paatospvm"]);
-      if (ts) {
-        self.mainVerdictDate(new Date(ts));
+      initialVerdictsTs = util.getIn(filteredVerdicts, [0, "paatokset", 0, "poytakirjat", 0, "paatospvm"]);
+      if (initialVerdictsTs) {
+        self.mainVerdictDate(new Date(initialVerdictsTs));
       }
       initialized = true;
     }
+  };
+
+  self.verdicts.subscribe(function(verdicts) {
+    initialize(verdicts);
   });
+
+  initialize(self.verdicts());
 
   self.addBackendId = function() {
     self.backendIds.push(ko.observable({id: null, kuntalupatunnus: ko.observable("")}));
@@ -93,7 +100,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
 
   self.disposedComputed(function() {
     var d = self.mainVerdictDate();
-    if (validDate(d)) {
+    if (validDate(d) && d.getTime() !== initialVerdictsTs) {
       ajax
         .command("set-archival-project-permit-date", {
           id: ko.unwrap(params.applicationId),
@@ -101,6 +108,7 @@ LUPAPISTE.BackendIdManagerModel = function(params) {
         })
         .success(function () {
           hub.send("indicator", {style: "positive"});
+          initialVerdictsTs = d.getTime();
         })
         .error(function (e) {
           hub.send("indicator", {style: "negative", message: e.text});
