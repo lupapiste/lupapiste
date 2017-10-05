@@ -68,14 +68,10 @@
    :states      states/all-application-states
    :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
-  [{application :application user :user created-ts :created}]
+  [{application :application user :user created-ts :created :as command}]
   (let [prepared-order (processor/prepare-order application order contacts)
         total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)
       (fail! :error.printing-order.too-large))
-    (let [result (mylly/login-and-send-order! (processor/enrich-with-file-content user prepared-order))]
-      (if (:ok result)
-        (do
-          (processor/save-integration-message user created-ts application prepared-order (:orderNumber result))
-          (ok :order-number (:orderNumber result) :size total-size))
-        (fail! :error.printing-order.submit-failed)))))
+    (processor/do-submit-order command prepared-order)
+    (ok)))

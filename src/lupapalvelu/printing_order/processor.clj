@@ -5,7 +5,23 @@
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [fail!]]
             [sade.util :as util]
-            [lupapalvelu.integrations.messages :as messages]))
+            [lupapalvelu.integrations.messages :as messages]
+            [clj-time.core :as t])
+  (:import (java.util.concurrent Executors ThreadFactory)))
+
+(defn thread-factory []
+  (let [security-manager (System/getSecurityManager)
+        thread-group (if security-manager
+                       (.getThreadGroup security-manager)
+                       (.getThreadGroup (Thread/currentThread)))]
+    (reify
+      ThreadFactory
+      (newThread [this runnable]
+        (doto (Thread. thread-group runnable "mylly-send-order-worker")
+          (.setDaemon true)
+          (.setPriority Thread/NORM_PRIORITY))))))
+
+(defonce send-order-thread-pool (Executors/newFixedThreadPool 3 (thread-factory)))
 
 (defn prepare-contact-to-order
   [contacts path]
@@ -54,14 +70,25 @@
                                       (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
 
-(defn save-integration-message [user created-ts application {:keys [internalOrderId delivery] :as prepared-order} order-number]
+(defn save-integration-message [user created-ts {:keys [internalOrderId delivery] :as prepared-order}]
   (messages/save {:id internalOrderId
                   :direction "out"
                   :messageType "printing-order"
                   :partner "mylly"
                   :format "xml"
                   :created created-ts
-                  :external-reference order-number
                   :initator (select-keys user [:id :username])
                   :attached-files (map :fileId (-> delivery :printedMaterials))
                   :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))
+
+(defn mark-acknowledged [{:keys [internalOrderId delivery] :as prepared-order} order-number]
+  (messages/mark-acknowledged-and-return internalOrderId (t/now)))
+
+(defn do-submit-order [{user :user created-ts :created} prepared-order]
+  (save-integration-message user created-ts prepared-order)
+  (.submit send-order-thread-pool
+    (fn []
+      (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
+        (if (:ok result)
+          (mark-acknowledged prepared-order (:orderNumber result))
+          (fail! :error.printing-order.submit-failed))))))
