@@ -98,7 +98,7 @@
   (coerce-subtype elem-schema))
 
 (defmethod coerce-type :text [elem-schema]
-  (data-leaf elem-schema sc/Str))
+  (data-leaf elem-schema (if (:required elem-schema) (ssc/min-length-string 1) sc/Str)))
 
 (defmethod coerce-type :select [{other-key :other-key :as elem-schema}]
   (data-leaf elem-schema (apply sc/enum (cond-> (mapv :name (:body elem-schema))
