@@ -165,7 +165,6 @@
       (aset container "scrollTop" scroll))))
 
 (defn- set-selected  [selected* value callback]
-  (console.log @selected* "vs." value)
   (when (common/reset-if-needed! selected* value)
     (when callback
       (callback value))))
@@ -262,11 +261,20 @@
   (rum/local 0 ::current) ;; Current term
   (rum/local false ::open?)
   (rum/local "" ::latest)
+  "Parameters: initial-value options
+   Initial value can be atom for two-way binding (see the mixin).
+   Options [optional]:
+     items  either list or function. The function argument is the
+            filtering term. An item is a map with mandatory :text
+            and :value keys and optional :group key.
+     [callback] change callback that is called when after list selection or blur.
+     [disabled?] Is component disabled? (false)
+     [required?] Is component required? (false)"
   [{current* ::current
     open?*   ::open?
     term*    ::term
-    latest* ::latest
-    :as      local-state} _ {callback :callback :as options}]
+    latest*  ::latest
+    :as      local-state} _ {:keys [callback required? disabled?] :as options}]
   (let [{:keys [text-edit
                 menu-items
                 items-fn]} (complete-parts local-state
@@ -276,7 +284,9 @@
                                                                  (reset! latest* %)
                                                                  (callback %)))
                                                   :combobox? true)
-                                           {:on-focus #(common/reset-if-needed! open?* true)})]
+                                           {:on-focus  #(common/reset-if-needed! open?* true)
+                                            :required? required?
+                                            :disabled  disabled?})]
     [:div.matti-autocomplete
      [:div text-edit]
      (when (and (rum/react open?*) (seq (items-fn @term*)))

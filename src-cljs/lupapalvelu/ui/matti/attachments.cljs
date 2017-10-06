@@ -35,35 +35,44 @@
    [:br]
    [:span.fileinfo (path/loc type) " " (js/util.sizeString size)]])
 
+(defn field-info [fields* {filename :filename}]
+  (let [c (rum/cursor-in fields* [(keyword filename)])]
+    (rum/react c)))
+
+(defn set-field [fields* {filename :filename} key value]
+  (swap! fields*
+         update (keyword filename)
+         assoc key value))
+
+(defn- kw-type [{:keys [type-group type-id]}]
+  (util/kw-path type-group type-id))
+
+(defn type-loc [& args]
+  (path/loc (util/kw-path :attachmentType args)))
+
 (rum/defcs type-selector < (components/initial-value-mixin ::fields)
   rum/reactive
   (rum/local nil ::types)
   [{fields* ::fields
     types* ::types} _ {:keys [schema] :as options} filedata]
   (attachment-types types*)
-  (let [type-loc  (fn [& args]
-                    (path/loc (util/kw-path :attachmentType args)))
-        att-types (some->> (rum/react types*)
+  (let [att-types (some->> (rum/react types*)
                            (filter (fn [{:keys [type-group]}]
                                      (if-let [regex (:type-group schema)]
                                        (re-matches regex type-group)
                                        true)))
-                           (map (fn [{:keys [type-group type-id]}]
+                           (map (fn [{:keys [type-group type-id] :as type}]
                                   {:group (type-loc type-group :_group_label)
                                    :text  (type-loc type-group type-id)
-                                   :value (util/kw-path type-group type-id)})))]
+                                   :value (kw-type type)})))]
     (when (seq att-types)
       (let [filename (keyword (:filename filedata))
             {value :value} (util/find-by-key :value
                                              (:default schema)
                                              att-types)
-            set-type-fn    (fn [v]
-                             (swap! fields*
-                                    update filename
-                                    assoc :type v))]
+            set-type-fn (partial set-field fields* filedata :type)]
         (when (and value
-                   (nil? (get-in (rum/react fields*)
-                                 [filename :type])))
+                   (-> (field-info fields* filedata) :type nil?))
           (set-type-fn value))
         (components/autocomplete value
                                  {:items     att-types
@@ -71,13 +80,36 @@
                                   :disabled? (not= (:state filedata)
                                                    :success)})))))
 
-(rum/defcs content-editor < (components/initial-value-mixin ::field)
+(rum/defcs content-editor < (components/initial-value-mixin ::fields)
   rum/reactive
-  (rum/local nil ::types)
-  [{field* ::field
-    types* ::types} _ {:keys [schema] :as options} filedata]
+  (rum/local [] ::types)
+  [{fields* ::fields
+    types*  ::types} _ filedata]
   (attachment-types types*)
-  (let [selected-type (path/react :type field*)]))
+  (let [{:keys [type contents]} (field-info fields* filedata)
+        att-types               (rum/react types*)
+        set-fn                  (partial set-field fields* filedata :contents)]
+    (when (and type
+               (seq att-types))
+      (let [items   (some->> att-types
+                             (util/find-first #(= type (kw-type %)))
+                             :metadata
+                             :contents
+                             (map #(path/loc :attachments.contents %))
+                             sort
+                             (map #(hash-map :text % :value %)))
+            default (if (<= (count items) 1)
+                      (or (-> items first :text)
+                          (type-loc type))
+                      "")]
+        (when-not contents
+          (set-fn default))
+        (components/combobox default
+                             {:items     items
+                              :callback  set-fn
+                              :required? true
+                              :disabled? (not= (:state filedata)
+                                               :success)})))))
 
 (rum/defcs attachments-batch < rum/reactive
   (components/initial-value-mixin ::file-options)
@@ -101,6 +133,7 @@
            [:tr
             [:td (fileinfo-link filedata)]
             [:td (type-selector fields* options filedata)]
+            [:td (content-editor fields* filedata)]
             ])]]])))
 
 (rum/defc matti-attachments < rum/reactive
