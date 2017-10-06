@@ -9,10 +9,12 @@
 (apply-remote-minimal)
 
 (facts ""
-  (let [{id :id} (init-verdict-template sipoo "r") =not=> nil?
-        _ (publish-verdict-template sipoo id)
-        {app-id :id} (create-and-submit-application sonja :operation "kerrostalo-rivitalo"
-                                             :propertyId sipoo-property-id
-                                             :x 406898.625 :y 6684125.375
-                                             :address "Hitantine 108")]
-    (command sonja :new-matti-verdict-draft :id app-id :template-id id)))
+  (let [{id :id} (init-verdict-template sipoo "r") =not=> nil?]
+    (set-template-draft-values id :bulletin-op-description "Kerrostalolle lupa")
+    (publish-verdict-template sipoo id) => ok?
+    (let [{app-id :id} (create-and-submit-application sonja :operation "kerrostalo-rivitalo"
+                                                      :propertyId sipoo-property-id
+                                                      :x 406898.625 :y 6684125.375
+                                                      :address "Hitantine 108")
+          {verdict :verdict} (command sonja :new-matti-verdict-draft :id app-id :template-id id) => ok?]
+      (-> verdict :data) => (contains {:bulletin-op-description "Kerrostalolle lupa"}))))
