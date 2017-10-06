@@ -20,9 +20,9 @@
 
 (def bulletin-page-size 10)
 
-(defn- make-query [{:keys [search-text municipality organization state]}]
-  (let [queries (filter seq [(when-not (ss/blank? search-text)
-                               (make-text-query (ss/trim search-text)))
+(defn- make-query [{:keys [searchText municipality organization state]}]
+  (let [queries (filter seq [(when-not (ss/blank? searchText)
+                               (make-text-query (ss/trim searchText)))
                              (when-not (ss/blank? municipality)
                                {:versions.municipality municipality})
                              (when-not (ss/blank? organization)
