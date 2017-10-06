@@ -198,6 +198,8 @@
      :permitSubtype "poikkeamislupa"
      :id "LP-753-2013-00001"
      :municipality "753"
+     :tosFunction "00 06 00 01"
+     :tosFunctionName "tiedonohjausmenettely"
      :neighbors ctc/neighbors}))
 
 (ctc/validate-all-documents poikkari-hakemus)
@@ -326,6 +328,9 @@
       avainsanatieto => (partial every? map?)
       avainsanatieto => (partial every? :Avainsana)
       (map :Avainsana avainsanatieto) => ["soderkulla" "Pena Panaani"])
+
+    (fact "menettelyTOS"
+      (:menettelyTOS Poikkeamisasia) => "tiedonohjausmenettely")
 
     (facts "yhden asunnon talot"
       (let [uusi (->> toimenpidetieto (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "011 yhden asunnon talot") %)) :Toimenpide)

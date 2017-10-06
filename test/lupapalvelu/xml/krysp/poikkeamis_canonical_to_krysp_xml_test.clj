@@ -98,7 +98,9 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])
+          (fact "menettelyTOS"
+            (xml/get-text lp-xml [:menettelyTOS]) => nil)))))
 
   (facts "2.2.3"
     (let [xml_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.3")
@@ -121,7 +123,9 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [["soderkulla"] ["Pena Panaani"]]))))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [["soderkulla"] ["Pena Panaani"]])
+          (fact "menettelyTOS"
+            (xml/get-text lp-xml [:menettelyTOS]) => "tiedonohjausmenettely"))))))
 
 
 (def canonical-no-toimenpidetieto (util/dissoc-in poikkeus-canonical [:Popast :poikkeamisasiatieto :Poikkeamisasia :toimenpidetieto]))
@@ -203,7 +207,9 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])
+          (fact "menettelyTOS"
+            (xml/get-text lp-xml [:menettelyTOS]) => nil)))))
 
   (facts "2.2.3"
     (let [xml_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.2.3")
@@ -226,4 +232,6 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => []))))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])
+          (fact "menettelyTOS"
+            (xml/get-text lp-xml [:menettelyTOS]) => "tiedonohjausmenettely"))))))

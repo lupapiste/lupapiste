@@ -25,6 +25,9 @@
 (def avainsanatieto_223
   {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
 
+(def menettely-tos_223
+  {:tag :menettelyTOS})
+
 (def abstract-poikkeamistype-212 [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                                   {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
                                   {:tag :osapuolettieto :child [mapping-common/osapuolet_210]}
@@ -71,11 +74,12 @@
 (def poikkeamisasia-223
   (-> abstract-poikkeamistype-221
     (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
-    (conj avainsanatieto_223)))
+    (conj avainsanatieto_223 menettely-tos_223)))
 
 (def suunnittelutarveasia-223
   (-> abstract-poikkeamistype-221
-    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})))
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+    (conj menettely-tos_223)))
 
 (def poikkeamis_to_krysp_212
   {:tag :Popast
