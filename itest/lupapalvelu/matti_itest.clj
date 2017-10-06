@@ -569,16 +569,9 @@
                               :reviews first)]
     (fact "Plan" plan =not=> nil)
     (fact "Review" review =not=> nil)
-    (letfn [(set-draft-value [path value]
-              (fact {:midje/description (format "Draft value: %s %s"
-                                                path value)}
-                (command sipoo :save-verdict-template-draft-value
-                         :template-id template-id
-                         :path (flatten [path])
-                         :value value) => ok?))
-            (set-date-delta [k v]
-              (set-draft-value [k :enabled] true)
-              (set-draft-value [k :delta] v))]
+    (letfn [(set-date-delta [k v]
+              (set-template-draft-values template-id [k :enabled] true
+                                                     [k :delta] v))]
       (fact "Full template"
         (command sipoo :set-verdict-template-name
                  :template-id template-id
@@ -591,19 +584,20 @@
         (set-date-delta "aloitettava" 1) ;; years
         (set-date-delta "voimassa" 2) ;; years
         )
-      (set-draft-value "giver" :lautakunta)
-      (set-draft-value "verdict-code" :ehdollinen)
-      (set-draft-value "paatosteksti" "Verdict text.")
-      (set-draft-value :foremen [:iv-tj :erityis-tj])
-      (set-draft-value "plans" [(:id plan)])
-      (set-draft-value "reviews" [(:id review)])
-      (set-draft-value "conditions" "Other conditions.")
-      (set-draft-value "appeal" "Humble appeal.")
-      (set-draft-value "complexity" "medium")
-      (set-draft-value "complexity-text" "Complex explanation.")
-      (set-draft-value "autopaikat" true)
-      (set-draft-value "paloluokka" true)
-      (set-draft-value "vss-luokka" true)
+      (set-template-draft-values template-id
+                        "giver" :lautakunta
+                        "verdict-code" :ehdollinen
+                        "paatosteksti" "Verdict text."
+                        :foremen [:iv-tj :erityis-tj]
+                        "plans" [(:id plan)]
+                        "reviews" [(:id review)]
+                        "conditions" "Other conditions."
+                        "appeal" "Humble appeal."
+                        "complexity" "medium"
+                        "complexity-text" "Complex explanation."
+                        "autopaikat" true
+                        "paloluokka" true
+                        "vss-luokka" true)
 
       (facts "New verdict using Full template"
         (let [{app-id :id

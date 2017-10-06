@@ -164,7 +164,6 @@
   [{application :application created :created}]
   (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
         today-long (tc/to-long (t/today-at-midnight))
-        _ (println verdict)
         updates (create-bulletin application created {:bulletinState :verdictGiven
                                                       :verdictGivenAt       today-long
                                                       :appealPeriodStartsAt today-long
