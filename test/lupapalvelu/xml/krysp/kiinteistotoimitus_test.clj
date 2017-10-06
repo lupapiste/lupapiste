@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.kiinteistotoimitus-test
-  (:require [midje.sweet :refer :all]
+  (:require [taoensso.timbre :refer [debug]]
+            [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :as cxml]
             [schema.core :as sc]
@@ -56,7 +57,7 @@
         parsed-105    (cr/strip-xml-namespaces (xml/parse xml_105_str))]
     canonical => map?
     xml_105_str => string?
-
+    (debug "canonical generated for kiinteistotoimitus test: " (pr-str canonical))
     (fact "valid 1.0.2" (validator/validate xml_102_str (:permitType app) "1.0.2") => nil) ; throws exception if invalid+
     (fact "valid 1.0.5" (validator/validate xml_105_str (:permitType app) "1.0.5") => nil) ; throws exception if invalid
 
