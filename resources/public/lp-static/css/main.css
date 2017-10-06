@@ -18461,6 +18461,7 @@ div.matti-autocomplete .ac--selected {
   table-layout: fixed;
   width: 100%;
   overflow-x: hidden;
+  background-color: white;
 }
 
 div.matti-autocomplete .ac--selected span {

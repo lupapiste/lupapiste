@@ -482,6 +482,39 @@ var util = (function($) {
     return moment( timestamp ).format( fmt ? fmt : "D.M.YYYY, HH:mm:ss");
   }
 
+  // v is unwrapped size value
+  function sizeString( v ) {
+    var result = "";
+    if( _.trim( v ) ) {
+      var value = parseFloat(v);
+      var unit = "B";
+
+      if (value > 1200.0) {
+        value = value / 1024.0;
+        unit = "kB";
+      }
+
+      if (value > 1200.0) {
+        value = value / 1024.0;
+        unit = "MB";
+      }
+      if (value > 1200.0) {
+        value = value / 1024.0;
+        unit = "GB";
+      }
+      if (value > 1200.0) {
+        value = value / 1024.0;
+        unit = "TB"; // Future proof?
+      }
+
+      if (unit !== "B") {
+        value = value.toFixed(1);
+      }
+      result = value + "\u00a0" + unit;
+    }
+    return result;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -535,7 +568,8 @@ var util = (function($) {
     isEven: isEven,
     finnishDate: finnishDate,
     toMoment: toMoment,
-    finnishDateAndTime: finnishDateAndTime
+    finnishDateAndTime: finnishDateAndTime,
+    sizeString: sizeString
   };
 
 })(jQuery);

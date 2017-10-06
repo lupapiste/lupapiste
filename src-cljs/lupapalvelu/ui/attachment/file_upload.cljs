@@ -1,6 +1,5 @@
 (ns lupapalvelu.ui.attachment.file-upload
-  (:require [lupapalvelu.ui.hub :as hub]
-            [clojure.walk :as walk]))
+  (:require [lupapalvelu.ui.hub :as hub]))
 
 (defn bindToElem [options]
   (.bindFileInput js/lupapisteApp.services.fileUploadService options))
@@ -76,7 +75,7 @@
                                        file))
                                    files)))))]
     {:added    (fn [msg]
-                 (swap! files* #(conj % (message-filedata msg))))
+                 (swap! files* #(conj (vec %) (message-filedata msg))))
      :bad      #(file-state % :bad)
      :success  #(file-state % :success)
      :failed   #(file-state % :failed)

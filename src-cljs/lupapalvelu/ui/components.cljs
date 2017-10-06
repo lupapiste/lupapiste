@@ -165,42 +165,158 @@
       (aset container "scrollTop" scroll))))
 
 (defn- set-selected  [selected* value callback]
+  (console.log @selected* "vs." value)
   (when (common/reset-if-needed! selected* value)
     (when callback
       (callback value))))
 
-;; Parameters: initial-value options
-;; Initial value can be atom for two-way binding (see the mixin).
-;; Options [optional]:
-;;   items  either list or function. The function argument is the
-;;          filtering term. An item is a map with mandatory :text
-;;          and :value keys and optional :group key.
-;;   [callback] change callback
-;;   [clear?] if truthy, clear button is shown when proper (default
-;;            false).
-;;   [disabled?] Is component disabled? (false)
+(defn- complete-parts
+  "Very (too?) straigh-forward DRY solution for sharing code between
+  autocomplete and combobox. Returns map with :items-fn :text-edit
+  and :menu-items."
+  [local-state
+   {:keys [items callback disabled? combobox?]}
+   text-edit-options]
+  (let [{selected* ::selected
+         term*     ::term
+         current*  ::current
+         open?*    ::open?} local-state
+        items-fn            (if (fn? items)
+                              items
+                              (default-items-fn items))
+        items               (vec (items-fn (rum/react term*)))]
+    (letfn [(close []
+              (reset! open?* false)
+              (reset! current* 0))
+            (select [value]
+              (when value
+                (set-selected (or selected* term*) value callback))
+              (close))
+            (inc-current [n]
+              (when (pos? (count items))
+                (do (swap! current* #(rem (+ (or % 0) n) (count items)))
+                    (scroll-element-if-needed (rum/ref local-state "autocomplete-items")
+                                              (rum/ref local-state (str "item-" @current*))))))]
+      {:items-fn   items-fn
+       :text-edit  (text-edit (if combobox?
+                                term*
+                                @term*)
+                              (merge {:callback    (fn [text]
+                                                     (reset! term* text)
+                                                     (common/reset-if-needed! current* 0))
+                                      :immediate?  true
+                                      :auto-focus  (not combobox?)
+                                      :on-blur     (fn []
+                                                     ;; Delay is needed to make sure
+                                                     ;; that possible selection will
+                                                     ;; be processed and the menu will
+                                                     ;; not accidentally reopen.
+                                                     (.start (Delay. close 200))
+                                                     (when combobox?
+                                                       (callback @term*)))
+                                      :on-key-down #(case (.-keyCode %)
+                                                      ;; Enter
+                                                      13 (do
+                                                           (select (some->> @current*
+                                                                            (get items)
+                                                                            :value))
+                                                           (.preventDefault %))
+                                                      ;; Esc
+                                                      27 (close)
+                                                      ;; Up
+                                                      38 (inc-current (- (count items) 1))
+                                                      ;; Down
+                                                      40 (inc-current 1)
+                                                      :default)}
+                                     text-edit-options))
+       :menu-items [:ul.ac__items
+                    {:ref "autocomplete-items"}
+                    (loop [[x & xs]   items
+                           index      0
+                           last-group ""
+                           li-items   []]
+                      (if x
+                        (let [{:keys [text value group]} x
+                              group                      (-> (or group "") s/trim)
+                              li-items                   (if (or (s/blank? group)
+                                                                 (= group last-group))
+                                                           li-items
+                                                           (conj li-items [:li.ac--group group]))]
+                          (recur xs
+                                 (inc index)
+                                 group
+                                 (conj li-items
+                                       [:li
+                                        {:on-click       #(select value)
+                                         :ref            (str "item-" index)
+                                         :on-mouse-enter #(reset! current* index)
+                                         :class          (common/css-flags :ac--current (= (rum/react current*)
+                                                                                           index)
+                                                                           :ac--grouped (not (s/blank? group)))}
+                                        text])))
+                        li-items))]})))
+
+
+(rum/defcs combobox < (initial-value-mixin ::term)
+  rum/reactive
+  (rum/local 0 ::current) ;; Current term
+  (rum/local false ::open?)
+  (rum/local "" ::latest)
+  [{current* ::current
+    open?*   ::open?
+    term*    ::term
+    latest* ::latest
+    :as      local-state} _ {callback :callback :as options}]
+  (let [{:keys [text-edit
+                menu-items
+                items-fn]} (complete-parts local-state
+                                           (assoc options
+                                                  :callback #(when (not= % @latest*)
+                                                               (do
+                                                                 (reset! latest* %)
+                                                                 (callback %)))
+                                                  :combobox? true)
+                                           {:on-focus #(common/reset-if-needed! open?* true)})]
+    [:div.matti-autocomplete
+     [:div text-edit]
+     (when (and (rum/react open?*) (seq (items-fn @term*)))
+       [:div.ac__menu menu-items])]))
+
 (rum/defcs autocomplete < (initial-value-mixin ::selected)
   rum/reactive
-  (rum/local "" ::term)    ; Filtering term
-  (rum/local 0 ::current) ; Currently highlighted item
+  (rum/local "" ::term)    ;; Filtering term
+  (rum/local 0 ::current)  ;; Currently highlighted item
   (rum/local false ::open?)
+  "Parameters: initial-value options
+   Initial value can be atom for two-way binding (see the mixin).
+   Options [optional]:
+     items  either list or function. The function argument is the
+            filtering term. An item is a map with mandatory :text
+            and :value keys and optional :group key.
+     [callback] change callback
+     [clear?] if truthy, clear button is shown when proper (default
+              false).
+     [disabled?] Is component disabled? (false)"
   [{selected* ::selected
     term*     ::term
     current*  ::current
     open?*    ::open?
-    :as       local-state} _ {:keys [items clear? callback disabled?]}]
-  (let [items-fn (if (fn? items)
-                   items
-                   (default-items-fn items))
-        open?    (rum/react open?*)
-        items    (vec (items-fn (rum/react term*)))]
+    :as       local-state} initial {:keys [items clear? callback disabled?]
+                                    :as options}]
+  (let [{:keys [text-edit
+                menu-items
+                items-fn]} (complete-parts local-state
+                                           options
+                                           {})
+
+        open? (rum/react open?*)]
     (when-not open?
       (common/reset-if-needed! term* ""))
     [:div.matti-autocomplete
      [:div.like-btn.ac--selected
       {:on-click (when-not disabled?
                    #(swap! open?* not))
-       :class (common/css-flags :disabled disabled?)}
+       :class    (common/css-flags :disabled disabled?)}
       [:span (:text (util/find-by-key :value
                                       (rum/react selected*)
                                       (items-fn "")))]
@@ -214,71 +330,10 @@
          {:on-click (fn [event]
                       (set-selected selected* "" callback)
                       (.stopPropagation event))}])]
-     (when (rum/react open?*)
-       (letfn [(close []
-                 (reset! open?* false)
-                 (reset! current* 0))
-               (select [value]
-                 (when value
-                   (set-selected selected* value callback))
-                 (close))
-               (inc-current [n]
-                 (when (pos? (count items))
-                   (do (swap! current* #(rem (+ (or % 0) n) (count items)))
-                       (scroll-element-if-needed (rum/ref local-state "autocomplete-items")
-                                                 (rum/ref local-state (str "item-" @current*))))))]
-         [:div.ac__menu
-          [:div.ac__term (text-edit @term*
-                                    {:callback (fn [text]
-                                                 (reset! term* text)
-                                                 (common/reset-if-needed! current* 0))
-                                     :immediate?  true
-                                     :auto-focus  true
-                                     ;; Delay is needed to make sure
-                                     ;; that possible selection will
-                                     ;; be processed and the menu will
-                                     ;; not accidentally reopen.
-                                     :on-blur     #(.start (Delay. close 200))
-                                     :on-key-down #(case (.-keyCode %)
-                                                     ;; Enter
-                                                     13 (do
-                                                          (select (some->> @current*
-                                                                           (get items)
-                                                                           :value))
-                                                          (.preventDefault %))
-                                                     ;; Esc
-                                                     27 (close)
-                                                     ;; Up
-                                                     38 (inc-current (- (count items) 1))
-                                                     ;; Down
-                                                     40 (inc-current 1)
-                                                     :default)})]
-          [:ul.ac__items
-           {:ref "autocomplete-items"}
-           (loop [[x & xs]   items
-                  index      0
-                  last-group ""
-                  li-items   []]
-             (if x
-               (let [{:keys [text value group]} x
-                     group                      (-> (or group "") s/trim)
-                     li-items                   (if (or (s/blank? group)
-                                                        (= group last-group))
-                                                  li-items
-                                                  (conj li-items [:li.ac--group group]))]
-                 (recur xs
-                        (inc index)
-                        group
-                        (conj li-items
-                              [:li
-                               {:on-click       #(select value)
-                                :ref            (str "item-" index)
-                                :on-mouse-enter #(reset! current* index)
-                                :class          (common/css-flags :ac--current (= (rum/react current*)
-                                                                                  index)
-                                                                  :ac--grouped (not (s/blank? group)))}
-                               text])))
-               li-items))]]))]))
+     (when open?
+       [:div.ac__menu
+        [:div.ac__term text-edit]
+        menu-items])]))
 
 ;; Dropwdown is a styled select.
 ;; Parameters: initial-value options

@@ -72,6 +72,7 @@ util.finnishDate = function() {};
 util.toMoment = function() {};
 util.prop = {};
 util.prop.toHumanFormat = function() {};
+uti.sizeString = function() {};
 
 var sprintf = function() {};
 
@@ -113,9 +114,10 @@ lupapisteApp.services.assignmentRecipientFilterService = {};
 lupapisteApp.services.assignmentService = {};
 lupapisteApp.services.assignmentTargetFilterService = {};
 lupapisteApp.services.attachmentsService = {};
-lupapisteApp.services.attachmentsService.bindAttachments = function() {};
-lupapisteApp.services.attachmentsService.removeAttachment = function() {};
 lupapisteApp.services.attachmentsService.attachmentTypes = function() {};
+lupapisteApp.services.attachmentsService.bindAttachments = function() {};
+lupapisteApp.services.attachmentsService.contentsData = function() {};
+lupapisteApp.services.attachmentsService.removeAttachment = function() {};
 lupapisteApp.services.buildingService = {};
 lupapisteApp.services.calendarService = {};
 lupapisteApp.services.cardService = {};

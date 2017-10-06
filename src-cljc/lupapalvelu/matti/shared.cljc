@@ -225,6 +225,10 @@
          {;; Matching type groups are listed on the type
           ;; selector. Default all type groups.
           (sc/optional-key :type-group) sc/Regex
+          ;; Default selection the value is a kw-path
+          ;; type-group.type-id. The value must in the filtered
+          ;; type-groups or it is ignored.
+          (sc/optional-key :default)    sc/Keyword
           ;; Dropzone is jQuery selector for the dropzone. For the
           ;; best visual effect the container should include dropzone
           ;; component. If not given, drag'n'drop is not supported.
@@ -588,6 +592,7 @@
                                     :show-building          {:docgen "required-in-verdict"}}}
       :attachments     {:attachments {:i18nkey    :application.verdict-attachments
                                       :type-group #"paatoksenteko"
+                                      :default    :paatoksenteko.paatosote
                                       :dropzone   "#application-matti-verdict-tab"
                                       :multiple?  true}}})
     :sections

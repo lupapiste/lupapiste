@@ -35,6 +35,7 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.components :as matti-components]
+            [lupapalvelu.ui.matti.attachments :as matti-att]
             [lupapalvelu.ui.matti.docgen :as docgen]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.phrases :as phrases]
@@ -171,7 +172,7 @@
 
 (defmethod view-component :attachments
   [_ {:keys [state path schema] :as options} & [wrap-label?]]
-  (let [elem (matti-components/matti-attachments options)]
+  (let [elem (matti-att/matti-attachments options)]
     (if (matti-components/show-label? schema wrap-label?)
       (docgen/docgen-label-wrap options elem)
       elem)))

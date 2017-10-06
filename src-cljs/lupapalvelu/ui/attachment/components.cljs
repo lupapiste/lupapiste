@@ -39,7 +39,6 @@
                                          "dropZone" dropzone
                                          "allowMultiple" (boolean multiple?)))
               (assoc state
-                     ::file-callback callback
                      ::fileupload-subscription-ids (upload/service-hubscribe input-id
                                                                              callback))))]
     {:will-mount (fn [state]

@@ -602,7 +602,7 @@
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
-  {:description      "Changes application state. The tranistions happen
+  {:description      "Changes application state. The transitions happen
   between post-verdict (excluding verdict given)states. In addition,
   the transition from appealed to a verdict given state is supported."
    :parameters       [id state]
