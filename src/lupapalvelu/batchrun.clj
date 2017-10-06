@@ -557,7 +557,7 @@
         permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
-        threads       (map (fn [org]
+        threads       (mapv (fn [org]
                              (util/future* (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
                            organizations)]
     (loop []
