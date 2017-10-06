@@ -61,12 +61,13 @@
 (defn- matching-data?
   "Do the two tasks have matching review data for the given keys?"
   [data-keys a b]
-  (let [key-comparator-map (->> data-keys
+  (let [key->comparator-fn (->> data-keys
+                                ;; If no comparator function is provided, use =
                                 (map #(if (vector? %) % [% =]))
                                 (into {}))
-        compared-keys (keys key-comparator-map)]
+        compared-keys (keys key->comparator-fn)]
     (every? true? (map (fn [key]
-                         ((key-comparator-map key) (get (katselmus-data a) key)
+                         ((key->comparator-fn key) (get (katselmus-data a) key)
                                                    (get (katselmus-data b) key)))
                        compared-keys))))
 
