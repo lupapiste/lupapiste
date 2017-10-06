@@ -79,8 +79,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
         var originalPosition = _.indexOf(event.originalFiles, originalFile[0]);
         event.files[0].position = originalPosition;
         var allFiles = _.concat( self.files(), event.files);
-        self.files(self.allowMultiple ? allFiles : allFiles.splice(-1));
-        self.files(_.sortBy(self.files(), ["position"]));
+        self.files(_.sortBy((self.allowMultiple ? allFiles : allFiles.splice(-1)), ["position"]));
       } else {
         notifyService( "fileCleared", {} );
         (params.errorHandler || indicatorError)({
