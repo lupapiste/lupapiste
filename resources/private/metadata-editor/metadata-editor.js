@@ -98,9 +98,6 @@
         naughtyFields.push(attribute.type);
       }
     });
-    if (util.getIn(data, ["sailytysaika", "arkistointi"]) && ko.unwrap(data.sailytysaika.arkistointi) === "ikuisesti") {
-      naughtyFields.push("sailytysaika");
-    }
     return naughtyFields;
   };
 
@@ -189,7 +186,6 @@
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);
-
       ajax.command(saveCommand)
         .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: metadata})
         .success(function(data) {
