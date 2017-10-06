@@ -3426,6 +3426,10 @@
                 {:multiple-operations-supported {$exists false}}
                 {$set {:multiple-operations-supported true}}
                 :multi true))
+
+(defmigration status-to-integration-messages
+  {:apply-when (pos? (mongo/count :integration-messages {:status {$exists false}}))}
+  (mongo/update-by-query :integration-messages {:status {$exists false}} {$set {:status "done"}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
