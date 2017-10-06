@@ -10,7 +10,8 @@
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.printing-order.mylly-client :as mylly]))
+            [lupapalvelu.printing-order.mylly-client :as mylly]
+            [lupapalvelu.mongo :as mongo]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
