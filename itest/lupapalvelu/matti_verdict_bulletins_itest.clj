@@ -9,8 +9,8 @@
 (apply-remote-minimal)
 
 (facts ""
-  (let [id (init-verdict-template sipoo) =not=> nil?
-        _ (publish-template sipoo id)
+  (let [{id :id} (init-verdict-template sipoo "r") =not=> nil?
+        _ (publish-verdict-template sipoo id)
         {app-id :id} (create-and-submit-application sonja :operation "kerrostalo-rivitalo"
                                              :propertyId sipoo-property-id
                                              :x 406898.625 :y 6684125.375
