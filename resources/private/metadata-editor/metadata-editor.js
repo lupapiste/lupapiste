@@ -91,7 +91,7 @@
     return errors;
   };
 
-  var getForbiddenFields = function(schema, roles, data) {
+  var getForbiddenFields = function(schema, roles) {
     var naughtyFields = [];
     _.forEach(schema, function (attribute) {
       if (attribute["require-role"] && !_.includes(roles, attribute["require-role"])) {
