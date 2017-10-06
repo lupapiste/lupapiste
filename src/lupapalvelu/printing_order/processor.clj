@@ -6,7 +6,9 @@
             [sade.core :refer [fail!]]
             [sade.util :as util]
             [lupapalvelu.integrations.messages :as messages]
-            [clj-time.core :as t])
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            [taoensso.timbre :as timbre])
   (:import (java.util.concurrent Executors ThreadFactory)))
 
 (defn thread-factory []
@@ -79,16 +81,19 @@
                   :created created-ts
                   :initator (select-keys user [:id :username])
                   :attached-files (map :fileId (-> delivery :printedMaterials))
+                  :external-reference ""
                   :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))
 
-(defn mark-acknowledged [{:keys [internalOrderId delivery] :as prepared-order} order-number]
-  (messages/mark-acknowledged-and-return internalOrderId (t/now)))
+(defn mark-acknowledged [{:keys [internalOrderId]} order-number]
+  (messages/mark-acknowledged-and-return internalOrderId (tc/to-long (t/now)) {:external-reference order-number}))
 
-(defn do-submit-order [{user :user created-ts :created} prepared-order]
+(defn do-submit-order [{user :user created-ts :created} {:keys [internalOrderId] :as prepared-order}]
   (save-integration-message user created-ts prepared-order)
+  (timbre/infof "Submitting printing order %s into integration thread pool" internalOrderId)
   (.submit send-order-thread-pool
     (fn []
       (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
+        (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
         (if (:ok result)
           (mark-acknowledged prepared-order (:orderNumber result))
           (fail! :error.printing-order.submit-failed))))))
