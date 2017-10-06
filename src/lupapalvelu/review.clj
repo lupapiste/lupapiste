@@ -52,9 +52,8 @@
                        tasks))))
 
 (defn- task-with-same-name-and-type [mongo-task tasks]
-  (->> tasks
-       (filter #(reviews-have-same-name-and-type? mongo-task %))
-       (first)))
+  (util/find-first #(reviews-have-same-name-and-type? mongo-task %)
+                   tasks))
 
 (defn- katselmus-data [t]
   (-> t :data :katselmus tools/unwrapped))
@@ -72,21 +71,16 @@
                        compared-keys))))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
-  (->> tasks
-       (filter #(and (reviews-have-same-name-and-type? mongo-task %)
-                     (matching-data? data-keys mongo-task %)))
-       (first)))
-
-(def maximum-pitaja-edit-distance 3)
+  (util/find-first #(and (reviews-have-same-name-and-type? mongo-task %)
+                         (matching-data? data-keys mongo-task %))
+                   tasks))
 
 (defn- compare-pitaja
   "In order to accommodate for small inconsistensies with how backends
-  store pitaja information, small edit distance is allowed"
+  store pitaja information, compare by removing non-letter characters
+  and converting to lower case"
   [pitaja-a pitaja-b]
-  (if (or (nil? pitaja-a) (nil? pitaja-b))
-    (= pitaja-a pitaja-b)
-    (<= (util/edit-distance pitaja-a pitaja-b)
-        maximum-pitaja-edit-distance)))
+  (ss/=alpha-i pitaja-a pitaja-b))
 
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
@@ -95,16 +89,17 @@
    (task-with-matching-background-id mongo-task update-tasks)
 
    ;; 2. task with same name and type WHEN mongo task is empty, or
-   (and (empty-review-task? mongo-task)
-        (task-with-same-name-and-type mongo-task update-tasks))
+   (when (empty-review-task? mongo-task)
+     (task-with-same-name-and-type mongo-task update-tasks))
 
-   ;; 3. task with same name, type and other data related to
-   ;;    holding the review
-   (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
-                                       :pitoPvm
-                                       [:pitaja compare-pitaja]]
-                                      mongo-task
-                                      update-tasks)))
+   ;; 3. task with same name, type and other data related to holding
+   ;;    the review, given that mongo task does not have background id
+   (when (ss/empty? (background-id mongo-task))
+     (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
+                                         :pitoPvm
+                                         [:pitaja compare-pitaja]]
+                                        mongo-task
+                                        update-tasks))))
 
 (defn- merge-review-tasks
   "Returns a vector with two values:

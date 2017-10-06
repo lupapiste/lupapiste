@@ -178,6 +178,14 @@
   [& xs]
   (apply = (map (comp trim lower-case) xs)))
 
+(defn strip-non-letters [string]
+  (apply str (filter #(Character/isLetter %) string)))
+
+(defn =alpha-i
+  "Compares strings after removing non-letters and lower-casing"
+  [& xs]
+  (apply = (map (comp lower-case strip-non-letters) xs)))
+
 (defn fuzzy-re
   "Takes search term and turns it into 'fuzzy' regular expression
   string (not pattern!) that matches any string that contains the
