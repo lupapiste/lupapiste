@@ -139,11 +139,11 @@
                                             (pos? (get order id)))))
         order-number (-> @state/component-state :order-number)]
     [:div
-     (when order-number
+     (when (= (-> @state/component-state :phase) 4)
        [:div.order-section
         [:div.row
          [:div.col-4
-          (loc-html :span :printing-order.phase4.order-reference order-number)]]])
+          (loc-html :span :printing-order.phase4.order-reference)]]])
      [:div.order-section
       (poc/section-header :printing-order.summary.documents)
       (files/files-table attachments-selected :read-only)]
