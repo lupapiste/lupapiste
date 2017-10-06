@@ -315,11 +315,6 @@
 (defn- get-hankkeen-vaativuus [documents-by-type]
   (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
-(defn- get-avainsanaTieto [{tags :tags :as application}]
-  (->> (map :label tags)
-       (remove nil?)
-       (map (partial hash-map :Avainsana))))
-
 (defn application-to-canonical-operations
   [application]
   (-> application tools/unwrapped get-operations))

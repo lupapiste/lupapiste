@@ -276,6 +276,11 @@
       :saapumisPvm     (util/to-xml-date submitted)
       :kuntalupatunnus backend-id)}))
 
+(defn get-avainsanaTieto [{tags :tags :as application}]
+  (->> (map :label tags)
+       (remove nil?)
+       (map (partial hash-map :Avainsana))))
+
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
    "Ilmoituksen tekij\u00e4"        "hakija"

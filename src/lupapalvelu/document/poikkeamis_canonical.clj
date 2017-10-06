@@ -59,6 +59,7 @@
                                                     "ruotsi"
                                                     "suomi")}}
       :kayttotapaus kayttotapaus
+      :avainsanaTieto (get-avainsanaTieto application)
       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (:poikkeamat hanke)
                                   kuvaus-avain (:kuvaus hanke)}}})))
 
@@ -69,6 +70,3 @@
 
 (defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
   (common-poikkeamis-asia application [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia] lang :suunnittelutarveasianKuvaus "Uusi suunnittelutarveasia"))
-
-
-

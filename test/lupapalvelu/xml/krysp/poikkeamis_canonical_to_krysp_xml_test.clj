@@ -78,21 +78,50 @@
       (validator/validate xml_220_s (:permitType poikkari-hakemus) "2.2.0"))) ; throws exception
 
   (facts "2.2.1"
-    (let [xml_221_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.1")
+    (let [xml_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.1")
                         (element-to-xml mapping/poikkeamis_to_krysp_221)
                         (indent-str))]
 
       (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}})
 
-      (validator/validate xml_221_s (:permitType poikkari-hakemus) "2.2.1") ; throws exception
+      (validator/validate xml_s (:permitType poikkari-hakemus) "2.2.1") ; throws exception
 
       (facts "Check xml"
-        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_221_s))
-              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_221_s)))]
-          (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
-          (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"
-          (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN"
-          (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")))))
+        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
+              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+          (fact "pintaAla"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
+          (fact "kerrosala"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200")
+          (fact "valtioKansainvalinen"
+            (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN")
+          (fact "kaavatilanne"
+            (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
+          (fact "avainsanaTieto"
+            (xml/get-text lp-xml [:avainsanaTieto]) => nil)))))
+
+  (facts "2.2.3"
+    (let [xml_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.3")
+                        (element-to-xml mapping/poikkeamis_to_krysp_223)
+                        (indent-str))]
+
+      (mapping-to-krysp/save-application-as-krysp poikkari-hakemus "fi" poikkari-hakemus {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.3"}}})
+
+      (validator/validate xml_s (:permitType poikkari-hakemus) "2.2.3") ; throws exception
+
+      (facts "Check xml"
+        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
+              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+          (fact "pintaAla"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
+          (fact "kerrosala"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200")
+          (fact "valtioKansainvalinen"
+            (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN")
+          (fact "kaavatilanne"
+            (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
+          (fact "avainsanaTieto"
+            (xml/get-text lp-xml [:avainsanaTieto]) => nil))))))
 
 
 (def canonical-no-toimenpidetieto (util/dissoc-in poikkeus-canonical [:Popast :poikkeamisasiatieto :Poikkeamisasia :toimenpidetieto]))
@@ -138,7 +167,7 @@
 
 (facts "Suunnittelutarveratkaisu"
   (facts "2.1.2"
-    (let [xml_212_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.1.2")
+    (let [xml_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.1.2")
                         (element-to-xml mapping/poikkeamis_to_krysp_212)
                         (indent-str))]
 
@@ -147,25 +176,54 @@
         (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}}))
 
       (fact "Validate"
-        (validator/validate xml_212_s (:permitType suunnitelutarveratkaisu) "2.1.2")) ; throws exception
+        (validator/validate xml_s (:permitType suunnitelutarveratkaisu) "2.1.2")) ; throws exception
 
       (fact "Check xml"
-        (-> (cr/strip-xml-namespaces (xml/parse xml_212_s))
+        (-> (cr/strip-xml-namespaces (xml/parse xml_s))
             (xml/get-text [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla])) => "200")))
 
   (facts "2.2.1"
-    (let [xml_221_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.2.1")
+    (let [xml_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.2.1")
                         (element-to-xml mapping/poikkeamis_to_krysp_221)
                         (indent-str))]
 
       (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}})
 
-      (validator/validate xml_221_s (:permitType suunnitelutarveratkaisu) "2.2.1") ; throws exception
+      (validator/validate xml_s (:permitType suunnitelutarveratkaisu) "2.2.1") ; throws exception
 
       (facts "Check xml"
-        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_221_s))
-              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_221_s)))]
-          (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
-          (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"
-          (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN"
-          (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")))))
+        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
+              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+          (fact "pintaAla"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
+          (fact "kerrosala"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200")
+          (fact "valtioKansainvalinen"
+            (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN")
+          (fact "kaavatilanne"
+            (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
+          (fact "avainsanaTieto"
+            (xml/get-text lp-xml [:avainsanaTieto]) => nil)))))
+
+  (facts "2.2.3"
+    (let [xml_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.2.3")
+                        (element-to-xml mapping/poikkeamis_to_krysp_223)
+                        (indent-str))]
+
+      (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.3"}}})
+
+      (validator/validate xml_s (:permitType suunnitelutarveratkaisu) "2.2.3") ; throws exception
+
+      (facts "Check xml"
+        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_s))
+              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_s)))]
+          (fact "pintaAla"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil)
+          (fact "kerrosala"
+            (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200")
+          (fact "valtioKansainvalinen"
+            (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN")
+          (fact "kaavatilanne"
+            (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
+          (fact "avainsanaTieto"
+            (xml/get-text lp-xml [:avainsanaTieto]) => nil))))))
