@@ -10,7 +10,8 @@
             [schema.core :as sc]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
-            [lupapalvelu.printing-order.mylly-client :as mylly]))
+            [lupapalvelu.printing-order.mylly-client :as mylly]
+            [lupapalvelu.mongo :as mongo]))
 
 (def omitted-attachment-type-groups
   [:hakija :osapuolet :rakennuspaikan_hallinta :paatoksenteko :muutoksenhaku
@@ -62,6 +63,17 @@
 (def max-total-file-size ; 1 Gb
   (* 1024 1024 1024))
 
+(defquery my-printing-orders
+  {:feature :printing-order
+   :user-roles  #{:applicant :authority}}
+  [{user :user}]
+  (ok :orders (map (fn [m] {:order-number (:external-reference m)
+                            :application (-> m :application :id)
+                            :created (:created m)
+                            :acknowledged? (not (nil? (:acknowledged m)))})
+                   (mongo/select :integration-messages {:messageType :printing-order
+                                                        :initator.id (:id user)}))))
+
 (defcommand submit-printing-order
   {:feature      :printing-order
    :parameters  [:id order contacts]
@@ -73,5 +85,5 @@
         total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)
       (fail! :error.printing-order.too-large))
-    (processor/do-submit-order command prepared-order)
+    (processor/do-submit-order command application prepared-order)
     (ok)))

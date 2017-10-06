@@ -72,28 +72,30 @@
                                       (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
 
-(defn save-integration-message [user created-ts {:keys [internalOrderId delivery] :as prepared-order}]
+(defn save-integration-message [user created-ts {:keys [id organization state]} {:keys [internalOrderId delivery] :as prepared-order}]
   (messages/save {:id internalOrderId
                   :direction "out"
                   :messageType "printing-order"
                   :partner "mylly"
                   :format "xml"
                   :created created-ts
+                  :application {:id id :organization organization :state state}
                   :initator (select-keys user [:id :username])
                   :attached-files (map :fileId (-> delivery :printedMaterials))
                   :external-reference ""
                   :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))
 
-(defn mark-acknowledged [{:keys [internalOrderId]} order-number]
+(defn mark-acknowledged [internalOrderId order-number]
+  (timbre/infof "mark-acknowledged %s %s" internalOrderId order-number)
   (messages/mark-acknowledged-and-return internalOrderId (tc/to-long (t/now)) {:external-reference order-number}))
 
-(defn do-submit-order [{user :user created-ts :created} {:keys [internalOrderId] :as prepared-order}]
-  (save-integration-message user created-ts prepared-order)
+(defn do-submit-order [{user :user created-ts :created} application {:keys [internalOrderId] :as prepared-order}]
+  (save-integration-message user created-ts application prepared-order)
   (timbre/infof "Submitting printing order %s into integration thread pool" internalOrderId)
   (.submit send-order-thread-pool
-    (fn []
-      (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
-        (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
-        (if (:ok result)
-          (mark-acknowledged prepared-order (:orderNumber result))
-          (fail! :error.printing-order.submit-failed))))))
+     ; bound-fn needed for itest, so that the db-name binding is visible inside the thread
+    (bound-fn [] (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
+                   (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
+                   (if (:ok result)
+                     (mark-acknowledged internalOrderId (:orderNumber result))
+                     (fail! :error.printing-order.submit-failed))))))
