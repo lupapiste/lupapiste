@@ -6,6 +6,7 @@
              [lupapalvelu.tasks :as tasks]
              [sade.util :as util]))
 
+
 (testable-privates lupapalvelu.review merge-review-tasks matching-task)
 
 (def rakennustieto-fixture [{:KatselmuksenRakennus {:kiinttun "54300601900001",
@@ -158,39 +159,51 @@
                      [update-task])
       => nil?))
 
-  (fact "matches task with same name, type and proper related data"
-    (let [held-review-task (assoc-in mongo-task
-                                     [:data :katselmus]
-                                     {:tila    {:value "lopullinen"}
-                                      :pitoPvm {:value "8.9.2017"}
-                                      :pitaja  {:value "Pekka Pitaja"}})
+  (facts "matches task with same name, type and proper related data"
+    (let [held-review-task (-> mongo-task
+                               (assoc-in [:data :katselmus]
+                                         {:tila    {:value "lopullinen"}
+                                          :pitoPvm {:value "8.9.2017"}
+                                          :pitaja  {:value "Pekka Pitaja"}})
+                               (update :data dissoc :muuTunnus))
           held-review-task-modified (-> held-review-task
                                         (assoc-in [:data :katselmus :lasnaolijat]
                                                   {:value "Lasse Lasnaolija"})
-                                        (update :data dissoc :muuTunnus))]
+                                        (update :data assoc :muuTunnus {:value "ID"}))
+          held-review-task-edit-distance (-> held-review-task-modified
+                                             (assoc-in [:data :katselmus :pitaja]
+                                                       {:value ", Pekka Pitaja"}))]
+      (fact "other data modified"
+        (matching-task held-review-task
+                       [{:data {:muuTunnus {:value "DI"}}}
+                        held-review-task-modified
+                        {:data {:muuTunnus {:value "DD"}}}])
+        => held-review-task-modified)
 
-      ;; Match if :tila, :pitoPvm and :pitaja and mongo task does not have :muuTunnus
-      (matching-task (update held-review-task dissoc :muuTunnus)
-                     [{:data {:muuTunnus {:value "DI"}}}
-                      held-review-task-modified
-                      {:data {:muuTunnus {:value "DD"}}}])
-      => nil?
+      (fact ":pitaja has small edit distance"
+        (matching-task held-review-task
+                       [held-review-task-edit-distance])
+        => held-review-task-edit-distance)
 
-      ;; No match if mongo task has :muuTunnus
-      (matching-task held-review-task
-                     [{:data {:muuTunnus {:value "DI"}}}
-                      held-review-task-modified
-                      {:data {:muuTunnus {:value "DD"}}}])
-      => nil?
+      (fact ":pitaja has large edit distance"
+            (matching-task held-review-task
+                           [(assoc-in held-review-task-modified
+                                      [:data :katselmus :pitaja :value]
+                                      ", Pekka Piirakka")])
+        => nil?)
 
-      ;; No match, since :tila changed
-      (matching-task held-review-task
-                     [(assoc-in held-review-task-modified
-                                [:data :katselmus :tila]
-                                {:value "osittainen"})])
-      => nil?
+      (fact ":tila changed"
+        (matching-task held-review-task
+                       [(assoc-in held-review-task-modified
+                                  [:data :katselmus :tila]
+                                  {:value "osittainen"})])
+        => #_nil?
+        ;; NOTE :tila is ignored temporarily
+        (assoc-in held-review-task-modified
+                  [:data :katselmus :tila]
+                  {:value "osittainen"}))
 
-      ;; :muuTunnus prevails
-      (matching-task mongo-task [held-review-task-modified
-                                 {:data {:muuTunnus {:value "ID"}}}])
-      => {:data {:muuTunnus {:value "ID"}}}))))
+      (fact ":muuTunnus prevails"
+        (matching-task mongo-task [held-review-task
+                                   {:data {:muuTunnus {:value "ID"}}}])
+        => {:data {:muuTunnus {:value "ID"}}})))))

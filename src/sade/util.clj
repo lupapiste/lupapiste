@@ -688,3 +688,5 @@
                 coll)
         first
         seq)))
+
+(defalias edit-distance shared/edit-distance)
