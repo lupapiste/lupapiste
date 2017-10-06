@@ -44,3 +44,38 @@
   (filter-map-by-val pos? {:a 1 :b -1}) => {:a 1}"
   [pred m]
   (into {} (filter (fn [[_ v]] (pred v)) m)))
+
+(defn edit-distance
+  "Levenshtein distance between strings a and b using Wagner–Fischer
+  algorithm. The implementation is iterative, but uses O(|a|*|b|) space."
+  [a b]
+  {:pre [(string? a) (string? b)]}
+  (let [length-of-a (count a)
+        length-of-b (count b)]
+    (if (or (zero? length-of-a)
+            (zero? length-of-b))
+      ;; If either one of the strings is empty, the distance is simply
+      ;; the length of the other
+      (max length-of-a length-of-b)
+
+      ;; Otherwise, calculate the distance with Wagner-Fischer
+      (let [distances (->> (concat (map #(vector [% 0] %)
+                                        (range (inc length-of-a)))
+                                   (map #(vector [0 %] %)
+                                        (range (inc length-of-b))))
+                           (into {}))]
+       (loop [d distances
+              i 1
+              j 1]
+         (let [substitution-cost (if (= (get a (dec i)) (get b (dec j))) 0 1)
+               d-i-j (min (inc (d [(dec i) j]))
+                          (inc (d [i (dec j)]))
+                          (+ (d [(dec i) (dec j)]) substitution-cost))]
+           (if (and (= i length-of-a)
+                    (= j length-of-b))
+             d-i-j
+             (recur (assoc d [i j] d-i-j)
+                    (if (= j length-of-b)
+                      (inc i) i)
+                    (if (= j length-of-b)
+                      1 (inc j))))))))))

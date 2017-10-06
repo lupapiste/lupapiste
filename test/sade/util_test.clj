@@ -560,3 +560,31 @@
   (distinct-by even? [1 2 3 4 5 6]) => '(1 2)
   (distinct-by identity [1 1 2 3 2]) => '(1 2 3)
   (distinct-by :foo [{:foo 1 :bar :a} {:foo 1 :bar :b}]) => '({:foo 1 :bar :a}))
+
+(fact edit-distance
+  (edit-distance "" "") => 0
+
+  (edit-distance "a" "a") => 0
+
+  (edit-distance "" "a") => 1
+  (edit-distance "a" "") => 1
+
+  (edit-distance "a" "b") => 1
+  (edit-distance "b" "a") => 1
+
+  (let [test-string-1 "foo\n\tbar"
+        test-string-2 "foobar"
+        test-string-3 "moodaar"]
+    (edit-distance "" test-string-1) => (count test-string-1)
+    (edit-distance test-string-1 "") => (count test-string-1)
+
+    (edit-distance test-string-1 test-string-1) => 0
+    (edit-distance test-string-2 test-string-2) => 0
+    (edit-distance test-string-3 test-string-3) => 0
+
+    (edit-distance test-string-1 test-string-2) => 2
+    (edit-distance test-string-2 test-string-1) => 2
+    (edit-distance test-string-2 test-string-3) => 3
+    (edit-distance test-string-3 test-string-2) => 3
+    (edit-distance test-string-1 test-string-3) => 4
+    (edit-distance test-string-1 test-string-3) => 4))
