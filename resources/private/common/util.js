@@ -323,6 +323,12 @@ var util = (function($) {
     );
   }
 
+  function getSchemaElement(docSchema, path) {
+    return _.reduce(path, function(acc, name) {
+      return _.find(acc.body, ["name", name]);
+    }, docSchema);
+  }
+
   function bySchemaName(schemaName) {
     return function(task) {
       return util.getIn(task, ["schema-info", "name"]) === schemaName;
@@ -535,7 +541,8 @@ var util = (function($) {
     isEven: isEven,
     finnishDate: finnishDate,
     toMoment: toMoment,
-    finnishDateAndTime: finnishDateAndTime
+    finnishDateAndTime: finnishDateAndTime,
+    getSchemaElement: getSchemaElement
   };
 
 })(jQuery);

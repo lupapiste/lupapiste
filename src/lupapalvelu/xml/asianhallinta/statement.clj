@@ -47,29 +47,33 @@
                       (:application-id statement-data))]
     (logging/with-logging-context
       {:applicationId (:id application) :userId ftp-user}
-      (when-let [statement (statement/save-ah-statement-response
-                             application
-                             ftp-user
-                             statement-data
-                             created)]
-        (infof "ah-statement-response successfully updated statement %s, now saving %d attachments"
-               (:id statement)
-               (count attachments))
-        (doseq [attachment attachments]
-          (ah-att/insert-attachment!
-            unzipped-path
-            application
-            attachment
-            {:type-group "muut" :type-id "muu"}
-            {:type "statement" :id (:id statement)}
-            "Lausunnon liite (ELY-keskus)"
-            created
+      (if-let [statement (statement/save-ah-statement-response
+                           application
+                           ftp-user
+                           statement-data
+                           created)]
+        (do
+          (infof "ah-statement-response successfully updated statement %s, now saving %d attachments"
+                 (:id statement)
+                 (count attachments))
+          (doseq [attachment attachments]
+            (ah-att/insert-attachment!
+              unzipped-path
+              application
+              attachment
+              {:type-group "muut" :type-id "muu"}
+              {:type "statement" :id (:id statement)}
+              "Lausunnon liite (ELY-keskus)"
+              created
+              ely-user
+              {:read-only true}))
+          (child-to-attachment/create-attachment-from-children
             ely-user
-            {:read-only true}))
-        (child-to-attachment/create-attachment-from-children
-          ely-user
-          (domain/get-application-no-access-checking (:id application))
-          :statements
-          (:id statement)
-          "fi"))
-      (ok))))
+            (domain/get-application-no-access-checking (:id application))
+            :statements
+            (:id statement)
+            "fi")
+          (ok))
+        (error-and-fail!
+          (format "No statement found for ah statement response, statement id: %s" (:id statement-data))
+          :error.integration.asianhallinta.statement-not-found)))))

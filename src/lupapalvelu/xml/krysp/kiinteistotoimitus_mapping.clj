@@ -7,67 +7,103 @@
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]))
 
+(def osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
+             :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka])
+
+(def yht-liite {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]})
+
+
+(def toimitus-hakemus_102
+  {:Toimitushakemus
+   [{:hakemustunnustieto {:Hakemustunnus/yht [:tunnus :sovellus]}}
+    {:osapuolitieto
+     {:Osapuoli
+      [:roolikoodi :turvakieltokytkin :asioimiskieli
+       {:henkilotieto
+        {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
+                       {:osoite osoite}
+                       :sahkopostiosoite
+                       :faksinumero
+                       :puhelin
+                       :henkilotunnus]}}
+       {:yritystieto
+        {:Yritys/yht [:nimi :liikeJaYhteisotunnus
+                      {:postiosoitetieto {:postiosoite osoite}}
+                      :puhelin
+                      :sahkopostiosoite
+                      {:verkkolaskutustieto
+                       {:Verkkolaskutus [:ovtTunnus :verkkolaskuTunnus :valittajaTunnus]}}]}}
+       :vainsahkoinenAsiointiKytkin]}}
+    {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
+                                    {:piste/gml {:Point :pos}}]}}
+    {:liitetieto yht-liite}
+    {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
+    {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}
+    {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]})
+
+(defn toimitus-feature [toimitus-hakemus]
+  [{:toimituksenTiedottieto
+    {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi
+                             :kielitieto]}}
+   {:toimitushakemustieto [toimitus-hakemus]}
+   :toimituksenTila
+   {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
+   {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}])
+
+(def toimitus_102 (toimitus-feature toimitus-hakemus_102))
+
+(def kiito-liite-type                               ; since 1.0.3, used in AbstractToimitusFeatureType, not in toimitushakemus!
+  {:Liite
+   [:kuvaus/yht
+    :linkkiliitteeseen/yht
+    :muokkausHetki/yht
+    :versionumero/yht
+    {:tekija {:Osapuoli/yht (:child mapping-common/osapuoli-body_218)}}
+    :tyyppi
+    {:metatietotieto {:metatieto [:metatietoArvo :metatietoNimi]}}]})
+
+(defn- insert-kayttotapaus
+  "on 1.0.5 kayttotapaus was added to AbstractToimitusFeatureType"
+  [e]
+  (let [elem-name (if (map? e)
+                    (-> e (keys) (first))
+                    e)]
+    (if (= :kiinteistotieto elem-name)
+      [:kayttotapaus e]                                  ; "put" kayttotapaus before kiinteistotieto
+      [e])))
+
+(def toimitus_105
+  (vec (mapcat insert-kayttotapaus (toimitus-feature toimitus-hakemus_102))))
+
+(defn kiito-mapping-with-toimitus [version toimitus-types]
+  {:tag :Kiinteistotoimitus :ns "kiito"
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :KT version)
+                 :xmlns:kiito "http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"}
+                (mapping-common/common-namespaces :KT version))
+   :child [(mapping-common/mapper toimitus-types "gml")]})
+
+(defn toimitus-types [toimitus]
+  (let [toimitus-with-kuvaus (conj toimitus :kuvaus)]
+    {:featureMembers/kiito
+     [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
+      {:YhtAlueenOsuuksienSiirto toimitus-with-kuvaus}
+      {:Rasitetoimitus (conj toimitus
+                             {:kayttooikeustieto
+                              {:KayttoOikeus [:kayttooikeuslaji :kayttaja :antaja
+                                              :valiaikainenKytkin :paattymispvm]}})}
+      {:KiinteistolajinMuutos toimitus-with-kuvaus}
+      {:YleisenAlueenLohkominen toimitus-with-kuvaus}
+      {:KiinteistojenYhdistaminen toimitus-with-kuvaus}
+      {:Halkominen toimitus-with-kuvaus}
+      {:KiinteistonMaaritys (concat toimitus [:selvitettavaAsia :kuvaus])}
+      {:Tilusvaihto toimitus-with-kuvaus}]}))
+
 (def kiinteistotoimitus_to_krysp_102
-  (let [osoite [:valtioSuomeksi :valtioKansainvalinen {:osoitenimi :teksti} :ulkomainenLahiosoite
-                :postinumero :postitoimipaikannimi :ulkomainenPostitoimipaikka]
-        toimitus [{:toimituksenTiedottieto
-                   {:ToimituksenTiedot/yht [:aineistonnimi :aineistotoimittaja :tila :toimitusPvm :kuntakoodi
-                                            :kielitieto]}}
-                  {:toimitushakemustieto
-                   [{:Toimitushakemus
-                     [{:hakemustunnustieto {:Hakemustunnus/yht [:tunnus :sovellus]}}
-                      {:osapuolitieto
-                       {:Osapuoli
-                        [:roolikoodi :turvakieltokytkin :asioimiskieli
-                         {:henkilotieto
-                          {:Henkilo/yht [{:nimi [:etunimi :sukunimi]}
-                                         {:osoite osoite}
-                                         :sahkopostiosoite
-                                         :faksinumero
-                                         :puhelin
-                                         :henkilotunnus]}}
-                         {:yritystieto
-                          {:Yritys/yht [:nimi :liikeJaYhteisotunnus
-                                        {:postiosoitetieto {:postiosoite osoite}}
-                                        :puhelin
-                                        :sahkopostiosoite
-                                        {:verkkolaskutustieto
-                                         {:Verkkolaskutus [:ovtTunnus :verkkolaskuTunnus :valittajaTunnus]}}]}}
-                         :vainsahkoinenAsiointiKytkin]}}
-                      {:sijaintitieto {:Sijainti/yht [{:osoite [:yksilointitieto :alkuHetki {:osoitenimi :teksti}]}
-                                                      {:piste/gml {:Point :pos}}]}}
-                      {:liitetieto {:Liite/yht [:kuvaus :linkkiliitteeseen :muokkausHetki :versionumero]}}
-                      {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
-                      {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}
-                      {:tilatieto {:Tila [:pvm :kasittelija :hakemuksenTila]}}]}]}
-                  :toimituksenTila
-                  {:kiinteistotieto {:Kiinteisto :kiinteistotunnus}}
-                  {:maaraAlatieto {:MaaraAla :maaraAlatunnus}}]
-        basic (conj toimitus :kuvaus)
-        toimitus-types {:featureMembers/kiito
-                        [{:Lohkominen (concat toimitus [:lohkomisenTyyppi :kuvaus])}
-                         {:YhtAlueenOsuuksienSiirto basic}
-                         {:Rasitetoimitus (conj toimitus {:kayttooikeustieto
-                                                          {:KayttoOikeus [:kayttooikeuslaji :kayttaja :antaja
-                                                                          :valiaikainenKytkin :paattymispvm]}})}
-                         {:KiinteistolajinMuutos basic}
-                         {:YleisenAlueenLohkominen basic}
-                         {:KiinteistojenYhdistaminen basic}
-                         {:Halkominen basic}
-                         {:KiinteistonMaaritys (concat toimitus [:selvitettavaAsia :kuvaus])}
-                         {:Tilusvaihto basic}]}]
-    {:tag :Kiinteistotoimitus :ns "kiito"
-     :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :KT "1.0.2")
-                   :xmlns:kiito "http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"}
-                  (mapping-common/common-namespaces :KT "1.0.2"))
-     :child [(mapping-common/mapper toimitus-types "gml")]}))
+  (kiito-mapping-with-toimitus "1.0.2" (toimitus-types toimitus_102)))
 
 (def kiinteistotoimitus_to_krysp_105
-  (-> kiinteistotoimitus_to_krysp_102
-      (update-in [:attr] merge
-                 {:xsi:schemaLocation (mapping-common/schemalocation :KT "1.0.5")
-                  :xmlns:kiito "http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus"}
-                 (mapping-common/common-namespaces :R "1.0.5"))))
+  (-> (kiito-mapping-with-toimitus "1.0.5" (toimitus-types toimitus_105))
+      (update :attr assoc :xmlns:kiito "http://www.kuntatietopalvelu.fi/gml/kiinteistotoimitus")))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}

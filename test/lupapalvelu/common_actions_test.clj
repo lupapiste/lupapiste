@@ -231,7 +231,7 @@
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            :application-organization-archive-enabled
                            ;; matti
-                           :matti-verdicts :matti-verdict
+                           :matti-verdicts :matti-verdict :matti-verdict-tab
                            ;; raw
                            :download-all-attachments :download-attachments
                            :pdf-export

@@ -25,7 +25,12 @@
                                   <span data-bind="ltext: state, attr: {'title' : loc([state(), 'title']), 'class': state() + '-box'}"></span>
                                   <!-- /ko -->
                                   <!-- ko  foreach: stateSeq -->
-                                  <span data-bind="ltext: $data, attr: {'title' : loc([$data, 'title']), 'class': $data + '-box'}"></span>
+                                  <span data-bind="ltext: $data,
+                                                   attr: {
+                                                    'title': $root.application.isArchivingProject() ? loc([$data, 'archivingProject', 'title']) : loc([$data, 'title']),
+                                                    'class': $data + '-box'
+                                                   }">
+                                  </span>
                                   <!-- /ko -->
                                 </div>
                             </div>
@@ -65,7 +70,8 @@
                         <ul class="tabs" id="applicationTabs">
                             <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
-                                    <span data-bind="ltext: 'application.tabInfo'"></span>
+                                    <span data-bind="ltext: 'application.tabInfo', visible: !$root.application.isArchivingProject()"></span>
+                                    <span data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></span>
                                     <span data-bind="if: nonpartyDocumentIndicator">
                                         <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span>
                                     </span></a></li>
@@ -114,21 +120,22 @@
                                 <span data-bind="if: unseenVerdicts">
                                       <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
-                                           css: {'active': $parent.selectedTabName() === 'matti-verdict'}">
+                            <li data-bind="if: $root.authorization.ok( 'matti-verdict-tab')">
                               <a  data-bind="click: changeTab,
-                                            feature: 'matti'"
-                                 href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
-                                 class="link-btn feature--no-border">
-                                <span data-bind="ltext: 'application.tabVerdict' + $root.application.verdictPostfix()"></span>
-                                <span data-bind="if: unseenVerdicts">
-                                  <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
+                                             feature: 'matti'"
+                                  href="#" data-target="matti-verdict" data-test-id="matti-verdict-tab"
+                                  class="link-btn">
+                                <span data-bind="ltext: 'application.tabVerdict'"></span>
+                              </a>
+                            </li>
 
                             <!-- In post-verdict states plus 'canceled' -->
                             <li data-bind="if: $root.authorization.ok('application-summary-tab-visible'), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
                                    class="link-btn">
-                                    <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+                                    <span data-bind="ltext: 'application.applicationSummary', visible: !$root.application.isArchivingProject()"></span>
+                                    <span data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></span>
+                                </a></li>
 
                             <!-- Can be shown if calendars are active in the target municipality and sector -->
                             <li data-bind="if: $root.calendarConfig.initialized, css: {'active': $parent.selectedTabName() === 'calendar'}">
@@ -177,7 +184,8 @@
 
                     <div id="application-info-tab" class="tab-content" data-bind="with: application">
                         <div>
-                            <h1 data-bind="ltext: 'application.tabInfo'"></h1>
+                            <h1 data-bind="ltext: 'application.tabInfo', visible: !$root.application.isArchivingProject()"></h1>
+                            <h1 data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></h1>
                             <span data-bind="component: {
                                              name: 'help-toggle',
                                              params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
@@ -193,6 +201,13 @@
                         <div data-bind="if: $root.application.state() == 'draft'">
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
+
+                        <!-- ko if: $root.application.isArchivingProject -->
+                        <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                                    applicationId: $root.application.id,
+                                                    authModel: $root.authorization"></backend-id-manager>
+                        <!-- /ko -->
+
                         <div class="operation-info">
                             <!-- ko if: !$root.authorization.ok('link-permit-required') -->
                             <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
@@ -258,17 +273,26 @@
 
                     <div id="application-applicationSummary-tab" data-bind="with: $root.application" class="tab-content" >
 
-                        <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
+                        <h1 data-bind="ltext: 'application.tabApplicationSummary', visible: !$root.application.isArchivingProject()"></h1>
+                        <h1 data-bind="ltext: 'application.archivingProject.tabInfo', visible: $root.application.isArchivingProject()"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.application.summary'}
                                          }"></span>
+
+                        <div data-bind="if: $root.application.isArchivingProject" style="margin-bottom: 2em;">
+                        <backend-id-manager params="verdicts: $root.verdictModel.unfilteredVerdicts,
+                                                      applicationId: $root.application.id,
+                                                      authModel: $root.authorization"></backend-id-manager>
+                        </div>
+
                         <div class="application_section">
                             <div id="applicationAndPartiesDocgen" class="docgen-content">
                                 <!-- This is where the generated documents will be placed. -->
                             </div>
                         </div>
 
+                        <!-- ko ifnot: $root.application.isArchivingProject -->
                         <section class="accordion" id="accordion-application-summary-statements">
                             <button onclick="accordion.click(this)"
                                     data-test-id="accordion-application-summary-statements-header"
@@ -312,6 +336,8 @@
                                 </div>
                             </div>
                         </section>
+
+                        <!-- /ko -->
 
                         <div class="process-nav">
                             <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">

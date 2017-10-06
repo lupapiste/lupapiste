@@ -324,6 +324,8 @@
   (some->> backend-ids
            (remove (set (map :kuntalupatunnus verdicts)))
            (map backend-id->verdict)
+           ; Need to force realization here for testing purposes
+           vec
            (assoc-in {} [$push :verdicts $each])))
 
 (defn validate-section-requirement

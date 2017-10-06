@@ -153,7 +153,7 @@
 (defcommand mark-everything-seen
   {:parameters [:id]
    :user-roles #{:authority :oirAuthority}
-   :states     (states/all-states-but [:draft])}
+   :states     (states/all-states-but [:draft :archived])}
   [{:keys [application user created] :as command}]
   (update-application command {$set (app/mark-indicators-seen-updates application user created)}))
 
@@ -608,7 +608,7 @@
    :parameters       [id state]
    :input-validators [(partial action/non-blank-parameters [:state])]
    :user-roles       #{:authority}
-   :states           states/post-verdict-states
+   :states           (conj states/post-verdict-states :underReview)
    :pre-checks       [permit/valid-permit-types-for-state-change app/valid-new-state]
    :notified         true
    :on-success       (notify :application-state-change)}
@@ -669,7 +669,7 @@
   change-application-state transitions."
    :user-roles  #{:authority}
    :pre-checks  [permit/valid-permit-types-for-state-change]
-   :states      states/post-verdict-states}
+   :states      (conj states/post-verdict-states :underReview)}
   [{application :application}]
   (ok :states (app/change-application-state-targets application)))
 

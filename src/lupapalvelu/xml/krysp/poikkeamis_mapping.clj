@@ -22,6 +22,12 @@
                                                 {:tag :kokonaisala}
                                                 {:tag :kerrosala}]})
 
+(def avainsanatieto_223
+  {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
+
+(def menettely-tos_223
+  {:tag :menettelyTOS})
+
 (def abstract-poikkeamistype-212 [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                                   {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
                                   {:tag :osapuolettieto :child [mapping-common/osapuolet_210]}
@@ -65,9 +71,15 @@
     (mapping-common/update-child-element [:liitetieto :Liite] {:tag :Liite :child mapping-common/liite-children_216})
     (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})))
 
-(def abstract-poikkeamistype-223
+(def poikkeamisasia-223
   (-> abstract-poikkeamistype-221
-    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})))
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+    (conj avainsanatieto_223 menettely-tos_223)))
+
+(def suunnittelutarveasia-223
+  (-> abstract-poikkeamistype-221
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+    (conj menettely-tos_223)))
 
 (def poikkeamis_to_krysp_212
   {:tag :Popast
@@ -121,8 +133,8 @@
                   :xmlns:ppst "http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
                  (mapping-common/common-namespaces :P "2.2.3"))
       (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
-                     {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-223}]}
-                     {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-223}]}])))
+                     {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child poikkeamisasia-223}]}
+                     {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child suunnittelutarveasia-223}]}])))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}

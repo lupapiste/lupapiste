@@ -7,7 +7,7 @@
                   clickBubble: false">
     <div class="stacked">
       <!-- ko foreach: menu -->
-      <!-- ko if: _.isUndefined( $data.showIf ) || $data.showIf -->
+      <!-- ko if: _.isUndefined( $data.showIf ) || $data.showIf() -->
       <button class="sidebar-button"
               data-bind="disable: $parent.isCurrentPage( page ),
                          click: $parent.openPage,

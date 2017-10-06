@@ -74,8 +74,12 @@ LUPAPISTE.UploadModel = function( owner, params ) {
         // Since the basic file upload jQuery plugin does not support
         // limiting drag'n'drop to only one file, we prune the files
         // array, if needed.
+        var fileName = event.files[0].filename;
+        var originalFile = _.filter(event.originalFiles, { "name" : fileName});
+        var originalPosition = _.indexOf(event.originalFiles, originalFile[0]);
+        event.files[0].position = originalPosition;
         var allFiles = _.concat( self.files(), event.files);
-        self.files(self.allowMultiple ? allFiles : allFiles.splice(-1));
+        self.files(_.sortBy((self.allowMultiple ? allFiles : allFiles.splice(-1)), ["position"]));
       } else {
         notifyService( "fileCleared", {} );
         (params.errorHandler || indicatorError)({

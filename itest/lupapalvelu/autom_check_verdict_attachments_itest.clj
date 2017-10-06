@@ -33,6 +33,7 @@
                          (-> attachment :target :id)
                          (-> attachment :target :urlHash)))
 
+(apply-remote-minimal)
 (mongo/connect!)
 (mongo/with-db db-name
   (fixture/apply-fixture "minimal")

@@ -83,13 +83,13 @@
   (data-leaf elem-schema ssc/FinnishOVTid))
 
 (defmethod coerce-subtype :vrk-name [elem-schema]
-  (data-leaf elem-schema sc/Str))
+  (data-leaf elem-schema (ssc/min-length-string 1)))
 
 (defmethod coerce-subtype :vrk-address [elem-schema]
-  (data-leaf elem-schema sc/Str))
+  (data-leaf elem-schema (ssc/min-length-string 1)))
 
 (defmethod coerce-subtype nil [elem-schema]
-  (data-leaf elem-schema sc/Str))
+  (data-leaf elem-schema (if (:required elem-schema) (ssc/min-length-string 1) sc/Str)))
 
 (defmethod coerce-subtype :recent-year [elem-schema]
   (data-leaf elem-schema (ssc/min-max-valued-integer-string 1950 2015)))

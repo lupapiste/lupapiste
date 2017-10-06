@@ -157,13 +157,15 @@
 (defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
   {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
                                     {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin))}
+                                    {:rakennustietojaEimuutetaKytkin (true? (-> rakennuksen-muuttaminen-doc :data :rakennustietojaEimuutetaKytkin))}
                                     {:muutostyonLaji (fix-typo-in-kayttotarkotuksen-muutos (-> rakennuksen-muuttaminen-doc :data :muutostyolaji))})
                 :rakennustieto (get-rakennus-data application rakennuksen-muuttaminen-doc)}
    :created (:created rakennuksen-muuttaminen-doc)})
 
 (defn- get-rakennustietojen-korjaus-toimenpide [rakennustietojen-korjaus-doc application]
   {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennustietojen-korjaus-doc)
-                                    {:perusparannusKytkin false}
+                                    {:perusparannusKytkin false
+                                     :rakennustietojaEimuutetaKytkin false}
                                     {:muutostyonLaji      schemas/muumuutostyo})
                 :rakennustieto (get-rakennus-data application rakennustietojen-korjaus-doc)}
    :created (:created rakennustietojen-korjaus-doc)})
@@ -312,11 +314,6 @@
 
 (defn- get-hankkeen-vaativuus [documents-by-type]
   (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
-
-(defn- get-avainsanaTieto [{tags :tags :as application}]
-  (->> (map :label tags)
-       (remove nil?)
-       (map (partial hash-map :Avainsana))))
 
 (defn application-to-canonical-operations
   [application]

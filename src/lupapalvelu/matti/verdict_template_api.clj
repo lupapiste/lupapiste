@@ -15,6 +15,12 @@
 ;; Pre-checks
 ;; ----------------------------------
 
+(defn- matti-enabled
+  "Pre-checker that fails if Matti is not enabled in the organization."
+  [cmd]
+  (when-not (:matti-enabled (template/command->organization cmd))
+    (fail :error.matti-disabled)))
+
 (defn- valid-category [{{category :category} :data :as command}]
   (when category
     (when-not (util/includes-as-kw? (template/organization-categories (template/command->organization command))
@@ -76,6 +82,15 @@
 ;; Verdict template API
 ;; ----------------------------------
 
+(defquery matti-enabled
+  {:description "Pseudo-query that fails if Matti is not enabled in
+  the organization"
+   :feature     :matti
+   :user-roles  #{:authorityAdmin}
+   :pre-checks  [matti-enabled]}
+  [_])
+
+
 (defcommand new-verdict-template
   {:description      "Creates new empty template. Returns template id, name
   and draft."
@@ -83,7 +98,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [{:keys [created user lang]}]
   (ok (template/new-verdict-template (usr/authority-admins-organization-id user)
                                      created
@@ -95,7 +111,8 @@
    :feature          :matti
    :parameters       [template-id name]
    :input-validators [(partial action/non-blank-parameters [:name])]
-   :pre-checks       [(template/verdict-template-check :editable)]
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check :editable)]
    :user-roles       #{:authorityAdmin}}
   [{created :created :as command}]
   (template/set-name (template/command->organization command)
@@ -113,7 +130,8 @@
    ;; Value is validated upon saving according to the schema.
    :input-validators [(partial action/vector-parameters [:path])
                       (partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [(template/verdict-template-check :editable)]}
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check :editable)]}
   [{:keys [created] :as command}]
   (if-let [error (template/save-draft-value (template/command->organization command)
                                             template-id
@@ -130,7 +148,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [(template/verdict-template-check :editable :named)]}
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check :editable :named)]}
   [{:keys [created user user-organizations] :as command}]
   (template/publish-verdict-template (template/command->organization command)
                                      template-id
@@ -141,7 +160,8 @@
   {:description "Id, name, modified, published and deleted maps for
   every verdict template."
    :feature     :matti
-   :user-roles  #{:authorityAdmin}}
+   :user-roles  #{:authorityAdmin}
+   :pre-checks  [matti-enabled]}
   [command]
   (ok :verdict-templates (->> (template/command->organization command)
                               :verdict-templates
@@ -151,7 +171,8 @@
 (defquery verdict-template-categories
   {:description "Categories for the user's organization"
    :feature     :matti
-   :user-roles  #{:authorityAdmin}}
+   :user-roles  #{:authorityAdmin}
+   :pre-checks  [matti-enabled]}
   [command]
   (ok :categories (template/organization-categories (template/command->organization command))))
 
@@ -162,7 +183,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [(template/verdict-template-check :editable)]}
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check :editable)]}
   [command]
   (let [template (template/verdict-template (template/command->organization command)
                                             template-id)]
@@ -176,7 +198,8 @@
    :parameters       [template-id delete]
    :input-validators [(partial action/non-blank-parameters [:template-id])
                       (partial action/boolean-parameters [:delete])]
-   :pre-checks       [(template/verdict-template-check)]}
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check)]}
   [command]
   (template/set-deleted (template/command->organization command)
                         template-id
@@ -190,7 +213,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [template-id]
    :input-validators [(partial action/non-blank-parameters [:template-id])]
-   :pre-checks       [(template/verdict-template-check)]}
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check)]}
   [{:keys [created lang] :as command}]
   (ok (template/copy-verdict-template (template/command->organization command)
                                       template-id
@@ -207,7 +231,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [command]
   (when-let [settings (template/settings (template/command->organization command)
                                          category)]
@@ -222,7 +247,8 @@
    ;; Value is validated against schema on saving.
    :input-validators [(partial action/non-blank-parameters [:category])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [{:keys [created] :as command}]
   (if-let [error (template/save-settings-value (template/command->organization command)
                                                category
@@ -242,7 +268,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [command]
   (ok :reviews (template/generic-list (template/command->organization command)
                                       category
@@ -255,7 +282,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [{user :user}]
   (ok :review (template/new-review (usr/authority-admins-organization-id user)
                                    category)))
@@ -272,7 +300,8 @@
                                                :type :deleted)
                          settings-generic-details-valid
                          settings-review-details-valid]
-   :pre-checks          [(settings-generic-editable :reviews)]}
+   :pre-checks          [matti-enabled
+                         (settings-generic-editable :reviews)]}
   [{:keys [created user data] :as command}]
   (template/set-review-details (template/command->organization command)
                                created
@@ -292,7 +321,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [command]
   (ok :plans (template/generic-list (template/command->organization command)
                                     category
@@ -305,7 +335,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [category]
    :input-validators [(partial action/non-blank-parameters [:category])]
-   :pre-checks       [valid-category]}
+   :pre-checks       [matti-enabled
+                      valid-category]}
   [{user :user}]
   (ok :plan (template/new-plan (usr/authority-admins-organization-id user)
                                category)))
@@ -320,7 +351,8 @@
    :input-validators    [(partial action/non-blank-parameters [:plan-id])
                          (supported-parameters :plan-id :fi :sv :en :deleted)
                          settings-generic-details-valid]
-   :pre-checks          [(settings-generic-editable :plans)]}
+   :pre-checks          [matti-enabled
+                         (settings-generic-editable :plans)]}
   [{:keys [created user data] :as command}]
   (template/set-plan-details (template/command->organization command)
                              created
@@ -361,7 +393,8 @@
   {:description "Map where keys are operations and values template
   ids. Deleted templates are filtered out."
    :feature     :matti
-   :user-roles  #{:authorityAdmin}}
+   :user-roles  #{:authorityAdmin}
+   :pre-checks  [matti-enabled]}
   [command]
   (ok :templates (template/operation-verdict-templates (template/command->organization command))))
 
@@ -372,7 +405,8 @@
    :user-roles       #{:authorityAdmin}
    :parameters       [operation template-id]
    :input-validators [(partial action/non-blank-parameters [:operation])]
-   :pre-checks       [(template/verdict-template-check :published :editable :blank)
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check :published :editable :blank)
                       organization-operation
                       operation-vs-template-category]}
   [{user :user}]

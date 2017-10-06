@@ -23,6 +23,14 @@
 ;; TODO: Make sure that the functionality (including notifications)
 ;; and constraints are in sync with the legacy verdict API.
 
+(defn- matti-enabled
+  "Pre-checker that fails if Matti is not enabled in the application
+  organization."
+  [{:keys [organization]}]
+  (when (and organization
+             (not (:matti-enabled @organization)))
+    (fail :error.matti-disabled)))
+
 (defn- verdict-exists
   "Returns pre-checker that fails if the verdict does not exist.
   Additional conditions:
@@ -45,6 +53,7 @@
    :user-roles       #{:authority}
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [matti-enabled]
    :states           states/give-verdict-states}
   [{:keys [application organization]}]
   (ok :templates (template/application-verdict-templates @organization
@@ -57,7 +66,8 @@
    :user-roles       #{:authority}
    :parameters       [id template-id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :pre-checks       [(template/verdict-template-check :application :published)]
+   :pre-checks       [matti-enabled
+                      (template/verdict-template-check :application :published)]
    :states           states/give-verdict-states}
   [command]
   (ok (verdict/new-verdict-draft template-id command)))
@@ -72,6 +82,7 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
+   :pre-checks       [matti-enabled]
    :states           (states/all-states-but [:draft :open])}
   [{:keys [application]}]
   (ok :verdicts (map verdict/verdict-summary
@@ -84,7 +95,8 @@
    :org-authz-roles  roles/reader-org-authz-roles
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists)]
+   :pre-checks       [matti-enabled
+                      (verdict-exists)]
    :states           states/give-verdict-states}
   [command]
   (ok (verdict/open-verdict command)))
@@ -96,7 +108,8 @@
    :user-roles       #{:authority}
    :parameters       [id verdict-id]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
-   :pre-checks       [(verdict-exists :editable?)]
+   :pre-checks       [matti-enabled
+                      (verdict-exists :editable?)]
    :states           (states/all-states-but [:draft :open])}
   [command]
   (verdict/delete-verdict verdict-id command)
@@ -110,10 +123,22 @@
    :parameters       [id verdict-id path value]
    :input-validators [(partial action/non-blank-parameters [:id :verdict-id])
                       (partial action/vector-parameters [:path])]
-   :pre-checks       [(verdict-exists :editable?)]
+   :pre-checks       [matti-enabled
+                      (verdict-exists :editable?)]
    :states           states/give-verdict-states}
   [command]
   (ok (verdict/edit-verdict command)))
+
+(defquery matti-verdict-tab
+  {:description     "Pseudo-query that fails if the Matti verdicts tab
+  should not be shown on the UI."
+   :feature         :matti
+   :parameters      [:id]
+   :user-roles      #{:applicant :authority}
+   :org-authz-roles roles/reader-org-authz-roles
+   :states          (states/all-states-but [:draft :open])
+   :pre-checks      [matti-enabled]}
+  [_])
 
 (defn- get-search-fields [fields app]
   (into {} (map #(hash-map % (% app)) fields)))

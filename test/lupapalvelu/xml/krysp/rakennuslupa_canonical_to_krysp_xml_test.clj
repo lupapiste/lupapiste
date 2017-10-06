@@ -217,17 +217,28 @@
     (facts "2.2.0"
       (fact "avainsanatieto"
         (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
-
+      (fact "Suunnitelijat"
+        (count (xml/select lp-xml_220 [:suunnittelijatieto :Suunnittelija])) => 4)
+      (fact "Osapuolet"
+        (count (xml/select lp-xml_222 [:osapuolettieto :Osapuoli])) => 5)
       (fact "menettelyTOS"
-        (xml/get-text lp-xml_220 [:menettelyTOS]) => nil))
+        (xml/get-text lp-xml_220 [:menettelyTOS]) => nil)
+      (fact "rakennustietojEiMmutetaKytkin not exists"
+        (xml/get-text lp-xml_220 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => nil))
 
     (facts "2.2.2"
       (fact "avainsanatieto"
         (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
              (map :content)) => [["avainsana"]
                                  ["toinen avainsana"]])
+      (fact "Suunnitelijat"
+        (count (xml/select lp-xml_222 [:suunnittelijatieto :Suunnittelija])) => 4)
+      (fact "Osapuolet"
+        (count (xml/select lp-xml_222 [:osapuolettieto :Osapuoli])) => 5)
       (fact "menettelyTOS"
-        (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely"))))
+        (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely")
+      (fact "rakennustietojEiMmutetaKytkin"
+        (xml/get-text lp-xml_222 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => "true"))))
 
 (facts "Rakennelma"
   (let [canonical (application-to-canonical application-aurinkopaneeli "fi")

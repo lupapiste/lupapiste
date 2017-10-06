@@ -9,9 +9,10 @@ LUPAPISTE.NaviSidebarService = function() {
 
   var animate = ko.observable();
 
-  var showArchivingMenu = ko.pureComputed(function() {
-    return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled");
-  });
+  function authOk( action ) {
+    return  _.wrap( action,
+                    lupapisteApp.models.globalAuthModel.ok);
+  }
 
   var menus = {
     authorityAdmin: [{icon: "lupicon-user",
@@ -44,16 +45,16 @@ LUPAPISTE.NaviSidebarService = function() {
                      {icon: "lupicon-archives",
                       page: "archiving",
                       loc: "arkistointi",
-                      showIf: showArchivingMenu},
+                      showIf: authOk( "permanent-archive-enabled")},
                      {icon: "lupicon-calendar",
                       page: "organization-calendars",
                       loc: "auth-admin.organization-calendars",
-                      showIf: lupapisteApp.models.globalAuthModel
-                              .ok("calendars-enabled"),
+                      showIf: authOk( "calendars-enabled" ),
                       feature: "ajanvaraus"},
                      {icon: "lupicon-circle-section-sign",
                       page: "matti-verdict-templates",
                       loc: "matti.verdict-templates",
+                      showIf: authOk( "matti-enabled"),
                       feature: "matti"}],
     admin: [{icon: "lupicon-download",
              page: "admin",
