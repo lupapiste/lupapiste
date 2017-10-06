@@ -115,7 +115,7 @@
      path: keyword sequence
      v: the new value or a function that produces the new value from the old"
   [children path v]
-  (map
+  (mapv
     #(if (= (:tag %) (first path))
       (if (seq (rest path))
         (update-in % [:child] update-child-element (rest path) v)

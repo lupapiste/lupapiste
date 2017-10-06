@@ -98,7 +98,7 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (xml/get-text lp-xml [:avainsanaTieto]) => nil)))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])))))
 
   (facts "2.2.3"
     (let [xml_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.3")
@@ -121,7 +121,7 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (xml/get-text lp-xml [:avainsanaTieto]) => nil))))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [["soderkulla"] ["Pena Panaani"]]))))))
 
 
 (def canonical-no-toimenpidetieto (util/dissoc-in poikkeus-canonical [:Popast :poikkeamisasiatieto :Poikkeamisasia :toimenpidetieto]))
@@ -203,7 +203,7 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (xml/get-text lp-xml [:avainsanaTieto]) => nil)))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => [])))))
 
   (facts "2.2.3"
     (let [xml_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.2.3")
@@ -226,4 +226,4 @@
           (fact "kaavatilanne"
             (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")
           (fact "avainsanaTieto"
-            (xml/get-text lp-xml [:avainsanaTieto]) => nil))))))
+            (map :content (xml/select lp-xml [:avainsanaTieto :Avainsana])) => []))))))
