@@ -41,8 +41,7 @@
                                   :email "pena@example.com"}
                         :payer-same-as-orderer true
                         :delivery-same-as-orderer true}]
-          (against-background [(mylly/login-and-send-order! anything) => {:ok true :orderNumber "itest-128301023"}]
-                              (fact "submit"
-                                (command pena :submit-printing-order :id application-id :order order-amounts :contacts contacts) => ok?
-                                (Thread/sleep 5000)
-                                (:orders (query pena :my-printing-orders)) => (has some (contains {:application application-id :order-number "itest-128301023"})))))))))
+          (fact "submit"
+            (command pena :submit-printing-order :id application-id :order order-amounts :contacts contacts) => ok?
+             (Thread/sleep 1000)
+             (:orders (query pena :my-printing-orders)) => (has some (contains {:application application-id :acknowledged? true}))))))))
