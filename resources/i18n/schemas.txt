@@ -3986,7 +3986,7 @@
 "uusiRakennus.osoite.porras" "sv" "Trappa"
 "uusiRakennus.poikkeamat" "en" "Deviations from the provisions and their reasons"
 "uusiRakennus.poikkeamat" "fi" "Poikkeamiset säännöksistä perusteluineen"
-"uusiRakennus.poikkeamat" "sv" "Avvikelse från bestämmelserna med motiveringar"
+"uusiRakennus.poikkeamat" "sv" "Undantag från bestämmelserna med motiveringar"
 "uusiRakennus.poikkeamat.help" "en" "List here all building codes and regulations you are applying to deviate slightly from. Justification for each deviation must be provided. A slight deviation cannot be granted without justification."
 "uusiRakennus.poikkeamat.help" "fi" "Tässä kohdassa on lueteltava kaikki määräykset, joista haetaan luvan yhteydessä vähäistä poikkeamista. Lisäksi on esitettävä perustelut jokaiselle poikkeamiselle. Vähäistä poikkeamista ei voida myöntää ilman perusteluja."
 "uusiRakennus.poikkeamat.help" "sv" "Under denna punkt ska alla de bestämmelser räknas upp från vilka obetydligt avsteg ansöks om i samband med lovet. Dessutom ska motiveringar anges för varje sådant avsteg. Utan motivering kan obetydligt avsteg inte beviljas."
