@@ -98,4 +98,4 @@
                    (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
                    (if (:ok result)
                      (mark-acknowledged internalOrderId (:orderNumber result))
-                     (fail! :error.printing-order.submit-failed))))))
+                     (timbre/errorf "PRINTING ORDER SUBMISSION FAILED, integration-messages id %s" internalOrderId))))))
