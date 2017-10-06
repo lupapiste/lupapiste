@@ -62,20 +62,27 @@
 (def max-total-file-size ; 1 Gb
   (* 1024 1024 1024))
 
+(defquery my-printing-orders
+  {:feature :printing-order
+   :user-roles  #{:applicant :authority}}
+  [{user :user}]
+  (ok :orders (map (fn [m] {:order-number (:external-reference m)
+                            :application (-> m :application :id)
+                            :created (:created m)
+                            :acknowledged? (not (nil? (:acknowledged m)))})
+                   (mongo/select :integration-messages {:messageType :printing-order
+                                                        :initator.id (:id user)}))))
+
 (defcommand submit-printing-order
   {:feature      :printing-order
    :parameters  [:id order contacts]
    :states      states/all-application-states
    :user-roles  #{:applicant}
    :pre-checks  [pricing-available?]}
-  [{application :application user :user created-ts :created cmd-name :action}]
+  [{application :application user :user created-ts :created :as command}]
   (let [prepared-order (processor/prepare-order application order contacts)
         total-size (reduce + (map :size (:files prepared-order)))]
     (when (> total-size max-total-file-size)
       (fail! :error.printing-order.too-large))
-    (let [result (mylly/login-and-send-order! (processor/enrich-with-file-content user prepared-order))]
-      (if (:ok result)
-        (do
-          (processor/save-integration-message user created-ts cmd-name prepared-order (:orderNumber result))
-          (ok :order-number (:orderNumber result) :size total-size))
-        (fail! :error.printing-order.submit-failed)))))
+    (processor/do-submit-order command application prepared-order)
+    (ok)))
