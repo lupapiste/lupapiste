@@ -202,6 +202,7 @@
                    :oskari anyone
                    :neighbor anyone
                    :bulletins anyone
+                   :local-bulletins anyone
                    :financial-authority financial-authority?})
 
 (defn cache-headers [resource-type]
