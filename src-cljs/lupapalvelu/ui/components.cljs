@@ -288,7 +288,7 @@
                                             :required? required?
                                             :disabled  disabled?})]
     [:div.matti-autocomplete
-     [:div text-edit]
+     [:div.ac--combobox text-edit]
      (when (and (rum/react open?*) (seq (items-fn @term*)))
        [:div.ac__menu menu-items])]))
 

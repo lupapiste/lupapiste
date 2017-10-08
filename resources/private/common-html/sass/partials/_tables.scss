@@ -617,6 +617,13 @@ select.waste-unit-select {
       }
     }
   }
+  // The following td classes are used in Matti
+  td.batch--file {
+    width: 100%;
+  }
+  td.batch--type {
+    min-width: 15em;
+  }
 }
 
 div.handler-roles-container {

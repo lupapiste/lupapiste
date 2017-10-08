@@ -330,6 +330,12 @@ span.phrase-text {
 div.matti-autocomplete {
   position: relative;
   display: inline-block;
+  // Without border-collapse fix, height would be 41px within tables
+  // (e.g., attachment-batch-table)
+  border-collapse: initial;
+  .ac--combobox {
+    display: table;
+  }
   .ac--selected {
     min-height: 40px;
     max-height: 40px;

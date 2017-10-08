@@ -12171,6 +12171,14 @@ select.waste-unit-select {
   height: 100%;
 }
 
+.attachment-batch-table td.batch--file {
+  width: 100%;
+}
+
+.attachment-batch-table td.batch--type {
+  min-width: 15em;
+}
+
 div.handler-roles-container {
   margin-bottom: 24px;
 }
@@ -18451,6 +18459,11 @@ span.phrase-text {
 div.matti-autocomplete {
   position: relative;
   display: inline-block;
+  border-collapse: initial;
+}
+
+div.matti-autocomplete .ac--combobox {
+  display: table;
 }
 
 div.matti-autocomplete .ac--selected {

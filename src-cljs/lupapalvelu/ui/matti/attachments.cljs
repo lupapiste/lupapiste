@@ -50,11 +50,9 @@
 (defn type-loc [& args]
   (path/loc (util/kw-path :attachmentType args)))
 
-(rum/defcs type-selector < (components/initial-value-mixin ::fields)
-  rum/reactive
+(rum/defcs type-selector < rum/reactive
   (rum/local nil ::types)
-  [{fields* ::fields
-    types* ::types} _ {:keys [schema] :as options} filedata]
+  [{types* ::types} {:keys [schema files* fields*] :as options} filedata]
   (attachment-types types*)
   (let [att-types (some->> (rum/react types*)
                            (filter (fn [{:keys [type-group]}]
@@ -70,21 +68,21 @@
             {value :value} (util/find-by-key :value
                                              (:default schema)
                                              att-types)
-            set-type-fn (partial set-field fields* filedata :type)]
+            set-type-fn (fn [type]
+                          (set-field fields* filedata :type type)
+                          (set-field fields* filedata :contents nil))]
         (when (and value
                    (-> (field-info fields* filedata) :type nil?))
-          (set-type-fn value))
+          (set-field fields* filedata :type value))
         (components/autocomplete value
                                  {:items     att-types
                                   :callback  set-type-fn
                                   :disabled? (not= (:state filedata)
                                                    :success)})))))
 
-(rum/defcs content-editor < (components/initial-value-mixin ::fields)
-  rum/reactive
+(rum/defcs contents-editor < rum/reactive
   (rum/local [] ::types)
-  [{fields* ::fields
-    types*  ::types} _ filedata]
+  [{types*  ::types} {fields* :fields*} {filename :filename :as filedata}]
   (attachment-types types*)
   (let [{:keys [type contents]} (field-info fields* filedata)
         att-types               (rum/react types*)
@@ -104,37 +102,36 @@
                       "")]
         (when-not contents
           (set-fn default))
-        (components/combobox default
+        (components/combobox (rum/cursor-in fields*
+                                            [(keyword filename) :contents])
                              {:items     items
                               :callback  set-fn
                               :required? true
                               :disabled? (not= (:state filedata)
                                                :success)})))))
 
-(rum/defcs attachments-batch < rum/reactive
-  (components/initial-value-mixin ::file-options)
+(rum/defc attachments-batch < rum/reactive
   "Metadata editor for file upload. The name is a hat-tip to the
   AttachmentBatchModel."
-  [{file-options* ::file-options} _ {:keys [schema] :as options}]
-  (let [{files* :files
-         fields* :fields} @file-options*]
-    (when (-> files* rum/react seq)
-      [:div
-       [:table.attachment-batch-table
-        [:thead
-         [:tr
-          [:th [:span (path/loc :attachment.file)]]
-          [:th [:span.batch-required (path/loc :application.attachmentType)]]
-          [:th [:span.batch-required (path/loc :application.attachmentContents)]]
-          [:th.td-center (path/loc :remove)]]]
-        [:tbody
-         (for [{filename :filename :as filedata} @files*]
+  [{:keys [schema files* fields*] :as options}]
+  (when (-> files* rum/react seq)
+    [:div
+     [:table.attachment-batch-table
+      [:thead
+       [:tr
+        [:th [:span (path/loc :attachment.file)]]
+        [:th [:span.batch-required (path/loc :application.attachmentType)]]
+        [:th [:span.batch-required (path/loc :application.attachmentContents)]]
+        [:th.td-center (path/loc :remove)]]]
+      [:tbody
+       (for [{filename :filename :as filedata} @files*]
 
-           [:tr
-            [:td (fileinfo-link filedata)]
-            [:td (type-selector fields* options filedata)]
-            [:td (content-editor fields* filedata)]
-            ])]]])))
+         [:tr
+          [:td.batch--file (fileinfo-link filedata)]
+          [:td.batch--type (type-selector options filedata)]
+          [:td.batch--contents (contents-editor options filedata)]
+          [:td.td-center [:i.lupicon-remove.primary]]
+          ])]]]))
 
 (rum/defc matti-attachments < rum/reactive
   "Displays and supports adding new attachments."
@@ -152,9 +149,9 @@
                                           [:label.btn.positive {:for input-id }
                                            [:i.lupicon-circle-plus]
                                            [:span (path/loc :attachment.addFile)]]])}))
-     (attachments-batch {:files files*
-                         :fields fields*}
-                        options)
+     (attachments-batch (assoc options
+                               :files*  files*
+                               :fields* fields*))
 
 
      (components/debug-atom files* "Files")
