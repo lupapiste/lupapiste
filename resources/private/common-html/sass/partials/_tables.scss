@@ -660,6 +660,15 @@ select.waste-unit-select {
     width: 100%;
     word-wrap: normal;
   }
+  tfoot.batch--buttons {
+    td {
+      padding-top: $marginS;
+      text-align: right;
+      button {
+        margin-left: $marginM;
+      }
+    }
+  }
 }
 
 div.handler-roles-container {
