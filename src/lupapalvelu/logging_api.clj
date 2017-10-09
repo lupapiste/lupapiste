@@ -46,7 +46,7 @@
   {:user-roles #{:admin}
    :description "Returns frontend entries from all test runs."}
   [_]
-  (ok :log (merge (zipmap levels (repeat [])) (reduce (partial merge-with concat) @frontend-log))))
+  (ok :log (merge (zipmap levels (repeat [])) (apply merge-with concat (vals @frontend-log)))))
 
 (defquery newest-version
   {:user-roles #{:anonymous}
