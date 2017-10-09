@@ -2,7 +2,7 @@
   <navi-sidebar></navi-sidebar>
   <div class="container container--authority-admin feature--no-border"
        data-bind="feature: 'matti',
-                  if: organization.organizationId,
+                  if: organization.organizationId() && authorization.ok('matti-enabled'),
                   css: lupapisteApp.services.naviSidebarService.containerCss">
     <cljs-matti_verdict-templates></cljs-matti_verdict-templates>
   </div>
