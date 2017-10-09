@@ -173,3 +173,9 @@
                   :verdict-id verdict-id
                   :path path
                   :value value))
+
+;; Attachments
+
+(defn delete-file [file-id]
+  (common/command {:command :remove-uploaded-file}
+                  :attachmentId file-id))

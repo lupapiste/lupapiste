@@ -5,6 +5,7 @@
             [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.components :as components]
             [lupapalvelu.ui.matti.path :as path]
+            [lupapalvelu.ui.matti.service :as service]
             [rum.core :as rum]
             [sade.shared-util :as util])
   (:import [goog.async Delay]))
@@ -29,11 +30,14 @@
   IMG_2253.JPG
   JPG-kuva 2.9 MB"
   [{:keys [filename size type file-id]}]
-  [:div
-   [:a {:href   (str "/api/raw/view-file?fileId=" file-id)
-        :target :_blank} filename]
-   [:br]
-   [:span.fileinfo (path/loc type) " " (js/util.sizeString size)]])
+  [:div.batch--filedata
+   (if file-id
+     [:a.batch--filename {:href   (str "/api/raw/view-file?fileId=" file-id)
+          :target :_blank} filename]
+     [:span.batch--filename filename])
+   [:div.batch--fileinfo (if (loc.hasTerm type)
+                     (path/loc type)
+                     type) " " (js/util.sizeString size)]])
 
 (defn field-info [fields* {filename :filename}]
   (let [c (rum/cursor-in fields* [(keyword filename)])]
@@ -110,6 +114,23 @@
                               :disabled? (not= (:state filedata)
                                                :success)})))))
 
+(defn- td-error [msg]
+  [:td.batch--error {:colSpan 2} msg])
+
+(defn- td-progress [percentage]
+  [:td.batch--progress {:colSpan 2}
+   [:div [:span {:style {:width (str percentage "%")}} " "]]])
+
+(defn- remove-button [{:keys [files* fields*]} {:keys [filename file-id]}]
+  [:i.lupicon-remove.primary
+   {:on-click (fn []
+                (when file-id
+                  (service/delete-file file-id))
+                (swap! files*
+                       (partial remove #(util/=as-kw filename (:filename %))))
+                (swap! fields*
+                       dissoc (keyword filename)))}])
+
 (rum/defc attachments-batch < rum/reactive
   "Metadata editor for file upload. The name is a hat-tip to the
   AttachmentBatchModel."
@@ -124,13 +145,21 @@
         [:th [:span.batch-required (path/loc :application.attachmentContents)]]
         [:th.td-center (path/loc :remove)]]]
       [:tbody
-       (for [{filename :filename :as filedata} @files*]
-
+       (for [{:keys [filename state] :as filedata} @files*]
          [:tr
           [:td.batch--file (fileinfo-link filedata)]
-          [:td.batch--type (type-selector options filedata)]
-          [:td.batch--contents (contents-editor options filedata)]
-          [:td.td-center [:i.lupicon-remove.primary]]
+          (case state
+            :bad (td-error (:message filedata))
+            :failed (td-error (path/loc :file.upload.failed))
+            :progress (td-progress (:progress filedata))
+            [
+             [:td.batch--type
+              {:key (path/unique-id "batch-type")}
+              (type-selector options filedata)]
+             [:td.batch--contents
+              {:key (path/unique-id "batch-contents")}
+              (contents-editor options filedata)]])
+          [:td.td-center (remove-button options filedata)]
           ])]]]))
 
 (rum/defc matti-attachments < rum/reactive

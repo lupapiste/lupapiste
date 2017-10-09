@@ -12172,11 +12172,52 @@ select.waste-unit-select {
 }
 
 .attachment-batch-table td.batch--file {
+  max-width: 20em;
+  vertical-align: middle;
+}
+
+.attachment-batch-table td.batch--file div.batch--filedata {
+  line-height: 1.1;
+}
+
+.attachment-batch-table td.batch--file div.batch--filedata .batch--filename {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 20em;
+  overflow-x: hidden;
+  display: inline-block;
+  padding-right: 6px;
+}
+
+.attachment-batch-table td.batch--file div.batch--filedata .batch--fileinfo {
+  white-space: nowrap;
+}
+
+.attachment-batch-table td.batch--progress {
   width: 100%;
+}
+
+.attachment-batch-table td.batch--progress div {
+  width: 100%;
+  border: solid 1px #ef7626;
+  height: 24px;
+}
+
+.attachment-batch-table td.batch--progress div span {
+  height: 22px;
+  background-color: #f39129;
+  display: inline-block;
 }
 
 .attachment-batch-table td.batch--type {
   min-width: 15em;
+}
+
+.attachment-batch-table td.batch--error {
+  color: #df3215;
+  min-width: 20em;
+  width: 100%;
+  word-wrap: normal;
 }
 
 div.handler-roles-container {

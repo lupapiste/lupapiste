@@ -46,12 +46,16 @@
      :filename      (.-name file)
      :size          (.-size file)
      :type          (.-type file)
-     :file-id       (.-fileId file)}
+     :file-id       (.-fileId file)
+     ;; The following are not filedata but available only for single
+     ;; files.
+     :message       (.-message message)
+     :progress      (.-progress message)}
     (do
       (->> (.-files message)
-          (map (fn [file]
-                 {:filename (.-filename file)
-                  :file-id  (.-fileId file)}))))))
+           (map (fn [file]
+                  {:filename (.-filename file)
+                   :file-id  (.-fileId file)}))))))
 
 
 (defn file-monitors
@@ -71,12 +75,14 @@
                                      (if-let [c-file (get changed filename)]
                                        (merge (assoc file
                                                      :state state)
-                                              (select-keys c-file [:file-id]))
+                                              (select-keys c-file [:file-id :progress]))
                                        file))
-                                   files)))))]
-    {:added    (fn [msg]
-                 (swap! files* #(conj (vec %) (message-filedata msg))))
-     :bad      #(file-state % :bad)
+                                   files)))))
+          (add-file [msg state]
+            (swap! files* #(conj (vec %) (assoc (message-filedata msg)
+                                                :state state))))]
+    {:added    #(add-file % :added)
+     :bad      #(add-file % :bad)
      :success  #(file-state % :success)
      :failed   #(file-state % :failed)
      :progress #(file-state % :progress)}))
