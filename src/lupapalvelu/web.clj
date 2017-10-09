@@ -3,6 +3,8 @@
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
+            [clj-time.core :as time]
+            [clj-time.local :as local]
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
             [ring.util.response :refer [resource-response]]
@@ -14,46 +16,46 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
+            [net.cgrand.enlive-html :as enlive]
             [monger.operators :refer [$set $push $elemMatch]]
+            [sade.common-reader :refer [strip-xml-namespaces]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
-            [sade.files :as files]
             [sade.env :as env]
+            [sade.files :as files]
             [sade.http :as http]
-            [sade.util :as util]
             [sade.property :as p]
+            [sade.session :as ssess]
             [sade.status :as status]
             [sade.strings :as ss]
-            [sade.session :as ssess]
+            [sade.util :as util]
             [sade.xml :as xml]
-            [sade.common-reader :refer [strip-xml-namespaces]]
-            [lupapalvelu.api-common :refer :all]
-            [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
+            [lupapalvelu.activation :as activation]
+            [lupapalvelu.api-common :refer :all]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment.muuntaja-client :as muuntaja]
-            [lupapalvelu.autologin :as autologin]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :refer [*lang*] :as i18n]
-            [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.token :as token]
-            [lupapalvelu.activation :as activation]
-            [lupapalvelu.logging :refer [with-logging-context]]
-            [lupapalvelu.idf.idf-api :as idf-api]
-            [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.calendars-api :as calendars]
-            [lupapalvelu.ident.suomifi]
+            [lupapalvelu.control-api :as control]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.ident.dummy]
-            [lupapalvelu.ya-extension :as yax]
-            [clj-time.core :as time]
-            [clj-time.local :as local]
+            [lupapalvelu.ident.suomifi]
+            [lupapalvelu.idf.idf-api :as idf-api]
+            [lupapalvelu.logging :refer [with-logging-context]]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.proxy-services :as proxy-services]
+            [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.tasks :as tasks]
-            [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
+            [lupapalvelu.token :as token]
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.xml.asianhallinta.reader :as ah-reader]
+            [lupapalvelu.ya-extension :as yax]
+            )
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -830,16 +832,6 @@
                                 "fi")
       (resp/status 200 "PROCESSED")))
 
-  (defn override-xml [xml-file overrides]
-    (let [xml            (enlive/xml-resource xml-file)
-          overridden-xml (reduce (fn [nodes override]
-                                   (enlive/transform nodes
-                                                     (->> (:selector override)
-                                                          (map keyword))
-                                                     (enlive/content (:value override))))
-                                 xml overrides)]
-      (apply str (enlive/emit* overridden-xml))))
-
   (defpage [:get "/dev/ah/message-response"] {:keys [id messageId ftp-user]} ; LPK-3126
     (let [xml (-> (io/resource "asianhallinta/sample/ah-example-response.xml")
                   (enlive/xml-resource)
@@ -892,4 +884,11 @@
     (defpage [:post "/dev/statusecho/:status"] {status :status}
       (response status))
     (defpage [:get "/dev/statusecho/:status"] {status :status}
-      (response status))))
+      (response status)))
+
+  (defpage [:get "/dev/batchrun-invoke"] {batchrun :batchrun args :args}
+    (let [batchruns {"check-verdict-attachments" batchrun/check-for-verdict-attachments}
+          batchrun-fn (batchruns batchrun)]
+      (if (nil? batchrun-fn)
+        (fail :error.batchrun-not-defined :batchrun batchrun)
+        (ok (resp/json (apply batchrun-fn args)))))))

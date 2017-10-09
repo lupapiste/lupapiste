@@ -2,13 +2,17 @@
   (:require [clj-time.coerce :as c]
             [clj-time.core :as t]
             [midje.sweet :refer :all]
-            [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [now]]
             [sade.util :as util]))
+
+(defn check-verdict-attachments []
+  (-> (http-get (str (server-address) "/dev/batchrun-invoke?batchrun=check-verdict-attachments") {})
+      decode-response
+      :body))
 
 (defn- application-verdict-url-hashes [application]
   (->> application
@@ -61,10 +65,7 @@
            (fact "verdicts do not have urlHashes"
                  (application-verdict-url-hashes application) => (has every? nil?))
 
-           (let [batchrun-result (mongo/with-db test-db-name
-                                   (batchrun/fetch-verdict-attachments (-> 3 t/months t/ago c/to-long)
-                                                                       (now)
-                                                                       []))
+           (let [batchrun-result (check-verdict-attachments)
                  updated-application (query-application sonja app-id)
                  url-hashes (->> (application-verdict-url-hashes updated-application)
                                  (filter string?))]
@@ -112,10 +113,7 @@
                    => (dissoc updated-application :attachments :comments :verdicts))
 
              (fact "running fetch-verdict-attachments again does not alter the application"
-                   (let [new-batchrun-result (mongo/with-db test-db-name
-                                               (batchrun/fetch-verdict-attachments (-> 3 t/months t/ago c/to-long)
-                                                                                  (now)
-                                                                                  []))
+                   (let [new-batchrun-result (check-verdict-attachments)
                          non-updated-application (query-application sonja app-id)]
                      (:updated-applications new-batchrun-result) => empty?
                      updated-application => non-updated-application))))))
