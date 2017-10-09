@@ -15,6 +15,7 @@
             [sade.schemas :as ssc]
             [sade.schema-utils :as ssu]
             [sade.strings :as ss]
+            [sade.threads :as threads]
             [sade.util :as util]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
@@ -29,22 +30,9 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit])
-  (:import [java.util.concurrent ThreadFactory Executors]
-           [java.io InputStream]))
+  (:import [java.io InputStream]))
 
-(defn thread-factory []
-  (let [security-manager (System/getSecurityManager)
-        thread-group (if security-manager
-                       (.getThreadGroup security-manager)
-                       (.getThreadGroup (Thread/currentThread)))]
-    (reify
-      ThreadFactory
-      (newThread [this runnable]
-        (doto (Thread. thread-group runnable "archive-upload-worker")
-          (.setDaemon true)
-          (.setPriority Thread/NORM_PRIORITY))))))
-
-(defonce upload-threadpool (Executors/newFixedThreadPool 3 (thread-factory)))
+(defonce upload-threadpool (threads/threadpool 3 "archive-upload-worker"))
 
 (def archival-states #{:arkistoidaan :arkistoitu})
 
@@ -116,29 +104,28 @@
   [id is-or-file-fn content-type metadata-fn {app-id :id :as application} now state-update-fn user]
   (info "Trying to archive attachment id" id "from application" app-id)
   (do (state-update-fn :arkistoidaan application now id)
-      (.submit
+      (threads/submit
         upload-threadpool
-        (fn []
-          (let [metadata (metadata-fn)
-                {:keys [status body]} (upload-file id
-                                                   (is-or-file-fn)
-                                                   content-type
-                                                   (assoc metadata :tila :arkistoitu))]
-            (cond
-              (= 200 status)
-              (do
-                (info "Archived attachment id" id "from application" app-id)
-                (do-post-archival-ops state-update-fn id application now user))
+        (let [metadata (metadata-fn)
+              {:keys [status body]} (upload-file id
+                                                 (is-or-file-fn)
+                                                 content-type
+                                                 (assoc metadata :tila :arkistoitu))]
+          (cond
+            (= 200 status)
+            (do
+              (info "Archived attachment id" id "from application" app-id)
+              (do-post-archival-ops state-update-fn id application now user))
 
-              (and (= status 409) (string/includes? body "already exists"))
-              (do
-                (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
-                (do-post-archival-ops state-update-fn id application now user))
+            (and (= status 409) (string/includes? body "already exists"))
+            (do
+              (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
+              (do-post-archival-ops state-update-fn id application now user))
 
-              :else
-              (do
-                (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
-                (state-update-fn :valmis application now id))))))))
+            :else
+            (do
+              (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
+              (state-update-fn :valmis application now id)))))))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-ids]
   (->>
