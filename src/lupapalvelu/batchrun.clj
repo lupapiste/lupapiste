@@ -31,6 +31,7 @@
             [sade.dummy-email-server]
             [sade.http :as http]
             [sade.strings :as ss]
+            [sade.threads :as threads]
             [sade.util :refer [fn-> pcond->] :as util]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import [org.xml.sax SAXParseException]))
@@ -559,13 +560,13 @@
         permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
+        threadpool    (threads/threadpool 16 "review checking worker")
         threads       (mapv (fn [org]
-                             (util/future* (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
-                           organizations)]
-    (loop []
-      (when-not (every? realized? threads)
-        (Thread/sleep 1000)
-        (recur)))))
+                              (threads/submit
+                               threadpool
+                               (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
+                            organizations)]
+    (threads/wait-for-threads threads)))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
