@@ -14,9 +14,9 @@
 (sc/defschema OrganizationDocstoreInfo
   (assoc org/DocStoreInfo
          :id org/OrgId
-         :name (i18n/localization-schema sc/Str)
-         :municipalities [{:id         sc/Str
-                           :name       (i18n/localization-schema sc/Str)}]))
+         :name i18n/LocalizationStringMap
+         :municipalities [{:id   sc/Str
+                           :name i18n/LocalizationStringMap}]))
 
 (sc/defschema OrganizationResponse
   (assoc ApiResponse :data OrganizationDocstoreInfo))
@@ -27,7 +27,7 @@
 (defn- municipality-name [municipality-code]
   (i18n/supported-langs-map #(i18n/localize % (str "municipality." municipality-code))))
 
-(defn municipality-info [{:keys [municipality permitType]}]
+(defn municipality-info [{:keys [municipality]}]
   {:id         municipality
    :name       (municipality-name municipality)})
 
