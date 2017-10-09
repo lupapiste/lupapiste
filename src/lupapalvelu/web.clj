@@ -675,12 +675,7 @@
             (app/submit command)
 
             (and (ss/not-blank? state) (not= state (get-in command [:application :state])))
-            (action/update-application command
-                                       (app-state/state-transition-update
-                                         (keyword state)
-                                         (:created command)
-                                         (:application command)
-                                         user)))
+            (action/update-application command {$set {:state state}, $push {:history (app-state/history-entry state (:created command) user)}}))
 
           (if redirect
             (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))
