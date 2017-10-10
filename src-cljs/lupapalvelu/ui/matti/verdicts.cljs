@@ -176,18 +176,7 @@
                                                                         [:state :info :_meta])
                                                      :schema (dissoc schema :dictionary)
                                                      :dictionary dictionary
-                                                     :references state/references)))))
-
-     #_(lupapalvelu.ui.attachment.components/upload-link console.log)
-     #_(lupapalvelu.ui.attachment.components/upload-wrapper {:callback console.log
-                                                           :dropzone "#application-matti-verdict-tab"
-                                                           :component (fn [{:keys [input input-id callback] :as options}]
-                                                                        (console.log "Options:" options)
-                                                                        [:div
-                                                                         input
-                                                                         [:label.btn.positive {:for input-id }
-                                                                          [:i.lupicon-circle-plus]
-                                                                          [:span (path/loc :attachment.addFile)]]])})]))
+                                                     :references state/references)))))]))
 
 (defn mount-component []
   (when (common/feature? :matti)

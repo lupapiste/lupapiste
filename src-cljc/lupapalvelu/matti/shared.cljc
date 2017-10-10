@@ -604,7 +604,7 @@
                                     :paloluokka             {:docgen "matti-string"}
                                     :show-building          {:docgen "required-in-verdict"}}}
       :attachments     {:attachments {:i18nkey    :application.verdict-attachments
-                                      ;;:type-group #"paatoksenteko"
+                                      :type-group #"paatoksenteko"
                                       :default    :paatoksenteko.paatosote
                                       :dropzone   "#application-matti-verdict-tab"
                                       :multiple?  true}}})

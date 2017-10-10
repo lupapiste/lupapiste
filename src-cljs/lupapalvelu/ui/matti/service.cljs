@@ -215,8 +215,8 @@
 
   app-id: Application id
 
-  filedatas: List of maps with :file-id (string), :type (kw-path)
-  and :contents (string).
+  filedatas: List of maps with :file-id (string), :type (kw-path). Any
+  additional keys (e.g., :contents, :target) are copied as is.
 
   status-fn: Will be called with updated status - [file-id]
   map. Status can be :pending, :done or :error. The callback will not
@@ -225,11 +225,11 @@
   [app-id filedatas status-fn]
   (let [result* (atom {})]
     (bind-attachments app-id
-                      (map (fn [{:keys [file-id contents type]}]
+                      (map (fn [{:keys [file-id type] :as filedata}]
                              (let [[type-group type-id] (util/split-kw-path type)]
-                                  {:fileId   file-id
-                                   :contents contents
-                                   :type {:type-group type-group
-                                          :type-id type-id}}))
+                               (merge (dissoc filedata :file-id :type)
+                                      {:fileId   file-id
+                                       :type {:type-group type-group
+                                              :type-id type-id}})))
                            filedatas)
                       (partial batch-job status-fn))))

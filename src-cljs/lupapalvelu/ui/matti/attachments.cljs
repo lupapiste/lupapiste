@@ -136,7 +136,7 @@
   (swap! fields*
          dissoc (keyword filename)))
 
-(defn- bind-batch [{:keys [files* fields* binding?*]}]
+(defn- bind-batch [{:keys [files* fields* binding?* info]}]
   (reset! binding?* true)
   (swap! files* (fn [files]
                   (filter #(= (:state %) :success) files)))
@@ -145,10 +145,11 @@
                                   (map (fn [{:keys [file-id filename]}]
 
                                          (assoc ((keyword filename) @fields*)
-                                                :file-id file-id))
+                                                :file-id file-id
+                                                :target {:type :verdict
+                                                         :id   (:id @info)}))
                                        @files*)
                                   (fn [{:keys [done pending] :as job}]
-                                    (console.log job)
                                     (swap! files* (fn [files]
                                                     (remove #(util/includes-as-kw? done
                                                                                    (:file-id %))
@@ -212,8 +213,7 @@
              (when-not binding?
                [:i.lupicon-remove.primary
                 {:on-click #(remove-file options filedata)}])]])]
-        (batch-buttons options)]
-       ])))
+        (batch-buttons options)]])))
 
 (rum/defc add-file-label < rum/reactive
   "Add file label button as a separate component for binding?* atom's

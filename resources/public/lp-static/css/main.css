@@ -12171,6 +12171,29 @@ select.waste-unit-select {
   height: 100%;
 }
 
+.attachment-batch-table tr:nth-child(4n+3),
+.attachment-batch-table tr:nth-child(4n+4) {
+  background: #f6f6f6;
+}
+
+.attachment-batch-table tr:nth-child(4n+1),
+.attachment-batch-table tr:nth-child(4n+2) {
+  background: #ffffff;
+}
+
+.attachment-batch-table tr:nth-child(4n+1):hover,
+.attachment-batch-table tr:nth-child(4n+2):hover {
+  background: #ffffff;
+}
+
+.attachment-batch-table tr.file {
+  border-bottom: 0;
+}
+
+.attachment-batch-table tr.metadata {
+  border-top: 0;
+}
+
 .attachment-batch-table td.batch--file {
   max-width: 20em;
   vertical-align: middle;
