@@ -91,8 +91,7 @@
           :deleted  sc/Bool
           :draft    sc/Any ;; draft is copied to version data on publish.
           :modified ssc/Timestamp
-          :published {:id        ssc/ObjectIdStr
-                      :published ssc/Timestamp
+          :published {:published ssc/Timestamp
                       :data      sc/Any
                       :settings  MattiPublishedSettings}}))
 
