@@ -8,6 +8,8 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.util :as att-util]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.company :as company]
             [lupapalvelu.domain :as domain]
@@ -15,8 +17,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.user :as user]))
 
 (defn by-id [application collection id]
   (let [docs ((keyword collection) application)]
@@ -173,7 +174,7 @@
   (when (and op-id attachments)
     (seq (map :id (filter
                     (fn [{versions :versions :as attachment}]
-                      (and ((set (att/get-operation-ids attachment)) op-id)
+                      (and ((set (att-util/get-operation-ids attachment)) op-id)
                            (empty? versions)))
                     attachments)))))
 

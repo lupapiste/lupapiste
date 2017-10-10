@@ -22,6 +22,12 @@
                                                 {:tag :kokonaisala}
                                                 {:tag :kerrosala}]})
 
+(def avainsanatieto_223
+  {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
+
+(def menettely-tos_223
+  {:tag :menettelyTOS})
+
 (def abstract-poikkeamistype-212 [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                                   {:tag :luvanTunnistetiedot :child [mapping-common/lupatunnus]}
                                   {:tag :osapuolettieto :child [mapping-common/osapuolet_210]}
@@ -65,13 +71,22 @@
     (mapping-common/update-child-element [:liitetieto :Liite] {:tag :Liite :child mapping-common/liite-children_216})
     (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})))
 
+(def poikkeamisasia-223
+  (-> abstract-poikkeamistype-221
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+    (conj avainsanatieto_223 menettely-tos_223)))
+
+(def suunnittelutarveasia-223
+  (-> abstract-poikkeamistype-221
+    (mapping-common/update-child-element [:osapuolettieto] {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+    (conj menettely-tos_223)))
 
 (def poikkeamis_to_krysp_212
   {:tag :Popast
    :ns "ppst"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :P "2.1.2")
                  :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
-           mapping-common/common-namespaces)
+                (mapping-common/common-namespaces :P "2.1.2"))
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-212}]}
            {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-212}]}]})
@@ -111,6 +126,16 @@
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-221}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-221}]}])))
 
+(def poikkeamis_to_krysp_223
+  (-> poikkeamis_to_krysp_221
+      (update-in [:attr] merge
+                 {:xsi:schemaLocation (mapping-common/schemalocation :P "2.2.3")
+                  :xmlns:ppst "http://www.kuntatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
+                 (mapping-common/common-namespaces :P "2.2.3"))
+      (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
+                     {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child poikkeamisasia-223}]}
+                     {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child suunnittelutarveasia-223}]}])))
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
@@ -120,6 +145,7 @@
     "2.1.5" poikkeamis_to_krysp_215
     "2.2.0" poikkeamis_to_krysp_220
     "2.2.1" poikkeamis_to_krysp_221
+    "2.2.3" poikkeamis_to_krysp_223
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- common-map-enums [canonical krysp-path krysp-version]

@@ -154,11 +154,7 @@
         (m k)))))
 
 (defalias find-by-key shared/find-by-key)
-
-(defn find-by-id
-  "Return item from sequence col of maps where :id matches id."
-  [id col]
-  (some (fn [m] (when (= id (:id m)) m)) col))
+(defalias find-by-id  shared/find-by-id)
 
 (defn replace-by-id
   "Return col of maps where elements are replaced by item when element :id matches item :id"
@@ -230,6 +226,8 @@
     (if (fn? checker)
       (checker coll)
       (= coll checker))))
+
+(defalias safe-update-in shared/safe-update-in)
 
 (defn ->keyword [x]
   ((if (number? x)
@@ -623,7 +621,8 @@
 
 (defn is-latest-of?
   "Compares timestamp ts to given timestamps.
-   Returns true if ts is greater than all given timestamps, false if even one of them is greater (or equal)"
+   Returns true if ts is greater than all given timestamps, false if
+  even one of them is greater (or equal)"
   [ts timestamps]
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
@@ -634,12 +633,16 @@
 (defalias intersection-as-kw shared/intersection-as-kw)
 
 (defn kw-path
-  "a b c -> :a.b.c"
+  "a b c -> :a.b.c
+   [a b c] -> :a.b.c"
   [& kw]
   (->> kw
+       flatten
        (map ss/->plain-string)
        (ss/join ".")
        keyword))
+
+(def split-kw-path shared/split-kw-path)
 
 (defn get-in-tree
   "Gets a branch in (operation)tree by path. Tree should be represented as vectors of pairs.

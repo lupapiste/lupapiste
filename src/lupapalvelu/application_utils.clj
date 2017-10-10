@@ -1,12 +1,11 @@
 (ns lupapalvelu.application-utils
   (:require [sade.strings :as ss]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.i18n :as i18n]
-            [sade.strings :as s]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as usr]
+            [monger.operators :refer :all]))
 
 
 (defn operation-description

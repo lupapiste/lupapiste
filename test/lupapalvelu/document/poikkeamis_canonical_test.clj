@@ -185,6 +185,8 @@
                         :name "poikkeamis"
                         :created 1379419361123}
      :secondaryOperations []
+     :tags [{:id "tag-1" :label "soderkulla"}
+            {:id "tag-2" :label "Pena Panaani"}]
      :infoRequest false
      :opened 1379422973832
      :created 1379419361123
@@ -196,6 +198,8 @@
      :permitSubtype "poikkeamislupa"
      :id "LP-753-2013-00001"
      :municipality "753"
+     :tosFunction "00 06 00 01"
+     :tosFunctionName "tiedonohjausmenettely"
      :neighbors ctc/neighbors}))
 
 (ctc/validate-all-documents poikkari-hakemus)
@@ -310,7 +314,8 @@
         suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
-        kaytttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
+        kayttotapaus (:kayttotapaus Poikkeamisasia) => "Uusi poikkeamisasia"
+        avainsanatieto (:avainsanaTieto Poikkeamisasia)
 
         asianTiedot (:asianTiedot Poikkeamisasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy
@@ -318,6 +323,14 @@
         kuvaus (:poikkeamisasianKuvaus Asiantiedot) => "Omakotitalon ja tallin rakentaminen."]
 
     (fact "toimenpide-count" (count toimenpidetieto) => 2)
+
+    (fact "avainsanatieto"
+      avainsanatieto => (partial every? map?)
+      avainsanatieto => (partial every? :Avainsana)
+      (map :Avainsana avainsanatieto) => ["soderkulla" "Pena Panaani"])
+
+    (fact "menettelyTOS"
+      (:menettelyTOS Poikkeamisasia) => "tiedonohjausmenettely")
 
     (facts "yhden asunnon talot"
       (let [uusi (->> toimenpidetieto (some #(when (= (get-in % [:Toimenpide :tavoitetilatieto :Tavoitetila :paakayttotarkoitusKoodi]) "011 yhden asunnon talot") %)) :Toimenpide)
@@ -493,7 +506,7 @@
         suoramarkkinointikielto  (:suoramarkkinointikieltoKytkin Lisatieto) => nil?
 
         ;end of abstarctPoikkeamistype
-        kaytttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
+        kayttotapaus (:kayttotapaus Suunnittelutarveasia) => "Uusi suunnittelutarveasia"
 
         asianTiedot (:asianTiedot Suunnittelutarveasia) => truthy
         Asiantiedot (:Asiantiedot asianTiedot) => truthy

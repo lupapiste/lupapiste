@@ -63,6 +63,9 @@ util.showSavedIndicator = function() {};
 util.partyFullName = function() {};
 util.finnishDateAndTime = function() {};
 util.finnishDate = function() {};
+util.toMoment = function() {};
+util.prop = {};
+util.prop.toHumanFormat = function() {};
 
 var sprintf = function() {};
 
@@ -121,6 +124,7 @@ lupapisteApp.services.calendarService = {};
 lupapisteApp.services.sutiService = {};
 lupapisteApp.services.infoService = {};
 lupapisteApp.services.contextService = {};
+lupapisteApp.services.contextService.applicationId = function() {};
 lupapisteApp.services.buildingService = {};
 lupapisteApp.services.assignmentService = {};
 lupapisteApp.services.assignmentRecipientFilterService = {};
@@ -132,6 +136,7 @@ lupapisteApp.services.cardService = {};
 
 lupapisteApp.models = {};
 lupapisteApp.models.application = {};
+lupapisteApp.models.application.permitType = function() {};
 lupapisteApp.models.application.userHasRole = function() {};
 lupapisteApp.models.currentUser = {};
 lupapisteApp.models.currentUser.firstName = function() {};
@@ -143,3 +148,7 @@ lupapisteApp.models.currentUser.city = function() {};
 lupapisteApp.models.currentUser.email = function() {};
 lupapisteApp.models.currentUser.company = {};
 lupapisteApp.models.currentUser.company.id = function() {};
+lupapisteApp.models.applicationAuthModel = {};
+lupapisteApp.models.applicationAuthModel.ok = function() {};
+lupapisteApp.models.globalAuthModel = {};
+lupapisteApp.models.globalAuthModel.ok = function() {};

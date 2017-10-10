@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment-itest
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.attachment.util :refer [attachment-state]]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.itest-util :refer :all]
@@ -314,6 +315,39 @@
           (map :id (filter #(seq (:signatures %)) attachments)) => (just [visible-id old-id] :in-any-order)
           (count (:signatures visible)) => 1
           (count (:signatures old)) => 1)))))
+
+(facts "Stamping copies all signings"
+  (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+        application (query-application pena application-id)
+        attachment-id (:id (first (:attachments application)))
+        _ (upload-attachment pena application-id {:id attachment-id :type {:type-group "paapiirustus" :type-id "asemapiirros"}} true) => ok?
+        _ (command pena :invite-with-role :id application-id :email "mikko@example.com" :text  "" :documentName "" :documentId "" :path "" :role "writer") => ok?
+        _ (command mikko :approve-invite :id application-id) => ok?
+        stamp {:id         "123456789012345678901234"
+               :name       "Oletusleima"
+               :position   {:x 10 :y 200}
+               :background 0
+               :page       "all"
+               :qrCode     true
+               :rows       [[{:type "custom-text" :value "Stamp"}]]}]
+
+    (fact "Both guys has sign attachment"
+      (command pena :sign-attachments :id application-id :attachmentIds [attachment-id] :password "pena") => ok?
+      (command mikko :sign-attachments :id application-id :attachmentIds [attachment-id] :password "mikko123") => ok?
+      (count (:signatures (first (:attachments (query-application pena application-id))))) => 2)
+
+    (fact "Sonja stamps the attachment"
+      (command pena :submit-application :id application-id) = ok?
+      (let [{job :job} (command sonja :stamp-attachments :id application-id :timestamp (sade.core/now) :files [attachment-id] :lang :fi :stamp stamp) => ok?]
+      ; Wait that stamping job is done
+      (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))))
+
+    (fact "Stamped attachment version have both signatures"
+      (let [{attachments :attachments} (query-application sonja application-id)
+            stamped-attachment (first attachments)]
+        (count (:signatures stamped-attachment)) => 4
+        (:version (get (:signatures stamped-attachment) 2)) => {:major 1 :minor 1}
+        (:version (get (:signatures stamped-attachment) 3)) => {:major 1 :minor 1}))))
 
 (facts* "Post-verdict attachments"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")

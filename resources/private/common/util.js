@@ -323,6 +323,12 @@ var util = (function($) {
     );
   }
 
+  function getSchemaElement(docSchema, path) {
+    return _.reduce(path, function(acc, name) {
+      return _.find(acc.body, ["name", name]);
+    }, docSchema);
+  }
+
   function bySchemaName(schemaName) {
     return function(task) {
       return util.getIn(task, ["schema-info", "name"]) === schemaName;
@@ -478,8 +484,8 @@ var util = (function($) {
     return m ? m.format( dateFormats.fi ) : dateArg;
   }
 
-  function finnishDateAndTime( timestamp ) {
-    return moment( timestamp ).format( "D.M.YYYY, HH:mm:ss");
+  function finnishDateAndTime( timestamp, fmt ) {
+    return moment( timestamp ).format( fmt ? fmt : "D.M.YYYY, HH:mm:ss");
   }
 
   return {
@@ -535,7 +541,8 @@ var util = (function($) {
     isEven: isEven,
     finnishDate: finnishDate,
     toMoment: toMoment,
-    finnishDateAndTime: finnishDateAndTime
+    finnishDateAndTime: finnishDateAndTime,
+    getSchemaElement: getSchemaElement
   };
 
 })(jQuery);

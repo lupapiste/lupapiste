@@ -9,10 +9,13 @@
             [sade.common-reader :as cr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
-            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
+            [lupapalvelu.document.rakennuslupa-canonical-test :refer [asiakirjat-toimitettu-checker
+                                                                      application-rakennuslupa
+                                                                      application-aurinkopaneeli
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-tyonjohtajan-nimeaminen-v2
                                                                       application-suunnittelijan-nimeaminen
+                                                                      application-suunnittelijan-nimeaminen-muu
                                                                       jatkolupa-application
                                                                       aloitusoikeus-hakemus]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
@@ -22,7 +25,7 @@
                                                                 rakennuslupa_to_krysp_216
                                                                 rakennuslupa_to_krysp_218
                                                                 rakennuslupa_to_krysp_220
-                                                                save-katselmus-as-krysp
+                                                                rakennuslupa_to_krysp_222
                                                                 rakennuslupa-element-to-xml]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
@@ -36,6 +39,7 @@
 (fact "2.1.6: :tag is set" (has-tag rakennuslupa_to_krysp_216) => true)
 (fact "2.1.8: :tag is set" (has-tag rakennuslupa_to_krysp_218) => true)
 (fact "2.2.0: :tag is set" (has-tag rakennuslupa_to_krysp_220) => true)
+(fact "2.2.2: :tag is set" (has-tag rakennuslupa_to_krysp_222) => true)
 
 (defn- do-test [application & {:keys [validate-tyonjohtaja-type validate-pysyva-tunnus? finnish? validate-operations?]
                                :or {validate-tyonjohtaja-type nil validate-pysyva-tunnus? false finnish? false validate-operations? false}}]
@@ -48,13 +52,15 @@
           xml_216 (rakennuslupa-element-to-xml canonical "2.1.6")
           xml_218 (rakennuslupa-element-to-xml canonical "2.1.8")
           xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
+          xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")
           xml_212_s (indent-str xml_212)
           xml_213_s (indent-str xml_213)
           xml_214_s (indent-str xml_214)
           xml_215_s (indent-str xml_215)
           xml_216_s (indent-str xml_216)
           xml_218_s (indent-str xml_218)
-          xml_220_s (indent-str xml_220)]
+          xml_220_s (indent-str xml_220)
+          xml_222_s (indent-str xml_222)]
 
       (fact "2.1.2: xml exist" xml_212 => truthy)
       (fact "2.1.3: xml exist" xml_213 => truthy)
@@ -63,12 +69,14 @@
       (fact "2.1.6: xml exist" xml_216 => truthy)
       (fact "2.1.8: xml exist" xml_218 => truthy)
       (fact "2.2.0: xml exist" xml_220 => truthy)
+      (fact "2.2.2: xml exist" xml_222 => truthy)
 
       (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
             lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
             lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
             lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
             lp-xml_220 (cr/strip-xml-namespaces (xml/parse xml_220_s))
+            lp-xml_222 (cr/strip-xml-namespaces (xml/parse xml_222_s))
             tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
@@ -181,6 +189,7 @@
       (validator/validate xml_216_s (:permitType application) "2.1.6")
       (validator/validate xml_218_s (:permitType application) "2.1.8")
       (validator/validate xml_220_s (:permitType application) "2.2.0")
+      (validator/validate xml_222_s (:permitType application) "2.2.2")
       )))
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
@@ -196,81 +205,85 @@
   (fact "Aloitusoikeus -> canonical -> xml"
     (do-test aloitusoikeus-hakemus :finnish? true)))
 
-(facts "Katselmus"
-  (let [application (assoc application-rakennuslupa
-                      :state "verdictGiven"
-                      :buildings [{:index "1" :propertyId "09100200990013" :localShortId "001" :nationalId "1234567892"}])
-        user        {:id "777777777777777777000017"
-                     :email "jussi.viranomainen@tampere.fi"
-                     :enabled true
-                     :role "authority"
-                     :username "jussi"
-                     :organizations ["837-YA"]
-                     :firstName "Jussi"
-                     :lastName "Viranomainen"
-                     :street "Katuosoite 1 a 1"
-                     :phone "1231234567"
-                     :zip "33456"
-                     :city "Tampere"}]
 
-    (fact "Katselmus data is parsed correctly from task. Not caring about actual mapping here."
-      (against-background
-        (#'lupapalvelu.xml.krysp.rakennuslupa-mapping/save-katselmus-xml
-          application
-          "fi"
-          "target"
-          "123" ; task id
-          "Pohjakatselmus 1" ; task name
-          "2.5.1974"
-          [{:tila {:tila "osittainen" :kayttoonottava true}
-            :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892" :kunnanSisainenPysyvaRakennusnumero "b123"}}]
-          user
-          "pohjakatselmus" ; katselmuksen-nimi
-          :katselmus ;tyyppi
-          "pidetty" ;osittainen
-          "pitaja" ;pitaja
-          false ;lupaehtona
-          {:kuvaus "kuvaus"
-           :maaraAika "3.5.1974"
-           :toteaja "toteaja"
-           :toteamisHetki "1.5.1974"} ;huomautukset
-          "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
-          "Ei poikkeamisia" ;poikkeamat
-          false ; tiedoksianto
-          "2.1.2" ;krysp-version
-          "begin-of-link" ;begin-of-link
-          {:type "task" :id "123"} ;attachment-target
-          ) => nil)
+(facts "Rakennusvalvonta tests"
+  (let [canonical (application-to-canonical application-rakennuslupa "fi")
+        xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
+        xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")
+        xml_220_s (indent-str xml_220)
+        xml_222_s (indent-str xml_222)
+        lp-xml_220 (cr/strip-xml-namespaces (xml/parse xml_220_s))
+        lp-xml_222 (cr/strip-xml-namespaces (xml/parse xml_222_s))]
 
-      (save-katselmus-as-krysp
-        application
-        {:id "123"
-         :taskname "Pohjakatselmus 1"
-         :schema-info {:name "task-katselmus"}
-         :data {:katselmuksenLaji {:value "pohjakatselmus"},
-                :vaadittuLupaehtona {:value false}
-                :rakennus {:0
-                           {:rakennus
-                            {:jarjestysnumero {:value "1"} :rakennusnro {:value "001"} :kiinttun {:value "09100200990013"} :kunnanSisainenPysyvaRakennusnumero {:value "b123"}}
-                            :tila {:tila {:value "osittainen"}
-                                   :kayttoonottava {:value true}}}}
-                :katselmus {:pitoPvm {:value "2.5.1974"}
-                            :pitaja {:value "pitaja"}
-                            :huomautukset {:kuvaus {:value "kuvaus"}
-                                           :maaraAika {:value "3.5.1974"}
-                                           :toteaja {:value "toteaja"}
-                                           :toteamisHetki {:value "1.5.1974"}}
-                            :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
-                            :poikkeamat {:value "Ei poikkeamisia"}
-                            :tiedoksianto {:value false}
-                            :tila {:value "pidetty"}}}}
-        user
-        "fi"
-        "2.1.2"
-        "target"
-        "begin-of-link") => nil
-      )))
+    (facts "2.2.0"
+      (fact "avainsanatieto"
+        (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
+      (fact "Suunnitelijat"
+        (count (xml/select lp-xml_220 [:suunnittelijatieto :Suunnittelija])) => 4)
+      (fact "Osapuolet"
+        (count (xml/select lp-xml_222 [:osapuolettieto :Osapuoli])) => 5)
+      (fact "menettelyTOS"
+        (xml/get-text lp-xml_220 [:menettelyTOS]) => nil)
+      (fact "rakennustietojEiMmutetaKytkin does not exist"
+        (xml/get-text lp-xml_220 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => nil)
+      (fact "lisatiedot / asiakirjatToimitettuPvm does not exist yet"
+        (xml/get-text lp-xml_220 [:lisatiedot :Lisatiedot :asiakirjatToimitettuPvm]) => ss/blank?))
 
+    (facts "2.2.2"
+      (fact "avainsanatieto"
+        (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
+             (map :content)) => [["avainsana"]
+                                 ["toinen avainsana"]])
+      (fact "Suunnitelijat"
+        (count (xml/select lp-xml_222 [:suunnittelijatieto :Suunnittelija])) => 4)
+      (fact "Osapuolet"
+        (count (xml/select lp-xml_222 [:osapuolettieto :Osapuoli])) => 5)
+      (fact "menettelyTOS"
+        (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely")
+      (fact "rakennustietojEiMmutetaKytkin"
+        (xml/get-text lp-xml_222 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => "true")
+      (fact "lisatiedot / asiakirjatToimitettuPvm"
+        (xml/get-text lp-xml_222 [:lisatiedot :Lisatiedot :asiakirjatToimitettuPvm]) => asiakirjat-toimitettu-checker))))
+
+(facts "Rakennelma"
+  (let [canonical (application-to-canonical application-aurinkopaneeli "fi")
+        xml_218 (rakennuslupa-element-to-xml canonical "2.1.8")
+        xml_220 (rakennuslupa-element-to-xml canonical "2.2.0")
+        xml_222 (rakennuslupa-element-to-xml canonical "2.2.2")
+        xml_218_s (indent-str xml_218)
+        xml_220_s (indent-str xml_220)
+        xml_222_s (indent-str xml_222)]
+
+    (validator/validate xml_218_s :R "2.1.8")
+    (validator/validate xml_220_s :R "2.2.0")
+    (validator/validate xml_222_s :R "2.2.2")
+
+    (facts "2.1.8"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_218_s))
+            toimenpide (xml/select1 lp-xml [:Toimenpide])
+            rakennelma (xml/select1 toimenpide [:Rakennelma])]
+
+        (fact "yksilointitieto" (xml/get-text toimenpide [:yksilointitieto]) => "muu-rakentaminen-id")
+        (fact "kuvaus"          (xml/get-text rakennelma [:kuvaus :kuvaus])  => "virtaa maailmaan")
+        (fact "kayttotarkoitus" (xml/get-text rakennelma [:kayttotarkoitus]) => nil)))
+
+    (facts "2.2.0"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_220_s))
+            toimenpide (xml/select1 lp-xml [:Toimenpide])
+            rakennelma (xml/select1 toimenpide [:Rakennelma])]
+
+        (fact "yksilointitieto" (xml/get-text toimenpide [:yksilointitieto]) => "muu-rakentaminen-id")
+        (fact "kuvaus"          (xml/get-text rakennelma [:kuvaus :kuvaus])  => "virtaa maailmaan")
+        (fact "kayttotarkoitus" (xml/get-text rakennelma [:kayttotarkoitus]) => "Muu rakennelma")))
+
+    (facts "2.2.2"
+      (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_222_s))
+            toimenpide (xml/select1 lp-xml [:Toimenpide])
+            rakennelma (xml/select1 toimenpide [:Rakennelma])]
+
+        (fact "yksilointitieto" (xml/get-text toimenpide [:yksilointitieto]) => "muu-rakentaminen-id")
+        (fact "kuvaus"          (xml/get-text rakennelma [:kuvaus :kuvaus])  => "virtaa maailmaan")
+        (fact "kayttotarkoitus" (xml/get-text rakennelma [:kayttotarkoitus]) => "Aurinkopaneeli")))))
 
 (facts "Tyonjohtajan sijaistus"
   (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")
@@ -321,6 +334,7 @@
 
       (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
       (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "postitetaanKytkin"       (xml/get-text suunnittelija [:postitetaanKytkin])       => nil)
       (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
       (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
       (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
@@ -335,6 +349,7 @@
 
       (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "rakennusfysikaalinen suunnittelija")
       (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "postitetaanKytkin"       (xml/get-text suunnittelija [:postitetaanKytkin])       => nil)
       (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
       (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
       (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
@@ -343,3 +358,37 @@
       (fact "FISEpatevyyskortti"      (xml/get-text suunnittelija [:FISEpatevyyskortti])      => "http://www.ym.fi")
       (fact "FISEkelpoisuus"          (xml/get-text suunnittelija [:FISEkelpoisuus])          => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
       (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy"))))
+
+(def suunnittelijan-nimaminen-muu-canonical (application-to-canonical application-suunnittelijan-nimeaminen-muu "fi"))
+
+(facts "Muu suunnittelija"
+
+  (facts "2.1.2"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.1.2") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.2")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => nil)
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")))
+
+  (facts "2.2.0"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.2.0") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.0")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => nil)
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")))
+
+  (facts "2.2.2"
+    (let [xml_s (-> suunnittelijan-nimaminen-muu-canonical (rakennuslupa-element-to-xml "2.2.2") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.2")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "muu")
+      (fact "muuSuunnittelijaRooli"   (xml/get-text suunnittelija [:muuSuunnittelijaRooli])   => "ei listassa -rooli")
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija"))))

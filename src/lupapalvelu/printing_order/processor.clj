@@ -4,26 +4,14 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [fail!]]
+            [sade.threads :as threads]
             [sade.util :as util]
             [lupapalvelu.integrations.messages :as messages]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
-            [taoensso.timbre :as timbre])
-  (:import (java.util.concurrent Executors ThreadFactory)))
+            [taoensso.timbre :as timbre]))
 
-(defn thread-factory []
-  (let [security-manager (System/getSecurityManager)
-        thread-group (if security-manager
-                       (.getThreadGroup security-manager)
-                       (.getThreadGroup (Thread/currentThread)))]
-    (reify
-      ThreadFactory
-      (newThread [this runnable]
-        (doto (Thread. thread-group runnable "mylly-send-order-worker")
-          (.setDaemon true)
-          (.setPriority Thread/NORM_PRIORITY))))))
-
-(defonce send-order-thread-pool (Executors/newFixedThreadPool 3 (thread-factory)))
+(defonce send-order-thread-pool (threads/threadpool 3 "mylly-send-order-worker"))
 
 (defn prepare-contact-to-order
   [contacts path]
@@ -72,30 +60,34 @@
                                       (with-open [content-is ((:content (att/get-attachment-file-as! user fileId)))]
                                         (assoc file :content (mylly/encode-file-from-stream content-is)))) files)))
 
-(defn save-integration-message [user created-ts {:keys [id organization state]} {:keys [internalOrderId delivery] :as prepared-order}]
+(defn save-integration-message [user created-ts cmd-name {:keys [id organization state]} {:keys [internalOrderId delivery] :as prepared-order}]
   (messages/save {:id internalOrderId
                   :direction "out"
                   :messageType "printing-order"
                   :partner "mylly"
                   :format "xml"
+                  :status "processing"
                   :created created-ts
+                  :external-reference ""
+                  :action cmd-name
                   :application {:id id :organization organization :state state}
                   :initator (select-keys user [:id :username])
                   :attached-files (map :fileId (-> delivery :printedMaterials))
-                  :external-reference ""
                   :attachmentsCount (reduce + (map :copyAmount (-> delivery :printedMaterials)))}))
 
 (defn mark-acknowledged [internalOrderId order-number]
   (timbre/infof "mark-acknowledged %s %s" internalOrderId order-number)
-  (messages/mark-acknowledged-and-return internalOrderId (tc/to-long (t/now)) {:external-reference order-number}))
+  (messages/mark-acknowledged-and-return internalOrderId (tc/to-long (t/now)) {:external-reference order-number
+                                                                               :status "done"}))
 
-(defn do-submit-order [{user :user created-ts :created} application {:keys [internalOrderId] :as prepared-order}]
-  (save-integration-message user created-ts application prepared-order)
+(defn do-submit-order [{user :user created-ts :created cmd-name :action} application {:keys [internalOrderId] :as prepared-order}]
+  (save-integration-message user created-ts cmd-name application prepared-order)
   (timbre/infof "Submitting printing order %s into integration thread pool" internalOrderId)
-  (.submit send-order-thread-pool
-     ; bound-fn needed for itest, so that the db-name binding is visible inside the thread
-    (bound-fn [] (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
-                   (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
-                   (if (:ok result)
-                     (mark-acknowledged internalOrderId (:orderNumber result))
-                     (timbre/errorf "PRINTING ORDER SUBMISSION FAILED, integration-messages id %s" internalOrderId))))))
+  (threads/submit
+   send-order-thread-pool
+   ;; bound-fn needed for itest, so that the db-name binding is visible inside the thread
+   (let [result (mylly/login-and-send-order! (enrich-with-file-content user prepared-order))]
+     (timbre/infof "Printing order %s sent with result %s" internalOrderId result)
+     (if (:ok result)
+       (mark-acknowledged internalOrderId (:orderNumber result))
+       (timbre/errorf "PRINTING ORDER SUBMISSION FAILED, integration-messages id %s" internalOrderId)))))

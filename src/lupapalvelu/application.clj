@@ -7,6 +7,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
@@ -18,7 +19,6 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.link-permit :as link-permit]
@@ -34,8 +34,8 @@
             [sade.env :as env]
             [sade.property :as prop]
             [sade.util :as util :refer [merge-in]]
-            [sade.coordinate :as coord]
-            [sade.schemas :as ssc]))
+            [sade.coordinate :as coord]))
+
 
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
@@ -52,8 +52,6 @@
         permit-subtypes (permit/permit-subtypes permit-type)]
     (distinct (concat op-subtypes permit-subtypes))))
 
-(defn history-entry [to-state timestamp user]
-  {:state to-state, :ts timestamp, :user (usr/summary user)})
 
 (defn tos-history-entry [tos-function timestamp user & [correction-reason]]
   {:pre [(map? tos-function)]}
@@ -177,23 +175,6 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-; the function is in doc to avoid cyclic dependency
-(def state-history-entries doc/state-history-entries)
-
-(defn last-history-item
-  [{history :history}]
-  (last (sort-by :ts history)))
-
-(defn get-previous-app-state
-  "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
-  [{history :history}]
-  (->> (state-history-entries history)
-       (sort-by :ts)
-       butlast
-       last
-       :state
-       keyword))
-
 (defn enrich-application-handlers [application {roles :handler-roles :as organization}]
   (update application :handlers (partial map #(merge (util/find-by-id (:roleId %) roles) %))))
 
@@ -272,7 +253,7 @@
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
 
-(defn- populate-operation-info [operations {info :schema-info :as doc}]
+(defn populate-operation-info [operations {info :schema-info :as doc}]
   (if (:op info)
     (if-let [operation (util/find-first #(= (:id %) (get-in info [:op :id])) operations)]
       (assoc-in doc [:schema-info :op] operation)
@@ -331,6 +312,8 @@
         fields-with-defaults (merge operation-meta-fields-to-enrich enrichable-fields)]
     (update app :primaryOperation merge fields-with-defaults)))
 
+(defn- enrich-tos-function-name [{tos-function :tosFunction org-id :organization :as application}]
+  (assoc application :tosFunctionName (:name (tos/tos-function-with-name tos-function org-id))))
 
 (defn post-process-app [{:keys [user] :as command}]
   (->> (with-auth-models command)
@@ -347,6 +330,8 @@
 (defn post-process-app-for-krysp [application organization]
   (-> application
       (domain/enrich-application-handlers organization)
+      (domain/enrich-application-tags organization)
+      enrich-tos-function-name
       meta-fields/enrich-with-link-permit-data
       link-permit/update-backend-ids-in-link-permit-data))
 
@@ -476,7 +461,7 @@
 (defn application-history-map [{:keys [created organization state tosFunction]} user]
   {:pre [(pos? created) (string? organization) (states/all-states (keyword state))]}
   (let [tos-function-map (tos/tos-function-with-name tosFunction organization)]
-    {:history (cond->> [(history-entry state created user)]
+    {:history (cond->> [(app-state/history-entry state created user)]
                 tos-function-map (concat [(tos-history-entry tos-function-map created user)]))}))
 
 (defn permit-type-and-operation-map [operation-name created]
@@ -633,17 +618,12 @@
                         :upsert true)))
 
 ;; Submit
-
 (defn submit [{:keys [application created user] :as command} ]
-  (let [history-entries (remove nil?
-                                [(when-not (:opened application) (history-entry :open created user))
-                                 (history-entry :submitted created user)])]
-    (action/update-application command
-                               {$set {:state     :submitted
-                                      :modified  created
-                                      :opened    (or (:opened application) created)
-                                      :submitted (or (:submitted application) created)}
-                                $push {:history {$each history-entries}}}))
+  (let [transitions (remove nil?
+                            [(when-not (:opened application)
+                               [:open created application user])
+                             [:submitted created application user]])]
+    (action/update-application command (app-state/state-transition-updates transitions)))
   (try
     (mongo/insert :submitted-applications (-> application
                                               meta-fields/enrich-with-link-permit-data
@@ -657,55 +637,11 @@
 ;; Updates
 ;;
 
-(def timestamp-key
-  (merge
-    ; Currently used states
-    {:draft :created
-     :open :opened
-     :submitted :submitted
-     :sent :sent
-     :complementNeeded :complementNeeded
-     :verdictGiven nil
-     :constructionStarted :started
-     :acknowledged :acknowledged
-     :foremanVerdictGiven nil
-     :agreementPrepared :agreementPrepared
-     :agreementSigned   :agreementSigned
-     :finished :finished
-     :closed :closed
-     :canceled :canceled}
-    ; New states, timestamps to be determined
-    (zipmap
-      [:appealed
-       :extinct
-       :hearing
-       :final
-       :survey
-       :sessionHeld
-       :proposal
-       :registered
-       :proposalApproved
-       :sessionProposal
-       :inUse
-       :onHold]
-      (repeat nil))))
-
-(assert (= states/all-application-states (set (keys timestamp-key))))
-
 (def two-years-ms 63072000000)
 
 (defn warranty-period [timestamp]
   {:warrantyStart timestamp,
    :warrantyEnd (+ timestamp two-years-ms)})
-
-(defn state-transition-update
-  "Returns a MongoDB update map for state transition"
-  [to-state timestamp application user]
-  {:pre [(sm/valid-state? application to-state)]}
-  (let [ts-key (timestamp-key to-state)]
-    {$set (merge {:state to-state, :modified timestamp}
-                 (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
-     $push {:history (history-entry to-state timestamp user)}}))
 
 (defn change-application-state-targets
   "Namesake query implementation."
@@ -740,7 +676,7 @@
 
 (defn cancel-inforequest [{:keys [created user data application] :as command}]
   {:pre [(seq (:application command))]}
-  (action/update-application command (state-transition-update :canceled created application user))
+  (action/update-application command (app-state/state-transition-update :canceled created application user))
   (remove-app-links (:id application))
   (assignment/cancel-assignments (:id application))
   (ok))
@@ -751,7 +687,7 @@
                           (i18n/localize lang "application.canceled.reason") ": "
                           text)]
     (->> (util/deep-merge
-          (state-transition-update :canceled created application user)
+          (app-state/state-transition-update :canceled created application user)
           (when (seq text)
             (comment/comment-mongo-update state comment-text {:type "application"} role false user nil created)))
          (action/update-application command)))
@@ -764,7 +700,11 @@
   (action/update-application command
                              {:state :canceled}
                              (merge
-                               (state-transition-update (get-previous-app-state application) created application user)
+                               (app-state/state-transition-update
+                                 (app-state/get-previous-app-state application)
+                                 created
+                                 application
+                                 user)
                                {$unset {:canceled 1}}))
   (assignment/activate-assignments (:id application))
   (ok))

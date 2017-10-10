@@ -1,15 +1,15 @@
 (ns lupapalvelu.digitizer-api
   (:require [lupapalvelu.digitizer :as d]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]
             [lupapalvelu.action :as action :refer [defcommand defquery]]
+            [lupapalvelu.application-state :as app-state]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.roles :as roles]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [sade.util :as util]
             [monger.operators :refer :all]
-            [lupapalvelu.roles :as roles]
-            [lupapalvelu.application :as app]
-            [clojure.set :as set]
-            [lupapalvelu.permit :as permit]))
+            [clojure.set :as set]))
 
 (defn user-is-allowed-to-digitize [{user-orgs :user-organizations user :user {:keys [organizationId]} :data}]
   (let [archive-enabled? (some #(and (:permanent-archive-enabled %) (:digitizer-tools-enabled %))
@@ -52,10 +52,10 @@
    :pre-checks       [permit/is-archiving-project]}
   [{:keys [application created user] :as command}]
   (action/update-application command
-                             {$set  {:state     :underReview
-                                     :modified  created
-                                     :opened    (:opened application)}
-                              $push {:history (app/history-entry :underReview created user)}}))
+                             (util/deep-merge
+                               (app-state/state-transition-update
+                                 :underReview created application user)
+                               {$set {:opened (:opened application)}})))
 
 (defcommand store-archival-project-backend-ids
   {:parameters [id verdicts]

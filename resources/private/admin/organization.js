@@ -12,6 +12,7 @@
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
     self.earliestArchivingDate = ko.observable();
+    self.mattiEnabled = ko.observable(false);
 
     self.permitTypes = ko.observableArray([]);
     self.municipalities = ko.observableArray([]);
@@ -60,27 +61,34 @@
     };
 
 
-    function organizationCommand( command, params ) {
+    function organizationCommand( command, params, pend ) {
       if (isLoading) {
         return;
       }
       ajax.command( command,
                     _.merge(params,
                             {organizationId: self.organization().id()}))
-        .pending( self.threeDMapServerParams.waiting)
+        .pending( pend || _.noop )
         .success( util.showSavedIndicator )
         .error( util.showSavedIndicator )
         .call();
     }
 
     self.threeDMapServerParams.channel.send = function( serverDetails ) {
-      organizationCommand( "update-3d-map-server-details", serverDetails );
+      organizationCommand( "update-3d-map-server-details", serverDetails, self.threeDMapServerParams.waiting );
     };
 
     self.threeDMapEnabled.subscribe( function( value ) {
-      organizationCommand( "set-3d-map-enabled", {flag: Boolean( value )});
+      organizationCommand( "set-3d-map-enabled", {flag: Boolean( value )}, self.threeDMapServerParams.waiting);
     });
 
+    function saveBooleanValue(updatePath, boolValue) {
+      organizationCommand("set-organization-boolean-path", {path: updatePath, value: boolValue});
+    }
+
+    self.saveMattiEnabled = function() {
+      saveBooleanValue("matti-enabled", self.mattiEnabled());
+    };
 
     function updateSsoKeys() {
       _.forEach(self.ssoKeys(), function(ssoKey) {

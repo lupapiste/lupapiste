@@ -5,6 +5,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
@@ -2912,7 +2913,7 @@
                              {:documents {$elemMatch {:schema-info.name "laajennettuRakennusjateselvitys"}}}))
 
 (defmigration fix-empty-foreman-user
-  {:apply-when (pos? (mongo/count :users {:email ""}))}
+  {:apply-when (pos? (mongo/count :users {:email "" :id "58afe17a28e06f2484a6e82f"}))}
   (let [malformed-user-id "58afe17a28e06f2484a6e82f"]
     (mongo/remove :users malformed-user-id)
     (mongo/update-by-query :submitted-applications
@@ -3068,7 +3069,7 @@
                              :history {$elemMatch {:state {$nin ["agreementPrepared" "agreementSigned" "finished"]}}}}
                             [:state :permitSubtype :permitType :primaryOperation :history])
           :let [verdict-state       (sm/verdict-given-state app)
-                state-history       (app/state-history-entries (:history app))
+                state-history       (app-state/state-history-entries (:history app))
                 history-states-set  (->> state-history (map (comp keyword :state)) set)
                 verdict-history     (util/find-first #(= "verdictGiven" (:state %)) state-history)
                 verdict-ts          (:ts verdict-history)
@@ -3079,11 +3080,11 @@
       (mongo/update-n coll {:_id (:id app)} {$push {:history {:state migration-target-state
                                                               :ts verdict-ts
                                                               :user usr/migration-user-summary}}
-                                             $set {(get app/timestamp-key (keyword migration-target-state)) verdict-ts}}))))
+                                             $set {(get app-state/timestamp-key (keyword migration-target-state)) verdict-ts}}))))
 
 (defn kayttolupa-to-tyolupa-state [{:keys [state history]}]
   (if (= "finished" state)
-    (or (->> (app/state-history-entries history)
+    (or (->> (app-state/state-history-entries history)
              (sort-by :ts)
              reverse
              (map :state)
@@ -3425,6 +3426,10 @@
                 {:multiple-operations-supported {$exists false}}
                 {$set {:multiple-operations-supported true}}
                 :multi true))
+
+(defmigration status-to-integration-messages
+  {:apply-when (pos? (mongo/count :integration-messages {:status {$exists false}}))}
+  (mongo/update-by-query :integration-messages {:status {$exists false}} {$set {:status "done"}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

@@ -236,16 +236,19 @@
    :ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen     :Sijoituslupa
    :ya-sijoituslupa-muu-sijoituslupa                             :Sijoituslupa})
 
-(defn toimituksen-tiedot [{:keys [title municipality]} lang]
-  {:aineistonnimi title
+(defn toimituksen-tiedot [{:keys [title municipality address]} lang]
+  {:aineistonnimi (or title address "Lupapiste KuntaGML")
    :aineistotoimittaja (env/value :technical-contact)
    :tila toimituksenTiedot-tila
    :toimitusPvm (util/to-xml-date (now))
    :kuntakoodi municipality
    :kielitieto lang})
 
-(defn- get-handler [{handlers :handlers :as application}]
-  (if-let [general-handler (util/find-first :general handlers)]
+(defn- get-general-handler [{handlers :handlers}]
+  (util/find-first :general handlers))
+
+(defn- get-handler [application]
+  (if-let [general-handler (get-general-handler application)]
     {:henkilo {:nimi {:etunimi (:firstName general-handler) :sukunimi (:lastName general-handler)}}}
     empty-tag))
 
@@ -272,6 +275,11 @@
       util/not-empty-or-nil?
       :saapumisPvm     (util/to-xml-date submitted)
       :kuntalupatunnus backend-id)}))
+
+(defn get-avainsanaTieto [{tags :tags :as application}]
+  (->> (map :label tags)
+       (remove nil?)
+       (map (partial hash-map :Avainsana))))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -379,7 +387,9 @@
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])
                    (get kuntaRoolikoodit (keyword subtype) default-role))]
-      (if (ss/blank? code) default-role code))))
+      (cond (ss/blank? code) default-role
+            (= "other" code) "muu"
+            :else            code))))
 
 (defn get-osapuoli-data
   ([osapuoli party-type]
@@ -408,6 +418,8 @@
                          {:henkilotunnus (get-in henkilo [:henkilotiedot :hetu])
                           :osoite (get-simple-osoite (:osoite henkilo))
                           :vainsahkoinenAsiointiKytkin (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)}))}
+           (when (not-empty (:laskuviite osapuoli))
+             {:laskuviite (not-empty (:laskuviite osapuoli))})
            (when yritys-type-osapuoli?
              {:yritys (get-yritys-data (:yritys osapuoli))})
            (when omistajalaji {:omistajalaji omistajalaji})))))))
@@ -433,9 +445,7 @@
 
 (defn get-suunnittelija-data [suunnittelija party-type & [subtype]]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
-    (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type subtype)
-          codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
-                 :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
+    (let [kuntaroolikoodi (get-kuntaRooliKoodi suunnittelija party-type subtype)
           patevyys (:patevyys suunnittelija)
           koulutus (if (= "other" (:koulutusvalinta patevyys))
                      "muu"
@@ -445,14 +455,20 @@
                     {:osoite osoite}
                     {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
-      (merge codes
-        {:koulutus koulutus
+      (merge
+        {:suunnittelijaRoolikoodi kuntaroolikoodi ; Note the lower case 'koodi'
+         :VRKrooliKoodi (if (= kuntaroolikoodi "muu")
+                          "erityissuunnittelija"
+                          (kuntaRoolikoodi-to-vrkRooliKoodi kuntaroolikoodi))
+         :koulutus koulutus
          :vaadittuPatevyysluokka (:suunnittelutehtavanVaativuusluokka suunnittelija)
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :FISEpatevyyskortti (:fise patevyys)
          :FISEkelpoisuus (:fiseKelpoisuus patevyys)
          :kokemusvuodet (:kokemus patevyys)}
+        (when (and (= kuntaroolikoodi "muu") (not-empty (:muuSuunnittelijaRooli suunnittelija)))
+          {:muuSuunnittelijaRooli (:muuSuunnittelijaRooli suunnittelija)})
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
         (when (-> suunnittelija :yritys :yritysnimi ss/blank? not)
@@ -880,17 +896,18 @@
 (defn process-parties [docs lang]
   (map (partial process-party lang) (schema-info-filter docs :type "party")))
 
-(defn application-state [app]
+(defn simple-application-state [app]
   (let [enums {:submitted "Vireill\u00e4"
                :sent "Haettu"
                :closed "P\u00e4\u00e4ttynyt"}
         state (-> app :state keyword)
         date (util/to-xml-date (state app))
-        {a-first :firstName a-last :lastName} (:authority app)]
+        {a-first :firstName a-last :lastName} (get-general-handler app)]
     {:Tila
-     {:pvm date
-      :kasittelija (format "%s %s" a-first a-last)
-      :hakemuksenTila (state enums)}}))
+     (util/strip-nils
+       {:pvm            date
+        :kasittelija    (and a-first a-last (format "%s %s" a-first a-last))
+        :hakemuksenTila (state enums)})}))
 
 (defn- mat-helper [property property-id]
   (when-let [mat (format-maara-alatunnus (:maaraalaTunnus property))]

@@ -27,7 +27,7 @@
 
 (rum/defcs phrase-category-select < rum/reactive
   (components/initial-value-mixin ::selected)
-  [{selected* ::selected} _ callback & [include-empty?]]
+  [{selected* ::selected} _ callback & [{:keys [include-empty? disabled?]}]]
   (let [items (->> (if include-empty?
                      shared/phrase-categories
                      (non-empty-categories))
@@ -35,12 +35,13 @@
                    (map (fn [n] {:value n :text (category-text n)}))
                    (sort-by :text))
         select (fn [value]
-                 (reset! selected* value)
-                 (callback value))]
+                 (when (common/reset-if-needed! selected* value)
+                   (callback value)))]
     (when-not (util/includes-as-kw? (map :value items) @selected*)
       (select (-> items first :value)))
     [:select.dropdown
      {:value  @selected*
+      :disabled disabled?
       :on-change #(select (.. % -target -value))}
      (map (fn [{:keys [value text]}]
             [:option {:key value :value value} text])
@@ -58,7 +59,7 @@
                               (fn [selected]
                                 (swap! local*
                                        #(assoc % :category selected)))
-                              true)]]
+                              {:include-empty? true})]]
     [:div.col-2
      [:div.col--vertical.col--full
       [:label.required (common/loc :phrase.tag)]

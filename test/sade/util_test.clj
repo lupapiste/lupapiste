@@ -561,6 +561,20 @@
   (distinct-by identity [1 1 2 3 2]) => '(1 2 3)
   (distinct-by :foo [{:foo 1 :bar :a} {:foo 1 :bar :b}]) => '({:foo 1 :bar :a}))
 
+(fact "kw-path"
+  (kw-path "a" :b 9) => :a.b.9
+  (kw-path ["a" :b 9]) => :a.b.9
+  (kw-path) => (keyword "")
+  (kw-path "a" nil "b") => :a..b)
+
+(fact "split-kw-path"
+  (split-kw-path :a.b.9) => [:a :b :9]
+  (split-kw-path :a..b) => [:a (keyword "" ):b])
+
+(facts "safe-update-in"
+  (safe-update-in {:a [{:b 2}]} [:a 0 :b] + 2) => {:a [{:b 4}]}
+  (safe-update-in {:a [{:b 2}]} [:a :b] + 2) => {:a [{:b 2}]})
+
 (fact edit-distance
   (edit-distance "" "") => 0
 

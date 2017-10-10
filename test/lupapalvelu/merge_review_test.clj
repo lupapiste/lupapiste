@@ -131,7 +131,7 @@
                            :katselmuksenLaji {:value "muu katselmus"}}
                     :taskname "Paikan merkitseminen"}]
 
-    (fact "matches ta sks with the same background id"
+    (fact "matches tasks with the same background id"
       (matching-task mongo-task
                      [{:data {:muuTunnus {:value "DI"}}}
                       {:data {:muuTunnus {:value "ID"}}}

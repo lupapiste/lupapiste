@@ -322,16 +322,20 @@
         (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
       (fact "read verdict"
         read-result => ok?)
-      (review/save-review-updates batchrun-user application (:updates read-result) (:added-tasks-with-updated-buildings read-result) {})
-      (let [updated-application (domain/get-application-no-access-checking application-id)
-            last-attachment-id (last (get-attachment-ids updated-application))
-            last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]
-        (files/with-temp-file temp-pdf-path
-          (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
-            (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
-          ; Note that these checks are highly dependent on the PDF structure. Check if your (raw source) PDF content has changed if these fail.
-          (re-seq #"(?ms)\(Kiinteist.{1,4}tunnus\).{1,200}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
-          (re-seq #"(?ms)\(Tila\).{1,200}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))
+      (let [application (domain/get-application-no-access-checking application-id)]
+        (review/save-review-updates (assoc (action/application->command application) :user batchrun-user)
+                                    (:updates read-result)
+                                    (:added-tasks-with-updated-buildings read-result)
+                                    {})
+        (let [updated-application (domain/get-application-no-access-checking application-id)
+              last-attachment-id (last (get-attachment-ids updated-application))
+              last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]
+          (files/with-temp-file temp-pdf-path
+            (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
+              (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
+            ; Note that these checks are highly dependent on the PDF structure. Check if your (raw source) PDF content has changed if these fail.
+            (re-seq #"(?ms)\(Kiinteist.{1,4}tunnus\).{1,200}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
+            (re-seq #"(?ms)\(Tila\).{1,200}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy))))))
 
 (facts "Automatic checking for reviews - overwriting existing reviews"
   (mongo/with-db db-name

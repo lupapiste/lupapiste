@@ -13,6 +13,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.integrations.matti :as matti]
             [lupapalvelu.logging :as log]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
@@ -268,11 +269,20 @@
           (states/all-inforequest-states new-state)
           ; delete-verdict commands sets state back, but no logging is required (LPK-917)
           (seq (get-in changes [$pull :verdicts])))
-        "event must be pushed to history array when state is set"))
+        "event must be pushed to history array when state is set")
+      (if (env/dev-mode?)
+        (when-not (map? (:user command))
+          (fatalf "no user defined in command '%s' for update-application call, new state was %s" (:action command) new-state))
+        (when-not (map? (:user command))
+          (warnf "no user defined in command '%s' for update-application call, new state was %s" (:action command)))))
 
     (with-application command
-      (fn [{:keys [id]}]
+      (fn [{:keys [id organization]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+          (when-let [new-state (get-in changes [$set :state])]
+            (when (and (env/feature? :matti-json) organization (org/matti-org? organization))
+              (util/future*
+                (matti/trigger-state-change command new-state))))
           (if return-count? n nil))))))
 
 (defn application->command

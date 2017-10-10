@@ -1,7 +1,7 @@
 (ns lupapalvelu.application-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [monger.operators :refer [$set $push]]
+            [monger.operators :refer [$set $push $each]]
             [swiss.arrows :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.action :refer [update-application]]
@@ -26,7 +26,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed? validate-handler-role validate-handler-role-not-in-use validate-handler-id-in-application validate-handler-in-organization)
-(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user)
+(testable-privates lupapalvelu.application required-link-permits new-attachment-types-for-operation attachment-grouping-for-type person-id-masker-for-user enrich-tos-function-name)
 (testable-privates lupapalvelu.ya validate-link-agreements-signature validate-link-agreements-state)
 
 (facts "mark-indicators-seen-updates"
@@ -136,19 +136,6 @@
   (validate-has-subtypes {:application {:permitType "R"}}) => {:ok false :text "error.permit-has-no-subtypes"}
   (validate-has-subtypes nil) => {:ok false :text "error.permit-has-no-subtypes"})
 
-(facts "State transitions"
-  (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
-    (fact "update"
-      (state-transition-update :open 1 {:created 0 :permitType "R"} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-      (state-transition-update :open 1 {:opened nil  :permitType "R"} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-      (state-transition-update :submitted 2 {:created 0 :opened 1  :permitType "R"} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
-      (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2  :permitType "R"} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
-
-    (fact "re-update"
-      (state-transition-update :open 4 {:opened 3  :permitType "R"} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
-      (state-transition-update :submitted 5 {:submitted 4 :permitType "R"} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
-      (state-transition-update :constructionStarted 6 {:started 5 :permitType "R"} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})))
-
 (fact "Valid permit types pre-checker"
       (let [error {:ok false :text "error.unsupported-permit-type"}
             m1 {:R [] :P :all}
@@ -168,35 +155,6 @@
         (permit/valid-permit-types m3 {:application {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}}) => nil
         (permit/valid-permit-types m3 {:application {:permitType "R" :permitSubtype "foobar"}}) => error
         (permit/valid-permit-types m3 {:application {:permitType "P" :permitSubtype "foo"}}) => error))
-
-(facts "Previous app state"
-  (let [user {:username "pena"}
-        now (now)
-        state-seq [:one :two :three :four :five]]
-
-    (dotimes [i (count state-seq)]
-      (let [prev-state (get-previous-app-state
-                         {:history (map
-                                     #(history-entry % now user)
-                                     (take (+ i 1) state-seq))})]
-        (if (= i 0)
-          (fact "no previous state" prev-state => nil)
-          (fact {:midje/description prev-state}
-            prev-state => (nth state-seq (- i 1))))))
-
-    (fact "no previous state if no history"
-      (get-previous-app-state nil) => nil
-      (get-previous-app-state []) => nil)))
-
-(facts "Get previous state (history)"
-  (let [state-seq [:one nil :two :three nil nil]
-        now (now)
-        history {:history
-                 (map-indexed
-                   (fn [i state] (history-entry state (+ now i) {:username "Pena"}))
-                   state-seq)}]
-    (fact "only entries with :state are regarded"
-      (get-previous-app-state history) => :two)))
 
 (facts "Primary operation prechecks"
        (let [app {:application {:primaryOperation {:name "foobar"}}}
@@ -564,3 +522,31 @@
         (map :id (:attachments attachments-map)) => (has every? #(= "mongo-id" %))
         (:attachments (application-attachments-map (assoc application :infoRequest true) {})) => [])))
   (against-background (mongo/create-id) => "mongo-id"))
+
+(facts enrich-tos-function-name
+  (fact "no tos-function"
+    (enrich-tos-function-name {:id ..app-id.. :organization "753-R"}) => {:id ..app-id.. :organization "753-R" :tosFunctionName nil}
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions anything) => irrelevant :times 0))
+
+  (fact "one matching tos-function"
+    (-> {:id ..app-id.. :organization "753-R" :tosFunction "12 13 14 15"}
+        enrich-tos-function-name
+        :tosFunctionName) => ..tos-name..
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "12 13 14 15" :name ..tos-name..}]))
+
+  (fact "no matching tos-function"
+    (-> {:id ..app-id.. :organization "753-R" :tosFunction "12 13 14 15"}
+        enrich-tos-function-name
+        :tosFunctionName) => nil
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "00 00 00 00" :name ..tos-name..}]))
+
+  (fact "multiple tos-functions for organization"
+    (-> {:id ..app-id.. :organization "753-R" :tosFunction "12 13 14 15"}
+        enrich-tos-function-name
+        :tosFunctionName) => ..tos-name-2..
+    (provided (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "12 13 14 14" :name ..tos-name-1..}
+                                                                             {:code "12 13 14 15" :name ..tos-name-2..}
+                                                                             {:code "12 13 14 16" :name ..tos-name-3..}
+                                                                             {:code "12 13 14 17" :name ..tos-name-4..}
+                                                                             {:code "12 13 14 18" :name ..tos-name-5..}
+                                                                             {:code "12 13 14 19" :name ..tos-name-6..}])))

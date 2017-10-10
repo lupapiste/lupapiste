@@ -3,14 +3,15 @@
             [me.raynes.fs :as fs]
             [monger.operators :refer :all]
             [clojure.set :as set]
-            [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [clj-time.coerce :as c]
+            [clj-time.core :as t]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.application :as app]
+            [lupapalvelu.application-state :as app-state]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.integrations.matti :as matti]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.neighbors-api :as neighbors]
@@ -25,13 +26,13 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [sade.util :refer [fn-> pcond->] :as util]
+            [sade.core :refer :all]
             [sade.env :as env]
             [sade.dummy-email-server]
-            [sade.core :refer :all]
-            [sade.strings :as ss]
             [sade.http :as http]
+            [sade.strings :as ss]
+            [sade.threads :as threads]
+            [sade.util :refer [fn-> pcond->] :as util]
             [lupapalvelu.xml.asianhallinta.reader :as ah-reader])
   (:import [org.xml.sax SAXParseException]))
 
@@ -312,8 +313,8 @@
           (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
             (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
-                (if-not (s/blank? url)
-                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdicts)
+                (if-not (ss/blank? url)
+                  (let [command (assoc (application->command app) :user eraajo-user :created (now) :action "fetch-verdicts")
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
@@ -405,7 +406,10 @@
   (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
     (when (ok? result)
       (try
-        (review/save-review-updates user application updates added-tasks-with-updated-buildings attachments-by-task-id)
+        (review/save-review-updates (assoc (application->command application) :user user)
+                                    updates
+                                    added-tasks-with-updated-buildings
+                                    attachments-by-task-id)
         (catch Throwable t
           {:ok false :desc (.getMessage t)})))))
 
@@ -498,7 +502,7 @@
                                         :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
                                        (when (not-empty application-ids)
                                          {:_id {$in application-ids}}))
-                  (merge app/timestamp-key
+                  (merge app-state/timestamp-key
                          (pcond-> projection
                                   sequential? (zipmap (repeat true)))))))
 
@@ -523,7 +527,8 @@
 
 (defn- fetch-reviews-for-organization
   [eraajo-user created {org-krysp :krysp :as organization} permit-types applications {:keys [overwrite-background-reviews?]}]
-  (let [projection (cond-> [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified]
+  (let [fields [:address :primaryOperation :permitSubtype :history :municipality :state :permitType :organization :tasks :verdicts :modified]
+        projection (cond-> (distinct (concat fields matti/base-keys))
                      overwrite-background-reviews? (conj :attachments))
         permit-types (remove (fn-> keyword org-krysp :url ss/blank?) permit-types)
         grouped-apps (if (seq applications)
@@ -555,13 +560,13 @@
         permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
+        threadpool    (threads/threadpool 16 "review checking worker")
         threads       (mapv (fn [org]
-                             (util/future* (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
-                           organizations)]
-    (loop []
-      (when-not (every? realized? threads)
-        (Thread/sleep 1000)
-        (recur)))))
+                              (threads/submit
+                               threadpool
+                               (fetch-reviews-for-organization eraajo-user (now) org permit-types (filter (comp #{(:id org)} :organization) applications) options)))
+                            organizations)]
+    (threads/wait-for-threads threads)))
 
 (defn check-for-reviews [& args]
   (when-not (system-not-in-lockdown?)
@@ -657,3 +662,69 @@
                       (if (:archivabilityError result)
                         (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
                         (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
+
+
+(defn fetch-verdict-attachments
+  [start-timestamp end-timestamp organizations]
+  {:pre [(number? start-timestamp)
+         (number? end-timestamp)
+         (< start-timestamp end-timestamp)
+         (vector? organizations)]}
+  (let [apps (verdict/applications-with-missing-verdict-attachments
+              {:start         start-timestamp
+               :end           end-timestamp
+               :organizations organizations})
+        eraajo-user (user/batchrun-user (map :organization apps))]
+    (->> (doall
+          (pmap
+           (fn [{:keys [id permitType organization] :as app}]
+             (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+               (try
+                 (let [command (assoc (application->command app) :user eraajo-user :created (now) :action :fetch-verdict-attachments)
+                       app-xml (krysp-fetch/get-application-xml-by-application-id app)
+                       result  (verdict/update-verdict-attachments-from-xml! command app-xml)]
+                   (when (-> result :updated-verdicts count pos?)
+                     ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+                     (logging/log-event :info {:run-by "Automatic verdict attachments checking"
+                                               :event "Found new verdict attachments"
+                                               :updated-verdicts (-> result :updated-verdicts)}))
+                   (when (or (nil? result) (fail? result))
+                     (logging/log-event :error {:run-by "Automatic verdict attachment checking"
+                                                :event "Failed to check verdict attachments"
+                                                :failure (if (nil? result) :error.no-app-xml result)
+                                                :organization {:id organization :permit-type permitType}
+                                                }))
+
+                   ;; Return result for testing purposes
+                   result)
+                 (catch Throwable t
+                   (logging/log-event :error {:run-by "Automatic verdict attachments checking"
+                                              :event "Unable to get verdict from backend"
+                                              :exception-message (.getMessage t)
+                                              :application-id id
+                                              :organization {:id organization :permit-type permitType}})))))
+           apps))
+         (remove #(empty? (:updated-verdicts %)))
+         (hash-map :updated-applications)
+         (merge {:start start-timestamp
+                 :end   end-timestamp
+                 :organizations organizations
+                 :applications (map :id apps)}))))
+
+(defn check-for-verdict-attachments
+  "Fetch missing verdict attachments for verdicts given in the time
+  interval between start-timestamp and end-timestamp (last 3 months by
+  default), for the organizations whose id's are provided as
+  arguments (all organizations by default)."
+  [& [start-timestamp end-timestamp & organizations]]
+  (when-not (system-not-in-lockdown?)
+    (logging/log-event :info {:run-by "Automatic verdict attachment checking" :event "Not run - system in lockdown"})
+    (fail! :system-in-lockdown))
+  (mongo/connect!)
+  (fetch-verdict-attachments (or (when start-timestamp
+                                   (util/to-millis-from-local-date-string start-timestamp))
+                                 (-> 3 t/months t/ago c/to-long))
+                             (or (when end-timestamp
+                                   (util/to-millis-from-local-date-string end-timestamp))
+                                 (now))
+                             (or (vec organizations) [])))

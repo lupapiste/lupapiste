@@ -1,35 +1,33 @@
-(ns lupapalvelu.matti.matti
-  (:require [lupapalvelu.i18n :as i18n]
+(ns lupapalvelu.matti.verdict-template
+  (:require [lupapalvelu.action :as action]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.matti.date :as date]
             [lupapalvelu.matti.schemas :as schemas]
             [lupapalvelu.matti.shared :as shared]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as ops]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [monger.operators :refer :all]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
 
 (defn command->organization
   "User-organizations is not available for input-validators."
-  [{:keys [user user-organizations]}]
-  (util/find-by-id (usr/authority-admins-organization-id user)
-                   user-organizations ))
-
-(defn permit-type->category [permit-type]
-  (when-let [kw (-> permit-type
-                    ss/lower-case
-                    keyword)]
-    (cond
-      (#{:r :p :ya} kw)              kw
-      (#{:kt :mm} kw)                :kt
-      (#{:yi :yl :ym :vvvl :mal} kw) :ymp)))
+  [{:keys [user user-organizations organization]}]
+  (if organization
+    @organization
+    (util/find-by-id (usr/authority-admins-organization-id user)
+                     user-organizations)))
 
 (defn organization-categories [{scope :scope}]
-  (set (map (comp permit-type->category :permitType) scope)))
+  (set (map (comp shared/permit-type->category :permitType) scope)))
 
 (defn operation->category [operation]
-  (permit-type->category (ops/permit-type-of-operation operation)))
+  (shared/permit-type->category (ops/permit-type-of-operation operation)))
 
 (defn new-verdict-template
   ([org-id timestamp lang category draft name]
@@ -42,8 +40,7 @@
                          org-id
                          {$push {:verdict-templates.templates
                                  (merge data
-                                        {:deleted  false
-                                         :versions []})}})
+                                        {:deleted false})}})
      data))
   ([org-id timestamp lang category]
    (new-verdict-template org-id timestamp lang category {}
@@ -52,8 +49,47 @@
 (defn verdict-template [{templates :verdict-templates} template-id]
   (util/find-by-id template-id (:templates templates)))
 
-(defn latest-version [organization template-id]
-  (-> (verdict-template organization template-id) :versions last))
+(defn verdict-template-summary [{published :published :as template}]
+  (assoc (select-keys template
+                      [:id :name :modified :deleted :category])
+         :published (:published published)))
+
+(defn verdict-template-check
+  "Returns prechecker for template-id parameters.
+   Condition parameters:
+     :editable    Template must be editable (not deleted)
+     :published   Template must hav been published
+     :blank       Template-id can be empty. Note: this does not
+                  replace input-validator.
+     :named       Template name cannot be empty
+     :application Template must belong to the same category as the
+                  application
+
+   Template's existence is always checked unless :blank matches."
+  [& conditions]
+  (let [{:keys [editable published blank named application]} (zipmap conditions
+                                                                     (repeat true))]
+    (fn [{{template-id :template-id} :data :as command}]
+      (when template-id
+        (if (ss/blank? template-id)
+          (when-not blank
+            (fail :error.missing-parameters))
+          (let [template (some-> (command->organization command)
+                                 (verdict-template template-id)
+                                 verdict-template-summary)]
+            (when-not template
+              (fail! :error.verdict-template-not-found))
+            (when (and editable (:deleted template))
+              (fail! :error.verdict-template-deleted))
+            (when (and published (not (:published template)))
+              (fail! :error.verdict-template-not-published))
+            (when (and named (-> template :name ss/blank?))
+              (fail! :error.verdict-template-name-missing))
+            (when (and application
+                       (util/not=as-kw (:category template)
+                                       (-> command :application :permitType
+                                           shared/permit-type->category)))
+              (fail! :error.invalid-category))))))))
 
 (defn- template-update [organization template-id update  & [timestamp]]
   (mongo/update :organizations
@@ -97,24 +133,24 @@
 (defn save-draft-value
   "Error code on failure (see schemas for details)."
   [organization template-id timestamp path value]
-  (let [template (verdict-template organization template-id)
-        draft    (assoc-in (:draft template) (map keyword path) value)]
-    (or (schemas/validate-path-value shared/default-verdict-template path value
-                                     {:schema-overrides {:section shared/MattiVerdictSection}
-                                      :references {:settings (:draft (settings organization
-                                                                               (:category template)))}})
+  (let [template (verdict-template organization template-id)]
+    (or (schemas/validate-path-value shared/default-verdict-template
+                                     path
+                                     value
+                                     {:settings (:draft (settings organization
+                                                                  (:category template)))})
         (template-update organization
                          template-id
-                         {$set {:verdict-templates.templates.$.draft draft}}
+                         {$set {(util/kw-path (cons :verdict-templates.templates.$.draft
+                                                    path)) value}}
                          timestamp))))
 
 (defn publish-verdict-template [organization template-id timestamp]
   (let [template (verdict-template organization template-id)]
     (template-update organization
                      template-id
-                     {$push {:verdict-templates.templates.$.versions
-                             {:id        (mongo/create-id)
-                              :published timestamp
+                     {$set {:verdict-templates.templates.$.published
+                             {:published timestamp
                               :data      (:draft template)
                               :settings (published-settings organization
                                                             (:category template))}}})))
@@ -124,11 +160,6 @@
                    template-id
                    {$set {:verdict-templates.templates.$.name name}}
                    timestamp))
-
-(defn verdict-template-summary [{versions :versions :as template}]
-  (assoc (select-keys template
-                      [:id :name :modified :deleted :category])
-         :published (-> versions last :published)))
 
 (defn set-deleted [organization template-id deleted?]
   (template-update organization
@@ -155,15 +186,28 @@
        (ss/join ".")
        keyword))
 
+(declare generic-list)
+
 (defn save-settings-value [organization category timestamp path value]
   (let [draft        (assoc-in (:draft (settings organization category))
                                (map keyword path)
                                value)
         settings-key (settings-key category)]
-    (mongo/update-by-id :organizations
-                        (:id organization)
-                        {$set {settings-key {:draft    draft
-                                             :modified timestamp}}})))
+    (or (schemas/validate-path-value (get shared/settings-schemas
+                                          (keyword category))
+                                     path
+                                     value
+                                     (when-let [ref-gen (some->> path
+                                                                 (util/intersection-as-kw [:plans :reviews])
+                                                                 first)]
+                                       (hash-map ref-gen
+                                                 (map :id (generic-list organization
+                                                                        category
+                                                                        ref-gen)))))
+     (mongo/update-by-id :organizations
+                         (:id organization)
+                         {$set {(util/kw-path settings-key :draft path) value
+                                (util/kw-path settings-key :modified)   timestamp}}))))
 
 ;; Generic is a placeholder term that means either review or plan
 ;; depending on the context. Namely, the subcollection argument in
@@ -243,7 +287,7 @@
 ;; Plans
 
 (defn new-plan [organization-id category]
-  (new-generic organization-id category :matti.suunnitelmat :plans))
+  (new-generic organization-id category :matti.plans :plans))
 
 (defn plan [organization review-id]
   (generic organization review-id :plans))
@@ -258,7 +302,7 @@
                        :verdict-templates
                        :templates
                        (remove :deleted)
-                       (filter (util/fn-> :versions seq))
+                       (filter :published)
                        (map :id)
                        set)]
     (->> organization
@@ -273,3 +317,20 @@
                              (if (ss/blank? template-id)
                                {$unset {path true}}
                                {$set {path template-id}}))))
+
+(defn application-verdict-templates [{:keys [operation-verdict-templates
+                                             verdict-templates]}
+                                     {:keys [permitType primaryOperation]}]
+  (let [app-category  (shared/permit-type->category permitType)
+        app-operation (-> primaryOperation :name keyword)]
+    (->> verdict-templates
+         :templates
+         (filter (fn [{:keys [deleted published category]}]
+                   (and (not deleted)
+                        published
+                        (util/=as-kw category app-category))))
+         (map (fn [{:keys [id name]}]
+                {:id       id
+                 :name     name
+                 :default? (= id (get operation-verdict-templates
+                                      app-operation))})))))

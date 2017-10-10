@@ -92,3 +92,9 @@
                    (map goog.string/regExpEscape)
                    (s/join ".*"))]
     (re-pattern (str "(?mi)^.*" fuzzy ".*$"))))
+
+
+(def nbsp {:dangerouslySetInnerHTML {:__html "&nbsp;"}})
+
+(defn empty-label []
+  [:label nbsp])

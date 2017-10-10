@@ -157,7 +157,10 @@
 (defn http [verb url options]
   (let [store (atom {})
         cookies (or (:cookie-store options) (->cookie-store store))]
-    (.addCookie cookies test-db-cookie)
+    (.addCookie cookies (if (:test-db-name options)
+                          (->cookie "test_db_name"
+                                    (:test-db-name options))
+                          test-db-cookie))
     (verb url (assoc options :cookie-store cookies))))
 
 (def http-get (partial http http/get))
@@ -194,21 +197,25 @@
 (defn decoded-simple-post [url params]
   (decode-response (http-post url params)))
 
+(defn ->arg-map [args]
+  (if (map? (first args))
+    (first args)
+    (apply hash-map args)))
+
 (defn- decode-post [action-type apikey command-name & args]
   (decode-response
     (http-post
       (str (server-address) "/api/" (name action-type) "/" (name command-name))
-      (let [args (if (map? (first args))
-                   (first args)
-                   (apply hash-map args))
-
+      (let [args         (->arg-map args)
             cookie-store (:cookie-store args)
-            args (dissoc args :cookie-store)]
+            test-db-name (:test-db-name args)
+            args (dissoc args :cookie-store :test-db-name)]
         {:headers {"content-type" "application/json;charset=utf-8"}
          :oauth-token apikey
          :body (json/encode args)
          :follow-redirects false
          :cookie-store cookie-store
+         :test-db-name test-db-name
          :throw-exceptions false}))))
 
 
@@ -234,6 +241,11 @@
 
 (defn get-by-id [collection id & args]
   (decode-response (http-get (str (server-address) "/dev/by-id/" (name collection) "/" id) (apply hash-map args))))
+
+(defn integration-messages [app-id & args]
+  (-> (http-get (str (server-address) "/dev/integration-messages/" app-id) (apply hash-map args))
+      (decode-response)
+      (get-in [:body :data])))
 
 (defn clear-collection [collection]
   (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
@@ -341,19 +353,21 @@
 ;; DSLs
 ;;
 
-(defn remove-krysp-xml-overrides [apikey org-id permit-type]
+(defn remove-krysp-xml-overrides [apikey org-id permit-type & provided-args]
   (let [org  (organization-from-minimal-by-id org-id)
         args (select-keys (get-in org [:krysp permit-type]) [:url :version])
         args (assoc args :permitType permit-type :username "" :password "")]
-    (command apikey :set-krysp-endpoint args)))
+    (command apikey :set-krysp-endpoint
+             (merge args (->arg-map provided-args)))))
 
-(defn override-krysp-xml [apikey org-id permit-type overrides]
+(defn override-krysp-xml [apikey org-id permit-type overrides & provided-args]
   (let [org         (organization-from-minimal-by-id org-id)
         current-url (get-in org [:krysp permit-type :url])
         new-url     (str current-url "?overrides=" (json/generate-string overrides))
         args        (select-keys (get-in org [:krysp permit-type]) [:version])
         args        (assoc args :permitType permit-type :url new-url :username "" :password "")]
-    (command apikey :set-krysp-endpoint args)))
+    (command apikey :set-krysp-endpoint
+             (merge args (->arg-map provided-args)))))
 
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
@@ -553,7 +567,7 @@
   {:scheme "http", :user (find-user-from-minimal-by-apikey apikey)})
 
 (defn- execute-local [apikey web-fn action & args]
-  (let [params (if (map? (first args)) (first args) (apply hash-map args))]
+  (let [params (->arg-map args)]
     (i18n/with-lang (:lang params)
       (binding [*request* (make-local-request apikey)]
         (web-fn (name action) params *request*)))))

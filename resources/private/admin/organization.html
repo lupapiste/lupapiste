@@ -146,6 +146,21 @@
 
           <button data-bind="visible: !openInfoRequests(), click: convertOpenInforequests" class="btn positive">Muuta avoimet neuvontapyynn&ouml;t tavallisiksi</button>
 
+
+          <div>
+            <h2>MATTI k&auml;yt&ouml;ss&auml;?</h2>
+            <div>
+              <div>
+                <label data-bind="text: loc('yes') + '/' + loc('no') " for="matti-enabled"></label>
+                <input data-bind="checked: mattiEnabled" id="matti-enabled" type="checkbox"/>
+              </div>
+              <button data-bind="ltext: 'save',
+                                 click: saveMattiEnabled" class="btn positive"
+                      data-test-id="save-matti-enabled"></button>
+            </div>
+          </div>
+
+
           <div>
             <h2>Valitse organisaatiolle luotetut autologin IP-osoitteet</h2>
             <table>

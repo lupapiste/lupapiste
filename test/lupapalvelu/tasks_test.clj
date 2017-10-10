@@ -4,7 +4,7 @@
             [lupapalvelu.tasks :refer :all]
             [lupapalvelu.verdict :as verdict]))
 
-(testable-privates lupapalvelu.tasks verdict->tasks)
+(testable-privates lupapalvelu.tasks verdict->tasks get-muu-tunnus-data)
 
 (facts "Tyonjohtajat KRYSP yhteiset 2.1.1"
   (let [tasks (flatten (verdict->tasks {:paatokset [{:lupamaaraykset {:vaadittuTyonjohtajatieto ["testi" "test 2"] }}]} nil {:buildings []}))
@@ -68,3 +68,31 @@
 
     (get-in (update-task-buildings buildings task-rakennus) [:data :rakennus :0 :rakennus :rakennusnro :value]) => "value-from-buildings"
     (get-in (update-task-buildings buildings task-rakennus) [:data :rakennus :0 :tila :tila :value]) => "value-from-task"))
+
+
+(facts get-muu-tunnus-data
+  (fact "no muu-tunnus"
+    (get-muu-tunnus-data {:katselmuksenLaji "aloituskokous"
+                          :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"}) => {:muuTunnus "" :muuTunnusSovellus ""})
+
+  (fact "muu-tunnus without :sovellus"
+    (get-muu-tunnus-data {:katselmuksenLaji "aloituskokous"
+                     :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "" :tunnus "999"}} ]}) => {:muuTunnus "999" :muuTunnusSovellus ""})
+
+  (fact "muu-tunnus with :sovellus"
+    (get-muu-tunnus-data {:katselmuksenLaji "aloituskokous"
+                     :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "RakApp" :tunnus "999"}} ]}) => {:muuTunnus "999" :muuTunnusSovellus "RakApp"})
+
+  (fact "muu-tunnus - :sovellus is Lupapiste"
+    (get-muu-tunnus-data {:katselmuksenLaji "aloituskokous"
+                     :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "Lupapiste" :tunnus "999"}} ]}) => {:muuTunnus "" :muuTunnusSovellus ""})
+
+  (fact "muu-tunnus multiple muuTunnus elements"
+    (get-muu-tunnus-data {:katselmuksenLaji "muu tarkastus"
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "lupapiste" :tunnus "999"}}
+                                      {:MuuTunnus {:sovellus "RakApp" :tunnus "998"}}
+                                      {:MuuTunnus {:sovellus "RakApp" :tunnus "997"}}]
+                          :tarkastuksenTaiKatselmuksenNimi "K\u00E4ytt\u00F6\u00F6nottotarkastus"}) => {:muuTunnus "998" :muuTunnusSovellus "RakApp"}))

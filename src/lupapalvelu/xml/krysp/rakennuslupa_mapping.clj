@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [debug]]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.tools :as tools]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -209,13 +208,18 @@
       [:Katselmus :katselmuspoytakirja]
       {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]})))
 
+(def- avainsanatieto_222
+  {:tag :avainsanaTieto :child [{:tag :Avainsana}]})
+
+(def- menettely-tos_222
+  {:tag :menettelyTOS})
 
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
    :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :R "2.1.2")
                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
-           mapping-common/common-namespaces)
+                (mapping-common/common-namespaces :R "2.1.2"))
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
@@ -366,6 +370,26 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto :Liite]
                  {:tag :Liite :child mapping-common/liite-children_216})))
 
+(def rakennuslupa_to_krysp_222
+  (-> rakennuslupa_to_krysp_220
+      (update-in [:attr] merge
+                 {:xsi:schemaLocation (mapping-common/schemalocation :R "2.2.2")
+                  :xmlns:rakval "http://www.kuntatietopalvelu.fi/gml/rakennusvalvonta"}
+                 (mapping-common/common-namespaces :R "2.2.2"))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_218]})
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
+                 #(update % :child concat [avainsanatieto_222 menettely-tos_222]))
+      (update :child mapping-common/update-child-element
+              [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :muuMuutosTyo]
+              #(update % :child conj {:tag :rakennustietojaEimuutetaKytkin}))
+      (update :child mapping-common/update-child-element
+              [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lisatiedot :Lisatiedot]
+              #(update % :child conj {:tag :asiakirjatToimitettuPvm}))))
+
+
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
@@ -376,32 +400,16 @@
     "2.1.6" rakennuslupa_to_krysp_216
     "2.1.8" rakennuslupa_to_krysp_218
     "2.2.0" rakennuslupa_to_krysp_220
+    "2.2.2" rakennuslupa_to_krysp_222
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- katselmus-pk? [{:keys [type-group type-id] :as attachment-type}]
   (and (= type-group "katselmukset_ja_tarkastukset")
     (#{"katselmuksen_tai_tarkastuksen_poytakirja" "aloituskokouksen_poytakirja"} type-id)))
 
-(defn- save-katselmus-xml [application
-                           lang
-                           output-dir
-                           task-id
-                           task-name
-                           started
-                           buildings
-                           user
-                           katselmuksen-nimi
-                           tyyppi
-                           osittainen
-                           pitaja
-                           lupaehtona
-                           huomautukset
-                           lasnaolijat
-                           poikkeamat
-                           tiedoksianto
-                           krysp-version
-                           begin-of-link
-                           attachment-target]
+(defn- save-katselmus-xml
+  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
+  [application lang output-dir task user krysp-version begin-of-link attachment-target]
   (let [target-pred #(= attachment-target (:target %))
         attachments (filter target-pred  (:attachments application))
         poytakirja  (some #(when (katselmus-pk? (:type %)) %) attachments)
@@ -416,9 +424,7 @@
 
         all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
 
-        canonical-without-attachments (canonical/katselmus-canonical application lang task-id task-name started buildings user
-                                                                     katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
-                                                                     huomautukset lasnaolijat poikkeamat tiedoksianto)
+        canonical-without-attachments (canonical/katselmus-canonical application lang task user)
         canonical (-> canonical-without-attachments
                     (#(if (seq canonical-attachments)
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
@@ -435,73 +441,19 @@
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir nil nil "review")))
 
-(defn- bad-building?
-  "Building can be bad either by choice (no state selected) or by
-  accident (ghost buildings)."
-  [building]
-  (or
-   (nil? building)
-   (= "ei tiedossa" (get-in building [:rakennus :jarjestysnumero]))
-   (util/empty-or-nil? (get-in building [:tila :tila]))
-   (every? ss/blank? (-> building :rakennus vals))))
-
-(defn save-katselmus-as-krysp
-  "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application katselmus user lang krysp-version output-dir begin-of-link]
-  (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
-                           (:nationalId (some #(when (and (= kiinttun (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
-        find-building (fn [nid] (some #(when (= (:nationalId %) nid) %) (:buildings application)))
-        data (tools/unwrapped (:data katselmus))
-        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
-        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila tiedoksianto]} (:katselmus data)
-        huomautukset (-> data :katselmus :huomautukset)
-        buildings    (->> (vals rakennus)
-                       (map
-                         (fn [{rakennus :rakennus :as b}]
-                           (when rakennus
-                             (let [nid (if (ss/blank? (:valtakunnallinenNumero rakennus))
-                                         (find-national-id rakennus)
-                                         (:valtakunnallinenNumero rakennus))
-                                   b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
-                                   op-id (:operationId (find-building nid))
-                                   b (if op-id (assoc-in b [:rakennus :operationId] op-id) b)
-                                   desc (:description (find-building nid))
-                                   b (if desc (assoc-in b [:rakennus :description] desc) b)]
-                               b))))
-                       (remove bad-building?))]
-    (save-katselmus-xml
-      application
-      lang
-      output-dir
-      (:id katselmus)
-      (:taskname katselmus)
-      pitoPvm
-      buildings
-      user
-      katselmuksenLaji
-      :katselmus
-      tila
-      pitaja
-      vaadittuLupaehtona
-      huomautukset
-      lasnaolijat
-      poikkeamat
-      tiedoksianto
-      krysp-version
-      begin-of-link
-      {:type "task" :id (:id katselmus)})))
-
 (defmethod permit/review-krysp-mapper :R [application review user lang krysp-version output-dir begin-of-link]
-  (save-katselmus-as-krysp application review user lang krysp-version output-dir begin-of-link))
+  (save-katselmus-xml application lang output-dir review user krysp-version begin-of-link {:type "task" :id (:id review)}))
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started
-                                     {:keys [index localShortId nationalId propertyId] :as building}
-                                     user krysp-version]
-  (let [building-id {:rakennus {:jarjestysnumero index
-                                :kiinttun        propertyId
-                                :rakennusnro     localShortId
-                                :valtakunnallinenNumero nationalId}}]
-    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil krysp-version nil nil)))
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
+  (let [task {:taskname "Aloitusilmoitus"
+              :data {:katselmus {:pitoPvm started}
+                     :katselmuksenLaji "Aloitusilmoitus"
+                     :rakennus {:0 {:tila {:tila "ei tiedossa"}
+                                    :rakennus {:jarjestysnumero index
+                                               :kiinttun propertyId
+                                               :rakennusnro localShortId
+                                               :valtakunnallinenNumero nationalId}}}}}]
+    (save-katselmus-xml application lang output-dir task user krysp-version nil nil)))
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -531,19 +483,22 @@
               (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
-(def designer-roles-mapping-new-to-old-220 {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
-                                            "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
-                                            "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
-                                            "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
-                                            "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
-                                            "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
-                                            "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"})
+(def designer-roles-mapping-new-to-old-222 {"muu" "ei tiedossa"})
 
-(defn map-suunnittelija-kuntaroolikoodi-pre220 [canonical]
+(def designer-roles-mapping-new-to-old-220 (merge designer-roles-mapping-new-to-old-222
+                                                  {"rakennussuunnittelija"                          "ARK-rakennussuunnittelija"
+                                                   "kantavien rakenteiden suunnittelija"            "RAK-rakennesuunnittelija"
+                                                   "pohjarakenteiden suunnittelija"                 "GEO-suunnittelija"
+                                                   "ilmanvaihdon suunnittelija"                     "IV-suunnittelija"
+                                                   "kiinteist\u00f6n vesi- ja viem\u00e4r\u00f6intilaitteiston suunnittelija"  "KVV-suunnittelija"
+                                                   "rakennusfysikaalinen suunnittelija"             "ei tiedossa"
+                                                   "kosteusvaurion korjausty\u00f6n suunnittelija"  "ei tiedossa"}))
+
+(defn map-suunnittelija-kuntaroolikoodi [mapping canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :suunnittelijatieto]
     #(map (fn [suunnittelija]
             (update-in suunnittelija [:Suunnittelija :suunnittelijaRoolikoodi]
-              (fn [role] (or (designer-roles-mapping-new-to-old-220 role) role))))
+              (fn [role] (or (mapping role) role))))
        %)))
 
 (def hakijan-asiamies-mapping-new-to-old-220 {"Hakijan asiamies"  "ei tiedossa"})
@@ -554,9 +509,26 @@
             (update-in osapuoli [:Osapuoli :kuntaRooliKoodi]
               (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role)))) %)))
 
-(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka map-hakijan-asiamies-pre220))
+(def rakennelman-kayttotarkoitus-pre-222 {"Aurinkopaneeli" "Muu rakennelma"
+                                          "Varastointis\u00e4ili\u00f6" "Muu rakennelma"})
 
-(def map-enums-213-218 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-hakijan-asiamies-pre220))
+(defn map-rakennelman-kayttotarkoitus-pre-222 [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto]
+             (partial map (fn [{{{{kayttotarkoitus :kayttotarkoitus} :Rakennelma} :rakennelmatieto} :Toimenpide :as toimenpide}]
+                            (if kayttotarkoitus
+                              (assoc-in toimenpide [:Toimenpide :rakennelmatieto :Rakennelma :kayttotarkoitus]
+                                        (get rakennelman-kayttotarkoitus-pre-222 kayttotarkoitus kayttotarkoitus))
+                              toimenpide)))))
+
+(def map-enums-220 (comp (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-222)
+                         map-rakennelman-kayttotarkoitus-pre-222))
+
+(def map-enums-213-218 (comp map-enums-220
+                             (partial map-suunnittelija-kuntaroolikoodi designer-roles-mapping-new-to-old-220)
+                             map-hakijan-asiamies-pre220))
+
+(def map-enums-212 (comp map-enums-213-218
+                         map-tyonjohtaja-patevyysvaatimusluokka))
 
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
@@ -574,6 +546,7 @@
         "2.1.6" (map-enums-213-218 canonical)
         "2.1.7" (map-enums-213-218 canonical)
         "2.1.8" (map-enums-213-218 canonical)
+        "2.2.0" (map-enums-220 canonical)
         canonical)
       (common-map-enums krysp-version)))
 

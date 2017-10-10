@@ -9,7 +9,7 @@
 
 (def create-id mongo/create-id)
 
-(def partners #{"ely" "mylly"})
+(def partners #{"ely" "mylly" "matti"})
 
 (sc/defschema IntegrationMessage
   {:id                            ssc/ObjectIdStr
@@ -18,6 +18,7 @@
    :partner                       (apply sc/enum partners)
    :format                        (sc/enum "xml" "json")
    :created                       ssc/Timestamp
+   :status                         (sc/enum "done" "published" "processing" "processed")
    (sc/optional-key :external-reference) sc/Str
    (sc/optional-key :output-dir)  sc/Str
    (sc/optional-key :application) {:id           ssc/ApplicationId
@@ -27,14 +28,17 @@
                                    :type sc/Str}
    (sc/optional-key :initator)    {:id       sc/Str
                                    :username sc/Str}
-   (sc/optional-key :action)            sc/Str
+   (sc/optional-key :action)            (sc/maybe sc/Str)
    (sc/optional-key :attached-files)    [ssc/ObjectIdStr]
    (sc/optional-key :attachmentsCount)  sc/Int
-   (sc/optional-key :acknowledged)      ssc/Timestamp})
+   (sc/optional-key :acknowledged)      ssc/Timestamp
+   (sc/optional-key :data)              {sc/Keyword sc/Any}})
 
 (sc/defn ^:always-validate save
-  [message :- IntegrationMessage]
-  (mongo/insert :integration-messages message WriteConcern/UNACKNOWLEDGED))
+  ([message :- IntegrationMessage]
+    (save message WriteConcern/UNACKNOWLEDGED))
+  ([message :- IntegrationMessage write-concern]
+    (mongo/insert :integration-messages message write-concern)))
 
 (sc/defn ^:always-validate mark-acknowledged-and-return :- (sc/maybe IntegrationMessage)
   ([message-id timestamp]

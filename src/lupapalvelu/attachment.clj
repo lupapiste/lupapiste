@@ -13,13 +13,14 @@
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.archiving-util :as archiving-util]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.attachment.metadata :as metadata]
+            [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.tag-groups :as att-tag-groups]
             [lupapalvelu.attachment.type :as att-type]
-            [lupapalvelu.attachment.accessibility :as access]
-            [lupapalvelu.attachment.metadata :as metadata]
-            [lupapalvelu.attachment.preview :as preview]
+            [lupapalvelu.attachment.util :as att-util]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.file-upload :as file-upload]
@@ -106,8 +107,8 @@
 (defschema Version
   "Attachment version"
   {:version                              VersionNumber
-   :fileId                               sc/Str             ;; fileId in GridFS
-   :originalFileId                       sc/Str             ;; fileId of the unrotated/unconverted file
+   :fileId                               ssc/ObjectIdStr             ;; fileId in GridFS
+   :originalFileId                       ssc/ObjectIdStr             ;; fileId of the unrotated/unconverted file
    :created                              ssc/Timestamp
    ;; Timestamp for the latest "non-versioning" operation (e.g.,
    ;; rotation, pdf/a conversion). Thus, modified can be present only
@@ -181,16 +182,6 @@
 (def attachment-is-readOnly? (partial attachment-value-is? true? :readOnly))
 (def attachment-is-locked?   (partial attachment-value-is? true? :locked))
 
-(defn get-original-file-id
-  "Returns original file id of the attachment version that matches
-  file-id. File-id can be either fileId or originalFileId."
-  [attachment file-id]
-  (some->> (:versions attachment)
-           (util/find-first (fn [{:keys [fileId originalFileId]}]
-                              (or (= fileId file-id)
-                                  (= originalFileId file-id))))
-           :originalFileId))
-
 (defn- version-approval-path
   [original-file-id & [subkey]]
   (->>  (if (ss/blank? (str subkey))
@@ -199,15 +190,6 @@
         (cons "attachments.$.approvals")
         (ss/join ".")
         keyword))
-
-(defn attachment-version-state [attachment file-id]
-  (when-let [file-key (keyword (get-original-file-id attachment file-id))]
-    (some-> attachment :approvals file-key :state keyword)))
-
-(defn attachment-state [attachment]
-  (attachment-version-state attachment (some-> attachment
-                                               :latestVersion
-                                               :originalFileId)))
 
 (defn attachment-array-updates
   "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
@@ -261,12 +243,9 @@
   [{:keys [attachments]} file-id]
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
-(defn get-operation-ids [{op :op :as attachment}]
-  (mapv :id op))
-
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
-  (filter (fn-> get-operation-ids set (contains? op-id)) attachments))
+  (filter (fn-> att-util/get-operation-ids set (contains? op-id)) attachments))
 
 (defn get-attachments-by-type
   [{:keys [attachments]} type]
@@ -287,7 +266,7 @@
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :readOnly true))
 
 (defn remove-operation-updates [{op :op :as attachment} removed-op-id]
-  (when (-> (get-operation-ids attachment) set (contains? removed-op-id))
+  (when (-> (att-util/get-operation-ids attachment) set (contains? removed-op-id))
     (let [updated-op (not-empty (remove (comp #{removed-op-id} :id) op))]
       {:op updated-op :groupType (when updated-op :operation)})))
 
@@ -375,13 +354,14 @@
 
 (defn create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
-  [application {ts :created :as options}]
+  [application {ts :created set-app-modified? :set-app-modified? :as options :or {set-app-modified? true}}]
   {:pre [(map? application)]}
   (let [attachment-data (create-attachment-data application options)]
     (update-application
      (application->command application)
-      {$set {:modified ts}
-       $push {:attachments attachment-data}})
+     (merge (when set-app-modified?
+              {$set {:modified ts}})
+            {$push {:attachments attachment-data}}))
     (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
@@ -408,14 +388,18 @@
       {$set   {:attachments.$.applicationState originalApplicationState}
        $unset {:attachments.$.originalApplicationState true}})))
 
-(defn- signature-updates [{:keys [fileId version]} user ts original-signature attachment-signatures]
-  (let [signature {:user   (or (:user original-signature) (usr/summary user))
-                   :created (or (:created original-signature) ts (now))
-                   :version version
-                   :fileId fileId}]
-    (if-let [orig-index (util/position-by-key :version version attachment-signatures)]
-      {$set  {(util/kw-path :attachments.$.signatures orig-index) signature}}
-      {$push {:attachments.$.signatures signature}})))
+(defn- signature [{:keys [fileId version]} current-user ts {:keys [user created]}]
+  {:user (or user (usr/summary current-user))
+   :created (or created ts (now))
+   :version version
+   :fileId fileId})
+
+(defn- signature-updates [version-model user ts original-signature attachment-signatures]
+  "Returns update query for single signature. If attachment version is signed updates signature,
+  if attachment version is not signed add signature."
+    (if-let [orig-index (util/position-by-key :version (:version version-model) attachment-signatures)]
+      {$set {(util/kw-path :attachments.$.signatures orig-index) (signature version-model user ts original-signature)}}
+      {$push {:attachments.$.signatures (signature version-model user ts original-signature)}}))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -423,7 +407,7 @@
   [user application attachment-id file-id]
   (not (when-not (auth/application-authority? application user)
          (when (some-> (get-attachment-info application attachment-id)
-                       (attachment-version-state file-id)
+                       (att-util/attachment-version-state file-id)
                        keyword
                        #{:ok :requires_user_action})
            :cannot-delete))))
@@ -504,7 +488,7 @@
               :attachments.$.groupType (:groupType group)}})
      (when-let [approval (cond
                            state                                           (->approval state user created )
-                           (not (attachment-version-state attachment
+                           (not (att-util/attachment-version-state attachment
                                                           originalFileId)) {:state :requires_authority_action})]
        {$set {(version-approval-path originalFileId) approval}})
 
@@ -536,8 +520,9 @@
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
-  ([application user {attachment-id :id :as attachment} options]
-    {:pre [(map? application) (map? attachment) (map? options)]}
+  ([application user {attachment-id :id :as attachment}
+    {:keys [set-app-modified?] :as options :or {set-app-modified? true}}]
+   {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
      (let [options       (if (contains? options :group)
                            (update options :group attachment-grouping-for-application application)
@@ -545,12 +530,16 @@
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
-           mongo-updates (util/deep-merge (attachment-comment-updates application user attachment options)
-                                          (when (:constructionTime options)
-                                            (construction-time-state-updates attachment true))
-                                          (when (or (:sign options) (:signature options))
-                                            (signature-updates version-model user (:created options) (:signature options) (:signatures attachment)))
-                                          (build-version-updates user attachment version-model options))
+
+           mongo-updates (cond-> (util/deep-merge (attachment-comment-updates application user attachment options)
+                                                  (when (:constructionTime options)
+                                                    (construction-time-state-updates attachment true))
+                                                  (when (or (:sign options) (:signature options))
+                                                    (if (> (count (:signature options)) 1)
+                                                      {$push {:attachments.$.signatures {$each (map (fn [original-signature] (signature version-model (:created options) user original-signature)) (:signature options))}}}
+                                                      (signature-updates version-model user (:created options) (first (:signature options)) (:signatures attachment))))
+                                                  (build-version-updates user attachment version-model options))
+                           (not set-app-modified?) (util/dissoc-in [$set :modified]))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
@@ -833,7 +822,7 @@
   [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
   (let [attachment       (get-attachment-info-by-file-id application file-id)
-        original-file-id (get-original-file-id attachment file-id)
+        original-file-id (att-util/get-original-file-id attachment file-id)
         data             (->> (->approval new-state user created)
                               (util/map-keys (partial util/kw-path "approvals" original-file-id)))]
     (update-attachment-data! command (:id attachment) data created :set-app-modified? true :set-attachment-modified? false)))
@@ -843,7 +832,7 @@
   (let [attachment (get-attachment-info-by-file-id application file-id)]
     (update-attachment-data! command
                              (:id attachment)
-                             {(util/kw-path "approvals" (get-original-file-id attachment file-id) "note") note}
+                             {(util/kw-path "approvals" (att-util/get-original-file-id attachment file-id) "note") note}
                              created
                              :set-app-modified? true
                              :set-attachment-modified? false)))
