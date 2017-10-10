@@ -16,7 +16,7 @@
 
 (defn set-template-draft-values [template-id & args]
   (doseq [[path value] (->arg-map args)]
-    (set-draft-value template-id path value)))
+    (set-template-draft-value template-id path value)))
 
 (defn publish-verdict-template [as-user id]
   (command as-user :publish-verdict-template :template-id id))
