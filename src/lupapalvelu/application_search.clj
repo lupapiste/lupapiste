@@ -73,7 +73,7 @@
         base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {$ne "YA"}}]}
                          {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil} {:permitType {$ne "YA"}}]}
                          {$and [{:state {$in ["closed" "extinct"]}} {:archived.completed nil} {:permitType "YA"}]}]}]
-    (if from-ts-by-orgs
+    (if (not (empty? from-ts-by-orgs))
       {$and [base-query
              {$or
               (map (fn [org-detail] (archival-start-ts-query (:org org-detail) (:ts org-detail))) from-ts-by-orgs)}]}
