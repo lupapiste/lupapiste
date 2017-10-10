@@ -54,7 +54,12 @@
             {:state (:data verdict)
              :info (dissoc verdict :data)
              :_meta {:updated updater
-                     :enabled? (can-edit?)}}))
+                     :enabled? (can-edit?)
+                     :attachments.filedata (fn [_ filedata & kvs]
+                                             (apply assoc filedata
+                                                    :target {:type :verdict
+                                                             :id (:id verdict)}
+                                                    kvs))}}))
   (reset! state/references references)
   (reset! state/current-view (if verdict ::verdict ::list)))
 

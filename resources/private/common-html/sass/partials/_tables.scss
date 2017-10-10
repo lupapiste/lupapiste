@@ -676,7 +676,9 @@ select.waste-unit-select {
     color: $negative;
     min-width: 20em;
     width: 100%;
-    word-wrap: normal;
+    white-space: normal;
+    word-break: break-word;
+
   }
   tfoot.batch--buttons {
     td {

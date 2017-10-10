@@ -136,26 +136,32 @@
   (swap! fields*
          dissoc (keyword filename)))
 
-(defn- bind-batch [{:keys [files* fields* binding?* info]}]
+(defn- bind-batch [{:keys [files* fields* binding?*] :as options}]
   (reset! binding?* true)
   (swap! files* (fn [files]
                   (filter #(= (:state %) :success) files)))
 
   (service/bind-attachments-batch @state/application-id
                                   (map (fn [{:keys [file-id filename]}]
-
-                                         (assoc ((keyword filename) @fields*)
-                                                :file-id file-id
-                                                :target {:type :verdict
-                                                         :id   (:id @info)}))
+                                         (let [filedata-fn (or (path/meta-value options :filedata)
+                                                               assoc)]
+                                           (filedata-fn options
+                                                        ((keyword filename) @fields*)
+                                                        :file-id file-id)))
                                        @files*)
-                                  (fn [{:keys [done pending] :as job}]
-                                    (swap! files* (fn [files]
-                                                    (remove #(util/includes-as-kw? done
-                                                                                   (:file-id %))
-                                                            files)) )
-                                    (when (empty? pending)
-                                      (reset! binding?* false)))))
+                                  (fn [{:keys [done pending result] :as job}]
+                                    (if job
+                                      (do (swap! files* (fn [files]
+                                                          (remove #(util/includes-as-kw? done
+                                                                                         (:file-id %))
+                                                                  files)))
+                                          (when (empty? pending)
+                                            (do (reset! binding?* false)
+                                                (reset! fields* {}))))
+                                      (do
+                                        (reset! binding?* false)
+                                        (hub/send :indicator {:style :negative
+                                                              :message :attachment.bind-failed}))))))
 
 (rum/defc batch-buttons < rum/reactive
   [{:keys [schema files* fields* binding?*] :as options}]
@@ -164,8 +170,9 @@
      [:tr
       [:td {:colSpan 4}
        [:button.primary.outline
-        {:on-click #(doseq [filedata @files*]
-                      (remove-file options filedata))
+        {:on-click #(do (doseq [filedata @files*]
+                          (remove-file options filedata))
+                        (reset! fields* {}))
          :disabled binding?}
         (path/loc :cancel)]
        [:button.positive

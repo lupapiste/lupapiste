@@ -193,17 +193,18 @@
                 :jobId job-id
                 :version version))
 
-(defn- batch-job [status-fn {job :job}]
-  (status-fn (reduce (fn [acc {:keys [fileId status]}]
-                       (let [k (case (keyword status)
-                                     :done :done
-                                     :error :error
-                                     :pending)]
-                         (update acc k #(cons fileId %))))
-                     {:pending []
-                      :error   []
-                      :done    []}
-                     (some-> job :value vals)))
+(defn- batch-job [status-fn {:keys [job]}]
+  (status-fn (when job
+               (reduce (fn [acc {:keys [fileId status]}]
+                         (let [k (case (keyword status)
+                                   :done :done
+                                   :error :error
+                                   :pending)]
+                           (update acc k #(cons fileId %))))
+                       {:pending []
+                        :error   []
+                        :done    []}
+                       (some-> job :value vals))))
   (when (util/=as-kw (:status job) :running)
     (bind-attachments-job (:id job)
                           (:version job)
@@ -221,7 +222,8 @@
   status-fn: Will be called with updated status - [file-id]
   map. Status can be :pending, :done or :error. The callback will not
   be called after every file has terminal status (:done or :error). In
-  other words, when the :pending list is empty"
+  other words, when the :pending list is empty. Nil (no job) argument
+  denotes error (e.g., timeout)."
   [app-id filedatas status-fn]
   (let [result* (atom {})]
     (bind-attachments app-id

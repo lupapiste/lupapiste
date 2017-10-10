@@ -221,6 +221,18 @@
   {sc/Keyword sc/Any})
 
 (defschema MattiAttachments
+  "Support for adding (via batch editor) attachments and viewing
+  attachment list. In addition to schema properties, the component
+  depends on two _meta functions:
+
+  filedata: (options filedata & kvs -> filedata) Receives regular
+  options (state, _meta, schema and other keys), filedata and extra
+  key-values. Returns filedata. Typical use case is to add target
+  information.
+
+  include?: (attachment -> boolean) True if the attachment is to be
+  included in the attachments list. Sample use case: list only the
+  verdict's attachments."
   (merge MattiComponent
          {;; Matching type groups are listed on the type
           ;; selector. Default all type groups.

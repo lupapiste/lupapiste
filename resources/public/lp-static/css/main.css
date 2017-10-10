@@ -12240,7 +12240,8 @@ select.waste-unit-select {
   color: #df3215;
   min-width: 20em;
   width: 100%;
-  word-wrap: normal;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .attachment-batch-table tfoot.batch--buttons td {
