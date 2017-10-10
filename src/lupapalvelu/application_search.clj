@@ -60,17 +60,23 @@
     (:id (user/get-user-by-email handler))
     handler))
 
+(defn archival-start-ts-query [organization start-ts]
+  {$and
+   [{:organization organization}
+    {$or [{:submitted {$gte start-ts}}
+          {:submitted nil
+           :created   {$gte start-ts}}]}]})
+
 (defn- archival-query [user]
-  (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
-                     (organization/earliest-archive-enabled-ts))
+  (let [user-orgs (user/organization-ids-by-roles user #{:archivist})
+        from-ts-by-orgs (map (fn [org] {:org org :ts (organization/earliest-archive-enabled-ts [org])}) user-orgs)
         base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil} {:permitType {$ne "YA"}}]}
                          {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil} {:permitType {$ne "YA"}}]}
                          {$and [{:state {$in ["closed" "extinct"]}} {:archived.completed nil} {:permitType "YA"}]}]}]
-    (if from-ts
+    (if (not (empty? from-ts-by-orgs))
       {$and [base-query
-             {$or [{:submitted {$gte from-ts}}
-                   {:submitted nil
-                    :created {$gte from-ts}}]}]}
+             {$or
+              (map (fn [org-detail] (archival-start-ts-query (:org org-detail) (:ts org-detail))) from-ts-by-orgs)}]}
       base-query)))
 
 (defn- event-search [event]

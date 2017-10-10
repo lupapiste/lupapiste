@@ -129,6 +129,9 @@
     v/finnish-ovt? nil
     :else [:warn "illegal-ovt-tunnus"]))
 
+(defmethod subtype-validation :zipcode [_ _]                ; passthrough, subtype is used only for schema data generation
+  nil)
+
 (defmethod subtype-validation nil [_ _]
   nil)
 

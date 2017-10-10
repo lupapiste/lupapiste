@@ -45,15 +45,9 @@
           :toState   (merge {:name (get app-schema/Application :state)} displayName)
           :messageType sc/Str}))
 
-(defn to-lang-map [localize-function]
-  (reduce (fn [result lang]
-            (assoc result (keyword lang) (localize-function lang)))
-          {}
-          i18n/supported-langs))
-
 (sc/defn ^:always-validate get-op-data :- Operation [op]
   (-> (select-keys op [:id :name :description])
-      (assoc :displayName (to-lang-map #(i18n/localize % "operations" (:name op))))))
+      (assoc :displayName (i18n/to-lang-map #(i18n/localize % "operations" (:name op))))))
 
 (def building-id-other-key
   (or
@@ -101,11 +95,11 @@
       (update :location-wgs84 location-array-to-map)
       (update :location location-array-to-map)
       (assoc :operations (build-operations application))
-      (assoc :link (to-lang-map #(make-app-link (:id application) %)))))
+      (assoc :link (i18n/to-lang-map #(make-app-link (:id application) %)))))
 
 (defn state-map [state]
   {:name (name state)
-   :displayName (to-lang-map #(i18n/localize % state))})
+   :displayName (i18n/to-lang-map #(i18n/localize % state))})
 
 (sc/defn ^:always-validate state-change-data :- StateChangeMessage [application new-state]
   (-> (application-data application)

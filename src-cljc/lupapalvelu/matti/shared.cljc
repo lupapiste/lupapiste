@@ -63,7 +63,7 @@
 
 (def phrase-categories #{:paatosteksti :lupaehdot :naapurit
                          :muutoksenhaku :vakuus :vaativuus
-                         :rakennusoikeus :kaava})
+                         :rakennusoikeus :kaava :toimenpide-julkipanoon})
 
 (def path-type (sc/conditional
                 ;; Joined kw-path (e.g. :one.two.three)
@@ -371,10 +371,13 @@
                 :aloitettava   {:date-delta {:unit :years}}
                 :voimassa      {:date-delta {:unit :years}}
                 :giver         {:docgen "matti-verdict-giver"}
+                :verdict-section  {:docgen "matti-verdict-section"}
                 :verdict-code  {:reference-list {:path       :settings.verdict-code
                                                  :type       :select
                                                  :loc-prefix :matti-r.verdict-code}}
                 :paatosteksti  {:phrase-text {:category :paatosteksti}}
+                :bulletin-op-description {:phrase-text {:category :toimenpide-julkipanoon
+                                                        :i18nkey :phrase.category.toimenpide-julkipanoon}}
                 ;; The following keys are whole sections
                 :foremen       (reference-list :settings.foremen {:item-loc-prefix :matti-r.foremen})
                 :plans         (reference-list :settings.plans {:term {:path       [:plans]
@@ -421,11 +424,19 @@
                                       [{:col  3
                                         :id   :giver
                                         :dict :giver}
+                                       {:col  2
+                                        :id   :section
+                                        :dict :verdict-section}
                                        {:align :full
                                         :col   3
                                         :dict  :verdict-code}]
                                       [{:col  12
                                         :dict :paatosteksti}]]}}
+              {:id          "bulletin"
+               :loc-prefix  :bulletin
+               :grid        {:columns 1
+                             :rows [[{:col  1
+                                      :dict :bulletin-op-description}]]}}
               (multi-section :foremen)
               (multi-section :reviews)
               (multi-section :plans)
@@ -544,6 +555,8 @@
                                           :type       :select
                                           :loc-prefix :matti-r.verdict-code}}
       :verdict-text     {:phrase-text {:category :paatosteksti}}
+      :bulletin-op-description {:phrase-text {:category :toimenpide-julkipanoon
+                                              :i18nkey :phrase.category.toimenpide-julkipanoon}}
       :verdict-text-ref {:reference {:path :verdict-text}}
       :application-id   {:placeholder {:type :application-id}}}
      (reduce (fn [acc [loc-prefix kw term? separator?]]
@@ -620,15 +633,16 @@
              :rows    [[{:loc-prefix :matti-verdict.giver
                          :hide?      :_meta.editing?
                          :dict       :contact-ref}
-                        {:col   3
+                        {:col   2
                          :show? :_meta.editing?
                          :list  {:items [{:id   :giver
                                           :dict :giver}
                                          {:id    :contact
                                           :show? :_meta.editing?
                                           :dict  :contact}]}}
-                        {:col   2
-                         :hide? :_meta.editing?}
+                        {:col   1
+                         :loc-prefix :matti-verdict.section
+                         :dict  :verdict-section}
                         {:col   2
                          :align :full
                          :dict  :verdict-code}]
@@ -643,6 +657,13 @@
                          :id    "application-id"
                          :hide? :_meta.editing?
                          :dict  :application-id}]]}}
+     {:id          "bulletin"
+      :loc-prefix  :bulletin
+      :show?       :?.bulletin-op-description
+      :grid        {:columns 1
+                    :rows [[{:col  1
+                             :id   "toimenpide-julkipanoon"
+                             :dict :bulletin-op-description}]]}}
      {:id   "requirements"
       :grid {:columns 7
              :rows    (concat (map (fn [dict]

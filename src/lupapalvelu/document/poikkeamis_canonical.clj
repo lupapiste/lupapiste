@@ -30,14 +30,12 @@
                                                                     :paakayttotarkoitusKoodi kayttotarkoitusKoodi}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))
 
-
 (defn- get-toimenpiteet [toimenpiteet]
   (remove
     #(or (nil? %) (empty? %))
     (map (comp util/strip-empty-maps
                util/strip-nils
                get-toimenpidefull) toimenpiteet)))
-
 
 (defn common-poikkeamis-asia [application poikkeamisasia-path lang kuvaus-avain kayttotapaus]
   (let [application (tools/unwrapped application)
@@ -59,6 +57,8 @@
                                                     "ruotsi"
                                                     "suomi")}}
       :kayttotapaus kayttotapaus
+      :avainsanaTieto (get-avainsanaTieto application)
+      :menettelyTOS (:tosFunctionName application)
       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (:poikkeamat hanke)
                                   kuvaus-avain (:kuvaus hanke)}}})))
 
@@ -69,6 +69,3 @@
 
 (defmethod poikkeus-application-to-canonical "suunnittelutarveratkaisu" [application lang]
   (common-poikkeamis-asia application [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia] lang :suunnittelutarveasianKuvaus "Uusi suunnittelutarveasia"))
-
-
-

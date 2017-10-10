@@ -9,7 +9,8 @@
             [sade.common-reader :as cr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
-            [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
+            [lupapalvelu.document.rakennuslupa-canonical-test :refer [asiakirjat-toimitettu-checker
+                                                                      application-rakennuslupa
                                                                       application-aurinkopaneeli
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-tyonjohtajan-nimeaminen-v2
@@ -217,21 +218,32 @@
     (facts "2.2.0"
       (fact "avainsanatieto"
         (xml/select lp-xml_220 [:avainsanaTieto :Avainsana]) => [])
-
+      (fact "Suunnitelijat"
+        (count (xml/select lp-xml_220 [:suunnittelijatieto :Suunnittelija])) => 4)
+      (fact "Osapuolet"
+        (count (xml/select lp-xml_222 [:osapuolettieto :Osapuoli])) => 5)
       (fact "menettelyTOS"
         (xml/get-text lp-xml_220 [:menettelyTOS]) => nil)
-      (fact "rakennustietojEiMmutetaKytkin not exists"
-        (xml/get-text lp-xml_220 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => nil))
+      (fact "rakennustietojEiMmutetaKytkin does not exist"
+        (xml/get-text lp-xml_220 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => nil)
+      (fact "lisatiedot / asiakirjatToimitettuPvm does not exist yet"
+        (xml/get-text lp-xml_220 [:lisatiedot :Lisatiedot :asiakirjatToimitettuPvm]) => ss/blank?))
 
     (facts "2.2.2"
       (fact "avainsanatieto"
         (->> (xml/select lp-xml_222 [:avainsanaTieto :Avainsana])
              (map :content)) => [["avainsana"]
                                  ["toinen avainsana"]])
+      (fact "Suunnitelijat"
+        (count (xml/select lp-xml_222 [:suunnittelijatieto :Suunnittelija])) => 4)
+      (fact "Osapuolet"
+        (count (xml/select lp-xml_222 [:osapuolettieto :Osapuoli])) => 5)
       (fact "menettelyTOS"
         (xml/get-text lp-xml_222 [:menettelyTOS]) => "tos menettely")
       (fact "rakennustietojEiMmutetaKytkin"
-        (xml/get-text lp-xml_222 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => "true"))))
+        (xml/get-text lp-xml_222 [:muuMuutosTyo :rakennustietojaEimuutetaKytkin]) => "true")
+      (fact "lisatiedot / asiakirjatToimitettuPvm"
+        (xml/get-text lp-xml_222 [:lisatiedot :Lisatiedot :asiakirjatToimitettuPvm]) => asiakirjat-toimitettu-checker))))
 
 (facts "Rakennelma"
   (let [canonical (application-to-canonical application-aurinkopaneeli "fi")

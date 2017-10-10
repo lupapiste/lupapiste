@@ -72,13 +72,13 @@
          {:type               (sc/eq :string)
           (opt :default)      sc/Str
           (opt :min-len)      sc/Int
-          (opt :max-len)      sc/Int}))
+          (opt :max-len)      sc/Int
+          (opt :dummy-test)   sc/Keyword}))
 
 (defschema PlainString
   "String type without subtype"
   (merge GenString
-         {(opt :dummy-test)   sc/Keyword
-          (opt :identifier)   sc/Bool     ;; TODO: should be a subtype?
+         {(opt :identifier)   sc/Bool     ;; TODO: should be a subtype?
           (opt :unit)         sc/Keyword  ;; TODO: should have numeric subtype?
           }))
 
@@ -149,6 +149,10 @@
   (merge GenString
          {:subtype            (sc/eq :vrk-address)}))
 
+(defschema Zipcode
+  (merge GenString
+         {:subtype            (sc/eq :zipcode)}))
+
 (defschema Date
   (merge GenInput
          {:type       (sc/eq :date)}))
@@ -203,6 +207,7 @@
                   (subtype-pred :ovt)              Ovt
                   (subtype-pred :vrk-name)         VrkName
                   (subtype-pred :vrk-address)      VrkAddress
+                  (subtype-pred :zipcode)          Zipcode
                   #(not (contains? % :subtype))    PlainString
                   :else                            {:subtype (sc/eq nil)})) ; For better error messages
 

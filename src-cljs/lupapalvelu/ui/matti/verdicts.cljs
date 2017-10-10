@@ -75,10 +75,17 @@
 (defn with-back-button [component]
   [:div
    (lupapalvelu.ui.attachment.components/dropzone)
-   [:button.secondary
-    {:on-click #(reset-verdict nil)}
-    [:i.lupicon-chevron-left]
-    [:span (common/loc "back")]]
+   [:div.operation-button-row
+    [:button.secondary
+     {:on-click #(reset-verdict nil)}
+     [:i.lupicon-chevron-left]
+     [:span (common/loc "back")]]
+    [:button.primary
+     {:on-click #(common/command :upsert-matti-verdict-bulletin
+                                 identity
+                                 :id @state/application-id
+                                 :verdict-id (-> @state/current-verdict :info :id))}
+     [:span "Päivitä Julkipanoon"]]]
    component])
 
 (rum/defc verdict-section-header < rum/reactive

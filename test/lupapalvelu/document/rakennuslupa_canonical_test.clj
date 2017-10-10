@@ -10,9 +10,12 @@
             [lupapalvelu.document.schemas :as doc-schemas]
             [lupapalvelu.document.data-schema :as doc-data-schema]
             [lupapalvelu.factlet :as fl]
-            [sade.util :as util]
+            [lupapalvelu.attachment :as att]
+            [schema.core :as sc]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [sade.schema-generators :as ssg]
+            [sade.util :as util]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
             [midje.sweet :refer :all]
@@ -78,7 +81,6 @@
                                       :subtype "hakija"
                                       :version 1}
    :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
-                                             :postitetaanPaatos {:value true}
                                              :suoramarkkinointilupa {:value false}})}})
 (def- asiamies-henkilo
   {:id "asiamies-henkilo" :schema-info {:name "hakijan-asiamies"
@@ -110,7 +112,6 @@
                        :kokemus {:value "5"}
                        :fise {:value "http://www.ym.fi"}
                        :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
-           {:kytkimet {:postitetaanPaatos {:value false}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija1
@@ -139,7 +140,6 @@
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}
                             :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
-                {:kytkimet {:postitetaanPaatos {:value true}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija3
@@ -499,6 +499,11 @@
 (defn op-info [doc]
   (select-keys (-> doc :schema-info :op) [:id :name :description]))
 
+(defn- randomize-versions [a]
+  (if (> 0.5 (rand))
+    (assoc a :versions [])
+    a))
+
 (def application-rakennuslupa
   {:id "LP-753-2013-00001"
    :permitType "R"
@@ -514,10 +519,12 @@
    :opened 1354532324658
    :submitted 1354532324658
    :location [408048 6693225]
-   :attachments [],
    :handlers[{:firstName "Sonja"
               :lastName "Sibbo"
               :general true}]
+   :attachments [(->> (ssg/generate (dissoc att/Attachment (sc/optional-key :metadata)))
+                      randomize-versions
+                      ((fn [a] (assoc a :latestVersion (-> a :versions last)))))]
    :title "s"
    :created 1354532324658
    :documents documents
@@ -695,7 +702,6 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
-    (fact "postitetaanKytkin" (:postitetaanKytkin hakija-model) => true)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
@@ -711,7 +717,6 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi asiamies-model) => "muu osapuoli")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin asiamies-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
-    (fact "postitetaanKytkin" (:postitetaanKytkin asiamies-model) => false)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin asiamies-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
@@ -726,7 +731,6 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-model) => "hakija")
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin yritys) => true)
-    (fact "postitetaanKytkin" (:postitetaanKytkin hakija-model) => false)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => false)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
@@ -750,7 +754,6 @@
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "FISEpatevyyskortti" (:FISEpatevyyskortti suunnittelija-model) => "http://www.ym.fi")
     (fact "FISEkelpoisuus" (:FISEkelpoisuus suunnittelija-model) => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
-    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -766,7 +769,6 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
-    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -782,7 +784,6 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "A")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
-    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => true)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -798,7 +799,6 @@
     (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
-    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
     (fact "yritys" (:yritys suunnittelija-model) => truthy)))
 
@@ -811,8 +811,7 @@
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
-    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
-    (fact "postitetaanKytkin" (:postitetaanKytkin suunnittelija-model) => false)))
+    (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
 
 (facts "Canonical suunnittelija-blank-role model is correct"
   (let [suunnittelija (tools/unwrapped (:data suunnittelija-blank-role))
@@ -1088,6 +1087,17 @@
         (get-in result [:Rakennuspaikka :kaavanaste]) => falsey
         (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))))
 
+(defn asiakirjat-toimitettu-checker
+  "Checking depends on value of the generator above.
+  Selects newest attachment version (if applicable), and checks if actual matches version's created."
+  [actual]
+  (if-let [version (->> (map :latestVersion (:attachments application-rakennuslupa))
+                        (remove nil?)
+                        (sort-by :created)
+                        last)]
+    (= actual (-> version (:created) (util/to-xml-date)))
+    (ss/blank? actual)))
+
 (fl/facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -1207,6 +1217,7 @@
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => nil?)
     (fact "vakuus" (:vakuus Lisatiedot) => nil)
     (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
+    (fact "Lisatiedot asiakirjatToimitettuPvm (2.2.2)" (:asiakirjatToimitettuPvm Lisatiedot) => asiakirjat-toimitettu-checker)
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuiden kaataminen:Puun kaataminen")
     (fact "kayttotapaus" kayttotapaus => "Uusi hakemus")
 

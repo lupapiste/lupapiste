@@ -9,6 +9,7 @@ LUPAPISTE.VerdictsModel = function() {
   }
 
   self.verdicts = ko.observable();
+  self.unfilteredVerdicts = ko.observableArray();
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
 
@@ -39,6 +40,7 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.refresh = function(application) {
     self.applicationId = application.id;
+    self.unfilteredVerdicts(application.verdicts);
     var verdicts = _(application.verdicts || [])
       .cloneDeep()
       .map(function(verdict) {

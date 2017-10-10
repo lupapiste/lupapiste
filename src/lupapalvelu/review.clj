@@ -61,15 +61,27 @@
 (defn- matching-data?
   "Do the two tasks have matching review data for the given keys?"
   [data-keys a b]
-  (= (select-keys (katselmus-data a)
-                  data-keys)
-     (select-keys (katselmus-data b)
-                  data-keys)))
+  (let [key->comparator-fn (->> data-keys
+                                ;; If no comparator function is provided, use =
+                                (map #(if (vector? %) % [% =]))
+                                (into {}))
+        compared-keys (keys key->comparator-fn)]
+    (every? true? (map (fn [key]
+                         ((key->comparator-fn key) (get (katselmus-data a) key)
+                                                   (get (katselmus-data b) key)))
+                       compared-keys))))
 
 (defn- task-with-same-name-type-and-data [data-keys mongo-task tasks]
   (util/find-first #(and (reviews-have-same-name-and-type? mongo-task %)
                          (matching-data? data-keys mongo-task %))
                    tasks))
+
+(defn- compare-pitaja
+  "In order to accommodate for small inconsistensies with how backends
+  store pitaja information, compare by removing non-letter characters
+  and converting to lower case"
+  [pitaja-a pitaja-b]
+  (ss/=alpha-i pitaja-a pitaja-b))
 
 (defn- matching-task
   "For a given mongo-task, return a matching task from the XML update"
@@ -84,7 +96,9 @@
    ;; 3. task with same name, type and other data related to holding
    ;;    the review, given that mongo task does not have background id
    (when (ss/empty? (background-id mongo-task))
-     (task-with-same-name-type-and-data [:tila :pitoPvm :pitaja]
+     (task-with-same-name-type-and-data [#_:tila ;; Temporarily disabled
+                                         :pitoPvm
+                                         [:pitaja compare-pitaja]]
                                         mongo-task
                                         update-tasks))))
 
@@ -260,12 +274,15 @@
         :attachments-by-task-id attachments-by-task-id
         :added-tasks-with-updated-buildings added-tasks-with-updated-buildings)))
 
-(defn save-review-updates [command updates added-tasks-with-updated-buildings attachments-by-task-id]
-  (let [update-result (update-application command updates)
-        updated-application (domain/get-application-no-access-checking (get-in command [:application :id] ))] ;; TODO: mongo projection
-    (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
-      (let [attachments (get attachments-by-task-id id)]
-        (if-not (empty? attachments)
-          (doseq [att attachments]
-            (verdict-review-util/get-poytakirja! (:application command) (:user command) (now) {:type "task" :id id} att))
-          (tasks/generate-task-pdfa updated-application added-task (:user command) "fi"))))))
+(defn save-review-updates [{user :user  application :application :as command} updates added-tasks-with-updated-buildings attachments-by-task-id]
+  (let [update-result (pos? (update-application command {:modified (:modified application)} updates :return-count? true))
+        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
+    (when update-result
+      (doseq [{id :id :as added-task} added-tasks-with-updated-buildings]
+        (let [attachments (get attachments-by-task-id id)]
+          (if-not (empty? attachments)
+            (doseq [att attachments]
+              (verdict-review-util/get-poytakirja! application user (now) {:type "task" :id id} att))
+            (tasks/generate-task-pdfa updated-application added-task (:user command) "fi")))))
+    (cond-> {:ok update-result}
+      (false? update-result) (assoc :desc (format "Application modified does not match (was: %d, now: %d)" (:modified application) (:modified updated-application))))))

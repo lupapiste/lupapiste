@@ -416,7 +416,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentTriggers( _.get( organization, "assignment-triggers", []));
 
-    if( features.enabled( "matti")) {
+    if( authorizationModel.ok("matti-enabled")) {
       refreshVerdictTemplates();
     }
     self.initialized = true;

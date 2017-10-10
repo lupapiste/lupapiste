@@ -57,6 +57,35 @@
                                  :underReview created application user)
                                {$set {:opened (:opened application)}})))
 
+(defcommand store-archival-project-backend-ids
+  {:parameters [id verdicts]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/vector-parameters [:verdicts])]
+   :user-roles #{:authority}
+   :user-authz-roles roles/default-authz-writer-roles
+   :states           #{:open :underReview}
+   :pre-checks       [permit/is-archiving-project]}
+  [command]
+  (if (some #(ss/blank? (ss/trim (:kuntalupatunnus %))) verdicts)
+    (fail :error.no-verdict-municipality-id)
+    (do (d/update-verdicts command verdicts)
+        (ok))))
+
+(defcommand set-archival-project-permit-date
+  {:parameters [id date]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/number-parameters [:date])]
+   :user-roles #{:authority}
+   :user-authz-roles roles/default-authz-writer-roles
+   :states           #{:open :underReview}
+   :pre-checks       [permit/is-archiving-project
+                      (fn [{{d :date} :data}]
+                        (when (and (number? d) (> d (now)))
+                          (fail :error.invalid-date)))]}
+  [command]
+  (d/update-verdict-date command date)
+  (ok))
+
 (defquery user-is-pure-digitizer
   {:user-roles #{:authority}
    :pre-checks [(fn [{{org-authz :orgAuthz} :user}]

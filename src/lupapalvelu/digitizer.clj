@@ -202,3 +202,27 @@
                                                                                                building-xml
                                                                                                kuntalupatunnus)]
                                            (ok :id id)))))
+
+(defn update-verdicts [{:keys [application] :as command} verdicts]
+  (let [current-verdicts (:verdicts application)
+        modified-verdicts (filter (fn [{:keys [id kuntalupatunnus]}]
+                                    (some #(and (= id (:id %))
+                                                (not= kuntalupatunnus (:kuntalupatunnus %))) current-verdicts))
+                                  verdicts)
+        removed-verdicts (remove #(contains? (set (map :id verdicts)) (:id %)) current-verdicts)
+        new-verdicts (filter #(nil? (:id %)) verdicts)]
+    (doseq [{:keys [id kuntalupatunnus]} modified-verdicts]
+      (action/update-application command
+                                 {:verdicts.id id}
+                                 {$set {:verdicts.$.kuntalupatunnus kuntalupatunnus}}))
+    (doseq [{:keys [id]} removed-verdicts]
+      (action/update-application command
+                                 {$pull {:verdicts {:id id}}}))
+    (some->> (seq (map :kuntalupatunnus new-verdicts))
+             (verdict/backend-id-mongo-updates application)
+             (action/update-application command))))
+
+(defn update-verdict-date [command date]
+  (action/update-application command
+                             {$set {:verdicts.0.paatokset [{:id (mongo/create-id)
+                                                            :poytakirjat [{:paatospvm date}]}]}}))

@@ -1,6 +1,7 @@
 (ns lupapalvelu.matti-itest
   (:require [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.matti-itest-util :refer :all]
             [midje.sweet :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -79,8 +80,7 @@
   => (contains ["r" "p" "ymp" "kt"] :in-any-order))
 
 (fact "Create new template"
-  (let [{:keys [id name draft modified category]}
-        (command sipoo :new-verdict-template :category "r")]
+  (let [{:keys [id name draft modified category]} (init-verdict-template sipoo :r)]
     id => string?
     name => "P\u00e4\u00e4t\u00f6spohja"
     draft => {}
@@ -157,9 +157,7 @@
                                                            :plans   true}}
                                 :modified last-edit}))
                 (fact "Publish template"
-                  (let [{published :published}
-                        (command sipoo :publish-verdict-template
-                                 :template-id id)]
+                  (let [{published :published} (publish-verdict-template sipoo id)]
                     (- published last-edit) => pos?
                     (fact "Delete template"
                       (command sipoo :toggle-delete-verdict-template
@@ -185,8 +183,7 @@
                                :value "Foo")
                       => (err :error.verdict-template-deleted))
                     (fact "Publish not allowed for deleted template"
-                      (command sipoo :publish-verdict-template
-                               :template-id id)
+                          (publish-verdict-template sipoo id)
                       => (err :error.verdict-template-deleted))
                     (fact "Fetch draft not allowed for deleted template"
                       (query sipoo :verdict-template
@@ -255,7 +252,7 @@
   => (err :error.verdict-template-not-found))
 
 (facts "Data path and value validation"
-  (let [{id :id} (command sipoo :new-verdict-template :category "r")]
+  (let [{id :id} (init-verdict-template sipoo :r)]
     (command sipoo :save-verdict-template-draft-value
              :template-id id
              :path [:julkipano :enabled]
@@ -483,13 +480,13 @@
   (fact "No defaults yet"
     (:templates (query sipoo :default-operation-verdict-templates))
     => {})
-  (let [{template-id :id} (command sipoo :new-verdict-template :category "r")]
+  (let [{template-id :id} (init-verdict-template sipoo :r)]
     (fact "Verdict template not published"
       (command sipoo :set-default-operation-verdict-template
                :operation "pientalo" :template-id template-id)
       => (err :error.verdict-template-not-published))
     (fact "Publish the verdict template"
-      (command sipoo :publish-verdict-template :template-id template-id)
+      (publish-verdict-template sipoo template-id)
       => ok?)
     (fact "Delete verdict template"
       (command sipoo :toggle-delete-verdict-template
@@ -549,8 +546,7 @@
                                                         :operation :pientalo
                                                         :propertyId sipoo-property-id)]
         (fact "Create and delete verdict template"
-          (let [{tmp-id :id} (command sipoo :new-verdict-template
-                                      :category "r")]
+          (let [{tmp-id :id} (init-verdict-template sipoo :r)]
             (command sipoo :toggle-delete-verdict-template
                      :template-id tmp-id :delete true) => ok?))
         (fact "Rename assumed default"
@@ -566,23 +562,16 @@
                          :name "Uusi nimi"})] :in-any-order)))))
 
 (facts "Verdicts"
-  (let [{template-id :id} (command sipoo :new-verdict-template :category "r")
+  (let [{template-id :id} (init-verdict-template sipoo :r)
         plan              (-> (query sipoo :verdict-template-plans :category "r")
                               :plans first)
         review            (-> (query sipoo :verdict-template-reviews :category "r")
                               :reviews first)]
     (fact "Plan" plan =not=> nil)
     (fact "Review" review =not=> nil)
-    (letfn [(set-draft-value [path value]
-              (fact {:midje/description (format "Draft value: %s %s"
-                                                path value)}
-                (command sipoo :save-verdict-template-draft-value
-                         :template-id template-id
-                         :path (flatten [path])
-                         :value value) => ok?))
-            (set-date-delta [k v]
-              (set-draft-value [k :enabled] true)
-              (set-draft-value [k :delta] v))]
+    (letfn [(set-date-delta [k v]
+              (set-template-draft-values template-id [k :enabled] true
+                                                     [k :delta] v))]
       (fact "Full template"
         (command sipoo :set-verdict-template-name
                  :template-id template-id
@@ -595,19 +584,20 @@
         (set-date-delta "aloitettava" 1) ;; years
         (set-date-delta "voimassa" 2) ;; years
         )
-      (set-draft-value "giver" :lautakunta)
-      (set-draft-value "verdict-code" :ehdollinen)
-      (set-draft-value "paatosteksti" "Verdict text.")
-      (set-draft-value :foremen [:iv-tj :erityis-tj])
-      (set-draft-value "plans" [(:id plan)])
-      (set-draft-value "reviews" [(:id review)])
-      (set-draft-value "conditions" "Other conditions.")
-      (set-draft-value "appeal" "Humble appeal.")
-      (set-draft-value "complexity" "medium")
-      (set-draft-value "complexity-text" "Complex explanation.")
-      (set-draft-value "autopaikat" true)
-      (set-draft-value "paloluokka" true)
-      (set-draft-value "vss-luokka" true)
+      (set-template-draft-values template-id
+                        "giver" :lautakunta
+                        "verdict-code" :ehdollinen
+                        "paatosteksti" "Verdict text."
+                        :foremen [:iv-tj :erityis-tj]
+                        "plans" [(:id plan)]
+                        "reviews" [(:id review)]
+                        "conditions" "Other conditions."
+                        "appeal" "Humble appeal."
+                        "complexity" "medium"
+                        "complexity-text" "Complex explanation."
+                        "autopaikat" true
+                        "paloluokka" true
+                        "vss-luokka" true)
 
       (facts "New verdict using Full template"
         (let [{app-id :id
@@ -625,8 +615,7 @@
             (command sonja :new-matti-verdict-draft :id app-id :template-id template-id)
             => fail?)
           (fact "Publish Full template"
-            (command sipoo :publish-verdict-template
-                     :template-id template-id)
+            (publish-verdict-template sipoo template-id)
             => ok?)
           (fact "Pena cannot create verdict"
             (command pena :new-matti-verdict-draft :id app-id :template-id template-id)
@@ -938,8 +927,7 @@
                         (edit-template :autopaikat false)
                         (edit-template :vss-luokka false))
                       (fact "Publish template"
-                        (command sipoo :publish-verdict-template
-                                 :template-id template-id) => ok?)))
+                        (publish-verdict-template sipoo template-id) => ok?)))
                   (fact "New verdict"
                     (let  [{verdict :verdict}   (command sonja :new-matti-verdict-draft
                                                          :id app-id
@@ -959,6 +947,7 @@
                                :plans            [(:id plan)]
                                :reviews-included false
                                :reviews          [(:id review)]
+                               :bulletin-op-description ""
                                :buildings        {op-id          {:description   "Hello world!"
                                                                   :show-building true
                                                                   :building-id   "789"

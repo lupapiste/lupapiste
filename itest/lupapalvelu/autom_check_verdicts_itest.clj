@@ -63,7 +63,7 @@
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:foo 42}]
-          (clojure.string/blank? nil) =throws=> (IllegalArgumentException.)
+          (sade.strings/blank? nil) =throws=> (IllegalArgumentException.)
           (lupapalvelu.logging/log-event :error anything) => nil))
 
       (fact "batchrun check-for-verdicts logs failure details"
@@ -72,7 +72,7 @@
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:foo 42}]
-          (clojure.string/blank? anything) => false
+          (sade.strings/blank? anything) => false
           (lupapalvelu.logging/log-event :error anything) => nil
           (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar)))
 

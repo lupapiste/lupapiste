@@ -617,6 +617,24 @@ select.waste-unit-select {
       }
     }
   }
+    tr:nth-child(4n+3),
+  tr:nth-child(4n+4) {
+    background: $tr-color-even;
+  }
+  tr:nth-child(4n+1),
+  tr:nth-child(4n+2) {
+    background: #ffffff;
+    &:hover {
+      background: #ffffff;
+    }
+  }
+  tr.file {
+    border-bottom: 0;
+  }
+  tr.metadata {
+    border-top: 0;
+  }
+
   // The following td classes are used in Matti
   td.batch--file {
     max-width: 20em;

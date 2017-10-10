@@ -730,9 +730,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     function selectEmit( target, sendLater ) {
+      var opts = target.value === "other" ?
+                   {locName: loc("select-other")} :  _.find( options, {name: target.value});
       emit( target, _.defaults( {sendLater: Boolean( sendLater ),
                                  subSchema: subSchema},
-                                _.find( options, {name: target.value})));
+                                opts));
     }
 
     var locSelectedOption = _.find(options, function(e) {

@@ -50,6 +50,7 @@ Primary operation can be changed
   Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]/i[contains(@class, 'lupicon-star')]
   Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]/i[contains(@class, 'lupicon-star')]
 
+  Scroll to  button[data-op-name='muu-uusi-rakentaminen']
   Click Element  //button[@data-op-name="muu-uusi-rakentaminen"]
 
   Wait until  Primary operation is  muu-uusi-rakentaminen

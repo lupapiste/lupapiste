@@ -10,7 +10,10 @@
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.application-bulletins :as bulletins]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 
 ;; ------------------------------------------
@@ -136,3 +139,36 @@
    :states          (states/all-states-but [:draft :open])
    :pre-checks      [matti-enabled]}
   [_])
+
+(defn- get-search-fields [fields app]
+  (into {} (map #(hash-map % (% app)) fields)))
+
+(defn- create-bulletin [application created & [updates]]
+  (let [app-snapshot (bulletins/create-bulletin-snapshot application)
+        app-snapshot (if updates
+                       (merge app-snapshot updates)
+                       app-snapshot)
+        search-fields [:municipality :address :verdicts :matti-verdicts :_applicantIndex
+                       :bulletinState :applicant :organization :bulletin-op-description]
+        search-updates (get-search-fields search-fields app-snapshot)]
+    (bulletins/snapshot-updates app-snapshot search-updates created)))
+
+(defcommand upsert-matti-verdict-bulletin
+  {:description      ""
+   :feature          :matti
+   :user-roles       #{:authority}
+   :parameters       [id verdict-id]
+   :input-validators [(partial action/non-blank-parameters [:id :verdict-id])]
+   :pre-checks       [(verdict-exists :editable?)]
+   :states           states/give-verdict-states}
+  [{application :application created :created}]
+  (let [verdict (util/find-by-id verdict-id (:matti-verdicts application))
+        today-long (tc/to-long (t/today-at-midnight))
+        updates (create-bulletin application created {:bulletinState :verdictGiven
+                                                      :verdictGivenAt       today-long
+                                                      :appealPeriodStartsAt today-long
+                                                      :appealPeriodEndsAt   (tc/to-long (t/plus (t/today-at-midnight) (t/days 14)))
+                                                      :verdictGivenText ""
+                                                      :bulletin-op-description (-> verdict :data :bulletin-op-description)})]
+    (bulletins/upsert-bulletin-by-id id updates)
+    (ok)))

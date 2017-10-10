@@ -289,10 +289,22 @@
        (map get-toimenpide-with-count (range 1 1000))
        not-empty))
 
+(defn- get-asiakirjat-toimitettu-pvm [{:keys [attachments]}]
+  (when-let [versions (seq (map :latestVersion attachments))]
+    (util/to-xml-date
+      (->> versions
+           (sort-by :created)
+           last
+           :created))))
+
 (defn get-lisatiedot [lang]
   {:Lisatiedot {:asioimiskieli (case lang
                                  "sv" "ruotsi"
                                  "suomi")}})
+
+(defn get-lisatiedot-with-asiakirjat-toimitettu [application lang]
+  (-> (get-lisatiedot lang)
+      (update :Lisatiedot util/assoc-when :asiakirjatToimitettuPvm (get-asiakirjat-toimitettu-pvm application))))
 
 (defn- get-asian-tiedot [documents-by-type]
   (let [maisematyo_documents (:maisematyo documents-by-type)
@@ -314,11 +326,6 @@
 
 (defn- get-hankkeen-vaativuus [documents-by-type]
   (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
-
-(defn- get-avainsanaTieto [{tags :tags :as application}]
-  (->> (map :label tags)
-       (remove nil?)
-       (map (partial hash-map :Avainsana))))
 
 (defn application-to-canonical-operations
   [application]
@@ -351,7 +358,7 @@
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
-                      :lisatiedot (get-lisatiedot lang)
+                      :lisatiedot (get-lisatiedot-with-asiakirjat-toimitettu application lang)
                       :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}
                  util/not-empty-or-nil?
                  :viitelupatieto (map get-viitelupatieto link-permits)
@@ -506,5 +513,5 @@
       {:RakennusvalvontaAsia
        {:kasittelynTilatieto (get-state application)
         :luvanTunnisteTiedot (lupatunnus application)
-        :lisatiedot (get-lisatiedot lang)
+        :lisatiedot (get-lisatiedot-with-asiakirjat-toimitettu application lang)
         :kayttotapaus "Liitetiedoston lis\u00e4ys"}}}}))

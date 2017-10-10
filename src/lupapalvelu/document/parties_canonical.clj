@@ -56,7 +56,7 @@
       :osapuolettieto {:Osapuolet (party-canonical-info party-doc)}
       :kayttotapaus (party-usage-info party-doc)
       :asianTiedot {:Asiantiedot {:rakennusvalvontaasianKuvaus (party-krysp-description party-doc)}}
-      :lisatiedot (rl-canonical/get-lisatiedot lang)}}}})
+      :lisatiedot (rl-canonical/get-lisatiedot-with-asiakirjat-toimitettu application lang)}}}})
 
 (defn- write-party-krysp [application lang krysp-version output-dir {doc-id :id :as party-doc}]
   (as-> party-doc $
