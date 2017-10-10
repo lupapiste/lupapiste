@@ -187,3 +187,11 @@
        (fact "No substitutions"
              (localize-and-fill :fi :applications.operation "foo" "bar")
              => "Toimenpide"))
+
+(let [lang-map (to-lang-map #(localize % "error.unknown"))]
+  (fact "to-lang-map"
+    lang-map => map?
+    (:fi lang-map) => "Odottamaton virhe"
+    (keys lang-map) => supported-langs
+    (= lang-map
+       (zipmap supported-langs (map #(localize % "error.unknown") supported-langs))) => true))

@@ -191,6 +191,13 @@
             s
             (range (count values)))))
 
+(defn to-lang-map
+  "Returns map, where keys are languages."
+  [localize-function]
+  (reduce
+    #(assoc %1 (keyword %2) (localize-function %2))
+    {}
+    supported-langs))
 
 ;;
 ;; Middleware
