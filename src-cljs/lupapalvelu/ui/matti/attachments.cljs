@@ -8,6 +8,7 @@
             [lupapalvelu.ui.hub :as hub]
             [lupapalvelu.ui.matti.path :as path]
             [lupapalvelu.ui.matti.service :as service]
+            [lupapalvelu.ui.matti.state :as state]
             [rum.core :as rum]
             [sade.shared-util :as util])
   (:import [goog.async Delay]))
@@ -135,6 +136,26 @@
   (swap! fields*
          dissoc (keyword filename)))
 
+(defn- bind-batch [{:keys [files* fields* binding?*]}]
+  (reset! binding?* true)
+  (swap! files* (fn [files]
+                  (filter #(= (:state %) :success) files)))
+
+  (service/bind-attachments-batch @state/application-id
+                                  (map (fn [{:keys [file-id filename]}]
+
+                                         (assoc ((keyword filename) @fields*)
+                                                :file-id file-id))
+                                       @files*)
+                                  (fn [{:keys [done pending] :as job}]
+                                    (console.log job)
+                                    (swap! files* (fn [files]
+                                                    (remove #(util/includes-as-kw? done
+                                                                                   (:file-id %))
+                                                            files)) )
+                                    (when (empty? pending)
+                                      (reset! binding?* false)))))
+
 (rum/defc batch-buttons < rum/reactive
   [{:keys [schema files* fields* binding?*] :as options}]
   (let [binding? (rum/react binding?*)]
@@ -147,13 +168,12 @@
          :disabled binding?}
         (path/loc :cancel)]
        [:button.positive
-        ;;
         {:disabled (or binding?
-                       (some (util/fn-> :contents s/blank?)
+                       (some #(-> % :contents s/blank?)
                              (vals (rum/react fields*)))
-                       (not-every? (util/fn-> :state #{:bad :success :failed})
+                       (not-every? #(-> % :state #{:bad :success :failed})
                                    (rum/react files*)))
-         :on-click #(reset! binding?* true)}
+         :on-click #(bind-batch options)}
         (if binding?
           [:i.lupicon-refresh.icon-spin]
           [:i.lupicon-check])

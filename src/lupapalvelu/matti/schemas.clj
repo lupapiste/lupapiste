@@ -89,12 +89,11 @@
   (merge MattiCategory
          {:name     sc/Str
           :deleted  sc/Bool
-          :draft    sc/Any ;; draft is copied to version data on publish.
+          :draft    sc/Any ;; draft is published data on publish.
           :modified ssc/Timestamp
-          :published {:id        ssc/ObjectIdStr
-                      :published ssc/Timestamp
-                      :data      sc/Any
-                      :settings  MattiPublishedSettings}}))
+          (sc/optional-key :published) {:published ssc/Timestamp
+                                        :data      sc/Any
+                                        :settings  MattiPublishedSettings}}))
 
 (defschema MattiSavedVerdictTemplates
   {:templates [MattiSavedTemplate]

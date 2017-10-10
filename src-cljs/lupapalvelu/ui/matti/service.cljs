@@ -1,7 +1,8 @@
 (ns lupapalvelu.ui.matti.service
   (:require [lupapalvelu.ui.common :as common]
             [lupapalvelu.ui.hub :as hub]
-            [lupapalvelu.ui.matti.state :as state]))
+            [lupapalvelu.ui.matti.state :as state]
+            [sade.shared-util :as util]))
 
 (defn fetch-schemas
   "We fetch schemas only when needed, since they do not change during
@@ -179,3 +180,56 @@
 (defn delete-file [file-id]
   (common/command {:command :remove-uploaded-file}
                   :attachmentId file-id))
+
+(defn bind-attachments [app-id filedatas callback]
+  (common/command {:command :bind-attachments
+                   :success callback}
+                  :id app-id
+                  :filedatas filedatas))
+
+(defn bind-attachments-job [job-id version callback]
+  (common/query :bind-attachments-job
+                callback
+                :jobId job-id
+                :version version))
+
+(defn- batch-job [status-fn {job :job}]
+  (status-fn (reduce (fn [acc {:keys [fileId status]}]
+                       (let [k (case (keyword status)
+                                     :done :done
+                                     :error :error
+                                     :pending)]
+                         (update acc k #(cons fileId %))))
+                     {:pending []
+                      :error   []
+                      :done    []}
+                     (some-> job :value vals)))
+  (when (util/=as-kw (:status job) :running)
+    (bind-attachments-job (:id job)
+                          (:version job)
+                          (partial batch-job status-fn))))
+
+(defn bind-attachments-batch
+  "Convenience function that combines the binding and querying of the
+  results. Arguments:
+
+  app-id: Application id
+
+  filedatas: List of maps with :file-id (string), :type (kw-path)
+  and :contents (string).
+
+  status-fn: Will be called with updated status - [file-id]
+  map. Status can be :pending, :done or :error. The callback will not
+  be called after every file has terminal status (:done or :error). In
+  other words, when the :pending list is empty"
+  [app-id filedatas status-fn]
+  (let [result* (atom {})]
+    (bind-attachments app-id
+                      (map (fn [{:keys [file-id contents type]}]
+                             (let [[type-group type-id] (util/split-kw-path type)]
+                                  {:fileId   file-id
+                                   :contents contents
+                                   :type {:type-group type-group
+                                          :type-id type-id}}))
+                           filedatas)
+                      (partial batch-job status-fn))))
