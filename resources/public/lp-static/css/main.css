@@ -184,7 +184,7 @@ body {
   height: 100%;
 }
 
-body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins, body.financial-authority {
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin, body.oir, body.neighbor, body.hashbang, body.bulletins, body.local-bulletins, body.financial-authority {
   min-height: 100vh;
   padding-bottom: 320px;
   position: relative;
@@ -26597,237 +26597,261 @@ div.summary-button-bar {
   margin-right: 1em;
 }
 
-#bulletins {
+#bulletins, #local-bulletins {
   font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;
   font-size: 1rem;
   color: #333333;
 }
 
-#bulletins h1, #bulletins h2, #bulletins h3, #bulletins h4, #bulletins h5 {
+#bulletins h1, #bulletins h2, #bulletins h3, #bulletins h4, #bulletins h5, #local-bulletins h1, #local-bulletins h2, #local-bulletins h3, #local-bulletins h4, #local-bulletins h5 {
   font-family: "Source Sans Pro", sans-serif;
   color: #333333;
   text-transform: none;
   margin-bottom: 6px;
 }
 
-#bulletins h1 {
+#bulletins h1, #local-bulletins h1 {
   font-weight: 900;
   font-size: 3.75rem;
 }
 
-#bulletins h2 {
+#bulletins h2, #local-bulletins h2 {
   font-weight: 300;
   font-size: 3rem;
 }
 
-#bulletins h3 {
+#bulletins h3, #local-bulletins h3 {
   font-weight: 700;
   font-size: 2rem;
 }
 
-#bulletins h4 {
+#bulletins h4, #local-bulletins h4 {
   font-weight: 400;
   font-size: 1.5rem;
   text-transform: uppercase;
 }
 
-#bulletins h5 {
+#bulletins h5, #local-bulletins h5 {
   font-weight: 700;
   font-size: 1.125rem;
 }
 
-#bulletins p {
+#bulletins p, #local-bulletins p {
   margin-bottom: 20px;
 }
 
-#bulletins .intro {
+#bulletins .intro, #local-bulletins .intro {
   font-weight: 300;
   font-size: 1.375rem;
   margin-top: 20px;
 }
 
-#bulletins .intro button {
+#bulletins .intro button, #local-bulletins .intro button {
   margin-left: 20px;
 }
 
-#bulletins .help-toggle {
+#bulletins .help-toggle, #local-bulletins .help-toggle {
   color: #0fbbf7;
 }
 
-#bulletins .help-toggle .lupicon-circle-question {
+#bulletins .help-toggle .lupicon-circle-question, #local-bulletins .help-toggle .lupicon-circle-question {
   color: #0fbbf7;
 }
 
-#bulletins .help-toggle .lupicon-circle-question.expanded {
+#bulletins .help-toggle .lupicon-circle-question.expanded, #local-bulletins .help-toggle .lupicon-circle-question.expanded {
   color: #0fbbf7;
 }
 
-#bulletins .help-text {
+#bulletins .help-text, #local-bulletins .help-text {
   border-color: #0fbbf7;
 }
 
-#bulletins .help-arrow:before {
+#bulletins .help-arrow:before, #local-bulletins .help-arrow:before {
   border-bottom-color: #0fbbf7;
 }
 
-#bulletins input:focus {
+#bulletins input:focus, #local-bulletins input:focus {
   border-color: #0fcff7;
 }
 
-#bulletins .blue-bg {
+#bulletins .blue-bg, #local-bulletins .blue-bg {
   background-color: #0fa8f7;
 }
 
-#bulletins .blue-bg h1, #bulletins .blue-bg p {
+#bulletins .blue-bg h1, #bulletins .blue-bg p, #local-bulletins .blue-bg h1, #local-bulletins .blue-bg p {
   color: #fff;
 }
 
-#bulletins .gray-bg {
+#bulletins .gray-bg, #local-bulletins .gray-bg {
   background-color: #eeeeee;
 }
 
-#bulletins .content-center {
+#bulletins .orange-bg, #local-bulletins .orange-bg {
+  background-color: #f39129;
+}
+
+#bulletins .orange-bg h1, #bulletins .orange-bg h2, #bulletins .orange-bg p, #local-bulletins .orange-bg h1, #local-bulletins .orange-bg h2, #local-bulletins .orange-bg p {
+  color: #fff;
+}
+
+#bulletins .content-center, #local-bulletins .content-center {
   max-width: 1280px;
   margin: 0 auto;
   position: relative;
   padding: 40px 0;
 }
 
-#bulletins .full {
+#bulletins .full, #local-bulletins .full {
   width: 100%;
   min-width: 320px;
 }
 
-#bulletins .slogan, #bulletins .ingress {
+#bulletins .slogan, #bulletins .ingress, #local-bulletins .slogan, #local-bulletins .ingress {
   text-align: center;
   width: 80%;
   margin: 0 auto 20px;
 }
 
-#bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
+#bulletins .municipal-heading, #local-bulletins .municipal-heading {
+  font-weight: 900;
+  padding-top: 40px;
+}
+
+#bulletins .municipal-caption, #local-bulletins .municipal-caption {
+  border: 1px solid;
+  padding: 20px;
+  margin-top: 40px;
+  border-color: #f39129;
+}
+
+#bulletins .municipal-caption p:last-child, #local-bulletins .municipal-caption p:last-child {
+  margin-bottom: auto;
+}
+
+#bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron, #local-bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
   color: #0fa8f7;
 }
 
-#bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
+#bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle, #local-bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
   color: #0fcff7;
 }
 
-#bulletins .autocomplete-component .autocomplete-selection-wrapper.active {
+#bulletins .autocomplete-component .autocomplete-selection-wrapper.active, #local-bulletins .autocomplete-component .autocomplete-selection-wrapper.active {
   border-color: #0fcff7;
 }
 
-#bulletins .autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron {
+#bulletins .autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron, #local-bulletins .autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron {
   color: #0fcff7;
 }
 
-#bulletins .autocomplete-component .search .search-icon {
+#bulletins .autocomplete-component .search .search-icon, #local-bulletins .autocomplete-component .search .search-icon {
   color: #0fa8f7;
 }
 
-#bulletins .autocomplete-component .search.active .search-icon {
+#bulletins .autocomplete-component .search.active .search-icon, #local-bulletins .autocomplete-component .search.active .search-icon {
   color: #0fcff7;
 }
 
-#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
+#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result, #local-bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   border-color: #0fcff7;
 }
 
-#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
+#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active, #local-bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #0fbbf7;
 }
 
-#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
+#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active, #local-bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #0fcff7;
 }
 
-#bulletins .form-grid textarea {
+#bulletins .form-grid textarea, #local-bulletins .form-grid textarea {
   display: block;
 }
 
-#bulletins .form-grid textarea:focus {
+#bulletins .form-grid textarea:focus, #local-bulletins .form-grid textarea:focus {
   color: #333333;
   border-color: #0fcff7;
 }
 
-#bulletins .search-button-wrapper {
+#bulletins .search-button-wrapper, #local-bulletins .search-button-wrapper {
   text-align: center;
 }
 
-#bulletins .search-button-wrapper button span:last-child {
+#bulletins .search-button-wrapper button span:last-child, #local-bulletins .search-button-wrapper button span:last-child {
   padding-left: 6px;
 }
 
-#bulletins .search-button-wrapper button span:last-child:before {
+#bulletins .search-button-wrapper button span:last-child:before, #local-bulletins .search-button-wrapper button span:last-child:before {
   content: "(";
 }
 
-#bulletins .search-button-wrapper button span:last-child:after {
+#bulletins .search-button-wrapper button span:last-child:after, #local-bulletins .search-button-wrapper button span:last-child:after {
   content: ")";
 }
 
-#bulletins .bulletins-search h3 {
+#bulletins .bulletins-search h3, #local-bulletins .bulletins-search h3 {
   text-align: center;
 }
 
-#bulletins .bulletins-search .search-field i {
+#bulletins .bulletins-search .search-field i, #local-bulletins .bulletins-search .search-field i {
   color: #0fa8f7;
 }
 
-#bulletins .bulletins-search .search-field.active i {
+#bulletins .bulletins-search .search-field.active i, #local-bulletins .bulletins-search .search-field.active i {
   color: #0fcff7;
 }
 
-#bulletins #application-bulletins-list th.sixth {
+#bulletins #application-bulletins-list th.sixth, #local-bulletins #application-bulletins-list th.sixth {
   width: 5%;
 }
 
-#bulletins #application-bulletins-list th > i {
+#bulletins #application-bulletins-list th > i, #local-bulletins #application-bulletins-list th > i {
   color: #0fa8f7;
   position: absolute;
 }
 
-#bulletins #application-bulletins-list tbody > tr {
+#bulletins #application-bulletins-list tbody > tr, #local-bulletins #application-bulletins-list tbody > tr {
   cursor: pointer;
 }
 
-#bulletins .bulletin-comment h5 {
+#bulletins .bulletin-comment h5, #local-bulletins .bulletin-comment h5 {
   display: inline-block;
 }
 
-#bulletins .bulletin-comment .help-toggle {
+#bulletins .bulletin-comment .help-toggle, #local-bulletins .bulletin-comment .help-toggle {
   vertical-align: top;
 }
 
-#bulletins .bulletin-comment .user-info {
+#bulletins .bulletin-comment .user-info, #local-bulletins .bulletin-comment .user-info {
   font-style: italic;
 }
 
-#bulletins ul.bulletin-comment__attachment-list {
+#bulletins ul.bulletin-comment__attachment-list, #local-bulletins ul.bulletin-comment__attachment-list {
   display: table;
   list-style: none;
   padding: 0;
 }
 
-#bulletins ul.bulletin-comment__attachment-list li {
+#bulletins ul.bulletin-comment__attachment-list li, #local-bulletins ul.bulletin-comment__attachment-list li {
   display: table-row;
   padding: 0;
 }
 
-#bulletins ul.bulletin-comment__attachment-list li span {
+#bulletins ul.bulletin-comment__attachment-list li span, #local-bulletins ul.bulletin-comment__attachment-list li span {
   display: table-cell;
   padding-right: 24px;
 }
 
-#bulletins table.bulletin-attachments tr td {
+#bulletins table.bulletin-attachments tr td, #local-bulletins table.bulletin-attachments tr td {
   word-wrap: break-word;
 }
 
-#bulletins table.bulletin-attachments tr td:first-child {
+#bulletins table.bulletin-attachments tr td:first-child, #local-bulletins table.bulletin-attachments tr td:first-child {
   padding-left: 12px;
 }
 
-#bulletins .bulletin-tab-content h3 {
+#bulletins .bulletin-tab-content h3, #local-bulletins .bulletin-tab-content h3 {
   margin-bottom: 24px;
 }
 

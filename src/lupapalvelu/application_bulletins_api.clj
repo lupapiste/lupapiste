@@ -20,19 +20,23 @@
 
 (def bulletin-page-size 10)
 
-(defn- make-query [search-text municipality state]
-  (let [text-query         (when-not (ss/blank? search-text)
-                             (make-text-query (ss/trim search-text)))
-        municipality-query (when-not (ss/blank? municipality)
-                             {:versions.municipality municipality})
-        state-query        (when-not (ss/blank? state)
-                             {:bulletinState state})
-        queries            (filter seq [text-query municipality-query state-query])]
+(defn- make-query [{:keys [searchText municipality organization state]}]
+  (let [queries (filter seq [(when-not (ss/blank? searchText)
+                               (make-text-query (ss/trim searchText)))
+                             (when-not (ss/blank? municipality)
+                               {:versions.municipality municipality})
+                             (when-not (ss/blank? organization)
+                               {:versions.organization organization})
+                             (when-not (ss/blank? state)
+                               {:bulletinState state})])]
     (when-let [and-query (seq queries)]
       {$and and-query})))
 
-(defn- get-application-bulletins-left [page searchText municipality state _]
-  (let [query (make-query searchText municipality state)]
+(defn- get-application-bulletins-left [{:keys [page] :as parameters}]
+  (let [query (make-query parameters)
+        page (cond
+               (string? page) (read-string page)
+               :default page)]
     (- (mongo/count :application-bulletins query)
        (* page bulletin-page-size))))
 
@@ -49,11 +53,14 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
-(defn- get-application-bulletins
+(defn get-application-bulletins
   "Queries bulletins from mongo. Returns latest versions of bulletins.
    Bulletins which have starting dates in the future will be omitted."
-  [page searchText municipality state sort]
-  (let [query (or (make-query searchText municipality state) {})
+  [{:keys [page sort] :as parameters}]
+  (let [query (or (make-query parameters) {})
+        page (cond
+               (string? page) (read-string page)
+               :default page)
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
                (query/fields bulletins/bulletins-fields)
@@ -78,10 +85,17 @@
                       page-size-validator
                       search-text-validator]
    :user-roles #{:anonymous}}
-  [_]
-  (let [parameters [page searchText municipality state sort]]
-    (ok :data (apply get-application-bulletins parameters)
-        :left (apply get-application-bulletins-left parameters))))
+  [{data :data}]
+  (ok :data (get-application-bulletins data)
+      :left (get-application-bulletins-left data)))
+
+(defquery local-application-bulletins
+  {:parameters [searchText organization]
+   :input-validators [search-text-validator]
+   :user-roles #{:anonymous}}
+  [{data :data}]
+  (ok :data (get-application-bulletins data)
+      :left (get-application-bulletins-left data)))
 
 (defquery application-bulletin-municipalities
   {:description "List of distinct municipalities of application bulletins"

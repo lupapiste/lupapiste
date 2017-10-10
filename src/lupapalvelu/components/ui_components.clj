@@ -510,9 +510,12 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins {:depends [:ui-components :map :docgen :services]
-               :html ["header.html" "footer.html"
-                      "bulletins.html" "bulletins-template.html"
+   :bulletins-common {:depends []
+                      :js ["header.js" "vetuma-service.js"]
+                      :html ["header.html" "footer.html"]}
+
+   :bulletins {:depends [:bulletins-common :ui-components :map :docgen :services]
+               :html ["bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
@@ -529,10 +532,8 @@
                       "application-bulletins/bulletins-search/bulletins-search-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
-               :js ["header.js"
-                    "bulletins.js" "bulletins-model.js"
+               :js ["bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
-                    "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
@@ -550,6 +551,14 @@
                              :js ["financial-authority-app.js"]}
    :financial-authority     {:depends [:financial-authority-app :common-html :authenticated :applications :application :mypage
                              :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components :statement]}
+
+   :local-bulletins-app {:depends []
+                         :html ["local-bulletins.html"]
+                         :js ["local-bulletins-app.js"]}
+
+   :local-bulletins {:depends [:bulletins-common :local-bulletins-app :ui-components :map :docgen :services]
+                     :html ["local-bulletins-template.html"]
+                     :js ["local-bulletins-model.js"]}
    })
 
 ; Make sure all dependencies are resolvable:
