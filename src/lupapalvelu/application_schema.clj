@@ -202,9 +202,221 @@ when/why."
   "TODO: document this. Only 2052 applications have this as null."
   (sc/maybe sc/Str))
 
+(def task-states
+  ["requires_user_action"
+   "sent"
+   "ok"
+   "requires_authority_action"
+   "faulty_review_task"])
+
+(def task-schema-info-names
+  "TODO: get these from somewhere else?"
+  ["task-katselmus"
+   "task-katselmus-backend"
+   "task-lupamaarays"
+   "task-vaadittu-tyonjohtaja"
+   "task-katselmus-ya"])
+
+(def task-schema-info-subtypes
+  ["foreman" "review" "review-backend"])
+
+(defschema TaskSchemaInfo
+  "TODO: document.
+What is the point of the fields with only one possible values?"
+  {:type (sc/eq "task")
+   :name (apply sc/enum task-schema-info-names)
+   :order long
+   :version (sc/eq 1)
+   (sc/optional-key :subtype) (apply sc/enum task-schema-info-subtypes) ;;why is this optional?
+   (sc/optional-key :i18name) (sc/eq "task-katselmus")
+   (sc/optional-key :section-help) (sc/eq "authority-fills")
+   (sc/optional-key :i18nprefix) (sc/eq "task-katselmus.katselmuksenLaji")
+   (sc/optional-key :user-authz-roles) (sc/eq []) ;; what is the point of this?
+   })
+
+(defschema BackgroundTaskSource
+  {:type (sc/eq "background")})
+
+(def normal-task-source-types
+  ["verdict" "authority" "task"])
+
+(defschema NormalTaskSource
+  {:type (apply sc/enum normal-task-source-types)
+   :id ssc/ObjectIdStr})
+
+(defschema TaskSource
+  (sc/conditional (fn [x] (= "background"
+                            (:type x)))
+                  BackgroundTaskSource
+                  (fn [x] true)
+                  NormalTaskSource))
+
+(defschema TaskAssignee
+  "TODO: check if the keys either all appear or none? Can there be other fields?"
+  {(sc/optional-key :id) ssc/ObjectIdStr
+   (sc/optional-key :firstName) ssc/NonBlankStr
+   (sc/optional-key :lastName) ssc/NonBlankStr})
+
+(def task-data-katselmuksenLaji-values
+  #{""
+    "aloituskokous"
+    "loppukatselmus"
+    "muu katselmus"
+    "osittainen loppukatselmus"
+    "rakennekatselmus"
+    "rakennuksen paikan merkitseminen"
+    "rakennuksen paikan tarkastaminen"
+    "pohjakatselmus"
+    "ei tiedossa"
+    "lämpö-, vesi- ja ilmanvaihtolaitteiden katselmus"
+    "muu tarkastus"
+    "Loppukatselmus"
+    "Aloituskatselmus"
+    "Muu valvontakäynti"})
+
+(def task-data-katselmuksenLaji-numeric-values
+  #{"0"
+    "2"
+    "6"
+    "8"
+    "9"
+    "10"
+    "12"
+    "13"
+    "14"
+    "17"
+    "18"
+    "19"
+    "20"
+    "21"
+    "22"
+    "23"
+    "24"
+    "26"
+    "27"
+    "32"
+    "37"
+    "38"
+    "39"
+    "42"
+    "43"
+    "44"
+    "47"
+    "52"
+    "53"
+    "54"
+    "55"
+    "104"
+    "105"
+    "106"
+    "107"
+    "110"
+    "114"
+    "125"
+    "134"
+    "400"
+    "401"})
+
+(defschema TaskDataKatselmuksenLaji
+  "NOTE: 318 applications have task data where katselmuksenLaji.value is a number string.
+Many of these have null modified timestamps.
+572 applications have task data where katselmuksenLaji.value is null.
+Only 5 of the cases with value '' have a non null modified timestamp.
+24 applications have task data where katselmuksenLaji.value is empty string ''.
+All 24 of those with value '' have non null modified timestamp."
+  {:value (sc/maybe
+            (apply sc/enum
+                   (clojure.set/union
+                     task-data-katselmuksenLaji-values
+                     task-data-katselmuksenLaji-numeric-values)))
+   ;; TODO:remove nulls, "" and numeric values?
+   (sc/optional-key :modified) (sc/maybe ssc/Timestamp)
+   ;;why both optional and nullable?
+   })
+
+(defschema TaskDataVaadittuLupaehtona
+  {:value sc/Bool
+   (sc/optional-key :modified) (sc/maybe ssc/Timestamp) ;;why both optional and nullable?
+   })
+
+(defschema NatString
+  (sc/pred (fn [s] (re-matches #"^0|[1-9]\d*$" s)) 'NatStringRegex))
+
+(defschema TaskDataRakennusRakennus
+  {:jarjestysnumero {:value NatString}
+   :kiinttun {:value ssc/ObjectIdStr} ;; is this always ObjectIdStr?
+   :rakennusnro {:value (sc/pred (partial re-matches #"^\d{3}$") 'TaskDataRakennusNro)}
+   :valtakunnallinenNumero {:value (sc/maybe NatString)}
+   :kunnanSisainenPysyvaRakennusnumero {:value NatString}
+   })
+
+(def task-data-rakennus-tila-tila-values
+  ["lopullinen" "osittainen" ""])
+
+(defschema TaskDataRakennusTila
+  {:tila {:value (sc/maybe
+                   (apply sc/enum task-data-rakennus-tila-tila-values))
+          ;;allows nulls and empty string, are "lopullinen" and "osittainen" the only other possible values?
+          }
+   (sc/optional-key :kayttoonottava) {:value sc/Bool}})
+
+(defschema TaskDataRakennus
+  {NatString
+   {:rakennus TaskDataRakennusRakennus
+    :tila TaskDataRakennusTila}})
+
+(defschema TaskDataType1
+  "TODO: this needs a better name"
+  {:katselmuksenLaji TaskDataKatselmuksenLaji
+   :vaadittuLupaehtona TaskDataVaadittuLupaehtona
+   :rakennus TaskDataRakennus
+   (sc/optional-key :katselmus) sc/Any ;;FIXME
+   (sc/optional-key :muuTunnus) sc/Any ;; FIXME
+   })
+
+(defschema TaskDataType2
+  "TODO: write subschemas, document and name"
+  {:maarays sc/Any
+   (sc/optional-key :kuvaus) sc/Any
+   (sc/optional-key :vaaditutErityissuunnitelmat)})
+
+(defschema TaskDataType3
+  "TODO: write subschemas, document and name"
+  {:asiointitunnus sc/Any
+   (sc/optional-key :osapuolena) sc/Any})
+
+(defschema TaskData
+  " A quick glance indicates that this migh be a disjoint unoin of schemas with
+fields [:katselmuksenLaji, :vaadittuLupaehto, :rakennus, (optional :katselmus), (optional :muuTunnus)],
+[:maarays, (optional-key :kuvaus), (optional-key :vaaditutErityissuunnitelmat)], and
+[(optional :osapuolena), :asiointitunnus].
+
+TODO: These need further checking, might not be sufficient."
+  (sc/conditional (fn [x] (contains? x :rakennus))
+                  TaskDataType1
+                  (fn [x] (contains? x :maaraus))
+                  TaskDataType2
+                  (fn [x] (contains? x :asiointitunnus))
+                  TaskDataType3))
+
+(defschema Task
+  "TODO: document"
+  {:id ssc/ObjectIdStr
+   :taskname (sc/maybe sc/Str) ;;only 2 tasks have taskname null, only 1 with taskname ""
+   :state (apply sc/enum task-states)
+   :created (sc/maybe ssc/Timestamp)
+   :closed (sc/eq nil) ;; always null, why ???
+   :duedate (sc/eq nil) ;;always null, why ???
+   :schema-info TaskSchemaInfo
+   :data TaskData
+   :source TaskSource
+   :assignee TaskAssignee
+   }
+  )
+
 (defschema Tasks
   "TODO: document and give schema."
-  [sc/Any])
+  [Task])
 
 (defschema ClosedBy
   "TODO: document and give schema"
