@@ -1132,3 +1132,131 @@
   (fact "can't set decimal document price"
     (update-docstore-info "753-R" true 1.0 "Description")
     => (partial expected-failure? :error.illegal-number)))
+
+(fact "organizations bulletin settings"
+  (facts "query setting"
+    (fact "sipoo"
+      (let [result (query sipoo :user-organization-bulletin-settings)]
+        result => ok?
+        (:bulletin-settings result)  => [{:permitType "R"
+                                            :municipality "753"
+                                            :bulletins {:enabled true
+                                                        :url "http://localhost:8000/dev/julkipano"
+                                                        :notification-email "sonja.sibbo@sipoo.fi"}}]))
+
+    (facts "oulu"
+      (query oulu :user-organization-bulletin-settings)
+      => (partial expected-failure? :error.bulletins-not-enebled-for-scope))
+
+    (facts "authority"
+      (query sonja :user-organization-bulletin-settings) => unauthorized?))
+
+  (facts "update-organization-bulletin-settings"
+    (fact "sipoo R"
+      (command sipoo :update-organization-bulletin-settings
+               :permitType "R"
+               :municipality "753"
+               :notificationEmail "pena@example.com") => ok?
+
+      (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+      => [{:permitType "R"
+           :municipality "753"
+           :bulletins {:enabled true
+                       :url "http://localhost:8000/dev/julkipano"
+                       :notification-email "pena@example.com"}}])
+
+    (fact "sipoo P"
+      (command sipoo :update-organization-bulletin-settings
+               :permitType "P"
+               :municipality "753"
+               :notificationEmail "pena@example.com")
+      => (partial expected-failure? :error.bulletins-not-enebled-for-scope)
+
+      (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+      => [{:permitType "R"
+           :municipality "753"
+           :bulletins {:enabled true
+                       :url "http://localhost:8000/dev/julkipano"
+                       :notification-email "pena@example.com"}}]))
+
+  (facts "enable organization bulletins"
+
+    (fact "sipoo P - enable"
+      (command admin :update-organization
+               :permitType "P"
+               :municipality "753"
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail false
+               :opening nil
+               :bulletinsEnabled true
+               :bulletinsUrl nil) => ok?
+
+      (fact "is enabled"
+
+        (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+        => [{:permitType "R"
+             :municipality "753"
+             :bulletins {:enabled true
+                         :url "http://localhost:8000/dev/julkipano"
+                         :notification-email "pena@example.com"}}
+            {:permitType "P"
+             :municipality "753"
+             :bulletins {:enabled true
+                         :url ""}}]
+
+        (command sipoo :update-organization-bulletin-settings
+                 :permitType "P"
+                 :municipality "753"
+                 :notificationEmail "rane@example.com") => ok?))
+
+    (fact "sipoo P - update url"
+      (command admin :update-organization
+               :permitType "P"
+               :municipality "753"
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail false
+               :opening nil
+               :bulletinsEnabled true
+               :bulletinsUrl "http://foo.my.url") => ok?
+
+      (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+      => [{:permitType "R"
+           :municipality "753"
+           :bulletins {:enabled true
+                       :url "http://localhost:8000/dev/julkipano"
+                       :notification-email "pena@example.com"}}
+          {:permitType "P"
+           :municipality "753"
+           :bulletins {:enabled true
+                       :url "http://foo.my.url"
+                       :notification-email "rane@example.com"}}])
+
+    (fact "sipoo P - disable"
+      (command admin :update-organization
+               :permitType "P"
+               :municipality "753"
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail false
+               :opening nil
+               :bulletinsEnabled false
+               :bulletinsUrl "http://foo.my.url") => ok?
+
+      (fact "is disabled"
+        (command sipoo :update-organization-bulletin-settings
+                 :permitType "P"
+                 :municipality "753"
+                 :notificationEmail "pena@example.com")
+        => (partial expected-failure? :error.bulletins-not-enebled-for-scope)
+
+        (:bulletin-settings (query sipoo :user-organization-bulletin-settings))
+        => [{:permitType "R"
+             :municipality "753"
+             :bulletins {:enabled true
+                         :url "http://localhost:8000/dev/julkipano"
+                         :notification-email "pena@example.com"}}]))))
