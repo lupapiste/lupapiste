@@ -378,7 +378,7 @@ All 24 of those with value '' have non null modified timestamp."
   "TODO: write subschemas, document and name"
   {:maarays sc/Any
    (sc/optional-key :kuvaus) sc/Any
-   (sc/optional-key :vaaditutErityissuunnitelmat)})
+   (sc/optional-key :vaaditutErityissuunnitelmat) sc/Any})
 
 (defschema TaskDataType3
   "TODO: write subschemas, document and name"
