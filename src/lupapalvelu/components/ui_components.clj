@@ -476,7 +476,7 @@
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
                                 "organization-reports.html" "organization-calendars.html" "calendar-admin.html" "assignments.html" "stamp-editor.html"
-                                "matti-verdict-templates.html" "archiving.html"]}
+                                "matti-verdict-templates.html" "archiving.html" "organization-bulletins.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}
