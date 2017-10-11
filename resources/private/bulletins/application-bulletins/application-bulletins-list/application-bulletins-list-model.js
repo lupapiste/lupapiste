@@ -18,7 +18,7 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
-      var commentingType, commentingEndsAt, enddate, typeText;
+      var commentingType, commentingEndsAt, enddate;
       if (bulletin.proclamationEndsAt) {
         commentingType = loc("bulletin.comment.period");
         enddate = moment(bulletin.proclamationEndsAt).endOf("day");
