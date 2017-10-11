@@ -138,7 +138,7 @@
                     :propertyId   "18600303560006",
                     :operationId  nil
                     :location     [393033.614 6707228.994]
-                    :location-wgs84 [25.053 60.487]}]))
+                    :location-wgs84 [25.0534 60.48698]}]))
        (fact "FeatureCollection review"
              (let [fc-group (group-xml "resources/krysp/dev/feature-collection.xml")]
                (keys fc-group) => (contains ["LP-020-2016-22222" "LP-020-2016-99999"] :in-any-order)
@@ -167,7 +167,7 @@
                                    :propertyId   "02012345",
                                    :operationId  nil
                                    :location     [347545.336 6977611.366]
-                                   :location-wgs84 [24.0 62.896]}]))
+                                   :location-wgs84 [24.0 62.8965]}]))
        (fact "FeatureCollection+boundedBy review"
              (let [fc-group (group-xml "resources/krysp/dev/feature-collection-having-boundedby.xml")]
                (keys fc-group) => (contains ["LP-020-2016-22222" "LP-020-2016-99999"] :in-any-order)
@@ -196,7 +196,7 @@
                     :propertyId   "02012345",
                     :operationId  nil
                     :location     [347545.336 6977611.366]
-                    :location-wgs84 [24.0 62.896]}]))
+                    :location-wgs84 [24.0 62.8965]}]))
        (fact "FeatureCollection+boundedBy+multiple featureMembers review"
              (let [fc-group (group-xml "resources/krysp/dev/feature-collection-with-many-featureMember-elems.xml")]
                (keys fc-group) => (contains ["LP-999-2016-99999" "LP-999-2016-99349"] :in-any-order))))
