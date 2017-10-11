@@ -144,24 +144,25 @@
   [{user :user}]
   (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:archivist :digitizer})}})))
 
-(defn- check-bulletins-enabled [{user-orgs :user-organizations {permit-type :permitType org-id :organization} :data}]
-  (let [org    (if org-id
-                 (util/find-by-id org-id user-orgs)
-                 (first user-orgs))
-        scopes (cond->> (:scope org)
-                 permit-type (filter (comp #{permit-type} :permitType)))]
-    (when (not-any? (comp :enabled :bulletins) scopes)
-      (fail :error.bulletins-not-enebled-for-scope))))
+(defn bulletins-enabled?
+  [organization permit-type municipality]
+  (let [scopes (cond->> (:scope organiztion)
+                 permit-type  (filter (comp #{permit-type} :permitType))
+                 municipality (filter (comp #{municipality} :municipality)))]
+    (boolean (some (comp :enabled :bulletins) scopes))))
+
+(defn- check-bulletins-enabled [{user-orgs :user-organizations {permit-type :permitType municipality :municipality} :data}]
+  (when-not (bulletins-enabled? (first user-orgs) permit-type municipality)
+    (fail :error.bulletins-not-enebled-for-scope)))
 
 (defquery user-organization-bulletin-settings
   {:user-roles #{:authorityAdmin}
    :pre-checks [check-bulletins-enabled]}
   [{user :user user-orgs :user-organizations}]
   (->> user-orgs first :scope
-       (filter :bulletins)
-       (map (juxt :permitType :bulletins))
-       (into {})
-       (ok :bulletins-by-scope)))
+       (filter (comp :enabled :bulletins))
+       (map #(select-keys % [:permitType :municipality :bulletins]))
+       (ok :bulletin-settings)))
 
 (defcommand update-organization-bulletin-settings
   {:user-roles #{:authorityAdmin}
