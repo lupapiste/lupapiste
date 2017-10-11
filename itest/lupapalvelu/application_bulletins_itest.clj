@@ -27,9 +27,9 @@
                                               :x 430109.3125 :y 7210461.375
                                               :address "Oulu 10")]
     (fact "R permit can not be published"
-      (query sonja :publish-bulletin-enabled :id (:id r-app)) => (partial expected-failure? :error.invalid-permit-type))
+      (query sonja :ymp-publish-bulletin-enabled :id (:id r-app)) => (partial expected-failure? :error.invalid-permit-type))
     (fact "YM permit can be published"
-      (query olli :publish-bulletin-enabled :id (:id ym-app)) => ok?)))
+      (query olli :ymp-publish-bulletin-enabled :id (:id ym-app)) => ok?)))
 
 (facts "Publishing bulletins"
   (let [ts-now  (now)

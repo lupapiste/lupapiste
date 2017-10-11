@@ -342,7 +342,8 @@
   (attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
 
-(defquery "publish-bulletin-enabled"
-  {:parameters [id]
+(defquery ymp-publish-bulletin-enabled
+  {:description "Bulletin implementation for YMP permit types enabled"
+   :parameters [id]
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})

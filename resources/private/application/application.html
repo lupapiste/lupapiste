@@ -166,11 +166,15 @@
                             </a>
                           </li>
 
-                            <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
-                                           css: {'active': $parent.selectedTabName() === 'bulletin'}">
-                                <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
+                            <li data-bind="if: $root.authorization.ok('ymp-publish-bulletin-enabled'),
+                                           css: {'active': $parent.selectedTabName() === 'ymp-bulletin'}">
+                                <a data-bind="click: changeTab" href="#" data-target="ymp-bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
                                   <span data-bind="ltext: 'bulletin'"></span>
                                 </a></li>
+                              <a data-bind="click: changeTab" href="#" data-target="ymp-bulletin" data-test-id="application-open-ymp-bulletin-tab" class="link-btn">
+                                <span data-bind="ltext: 'bulletin'"></span>
+                              </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -443,8 +447,8 @@
                   <!-- /ko -->
 
                     <!-- Bulletin tab -->
-                    <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('publish-bulletin-enabled') -->
-                    <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
+                    <!-- ko if: selectedTabName() === 'ymp-bulletin' && $root.authorization.ok('ymp-publish-bulletin-enabled') -->
+                    <div id="application-ymp-bulletin-tab" data-bind="with: application" class="tab-content">
                         <div data-bind="component: {name: 'bulletin-tab',
                                                     params: {appId: id,
                                                              appState: state,
