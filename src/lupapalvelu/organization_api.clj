@@ -144,15 +144,8 @@
   [{user :user}]
   (ok :organizations (org/get-organizations {:_id {$in (usr/organization-ids-by-roles user #{:archivist :digitizer})}})))
 
-(defn bulletins-enabled?
-  [organization permit-type municipality]
-  (let [scopes (cond->> (:scope organiztion)
-                 permit-type  (filter (comp #{permit-type} :permitType))
-                 municipality (filter (comp #{municipality} :municipality)))]
-    (boolean (some (comp :enabled :bulletins) scopes))))
-
 (defn- check-bulletins-enabled [{user-orgs :user-organizations {permit-type :permitType municipality :municipality} :data}]
-  (when-not (bulletins-enabled? (first user-orgs) permit-type municipality)
+  (when-not (org/bulletins-enabled? (first user-orgs) permit-type municipality)
     (fail :error.bulletins-not-enebled-for-scope)))
 
 (defquery user-organization-bulletin-settings

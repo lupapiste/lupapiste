@@ -703,3 +703,10 @@
                    :open-inforequest        open-inforequest
                    :open-inforequest-email  open-inforequest-email
                    :opening                 (when (number? opening) opening)))
+
+(defn bulletins-enabled?
+  [organization permit-type municipality]
+  (let [scopes (cond->> (:scope organization)
+                 permit-type  (filter (comp #{permit-type} :permitType))
+                 municipality (filter (comp #{municipality} :municipality)))]
+    (boolean (some (comp :enabled :bulletins) scopes))))
