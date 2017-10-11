@@ -16,7 +16,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.application-search :refer [make-text-query dir]]
             [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.organization :as org]))
 
 (def bulletin-page-size 10)
 
@@ -348,8 +349,13 @@
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
 
+(defn- check-bulletins-enabled [{organization :organization {permit-type :permitType municipality :municipality} :application}]
+  (when-not (and organization (org/bulletins-enabled? @organization permit-type municipality))
+    (fail :error.bulletins-not-enebled-for-scope)))
+
 (defquery bulletin-for-application-verdict-enabled
   {:description ""
    :parameters [id]
    :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
+   :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)
+                check-bulletins-enabled]})
