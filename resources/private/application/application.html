@@ -464,9 +464,9 @@
                     <!-- / Bulletin tab -->
 
                   <!-- Generic Bulletin tab -->
-                  <!-- ko if: selectedTabName() === 'ymp-bulletin' && $root.authorization.ok('bulletin-for-application-verdict-enabled') -->
+                  <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('bulletin-for-application-verdict-enabled') -->
                   <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
-                    <h2 data-bind="ltext: 'bulletin" />
+                    <h1 data-bind="ltext: 'bulletin'" />
                   </div>
 
                   <!-- /ko -->

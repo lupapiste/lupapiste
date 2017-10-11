@@ -347,3 +347,9 @@
    :parameters [id]
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
+
+(defquery bulletin-for-application-verdict-enabled
+  {:description ""
+   :parameters [id]
+   :user-roles #{:authority}
+   :pre-checks [(permit/validate-permit-type-is-not permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
