@@ -466,7 +466,8 @@
                   <!-- Generic Bulletin tab -->
                   <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('bulletin-for-application-verdict-enabled') -->
                   <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
-                    <h1 data-bind="ltext: 'bulletin'" />
+                    <div data-bind="component: {name: 'generic-bulletin-tab',
+                                                params: {appId: id}}"></div>
                   </div>
 
                   <!-- /ko -->
