@@ -560,7 +560,7 @@
         permit-types  (-> (map (comp keyword :permitType) applications) distinct not-empty (or [:R]))
         organizations (->> (map :organization applications) distinct (concat organization-ids) (apply orgs-for-review-fetch))
         eraajo-user   (user/batchrun-user (map :id organizations))
-        threadpool    (threads/threadpool 16 "review checking worker")
+        threadpool    (threads/threadpool (util/->int (env/value :batchrun :review-check-threadpool-size) 8) "review checking worker")
         threads       (mapv (fn [org]
                               (threads/submit
                                threadpool
