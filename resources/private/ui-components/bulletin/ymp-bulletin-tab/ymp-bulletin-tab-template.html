@@ -1,4 +1,4 @@
-<script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-tab-template">
+<script class="ko-template" type="text/x-jquery-tmpl" id="ymp-bulletin-tab-template">
 
   <!-- ko if: showPublishing -->
   <div class="bulletin-component" data-bind="component: {name: 'publish-application',
@@ -11,7 +11,7 @@
 
   <!-- ko if: bulletin -->
     <!-- ko if: showVersions -->
-    <div class="bulletin-component" data-bind="component: {name: 'bulletin-versions',
+    <div class="bulletin-component" data-bind="component: {name: 'ymp-bulletin-versions',
                                                            params: {appId: appId,
                                                                     authModel: authModel,
                                                                     bulletin: bulletin,
@@ -19,7 +19,7 @@
     <!-- /ko -->
 
     <!-- ko if: bulletinVersion -->
-    <div class="bulletin-component" data-bind="component: {name: 'bulletin-comments',
+    <div class="bulletin-component" data-bind="component: {name: 'ymp-bulletin-comments',
                                                            params: {bulletinVersion: bulletinVersion,
                                                                     bulletin: bulletin,
                                                                     comments: comments,
